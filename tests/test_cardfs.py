@@ -29,9 +29,7 @@ class CardFsTest(unittest.TestCase):
                 self.stats.append(path)
             return real_stat(path, *a, **k)
         for name, value in (("scandir", scandir), ("stat", stat)):
-            patcher = mock.patch.object(os, name, value)
-            patcher.start()
-            self.addCleanup(patcher.stop)
+            self.enterContext(mock.patch.object(os, name, value))
         caching = cardfs.caching()
         caching.__enter__()
         self.addCleanup(caching.__exit__, None, None, None)

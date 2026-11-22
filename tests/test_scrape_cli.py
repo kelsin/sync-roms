@@ -192,17 +192,12 @@ class Dispatch(Isolated):
 class SetCredentials(RealDataDirGuard):
     def setUp(self):
         super().setUp()
-        tmp = tempfile.TemporaryDirectory()
-        self.addCleanup(tmp.cleanup)
-        self.dir = tmp.name
-        p = mock.patch.object(store, "data_dir", lambda: self.dir)
-        p.start()
-        self.addCleanup(p.stop)
+        self.dir = self.enterContext(tempfile.TemporaryDirectory())
+        self.enterContext(mock.patch.object(store, "data_dir", lambda: self.dir))
         self.path = os.path.join(self.dir, "settings.json")
         self.quota = mock.Mock(return_value=screenscraper.Quota(2, 123, 20000))
-        p = mock.patch.object(screenscraper, "Client", return_value=mock.Mock(quota=self.quota))  # no request leaves the test
-        self.client_class = p.start()
-        self.addCleanup(p.stop)
+        # no request leaves the test
+        self.client_class = self.enterContext(mock.patch.object(screenscraper, "Client", return_value=mock.Mock(quota=self.quota)))
 
     def run_it(self, inputs, passwords, saved=None):
         if saved:

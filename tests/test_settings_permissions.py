@@ -21,9 +21,7 @@ class SettingsPermissionsTest(RealDataDirGuard):
         super().setUp()
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
-        p = mock.patch.object(store, "data_dir", lambda: self.tmp.name)
-        p.start()
-        self.addCleanup(p.stop)
+        self.enterContext(mock.patch.object(store, "data_dir", lambda: self.tmp.name))
         self.path = os.path.join(self.tmp.name, "settings.json")
 
     def mode(self):

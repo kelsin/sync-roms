@@ -46,9 +46,7 @@ class ClassifyTest(unittest.TestCase):
 
 class ScanTest(unittest.TestCase):
     def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory()
-        self.addCleanup(self.tmp.cleanup)
-        self.base = self.tmp.name
+        self.base = self.enterContext(tempfile.TemporaryDirectory())
 
     def p(self, *a):
         return os.path.join(self.base, *a)
@@ -232,17 +230,14 @@ class ScanTest(unittest.TestCase):
 
 class StashTest(unittest.TestCase):
     def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory()
-        self.addCleanup(self.tmp.cleanup)
+        self.tmp = self.enterContext(tempfile.TemporaryDirectory())
         import datetime
-        patch = mock.patch.object(store, "data_dir", return_value=os.path.join(self.tmp.name, "data"))
-        patch.start()
-        self.addCleanup(patch.stop)
+        self.enterContext(mock.patch.object(store, "data_dir", return_value=os.path.join(self.tmp, "data")))
         self.now = datetime.datetime(2026, 11, 18, 10, 2, 3)
 
     def entries(self):
-        a = os.path.join(self.tmp.name, "src", "Game.srm")
-        b = os.path.join(self.tmp.name, "src", "Game.state.auto")
+        a = os.path.join(self.tmp, "src", "Game.srm")
+        b = os.path.join(self.tmp, "src", "Game.state.auto")
         helpers.touch(a, "save")
         helpers.touch(b, "state")
         return [{"path": a, "name": "Game.srm", "kind": "save", "core": "gpSP", "size": 4, "mtime": 0},
@@ -409,9 +404,7 @@ class BesideRomsTest(unittest.TestCase):
     NAMES = ("Game.gba", "Game.srm", "Old.gba", "Old.srm", "Old.state1", "Old.state1.png", "Old.rtc")
 
     def setUp(self):
-        tmp = tempfile.TemporaryDirectory()
-        self.addCleanup(tmp.cleanup)
-        self.dest = tmp.name
+        self.dest = self.enterContext(tempfile.TemporaryDirectory())
         for name in self.NAMES:
             helpers.touch(os.path.join(self.dest, name))
 
@@ -454,8 +447,7 @@ class CommandTest(helpers.Cmd):
         for p in (mock.patch.object(store, "load_catalog", lambda: catalog),
                   mock.patch.object(ui, "has_terminal", lambda: True),
                   mock.patch.object(picker, "_Session", SessionFree)):
-            p.start()
-            self.addCleanup(p.stop)
+            self.enterContext(p)
         self.cards = {}
         self.calls = []
 
@@ -474,9 +466,7 @@ class CommandTest(helpers.Cmd):
             self.calls.append((title, list(labels), kw))
             a = next(it)
             return a(labels) if callable(a) else a
-        p = mock.patch.object(picker, "filter_list", fake)
-        p.start()
-        self.addCleanup(p.stop)
+        self.enterContext(mock.patch.object(picker, "filter_list", fake))
 
     def read_file(self, *parts):
         with open(os.path.join(*parts)) as f:
@@ -696,9 +686,7 @@ class ApplyCommandTest(CommandTest):
     def muos_catalog(self):
         catalog = {"layouts": LAYOUTS, "systems": [dict(s, folders=dict(s["folders"], muos=s["bucket"]))
                                                    for s in CATALOG_SYSTEMS], "devices": []}
-        p = mock.patch.object(store, "load_catalog", lambda: catalog)
-        p.start()
-        self.addCleanup(p.stop)
+        self.enterContext(mock.patch.object(store, "load_catalog", lambda: catalog))
 
     def test_same_stem_in_sibling_rom_dirs_stays_apart(self):
         self.muos_catalog()

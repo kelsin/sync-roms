@@ -22,12 +22,9 @@ class IsolationTest(unittest.TestCase):
 
 class FolderStorageTest(unittest.TestCase):
     def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory()
-        self.addCleanup(self.tmp.cleanup)
-        self.root = self.tmp.name
+        self.root = self.enterContext(tempfile.TemporaryDirectory())
         for p in (mock.patch.object(runtime, "ROOT", self.root), mock.patch.object(runtime, "_mirror_root", None)):
-            p.start()
-            self.addCleanup(p.stop)
+            self.enterContext(p)
 
     def test_put_get_list_range(self):
         s3.put_text("scrapes/gba/metadata.json", "héllo")

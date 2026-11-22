@@ -81,11 +81,10 @@ class ApplyNames(ScriptDir):
         super().setUp()
         self.put(KEY, scrape_plan.dump_json({"A.zip": {"name": "A"}, "B (T).zip": {"name": "A - Translated",
                                                                                      "translated": True}}).encode())
-        self.dir = tempfile.TemporaryDirectory()
-        self.addCleanup(self.dir.cleanup)
+        self.dir = self.enterContext(tempfile.TemporaryDirectory())
 
     def run_main(self, decisions, *flags):
-        path = os.path.join(self.dir.name, "decisions.json")
+        path = os.path.join(self.dir, "decisions.json")
         with open(path, "w") as f:
             json.dump(decisions, f)
         return self.run_script(apply_names.main, [path, *flags])

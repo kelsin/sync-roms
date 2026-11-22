@@ -18,9 +18,7 @@ def load_tests(loader, tests, pattern):
 class Picks(Flow):
     def setUp(self):
         super().setUp()
-        p = mock.patch("builtins.print")  # without a storage cache, listing a folder says so
-        p.start()
-        self.addCleanup(p.stop)
+        self.enterContext(mock.patch("builtins.print"))  # without a storage cache, listing a folder says so
 
     def picks(self):
         return CardPicks("c", (DEVICE, "esde"))

@@ -866,19 +866,18 @@ class SyncFlowTest(unittest.TestCase):
         """A dry run of a card whose entry in a real cards.json is entry (None: it has none), with the real saved_setup,
         save_card and update_card, so only --dry-run keeps the card from being saved.
         Returns (exit code, what it printed with the card's name as CARD, the card's entry in cards.json afterwards)."""
-        data = tempfile.TemporaryDirectory()
-        self.addCleanup(data.cleanup)
+        data = self.enterContext(tempfile.TemporaryDirectory())
 
         def prepare(card_dir):
-            store.write_json(os.path.join(data.name, "cards.json"), {} if entry is None else {os.path.basename(card_dir): entry})
+            store.write_json(os.path.join(data, "cards.json"), {} if entry is None else {os.path.basename(card_dir): entry})
         err = io.StringIO()
         with contextlib.redirect_stderr(err):
             code, out, *_ = self.run_sync(dry_run=True, prepare=prepare, extra=(
-                (store, "data_dir", lambda: data.name), (store, "load_cards", REAL_LOAD_CARDS),
+                (store, "data_dir", lambda: data), (store, "load_cards", REAL_LOAD_CARDS),
                 (store, "save_card", REAL_SAVE_CARD), (store, "update_card", REAL_UPDATE_CARD),
                 (cli.picker, "saved_setup", REAL_SAVED_SETUP), (cli.picker, "choose_setup", lambda manifest: (None, "esde")),
                 (cli, "free_space", lambda path: 10**9)))
-        with mock.patch.object(store, "data_dir", lambda: data.name):
+        with mock.patch.object(store, "data_dir", lambda: data):
             after = store.load_cards().get(self.card)
         return code, (out + err.getvalue()).replace(self.card, "CARD"), after
 
@@ -923,10 +922,9 @@ class SyncFlowTest(unittest.TestCase):
         self.assertIn(f"{self.card}'s picks take 2 GB of its 1 GB: 1 GB over", warned)
 
     def mirror_root(self):
-        tmp = tempfile.TemporaryDirectory()
-        self.addCleanup(tmp.cleanup)
-        open(os.path.join(tmp.name, runtime.MIRROR_MARKER), "w").close()
-        return tmp.name
+        tmp = self.enterContext(tempfile.TemporaryDirectory())
+        open(os.path.join(tmp, runtime.MIRROR_MARKER), "w").close()
+        return tmp
 
     def run_editing(self, old, new, keys, **kw):
         """A sync whose Surprise step (or the editor it opens) changes the gba system from `old` to `new`;

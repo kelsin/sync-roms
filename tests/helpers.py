@@ -123,9 +123,7 @@ class DataDir(RealDataDirGuard):
         super().setUp()
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
-        patch = mock.patch.object(store, "data_dir", lambda: self.tmp.name)
-        patch.start()
-        self.addCleanup(patch.stop)
+        self.enterContext(mock.patch.object(store, "data_dir", lambda: self.tmp.name))
 
     def path(self, name):
         return os.path.join(self.tmp.name, name)
@@ -163,9 +161,7 @@ class StorageFolder(DataDir):
         for key, size in (("gba/a.zip", 1), ("gba/b.zip", 2), ("BIOS/x.bin", 3)):
             self.put(key, size)
         for name, value in (("ROOT", self.root.name), ("BUCKET", None), ("ENDPOINT", None), ("_mirror_root", None)):
-            p = mock.patch.object(runtime, name, value)
-            p.start()
-            self.addCleanup(p.stop)
+            self.enterContext(mock.patch.object(runtime, name, value))
 
     def put(self, key, size):
         touch(os.path.join(self.root.name, key), b"x" * size)
@@ -187,8 +183,7 @@ class StorageDir(RealDataDirGuard):
         os.makedirs(self.root)
         for p in (mock.patch.object(runtime, "ROOT", self.root), mock.patch.object(runtime, "_mirror_root", None),
                   mock.patch.object(store, "data_dir", return_value=self.data)):
-            p.start()
-            self.addCleanup(p.stop)
+            self.enterContext(p)
 
     def put(self, key, data=b"abc"):
         path = os.path.join(self.root, key)
@@ -226,9 +221,7 @@ class ScriptDir(StorageDir):
 
     def setUp(self):
         super().setUp()
-        p = mock.patch.object(usersettings, "apply_settings")
-        p.start()
-        self.addCleanup(p.stop)
+        self.enterContext(mock.patch.object(usersettings, "apply_settings"))
 
     def run_script(self, main, *args):
         """main(*args) with its output captured: (what it returned, what it printed)."""
@@ -246,13 +239,9 @@ def storage_sets(test, sets, root=None):
     to store.data_dir() (patch that first). Returns the storage folder."""
     from sync_roms import inventory
     if root is None:
-        tmp = tempfile.TemporaryDirectory()
-        test.addCleanup(tmp.cleanup)
-        root = tmp.name
+        root = test.enterContext(tempfile.TemporaryDirectory())
         for name, value in (("ROOT", root), ("BUCKET", None), ("ENDPOINT", None), ("_mirror_root", None)):
-            p = mock.patch.object(runtime, name, value)
-            p.start()
-            test.addCleanup(p.stop)
+            test.enterContext(mock.patch.object(runtime, name, value))
         inventory.reset()
         test.addCleanup(inventory.reset)
     os.makedirs(os.path.join(root, "sets"), exist_ok=True)
@@ -271,12 +260,8 @@ class Isolated(RealDataDirGuard):
     def setUp(self):
         super().setUp()
         for name in ("BUCKET", "ENDPOINT", "PROFILE", "WRITE_PROFILE"):
-            p = mock.patch.object(runtime, name, getattr(runtime, name))
-            p.start()
-            self.addCleanup(p.stop)
-        p = mock.patch.dict(os.environ)
-        p.start()
-        self.addCleanup(p.stop)
+            self.enterContext(mock.patch.object(runtime, name, getattr(runtime, name)))
+        self.enterContext(mock.patch.dict(os.environ))
         for name in ENV:
             os.environ.pop(name, None)
         runtime.OVERRIDES.clear()

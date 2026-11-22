@@ -128,25 +128,17 @@ class Settings(unittest.TestCase):
 
 class Card(unittest.TestCase):
     def setUp(self):
-        tmp = tempfile.TemporaryDirectory()
-        self.addCleanup(tmp.cleanup)
-        self.base = tmp.name
+        self.base = self.enterContext(tempfile.TemporaryDirectory())
         self.warned = []
-        patcher = mock.patch.object(ui, "warn", self.warned.append)
-        patcher.start()
-        self.addCleanup(patcher.stop)
+        self.enterContext(mock.patch.object(ui, "warn", self.warned.append))
 
 
 class Esde(Card):
     """An ES-DE card, with storage a folder (runtime.ROOT) that may hold the theme archive."""
     def setUp(self):
         super().setUp()
-        storage = tempfile.TemporaryDirectory()
-        self.addCleanup(storage.cleanup)
-        self.storage = storage.name
-        patcher = mock.patch.object(runtime, "ROOT", self.storage)
-        patcher.start()
-        self.addCleanup(patcher.stop)
+        self.storage = self.enterContext(tempfile.TemporaryDirectory())
+        self.enterContext(mock.patch.object(runtime, "ROOT", self.storage))
 
     def store(self, commit, files):
         top = f"art-book-next-es-de-{commit}"
@@ -429,12 +421,8 @@ class Emudeck(Esde):
     """An EmuDeck card: the theme goes into ES-DE's folder on this computer, not on the card."""
     def setUp(self):
         super().setUp()
-        appdata = tempfile.TemporaryDirectory()
-        self.addCleanup(appdata.cleanup)
-        self.appdata = appdata.name
-        patcher = mock.patch.dict(os.environ, {"ESDE_APPDATA_DIR": self.appdata})
-        patcher.start()
-        self.addCleanup(patcher.stop)
+        self.appdata = self.enterContext(tempfile.TemporaryDirectory())
+        self.enterContext(mock.patch.dict(os.environ, {"ESDE_APPDATA_DIR": self.appdata}))
 
     def test_the_theme_and_art_go_into_es_de_on_this_computer_and_are_selected(self):
         self.store("abc", {"theme.xml": b"<theme/>"})

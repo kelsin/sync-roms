@@ -63,14 +63,9 @@ class FakeTools:
 
 class ChdTest(unittest.TestCase):
     def setUp(self):
-        self._tmp = tempfile.TemporaryDirectory()
-        self.dir = os.path.realpath(self._tmp.name)
-        self.addCleanup(self._tmp.cleanup)
-        systemp = tempfile.TemporaryDirectory()  # stale_local_scratch looks at this, never at the real temp folder
-        self.addCleanup(systemp.cleanup)
-        patch = mock.patch.object(tempfile, "tempdir", os.path.realpath(systemp.name))
-        patch.start()
-        self.addCleanup(patch.stop)
+        self.dir = os.path.realpath(self.enterContext(tempfile.TemporaryDirectory()))
+        systemp = self.enterContext(tempfile.TemporaryDirectory())  # stale_local_scratch looks at this, never at the real temp folder
+        self.enterContext(mock.patch.object(tempfile, "tempdir", os.path.realpath(systemp)))
         self.tools = {"7z": "7z", "chdman": "chdman", "extract-xiso": "extract-xiso", "iso2zar": "iso2zar", "np": 1}
 
     def touch(self, *names, text=""):

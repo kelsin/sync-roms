@@ -17,9 +17,7 @@ FAH = ["Fahrenheit (USA) (Disc 1) (Key Disc) (Sega CD).chd", "Fahrenheit (USA) (
 
 class M3uTest(unittest.TestCase):
     def setUp(self):
-        self._tmp = tempfile.TemporaryDirectory()
-        self.dir = self._tmp.name
-        self.addCleanup(self._tmp.cleanup)
+        self.dir = self.enterContext(tempfile.TemporaryDirectory())
 
     def touch(self, *names, text=""):
         for n in names:
@@ -154,9 +152,7 @@ class GameFoldersTest(unittest.TestCase):
 
 class HiddenDiscsTest(unittest.TestCase):
     def setUp(self):
-        self._tmp = tempfile.TemporaryDirectory()
-        self.dir = self._tmp.name
-        self.addCleanup(self._tmp.cleanup)
+        self.dir = self.enterContext(tempfile.TemporaryDirectory())
 
     def touch(self, *names, text=""):
         for n in names:

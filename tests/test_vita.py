@@ -12,9 +12,7 @@ from sync_roms import vita  # noqa: E402
 
 class VitaTest(unittest.TestCase):
     def setUp(self):
-        self._tmp = tempfile.TemporaryDirectory()
-        self.dir = os.path.realpath(self._tmp.name)
-        self.addCleanup(self._tmp.cleanup)
+        self.dir = os.path.realpath(self.enterContext(tempfile.TemporaryDirectory()))
 
     def zip(self, name, category="gd", title_id="PCSE00120", entry="app/PCSE00120/sce_sys/param.sfo"):
         keys = [("CATEGORY", category), ("TITLE_ID", title_id)]

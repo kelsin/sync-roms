@@ -66,8 +66,7 @@ class Session(unittest.TestCase):
                   mock.patch.object(picker, "_session", None), mock.patch.object(ui, "terminal_runner", None),
                   mock.patch.object(ui, "prompter", None),
                   mock.patch.object(sys, "stdout", sys.stdout), mock.patch.object(sys, "stderr", sys.stderr)):
-            p.start()
-            self.addCleanup(p.stop)
+            self.enterContext(p)
 
     def run_editor(self, editor, script):
         """Run editor through picker.one_app; each app it starts runs headless and is driven by script(app, pilot)."""
@@ -1257,9 +1256,7 @@ class Session(unittest.TestCase):
             signal.pthread_kill(threading.main_thread().ident, signal.SIGINT)
             if not handled.acquire(timeout=10):
                 raise AssertionError("timed out")
-        patch = mock.patch.object(picker._Session, "on_sigint", on_sigint)
-        patch.start()
-        self.addCleanup(patch.stop)
+        self.enterContext(mock.patch.object(picker._Session, "on_sigint", on_sigint))
         return kick
 
     def test_a_ctrl_c_before_the_first_list_interrupts_it(self):
@@ -1454,15 +1451,13 @@ class Previews(unittest.TestCase):
     def setUp(self):
         import tempfile
         from PIL import Image
-        tmp = tempfile.TemporaryDirectory()
-        self.addCleanup(tmp.cleanup)
-        self.paths = [os.path.join(tmp.name, f"{i}.png") for i in range(4)]
+        tmp = self.enterContext(tempfile.TemporaryDirectory())
+        self.paths = [os.path.join(tmp, f"{i}.png") for i in range(4)]
         for path in self.paths:
             Image.new("RGB", (45, 108), "red").save(path)
         for p in (mock.patch.object(sys, "__stdout__", io.StringIO()),  # not a terminal: the import would probe it
                   mock.patch.object(picker, "_draws_images", return_value=True)):
-            p.start()
-            self.addCleanup(p.stop)
+            self.enterContext(p)
 
     def run_list(self, script, preview):
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))

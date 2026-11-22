@@ -95,8 +95,7 @@ class Write(unittest.TestCase):
         with gzip.open(self.gz, "wb") as f:
             f.write(self.data)
         for patcher in (mock.patch.object(flash, "DD", ["dd"]), mock.patch.object(flash, "raw", lambda d: self.target)):
-            patcher.start()
-            self.addCleanup(patcher.stop)
+            self.enterContext(patcher)
 
     def test_write_copies_image(self):
         size = flash.write_image(self.gz, "disk9")
@@ -294,8 +293,7 @@ class Run(helpers.StorageDir):
                   mock.patch.object(flash.tempfile, "mkdtemp", mkdtemp),
                   mock.patch.object(store, "repo_json", return_value=[
                       {"id": "anbernic-rg35xxh", "name": "Anbernic RG35XX H", "firmwares": ["knulli"]}])):
-            p.start()
-            self.addCleanup(p.stop)
+            self.enterContext(p)
 
     def flash(self, dry_run=False):
         with contextlib.redirect_stdout(io.StringIO()) as out, contextlib.redirect_stderr(io.StringIO()):

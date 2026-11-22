@@ -167,9 +167,7 @@ class Flow(DataDir):
                               (edit, {"note": lambda text: None}),
                               (cardedit, {"_spawn": lambda fn: None, "_metadata": {}})):  # no metadata read
             for name, new in attrs.items():
-                p = mock.patch.object(target, name, new)
-                p.start()
-                self.addCleanup(p.stop)
+                self.enterContext(mock.patch.object(target, name, new))
 
     def card(self, **entry):
         self.write_json("cards.json", {"c": {"device": "d", "layout": "esde", **entry}})
@@ -704,9 +702,7 @@ class Flow(DataDir):
         """Sets with a "vs" set whose gba/Ruby.zip has the given variants."""
         vset = {"id": "vs", "name": "Variants", "description": "", "games": [
             {"system": "gba", "bucket": "gba/Ruby.zip", "variants": list(variants)}]}
-        p = mock.patch.object(store, "load_sets", return_value=[SET, vset])
-        p.start()
-        self.addCleanup(p.stop)
+        self.enterContext(mock.patch.object(store, "load_sets", return_value=[SET, vset]))
 
     RED = {"bucket": "gb/Red.gb", "note": "GB: the original"}
 
@@ -1389,9 +1385,7 @@ class VitaFlow(Flow):
         self.files["psvita/"] = {G: 10, DLC: 1, NEW: 2, H: 5}
         vita = {"name": "Sony PlayStation Vita", "bucket": "psvita", "folders": {"esde": "psvita"}, "bios": {"files": []}}
         catalog = {**CATALOG, "systems": CATALOG["systems"] + [vita]}
-        p = mock.patch.object(store, "repo_json", lambda name: catalog[name])
-        p.start()
-        self.addCleanup(p.stop)
+        self.enterContext(mock.patch.object(store, "repo_json", lambda name: catalog[name]))
 
     def test_only_games_are_rows_and_a_game_with_extras_is_marked(self):
         self.card()
@@ -1504,9 +1498,7 @@ class MetaFlow(Flow):
             return self.texts[key]
         for target, name, new in ((cardedit, "_spawn", self.loaders.append), (cardedit, "_metadata", {}),
                                   (s3, "get_text", get_text), (edit, "note", self.notes.append)):
-            p = mock.patch.object(target, name, new)
-            p.start()
-            self.addCleanup(p.stop)
+            self.enterContext(mock.patch.object(target, name, new))
 
     def load(self):
         """Run the background loads that were started (what the worker thread does)."""

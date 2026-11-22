@@ -41,8 +41,7 @@ class S3Test(unittest.TestCase):
         patches = [mock.patch.object(runtime, "BUCKET", BUCKET), mock.patch.object(runtime, "_mirror_root", None),
                    mock.patch.dict(s3._s3, {runtime.PROFILE: self.read, runtime.WRITE_PROFILE: self.write}, clear=True)]
         for p in patches:
-            p.start()
-            self.addCleanup(p.stop)
+            self.enterContext(p)
 
     def tearDown(self):
         self.rs.deactivate()
@@ -200,8 +199,7 @@ class FlushTest(unittest.TestCase):
         self.events = []  # ("wrote", n) and ("fsync", bytes on disk so far)
         for p in (mock.patch.object(s3, "FLUSH_BYTES", 10), mock.patch.object(os, "fsync", self.fsync),
                   mock.patch.object(s3, "read_root", return_value=self.tmp)):
-            p.start()
-            self.addCleanup(p.stop)
+            self.enterContext(p)
 
     def fsync(self, fd):
         self.events.append(("fsync", os.fstat(fd).st_size))
@@ -317,8 +315,7 @@ class CachedDownloadTest(unittest.TestCase):
                    mock.patch.object(runtime, "_mirror_root", None),
                    mock.patch.dict(s3._s3, {runtime.PROFILE: self.client}, clear=True)]
         for p in patches:
-            p.start()
-            self.addCleanup(p.stop)
+            self.enterContext(p)
 
     def download(self, files, etags):
         """Download gba/a.zip with this cache; returns (file contents, bytes received, bytes written)."""

@@ -32,9 +32,7 @@ K, N, O = LAYOUTS["knulli"], LAYOUTS["nextui"], LAYOUTS["onion"]
 
 class ConvertTest(unittest.TestCase):
     def setUp(self):
-        self._tmp = tempfile.TemporaryDirectory()
-        self.addCleanup(self._tmp.cleanup)
-        self.base = os.path.realpath(self._tmp.name)
+        self.base = os.path.realpath(self.enterContext(tempfile.TemporaryDirectory()))
 
     def p(self, *parts):
         return os.path.join(self.base, *parts)
@@ -456,14 +454,10 @@ class ConvertCommandTest(unittest.TestCase):
         import json
         from sync_roms import store
         self.argparse, self.json, self.store = argparse, json, store
-        self._tmp = tempfile.TemporaryDirectory()
-        self.addCleanup(self._tmp.cleanup)
-        root = os.path.realpath(self._tmp.name)
+        root = os.path.realpath(self.enterContext(tempfile.TemporaryDirectory()))
         self.data = os.path.join(root, "data")
         os.makedirs(self.data)
-        patch = mock.patch.object(store, "data_dir", lambda: self.data)
-        patch.start()
-        self.addCleanup(patch.stop)
+        self.enterContext(mock.patch.object(store, "data_dir", lambda: self.data))
         self.base = os.path.join(root, "SD")
         os.makedirs(self.base)
         self.set_card({"device": "anbernic-rg34xx-sp", "layout": "knulli"})

@@ -195,8 +195,7 @@ class BucketWriteTest(SharedTest):
         client.get_object.side_effect = lambda Bucket, Key: {"Body": io.BytesIO(self.objects[Key])}
         for p in (mock.patch.object(runtime, "ROOT", None), mock.patch.object(runtime, "BUCKET", "roms"),
                   mock.patch.object(s3, "s3_client", return_value=client)):
-            p.start()
-            self.addCleanup(p.stop)
+            self.enterContext(p)
 
     def etag(self, body):
         return f'"{hashlib.md5(body).hexdigest()}"'

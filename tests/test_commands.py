@@ -766,17 +766,13 @@ class MirrorThemeUpdateTest(DataDir):
         inventory.reset()
         self.addCleanup(inventory.reset)
         for name, value in (("ROOT", None), ("BUCKET", "roms"), ("ENDPOINT", None), ("_mirror_root", None)):
-            p = mock.patch.object(runtime, name, value)
-            p.start()
-            self.addCleanup(p.stop)
+            self.enterContext(mock.patch.object(runtime, name, value))
         client = mock.Mock()
         client.get_paginator.return_value.paginate.return_value = [{"Contents": [
             {"Key": themeart.ESDE_ARCHIVE, "Size": 3, "ETag": etag(b"old")},
             {"Key": themeart.ESDE_COMMIT, "Size": 41, "ETag": etag(self.OLD)}]}]
         client.put_object.side_effect = lambda **kw: {"ETag": etag(kw["Body"])}
-        p = mock.patch.object(s3, "s3_client", return_value=client)
-        p.start()
-        self.addCleanup(p.stop)
+        self.enterContext(mock.patch.object(s3, "s3_client", return_value=client))
         with contextlib.redirect_stdout(io.StringIO()):
             inventory.update()
         self.mirror = os.path.join(self.tmp.name, "mirror")

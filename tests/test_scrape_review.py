@@ -29,9 +29,7 @@ class ReviewBase(StorageDir):
         self.out = io.StringIO()
 
     def patch(self, target, name, value):
-        p = mock.patch.object(target, name, value)
-        p.start()
-        self.addCleanup(p.stop)
+        self.enterContext(mock.patch.object(target, name, value))
 
     def answers(self, *items):
         items = list(items)

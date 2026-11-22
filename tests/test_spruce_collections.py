@@ -41,9 +41,7 @@ class WantedTests(unittest.TestCase):
 
 class PlanTests(unittest.TestCase):
     def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory()
-        self.addCleanup(self.tmp.cleanup)
-        self.base = self.tmp.name
+        self.base = self.enterContext(tempfile.TemporaryDirectory())
         self.path = os.path.join(self.base, spruce_collections.FILE)
 
     def put(self, data):

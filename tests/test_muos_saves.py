@@ -19,9 +19,7 @@ SYSTEMS = [{"bucket": "gba", "folders": {"muos": "gba"}},
 
 class ScanTest(unittest.TestCase):
     def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory()
-        self.addCleanup(self.tmp.cleanup)
-        self.base = self.tmp.name
+        self.base = self.enterContext(tempfile.TemporaryDirectory())
 
     def p(self, *a):
         return os.path.join(self.base, "MUOS", "pickles", *a)
@@ -92,10 +90,9 @@ class ScanTest(unittest.TestCase):
 
 class PlanApplyTest(unittest.TestCase):
     def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory()
-        self.addCleanup(self.tmp.cleanup)
-        self.src = os.path.join(self.tmp.name, "stash")
-        self.card = os.path.join(self.tmp.name, "card")
+        self.tmp = self.enterContext(tempfile.TemporaryDirectory())
+        self.src = os.path.join(self.tmp, "stash")
+        self.card = os.path.join(self.tmp, "card")
         files = {"Game.srm": "a", "slot_1.state": "b", "states.ini": "c"}
         for n, c in files.items():
             helpers.touch(os.path.join(self.src, n), c)

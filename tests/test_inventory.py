@@ -146,17 +146,13 @@ class BucketCacheTest(helpers.DataDir):
         inventory.reset()
         self.addCleanup(inventory.reset)
         for name, value in (("ROOT", None), ("BUCKET", "roms"), ("ENDPOINT", None)):
-            p = mock.patch.object(runtime, name, value)
-            p.start()
-            self.addCleanup(p.stop)
+            self.enterContext(mock.patch.object(runtime, name, value))
         client = mock.Mock()
         client.get_paginator.return_value.paginate.return_value = [
             {"Contents": [{"Key": "gba/a.zip", "Size": 1, "ETag": '"aa"'}]},
             {"Contents": [{"Key": "BIOS/x.bin", "Size": 3, "ETag": '"bb-2"'},
                           {"Key": "gba/.DS_Store", "Size": 4, "ETag": '"cc"'}]}]
-        p = mock.patch.object(s3, "s3_client", return_value=client)
-        p.start()
-        self.addCleanup(p.stop)
+        self.enterContext(mock.patch.object(s3, "s3_client", return_value=client))
 
     def test_one_listing_gives_sizes_and_etags(self):
         quiet(inventory.update)
@@ -328,9 +324,7 @@ class FolderMtimeTest(helpers.StorageFolder):
 
     def later(self):
         """Run the rest of the test an hour from now, when every mtime set now is old enough to trust."""
-        p = mock.patch.object(inventory, "_clock", return_value=inventory._clock() + 3600)
-        p.start()
-        self.addCleanup(p.stop)
+        self.enterContext(mock.patch.object(inventory, "_clock", return_value=inventory._clock() + 3600))
 
     def mtime(self, folder):
         return os.stat(os.path.join(self.root.name, folder)).st_mtime_ns
@@ -674,9 +668,7 @@ class IgnoredTest(helpers.StorageFolder):
 
     def setUp(self):
         super().setUp()
-        p = mock.patch.object(ignore, "_keys", frozenset({"gba/b.zip"}))
-        p.start()
-        self.addCleanup(p.stop)
+        self.enterContext(mock.patch.object(ignore, "_keys", frozenset({"gba/b.zip"})))
 
     def each(self, check):
         with self.subTest(cache=False):
