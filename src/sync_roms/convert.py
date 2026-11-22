@@ -2,7 +2,7 @@
 import os
 import shutil
 
-from sync_roms import commands, downloads, frontend, m3u, muos_saves, picker, saves, scrape_plan, store, ui
+from sync_roms import commands, downloads, frontend, m3u, muos_saves, saves, scrape_plan, store, ui
 
 PLAYLIST_NOTE = "playlist paths differ between layouts; sync rewrites it"
 PICKLES_NOTE = "muOS uses Pickles' saves and states, not RetroArch's; left in place"
@@ -353,17 +353,7 @@ def remove_media(paths, base=None):
 def convert_command(args):
     """`cards convert [CARD] --layout ID [--dry-run] [--yes]`: move the card's ROMs, BIOS and RetroArch saves and
     states to the folders of another layout, then save that layout for the card."""
-    base = os.path.abspath(args.card or os.getcwd())
-    name = os.path.basename(base)
-    cards = store.load_cards()
-    if name not in cards:
-        ui.fail(f"No card named {name!r}. Set it up with `sync-roms cards new {name} --device ID|full --layout NAME`", 2)
-    catalog = store.load_catalog()
-    current = picker.saved_setup(cards[name], catalog["devices"], catalog["layouts"], name)
-    if not current:
-        ui.fail(f"{name!r} has no usable layout. Set it with `sync-roms cards set {name} --layout NAME`", 2)
-    if not os.path.isdir(base):
-        ui.fail(f"No folder {base}", 2)
+    base, name, current, catalog = saves.card_setup(args)
     _, new_name = commands.setup_from_flags(catalog, current, None, args.layout)
     old_name = current[1]
     old, new, systems = catalog["layouts"][old_name], catalog["layouts"][new_name], catalog["systems"]
@@ -418,18 +408,7 @@ def convert_command(args):
 def clean_command(args):
     """`cards clean [CARD] [--dry-run] [--yes]`: delete the scraped media other layouts left in the card's ROM
     folders (a convert before this existed, or a card used with another firmware); the card's own layout's stays."""
-    base = os.path.abspath(args.card or os.getcwd())
-    name = os.path.basename(base)
-    cards = store.load_cards()
-    if name not in cards:
-        ui.fail(f"No card named {name!r}. Set it up with `sync-roms cards new {name} --device ID|full --layout NAME`", 2)
-    catalog = store.load_catalog()
-    current = picker.saved_setup(cards[name], catalog["devices"], catalog["layouts"], name)
-    if not current:
-        ui.fail(f"{name!r} has no usable layout. Set it with `sync-roms cards set {name} --layout NAME`", 2)
-    if not os.path.isdir(base):
-        ui.fail(f"No folder {base}", 2)
-    keep_name = current[1]
+    base, name, (_, keep_name), catalog = saves.card_setup(args)
     layouts, systems = catalog["layouts"], catalog["systems"]
     media = list(dict.fromkeys(
         path for other, layout in layouts.items() if other != keep_name

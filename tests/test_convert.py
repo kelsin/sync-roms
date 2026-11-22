@@ -571,6 +571,24 @@ class ConvertCommandTest(unittest.TestCase):
         self.assertIn("cards set", self.err.getvalue())
         self.assertFalse(self.moved())
 
+    def test_card_checks_come_in_order_for_both_commands(self):
+        """An unknown card is reported before its unusable layout, and that before a missing folder."""
+        os.rename(self.base, self.base + "-gone")
+        checks = ((None, "No card named 'SD'"), ({}, "'SD' has no usable layout"),
+                  ({"device": "anbernic-rg34xx-sp", "layout": "knulli"}, f"No folder {self.base}"))
+        for command in (convert.convert_command, convert.clean_command):
+            for i, (entry, said) in enumerate(checks):
+                self.set_card(entry)
+                self.err.truncate(0)
+                self.err.seek(0)
+                args = self.argparse.Namespace(card=self.base, layout="nextui", dry_run=False, yes=True)
+                with self.redirect_err(self.err), self.assertRaises(SystemExit) as caught:
+                    command(args)
+                self.assertEqual(caught.exception.code, 2)
+                self.assertIn(said, self.err.getvalue())
+                for _, later in checks[i + 1:]:
+                    self.assertNotIn(later, self.err.getvalue())
+
     def test_conflicts_reported_and_layout_still_saved(self):
         touch(os.path.join(self.base, "Roms", "Game Boy Advance (GBA)", "Game.zip"), b"other")
         self.assertEqual(self.run_cmd(), 0)
