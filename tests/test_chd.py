@@ -83,6 +83,20 @@ class ChdTest(unittest.TestCase):
         self.touch("a.gdi", text=GDI)
         self.assertEqual(chd.sheet_tracks(os.path.join(self.dir, "a.cue")), ["Game (Track 1).bin", "Game (Track 2).bin"])
         self.assertEqual(chd.sheet_tracks(os.path.join(self.dir, "a.gdi")), ["track01.bin", "track 02.raw", "track03.bin"])
+        self.touch("b.cue", text='TITLE "One file of many"\nFILE Game.bin BINARY\n  TRACK 01 MODE2/2352\n  FILE "Game (Track 2).bin" BINARY\n')
+        self.assertEqual(chd.sheet_tracks(os.path.join(self.dir, "b.cue")), ["Game.bin", "Game (Track 2).bin"])
+
+    def test_cue_with_an_unquoted_file_name_owns_its_track(self):
+        self.touch("Game.cue", text="FILE Game.bin BINARY\n  TRACK 01 MODE2/2352\n    INDEX 01 00:00:00\n")
+        self.touch("out.cue", text="FILE ../secret.bin BINARY\n")
+        self.touch("Game.bin")
+        paths = [os.path.join(self.dir, n) for n in ("Game.bin", "Game.cue", "out.cue")]
+        skipped = []
+        (image, owned), = chd.disc_images(paths, skipped=skipped)
+        self.assertEqual(skipped, [paths[2]])
+        with mock.patch.object(external, "run_tool", FakeTools()):
+            self.assertIsNone(chd.chd_image(self.tools, CD["chd"], image, owned))
+        self.assertEqual(self.files(), ["Game.chd", "out.cue"])
 
     def test_plan_finds_system_from_folder_names(self):
         folders = {"psx": CD, "gc": EXTRACT}
