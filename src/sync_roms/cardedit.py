@@ -552,11 +552,13 @@ def pick_card_set(name, setup, systems, current=None):
     return None if i is None else shown[i][0]
 
 
-def pick_set(system, sets, games, titles, catalog, current=None, synced=lambda: set()):
+def pick_set(system, sets, games, titles, catalog, current=None, synced=lambda: set(), switch=None):
     """The set to filter a system's games to, or None: sets with games in catalog (the system's bucket keys) are
     offered, starting on the one named current, each with how many of its games are synced out of those in storage
     (synced() gives the synced bucket keys). Space/Tab adds that set's games on this system to games (in place) as
-    direct picks, or removes them when all are already picked; other systems are untouched."""
+    direct picks, or removes them when all are already picked; other systems are untouched. With switch (the card
+    editor, where a game can also be on through a set or off by an exclusion), Space/Tab calls switch(keys, on)
+    instead: on unless every one of them is synced already."""
     shown = [(x, set_filter(x, system)) for x in sets]
     shown = [(x, keys) for x, keys in shown if keys & catalog]
     if not shown:
@@ -582,7 +584,9 @@ def pick_set(system, sets, games, titles, catalog, current=None, synced=lambda: 
             return False
         have = {g.get("bucket") for g in games}
         mine = shown[idx][1] & catalog
-        if mine <= have:
+        if switch:
+            switch(sorted(mine), not mine <= synced())
+        elif mine <= have:
             games[:] = [g for g in games if g.get("bucket") not in mine]
         else:
             for key in sorted(mine - have):
@@ -813,7 +817,8 @@ def edit_system(name, system, setup, to_fetch=None, card_usages=None):
             else:
                 filters.handle(result[0], [r[1] for r in sp.rows], place, lambda current: pick_set(
                     system, list(picks.sets_by_id.values()), sp.games, sp.titles, {r[1] for r in sp.rows}, current,
-                    lambda: {k for k, v in sp.states(picks.cover()).items() if v}))
+                    lambda: {k for k, v in sp.states(picks.cover()).items() if v},
+                    lambda keys, on: sp.apply(keys, picks.cover(), sp.states(picks.cover()), [on] * len(keys))))
     except KeyboardInterrupt:  # Ctrl-C: keep the toggles
         if pending:
             keys, notes, base, session = pending

@@ -944,6 +944,45 @@ class Flow(DataDir):
                         lambda labels, kw: kw["session"]["sel"])
         self.assertEqual(store.card_games("c"), {})
 
+    def set_list_shows(self, count):
+        """A set list step that checks the first set's count and leaves the list."""
+        def step(labels, kw):
+            self.assertEqual(kw["extras"], [[(f"  {count}", "cyan")]])
+            return None
+        return step
+
+    def test_set_list_toggle_switches_on_a_game_excluded_from_a_referenced_set(self):
+        self.card(games={"sets": ["pk"]}, excluded={"gba": ["gba/Ruby.zip"]})
+        self.run_system(returns((cardedit.SET_KEY, 0)), returns((" ", 0)), self.set_list_shows("✅"),
+                        lambda labels, kw: kw["session"]["sel"])
+        entry = self.read("cards.json")["c"]
+        self.assertEqual(entry["games"], {"sets": ["pk"]})  # the set syncs it: no direct pick
+        self.assertNotIn("gba", entry.get("excluded", {}))
+
+    def test_set_list_toggle_switches_on_an_excluded_direct_pick(self):
+        self.card(games={"gba": [g("gba/Ruby.sav"), g("gba/Ruby.zip")]}, excluded={"gba": ["gba/Ruby.zip"]})
+        self.run_system(returns((cardedit.SET_KEY, 0)), returns((" ", 0)), self.set_list_shows("✅"),
+                        lambda labels, kw: kw["session"]["sel"])
+        entry = self.read("cards.json")["c"]
+        self.assertEqual(entry["games"], {"gba": [g("gba/Ruby.sav"), g("gba/Ruby.zip")]})  # still one pick each
+        self.assertNotIn("gba", entry.get("excluded", {}))
+
+    def test_set_list_toggle_on_a_referenced_set_excludes_its_games(self):
+        self.card(games={"sets": ["pk"]})
+        self.run_system(returns((cardedit.SET_KEY, 0)), returns((" ", 0)), self.set_list_shows("0/1"),
+                        lambda labels, kw: kw["session"]["sel"])
+        entry = self.read("cards.json")["c"]
+        self.assertEqual(entry["games"], {"sets": ["pk"]})  # the set syncs them: no direct picks to add or remove
+        self.assertEqual(entry["excluded"], {"gba": ["gba/Ruby.sav", "gba/Ruby.zip"]})
+
+    def test_set_list_toggle_again_on_a_referenced_set_brings_its_games_back(self):
+        self.card(games={"sets": ["pk"]})
+        before = self.read("cards.json")
+        changed, _ = self.run_system(returns((cardedit.SET_KEY, 0)), returns((" ", 0)), returns((" ", 0)),
+                                     self.set_list_shows("✅"), lambda labels, kw: kw["session"]["sel"])
+        self.assertFalse(changed)
+        self.assertEqual(self.read("cards.json"), before)
+
     def test_game_view_status_counts_pending_picks(self):
         self.card(size="1 GB")
         self.cache = {"gba/": self.files["gba/"], "scrapes/gba/": {}, "BIOS/": {"BIOS/gba_bios.bin": 16}, "gb/": {}}
