@@ -95,6 +95,11 @@ class PlanTests(unittest.TestCase):
         self.assertEqual(len(plan["warnings"]), 1)
         self.assertEqual(plan["owned"], [])
 
+    def test_an_unreadable_file_keeps_the_owned_names(self):
+        self.put({"bad": 1})
+        plan = self.run_plan({"Favs": [entry("A.sfc")]}, ["Favs", "Surprise"])
+        self.assertEqual(plan["owned"], ["Favs", "Surprise"])
+
 
 if __name__ == "__main__":
     unittest.main()

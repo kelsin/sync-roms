@@ -47,6 +47,7 @@ def plan(base, wanted, owned):
     if current is None:
         if wanted or owned:
             result["warnings"].append(f"{FILE.replace(os.sep, '/')} can't be read; Spruce collections skipped")
+        result["owned"] = list(owned)
         return result
     others = {c.get("collection_name") for c in current if c.get("collection_name") not in owned}
     kept = [c for c in current if c.get("collection_name") in others]
