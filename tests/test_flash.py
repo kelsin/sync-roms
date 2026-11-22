@@ -173,6 +173,12 @@ class FlashOakMoss(unittest.TestCase):
         self.assertEqual(found, [(self.KEYS[1], True), (self.KEYS[0], True)])
         self.assertTrue(all(not m for _, m in flash.sort_images(self.KEYS, "miyoo-flip")))
 
+    def test_a_date_in_the_name_does_not_replace_the_version(self):
+        keys = ["os/oakmoss/oakmoss-zero40-v0.8.0-20270101.img.xz", "os/oakmoss/oakmoss-zero40-v0.9.0-20260101.img.xz",
+                "os/baseos/baseos-rg28xx-20270101-1.4.0.img.zip", "os/baseos/baseos-rg28xx-20260101-1.5.0.img.zip"]
+        self.assertEqual([k for k, _ in flash.sort_images(keys[:2], "x")], keys[1::-1])
+        self.assertEqual([k for k, _ in flash.sort_images(keys[2:], "x")], keys[:1:-1])
+
 
 class FlashMuos(unittest.TestCase):
     MUOS = ["os/muos/muos-pixie-2601.0-rg35xx.img.gz", "os/muos/muos-banana-20260101.img.gz"]
