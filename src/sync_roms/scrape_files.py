@@ -1,5 +1,4 @@
 """Storage's scrapes/ folder: the ROMs it is for, derived art names and cleanup."""
-import json
 import os
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
@@ -53,7 +52,7 @@ def metadata_roms(remote_texts):
         if len(parts) != 3:
             continue
         try:
-            out |= {f"{parts[1]}/{rom}" for rom in json.loads(text)}
+            out |= {f"{parts[1]}/{rom}" for rom in scrape_plan.parse_metadata(text, key)}
         except ValueError:  # plan_clean warns about it
             pass
     return out
@@ -74,7 +73,7 @@ def plan_clean(existing, roms, remote_texts):
         system = parts[1]
         if parts[2] == "metadata.json" and len(parts) == 3:
             try:
-                data = json.loads(remote_texts[key])
+                data = scrape_plan.parse_metadata(remote_texts[key], key)
             except (KeyError, ValueError):
                 warnings.append(f"{key} isn't valid JSON, skipped")
                 continue
@@ -86,11 +85,10 @@ def plan_clean(existing, roms, remote_texts):
                 rewrites.append((key, scrape_plan.dump_json(keep)))
             else:
                 delete.append(key)
-        elif parts[2] in scrape_plan.BUCKET_MEDIA and len(parts) > 3:
-            if os.path.splitext("/".join(parts[3:]))[0] not in stems.get(system, ()):
-                delete.append(key)
-                per[system]["media"] += 1
-                per[system]["bytes"] += size
+        elif (entry := scrape_plan.media_entry(key)) and entry[0] not in stems.get(system, ()):
+            delete.append(key)
+            per[system]["media"] += 1
+            per[system]["bytes"] += size
     return delete, rewrites, per, warnings
 
 

@@ -30,6 +30,15 @@ def metadata_key(system):
     return f"{SCRAPES}/{system}/metadata.json"
 
 
+def parse_metadata(text, key):
+    """The object in a metadata.json's text (key: the file, for the message). Raises ValueError if it isn't valid JSON
+    or isn't a JSON object."""
+    data = json.loads(text)
+    if not isinstance(data, dict):
+        raise ValueError(f"{key} isn't a JSON object")
+    return data
+
+
 def load_metadata(system, fresh=False):
     """A system's metadata.json from storage ({} when there is none), read through the local mirror when a sync has one,
     or with fresh from storage itself. Raises ValueError if it isn't a JSON object."""
@@ -42,10 +51,7 @@ def load_metadata(system, fresh=False):
         if not s3.missing(e):
             raise
         return {}
-    data = json.loads(text)
-    if not isinstance(data, dict):
-        raise ValueError(f"{key} isn't a JSON object")
-    return data
+    return parse_metadata(text, key)
 
 
 def dump_json(data):
@@ -110,7 +116,7 @@ def gamelist_fields(meta):
     return out
 
 
-def _index_entry(key):
+def media_entry(key):
     """(ROM stem, media type) of a scrapes/<system>/<type>/<ROM path>.<ext> key, or None for any other key."""
     parts = key.split("/")
     if len(parts) > 3 and parts[2] in BUCKET_MEDIA:
@@ -128,14 +134,14 @@ def scrape_index(listing):
 
 def index_add(index, key, size):
     """Add one listing entry to a scrape_index (the first key of a stem and type stays)."""
-    entry = _index_entry(key)
+    entry = media_entry(key)
     if entry:
         index[entry[0]].setdefault(entry[1], (key, size))
 
 
 def index_drop(index, key):
     """Remove one listing entry from a scrape_index."""
-    entry = _index_entry(key)
+    entry = media_entry(key)
     if entry and index.get(entry[0], {}).get(entry[1], (None,))[0] == key:
         del index[entry[0]][entry[1]]
 
@@ -309,7 +315,7 @@ def load_scrape_data(systems):
     for s, listing in zip(systems, listings):
         key = metadata_key(s["bucket"])
         try:
-            meta = json.loads(texts[key]) if key in texts else {}
+            meta = parse_metadata(texts[key], key) if key in texts else {}
         except ValueError:
             meta = {}
         data[s["bucket"]] = (listing, meta)

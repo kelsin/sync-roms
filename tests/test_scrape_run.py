@@ -367,6 +367,19 @@ class ScrapeRunTest(RunBase):
         self.assertIn("URLError", out)
         self.assertIn("run `sync-roms scrape` again later", out)
 
+    def test_systems_with_unreadable_metadata_are_skipped_in_the_manifests_order(self):
+        self.systems = [NES, {**GBA, "bucket": "gb"}, GBA]
+        for name, text in (("nes", b"[]"), ("gb", b"{nope"), ("gba", b"{}")):
+            self.put(f"{name}/a.zip")
+            self.put(f"scrapes/{name}/metadata.json", text)
+        self.assertEqual(self.run_scrape(), 0)
+        out = self.out.getvalue()
+        warnings = [f"  ⚠️  scrapes/{name}/metadata.json isn't valid JSON; skipping {name}\n" for name in ("nes", "gb")]
+        self.assertIn("".join(warnings), out)
+        self.assertNotIn("skipping gba", out)
+        self.assertEqual(self.client.lookups, ["a.zip"])
+        self.assertEqual(set(self.metadata()), {"a.zip"})
+
     def test_count_of_roms_in_a_row_spans_systems(self):
         self.systems = [GBA, NES]
         self.put("gba/a.zip")
@@ -1319,6 +1332,21 @@ class BigFileHashTest(RunBase):
             self.assertEqual(self.run_scrape(), 0)
         self.assertIn("a.zip", seen[0])  # written before the first batch's entries, not only when the run ends
 
+    def test_a_run_writes_each_state_file_once_and_in_order(self):
+        """One batch with a scraped ROM (hashes, media not offered) and an unknown one: on the metadata timer the three
+        ledgers are written before the entries; without it the unknown one before them and the other two after."""
+        for interval, writes in ((60, ["unknown", "metadata", "hashes", "nomedia"]),
+                                 (0, ["unknown", "hashes", "nomedia", "metadata"])):
+            with self.subTest(interval=interval), mock.patch.object(scrape_online, "METADATA_INTERVAL", interval), \
+                    mock.patch.object(s3, "put_text", wraps=s3.put_text) as put:
+                self.put("gba/a.zip")
+                self.put("gba/zzz.zip")
+                self.assertEqual(self.run_scrape(), 0)
+                self.assertEqual([c.args[0] for c in put.call_args_list], [f"scrapes/gba/{w}.json" for w in writes])
+            shutil.rmtree(self.root)
+            os.makedirs(self.root)
+            scrape_state.reset()
+
 
 class ProgressTest(RunBase):
     def run_quiet(self, **kw):
@@ -1528,6 +1556,19 @@ class ProgressTest(RunBase):
         err = self.err.getvalue()
         self.assertIn("gba/a.zip: ScreenScraper request failed (HTTP 500); skipped", err)
         self.assertIn("Interrupted. 0 ROM(s) scraped this run are saved and 2 are left", err)
+
+
+class MediaKeysTest(unittest.TestCase):
+    def test_every_media_key_of_the_stem_in_that_system(self):
+        keys = ["scrapes/gba/covers/a.png", "scrapes/gba/covers/a.jpg", "scrapes/gba/onion/a.png", "scrapes/gba/covers/ab.png",
+                "scrapes/gba/covers/sub/a.png", "scrapes/gba/extras/a.png", "scrapes/gba/metadata.json", "scrapes/gba/a.png",
+                "scrapes/nes/covers/a.png"]
+        listing = dict.fromkeys(keys, 1)
+        self.assertEqual(scrape_online._media_keys(listing, "gba", "a"),
+                         {"scrapes/gba/covers/a.png": "covers", "scrapes/gba/covers/a.jpg": "covers", "scrapes/gba/onion/a.png": "onion"})
+        self.assertEqual(scrape_online._media_keys(listing, "gba", "sub/a"), {"scrapes/gba/covers/sub/a.png": "covers"})
+        self.assertEqual(scrape_online._media_keys(listing, "nes", "a"), {"scrapes/nes/covers/a.png": "covers"})
+        self.assertEqual(scrape_online._media_keys(listing, "gb", "a"), {})
 
 
 class ReportTest(unittest.TestCase):

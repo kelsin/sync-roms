@@ -422,6 +422,19 @@ class EsdeExtrasSyncTest(unittest.TestCase):
         self.assertEqual([c.args[0] for c in ls.call_args_list], ["scrapes/gba/"])
         ft.assert_called_once_with([])
 
+    def test_metadata_that_is_not_an_object_syncs_as_no_metadata(self):
+        key = "scrapes/gba/metadata.json"
+        for text in ("{nope", "[]", '["A.zip"]', "5", '"A.zip"', "null"):
+            with self.subTest(text=text), tempfile.TemporaryDirectory() as base, \
+                    mock.patch.object(scrape_plan.s3, "list_sizes", return_value={key: 1}), \
+                    mock.patch.object(scrape_plan.s3, "fetch_texts", return_value={key: text}):
+                data = scrape_plan.load_scrape_data([GBA])
+                self.assertEqual(data, {"gba": ({key: 1}, {})})
+                plan = scrape_plan.build_scrape_plan("esde", [GBA], data, {"gba": ["A.zip"]},
+                                                     lambda s: os.path.join(base, "ROMs", "gba"), os.path.join(base, "ES-DE"),
+                                                     lambda p: True, base)
+                self.assertEqual((plan["jobs"], dict(plan["gamelists"]), plan["writes"]), ([], {}, []))
+
     def test_mirror_wanted_skips_scrapes_esde_but_keeps_onion_themes(self):
         listings = {"BIOS/": {"BIOS/gba_bios.bin": 1}, "os/onion/Themes/": {"os/onion/Themes/t/a.png": 2},
                     "scrapes/esde/": {"scrapes/esde/themes/t/theme.xml": 3},

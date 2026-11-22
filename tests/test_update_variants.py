@@ -12,7 +12,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from helpers import StorageDir, load_script, storage_sets  # noqa: E402
 
-from sync_roms import inventory, runtime, shared, store, usersettings  # noqa: E402
+from sync_roms import inventory, runtime, scrape_plan, shared, store, usersettings  # noqa: E402
 
 SCRIPTS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".claude", "skills", "update-variants", "scripts")
 
@@ -30,7 +30,9 @@ class CheckedInStorage(StorageDir):
 
     def checked(self):
         with open(os.path.join(self.root, "variants-checked.json")) as f:
-            return json.load(f)
+            text = f.read()
+        self.assertEqual(text, scrape_plan.dump_json(json.loads(text)))  # as the other shared storage files are written
+        return json.loads(text)
 
 
 class ApplyVariants(CheckedInStorage):

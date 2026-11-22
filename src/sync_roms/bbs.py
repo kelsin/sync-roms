@@ -235,9 +235,7 @@ def _move_state(old_file, new_file):
     scrape_state.clear_unknown("pico8", old_file)
     scrape_state.mark_nomedia("pico8", old_file, ())
     scrape_state.forget_hashes("pico8", old_file)
-    scrape_state.flush_unknown()
-    scrape_state.flush_nomedia()
-    scrape_state.flush_hashes()
+    scrape_state.flush()
 
 
 def _download(cart, tmp):

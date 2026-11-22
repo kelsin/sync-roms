@@ -4,7 +4,7 @@ Per system: scrapes/<system>/{matches,unknown,nomedia,hashes}.json, keyed by ROM
 by "system/rom". Each file is read once per run (through its local mirror, see shared.py) and this module's own changes
 are applied to that copy, so the run always sees them. Every write reads the storage file fresh and applies only this
 run's changes (shared.update), so two machines merge. Matches and non-games are written at once; unknown, not-offered
-and hash marks wait in memory for flush_unknown/flush_nomedia/flush_hashes."""
+and hash marks wait in memory for flush (flush_unknown writes the unknown marks alone)."""
 import json
 import os
 import threading
@@ -175,23 +175,17 @@ def cached_hashes(system, rom, size, mtime):
 
 
 def save_hashes(system, rom, size, mtime, hashes):
-    """Remember a ROM's hashes; the files are written every HASH_FLUSH hashes and by flush_hashes."""
+    """Remember a ROM's hashes; the files are written every HASH_FLUSH hashes and by flush."""
     with _lock:
         _mark(HASHES, system, rom, {"size": size, "mtime": mtime, "hashes": hashes})
         if sum(map(len, _pending[HASHES].values())) >= HASH_FLUSH:
-            flush_hashes()
+            _flush(HASHES)
 
 
 def forget_hashes(system, rom):
-    """Forget a ROM's saved hashes (written by flush_hashes)."""
+    """Forget a ROM's saved hashes (written by flush)."""
     with _lock:
         _mark(HASHES, system, rom, _GONE)
-
-
-def flush_hashes():
-    """Write the hashes saved and forgotten so far."""
-    with _lock:
-        _flush(HASHES)
 
 
 def _game_id(v):
@@ -258,7 +252,8 @@ def clear_unknown(system=None, rom=None):
 
 
 def flush_unknown():
-    """Write the unknown marks and clears made so far."""
+    """Write the unknown marks and clears made so far, and only those: while a system is scraped its threads keep adding
+    hashes and not-offered marks, which are written in groups by flush."""
     with _lock:
         _flush(UNKNOWN)
 
@@ -271,15 +266,16 @@ def unknown():
 
 def mark_nomedia(system, rom, types):
     """Remember the media types ScreenScraper's last answer for a ROM didn't offer (none forgets it); the ledger is
-    written by flush_nomedia."""
+    written by flush."""
     with _lock:
         _mark(NOMEDIA, system, rom, sorted(types) or _GONE)
 
 
-def flush_nomedia():
-    """Write the not-offered marks made so far."""
+def flush():
+    """Write every unknown, hash and not-offered mark made so far."""
     with _lock:
-        _flush(NOMEDIA)
+        for name in (UNKNOWN, HASHES, NOMEDIA):
+            _flush(name)
 
 
 def nomedia():

@@ -349,6 +349,16 @@ def _each(fn, names):
 metadata_key, load_metadata = scrape_plan.metadata_key, scrape_plan.load_metadata
 
 
+def _load_all(systems):
+    """{storage folder: the system's metadata.json, or None when it isn't a JSON object} for each of systems."""
+    def loaded(name):
+        try:
+            return load_metadata(name)
+        except ValueError:
+            return None
+    return _each(loaded, [s["bucket"] for s in systems])
+
+
 def planned_match(system, rom, size, etag):
     """How match() will look a ROM up first, without asking ScreenScraper."""
     if scrape_state.manual_match(system, rom) is not None:
@@ -535,10 +545,9 @@ def _media_keys(listing, system, stem):
     listing."""
     out = {}
     for key in listing:
-        parts = key.split("/", 3)
-        if len(parts) == 4 and parts[1] == system and parts[2] in scrape_plan.BUCKET_MEDIA \
-                and os.path.splitext(parts[3])[0] == stem:
-            out[key] = parts[2]
+        entry = scrape_plan.media_entry(key)
+        if entry and entry[0] == stem and key.split("/")[1] == system:
+            out[key] = entry[1]
     return out
 
 
@@ -803,9 +812,7 @@ def scrape_system(client, system, items, threads, skip, shrink, outcomes, listin
             failed += n
             halted = hit if isinstance(hit, KeyboardInterrupt) else halted or hit  # Ctrl-C wins over an earlier stop
             if time.monotonic() - last_write >= METADATA_INTERVAL:
-                scrape_state.flush_unknown()  # marks from a run that finds nothing must not wait for the final flush
-                scrape_state.flush_hashes()
-                scrape_state.flush_nomedia()
+                scrape_state.flush()  # marks from a run that finds nothing must not wait for the final flush
                 last_write = time.monotonic()
                 if pending:
                     n, halt = record(system, pending, outcomes, listing, index, skip, replace, rerun, fill, translated=translated)
@@ -825,9 +832,7 @@ def scrape_system(client, system, items, threads, skip, shrink, outcomes, listin
         stop.set()
         ex.shutdown(wait=True, cancel_futures=True)
         hasher.shutdown(wait=True, cancel_futures=True)
-        scrape_state.flush_hashes()
-        scrape_state.flush_unknown()
-        scrape_state.flush_nomedia()
+        scrape_state.flush()
         for _, begun in flight:
             shutil.rmtree(begun.tmp, ignore_errors=True)
 
@@ -959,13 +964,8 @@ def _scrape_command(args):
         print("📏 Listing the ROMs available in storage...")
         roms = scrape_files.bucket_roms(systems, all_files=getattr(args, "all", False))
         listed = [s for s in systems if roms.get(s["bucket"])]
-        def loaded(name):
-            try:
-                return load_metadata(name)
-            except ValueError:
-                return None
         metadata = {}
-        for name, data in _each(loaded, [s["bucket"] for s in listed]).items():
+        for name, data in _load_all(listed).items():
             if data is None:
                 print(ui.yellow(f"  ⚠️  {metadata_key(name)} isn't valid JSON; skipping {name}"))
                 roms[name] = set()
@@ -1123,13 +1123,7 @@ def missing_command(args):
     try:
         roms = scrape_files.bucket_roms(systems, all_files=getattr(args, "all", False))
         listed = [s for s in systems if roms.get(s["bucket"])]
-
-        def loaded(name):
-            try:
-                return load_metadata(name)
-            except ValueError:
-                return None
-        metadata = _each(loaded, [s["bucket"] for s in listed])
+        metadata = _load_all(listed)
     except s3.ERRORS as e:
         ui.fail(f"{e}", 3)
     state, total = scrape_state.snapshot(), 0

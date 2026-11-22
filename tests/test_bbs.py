@@ -280,6 +280,16 @@ class Download(helpers.StorageDir):
                                          "scrapes/pico8/covers/x-10.p8.png", META})
         self.assertEqual(self.meta(), {"x-2.p8.png": {"name": "X Two", "developer": "Ex", "genre": "g"}})
 
+    def test_upgrade_moves_the_old_revisions_files_in_any_scrapes_folder(self):
+        self.put("pico8/x-1.p8.png")
+        self.put("scrapes/pico8/extras/x-1.p8.png")  # not a media type
+        self.put("scrapes/pico8/covers/sub/x-1.p8.jpg")
+        with mock.patch.object(bbs, "retarget", return_value=[]):
+            code, _, _, _ = self.run_download([page(("x-2", "X Two", "Ex")), EMPTY])
+        self.assertEqual(code, 0)
+        self.assertEqual(self.stored(), {"pico8/x-2.p8.png", "scrapes/pico8/extras/x-2.p8.png",
+                                         "scrapes/pico8/covers/sub/x-2.p8.jpg", META})
+
     def test_upgrade_moves_the_manual_match_and_forgets_the_old_revisions_scrape_state(self):
         self.put("pico8/x-1.p8.png")
         hashes = {"size": 3, "mtime": 1, "hashes": {"md5": "a"}}

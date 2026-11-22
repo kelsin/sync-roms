@@ -10,14 +10,10 @@ import re
 import sys
 from collections import defaultdict
 
-from sync_roms import inventory, m3u, names, shared, store, usersettings, vita
+from sync_roms import inventory, m3u, names, scrape_plan, shared, store, usersettings, vita
 
 CHECKED = "variants-checked.json"  # a storage key
 REISSUE = re.compile(r"^(classic nes series|famicom mini \d*|nes classics|sega ages( \d+)?)\s*[-:]\s*", re.I)
-
-
-def _dump(checked):
-    return json.dumps(checked, indent=1, ensure_ascii=False, sort_keys=True)
 
 
 def norm(title):
@@ -58,7 +54,7 @@ def main():
 
     stored = set()
     for s in store.repo_json("systems"):
-        stored.update(k for k in inventory.files(f"{s['bucket']}/", sizes=False) if not k.endswith("/"))
+        stored.update(store.folder_keys(s["bucket"], say=False))
 
     by_title, by_family = defaultdict(list), defaultdict(list)
     for key, info in games.items():
@@ -72,7 +68,7 @@ def main():
     new = [k for k in unlisted if not any(g in checked for g in groups.get(k, [k]))]
     if "--baseline" in sys.argv[1:]:
         shared.update(CHECKED, json.loads, {}, lambda c: c.update(
-            {k: "baseline: in storage before variants were tracked" for k in new}), _dump)
+            {k: "baseline: in storage before variants were tracked" for k in new}), scrape_plan.dump_json)
         print(f"Marked {len(new)} unlisted ROM(s) as checked in storage's {CHECKED}")
         return
     matches, unmatched, seen = defaultdict(list), 0, set()
