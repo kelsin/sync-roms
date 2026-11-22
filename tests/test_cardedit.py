@@ -1158,6 +1158,38 @@ class Flow(DataDir):
         self.assertEqual({x["bucket"] for x in entry["games"]["gba"]}, {"gba/Zelda.zip", "gba/Ruby.sav"})
         self.assertNotIn("sets", entry["games"])
 
+    def test_ctrl_c_in_the_set_list_only_saves(self):
+        self.card()
+
+        def ruby_on_then_sets(labels, kw):
+            kw["session"]["sel"][labels.index("Ruby.zip")] = True
+            return (cardedit.SET_KEY, 0)
+
+        def interrupted(labels, kw):
+            raise KeyboardInterrupt
+        with self.assertRaises(KeyboardInterrupt):  # Space twice in the set list: its games on, then off again
+            self.run_system(ruby_on_then_sets, returns((" ", 0)), returns((" ", 0)), interrupted)
+        self.assertEqual(store.card_games("c"), {})  # the pass before the set list isn't applied a second time
+
+    def test_ctrl_c_in_the_variant_list_saves_what_was_toggled(self):
+        self.with_variants(self.RED, {"bucket": "psx/x.chd", "note": "PS1: x"})
+        self.card()
+
+        def zelda_on_then_v(labels, kw):
+            kw["session"]["sel"][labels.index("Zelda.zip")] = True
+            return (cardedit.VARIANT_KEY, labels.index("Ruby.zip"))
+
+        def interrupted(labels, kw):
+            raise KeyboardInterrupt
+        with self.assertRaises(KeyboardInterrupt):
+            self.run_system(zelda_on_then_v, interrupted)
+        self.assertEqual(store.card_games("c"), {"gba": [g("gba/Zelda.zip")]})
+
+    def test_a_systems_games_keep_select_all(self):
+        self.card()
+        _, calls = self.run_system(returns([False] * 4))
+        self.assertIs(calls[0][2].get("select_all", True), True)
+
     def initial_of(self, kw, labels, name):
         return kw["initial"][labels.index(name)]
 
@@ -1625,6 +1657,21 @@ class SetFlow(Flow):
         with self.assertRaises(KeyboardInterrupt):
             self.run_set(interrupted)
         self.assertIn("gba/Ruby.zip", {x["bucket"] for x in self.read("cards.json")["c"]["games"]["gba"]})
+
+    def test_ctrl_c_in_the_series_list_saves_what_was_toggled(self):
+        self.card()
+        game_set = {**SET, "games": [{**x, "series": "A"} for x in SET["games"]]}
+
+        def red_on_then_series(labels, kw):
+            kw["session"]["sel"][labels.index("Game Boy — Red")] = True
+            return (cardedit.SERIES_KEY, None)
+
+        def interrupted(labels, kw):
+            self.assertEqual(labels, ["A  (2 games)"])
+            raise KeyboardInterrupt
+        with self.assertRaises(KeyboardInterrupt):
+            self.run_set(red_on_then_series, interrupted, game_set=game_set)
+        self.assertEqual(store.card_games("c"), {"gb": [g("gb/Red.gb")]})
 
     def run_series(self, game_set, pick, *steps):
         """Drives edit_set; the series list (no multi mode) answers with the index pick, and its labels are kept."""

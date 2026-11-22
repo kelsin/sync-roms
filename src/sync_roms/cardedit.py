@@ -744,6 +744,75 @@ def _toggle_variant(picks, key, title):
     return found[0]["bucket"].partition("/")[0]
 
 
+def _games_pass(title, shown, picks, sps, files_of, start, work, capacity, to_fetch, place, **list_kw):
+    """One pass of a card's games list over shown, rows of (system, bucket key, title, label), from the card as edited
+    so far; the toggles are then folded into picks (on Ctrl-C too, which is raised again). sps: {system bucket:
+    SystemPicks} of the rows' systems but the full ones, whose rows are on and locked; files_of: {bucket key: the files
+    switched with it}; start: {bucket key: synced} when the editor opened; work: _work_out's; place:
+    picker.carry_place's, kept across passes; list_kw: filter_list's arguments each list sets itself (hint, hotkeys,
+    key_help, filters, select_all). Returns filter_list's result."""
+    notes = picks.cover()
+    bases = {b: sp.states(notes) for b, sp in sps.items()}
+    keys = [r[1] for r in shown]
+    sp_of = [sps.get(r[0]["bucket"]) for r in shown]  # None on a full system
+    base = {k: sp is None or bases[sp.bucket][k] for k, sp in zip(keys, sp_of)}
+    index = {k: i for i, k in enumerate(keys)}
+    links = [[index[m] for m in sp.groups.get(k, ()) if m in index] if sp else [] for k, sp in zip(keys, sp_of)]
+    session = {"sel": [base[k] for k in keys]}
+    picker.carry_place(place, keys, session)  # where the last pass was, when it listed the same games
+
+    def on_card(key):
+        """picks.on_card, from this pass's states where the key's system has them."""
+        b = key.partition("/")[0]
+        return bases[b].get(key, False) if b in bases else picks.on_card(key)
+    extras = [_row_extras(sp, work, k, notes, st) + [_variant_mark(picks, k, on_card)] if sp else []
+              for k, sp, st in zip(keys, sp_of, session["sel"])]
+
+    def switched(state):
+        """{system bucket: (keys, states)} of the rows this pass switched, each with its files."""
+        out = {}
+        for k, sp, want in zip(keys, sp_of, state):
+            if sp and want != base[k]:
+                ks, ws = out.setdefault(sp.bucket, ([], []))
+                for f in (k, *files_of.get(k, ())):
+                    if f in bases[sp.bucket]:
+                        ks.append(f)
+                        ws.append(want)
+        return out
+
+    def status(state):
+        moved = switched(state)
+        now = []
+        for b, sp in sps.items():
+            states = dict(bases[b])
+            if b in moved:
+                states.update(sp.changes(moved[b][0], bases[b], moved[b][1]))
+            now.append((sp, states))
+        return _status(work, now, capacity, to_fetch)
+
+    def apply(state):
+        for b, (ks, ws) in switched(state).items():
+            sps[b].apply(ks, notes, bases[b], ws)
+
+    try:
+        result = picker.filter_list(
+            title, [r[3] for r in shown], multi=True, initial=[start[k] for k in keys], extras=extras, status=status,
+            row_note=lambda i: edit.variant_line(keys[i], picks.variants, picks.parents, picks.system_names,
+                                                 picks.on_card),
+            session=session, note_text=lambda i: edit.note_text(sp_of[i].games, keys[i]),
+            on_note=lambda i, text: edit.save_note(sp_of[i].games, keys[i], text),
+            preview=lambda i: previews.game_thumb(keys[i]) if i < len(keys) else None,
+            preview_width=previews.GAME_WIDTH, links=links,
+            locked=[sp is None or k in sp.locked_from for k, sp in zip(keys, sp_of)],
+            locked_note=[edit.FULL_SYSTEM_NOTE if sp is None else _locked_note(sp, k) for k, sp in zip(keys, sp_of)],
+            **list_kw)
+    except KeyboardInterrupt:  # Ctrl-C: keep the toggles
+        apply(session["sel"])
+        raise
+    apply(session["sel"] if isinstance(result, tuple) else result)
+    return result
+
+
 def edit_system(name, system, setup, to_fetch=None, card_usages=None):
     """A card's games of one system: the whole storage folder, searchable, filterable to a set's games and by scraped
     metadata. Saves to cards.json when left; returns whether anything changed. to_fetch: as for edit_card.
@@ -767,46 +836,19 @@ def edit_system(name, system, setup, to_fetch=None, card_usages=None):
     work = _work_out(picks, [sp], others, card_usages, to_fetch)
     start = sp.states(picks.cover())
 
-    pending = None  # (rows shown, notes, states before) of the pass on screen, applied if Ctrl-C ends it
     place = {}  # picker.carry_place's: the last pass's row, filter text, view and scroll
     try:
         while True:
-            notes = picks.cover()
-            base = sp.states(notes)
             kept = {r[1] for r in sp.rows if filters.keep(r[1])}
             shown = [r for r in sp.rows if r[1] in kept and sp.playlist_of.get(r[1]) not in kept]  # a shown playlist hides its discs
-            keys = [r[1] for r in shown]
-            index = {k: i for i, k in enumerate(keys)}
-            links = [[index[m] for m in sp.groups.get(k, ()) if m in index] for k in keys]
-            session = {"sel": [base[k] for k in keys]}
-            picker.carry_place(place, keys, session)  # where the last pass was, when it listed the same games
-            extras = [_row_extras(sp, work, k, notes, st) + [_variant_mark(picks, k)]
-                      for k, st in zip(keys, session["sel"])]
-
-            def status(state):
-                now = dict(base)
-                now.update(sp.changes(keys, base, state))
-                return _status(work, [(sp, now)], capacity, to_fetch)
-
-            pending = (keys, notes, base, session)
-            result = picker.filter_list(f"✏️  {system['name']} on {name} — ✅ synced, ⬜ not, 📦 from a set",
-                                        [r[3] for r in shown], multi=True, initial=[start[k] for k in keys],
-                                        extras=extras, hint=GAMES_HINT, hotkeys=(*GameFilters.KEYS, VARIANT_KEY),
-                                        key_help=GAMES_KEYS, filters=filters.describe(),
-                                        status=status, row_note=lambda i: edit.variant_line(
-                                            keys[i], picks.variants, picks.parents, picks.system_names, picks.on_card),
-                                        session=session, note_text=lambda i: edit.note_text(sp.games, keys[i]),
-                                        on_note=lambda i, text: edit.save_note(sp.games, keys[i], text),
-                                        preview=lambda i: previews.game_thumb(keys[i]) if i < len(keys) else None,
-                                        preview_width=previews.GAME_WIDTH,
-                                        links=links, locked=[k in sp.locked_from for k in keys],
-                                        locked_note=[_locked_note(sp, k) for k in keys])
-            pending = None
-            sp.apply(keys, notes, base, session["sel"] if isinstance(result, tuple) else result)
+            result = _games_pass(
+                f"✏️  {system['name']} on {name} — ✅ synced, ⬜ not, 📦 from a set", shown, picks, {bucket: sp}, {},
+                start, work, capacity, to_fetch, place, hint=GAMES_HINT, hotkeys=(*GameFilters.KEYS, VARIANT_KEY),
+                key_help=GAMES_KEYS, filters=filters.describe())
             if not isinstance(result, tuple):
                 break
             if result[0] == VARIANT_KEY:
-                variant = result[1] is not None and _toggle_variant(picks, keys[result[1]], sp.titles[keys[result[1]]])
+                variant = result[1] is not None and _toggle_variant(picks, *shown[result[1]][1:3])
                 if variant:
                     work = _work_out(picks, [sp], others, card_usages, to_fetch, variant)
             else:
@@ -814,10 +856,7 @@ def edit_system(name, system, setup, to_fetch=None, card_usages=None):
                     system, list(picks.sets_by_id.values()), sp.games, sp.titles, {r[1] for r in sp.rows}, current,
                     lambda: {k for k, v in sp.states(picks.cover()).items() if v},
                     lambda keys, on: sp.apply(keys, picks.cover(), sp.states(picks.cover()), [on] * len(keys))))
-    except KeyboardInterrupt:  # Ctrl-C: keep the toggles
-        if pending:
-            keys, notes, base, session = pending
-            sp.apply(keys, notes, base, session["sel"])
+    except KeyboardInterrupt:  # Ctrl-C: the pass on screen kept its toggles
         picks.save()
         raise
     return picks.save()
@@ -898,62 +937,15 @@ def edit_set(name, game_set, setup, to_fetch=None, card_usages=None, narrow_sets
     capacity = budget.card_capacity(card_entry(name, setup, cards))
     work = _work_out(picks, list(sps.values()), others, card_usages, to_fetch)
 
-    def row_states(bases):
-        """{bucket key: synced} for every row, from each system's SystemPicks.states."""
-        return {key: s["bucket"] not in sps or bases[s["bucket"]][key] for s, key, _, _ in rows}
-    start = row_states({b: sp.states(picks.cover()) for b, sp in sps.items()})
-    pending = None  # (apply, session) of the pass on screen, applied if Ctrl-C ends it
+    opened = {b: sp.states(picks.cover()) for b, sp in sps.items()}
+    start = {key: s["bucket"] not in sps or opened[s["bucket"]][key] for s, key, _, _ in rows}
     place = {}  # picker.carry_place's: the last pass's row, filter text, view and scroll
     try:
         while True:
-            notes = picks.cover()
-            bases = {b: sp.states(notes) for b, sp in sps.items()}
-            base = row_states(bases)
             wanted = listedit.series_keys(game_set, series_filter) if series_filter else None
             if chosen:
                 wanted = {g["bucket"] for g in store.set_games(chosen)}
             shown = [r for r in listed if wanted is None or r[1] in wanted]
-            keys = [r[1] for r in shown]
-            sp_of = [sps.get(r[0]["bucket"]) for r in shown]  # None on a full system
-            index = {k: i for i, k in enumerate(keys)}
-            links = [[index[m] for m in sp.groups.get(k, ()) if m in index] if sp else [] for k, sp in zip(keys, sp_of)]
-            session = {"sel": [base[k] for k in keys]}
-            picker.carry_place(place, keys, session)
-
-            def on_card(key):
-                """picks.on_card, from this pass's states where the key's system has them."""
-                b = key.partition("/")[0]
-                return bases[b].get(key, False) if b in bases else picks.on_card(key)
-            extras = [_row_extras(sp, work, k, notes, st) + [_variant_mark(picks, k, on_card)] if sp else []
-                      for k, sp, st in zip(keys, sp_of, session["sel"])]
-
-            def switched(state):
-                """{system bucket: (keys, states)} of the rows this pass switched, each with its files."""
-                out = {}
-                for k, sp, want in zip(keys, sp_of, state):
-                    if sp and want != base[k]:
-                        ks, ws = out.setdefault(sp.bucket, ([], []))
-                        for f in (k, *files_of[k]):
-                            if f in bases[sp.bucket]:
-                                ks.append(f)
-                                ws.append(want)
-                return out
-
-            def status(state):
-                moved = switched(state)
-                now = []
-                for b, sp in sps.items():
-                    states = dict(bases[b])
-                    if b in moved:
-                        states.update(sp.changes(moved[b][0], bases[b], moved[b][1]))
-                    now.append((sp, states))
-                return _status(work, now, capacity, to_fetch)
-
-            def apply(state):
-                for b, (ks, ws) in switched(state).items():
-                    sps[b].apply(ks, notes, bases[b], ws)
-
-            pending = (apply, session)
             if narrow_sets:
                 emoji, hint, hotkeys, key_help = "🌐", ALL_GAMES_HINT, (VARIANT_KEY, SET_KEY, CLEAR_KEY), ALL_GAMES_KEYS
                 filters = f"{themeart.set_emoji(chosen)} {chosen['name']} only (c clear filters)" if chosen else ""
@@ -961,20 +953,10 @@ def edit_set(name, game_set, setup, to_fetch=None, card_usages=None, narrow_sets
                 emoji, hint, hotkeys, key_help = (themeart.set_emoji(game_set), SET_GAMES_HINT,
                                                   (VARIANT_KEY, SERIES_KEY, CLEAR_KEY), SET_GAMES_KEYS)
                 filters = f"{series_filter} (c clear filters)" if series_filter else ""
-            result = picker.filter_list(
-                f"{emoji} {game_set['name']} on {name} — ✅ synced, ⬜ not, 📦 from a set",
-                [r[3] for r in shown], multi=True, initial=[start[k] for k in keys], extras=extras,
-                hint=hint, hotkeys=hotkeys, key_help=key_help, status=status, filters=filters,
-                row_note=lambda i: edit.variant_line(keys[i], picks.variants, picks.parents, picks.system_names,
-                                                     picks.on_card),
-                session=session, note_text=lambda i: edit.note_text(sp_of[i].games, keys[i]),
-                on_note=lambda i, text: edit.save_note(sp_of[i].games, keys[i], text),
-                preview=lambda i: previews.game_thumb(keys[i]) if i < len(keys) else None,
-                preview_width=previews.GAME_WIDTH, links=links, select_all=False,
-                locked=[sp is None or k in sp.locked_from for k, sp in zip(keys, sp_of)],
-                locked_note=[edit.FULL_SYSTEM_NOTE if sp is None else _locked_note(sp, k) for k, sp in zip(keys, sp_of)])
-            pending = None
-            apply(session["sel"] if isinstance(result, tuple) else result)
+            result = _games_pass(
+                f"{emoji} {game_set['name']} on {name} — ✅ synced, ⬜ not, 📦 from a set", shown, picks, sps, files_of,
+                start, work, capacity, to_fetch, place, hint=hint, hotkeys=hotkeys, key_help=key_help, filters=filters,
+                select_all=False)
             if not isinstance(result, tuple):
                 break
             if result[0] == CLEAR_KEY:
@@ -987,13 +969,10 @@ def edit_set(name, game_set, setup, to_fetch=None, card_usages=None, narrow_sets
             elif result[0] == SERIES_KEY:
                 series_filter = pick_series(game_set, series_filter) or series_filter
             elif result[1] is not None:
-                variant = _toggle_variant(picks, keys[result[1]], shown[result[1]][2])
+                variant = _toggle_variant(picks, *shown[result[1]][1:3])
                 if variant:
                     work = _work_out(picks, list(sps.values()), others, card_usages, to_fetch, variant)
-    except KeyboardInterrupt:  # Ctrl-C: keep the toggles
-        if pending:
-            apply, session = pending
-            apply(session["sel"])
+    except KeyboardInterrupt:  # Ctrl-C: the pass on screen kept its toggles
         picks.save()
         raise
     return picks.save()
