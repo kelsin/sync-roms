@@ -120,10 +120,10 @@ What sync-roms does today (`screenscraper.py`, `scrape_online.py`), where it dif
 - **Hashes sent.** Not every lookup carries all three hashes.
   - Bucket with no local mirror: only `md5`, taken from the ETag; nothing for a multipart upload's ETag, which is not the file's MD5.
   - Storage folder or local mirror, file under 64 MiB (`HASH_MAX`): `md5`, `sha1` and `crc` of the file.
-  - Storage folder or local mirror, file of 64 MiB or more: cached hashes if there are any, else none; when that lookup finds nothing, the file is hashed and looked up once more.
+  - Storage folder or local mirror, file of 64 MiB or more: cached hashes if there are any, else none; when a lookup sent without hashes finds nothing, the file is hashed and looked up once more.
 - **Non-games.** A result is a non-game when any of its names starts with `ZZZ(NOTGAME)`, in any case. It is not discarded: the ROM gets no entry and is recorded in `scrapes/notgames.json` with what ScreenScraper says about it, for `scrape review`.
 - **Search.** `jeuRecherche.php` is used by `scrape match` with a name, by `scrape review`'s `s` and `t` answers, and by the skills' `match-translations/scripts/search.py` and `dedup-names/scripts/search_games.py`. Results whose title is a `ZZZ(NOTGAME)` name are dropped; the title is picked by `wor`, `us`, `ss`, `eu`, `jp`, then any region.
-- **Quota.** Of the `ssuser` fields only `maxthreads`, `requeststoday` and `maxrequestsperday` are read. A run scrapes on `maxthreads` threads; nothing enforces a per-minute cap. A 429, a 5xx or a network error is retried 3 times, after 10, 20 and 40 s. A 430 or 431 stops the run.
+- **Quota.** Of the `ssuser` fields only `maxthreads`, `requeststoday` and `maxrequestsperday` are read. A run scrapes on `maxthreads` threads; nothing enforces a per-minute cap. A 429, a 5xx or a network error is retried 3 times, after 10, 20 and 40 s. A 430 or 431 (quota), or a 401, 403, 423 or 426 (refused), stops the run; so do 3 ROMs in a row that stay unreachable after their retries.
 - **Never used.** `romtype`, `serialnum`, `systemesListe.php` (the ids are in `systems.json`), `niveau` and `video-normalized`.
 
 ## Fixtures
