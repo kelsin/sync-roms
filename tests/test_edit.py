@@ -13,15 +13,10 @@ from textual import events
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from helpers import DataDir  # noqa: E402,F401  (re-exported: other test modules still import it from here)
 from helpers import feed_list, pilot_list, screen_lines, screen_text, shown_preview  # noqa: E402
+from helpers import VITA_DLC as DLC, VITA_GAME as G, VITA_UPDATE as NEW  # noqa: E402
 from sync_roms import edit, names, picker, runtime, s3, store, ui  # noqa: E402
 
 SETS = {"s": {"id": "s", "name": "Mix", "games": [{"system": "gba", "bucket": "gba/A.zip", "files": ["gba/A2.zip"]}]}}
-
-
-G = "psvita/G [PCSE00349] [USA] [NoNpDRM].zip"
-DLC = "psvita/D [PCSE00349] [USA] [DLC-X].zip"
-NEW = "psvita/G [PCSE00349] [USA] [PATCH] [v1.11] [NoNpDRM].zip"
-H = "psvita/H [PCSE00001] [USA] [NoNpDRM].zip"
 
 
 class Helpers(unittest.TestCase):

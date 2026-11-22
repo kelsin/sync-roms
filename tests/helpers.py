@@ -18,6 +18,11 @@ SYSTEM = {"name": "Game Boy Advance", "bucket": "gba", "folders": {"esde": "gba"
           "games": [{"bucket": "gba/Game.zip"}]}
 MANIFEST = {"systems": [SYSTEM], "devices": [], "layouts": {"esde": {"label": "ES-DE", "roms_dir": "ROMs", "bios_dir": "BIOS"}}}
 ENV = ("ROMS_BUCKET", "ROMS_ENDPOINT", "ROMS_PROFILE", "ROMS_WRITE_PROFILE")
+# A Vita game with its DLC and newest update (vita.py tells them apart by these tags), and another game
+VITA_GAME = "psvita/G [PCSE00349] [USA] [NoNpDRM].zip"
+VITA_DLC = "psvita/D [PCSE00349] [USA] [DLC-X].zip"
+VITA_UPDATE = "psvita/G [PCSE00349] [USA] [PATCH] [v1.11] [NoNpDRM].zip"
+VITA_OTHER = "psvita/H [PCSE00001] [USA] [NoNpDRM].zip"
 
 
 def list_sizes(prefix, sizes=True):

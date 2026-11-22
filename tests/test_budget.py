@@ -5,7 +5,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from helpers import DataDir  # noqa: E402
+from helpers import VITA_DLC as DLC, VITA_GAME as G, DataDir  # noqa: E402
 from sync_roms import budget, ignore, inventory, scrape_plan, store  # noqa: E402
 
 GBA = {"bucket": "gba", "name": "GBA"}
@@ -13,8 +13,6 @@ SIZES = {"gba/A.zip": 100, "gba/B.zip": 200, "gba/C.zip": 400}
 SCRAPES = {"scrapes/gba/screenshots/A.png": 10, "scrapes/gba/onion/A.png": 3,
            "scrapes/gba/screenshots/B.png": 20}
 VITA = {"bucket": "psvita", "name": "Vita"}
-G = "psvita/G [PCSE00349] [USA] [NoNpDRM].zip"
-DLC = "psvita/D [PCSE00349] [USA] [DLC-X].zip"
 UPD = "psvita/G [PCSE00349] [USA] [PATCH] [v1.02] [NoNpDRM].zip"
 SET = {"id": "s", "name": "S", "games": [{"system": "gba", "bucket": "gba/A.zip"}, {"system": "gba", "bucket": "gba/B.zip"}]}
 
