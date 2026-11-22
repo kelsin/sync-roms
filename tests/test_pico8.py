@@ -65,6 +65,24 @@ class Pico8(helpers.StorageDir):
         self.run_setup("knulli")
         self.assertFalse(os.path.exists(self.card_path("roms", "pico8", NEW)))
 
+    def test_layout_change_puts_the_zip_where_the_new_layout_looks(self):
+        self.put(f"os/pico8/{NEW}")
+        store.save_card("c", None, "esde")
+        self.run_setup("esde")
+        self.assertEqual(self.recorded(), NEW)
+        store.save_card("c", None, "knulli")
+        self.assertIsNone(self.recorded())
+        self.run_setup("knulli")
+        self.assertTrue(os.path.isfile(self.card_path("roms", "pico8", NEW)))
+        self.assertEqual(self.recorded(), NEW)
+
+    def test_device_change_and_same_layout_keep_the_record(self):
+        store.update_card("c", device="full", layout="knulli", pico8=NEW)
+        store.save_card("c", {"id": "x"}, "knulli")
+        self.assertEqual(store.load_cards()["c"], {"device": "x", "layout": "knulli", "pico8": NEW})
+        store.update_card("c", device="y")
+        self.assertEqual(self.recorded(), NEW)
+
     def test_newer_zip_replaces_old(self):
         self.put(f"os/pico8/{NEW}")
         old = self.card_path("roms", "pico8", OLD)

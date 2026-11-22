@@ -492,6 +492,15 @@ class ConvertCommandTest(unittest.TestCase):
         self.assertFalse(os.path.exists(os.path.join(self.base, "roms", "gba", "Game.zip")))
         self.assertEqual(self.layout(), "nextui")
 
+    def test_convert_drops_the_pico8_record(self):
+        self.set_card({"device": "anbernic-rg34xx-sp", "layout": "knulli", "pico8": "pico-8_0.2.7_raspi.zip"})
+        self.assertEqual(self.run_cmd(dry_run=True, yes=False), 0)
+        with open(os.path.join(self.data, "cards.json")) as f:
+            self.assertIn("pico8", self.json.load(f)["SD"])
+        self.assertEqual(self.run_cmd(), 0)
+        with open(os.path.join(self.data, "cards.json")) as f:
+            self.assertEqual(self.json.load(f)["SD"], {"device": "anbernic-rg34xx-sp", "layout": "nextui"})
+
     def test_convert_deletes_old_media(self):
         touch(os.path.join(self.base, "roms", "gba", "gamelist.xml"))
         touch(os.path.join(self.base, "roms", "gba", "images", "Game-image.png"))

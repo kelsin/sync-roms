@@ -503,10 +503,14 @@ def cards_readable():
 
 
 def update_card(name, **values):
-    """Merge values into a card's saved entry, keeping its other keys."""
+    """Merge values into a card's saved entry, keeping its other keys. A layout that differs from the saved one drops
+    the card's pico8: the zip was put where the old layout's installer looks, so the next sync puts it on the card again."""
     cards = load_cards()
     entry = cards.get(name)
-    cards[name] = {**(entry if isinstance(entry, dict) else {}), **values}
+    entry = dict(entry) if isinstance(entry, dict) else {}
+    if entry.get("layout") and values.get("layout", entry["layout"]) != entry["layout"]:
+        entry.pop("pico8", None)
+    cards[name] = {**entry, **values}
     return write_cards(cards)
 
 

@@ -375,6 +375,17 @@ class CardsTest(Cmd):
         self.assertEqual(self.run_cmd("cards", "copy", "A", "Z")[0], 2)
         self.assertEqual(self.run_cmd("cards", "copy", "A", "A")[0], 2)
 
+    def test_set_layout_drops_the_pico8_record(self):
+        device = next(d for d in store.repo_json("devices") if "esde" in d["firmwares"])
+        zip_name = "pico-8_0.2.7_raspi.zip"
+        self.write_json("cards.json", {"SD": {"device": "full", "layout": "esde", "pico8": zip_name}})
+        self.assertEqual(self.run_cmd("cards", "set", "SD", "--layout", "knulli", "--dry-run")[0], 0)
+        self.assertEqual(self.run_cmd("cards", "set", "SD", "--layout", "esde")[0], 0)
+        self.assertEqual(self.run_cmd("cards", "set", "SD", "--device", device["id"])[0], 0)
+        self.assertEqual(self.read("cards.json")["SD"], {"device": device["id"], "layout": "esde", "pico8": zip_name})
+        self.assertEqual(self.run_cmd("cards", "set", "SD", "--device", "full", "--layout", "knulli")[0], 0)
+        self.assertEqual(self.read("cards.json")["SD"], {"device": "full", "layout": "knulli"})
+
     def test_bad_layout_for_device_is_refused(self):
         device = store.repo_json("devices")[0]
         other = next(n for n in store.repo_json("layouts") if n not in device["firmwares"])
