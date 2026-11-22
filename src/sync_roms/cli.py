@@ -1034,7 +1034,8 @@ def sync_card(args):
             walks += downloads.walk_roms(os.path.join(dest, disc_dir), rename_temps=True)
         names = {downloads.name_key(os.path.relpath(os.path.join(root, f), dest)) for root, files in walks for f in files}
         disc_keys = m3u.disc_keys(keys) if disc_dir else ()
-        return {k for k in keys if downloads.name_key(downloads.rom_rel(k, disc_dir, disc_keys)) in names}
+        folders = m3u.game_folders(keys) if disc_folders else None
+        return {k for k in keys if downloads.name_key(downloads.rom_rel(k, disc_dir, disc_keys, folders)) in names}
 
     relist()
     interactive = not (ui.ASSUME_YES or args.json) and ui.has_terminal()
