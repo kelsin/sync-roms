@@ -1136,7 +1136,7 @@ def sync_card(args):
                 + raofflineproxy.install(card, layout_name, base, dry_run))
 
     def stage_spruce(dry_run):
-        """Stage the newest spruceOS on a spruce card. The failure count."""
+        """Stage boot logos, the newest spruceOS and the saved settings on a spruce card. The failure count."""
         wrote = []
         failed = spruce_bootlogo.install(card, layout_name, device, base, dry_run, wrote, keep=args.no_delete)
         failed += spruce_os.install(card, layout_name, base, dry_run, wrote, keep=args.no_delete)

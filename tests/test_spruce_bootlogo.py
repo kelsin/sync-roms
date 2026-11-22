@@ -142,6 +142,45 @@ class Install(helpers.CardDir):
         self.assertIn("K.png", self.err.getvalue())
         self.assertEqual(self.recorded(), ["A.bmp"])
 
+    def test_recorded_names_with_path_components_are_never_removed(self):
+        victim = os.path.join(self.tmp.name, "victim.txt")
+        helpers.touch(victim)
+        helpers.touch(self.img("sub/x.png"))
+        helpers.touch(os.path.join(self.card, "App", "BootLogo", "x.png"))
+        for name in ("../../../../victim.txt", "sub/x.png"):
+            with self.subTest(name):
+                store.update_card("c", boot_logos=[name])
+                self.run_install()
+                self.assertTrue(os.path.isfile(victim))
+                self.assertTrue(os.path.isfile(self.img("sub/x.png")))
+                self.assertFalse(self.recorded())
+
+    def test_failed_copy_leaves_no_partial_file_and_is_retried(self):
+        self.logo("K.png", b"kkk")
+        def partial(src, dst, *a, **kw):
+            with open(dst, "wb") as f:
+                f.write(b"k")
+            raise OSError("No space left")
+        with mock.patch("shutil.copyfile", side_effect=partial):
+            self.run_install()
+        self.assertEqual(self.failures, 1)
+        self.assertEqual(os.listdir(self.imgs), [])
+        self.assertFalse(self.recorded())
+        self.run_install()
+        self.assertEqual((self.failures, self.read("K.png"), self.recorded()), (0, b"kkk", ["K.png"]))
+
+    def test_case_only_rename_replaces_the_old_logo_without_a_clash_warning(self):
+        self.logo("K.png", b"old")
+        self.run_install()
+        shutil.rmtree(os.path.join(store.data_dir(), "bootlogos"))
+        self.logo("k.png", b"new")
+        self.run_install()
+        self.assertEqual(self.err.getvalue(), "")
+        self.assertEqual([n.lower() for n in os.listdir(self.imgs)], ["k.png"])
+        with open(self.img("k.png"), "rb") as f:
+            self.assertEqual(f.read(), b"new")
+        self.assertEqual(self.recorded(), ["k.png"])
+
     def test_dry_run_writes_and_records_nothing(self):
         self.logo("Old.png")
         self.run_install()

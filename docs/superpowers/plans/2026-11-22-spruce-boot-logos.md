@@ -49,7 +49,7 @@ Each is pinned by a test in Task 2.
 
 - [ ] **Step 2: Run** `uv run python -m unittest tests.test_devices_data -v`. Expected: FAIL (no `resolution`).
 
-- [ ] **Step 3: Add the values.** Source: `/private/tmp/claude-501/-Users-kelsin-src-sync-roms--claude-worktrees-es-de-gamelist-xml-errors-318df9/2aa61a2a-6136-4aa4-97c0-6996aff995ab/scratchpad/resolutions.json`, `{device id: {"resolution", "resolution2"?}}` (the two devices with `null` have no `screen`; copy only those two keys, not `source` or `note`). Put `resolution` directly after `screen` and `resolution2` directly after `screen2` in each device object, keeping the file's existing one-device-per-line formatting and every other byte unchanged (a throwaway script outside the repo is fine; check `git diff --stat` shows only that file and that no line changed other than by the inserted keys).
+- [ ] **Step 3: Add the values.** Source: the research file handed to the builder (`resolutions.json`), `{device id: {"resolution", "resolution2"?}}` (the two devices with `null` have no `screen`; copy only those two keys, not `source` or `note`). Put `resolution` directly after `screen` and `resolution2` directly after `screen2` in each device object, keeping the file's existing one-device-per-line formatting and every other byte unchanged (a throwaway script outside the repo is fine; check `git diff --stat` shows only that file and that no line changed other than by the inserted keys).
 
 - [ ] **Step 4: Run** the new tests and the whole suite (`uv run python -m unittest discover -s tests`). Expected: PASS. If `tests/test_setup_guide.py` fails, run `uv run python tools/update_setup_guide.py` (it should not need to: the guide embeds a fixed key list).
 
