@@ -832,9 +832,9 @@ class SyncFlowTest(unittest.TestCase):
         self.assertEqual(code, 0)
         self.assertEqual(self.after, "%ROMPATH%/gba/Game.zip\n")
 
-    def run_with_user_files(self, cards):
+    def run_with_user_files(self, cards, **kw):
         """A sync of the card entry cards with the user's own custom-F.cfg, custom-a.cfg and custom-Favs.cfg on it;
-        returns (exit code, which of them are left)."""
+        returns (exit code, which of them are left). kw: more of run_sync's arguments."""
         names = ("F", "a", "Favs")
 
         def prepare(card_dir):
@@ -843,7 +843,7 @@ class SyncFlowTest(unittest.TestCase):
                 os.makedirs(os.path.dirname(path), exist_ok=True)
                 open(path, "w").close()
         code, *_ = self.run_sync(cards=cards, prepare=prepare, colls=[FAVS], after=lambda d: [
-            n for n in names if os.path.exists(frontend.collection_path("esde", d, n))])
+            n for n in names if os.path.exists(frontend.collection_path("esde", d, n))], **kw)
         return code, self.after
 
     def test_malformed_card_collection_fields_delete_nothing(self):
@@ -851,6 +851,14 @@ class SyncFlowTest(unittest.TestCase):
                       {"collections": "favs", "frontend_collections": [None, 5, ""]}):
             with self.subTest(cards=cards), contextlib.redirect_stderr(io.StringIO()):
                 self.assertEqual(self.run_with_user_files(cards), (0, ["F", "a", "Favs"]))
+
+    def test_missing_or_malformed_card_entry_writes_and_deletes_no_collections(self):
+        for entry in (None, [], "", 0):  # no entry in cards.json, or one that isn't an object
+            cards = type("AnyCard", (dict,), {"get": lambda self, k, d=None: entry})()
+            for dry_run in (False, True):
+                with self.subTest(entry=entry, dry_run=dry_run):
+                    self.assertEqual(self.run_with_user_files(None, dry_run=dry_run, extra=[(store, "load_cards", lambda: cards)]),
+                                     (0, ["F", "a", "Favs"]))
 
     def surprise_calls(self, result=(), **kw):
         calls = []

@@ -397,6 +397,26 @@ class Flow(DataDir):
         self.run_card(returns((cardedit.COLLECTIONS_KEY, 0)), returns(0), returns(None), returns(None))
         self.assertEqual(self.read("cards.json")["c"]["collections"], [])
 
+    def test_collections_list_of_a_missing_or_malformed_card_entry_marks_none(self):
+        self.favs()
+        self.write_json("cards.json", {"c": {"collections": ["favs"]}, "odd": {"collections": [None, 5, "favs"]},
+                                       "bad": ["favs"], "worse": {"collections": "favs"}})
+        marked = []
+        for name in ("c", "odd", "bad", "worse", "none"):
+            look = Script(lambda labels, kw: marked.append(bool(kw["extras"][0][0][0])))
+            with mock.patch.object(picker, "filter_list", look), contextlib.redirect_stdout(io.StringIO()):
+                cardedit.pick_collections(name, {"gba"})
+        self.assertEqual(marked, [True, True, False, False, False])
+
+    def test_card_entry_is_a_copy_with_the_layout_being_edited(self):
+        cards = {"c": {"device": "d", "layout": "onion"}, "bad": ["junk"]}
+        self.assertEqual(cardedit.card_entry("c", (DEVICE, "esde"), cards), {"device": "d", "layout": "esde"})
+        self.assertEqual(cards["c"]["layout"], "onion")  # the saved entry is left as it was
+        self.assertEqual([cardedit.card_entry(n, (DEVICE, "esde"), cards) for n in ("bad", "none")], [{"layout": "esde"}] * 2)
+        self.write_json("cards.json", cards)
+        self.assertEqual([cardedit.card_entry(n, (DEVICE, "muos")) for n in ("c", "bad", "none")],
+                         [{"device": "d", "layout": "muos"}, {"layout": "muos"}, {"layout": "muos"}])
+
     def test_no_collections_is_a_note(self):
         self.card()
         with mock.patch.object(edit, "note") as note:

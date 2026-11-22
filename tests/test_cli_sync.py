@@ -465,6 +465,19 @@ class SyncSmokeTest(RealDataDirGuard):
                 self.run_sync(False, patches=patches)
                 self.assertEqual(got, expected)
 
+    def test_raofflineproxy_apk_is_copied_for_a_missing_or_malformed_card_entry(self):
+        apks = {"os/android/APKs/": 0, "os/android/APKs/Obtainium.apk": 5, "os/android/APKs/RAOfflineProxy-v3.apk": 6}
+        for entry in (None, [], "", 0):  # no entry in cards.json, or one that isn't an object: the setting is on
+            got = []
+            patches = ((cli, {"free_space": lambda path: 10**9}),
+                       (store, {"load_cards": lambda: type("AnyCard", (dict,), {"get": lambda self, k, d=None: entry})()}),
+                       (cli.downloads, {"run_downloads": lambda todo, label, icon, base, *a: (got.extend(j[0] for j in todo) if label == "Android" else None) or 0}),
+                       (cli.s3, {"list_sizes": lambda prefix, sizes=True: apks if prefix == "os/android/APKs/" else list_sizes(prefix)}),
+                       (cli.ui, {"choose": lambda q, *a, **k: "n"}))
+            with self.subTest(entry=entry):
+                self.run_sync(False, patches=patches)
+                self.assertEqual(got, ["os/android/APKs/Obtainium.apk", "os/android/APKs/RAOfflineProxy-v3.apk"])
+
     ZIP = "pico-8_0.2.7_raspi.zip"
 
     def run_pico8(self, games, copied, dry_run=False, prepare=None, asked=None, device=None, extra_systems=()):
