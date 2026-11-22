@@ -16,15 +16,15 @@ Run every command from the repo root.
 ## 1. Find duplicates
 
 ```bash
-sync-roms cache update
+uv run sync-roms cache update
 uv run --frozen python .claude/skills/dedup-names/scripts/find_duplicates.py > <scratchpad>/duplicates.json
 ```
 
 The output has:
 - `groups`: `system`, the shared `name` and its `roms` (`rom`, `name`, `qualifier`, `translated`, `developer`,
   `releasedate`). Only ROMs shown as a game count: discs of a multi-disc game (its `.m3u` stands for them), files
-  in a set's folder and Vita extras are left out.
-- `skipped`: counts of what was left out; mention the counts.
+  in a set's folder, Vita extras and entries whose ROM isn't in the storage cache are left out.
+- `skipped`: counts of what was left out (`discs`, `set_folders`, `vita_extras`, `not_stored`); mention the counts.
 
 No groups: tell the user there is nothing to fix and stop.
 

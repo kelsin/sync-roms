@@ -15,8 +15,11 @@ Run every command from the repo root.
 ## 1. List the ROMs
 
 ```bash
+uv run sync-roms cache update
 uv run --frozen python .claude/skills/match-translations/scripts/list_translated.py [SYSTEM] > <scratchpad>/translated.json
 ```
+
+The scripts list storage through the storage cache and stop when there is none, so refresh it first.
 
 Each entry has `system` (storage folder), `system_name`, `rom`, `search_name` (the English title from the file name),
 `kind` (`notgame` or `unknown`) and, for a non-game, `screenscraper_said`. It makes no ScreenScraper request. Empty:
