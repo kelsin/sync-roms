@@ -1,0 +1,212 @@
+<title>Handheld OS Plan</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+/* Layout: one reading column, summary first, then per-device table, OS matrix, then scenarios as stacked plans */
+:root {
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --fg: #1b2230;
+  --muted: #5d6676;
+  --line: #dde1e8;
+  --accent: #2f5fd0;
+  --accent-soft: #e6edfb;
+  --ok: #1f7a46;
+  --ok-soft: #e0f3e8;
+  --warn: #8a5a00;
+  --warn-soft: #fbf0d6;
+  --bad: #a3322b;
+  --bad-soft: #f9e3e1;
+  --font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-head: "Space Grotesk", "Inter", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12151b; --surface: #1a1f28; --fg: #e8ebf1; --muted: #9aa3b2; --line: #2b3240;
+    --accent: #7ea3f5; --accent-soft: #1f2c4a;
+    --ok: #6fd09a; --ok-soft: #173325;
+    --warn: #e8b85a; --warn-soft: #3a2d10;
+    --bad: #f08d86; --bad-soft: #3d1f1d;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #12151b; --surface: #1a1f28; --fg: #e8ebf1; --muted: #9aa3b2; --line: #2b3240;
+  --accent: #7ea3f5; --accent-soft: #1f2c4a;
+  --ok: #6fd09a; --ok-soft: #173325;
+  --warn: #e8b85a; --warn-soft: #3a2d10;
+  --bad: #f08d86; --bad-soft: #3d1f1d;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg);
+  font-family: var(--font-body); font-size: 15px; line-height: 1.55;
+  padding-block: 32px 64px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+main { max-width: 1040px; margin: 0 auto; display: flex; flex-direction: column; gap: 40px; }
+h1, h2, h3 { font-family: var(--font-head); text-wrap: balance; margin: 0; line-height: 1.2; }
+h1 { font-size: 2rem; }
+h2 { font-size: 1.35rem; margin-bottom: 4px; }
+h3 { font-size: 1.05rem; }
+p { margin: 0; }
+.lede { color: var(--muted); max-width: 68ch; margin-top: 8px; }
+.sub { color: var(--muted); max-width: 68ch; margin-bottom: 14px; }
+section { display: flex; flex-direction: column; min-width: 0; }
+a { color: var(--accent); }
+.wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; font-variant-numeric: tabular-nums; }
+th, td { padding: 9px 12px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
+th { font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 600; white-space: nowrap; background: var(--surface); }
+tr:last-child td { border-bottom: 0; }
+td.dev b { font-family: var(--font-head); font-weight: 700; display: block; }
+td.dev span { color: var(--muted); font-size: 12px; }
+.tag { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 12px; font-weight: 500; margin: 1px 3px 1px 0; white-space: nowrap; }
+.t-ok { background: var(--ok-soft); color: var(--ok); }
+.t-warn { background: var(--warn-soft); color: var(--warn); }
+.t-bad { background: var(--bad-soft); color: var(--bad); }
+.t-info { background: var(--accent-soft); color: var(--accent); }
+.t-os { border: 1px solid var(--line); color: var(--fg); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12.5px; color: var(--muted); margin-bottom: 12px; }
+.group td { background: var(--bg); font-family: var(--font-head); font-weight: 700; font-size: 12.5px; letter-spacing: .04em; color: var(--muted); }
+.summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; margin-top: 18px; }
+.box { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; min-width: 0; }
+.box h3 { margin-bottom: 6px; }
+.box p, .box li { font-size: 14px; }
+.plan { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 18px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.plan.best { border-color: var(--accent); }
+.plan-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 14px; }
+.plan-head .count { font-family: var(--font-head); font-weight: 700; color: var(--accent); }
+.assign { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 8px; }
+.assign > div { border: 1px solid var(--line); border-radius: 6px; padding: 9px 11px; font-size: 13.5px; min-width: 0; }
+.assign b { font-family: var(--font-head); display: block; margin-bottom: 2px; }
+.assign span { color: var(--muted); font-size: 12.5px; }
+.cons { color: var(--muted); font-size: 13.5px; }
+.cons b { color: var(--fg); }
+.plans { display: flex; flex-direction: column; gap: 14px; }
+.note { font-size: 13px; color: var(--muted); max-width: 80ch; }
+footer { font-size: 12.5px; color: var(--muted); }
+footer ul { margin: 6px 0 0; padding-left: 18px; }
+@media (max-width: 520px) { h1 { font-size: 1.6rem; } }
+</style>
+
+<main>
+  <header>
+    <h1>Handheld OS plan</h1>
+    <p class="lede">18 devices, 10 of them on Android (ES-DE). The other 8 run Knulli, Onion and NextUI today. Spruce's wiki and sync-roms main (release 3.19.0) both list every one of them as supported, so a single non-Android OS is possible. This page lays out what each device can run, how offline RetroAchievements and a game switcher compare, and the plans that follow.</p>
+    <div class="summary">
+      <div class="box"><h3>One OS is possible</h3><p>Spruce runs on all four Miyoos and, per its wiki, on the RG35XX H, RG40XX V, RG CubeXX and RG SP. It has the game switcher, offline RA and a Syncthing app, and sync-roms main already writes its collections (PR #427).</p></div>
+      <div class="box"><h3>The catch on Anbernics</h3><p>Spruce's wiki says the Anbernic H700 devices need a BaseOS image on card slot 1, with Spruce on slot 2. Check what that means for your RG SP's 32 GB card and for each device's current card.</p></div>
+      <div class="box"><h3>Still unverified</h3><p>What lid-close sleep does on Spruce clamshells (only wake-on-open is documented), and whether Spruce's Syncthing works well on the H700s. sync-roms' Spruce layout notes still describe Miyoo devices only, so check that it writes the right folders on an H700 card.</p></div>
+      <div class="box"><h3>Fallbacks</h3><p>If Spruce on the H700s disappoints, ROCKNIX or muOS cover all four H700s for a two-OS result, and sync-roms main has a layout with collections for each. Neither has a game switcher that I found.</p></div>
+    </div>
+  </header>
+
+  <section>
+    <h2>Per device</h2>
+    <p class="sub">Spruce's list comes from its wiki and the v4.6.0 release page, which disagree on a few devices (not on any of yours). Other options come from <code>devices.json</code> and release notes. sync-roms main now agrees on the RG SP: its firmware list is nextui, muos, rocknix and spruce, with no Knulli.</p>
+    <div class="legend">
+      <span><span class="tag t-ok">repo</span> confirmed in this repo</span>
+      <span><span class="tag t-info">web</span> from release notes, wikis or forum posts</span>
+      <span><span class="tag t-warn">unverified</span> not confirmed</span>
+    </div>
+    <div class="wrap">
+      <table>
+        <thead><tr><th>Device</th><th>Now</th><th>Used</th><th>WiFi</th><th>Can run</th><th>Offline RA</th><th>Game switcher</th></tr></thead>
+        <tbody>
+          <tr class="group"><td colspan="7">Linux handhelds</td></tr>
+          <tr><td class="dev"><b>MIYOOFLIP</b><span>Miyoo Flip, RK3566</span></td><td><span class="tag t-os">Knulli</span></td><td>0 B / 256 GB<br>0 games</td><td><span class="tag t-ok">yes</span></td><td><span class="tag t-os">Knulli</span><span class="tag t-os">Spruce</span></td><td>Spruce: built in <span class="tag t-info">web</span><br>Knulli: proxy <span class="tag t-ok">repo</span></td><td>Spruce <span class="tag t-info">web</span><br>Knulli <span class="tag t-warn">unverified</span></td></tr>
+          <tr><td class="dev"><b>MIYOOMINI</b><span>Miyoo Mini, SSD202D</span></td><td><span class="tag t-os">Onion</span></td><td>29.4 / 64 GB<br>58 games</td><td><span class="tag t-bad">none</span></td><td><span class="tag t-os">Onion</span><span class="tag t-os">Allium</span><span class="tag t-os">Spruce</span></td><td>Not applicable: no WiFi, so no online RA either</td><td>Onion and Spruce <span class="tag t-info">web</span></td></tr>
+          <tr><td class="dev"><b>MIYOOMINIF</b><span>Miyoo Mini Flip</span></td><td><span class="tag t-os">Onion</span></td><td>52.1 / 64 GB<br>136 games</td><td><span class="tag t-ok">yes</span></td><td><span class="tag t-os">Onion</span><span class="tag t-os">Allium</span><span class="tag t-os">Spruce</span></td><td>Spruce: built in <span class="tag t-info">web</span><br>Onion: experimental proxy <span class="tag t-info">web</span></td><td>Onion and Spruce <span class="tag t-info">web</span></td></tr>
+          <tr><td class="dev"><b>MIYOOMINIP</b><span>Miyoo Mini Plus</span></td><td><span class="tag t-os">Onion</span></td><td>0 B / 128 GB<br>0 games</td><td><span class="tag t-ok">yes</span></td><td><span class="tag t-os">Onion</span><span class="tag t-os">Allium</span><span class="tag t-os">Spruce</span></td><td>Same as Mini Flip</td><td>Onion and Spruce <span class="tag t-info">web</span></td></tr>
+          <tr><td class="dev"><b>RG35XXH</b><span>Anbernic RG35XX H, H700</span></td><td><span class="tag t-os">Knulli</span></td><td>197.3 / 256 GB<br>27 full systems, 127 games</td><td><span class="tag t-ok">yes</span></td><td><span class="tag t-os">Spruce</span><span class="tag t-os">Knulli</span><span class="tag t-os">muOS</span><span class="tag t-os">ROCKNIX</span></td><td>Spruce: built in <span class="tag t-info">web</span><br>Knulli: proxy <span class="tag t-ok">repo</span><br>muOS, ROCKNIX: proxy <span class="tag t-info">web</span></td><td>Spruce <span class="tag t-info">web</span><br>none found on Knulli, muOS, ROCKNIX</td></tr>
+          <tr><td class="dev"><b>RG40XXV</b><span>Anbernic RG40XX V, H700</span></td><td><span class="tag t-os">Knulli</span></td><td>187.7 / 256 GB<br>647 games</td><td><span class="tag t-ok">yes</span></td><td><span class="tag t-os">Spruce</span><span class="tag t-os">Knulli</span><span class="tag t-os">muOS</span><span class="tag t-os">ROCKNIX</span></td><td>Same as RG35XXH</td><td>Same as RG35XXH</td></tr>
+          <tr><td class="dev"><b>RGCUBEXX</b><span>Anbernic RG CubeXX, H700</span></td><td><span class="tag t-os">Knulli</span></td><td>77.9 / 256 GB<br>5 full systems</td><td><span class="tag t-ok">yes</span></td><td><span class="tag t-os">Spruce</span><span class="tag t-os">Knulli</span><span class="tag t-os">muOS</span><span class="tag t-os">ROCKNIX</span></td><td>Same as RG35XXH</td><td>Same as RG35XXH</td></tr>
+          <tr><td class="dev"><b>RGSP</b><span>Anbernic RG SP, H700</span></td><td><span class="tag t-os">NextUI</span></td><td>17.7 / 32 GB<br>21 full systems, 20 games</td><td><span class="tag t-ok">yes</span></td><td><span class="tag t-os">Spruce</span><span class="tag t-os">NextUI</span><span class="tag t-os">muOS</span><span class="tag t-os">ROCKNIX</span><span class="tag t-bad"><s>Knulli</s> not yet</span></td><td>Spruce: built in <span class="tag t-info">web</span><br>muOS, ROCKNIX: proxy <span class="tag t-info">web</span><br>NextUI: none found</td><td>Spruce <span class="tag t-info">web</span><br>none found on NextUI, muOS, ROCKNIX</td></tr>
+
+          <tr class="group"><td colspan="7">Android (ES-DE), no OS choice to make</td></tr>
+          <tr><td class="dev"><b>NOVA</b><span>Retroid Pocket Nova</span></td><td><span class="tag t-os">Android</span></td><td>263.7 / 512 GB<br>128 games</td><td><span class="tag t-ok">yes</span></td><td colspan="3" rowspan="10">All ten run Android with ES-DE. On sync-roms main, six of them (Pocket 6, Classic, both Novas, Flip 2 and Odin 2) also list ROCKNIX, and the Zero 40 lists Spruce, but moving them would add an OS to configure, not remove one. RAOfflineProxy is in the setup guide for each (RetroArch, Dolphin, PPSSPP, Flycast and others, casual achievements only). Syncthing runs as an Android app (general knowledge, not in the repo). Game switching is Android's own app switcher, so there is no Onion-style menu.</td></tr>
+          <tr><td class="dev"><b>Odin SD</b><span>AYN Odin 2</span></td><td><span class="tag t-os">Android</span></td><td>12.4 GB used<br>11 games</td><td><span class="tag t-ok">yes</span></td></tr>
+          <tr><td class="dev"><b>POCKET6</b><span>Retroid Pocket 6</span></td><td><span class="tag t-os">Android</span></td><td>0 B / 1 TB<br>0 games</td><td><span class="tag t-ok">yes</span></td></tr>
+          <tr><td class="dev"><b>POCKETCLSC</b><span>Retroid Pocket Classic</span></td><td><span class="tag t-os">Android</span></td><td>211.9 / 256 GB<br>28 full systems, 83 games</td><td><span class="tag t-ok">yes</span></td></tr>
+          <tr><td class="dev"><b>POCKETDUO</b><span>Retroid Pocket Duo</span></td><td><span class="tag t-os">Android</span></td><td>0 B / 512 GB<br>0 games</td><td><span class="tag t-ok">yes</span></td></tr>
+          <tr><td class="dev"><b>POCKETFLIP2</b><span>Retroid Pocket Flip 2</span></td><td><span class="tag t-os">Android</span></td><td>237.8 / 512 GB<br>892 games</td><td><span class="tag t-ok">yes</span></td></tr>
+          <tr><td class="dev"><b>POCKETNOVA</b><span>Retroid Pocket Nova</span></td><td><span class="tag t-os">Android</span></td><td>410.6 / 512 GB<br>13 full systems, 535 games</td><td><span class="tag t-ok">yes</span></td></tr>
+          <tr><td class="dev"><b>RG477V</b><span>Anbernic RG 477V</span></td><td><span class="tag t-os">Android</span></td><td>417.4 / 512 GB<br>25 full systems, 170 games</td><td><span class="tag t-ok">yes</span></td></tr>
+          <tr><td class="dev"><b>RGCUBE</b><span>Anbernic RG Cube</span></td><td><span class="tag t-os">Android</span></td><td>197.4 / 256 GB<br>19 full systems, 39 games</td><td><span class="tag t-ok">yes</span></td></tr>
+          <tr><td class="dev"><b>ZERO40</b><span>MagicX Zero 40</span></td><td><span class="tag t-os">Android</span></td><td>11.3 / 64 GB<br>248 games</td><td><span class="tag t-ok">yes</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Per OS</h2>
+    <p class="sub">What each firmware gives you for the things you care about.</p>
+    <div class="wrap">
+      <table>
+        <thead><tr><th>OS</th><th>Runs on (yours)</th><th>Offline RetroAchievements</th><th>Game switcher</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td class="dev"><b>Spruce</b></td><td>All 8: Flip, 3 Minis, RG35XXH, RG40XXV, RGCUBEXX, RGSP <span class="tag t-info">web</span></td><td>Built in since v4.5.0: cached games play without WiFi and sync later. In v4.6.0, achievements are cached at launch for RetroArch games only <span class="tag t-info">web</span></td><td><span class="tag t-ok">yes</span> hold MENU for 3 seconds to open; it switches between save states, as Onion's does <span class="tag t-info">web</span></td><td>Syncthing, Samba, SSH and WiFi file transfer are listed in its README. Anbernic clamshells wake when the lid opens (v4.5.6); lid-close behavior isn't documented. Anbernic H700 devices need a BaseOS image on card slot 1, Spruce on slot 2. Current release is v4.6.0 (7 Nov). sync-roms main writes its collections to Collections/collections.json (PR #427), adds Art Book Next art, and stages the newest spruceOS 7z for Apps &gt; EZ Updater. It leaves RAOfflineProxy alone because spruceOS 4.5.0+ ships it built in (#447) <span class="tag t-ok">repo</span>.</td></tr>
+          <tr><td class="dev"><b>Onion</b></td><td>3 Miyoo Minis</td><td>Experimental RAOfflineProxy build <span class="tag t-info">web</span></td><td><span class="tag t-ok">yes</span> the one you like</td><td>Already on your Minis. Spruce's switcher was modeled on it.</td></tr>
+          <tr><td class="dev"><b>Knulli</b></td><td>Miyoo Flip, RG35XXH, RG40XXV, RGCUBEXX</td><td><span class="tag t-ok">RAOfflineProxy, Linux alpha</span> in the repo's setup guide</td><td><span class="tag t-warn">none found</span></td><td>Does not support the RG SP yet. RetroArch cores only; standalone emulators are not covered by the proxy.</td></tr>
+          <tr><td class="dev"><b>muOS</b></td><td>RG35XXH, RG40XXV, RGCUBEXX, RGSP</td><td>RAOfflineProxy since v1.4.0-alpha1 <span class="tag t-info">web</span>; one user reported autostart failures on an RG35XX H</td><td><span class="tag t-warn">none found</span> a request for one exists</td><td>Lid sleep reports on SP-style devices are mixed. sync-roms already writes its collections.</td></tr>
+          <tr><td class="dev"><b>ROCKNIX</b></td><td>RG35XXH, RG40XXV, RGCUBEXX <span class="tag t-info">web</span><br>RGSP (sync-roms main lists it; you confirmed it on ROCKNIX's releases page)<br>Not any Miyoo</td><td>RAOfflineProxy since v1.6.0-alpha1 (RetroArch, PPSSPP; Dolphin from v1.10.0) <span class="tag t-info">web</span>. Its native RA needs internet.</td><td><span class="tag t-warn">none found</span></td><td>Syncthing is built in (Network Settings, web UI on port 8384). Lids use software "fake suspend" via the power button or lid close; no quality reports found. Saves default to the ROM folder, which can disturb Syncthing. sync-roms main has a ROCKNIX layout: scraped media, saves and states, PICO-8, RAOfflineProxy install, and collections staged in <code>roms/.sync-roms-collections/</code> that you install once by running "Install Collections" from Ports <span class="tag t-ok">repo</span>.</td></tr>
+          <tr><td class="dev"><b>NextUI</b></td><td>RG35XXH, RG40XXV, RGCUBEXX, RGSP <span class="tag t-ok">repo</span></td><td>Nothing found</td><td><span class="tag t-warn">unverified</span></td><td>H700 build is a release candidate. sync-roms main lists it for all four H700 devices, so the RG35XXH, RG40XXV and RGCUBEXX could run it too.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Plans by preference</h2>
+    <p class="sub">Each plan lists where every non-Android device ends up. Android devices don't change in any of them.</p>
+    <div class="plans">
+
+      <div class="plan best">
+        <div class="plan-head"><h3>One OS: Spruce on every Miyoo and Anbernic handheld</h3><span class="count">1 non-Android OS</span></div>
+        <p>Pick this if you want the fewest systems to configure and the Onion-style game switcher on every non-Android device.</p>
+        <div class="assign">
+          <div><b>Spruce</b><span>Miyoo Flip, Mini, Mini Flip, Mini Plus, RG35XXH, RG40XXV, RGCUBEXX, RGSP</span></div>
+        </div>
+        <p class="cons"><b>You gain:</b> a switcher on all 8 devices, offline RA without installing a proxy, Syncthing and file-transfer services on the WiFi devices, wake-on-open on Anbernic clamshells, and collections (sync-roms main already writes them). You give up Knulli, Onion and NextUI. <b>Costs and risks:</b> the H700 devices need a BaseOS image in slot 1 and Spruce in slot 2; lid-close sleep and Syncthing behavior on the H700s are unverified; Spruce's offline cache covers RetroArch games only; the wiki and the release page disagree about a few non-Anbernic devices, so check both before flashing; sync-roms' Spruce layout notes only mention Miyoo devices, so try it on one H700 card first.</p>
+      </div>
+
+      <div class="plan">
+        <div class="plan-head"><h3>Spruce on the Miyoos, a second OS on the H700s</h3><span class="count">2 non-Android OSes</span></div>
+        <p>Pick this if the BaseOS requirement is a problem, or Spruce on an H700 disappoints after a trial on one device.</p>
+        <div class="assign">
+          <div><b>Spruce</b><span>Miyoo Flip, Mini, Mini Flip, Mini Plus</span></div>
+          <div><b>ROCKNIX or muOS</b><span>RG35XXH, RG40XXV, RGCUBEXX, RGSP</span></div>
+        </div>
+        <p class="cons"><b>ROCKNIX:</b> built-in Syncthing, offline RA through the proxy, a sync-roms layout with collections (installed once by running a Ports script). <b>muOS:</b> offline RA through the proxy, sync-roms collections already work, mixed lid-sleep reports. Neither has a game switcher that I found.</p>
+      </div>
+
+      <div class="plan">
+        <div class="plan-head"><h3>Closest to what you run today</h3><span class="count">3 non-Android OSes</span></div>
+        <p>Pick this to change as little as possible while fixing the RG SP.</p>
+        <div class="assign">
+          <div><b>Knulli</b><span>Miyoo Flip, RG35XXH, RG40XXV, RGCUBEXX</span></div>
+          <div><b>Onion</b><span>3 Miyoo Minis, unchanged</span></div>
+          <div><b>muOS, ROCKNIX or Spruce</b><span>RGSP, replacing NextUI</span></div>
+        </div>
+        <p class="cons"><b>Gain:</b> the proxy path the repo already documents on four devices, offline RA on the RG SP. <b>Still true:</b> the Flip has no switcher, and you keep three systems to configure.</p>
+      </div>
+
+    </div>
+    <p class="note" style="margin-top:14px">Whichever plan you pick, sync-roms main already lists the right firmwares for all eight devices, including no Knulli on the RG SP.</p>
+  </section>
+
+  <footer>
+    <p>What this page rests on:</p>
+    <ul>
+      <li>The repo, on main at release 3.19.0: device firmware lists, WiFi flags, the Knulli and Android RAOfflineProxy steps in the setup guide, the Spruce, ROCKNIX and NextUI layouts (collections, EZ Updater staging, ROCKNIX proxy install), and the revert (#447) that stopped sync-roms installing the proxy on Spruce cards.</li>
+      <li>Spruce: <a href="https://github.com/spruceUI/spruceOS">README</a>, <a href="https://github.com/spruceUI/spruceOS/wiki/Supported-Devices">wiki Supported Devices</a>, <a href="https://github.com/spruceUI/spruceOS/releases/tag/v4.6.0">v4.6.0 release</a>, <a href="https://retrohandhelds.gg/spruceos-v4-5-0-release/">v4.5.0 coverage</a>, <a href="https://newreleases.io/project/github/spruceUI/spruceOS/release/v4.4.0">v4.4.0 release</a>, <a href="https://retrohandhelds.gg/spruceos-4-3-drops-with-support-for-trimui-brick-pro-anbernic-xx-and-more/">v4.3 coverage</a>. The wiki's "Latest Release" is given for every device, so there is no per-device Spruce version.</li>
+      <li>ROCKNIX: <a href="https://rocknix.org/devices/">device list</a>, <a href="https://rocknix.org/configure/cloud-sync/">Cloud Sync (Syncthing)</a>, <a href="https://rocknix.org/configure/fake-suspend/">Fake Suspend</a>, <a href="https://rocknix.org/play/retro-achievements/">RetroAchievements</a>, <a href="https://newreleases.io/project/github/misantronic/RAOfflineProxy/release/v1.6.0-alpha1">RAOfflineProxy v1.6.0-alpha1</a>. The RG SP isn't on that device index; it is on ROCKNIX's releases page, which you confirmed and I haven't read myself.</li>
+      <li>Others: <a href="https://community.muos.dev/t/raofflineproxy-earn-retroachievements-offline-on-muos/1547">RAOfflineProxy on muOS</a>, <a href="https://newreleases.io/project/github/misantronic/RAOfflineProxy/release/v1.0.1-alpha4">RAOfflineProxy v1.0.1-alpha4 (Onion)</a>, <a href="https://newreleases.io/project/github/pvaibhav/NextUI/release/h700-rc5">NextUI H700 rc5</a>.</li>
+      <li>Not checked: whether the Spruce layout's folders and saves are right on the H700s, Spruce lid-close sleep, Spruce Syncthing on the H700s, how much of the slot 1 BaseOS setup you already have, game switchers on Knulli, muOS, NextUI and ROCKNIX, and Syncthing on Onion.</li>
+    </ul>
+  </footer>
+</main>
