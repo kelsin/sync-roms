@@ -11,7 +11,7 @@ from unittest import mock
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from realdir_guard import RealDataDirGuard  # noqa: E402
-from sync_roms import commands, store, usersettings  # noqa: E402
+from sync_roms import cli, commands, store, usersettings  # noqa: E402
 
 CREDENTIALS = {"screenscraper_user": "u-secret", "screenscraper_password": "p-secret"}
 
@@ -141,6 +141,26 @@ class SettingsPermissionsTest(RealDataDirGuard):
             code = commands.doctor_cmd(SimpleNamespace())
         self.assertEqual(code, 1)
         self.assertIn(f"❌ {self.path} isn't valid JSON (line 1, column 2): fix or move it", out.getvalue())
+
+    def test_verbose_doctor_reports_invalid_file(self):
+        self.broken()
+        out, err = io.StringIO(), io.StringIO()
+        with contextlib.ExitStack() as st:
+            for name in ("BUCKET", "ROOT", "ENDPOINT", "PROFILE", "WRITE_PROFILE"):
+                st.enter_context(mock.patch.object(commands.runtime, name, getattr(commands.runtime, name)))
+            st.enter_context(mock.patch.dict(os.environ, {"ROMS_ROOT": self.tmp.name}))
+            st.enter_context(mock.patch.object(sys, "argv", ["sync-roms", "--verbose", "doctor"]))
+            st.enter_context(mock.patch.object(commands, "check_data", lambda: []))
+            st.enter_context(mock.patch.object(commands.external, "find_tool", lambda tool: "/bin/" + tool))
+            st.enter_context(contextlib.redirect_stdout(out))
+            st.enter_context(contextlib.redirect_stderr(err))
+            try:
+                code = cli.sync()
+            except SystemExit as e:
+                code = e.code
+        self.assertEqual(code, 1)
+        self.assertIn(f"❌ {self.path} isn't valid JSON (line 1, column 2): fix or move it", out.getvalue())
+        self.assertIn(f"root = {self.tmp.name} (env ROMS_ROOT)", err.getvalue())
 
     def test_credentials_round_trip(self):
         for name, value in CREDENTIALS.items():
