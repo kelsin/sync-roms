@@ -3,8 +3,11 @@
 A fix is a module here with `ID` (a key of data/spruce-fixes.json, which holds its `title` and `upstream` PR URL) and `plan(base)`, which returns
 `(writes, skip)`: `writes` is `[(path, bytes)]` to write on the card; with none, `skip` says why: `ABSENT` (the theme
 isn't on the card) or a short reason the theme is already right. To add a fix, write its module and list it in FIXES and add it to spruce-fixes.json;
-to remove one, delete its module, its list entry, its json entry, its test and its data."""
-from . import fds, pokemini
+to remove one, delete its module, its list entry, its json entry, its test and its data. `pyui` finds PyUI's resized
+copies of a theme (`icons_<W>x<H>/`, `bg_<W>x<H>/`), which the fixes patch too."""
+import os
+
+from . import fds, pokemini, pyui
 from .. import cardfs, store, ui
 
 ABSENT = None
@@ -29,6 +32,10 @@ def run(layout_name, base, dry_run):
             verb = "would apply to" if dry_run else "applied to"
             print(ui.green(f"   ✅ {title}: {verb} {len(writes)} file(s) ({url})"))
             total += len(writes)
+            sizes = {f"{m[2]}x{m[3]}" for path, _ in writes for m in map(pyui.VARIANT.match,
+                     os.path.relpath(path, base).split(os.sep)) if m}
+            for size in sorted(sizes):
+                print(ui.dim(f"      ↳ Fixing {size} theme variation"))
         elif skip is ABSENT:
             print(ui.dim(f"   ⏭️  {title}: skipped, the theme isn't on the card ({url})"))
         else:
