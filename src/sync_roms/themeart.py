@@ -124,20 +124,6 @@ def logo_svg(text):
             f'scale({scale:.5f} {-scale:.5f})">{"".join(paths)}</g>\n</svg>\n')
 
 
-def _put(path, data):
-    """Write data (bytes) to path unless it already holds them. Returns whether it wrote."""
-    try:
-        if os.path.getsize(path) == len(data):
-            with open(path, "rb") as f:
-                if f.read() == data:
-                    return False
-    except FileNotFoundError:
-        pass
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    store.replace_file(path, data)
-    return True
-
-
 def _reserved(layout_name):
     """Lowercase theme names a collection can't take art for: the systems' own, and the theme's built-in collections
     (giving them art would replace the system's)."""
@@ -224,21 +210,12 @@ def _extract(archive_path, dest, commit):
                 continue
             path = s3.safe_join(dest, rel)
             wanted.add(downloads.name_key(path))
-            data = archive.extractfile(member).read()
-            try:
-                if os.path.getsize(path) == len(data):
-                    with open(path, "rb") as f:
-                        if f.read() == data:
-                            continue
-            except FileNotFoundError:
-                pass
-            os.makedirs(os.path.dirname(path), exist_ok=True)
-            store.replace_file(path, data)
+            cardfs.write_bytes(path, archive.extractfile(member).read())
     owned = _read(os.path.join(dest, ESDE_OWNED)).splitlines()
     ours = [n for n in owned
             if downloads.name_key(os.path.join(dest, "_inc", "systems", "_metadata-global", f"{n}.xml")) not in wanted]
     if ours != owned:
-        _put(os.path.join(dest, ESDE_OWNED), "".join(f"{n}\n" for n in ours).encode())
+        cardfs.write_bytes(os.path.join(dest, ESDE_OWNED), "".join(f"{n}\n" for n in ours).encode())
     kept = {downloads.name_key(os.path.join(dest, *k.split("/"))) for k in _sync_written(dest)}
     for folder, _, names in os.walk(dest, topdown=False):
         for name in names:
@@ -310,7 +287,7 @@ def _esde_remove(dest, keep):
             os.rmdir(os.path.join(dest, folder))  # only when that emptied it
         except OSError:
             pass
-    return bool(stale) and _put(os.path.join(dest, ESDE_OWNED), "".join(f"{n}\n" for n in owned if n in keep).encode())
+    return bool(stale) and cardfs.write_bytes(os.path.join(dest, ESDE_OWNED), "".join(f"{n}\n" for n in owned if n in keep).encode())
 
 
 def install_esde(layout_name, base, arts):
@@ -344,9 +321,9 @@ def install_esde(layout_name, base, arts):
         del arts[name]
     changed |= _esde_remove(dest, {n.lower() for n in arts})
     owned = set(_read(os.path.join(dest, ESDE_OWNED)).splitlines()) | {n.lower() for n in arts}
-    changed |= _put(os.path.join(dest, ESDE_OWNED), "".join(f"{n}\n" for n in sorted(owned)).encode())
+    changed |= cardfs.write_bytes(os.path.join(dest, ESDE_OWNED), "".join(f"{n}\n" for n in sorted(owned)).encode())
     for rel, data in _esde_files(arts).items():
-        changed |= _put(s3.safe_join(dest, rel), data)
+        changed |= cardfs.write_bytes(s3.safe_join(dest, rel), data)
     _write_settings(frontend.settings_path(layout_name, base), layout_name, {"Theme": ESDE_COPY})
     return changed
 
@@ -440,7 +417,7 @@ def _custom_remove(root, arts, files=CUSTOM_FILES):
             except FileNotFoundError:
                 pass
     if arts:
-        _put(os.path.join(root, CUSTOM_OWNED), "".join(f"{n}\n" for n in sorted(arts)).encode())
+        cardfs.write_bytes(os.path.join(root, CUSTOM_OWNED), "".join(f"{n}\n" for n in sorted(arts)).encode())
     else:
         try:
             os.remove(os.path.join(root, CUSTOM_OWNED))
@@ -475,10 +452,10 @@ def install_knulli(base, arts):
     changed, settings = bool(stale), {}
     for name, png in arts.items():
         with open(png, "rb") as f:
-            changed |= _put(os.path.join(root, "artwork", f"{name}.png"), f.read())
+            changed |= cardfs.write_bytes(os.path.join(root, "artwork", f"{name}.png"), f.read())
         logo = logo_svg(name)
         if logo:
-            changed |= _put(os.path.join(root, "logos", f"{name}.svg"), logo.encode())
+            changed |= cardfs.write_bytes(os.path.join(root, "logos", f"{name}.svg"), logo.encode())
         settings.update(knulli_settings(name))
         if not logo:  # the theme shows the name as text
             del settings[f"subset.{name}.system-logos"]
@@ -501,10 +478,10 @@ def install_rocknix(base, arts):
     changed = bool(_custom_remove(root, arts))
     for name, png in arts.items():
         with open(png, "rb") as f:
-            changed |= _put(os.path.join(root, "artwork", f"{name}.png"), f.read())
+            changed |= cardfs.write_bytes(os.path.join(root, "artwork", f"{name}.png"), f.read())
         logo = logo_svg(name)
         if logo:
-            changed |= _put(os.path.join(root, "logos", f"{name}.svg"), logo.encode())
+            changed |= cardfs.write_bytes(os.path.join(root, "logos", f"{name}.svg"), logo.encode())
     return changed
 
 
@@ -523,7 +500,7 @@ def install_muos(base, arts):
         with open(png, "rb") as f:
             data = f.read()
         for folder, ext in MUOS_FILES:
-            changed |= _put(os.path.join(root, folder, name + ext), data)
+            changed |= cardfs.write_bytes(os.path.join(root, folder, name + ext), data)
     return changed
 
 
@@ -544,7 +521,7 @@ def install_spruce(base, arts, owned):
     changed = False
     for name, png in arts.items():
         with open(png, "rb") as f:
-            changed |= _put(os.path.join(base, SPRUCE_DIR, f"{name}.png"), f.read())
+            changed |= cardfs.write_bytes(os.path.join(base, SPRUCE_DIR, f"{name}.png"), f.read())
     for path in _spruce_stale(base, arts, owned):
         os.remove(path)
         changed = True

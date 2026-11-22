@@ -77,13 +77,13 @@ class FewerCardIO(unittest.TestCase):
 
     def test_art_file_of_another_size_is_not_read(self):
         path = os.path.join(self.dir, "a.png")
-        themeart._put(path, b"12345")
+        cardfs.write_bytes(path, b"12345")
         with mock.patch("builtins.open", side_effect=AssertionError("read")):
             with mock.patch.object(themeart.store, "replace_file") as replace:
-                self.assertTrue(themeart._put(path, b"123456"))
+                self.assertTrue(cardfs.write_bytes(path, b"123456"))
         replace.assert_called_once()
         with mock.patch.object(themeart.store, "replace_file") as replace:
-            self.assertFalse(themeart._put(path, b"12345"))
+            self.assertFalse(cardfs.write_bytes(path, b"12345"))
         replace.assert_not_called()
 
     def test_settings_are_read_once_and_written_once_with_both_edits(self):
