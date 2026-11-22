@@ -267,14 +267,9 @@ def edit_card(name, setup=None, to_fetch=None, card_match=None):
     recommended = store.recommended_systems(device, catalog["systems"]) if device else set()
     # every playable system's usage, kept across passes: a change to one system recounts only it
     usages, version = budget.system_usages(card_entry(name, setup), playable), inventory.version()
-    try:
-        with ui.silent_thread():
-            folders = inventory.folders()
-    except (*s3.ERRORS, SystemExit):  # storage can't be reached (ui.fail raises SystemExit): go by the cache alone
-        folders = None
+    stocked = {s["bucket"] for s in listedit.stocked(systems)}
     systems = [s for s in systems  # a missing or empty folder has nothing to pick, unless it already has picks
-               if budget.picked(usages[s["bucket"]])
-               or (folders is None or s["bucket"] in folders) and inventory.cached(f"{s['bucket']}/") != {}]
+               if budget.picked(usages[s["bucket"]]) or s["bucket"] in stocked]
     full = FullSizes({"layout": setup[1]}, systems)  # each system's size as a full system, kept for the session
     pos, set_pos = 0, None  # set_pos: the name of the set last opened
     changed = None  # what the last pass changed: one system, ALL (any system may have) or None
