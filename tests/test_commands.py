@@ -198,6 +198,19 @@ class GamesTest(CardCmd):
         self.assertEqual(self.run_cmd("games", "full", "gba", "off")[1].strip(), "Nothing to change.")
         self.assertEqual(self.games()["gba"], listed)
 
+    def test_import_of_a_full_system_keeps_the_game_list_for_full_off(self):
+        self.run_cmd("games", "add", "gba", "A.zip")
+        listed = self.games()["gba"]
+        path = self.path("list.txt")
+        with open(path, "w") as f:
+            f.write("gba/*\n")
+        code, out, _ = self.run_cmd("games", "import", path)
+        self.assertEqual(code, 0)
+        self.assertIn("+ gba (full system)", out)
+        self.assertEqual(self.games()["gba"], {"full_system": True, "games": listed})
+        self.run_cmd("games", "full", "gba", "off")
+        self.assertEqual(self.games()["gba"], listed)
+
     def test_import_adds_a_game_listed_twice_once(self):
         path = self.path("list.txt")
         with open(path, "w") as f:
