@@ -742,6 +742,22 @@ class Muos(Card):
         self.assertTrue(os.path.exists(other))
         self.assertEqual(read(marker).splitlines(), ["Surprise"])
 
+    def test_a_collection_renamed_in_other_capitals_keeps_its_art(self):
+        themeart.install("muos", self.base, {"Favs": "rpg"})
+        themeart.install("muos", self.base, {"favs": "rpg"})  # a card that ignores case has one file for both
+        for kind in ("box", "grid"):
+            self.assertIn("favs.png", os.listdir(os.path.dirname(self.path(kind, "favs"))))
+        marker = os.path.join(self.base, "MUOS", "info", "catalogue", "Collection", ".sync-roms-art")
+        self.assertEqual(read(marker).splitlines(), ["favs"])
+
+    def test_the_dry_run_names_the_art_that_would_be_removed(self):
+        themeart.install("muos", self.base, {**SURPRISE, "Favs": "rpg"})
+        with contextlib.redirect_stdout(io.StringIO()) as out:
+            themeart.describe("muos", self.base, dict(SURPRISE))
+        self.assertIn("would remove the art for Favs from MUOS/info/catalogue/Collection/", out.getvalue())
+        self.assertIn("would add art for Surprise to MUOS/info/catalogue/Collection/", out.getvalue())
+        self.assertTrue(os.path.exists(self.path("box", "Favs")))
+
     def test_describe_lists_the_names(self):
         out = io.StringIO()
         with contextlib.redirect_stdout(out):

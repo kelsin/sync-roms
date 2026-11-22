@@ -31,6 +31,13 @@ class WantedTests(unittest.TestCase):
     def test_a_collection_with_nothing_on_the_card_is_left_out(self):
         self.assertEqual(spruce_collections.wanted(self.games(("snes", "A.sfc")), SYSTEMS, lambda s, r: False), {})
 
+    def test_names_that_sanitise_alike_share_one_list_and_a_game_listed_again_stays(self):
+        colls = [*self.games(("snes", "A.sfc"), ("snes", "B.sfc"), ("snes", "A.sfc")),
+                 {"name": "Best Of", "games": [{"system": "snes", "bucket": "snes/A.sfc"}]},
+                 {"name": "...", "games": [{"system": "snes", "bucket": "snes/A.sfc"}]}]
+        wanted = spruce_collections.wanted(colls, SYSTEMS, lambda s, r: True)
+        self.assertEqual(wanted, {"Best Of": [entry("A.sfc"), entry("B.sfc"), entry("A.sfc"), entry("A.sfc")]})
+
 
 class PlanTests(unittest.TestCase):
     def setUp(self):
@@ -71,6 +78,14 @@ class PlanTests(unittest.TestCase):
         self.assertEqual(self.read(), [mine])
         self.assertEqual(plan["owned"], [])
         self.assertEqual(len(plan["warnings"]), 1)
+
+    def test_the_skipped_collection_is_warned_about_before_the_recorded_names(self):
+        self.put([{"collection_name": "Mine", "game_list": [entry("M.sfc")]}])
+        plan = self.run_plan({"Mine": [entry("A.sfc")]}, ["a/b", "Old", "Old", ""])
+        self.assertEqual([w.split(";")[0].split(" that ")[0] for w in plan["warnings"]],
+                         ["Spruce already has a collection Mine", "ignoring the recorded collection name 'a/b'",
+                          "ignoring the recorded collection name ''"])
+        self.assertEqual((plan["disable"], plan["owned"]), ({"Old"}, []))
 
     def test_a_dropped_collection_is_removed_and_the_others_stay(self):
         mine = {"collection_name": "Mine", "game_list": [entry("M.sfc")]}

@@ -9,7 +9,7 @@ stopped), so they show. It only removes or unlists collections it installed itse
 the art off again only for those, once sync took their art off the card."""
 import os
 
-from . import store
+from . import cardfs
 
 STAGING = os.path.join("roms", ".sync-roms-collections")
 SCRIPT = os.path.join("roms", "ports", "Install Collections.sh")
@@ -155,16 +155,8 @@ def write_script(base, keep):
             return True
         except FileNotFoundError:
             return False
-    data = SCRIPT_TEXT.encode("utf-8")
-    try:
-        if os.path.getsize(path) == len(data):
-            with open(path, "rb") as f:
-                if f.read() == data:
-                    return False
-    except FileNotFoundError:
-        pass
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    store.replace_file(path, data)
+    if not cardfs.write_bytes(path, SCRIPT_TEXT.encode("utf-8")):
+        return False
     try:
         os.chmod(path, 0o755)
     except OSError:  # a FAT card has no modes; ROCKNIX runs a port with bash anyway

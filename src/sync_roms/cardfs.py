@@ -145,6 +145,20 @@ def write_text(path, new):
     return True
 
 
+def write_bytes(path, data):
+    """Write data (bytes) to path unless it already holds them; True when it wrote. Nothing waits and nothing is kept
+    while caching(): the file itself is compared, and only one of the same size is read."""
+    try:
+        if os.path.getsize(path) == len(data):
+            with open(path, "rb") as f:
+                if f.read() == data:
+                    return False
+    except FileNotFoundError:
+        pass
+    _put(path, data)
+    return True
+
+
 def exists(path):
     return _entry(path) is not None
 

@@ -6,7 +6,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from sync_roms import m3u, scrape_plan, store, themeart  # noqa: E402
+from sync_roms import cardfs, m3u, scrape_plan, store, themeart  # noqa: E402
 
 
 class ReplaceFileTest(unittest.TestCase):
@@ -64,11 +64,22 @@ class ReplaceFileTest(unittest.TestCase):
         m3u.prefix_playlists(self.dir, ".d")
         self.assertEqual(self.read(path), b".d/a.chd\r\n")
 
-    def test_theme_art_put_writes_bytes_once(self):
+    def test_write_bytes_writes_bytes_once(self):
         path = os.path.join(self.dir, "sub", "a.png")
-        self.assertTrue(themeart._put(path, b"\x89PNG\r\n"))
+        self.assertTrue(cardfs.write_bytes(path, b"\x89PNG\r\n"))
         self.assertEqual(self.read(path), b"\x89PNG\r\n")
-        self.assertFalse(themeart._put(path, b"\x89PNG\r\n"))
+        self.assertFalse(cardfs.write_bytes(path, b"\x89PNG\r\n"))
+
+    def test_write_bytes_compares_with_the_file_itself_while_listings_and_reads_are_kept(self):
+        path = os.path.join(self.dir, "a.png")
+        with cardfs.caching():
+            self.assertTrue(cardfs.write_bytes(path, b"old"))
+            self.assertEqual(cardfs.read(path), b"old")  # kept until clear()
+            self.assertTrue(cardfs.write_bytes(path, b"new"))
+            self.assertEqual(self.read(path), b"new")  # written at once, not when caching() ends
+            self.assertTrue(cardfs.write_bytes(path, b"old"))
+            self.assertFalse(cardfs.write_bytes(path, b"old"))
+        self.assertEqual(self.read(path), b"old")
 
     def test_settings_file_is_written_with_lf(self):
         path = os.path.join(self.dir, "es_settings.xml")
