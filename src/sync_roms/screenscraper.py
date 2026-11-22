@@ -1,6 +1,6 @@
 """ScreenScraper API client and response parsing (stdlib only).
 
-The endpoints, media types and HTTP codes are in the CONSTANTS block below; JSON keys and query
+The endpoints, media types and HTTP codes are in the CONSTANTS block below; most JSON keys and query
 parameters are written where they are read. The JSON nesting is from memory and unverified against live responses, so
 parsing skips anything missing instead of failing.
 """

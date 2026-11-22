@@ -68,8 +68,9 @@ TOPICS = {
       Surprise app, RAOfflineProxy and Onion themes.
    6. Scraped data for the card's games is installed from storage's scrapes/ folder, then media on the
       card for ROMs it doesn't have is removed, in every system's folder, synced or not.
-   7. Onion, Allium and Spruce system folders left with no ROMs are removed, synced or not. The card's collections
-      and their art are written, a Spruce card gets the newest spruceOS 7z, and last the card is ejected.
+   7. Onion, Allium and Spruce system folders left with no ROMs and nothing else are removed, synced or not. The
+      card's collections and their art are written, a Spruce card gets the newest spruceOS 7z, and last the card
+      is ejected.
 
   --dry-run   show what would be downloaded and deleted, change nothing
   --yes       answer every prompt with its default (a default-no prompt, like deleting files, stays no)
@@ -182,7 +183,8 @@ TOPICS = {
   stash lists the card's games that have RetroArch saves (.srm and .rtc) or states (.state, .stateN, .state.auto and their
   .png), then their files, and copies them to ~/.sync-roms/saves/<system>/<game>/<time>-<card>/ (with stash.json).
   On layouts sorted by core and flat folders a save whose game isn't on the card is skipped; on Knulli and ROCKNIX the folder
-  gives the system (on ROCKNIX, where saves sit beside the ROMs, a save whose game isn't in that folder is skipped too).
+  gives the system (on ROCKNIX, where saves sit beside the ROMs, a save or state whose game isn't in the system's ROM
+  folder is skipped too).
   apply lists the stashes of systems the card syncs (one per game) and copies them into the card's RetroArch folders.
   A different file already there is only overwritten after you confirm (default no); identical ones are skipped.
   A stash without a core going to a layout sorted by core asks which core folder to use (skipped with --yes).
