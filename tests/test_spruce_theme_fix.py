@@ -1,73 +1,45 @@
 import os
 import sys
+import tempfile
 import unittest
-from io import StringIO
-from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-import tempfile  # noqa: E402
-from sync_roms import spruce_theme_fix  # noqa: E402
-
-NES = b"nes-logo"
+from sync_roms import cardfs, spruce_theme_fix  # noqa: E402
 
 
-class FixTests(unittest.TestCase):
+class ThemeFixTests(unittest.TestCase):
     def setUp(self):
         self.base = self.enterContext(tempfile.TemporaryDirectory())
-        with open(spruce_theme_fix.IMAGE, "rb") as f:
-            self.image = f.read()
 
-    def path(self, theme, name):
-        return os.path.join(self.base, "Themes", theme, "icons", "overlay", name)
+    def put(self, rel, data=b"x"):
+        path = os.path.join(self.base, "Themes", *rel.split("/"))
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "wb") as f:
+            f.write(data)
+        return path
 
-    def put(self, theme, fc, fds):
-        for name, data in (("fc.png", fc), ("fds.png", fds)):
-            os.makedirs(os.path.dirname(self.path(theme, name)), exist_ok=True)
-            with open(self.path(theme, name), "wb") as f:
-                f.write(data)
+    def test_copies_missing_poke(self):
+        self.put("ART_BOOK_OUTLINE/bg/pokemini.png", b"bg")
+        self.put("ART_BOOK_OUTLINE/icons/overlay/pokemini.png", b"logo")
+        self.put("ART_BOOK_OUTLINE/icons/pokemini.png", b"icon")
+        self.put("ART_BOOK_OUTLINE/icons/poke.png", b"icon")
+        copies = spruce_theme_fix.plan(self.base)
+        self.assertEqual(spruce_theme_fix.apply(copies), 2)
+        cardfs.flush()
+        with open(os.path.join(self.base, "Themes", "ART_BOOK_OUTLINE", "icons", "overlay", "poke.png"), "rb") as f:
+            self.assertEqual(f.read(), b"logo")
+        self.assertEqual(spruce_theme_fix.plan(self.base), [])
 
-    def read(self, theme, name="fds.png"):
-        with open(self.path(theme, name), "rb") as f:
-            return f.read()
+    def test_nothing_when_fixed_or_absent(self):
+        self.assertEqual(spruce_theme_fix.plan(self.base), [])
+        self.put("ART_BOOK_NEXT/icons/overlay/pokemini.png")
+        self.put("ART_BOOK_NEXT/icons/overlay/poke.png")
+        self.assertEqual(spruce_theme_fix.plan(self.base), [])
 
-    def test_buggy_card_is_fixed(self):
-        for theme in spruce_theme_fix.THEMES:
-            self.put(theme, NES, NES)
-        self.assertEqual(len(spruce_theme_fix.install("spruce", self.base, False)), 3)
-        for theme in spruce_theme_fix.THEMES:
-            self.assertEqual(self.read(theme), self.image)
-            self.assertEqual(self.read(theme, "fc.png"), NES)
-
-    def test_different_fds_untouched(self):
-        self.put("ART_BOOK_NEXT", NES, b"fixed upstream")
-        self.assertEqual(spruce_theme_fix.install("spruce", self.base, False), [])
-        self.assertEqual(self.read("ART_BOOK_NEXT"), b"fixed upstream")
-
-    def test_absent_theme_or_files(self):
-        self.assertEqual(spruce_theme_fix.install("spruce", self.base, False), [])
-        os.makedirs(os.path.dirname(self.path("ART_BOOK_NOIR", "fc.png")))
-        with open(self.path("ART_BOOK_NOIR", "fc.png"), "wb") as f:
-            f.write(NES)
-        self.assertEqual(spruce_theme_fix.install("spruce", self.base, False), [])
-
-    def test_idempotent(self):
-        self.put("ART_BOOK_NOIR", NES, NES)
-        self.assertEqual(len(spruce_theme_fix.install("spruce", self.base, False)), 1)
-        self.assertEqual(spruce_theme_fix.install("spruce", self.base, False), [])
-        self.assertEqual(self.read("ART_BOOK_NOIR"), self.image)
-
-    def test_dry_run_writes_nothing(self):
-        self.put("ART_BOOK_OUTLINE", NES, NES)
-        with mock.patch("sys.stdout", new=StringIO()) as out:
-            self.assertEqual(len(spruce_theme_fix.install("spruce", self.base, True)), 1)
-        self.assertIn("would replace", out.getvalue())
-        self.assertEqual(self.read("ART_BOOK_OUTLINE"), NES)
-
-    def test_other_layouts_skipped(self):
-        self.put("ART_BOOK_NEXT", NES, NES)
-        self.assertEqual(spruce_theme_fix.install("onion", self.base, False), [])
-        self.assertEqual(self.read("ART_BOOK_NEXT"), NES)
+    def test_other_themes_untouched(self):
+        self.put("SPRUCE/icons/pokemini.png")
+        self.assertEqual(spruce_theme_fix.plan(self.base), [])
 
 
 if __name__ == "__main__":

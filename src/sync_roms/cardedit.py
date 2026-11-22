@@ -90,7 +90,7 @@ def system_labels(card, systems, recommended, usages, full_sizes):
     """(labels, extras) for the system list, in the given order: recommended systems get a ⭐; each picked system
     shows its count and size (… while not sized), then each system its size as a full system (full_sizes: {bucket:
     budget.full_usage}, a missing one not worked out yet; an empty folder shows none). A full system shows its files
-    and full size instead of its picks, then 🗂️ (columns: blank where a row has none)."""
+    and full size instead of its picks, then 🗂️. The first column starts with the state: 🟢 full system, 🟡 some games picked, ⚪ none."""
     games = card.get("games") or {}
     labels, extras = [], []
     for s in systems:
@@ -98,18 +98,18 @@ def system_labels(card, systems, recommended, usages, full_sizes):
         labels.append(("⭐ " if rec else "   ") + s["name"])
         u, f = usages.get(s["bucket"]), full_sizes.get(s["bucket"])
         unknown = f is None or f.partial
-        row = [("", "green"), ("", "dim"), ("", "dim")]
+        row = [("  ⚪", "dim"), ("", "dim"), ("", "dim")]
         entry = games.get(s["bucket"])
         if isinstance(entry, dict) and entry.get("full_system"):
             files = SIZING if unknown else f.count
-            row = [(f"  {files} file" + ("" if files == 1 else "s"), "green"),
+            row = [(f"  🟢 {files} file" + ("" if files == 1 else "s"), "green"),
                    (f"  {SIZING if unknown else size_text(f.bytes)}", "dim"), ("  🗂️  full system", "cyan")]
         else:
             if u and budget.picked(u):
-                row[:2] = [(f"  {u.count or SIZING} picked", "green"), (f"  {SIZING if u.partial else size_text(u.bytes)}", "dim")]
+                row[:2] = [(f"  🟡 {u.count or SIZING} picked", "green"), (f"  {SIZING if u.partial else size_text(u.bytes)}", "dim")]
             if unknown or f.count:
                 row[2] = (f"  🗂️  {SIZING if unknown else size_text(f.bytes)} full", "dim")
-        extras.append(row if any(text for text, _ in row) else [])
+        extras.append(row)
     return labels, extras
 
 
