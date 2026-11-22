@@ -180,6 +180,30 @@ class Discs(unittest.TestCase):
             collectionedit.edit_one(collection, SYSTEMS, lambda bucket: keys if bucket == "gba" else set())
         self.assertEqual(seen, [dict.fromkeys(place), place])
 
+    def test_a_note_typed_on_a_game_just_switched_on_is_saved(self):
+        from sync_roms import surprise
+        collection = {"name": "Favs", "games": []}
+        picks = iter([1, 1, None])  # add from a system, Game Boy Advance (after All systems), back
+        said = []
+
+        def fake(title, labels, **kw):
+            if kw.get("multi"):
+                if not said:  # Ruby on, then a filter key: the list opens again
+                    kw["session"]["sel"] = [True, False]
+                    said.append(None)
+                    return ("c", 0)
+                said.append(kw["on_note"](0, "the good one"))
+                return kw["initial"]
+            return next(picks)
+
+        keys = {"gba/Ruby.zip", "gba/Zelda.zip"}
+        with mock.patch.object(picker, "filter_list", fake), mock.patch.object(ui, "ask", return_value=""), \
+                mock.patch.object(surprise, "past_keys", return_value=set()), mock.patch.object(edit, "note"):
+            collectionedit.edit_one(collection, SYSTEMS, lambda bucket: keys if bucket == "gba" else set())
+        self.assertEqual(said, [None, "Note saved"])
+        self.assertEqual(collection["games"], [{"title": "Ruby", "system": "gba", "bucket": "gba/Ruby.zip",
+                                                "note": "the good one"}])
+
     def test_p_narrows_the_add_games_list_to_past_surprises(self):
         from sync_roms import surprise
         collection = {"name": "Favs", "games": []}
