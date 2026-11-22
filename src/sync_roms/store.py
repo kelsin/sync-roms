@@ -627,6 +627,8 @@ def _read_sets():
     def fetch(key):
         try:
             return shared.load(key, _set_file, gone, fallback=False)
+        except UnicodeDecodeError:  # not UTF-8 text: not a set
+            return None
         except (*s3.ERRORS, SystemExit) as e:
             return e
     fetched = {}

@@ -77,6 +77,14 @@ class StorageSetsTest(StorageDir):
         for key in ("sets/bad.json", "sets/list.json", "sets/nogames.json"):
             self.assertIn(key, err)
 
+    def test_a_set_file_that_isnt_utf8_is_skipped_with_a_warning(self):
+        storage_sets(self, {"mix": SET}, self.root)
+        self.put("sets/b.json", '{"name": "Café", "games": []}'.encode("latin-1"))
+        sets, err = self.load()
+        self.assertEqual([x["id"] for x in sets], ["mix"])
+        self.assertIn("sets/b.json isn't a set", err)
+        self.assertEqual(store.skipped_sets(), ["sets/b.json"])
+
     def test_sets_are_read_once_per_run_and_reset_reads_them_again(self):
         storage_sets(self, {"mix": SET}, self.root)
         self.load()
@@ -338,6 +346,12 @@ class CheckStorageSetsTest(StorageDir):
         problems, keys, _ = self.check({"broken": "{not json", "list": "[]"})
         self.assertEqual(problems, ["sets/broken.json: isn't a set (a JSON object with a games list)",
                                     "sets/list.json: isn't a set (a JSON object with a games list)"])
+        self.assertEqual(keys, {})
+
+    def test_a_file_that_isnt_utf8_is_a_problem(self):
+        self.put("sets/b.json", '{"name": "Café", "games": []}'.encode("latin-1"))
+        problems, keys, _ = self.check({})
+        self.assertEqual(problems, ["sets/b.json: isn't a set (a JSON object with a games list)"])
         self.assertEqual(keys, {})
 
     def test_unknown_art_is_a_problem(self):
