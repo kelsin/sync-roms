@@ -1209,23 +1209,25 @@ class _Session:
 
     def ask(self, kind, payload):
         """On the worker: have the main thread show a list (kind "list", payload its model) or a prompt ("prompt", a
-        _PromptModel), or run a call ("call", payload a callable), and wait. Returns (result, error): at once, with
-        KeyboardInterrupt, once abandoned."""
+        _PromptModel), or run a call ("call", payload a callable), and wait. Returns its result or raises its error: at
+        once, KeyboardInterrupt, once abandoned."""
         reply = queue.Queue()
         with self.lock:
             if self.abandoned:
-                return None, KeyboardInterrupt()
+                raise KeyboardInterrupt
             self.working, self.pressed = False, None
             if self.app and not self.suspended and self.app.call_later(self.app.request, kind, payload, reply):
                 self.waiting = reply
             else:
                 self.requests.put((kind, payload, reply))
-        got = reply.get()
+        value, error = reply.get()
         with self.lock:
             self.waiting = None
             self.working = True
         self.answered_at = len(self.printed)
-        return got
+        if error is not None:
+            raise error
+        return value
 
     def probe(self, model):
         """Ask the terminal whether it draws images, once, when the first list with a preview comes (main thread, with
@@ -1252,19 +1254,13 @@ class _Session:
         if threading.get_ident() != self.worker:
             return ui.NOT_ASKED
         above = [self.printed.pop() for _ in range(len(self.printed) - self.answered_at)][::-1]
-        value, error = self.ask("prompt", _PromptModel(question, keys, above))
-        if error is not None:
-            raise error
-        return value
+        return self.ask("prompt", _PromptModel(question, keys, above))
 
     def outside(self, fn, *args, **kwargs):
         """ui.terminal_runner: fn called on the worker runs on the main thread, on the normal screen."""
         if threading.get_ident() != self.worker:
             return fn(*args, **kwargs)
-        value, error = self.ask("call", functools.partial(fn, *args, **kwargs))
-        if error is not None:
-            raise error
-        return value
+        return self.ask("call", functools.partial(fn, *args, **kwargs))
 
 
 def one_app(fn):
@@ -1297,10 +1293,7 @@ def _run(model):
             model.update()
             _session.kept += [text for text, keep in _session.notes if keep]
             _session.notes = []
-        result, error = _session.ask("list", model)
-        if error is not None:
-            raise error
-        return result
+        return _session.ask("list", model)
     app = _app_class()(model)
     result = app.run(mouse=False)
     if app.error:
