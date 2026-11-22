@@ -231,17 +231,31 @@ class ChdTest(unittest.TestCase):
             with open(os.path.join(self.dir, "Game.chd")) as f:
                 self.assertEqual(f.read(), "another disc")
 
-    def test_two_archives_of_one_disc_name_keep_the_second(self):
+    def test_two_archives_of_one_disc_name_keep_one(self):
         self.touch("psx/Game (USA) (Rev 1).zip", "psx/Game (USA).zip")
-        fake = FakeTools(archive=["Game (USA).cue", "Game (Track 1).bin", "Game (Track 2).bin"])
-        with mock.patch.object(external, "run_tool", fake), mock.patch.object(external, "find_tool", lambda t: t), \
-                mock.patch.object(external, "tool_output", lambda cmd: "SHA1:         " + ("aa" if cmd[-1].endswith(".part") else "bb")), \
-                contextlib.redirect_stdout(io.StringIO()) as out:
+        psx = os.path.join(self.dir, "psx")
+
+        def fake_run(cmd, progress=None, tty=False):  # each archive's disc, and the chd made from it, hold the archive's name
+            if cmd[0] == "7z":
+                with open(os.path.join(next(a for a in cmd if a.startswith("-o"))[2:], "Game (USA).cue"), "w") as f:
+                    f.write(os.path.basename(cmd[-1]))
+            elif cmd[1] == "createcd":
+                with open(cmd[cmd.index("-i") + 1]) as f, open(cmd[cmd.index("-o") + 1], "w") as chd_file:
+                    chd_file.write(f.read())
+
+        def info(cmd):
+            with open(cmd[-1]) as f:
+                return "SHA1:         " + f.read().encode().hex()
+
+        with mock.patch.object(external, "run_tool", fake_run), mock.patch.object(external, "find_tool", lambda t: t), \
+                mock.patch.object(external, "tool_output", info), contextlib.redirect_stdout(io.StringIO()) as out:
             self.assertEqual(chd.chd_command(SimpleNamespace(chd=self.dir, dry_run=False)), 1)
-        files = sorted(os.listdir(os.path.join(self.dir, "psx")))
-        self.assertEqual((len(files), files[-1]), (2, "Game (USA).chd"))
-        self.assertTrue(files[0].endswith(".zip"))
-        self.assertIn(": Game (USA).chd already exists and doesn't match this disc", out.getvalue())
+        kept = [n for n in os.listdir(psx) if n.endswith(".zip")]  # the jobs run in parallel: either archive may come second
+        self.assertEqual(len(kept), 1)
+        self.assertEqual(sorted(os.listdir(psx)), sorted(kept + ["Game (USA).chd"]))
+        with open(os.path.join(psx, "Game (USA).chd")) as f:
+            self.assertEqual({f.read(), kept[0]}, {"Game (USA) (Rev 1).zip", "Game (USA).zip"})
+        self.assertIn(f"❌ psx/{kept[0]}: Game (USA).chd already exists and doesn't match this disc (kept)", out.getvalue())
         self.assertIn("1 converted, 1 failed", out.getvalue())
 
     def test_failed_archive_is_kept_and_leaves_no_temp_folder(self):
