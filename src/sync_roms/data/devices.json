@@ -628,6 +628,15 @@
     ]
   },
   {
+    "id": "miyoo-a30",
+    "name": "Miyoo A30",
+    "soc": "Allwinner A33",
+    "screen": "4:3",
+    "firmwares": [
+      "spruce"
+    ]
+  },
+  {
     "id": "miyoo-flip",
     "name": "Miyoo Flip",
     "soc": "Rockchip RK3566",

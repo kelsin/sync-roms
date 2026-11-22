@@ -355,6 +355,10 @@
       "tier": "nds",
       "note": "Portrait 4:3-friendly screen on a quad Cortex-A53: solid through PS1 and NDS, and its vertical shooters (TATE arcade) shine. N64, Dreamcast, Saturn and PSP are too slow, so left off."
     },
+    "miyoo-a30": {
+      "tier": "nds",
+      "note": "Quad Cortex-A7 with 512MB RAM: stable through PS1 and NDS (spruce's DraStic). N64, Dreamcast and PSP are inconsistent, so left off."
+    },
     "miyoo-flip": {
       "tier": "nds",
       "note": "Stable through PS1 and NDS. N64, Dreamcast, Saturn and PSP are inconsistent, so left off."
