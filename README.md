@@ -593,8 +593,8 @@ sync-roms --edit
    toggles the game under the cursor, `a` toggles everything shown, `u` reverts, `o` cycles the view between all
    rows, only those that are on, and only those you changed. A multi-disc game's playlist and discs (marked 🔗) switch
    on and off together, even when a filter shows only some of them. `s` lists the sets with games on this system: `Enter`
-   narrows the list to that set's games here, `Space` (or `Tab`) picks that set's games on this system one by one (or
-   unpicks them when all are picked already); other systems are untouched. `m` filters by the system's
+   narrows the list to that set's games here, `Space` (or `Tab`) switches that set's games on this system on one by one (or
+   off when all are on already), as toggling each in the list would; other systems are untouched. `m` filters by the system's
    scraped metadata (`scrapes/<system>/metadata.json`): pick **Developer**, **Publisher**, **Genre** (its first part,
    so `Sports / Baseball` is `Sports`) or **Year**,
    then a value (each shows how many games in the list have it) to narrow the list to those games. Values are
