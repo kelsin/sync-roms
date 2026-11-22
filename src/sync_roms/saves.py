@@ -305,6 +305,13 @@ def core_folders(base, layout, retroarch_dir=None):
     return sorted(names)
 
 
+def file_state(src, dst):
+    """What copying src to dst would do: "new" with no dst, else "same" or "differs" by their bytes."""
+    if not os.path.exists(dst):
+        return "new"
+    return "same" if filecmp.cmp(src, dst, shallow=False) else "differs"
+
+
 def plan_apply(stash, base, layout_name, layout, system, core, retroarch_dir=None):
     """[(src, dst, "new" | "same" | "differs")] for copying a stash's files to the card."""
     plan, roms = [], None
@@ -321,11 +328,7 @@ def plan_apply(stash, base, layout_name, layout, system, core, retroarch_dir=Non
                 ui.warn(f"{'several ROMs share the name of' if several else 'no ROM on the card for'} {name}; "
                         "copied under its RetroArch name")
         dst = os.path.join(target_dir(base, layout_name, layout, system, f["kind"], core, retroarch_dir), name)
-        if not os.path.exists(dst):
-            state = "new"
-        else:
-            state = "same" if filecmp.cmp(src, dst, shallow=False) else "differs"
-        plan.append((src, dst, state))
+        plan.append((src, dst, file_state(src, dst)))
     return plan
 
 
