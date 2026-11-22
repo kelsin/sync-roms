@@ -102,7 +102,7 @@ def art_command(args):
     try:
         for system in scrape_online._pick_systems(args.system):
             name = system["bucket"]
-            listing = inventory.files(f"{scrape_plan.SCRAPES}/{name}/")
+            listing = scrape_plan.scrape_listing(name)
             carts = list(inventory.files("pico8/")) if name == "pico8" else ()
             plan = plan_art(listing, targets, replace, carts)
             if not any(plan.make.values()) and not any(plan.have.values()) and not plan.no_source:

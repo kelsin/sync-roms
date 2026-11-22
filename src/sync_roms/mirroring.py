@@ -20,7 +20,7 @@ def mirror_wanted(manifest):
         others = [ex.submit(inventory.files, prefix) for prefix in ("BIOS/", runtime.THEMES_PREFIX, runtime.ESDE_THEMES_PREFIX, drivers.PREFIX, runtime.PICO8_PREFIX, runtime.APKS_PREFIX, runtime.ONION_PREFIX, runtime.SPRUCE_PREFIX)]
         proxy_listings = {prefix: ex.submit(inventory.files, prefix) for prefix in raofflineproxy.prefixes()}
         roms = list(ex.map(store.list_system, todo))
-        scrapes = list(ex.map(lambda s: inventory.files(f"{scrape_plan.SCRAPES}/{s['bucket']}/"), todo))
+        scrapes = list(ex.map(lambda s: scrape_plan.scrape_listing(s["bucket"]), todo))
         bios, themes, esde_themes, driver_zips, pico8_zips, apks, onion, spruce = (f.result() for f in others)
     wanted = {}
     for s, have, scraped in zip(todo, roms, scrapes):

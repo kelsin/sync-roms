@@ -678,7 +678,7 @@ def run_batch(system, batch, started, shrink, outcomes, listing, index, pending,
                     raise
                 started.stop.set()
                 halt, cut, upload_failed = KeyboardInterrupt(), True, 1
-            have = inventory.files(f"{scrape_plan.SCRAPES}/{name}/") if upload_failed else {}
+            have = scrape_plan.scrape_listing(name) if upload_failed else {}
         except s3.ERRORS as e:
             _storage_fail(f"Uploading {name} media", e, rerun)
         if upload_failed:
@@ -865,7 +865,7 @@ def run_scrape(client, systems, todo, skip, ask=True, replace=False, forced=None
     _unreachable.reset()
     _media_skipped.clear()
     try:
-        listings.update(_each(lambda name: inventory.files(f"{scrape_plan.SCRAPES}/{name}/"), [n for n in todo if n not in listings]))
+        listings.update(_each(lambda name: scrape_plan.scrape_listing(name), [n for n in todo if n not in listings]))
     except s3.ERRORS as e:
         ui.fail(f"{e}", 3)
     indexes = {name: scrape_plan.scrape_index(listings[name]) for name in todo}
@@ -991,11 +991,11 @@ def _scrape_command(args):
                 metadata[name] = data
         fill = None
         if getattr(args, "fill_media", False):
-            have = _each(lambda name: inventory.files(f"{scrape_plan.SCRAPES}/{name}/", sizes=False), [s["bucket"] for s in listed])
+            have = _each(lambda name: scrape_plan.scrape_listing(name), [s["bucket"] for s in listed])
             fill = (set(screenscraper.MEDIA_MAP.values()) - skip, have)
         have = fill[1] if fill else {}
         if "pico8" in metadata and "pico8" not in have:  # its carts without a picture are scraped too
-            have = {"pico8": inventory.files(f"{scrape_plan.SCRAPES}/pico8/", sizes=False)}
+            have = {"pico8": scrape_plan.scrape_listing("pico8")}
         candidates = find_candidates(listed, roms, metadata, retry=args.retry, fill=fill, listings=have)
         for s in listed:
             if candidates.get(s["bucket"]) and "screenscraper" not in s:
@@ -1081,7 +1081,7 @@ def match_command(args):
     try:
         data = load_metadata(name)
         replace = args.rom in data
-        media = inventory.files(f"{scrape_plan.SCRAPES}/{name}/")
+        media = scrape_plan.scrape_listing(name)
     except ValueError:
         ui.fail(f"{metadata_key(name)} isn't valid JSON", 3)
     except s3.ERRORS as e:

@@ -128,6 +128,12 @@ def media_entry(key):
     return None
 
 
+def scrape_listing(name, sizes=True):
+    """{key: size} of scrapes/<name>/ with its empty media files left out: a 0-byte picture is a broken upload, so the
+    scrape treats it as missing and makes it again."""
+    return {k: v for k, v in inventory.files(f"{SCRAPES}/{name}/", sizes=sizes).items() if v != 0 or not media_entry(k)}
+
+
 def scrape_index(listing):
     """{ROM path without extension: {media type: (key, size)}} from a listing of scrapes/<system>/."""
     index = defaultdict(dict)
@@ -260,10 +266,17 @@ def can_shrink():
         return bool(shutil.which("sips"))
 
 
+def pillow_image():
+    """Pillow's Image, set to ignore a bad checksum in an optional PNG chunk (scraped files often have one in iCCP)."""
+    from PIL import Image, ImageFile
+    ImageFile.LOAD_TRUNCATED_IMAGES = True
+    return Image
+
+
 def shrink_png(src, dst, box=ONION_MAX):
     """Write src as a PNG that fits in box (never enlarged), with Pillow or macOS sips."""
     try:
-        from PIL import Image
+        Image = pillow_image()
     except ImportError:
         Image = None
     if Image:
@@ -310,7 +323,7 @@ def make_art(src, dst, box):
     file), else PNG. Top level so a process pool can run it."""
     if not dst.removesuffix(".part").endswith(".qoi"):
         return shrink_png(src, dst, box)
-    from PIL import Image
+    Image = pillow_image()
     from . import qoi
     with Image.open(src) as im:
         im.load()
@@ -361,7 +374,7 @@ def update_gamelist(path, entries):
 def load_scrape_data(systems):
     """The storage's scrape data for the chosen systems: {storage folder: (listing, metadata)}."""
     with ThreadPoolExecutor(runtime.WORKERS) as ex:
-        listings = list(ex.map(lambda s: inventory.files(f"{SCRAPES}/{s['bucket']}/", sizes=False), systems))
+        listings = list(ex.map(lambda s: scrape_listing(s["bucket"], sizes=False), systems))
     meta_keys = [metadata_key(s["bucket"]) for s, l in zip(systems, listings) if metadata_key(s["bucket"]) in l]
     texts = s3.fetch_texts(meta_keys)
     data = {}
