@@ -1,3 +1,4 @@
+import io
 import struct
 import unittest
 
@@ -86,6 +87,14 @@ class QoiTests(unittest.TestCase):
         deep = Image.new("I;16", (4, 4))
         deep.putdata([i * 1000 for i in range(16)])
         self.check(deep)
+
+    def test_pillow_reads_our_output(self):
+        image = Image.new("RGBA", (32, 24))
+        image.putdata([(x * 8, y * 10, (x * y) % 256, 255 - x * 4) for y in range(24) for x in range(32)])
+        Image.init()
+        with Image.open(io.BytesIO(qoi.encode(image))) as read:
+            self.assertEqual(read.format, "QOI")
+            self.assertEqual(read.convert("RGBA").tobytes(), image.tobytes())
 
     def test_header(self):
         data = qoi.encode(Image.new("RGBA", (5, 7)))

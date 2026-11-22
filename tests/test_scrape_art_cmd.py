@@ -126,6 +126,14 @@ class CommandTest(CommandBase):
             self.assertIn(f"scrapes/gba/{key}", have)
         self.assertEqual(self.read("scrapes/gba/spruce/a.qoi")[:4], b"qoif")
 
+    def test_stop_counts_the_files_of_the_interrupted_system(self):
+        self.art("a")
+        self.art("b")
+        with mock.patch.object(scrape_art, "BATCH", 1), \
+                mock.patch.object(upload, "run_uploads", side_effect=[0, KeyboardInterrupt()]):
+            self.assertEqual(self.run_art(target="onion"), 130)
+        self.assertIn("1 file(s) made so far", self.out.getvalue())
+
     def test_rerun_makes_nothing_new(self):
         self.art("a")
         self.run_art()

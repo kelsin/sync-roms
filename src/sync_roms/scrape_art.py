@@ -48,7 +48,7 @@ def plan_art(listing, targets, replace, carts=()):
             stems.add(stem)
     plan = ArtPlan(no_source=len(stems - sources.keys()))
     for target in targets:
-        kind, ext = (scrape_plan.ONION_TYPE, "png") if target == "onion" else ("spruce", "qoi")
+        kind = scrape_plan.ONION_TYPE if target == "onion" else "spruce"
         have = {s for s in sources if kind in found.get(s, {})}
         plan.have[target] = len(have)
         plan.make[target] = [(s, k) for s, k in sorted(sources.items()) if replace or s not in have]
@@ -97,7 +97,7 @@ def art_command(args):
     replace, dry_run = getattr(args, "replace", False), getattr(args, "dry_run", False)
     workers = getattr(args, "workers", None) or os.cpu_count() or 4
     print(ui.bold("🖼️  Make box art") + ui.dim(f"  {', '.join(targets)}"))
-    made = skipped = failed = 0
+    made = skipped = failed = made_here = 0
     total_bytes = 0
     try:
         for system in scrape_online._pick_systems(args.system):
@@ -141,9 +141,10 @@ def art_command(args):
                     shutil.rmtree(tmp, ignore_errors=True)
             print(f"  {name}: {made_here} file(s) made" + (f", {failed_here} failed" if failed_here else ""))
             made += made_here
+            made_here = 0
             failed += failed_here
     except KeyboardInterrupt:
-        print(ui.yellow(f"\nStopped; {made} file(s) made so far."))
+        print(ui.yellow(f"\nStopped; {made + made_here} file(s) made so far."))
         return 130
     except s3.ERRORS as e:
         ui.fail(f"{e}", 3)
