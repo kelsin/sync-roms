@@ -388,7 +388,8 @@ the cursor starts at the top of the list. Esc cancels.
   storage. Both counts are shown first, the overwrites are listed, and nothing uploads until you confirm (default no).
   `--dry-run` shows the plan and uploads nothing.
 - Frontend and OS leftovers (`gamelist.xml`, `images/`, `Thumbs.db`, `.DS_Store`, `._*`...) are never uploaded; other
-  dotfiles are.
+  dotfiles are. In a card's ROM folder, the layout's own `.multi-disc/` and `.media/` folders and the playlists a sync
+  pointed into `.multi-disc/` are left out too (also with `--replace`).
 - It uploads with the `ROMS_WRITE_PROFILE` profile (default `roms`) through one shared pool of requests, four per CPU
   core (at most 16), so many small files and the parts of big ones (64MB and up go as 32MB parts) all keep the
   connection busy. The biggest files start first. To a storage folder, 8 files

@@ -236,6 +236,19 @@ def never_uploaded(bucket, rel):
     return rel in OWN_ROOT_FILES.get(bucket, ()) or bool(saves.classify(rel.rsplit("/", 1)[-1]))
 
 
+def card_only(folder, rel):
+    """Whether rel, a path in folder (a card's ROM folder), is a layout's own copy of what storage has, never uploaded:
+    a file in a disc folder or in NextUI's .media (at any depth), or a playlist a sync pointed into a disc folder."""
+    discs = {layout["disc_dir"] for layout in store.repo_json("layouts").values() if layout.get("disc_dir")}
+    *dirs, name = rel.split("/")
+    if (discs | {".media"}).intersection(dirs):
+        return True
+    try:
+        return name.lower().endswith(".m3u") and any(e.split("/")[0] in discs for e in m3u.m3u_entries(os.path.join(folder, *dirs, name)))
+    except OSError:  # a playlist that can't be read is planned like any file
+        return False
+
+
 IGNORED_ROOT_DIRS = {"images", "videos", "manuals",                # Batocera / Knulli scraped media
                      "imgs"}                                       # Onion scraped box art
 IGNORED_FILES = {"thumbs.db", "desktop.ini"}                       # Windows
