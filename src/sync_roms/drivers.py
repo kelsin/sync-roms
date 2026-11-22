@@ -148,8 +148,7 @@ def prune(card, drivers_dir, current, dry_run, keep=False):
     """Remove the files in drivers_dir that the card's saved drivers list names but current doesn't (never another
     file), then save current as the list when it differs (no list counts as empty). The names removed (or, in a dry run,
     that would be). keep (--no-delete) removes nothing and leaves them in the list."""
-    entry = store.load_cards().get(card)
-    entry = entry if isinstance(entry, dict) else {}
+    entry = store.saved_card(card)
     saved = entry.get("drivers")
     saved = [n for n in saved if isinstance(n, str)] if isinstance(saved, list) else []
     removed = [n for n in saved if n not in current and os.path.isfile(os.path.join(drivers_dir, os.path.basename(n)))]

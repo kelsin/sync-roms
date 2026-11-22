@@ -1,11 +1,11 @@
 """The official PICO-8 zip from storage, put where each frontend installs it from."""
 import os
-import re
 import tempfile
 import zipfile
 
 from . import inventory, runtime, s3, store, ui
 
+PATTERN = r"pico-8_.*_raspi\.zip"  # the zip's name in os/pico8/
 TARGETS = {
     "esde": ("zip", "PICO-8/{name}"),
     "knulli": ("zip", "roms/pico8/{name}"),
@@ -23,20 +23,6 @@ ONLY = {"muos": ("pico-8/pico8_64", "pico-8/pico8.dat")}  # muOS's launcher runs
 
 def members(layout_name):
     return ONLY.get(layout_name) or EXTRACT + EXTRACT_MORE.get(layout_name, ())
-
-
-def _natural(name):
-    return [int(p) if p.isdigit() else p for p in re.split(r"(\d+)", name)]
-
-
-def _newest(listing):
-    keys = [k for k in listing if re.fullmatch(r"pico-8_.*_raspi\.zip", k[len(runtime.PICO8_PREFIX):])]
-    return max(keys, key=lambda k: _natural(k[len(runtime.PICO8_PREFIX):]), default=None)
-
-
-def newest_zip():
-    """The storage key of the newest pico-8_*_raspi.zip in os/pico8/ (digit runs compared as numbers), or None."""
-    return _newest(inventory.files(runtime.PICO8_PREFIX, sizes=False))
 
 
 def _path(base, layout_name, name):
@@ -63,13 +49,12 @@ def run(card, layout_name, base, dry_run, wrote=None):
     if layout_name not in TARGETS:
         return 0
     listing = inventory.files(runtime.PICO8_PREFIX)
-    key = _newest(listing)
+    key = inventory.newest(listing, runtime.PICO8_PREFIX, PATTERN)
     if not key:
         return 0
     name = key[len(runtime.PICO8_PREFIX):]
     kind, target = _path(base, layout_name, name)
-    entry = store.load_cards().get(card)
-    old = entry.get("pico8") if isinstance(entry, dict) else None
+    old = store.saved_card(card).get("pico8")
     old = old if isinstance(old, str) else None
     if kind == "extract":
         missing = any(not os.path.isfile(os.path.join(target, os.path.basename(m))) for m in members(layout_name))
@@ -103,8 +88,7 @@ def run(card, layout_name, base, dry_run, wrote=None):
 def keep_in(dest, card, layout_name=None):
     """Names in a pico8 ROM folder that the extras check must keep: the card's recorded zip, the Splore files, and the
     extracted runtime when the layout installs it into this folder (ROCKNIX)."""
-    entry = store.load_cards().get(card)
-    recorded = entry.get("pico8") if isinstance(entry, dict) else None
+    recorded = store.saved_card(card).get("pico8")
     keep = {recorded} if isinstance(recorded, str) else set()
     if layout_name == "rocknix":
         keep |= {os.path.basename(m) for m in members(layout_name)}

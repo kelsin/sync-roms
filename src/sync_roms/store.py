@@ -220,6 +220,12 @@ SETS_KEY = "sets"  # reserved key in a games list: ids of whole game sets to syn
 _warned = set()  # warnings already printed this run, so a menu redraw doesn't repeat them
 
 
+def saved_card(card, cards=None):
+    """A card's entry in cards.json (in cards, when already loaded; not a copy), or {} when it has none or a malformed one."""
+    entry = (load_cards() if cards is None else cards).get(card)
+    return entry if isinstance(entry, dict) else {}
+
+
 def card_games(card, cards=None):
     """The games list saved for a card in cards.json ({} when it has none). cards: cards.json already loaded."""
     entry = (load_cards() if cards is None else cards).get(card)

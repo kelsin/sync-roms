@@ -3,17 +3,10 @@ import contextlib
 import os
 import re
 
-from . import downloads, inventory, onion_surprise, runtime, store, ui
+from . import downloads, inventory, runtime, store, ui
 
 PATTERN = r"spruceV\d+(\.\d+)*\.7z"
 MARGIN = 64 * 1024 * 1024  # room left on the card after the 7z
-
-
-def newest(listing):
-    """The storage key of the newest spruceOS release 7z in the listing (digit runs compared as numbers), or None."""
-    prefix = runtime.SPRUCE_PREFIX
-    keys = [k for k in listing if k.startswith(prefix) and re.fullmatch(PATTERN, k[len(prefix):])]
-    return max(keys, key=lambda k: onion_surprise._natural(k[len(prefix):]), default=None)
 
 
 def install(card, layout_name, base, dry_run, wrote=None, keep=False):
@@ -22,12 +15,11 @@ def install(card, layout_name, base, dry_run, wrote=None, keep=False):
     if layout_name != "spruce":
         return 0
     listing = inventory.files(runtime.SPRUCE_PREFIX)
-    key = newest(listing)
+    key = inventory.newest(listing, runtime.SPRUCE_PREFIX, PATTERN)
     if not key:
         return 0
     name, size = key[len(runtime.SPRUCE_PREFIX):], listing[key]
-    entry = store.load_cards().get(card)
-    old = entry.get("spruce_os") if isinstance(entry, dict) else None
+    old = store.saved_card(card).get("spruce_os")
     if old == name:
         return 0
     previous = os.path.join(base, old) if isinstance(old, str) and re.fullmatch(PATTERN, old) else None

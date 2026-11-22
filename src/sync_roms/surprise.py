@@ -265,8 +265,7 @@ def run_surprise(card_name, setup, chosen_systems, interactive, dry_run, to_fetc
     their current surprises dropped. A dry run changes nothing. Returns the surprises kept (on a dry run, the saved
     ones). to_fetch, card_match: passed to the card editor."""
     cards = store.load_cards()
-    entry = cards.get(card_name)
-    entry = entry if isinstance(entry, dict) else {}
+    entry = store.saved_card(card_name, cards)
     if not enabled(entry):
         if entry.get("surprises") and not dry_run:
             entry.pop("surprises")
@@ -306,8 +305,7 @@ def fill_surprises(card_name, setup, chosen_systems, dry_run, rng=None, today=No
     rng = rng or random.Random()
     today = today or datetime.date.today()
     cards = store.load_cards()
-    entry = cards.get(card_name)
-    entry = entry if isinstance(entry, dict) else {}
+    entry = store.saved_card(card_name, cards)
     if not enabled(entry):
         return []
     names, kept = _current(entry, chosen_systems)
