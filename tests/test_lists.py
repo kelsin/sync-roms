@@ -87,6 +87,14 @@ class CardLists(DataDir):
         self.assertEqual([store.card_games(n) for n in "abcz"], [{}, {}, {}, {}])
         self.assertEqual(store.card_games("d"), {"gba": []})
 
+    def test_card_excluded_bad_shapes_and_loaded_cards(self):
+        cards = {"a": {"excluded": None}, "b": {"excluded": []}, "c": "x", "d": {"excluded": {"gba": ["gba/A.zip"]}}}
+        self.write_json("cards.json", cards)
+        self.assertEqual([store.card_excluded(n) for n in "abcz"], [{}, {}, {}, {}])
+        self.assertEqual(store.card_excluded("d"), {"gba": ["gba/A.zip"]})
+        self.assertEqual([store.card_excluded(n, cards) for n in "cdz"], [{}, {"gba": ["gba/A.zip"]}, {}])
+        self.assertEqual([store.card_games(n, {"c": "x", "d": {"games": {"gba": []}}}) for n in "cdz"], [{}, {"gba": []}, {}])
+
     def test_cards_json_games_roundtrip(self):
         self.write_json("cards.json", {"c": {"games": {"gba": []}, "layout": "esde"}})
         store.update_card("c", device="x")

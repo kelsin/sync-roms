@@ -284,8 +284,7 @@ def run_surprise(card_name, setup, chosen_systems, interactive, dry_run, to_fetc
         states = picker.filter_list("\U0001F381 Surprises: keep ✅ or replace ⬜ (Enter to confirm)",
                                     [f"{x.get('title') or x['bucket']}  ({names[x['system']]})" for x in current],
                                     multi=True, initial=[True] * len(current), diff_marks=False,
-                                    preview=lambda k: previews.game_thumb(current[k]["bucket"]) if k < len(current) else None,
-                                    preview_width=previews.GAME_WIDTH)
+                                    **previews.game_pane([x["bucket"] for x in current]))
         kept = current if states is None else [x for x, keep in zip(current, states) if keep]
     else:
         kept = []
