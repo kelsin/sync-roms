@@ -16,7 +16,9 @@
     "firmwares": [
       "knulli",
       "muos",
-      "rocknix"
+      "rocknix",
+      "nextui",
+      "spruce"
     ],
     "rocknix_image": "H700"
   },
@@ -60,9 +62,9 @@
     "screen": "3:2",
     "firmwares": [
       "nextui",
-      "knulli",
       "muos",
-      "rocknix"
+      "rocknix",
+      "spruce"
     ],
     "rocknix_image": "H700"
   },
@@ -90,7 +92,6 @@
     "soc": "Rockchip RK3576",
     "screen": "16:9",
     "firmwares": [
-      "knulli",
       "muos",
       "rocknix"
     ],
@@ -104,7 +105,9 @@
     "firmwares": [
       "knulli",
       "muos",
-      "rocknix"
+      "rocknix",
+      "nextui",
+      "spruce"
     ],
     "rocknix_image": "H700",
     "network": false
@@ -117,7 +120,9 @@
     "firmwares": [
       "knulli",
       "muos",
-      "rocknix"
+      "rocknix",
+      "nextui",
+      "spruce"
     ],
     "rocknix_image": "H700"
   },
@@ -130,7 +135,8 @@
       "nextui",
       "knulli",
       "muos",
-      "rocknix"
+      "rocknix",
+      "spruce"
     ],
     "rocknix_image": "H700"
   },
@@ -164,7 +170,9 @@
     "firmwares": [
       "knulli",
       "muos",
-      "rocknix"
+      "rocknix",
+      "nextui",
+      "spruce"
     ],
     "rocknix_image": "H700",
     "network": false
@@ -177,7 +185,9 @@
     "firmwares": [
       "knulli",
       "muos",
-      "rocknix"
+      "rocknix",
+      "nextui",
+      "spruce"
     ],
     "rocknix_image": "H700"
   },
@@ -189,7 +199,9 @@
     "firmwares": [
       "knulli",
       "muos",
-      "rocknix"
+      "rocknix",
+      "nextui",
+      "spruce"
     ],
     "rocknix_image": "H700"
   },
@@ -201,7 +213,9 @@
     "firmwares": [
       "knulli",
       "muos",
-      "rocknix"
+      "rocknix",
+      "nextui",
+      "spruce"
     ],
     "rocknix_image": "H700"
   },
@@ -213,7 +227,9 @@
     "firmwares": [
       "knulli",
       "muos",
-      "rocknix"
+      "rocknix",
+      "nextui",
+      "spruce"
     ],
     "rocknix_image": "H700"
   },
@@ -261,7 +277,9 @@
     "firmwares": [
       "knulli",
       "muos",
-      "rocknix"
+      "rocknix",
+      "nextui",
+      "spruce"
     ],
     "rocknix_image": "H700"
   },
@@ -273,7 +291,9 @@
     "firmwares": [
       "knulli",
       "muos",
-      "rocknix"
+      "rocknix",
+      "nextui",
+      "spruce"
     ],
     "rocknix_image": "H700"
   },
@@ -533,8 +553,10 @@
     "gpu": "adreno-630",
     "screen": "16:9",
     "firmwares": [
-      "esde"
-    ]
+      "esde",
+      "rocknix"
+    ],
+    "rocknix_image": "SDM845"
   },
   {
     "id": "ayn-odin-2",
@@ -597,6 +619,7 @@
     "id": "ayn-thor-lite",
     "name": "AYN Thor Lite",
     "soc": "Snapdragon 865",
+    "gpu": "adreno-650",
     "screen": "16:9",
     "screen2": "31:27",
     "firmwares": [
@@ -624,7 +647,8 @@
     "soc": "Allwinner A133P",
     "screen": "3:5",
     "firmwares": [
-      "esde"
+      "esde",
+      "spruce"
     ]
   },
   {
@@ -733,7 +757,8 @@
     "screen": "16:9",
     "firmwares": [
       "esde",
-      "rocknix"
+      "rocknix",
+      "knulli"
     ],
     "rocknix_image": "SM8250"
   },
@@ -764,7 +789,7 @@
   {
     "id": "retroid-pocket-duo",
     "name": "Retroid Pocket Duo",
-    "soc": "Snapdragon 7 Gen 4",
+    "soc": "Dragonwing Q-7790",
     "gpu": "adreno-722",
     "screen": "16:9",
     "screen2": "4:3",
@@ -813,7 +838,8 @@
     "screen": "16:9",
     "firmwares": [
       "esde",
-      "rocknix"
+      "rocknix",
+      "knulli"
     ],
     "rocknix_image": "SM8250"
   },
@@ -835,7 +861,8 @@
     "screen": "4:3",
     "firmwares": [
       "esde",
-      "rocknix"
+      "rocknix",
+      "knulli"
     ],
     "rocknix_image": "SM8250"
   },
@@ -847,7 +874,8 @@
     "screen": "31:27",
     "firmwares": [
       "esde",
-      "rocknix"
+      "rocknix",
+      "knulli"
     ],
     "rocknix_image": "SM8250"
   },
