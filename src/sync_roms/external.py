@@ -52,7 +52,7 @@ def run_tool(cmd, progress=None, tty=False):
         master, slave = pty.openpty() if tty else (None, None)
         try:
             proc = subprocess.Popen(cmd, stdin=subprocess.DEVNULL if slave is None else slave,
-                                    stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True)
+                                    stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True, errors="replace")
         finally:
             for fd in (master, slave):
                 if fd is not None:
@@ -67,6 +67,10 @@ def run_tool(cmd, progress=None, tty=False):
             elif line.strip():
                 last = line.strip()
         proc.wait()
+    except BaseException:  # the reader failed: the tool must not outlive this call
+        proc.kill()
+        proc.wait()
+        raise
     finally:
         with _tool_lock:
             _tool_procs.discard(proc)
@@ -77,7 +81,7 @@ def run_tool(cmd, progress=None, tty=False):
 def tool_output(cmd):
     """The tool's stdout, or None when it can't run or fails."""
     try:
-        done = subprocess.run(cmd, stdin=subprocess.DEVNULL, capture_output=True, text=True)
+        done = subprocess.run(cmd, stdin=subprocess.DEVNULL, capture_output=True, text=True, errors="replace")
     except OSError:
         return None
     return done.stdout if done.returncode == 0 else None
