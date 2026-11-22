@@ -1,5 +1,18 @@
 # Changelog
 
+## [3.22.0](https://github.com/kelsin/sync-roms/compare/v3.21.0...v3.22.0) (2026-11-22)
+
+
+### :video_game: Features
+
+* **cardedit:** show full, partial and empty systems with distinct emoji ([#505](https://github.com/kelsin/sync-roms/issues/505)) ([cc6ef80](https://github.com/kelsin/sync-roms/commit/cc6ef80b971b0df2997194004018739cd7e4f478))
+
+
+### :bug: Bug Fixes
+
+* **spruce:** add Pokémon Mini logo files to the Art Book themes ([#507](https://github.com/kelsin/sync-roms/issues/507)) ([28ffed3](https://github.com/kelsin/sync-roms/commit/28ffed3aac48f8327da395c6fa1a849f56483023))
+* **spruce:** replace the NES logo shown for FDS in the Art Book themes ([#508](https://github.com/kelsin/sync-roms/issues/508)) ([0547dc8](https://github.com/kelsin/sync-roms/commit/0547dc823cded050cf3515561b6d9c0493d2e3ed))
+
 ## [3.21.0](https://github.com/kelsin/sync-roms/compare/v3.20.1...v3.21.0) (2026-11-22)
 
 
