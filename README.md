@@ -223,7 +223,7 @@ For one command:
 | `--replace` | `upload`, `scrape art` | `upload`: make the storage folder match `DIR`. `scrape art`: remake the art files that already exist |
 | `--system ID` | `diff`, `scrape`, `scrape missing`, `scrape art` | `diff`: the system to compare with, instead of the picker. `scrape`, `scrape missing`, `scrape art`: only that storage folder (the same as `scrape SYSTEM`) |
 | `--for onion\|spruce\|both` | `scrape art` | Which art to make (default both) |
-| `--workers N` | `scrape art` | How many images to convert at once (default: your CPU count) |
+| `--workers N` | `scrape art` | How many sources to download at once (default: your CPU count); conversion always uses one process per core |
 | `--all` | `scrape`, `scrape missing` | Every ROM in storage, not only the games your cards reference |
 | `--retry` | `scrape` | Also try the ROMs ScreenScraper didn't know before (ROMs whose lookup failed are always tried again; non-games never are) and, with `--fill-media`, the ROMs missing only media it didn't offer |
 | `--fill-media` | `scrape` | Also scrape ROMs that have metadata but lack some media type in storage; their metadata is kept. Media types ScreenScraper didn't offer for a ROM are remembered, and a ROM missing only those isn't asked for again until `--retry` |
