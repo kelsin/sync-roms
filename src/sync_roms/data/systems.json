@@ -201,7 +201,7 @@
       "muos": "colecovision",
       "emudeck": "colecovision",
       "rocknix": "coleco",
-      "nextui": "ColecoVision (COLECO)"
+      "nextui": "Colecovision (COLECO)"
     },
     "muos_catalogue": "ColecoVision",
     "bios": {
@@ -745,7 +745,7 @@
       "muos": "gamegear",
       "emudeck": "gamegear",
       "rocknix": "gamegear",
-      "nextui": "Game Gear (GG)"
+      "nextui": "Sega Game Gear (GG)"
     },
     "muos_catalogue": "Sega Game Gear",
     "bios": {
@@ -899,7 +899,7 @@
       "muos": "snes",
       "emudeck": "snes",
       "rocknix": "snes",
-      "nextui": "Super Nintendo (SFC)"
+      "nextui": "Super Nintendo Entertainment System (SFC)"
     },
     "nextui_bios_tags": [
       "SUPA"
@@ -1742,7 +1742,7 @@
       "muos": "pico8",
       "emudeck": "pico8",
       "rocknix": "pico-8",
-      "nextui": "PICO-8 (P8)"
+      "nextui": "Pico-8 (P8)"
     },
     "muos_catalogue": "PICO-8",
     "bios": {
@@ -1765,7 +1765,7 @@
       "muos": "pokemini",
       "emudeck": "pokemini",
       "rocknix": "pokemini",
-      "nextui": "Pokemon Mini (PKM)"
+      "nextui": "Pokémon mini (PKM)"
     },
     "muos_catalogue": "Nintendo Pokemon Mini",
     "bios": {
@@ -1808,7 +1808,7 @@
       "muos": "psx",
       "emudeck": "psx",
       "rocknix": "psx",
-      "nextui": "PlayStation (PS)"
+      "nextui": "Sony PlayStation (PS)"
     },
     "muos_catalogue": "Sony PlayStation",
     "bios": {
@@ -2835,7 +2835,7 @@
       "muos": "msx1",
       "emudeck": "msx",
       "rocknix": "msx",
-      "nextui": "MSX (MSX)"
+      "nextui": "Microsoft MSX (MSX)"
     },
     "muos_catalogue": "Microsoft MSX",
     "bios": {

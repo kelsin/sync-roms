@@ -10,7 +10,7 @@ from concurrent.futures import ThreadPoolExecutor
 from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError
 
 from . import __version__, budget, cardedit, cardfs, clean, commands, downloads, drivers, edit, external, frontend, inventory, m3u, mirroring, picker, runtime, s3, scrape_plan, store
-from . import muos_collections, onion_surprise, pico8, raofflineproxy, rocknix_collections, saves, spruce_collections, spruce_os, surprise, themeart, ui, usersettings, vita
+from . import muos_collections, nextui_folders, onion_surprise, pico8, raofflineproxy, rocknix_collections, saves, spruce_collections, spruce_os, surprise, themeart, ui, usersettings, vita
 from . import collections as colls
 
 
@@ -939,6 +939,10 @@ def sync_card(args):
     disc_folders = layout.get("disc_folders")  # each disc game goes in a folder of its own (NextUI)
     onion = layout_name in scrape_plan.ONION_LAYOUTS
     roms_dir, bios_dir = dirs
+    if layout_name == "nextui":  # folders an earlier sync named differently from NextUI move rather than download again
+        for old, new in nextui_folders.migrate(roms_dir, args.dry_run):
+            print(ui.dim(f"  📦 {'would rename' if args.dry_run else 'Renamed'} {old} → {new}"))
+        cardfs.clear()
     clean_card = not args.dry_run and not args.no_clean
     dropped = []  # systems the device no longer lists: whatever they left on the card is unwanted
     if device:
