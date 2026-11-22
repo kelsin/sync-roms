@@ -1005,10 +1005,7 @@ def _scrape_command(args):
         for name, items in sorted(todo.items()):
             print(f"  {metadata_key(name)} {ui.dim(f'+{len(items)} entr' + ('y' if len(items) == 1 else 'ies'))}")
             print(f"  {scrape_plan.SCRAPES}/{name}/<{'|'.join(wanted)}>/ {ui.dim('what ScreenScraper has for:')}")
-            for r, _, _ in items[:SHOWN]:
-                print(ui.dim(f"     {r}"))
-            if len(items) > SHOWN:
-                print(ui.dim(f"     … and {len(items) - SHOWN} more"))
+            ui.print_head(items, SHOWN, lambda item: item[0], indent=5)
         return 0
     client = make_client()
     return run_scrape(client, {s["bucket"]: s for s in systems}, todo, skip, fill=fill is not None,
@@ -1077,10 +1074,7 @@ def match_command(args):
         print(ui.yellow(f"⚠️  {name}/{args.rom} shares its media files with {', '.join(shared)}"))
     if replace:
         old = sorted(k for k, t in _media_keys(media, name, stem).items() if t in SCRAPER_TYPES - skip)
-        for k in old[:SHOWN]:
-            print(ui.dim(f"     {k}"))
-        if len(old) > SHOWN:
-            print(ui.dim(f"     … and {len(old) - SHOWN} more"))
+        ui.print_head(old, SHOWN, indent=5)
         left = "custom/" + (f" and the skipped types ({', '.join(sorted(skip))})" if skip else "")
         question = (f"🔁 Replace the metadata entry and media of {name}/{args.rom} in {where} with ScreenScraper game "
                     f"{game_id}? {len(old)} file(s) listed above are overwritten or deleted; {left} left as they are.")

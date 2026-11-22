@@ -847,10 +847,7 @@ def total_bytes(jobs):
 def delete_extras(extras):
     """List the local ROMs that are no longer wanted and, after confirming, delete them."""
     print(ui.bold(f"\n🗑️  {len(extras)} local ROM(s) are no longer in the selection"))
-    for path in extras[:10]:
-        print(ui.dim(f"     {path}"))
-    if len(extras) > 10:
-        print(ui.dim(f"     … and {len(extras) - 10} more"))
+    ui.print_head(extras, 10, indent=5)
     answer = ui.choose(f"Delete these {len(extras)} local file(s) ({ui.human_size(sum(os.path.getsize(p) for p in extras))})?", "ynl", "n", "y yes · n no · l list all")
     while answer == "l":
         for path in extras:
@@ -883,10 +880,7 @@ def remove_stale_media(stale):
     """Delete the media files left for ROMs that aren't on the card, saying so."""
     if stale:
         print(ui.bold(f"\n🧹 Removing {len(stale)} media file(s) for ROMs that aren't on this card"))
-        for path in stale[:5]:
-            print(ui.dim(f"     {path}"))
-        if len(stale) > 5:
-            print(ui.dim(f"     … and {len(stale) - 5} more"))
+        ui.print_head(stale, 5, indent=5)
     for path in stale:
         try:
             os.remove(path)

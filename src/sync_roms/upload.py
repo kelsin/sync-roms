@@ -260,10 +260,7 @@ def upload_command(args):
     if not todo:
         print(ui.green("Nothing to upload ✨"))
         return 0
-    for key, _, size in changed[:10]:
-        print(ui.yellow(f"     overwrite {key} {ui.dim(ui.human_size(size))}"))
-    if len(changed) > 10:
-        print(ui.yellow(f"     … and {len(changed) - 10} more"))
+    ui.print_head(changed, 10, lambda f: f"overwrite {f[0]} {ui.dim(ui.human_size(f[2]))}", indent=5, paint=ui.yellow)
     if args.dry_run:
         print(ui.yellow("\n🧪 Dry run — nothing uploaded"))
         for key, _, size in new[:20]:
@@ -314,10 +311,7 @@ def replace_command(args, folder, system):
         print(ui.dim(f"     {old} → {newname}") + (ui.yellow("  (matched on samples)") if old in on_samples else ""))
     if len(renames) > 10 and not args.dry_run:
         print(ui.dim(f"     … and {len(renames) - 10} more"))
-    for p in changed[:10]:
-        print(ui.yellow(f"     overwrite {bucket}/{p} {ui.dim(ui.human_size(local[p]))}"))
-    if len(changed) > 10:
-        print(ui.yellow(f"     … and {len(changed) - 10} more"))
+    ui.print_head(changed, 10, lambda p: f"overwrite {bucket}/{p} {ui.dim(ui.human_size(local[p]))}", indent=5, paint=ui.yellow)
     if args.dry_run:
         print(ui.yellow("\n🧪 Dry run — nothing changed"))
         for p in new[:20]:

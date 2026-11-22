@@ -446,12 +446,13 @@ class ByteProgress:
         return self.done / self.total
 
 
-def print_head(items, n, fmt=str):
-    """Print the first n items dimmed, one per line, then "… and M more" when there are others."""
+def print_head(items, n, fmt=str, indent=7, paint=dim):
+    """Print the first n items, one per line, then "… and M more" when there are others: dimmed, 7 spaces in, unless
+    paint and indent say otherwise."""
     for item in items[:n]:
-        print(dim(f"       {fmt(item)}"))
+        print(paint(f"{' ' * indent}{fmt(item)}"))
     if len(items) > n:
-        print(dim(f"       … and {len(items) - n} more"))
+        print(paint(f"{' ' * indent}… and {len(items) - n} more"))
 
 
 def report_missing(keys, what):

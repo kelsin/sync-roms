@@ -710,6 +710,24 @@ class DownloadsTest(unittest.TestCase):
                 self.assertEqual(mirroring.refresh_mirror(root), 0)
             self.assertEqual(os.listdir(os.path.join(root, "gba")), ["Keep.zip"])
 
+    def test_mirror_lists_the_first_ten_files_it_asks_about_deleting(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as root:
+            open(os.path.join(root, ".sync-roms-mirror"), "w").close()
+            os.makedirs(os.path.join(root, "gba"))
+            for i in range(12):
+                open(os.path.join(root, "gba", f"{i:02}.zip"), "w").close()
+            with mock.patch.object(mirroring.store, "load_manifest", return_value={}), \
+                    mock.patch.object(mirroring.store, "all_card_names", return_value=[]), \
+                    mock.patch.object(mirroring, "mirror_wanted", return_value={}), \
+                    mock.patch.object(mirroring.downloads, "run_downloads", return_value=0), \
+                    mock.patch.object(mirroring.ui, "confirm", return_value=False), \
+                    mock.patch.object(ui, "_COLOR", True), contextlib.redirect_stdout(io.StringIO()) as out:
+                self.assertEqual(mirroring.refresh_mirror(root), 0)
+            self.assertEqual(len(os.listdir(os.path.join(root, "gba"))), 12)
+        self.assertEqual([line for line in out.getvalue().split("\n") if line.startswith("\x1b[2m")],
+                         [f"\x1b[2m     gba/{i:02}.zip\x1b[0m" for i in range(10)] + ["\x1b[2m     … and 2 more\x1b[0m"])
+
 
 def etag(data):
     return f'"{hashlib.md5(data).hexdigest()}"'

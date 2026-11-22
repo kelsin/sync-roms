@@ -243,6 +243,39 @@ class ReplaceContentTest(unittest.TestCase):
         self.assertNotIn("more", out)
 
 
+class OverwriteListTest(unittest.TestCase):
+    """upload and upload --replace list the files they would overwrite in yellow, 5 spaces in: the first ten, then the
+    rest counted."""
+
+    def setUp(self):
+        self.storage = tempfile.TemporaryDirectory()
+        self.addCleanup(self.storage.cleanup)
+        for p in (mock.patch.object(runtime, "ROOT", self.storage.name), mock.patch.object(runtime, "_mirror_root", None)):
+            p.start()
+            self.addCleanup(p.stop)
+
+    def overwrites(self, replace):
+        names = [f"{i:02}.gba" for i in range(12)]
+        with tempfile.TemporaryDirectory() as root:
+            for name in names:
+                touch(root, name, 10)
+                touch(self.storage.name, f"gba/{name}", 20)
+            args = argparse.Namespace(upload=root, replace=replace, dry_run=True)
+            with mock.patch.object(store, "load_manifest", lambda: {"systems": SYSTEMS}), \
+                    mock.patch.object(upload.picker, "filter_list", lambda *a, **k: 0), \
+                    mock.patch.object(inventory, "files", lambda prefix: {f"gba/{n}": 20 for n in names}), \
+                    mock.patch.object(inventory, "etags", lambda prefix: {n: (20, "-") for n in names}), \
+                    mock.patch.object(ui, "_COLOR", True), contextlib.redirect_stdout(io.StringIO()) as out:
+                self.assertEqual(upload.upload_command(args), 0)
+        return [line for line in out.getvalue().split("\n") if line.startswith("\x1b[33m     ")]
+
+    def test_upload_and_replace_show_the_first_ten(self):
+        want = [f"\x1b[33m     overwrite gba/{i:02}.gba \x1b[2m{ui.human_size(10)}\x1b[0m\x1b[0m" for i in range(10)]
+        for replace in (False, True):
+            with self.subTest(replace=replace):
+                self.assertEqual(self.overwrites(replace), want + ["\x1b[33m     … and 2 more\x1b[0m"])
+
+
 class RenameChainTest(unittest.TestCase):
     """upload --replace on a storage folder: renames through a name another rename moves away never overwrite it."""
 

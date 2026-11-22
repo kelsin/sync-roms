@@ -1181,6 +1181,33 @@ class SyncSmokeTest(RealDataDirGuard):
         self.assertTrue(any(q.startswith("Delete these 1") for q in asked), asked)
 
 
+class ShownPathsTest(unittest.TestCase):
+    """The card files a sync deletes are listed dimmed, 5 spaces in: the first few, then the rest counted."""
+
+    def shown(self, call, count):
+        with tempfile.TemporaryDirectory() as card:
+            paths = [os.path.join(card, f"{i:02}.zip") for i in range(count)]
+            for path in paths:
+                open(path, "w").close()
+            with mock.patch.object(cli.ui, "_COLOR", True), mock.patch.object(cli.ui, "choose", lambda *a: "n"), \
+                    contextlib.redirect_stdout(io.StringIO()) as out:
+                call(paths)
+        dimmed = [line for line in out.getvalue().split("\n") if line.startswith("\x1b[2m")]
+        return dimmed[:-1], dimmed[-1], [f"\x1b[2m     {p}\x1b[0m" for p in paths]
+
+    def test_unwanted_roms_show_the_first_ten(self):
+        head, last, lines = self.shown(cli.delete_extras, 12)
+        self.assertEqual((head, last), (lines[:10], "\x1b[2m     … and 2 more\x1b[0m"))
+        head, last, lines = self.shown(cli.delete_extras, 10)
+        self.assertEqual(head + [last], lines)
+
+    def test_stale_media_show_the_first_five(self):
+        head, last, lines = self.shown(cli.remove_stale_media, 7)
+        self.assertEqual((head, last), (lines[:5], "\x1b[2m     … and 2 more\x1b[0m"))
+        head, last, lines = self.shown(cli.remove_stale_media, 5)
+        self.assertEqual(head + [last], lines)
+
+
 class BiosFoldersTest(unittest.TestCase):
     def test_flat_layout(self):
         self.assertEqual(downloads.bios_folders({"folders": {"esde": "gba"}}, "esde", {}, "BIOS"), ["BIOS"])

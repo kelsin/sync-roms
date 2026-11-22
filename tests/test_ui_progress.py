@@ -30,6 +30,13 @@ class HelperTest(unittest.TestCase):
             ui.print_head([1, 2, 3], 2, lambda n: f"#{n}")
         self.assertEqual(out.getvalue().split("\n")[:3], ["       #1", "       #2", "       … and 1 more"])
 
+    def test_print_head_takes_another_indent_and_paint_for_every_line(self):
+        with mock.patch.object(ui, "_COLOR", True), contextlib.redirect_stdout(io.StringIO()) as out:
+            ui.print_head(["a", "b"], 1)
+            ui.print_head(["a", "b"], 1, indent=5, paint=ui.yellow)
+        self.assertEqual(out.getvalue().split("\n")[:4], ["\x1b[2m       a\x1b[0m", "\x1b[2m       … and 1 more\x1b[0m",
+                                                         "\x1b[33m     a\x1b[0m", "\x1b[33m     … and 1 more\x1b[0m"])
+
     def test_wait_drawing_redraws_until_the_result_is_ready(self):
         calls, drawn = [], []
 

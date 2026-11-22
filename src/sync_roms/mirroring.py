@@ -108,10 +108,7 @@ def refresh_mirror(root, dry_run=False):
         stale = []
     elif stale and (len(stale) > MIRROR_PRUNE_ASK or len(stale) * 10 > len(have)):
         # a lot of the mirror going at once is more likely a listing glitch or a trimmed list than intent
-        for key in stale[:10]:
-            print(ui.dim(f"     {key}"))
-        if len(stale) > 10:
-            print(ui.dim(f"     … and {len(stale) - 10} more"))
+        ui.print_head(stale, 10, indent=5)
         if not ui.confirm(f"🗑️  Delete these {len(stale)} file(s) no longer referenced?", default=False):
             print(ui.yellow("  ↩️  Keeping them"))
             stale = []
