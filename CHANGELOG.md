@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.21.0](https://github.com/kelsin/sync-roms/compare/v3.20.1...v3.21.0) (2026-11-22)
+
+
+### :video_game: Features
+
+* **spruce:** put fbneo in ARCADE, mame in MAME2003PLUS and hide BIOS zips ([#502](https://github.com/kelsin/sync-roms/issues/502)) ([dbea898](https://github.com/kelsin/sync-roms/commit/dbea8984ad943b00ad95d8606962d026dff7b7c8))
+* **spruce:** sync RetroAchievements and preference settings to spruce cards ([#504](https://github.com/kelsin/sync-roms/issues/504)) ([6dc1c41](https://github.com/kelsin/sync-roms/commit/6dc1c4180d0d7182f79d10cce8c0c74f8abcba4f))
+
 ## [3.20.1](https://github.com/kelsin/sync-roms/compare/v3.20.0...v3.20.1) (2026-11-22)
 
 
