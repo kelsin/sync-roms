@@ -313,7 +313,7 @@ def parse_collection(value):
 # Card-entry list fields that `games export`/`import` carry as `@field value` lines, one per value. CARD_HOOKS gives a
 # field its own parse(value) -> item or None (None skips the line; the hook warns) and format(item) -> text; a field
 # without one uses the text as it is.
-CARD_FIELDS = ("collections", "frontend_collections", "drivers", "surprise", "surprises", "pico8")
+CARD_FIELDS = ("collections", "frontend_collections", "drivers", "boot_logos", "surprise", "surprises", "pico8")
 CARD_HOOKS = {"collections": (parse_collection, str), "surprises": (None, lambda s: s["bucket"])}
 
 
@@ -997,7 +997,7 @@ def check_data(list_keys=None, repo_systems=None):
             problems.append(f"cards.json: {name}: 'collections' must be a list of collection ids")
         else:
             problems.extend(f"cards.json: {name}: unknown collection {i!r}" for i in picked if i not in collection_ids)
-        for field in ("frontend_collections", "drivers"):
+        for field in ("frontend_collections", "drivers", "boot_logos"):
             names = entry.get(field, [])
             if not isinstance(names, list) or not all(isinstance(i, str) for i in names):
                 problems.append(f"cards.json: {name}: '{field}' must be a list of names")

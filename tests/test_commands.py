@@ -224,14 +224,14 @@ class GamesTest(CardCmd):
         from sync_roms import collections
         collections.save_collection({"id": "favs", "name": "Favs", "games": []})
         cards = self.read("cards.json")
-        cards["SD"].update(collections=["favs"], frontend_collections=["Favs"], drivers=["a-v1.zip"])
+        cards["SD"].update(collections=["favs"], frontend_collections=["Favs"], drivers=["a-v1.zip"], boot_logos=["K.png"])
         self.write_json("cards.json", cards)
         self.assertEqual(self.run_cmd("games", "export")[1].splitlines(),
-                         ["@collections favs", "@frontend_collections Favs", "@drivers a-v1.zip"])
+                         ["@collections favs", "@frontend_collections Favs", "@drivers a-v1.zip", "@boot_logos K.png"])
         self.write_json("cards.json", {"SD": {"device": "full", "layout": "esde"}})
         listing = os.path.join(self.tmp.name, "list.txt")
         with open(listing, "w") as f:
-            f.write("@collections favs\n@collections ghost\n@frontend_collections Favs\n@drivers a-v1.zip\n@bogus x\n")
+            f.write("@collections favs\n@collections ghost\n@frontend_collections Favs\n@drivers a-v1.zip\n@boot_logos K.png\n@bogus x\n")
         code, _, err = self.run_cmd("games", "import", listing, "-n")
         self.assertEqual((code, self.read("cards.json")["SD"].get("collections")), (0, None))
         code, _, err = self.run_cmd("games", "import", listing)
@@ -239,7 +239,8 @@ class GamesTest(CardCmd):
         self.assertIn("ghost", err)
         self.assertIn("@bogus", err)
         entry = self.read("cards.json")["SD"]
-        self.assertEqual((entry["collections"], entry["frontend_collections"], entry["drivers"]), (["favs"], ["Favs"], ["a-v1.zip"]))
+        self.assertEqual((entry["collections"], entry["frontend_collections"], entry["drivers"], entry["boot_logos"]),
+                         (["favs"], ["Favs"], ["a-v1.zip"], ["K.png"]))
 
     def test_export_and_import_carry_the_pico8_zip(self):
         cards = self.read("cards.json")

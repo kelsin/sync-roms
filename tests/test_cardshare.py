@@ -16,7 +16,7 @@ from helpers import Cmd  # noqa: E402
 class CardShareTest(unittest.TestCase):
     def test_export_keeps_only_card_fields(self):
         entry = {"device": "d", "layout": "l", "size": 1, "games": {}, "excluded": [], "collections": [],
-                 "surprises": [], "surprise": True, "frontend_collections": [], "drivers": [], "pico8": "z",
+                 "surprises": [], "surprise": True, "frontend_collections": [], "drivers": [], "boot_logos": [], "pico8": "z",
                  "android_media": 1, "systems": []}
         self.assertLessEqual(set(cardshare.export_entry(entry, {})), set(cardshare.KEPT))
 

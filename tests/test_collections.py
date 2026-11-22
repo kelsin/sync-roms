@@ -140,10 +140,11 @@ class Check(DataDir):
     def test_card_collection_fields_are_checked(self):
         collections.save_collection({"id": "mine", "name": "Mine", "games": []})
         self.write_json("cards.json", {"c": {"device": "full", "layout": "esde", "collections": ["mine", "ghost"],
-                                             "frontend_collections": "Mine", "drivers": [1]}})
+                                             "frontend_collections": "Mine", "drivers": [1], "boot_logos": "K.png"}})
         self.assertEqual(commands.check_data(), ["cards.json: c: unknown collection 'ghost'",
                                                  "cards.json: c: 'frontend_collections' must be a list of names",
-                                                 "cards.json: c: 'drivers' must be a list of names"])
+                                                 "cards.json: c: 'drivers' must be a list of names",
+                                                 "cards.json: c: 'boot_logos' must be a list of names"])
 
 
 class Selection(DataDir):
