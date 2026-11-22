@@ -696,6 +696,8 @@ def set_changed(set_id, loaded):
     s3.check_root()
     try:
         data = _set_file(shared.read(SETS + set_id + ".json"))
+    except UnicodeDecodeError:  # not UTF-8 text: not a set
+        data = None
     except s3.ERRORS as e:
         if not s3.missing(e):
             raise

@@ -309,6 +309,11 @@ class StaleSetsTest(StorageDir):
         with mock.patch.object(runtime, "ROOT", self.root + "-unmounted"), self.assertRaises(FileNotFoundError):
             store.set_changed("new", None)  # an unmounted folder isn't a missing file
 
+    def test_a_set_file_that_isnt_utf8_counts_as_changed(self):
+        self.put("sets/b.json", '{"name": "Café", "games": []}'.encode("latin-1"))
+        self.assertTrue(store.set_changed("b", None))  # a new set whose id storage has, as an unreadable file
+        self.assertTrue(store.set_changed("b", store.set_files()[0]))
+
 
 class CheckStorageSetsTest(StorageDir):
     def check(self, sets):
