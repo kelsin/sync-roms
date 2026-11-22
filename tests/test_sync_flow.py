@@ -20,6 +20,7 @@ GAME = {"title": "Game", "system": "gba", "bucket": "gba/Game.zip"}
 FAVS = {"id": "favs", "name": "Favs", "games": [GAME]}
 REAL_LOAD_COLLECTIONS = collections_mod.load_collections
 REAL_BUILD_SCRAPE_PLAN, REAL_APPLY_SCRAPE_PLAN = scrape_plan.build_scrape_plan, scrape_plan.apply_scrape_plan
+REAL_STALE_MEDIA = scrape_plan.stale_media
 SCRAPED = {"gba": ({"scrapes/gba/covers/Game.png": 5}, {"Game.zip": {"name": "The Game"}})}
 
 
@@ -552,6 +553,26 @@ class SyncFlowTest(unittest.TestCase):
         self.assertEqual(cfg, "%ROMPATH%/gba/Game.zip\n")
         self.assertIn('<string name="CollectionSystemsCustom" value="Favs" />', settings)
         self.assertIn({"frontend_collections": ["Favs"]}, updates)
+
+    def test_esde_sync_keeps_the_favorites_in_the_cards_gamelist(self):
+        gamelist = os.path.join("ES-DE", "gamelists", "gba", "gamelist.xml")
+
+        def prepare(card_dir):
+            os.makedirs(os.path.join(card_dir, os.path.dirname(gamelist)))
+            with open(os.path.join(card_dir, gamelist), "w") as f:
+                f.write('<?xml version="1.0"?>\n<gameList>\n'
+                        '\t<game>\n\t\t<path>./Game.zip</path>\n\t\t<name>Game</name>\n\t\t<favorite>true</favorite>\n\t</game>\n'
+                        '\t<game>\n\t\t<path>./Gone.zip</path>\n\t\t<favorite>true</favorite>\n\t</game>\n'
+                        '</gameList>\n')
+        self.run_sync(cards={}, files=["ROMs/gba/Game.zip"], prepare=prepare,
+                      extra=[(scrape_plan, "load_scrape_data", lambda systems: SCRAPED),
+                             (scrape_plan, "build_scrape_plan", REAL_BUILD_SCRAPE_PLAN),
+                             (scrape_plan, "apply_scrape_plan", REAL_APPLY_SCRAPE_PLAN),
+                             (scrape_plan, "stale_media", REAL_STALE_MEDIA)],
+                      after=lambda d: read_from(d, gamelist))
+        self.assertIn("<name>The Game</name>", self.after)  # the scrape did write the file
+        self.assertEqual(self.after.count("<favorite>true</favorite>"), 2)
+        self.assertIn("<path>./Gone.zip</path>", self.after)
 
     def test_knulli_card_writes_under_system_configs(self):
         manifest = {**MANIFEST, "systems": [{**MANIFEST["systems"][0], "folders": {"knulli": "gba"}}],

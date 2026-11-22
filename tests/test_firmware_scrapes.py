@@ -4,6 +4,7 @@ import os
 import sys
 import tempfile
 import unittest
+import xml.etree.ElementTree as ET
 from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -171,6 +172,58 @@ class EmudeckPlanTest(unittest.TestCase):
                                      os.path.join(appdata, "gamelists", "sg1000", "gamelist.xml")]))
             self.assertEqual(scrape_plan.stale_media("emudeck", [system], roms, None, base),
                              [os.path.join(media, "sg1000", "covers", "A.png")])
+
+
+FAVORITED = ('<?xml version="1.0"?>\n<gameList>\n'
+             '\t<game>\n\t\t<path>./A.zip</path>\n\t\t<name>Old A</name>\n\t\t<favorite>true</favorite>\n'
+             '\t\t<playcount>3</playcount>\n\t</game>\n'
+             '\t<game>\n\t\t<path>./Gone.zip</path>\n\t\t<name>Gone</name>\n\t\t<favorite>true</favorite>\n\t</game>\n'
+             '</gameList>\n')
+
+
+class FavoritesKeptTest(unittest.TestCase):
+    """ES-DE keeps favorites in its gamelists; nothing a sync does may drop one already on the card."""
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._tmp.cleanup)
+        self.path = os.path.join(self._tmp.name, "gamelist.xml")
+        with open(self.path, "w") as f:
+            f.write(FAVORITED)
+
+    def games(self):
+        root = ET.parse(self.path).getroot()
+        return {g.findtext("path"): {c.tag: c.text for c in g} for g in root.findall("game")}
+
+    def test_a_rescrape_keeps_the_favorite_and_play_count(self):
+        self.assertTrue(scrape_plan.update_gamelist(self.path, {"A.zip": {"name": "New A", "desc": "d"}}))
+        a = self.games()["./A.zip"]
+        self.assertEqual((a["name"], a["desc"], a["favorite"], a["playcount"]), ("New A", "d", "true", "3"))
+
+    def test_a_favorite_whose_rom_is_not_synced_stays(self):
+        scrape_plan.update_gamelist(self.path, {"A.zip": {"name": "New A"}, "B.zip": {"name": "B"}})
+        games = self.games()
+        self.assertEqual(games["./Gone.zip"], {"path": "./Gone.zip", "name": "Gone", "favorite": "true"})
+        self.assertNotIn("favorite", games["./B.zip"])
+
+    def test_an_unchanged_scrape_leaves_the_file_as_it_is(self):
+        self.assertFalse(scrape_plan.update_gamelist(self.path, {"A.zip": {"name": "Old A"}}))
+        with open(self.path) as f:
+            self.assertEqual(f.read(), FAVORITED)
+
+    def test_scraped_metadata_never_sets_favorite(self):
+        self.assertNotIn("favorite", scrape_plan.gamelist_fields({"name": "A", "favorite": "false"}))
+
+    def test_stale_media_never_removes_an_es_de_gamelist_in_use(self):
+        for roms in (["ROMs/gba/A.zip"], []):  # a system with ROMs, and one emptied on the card
+            with tempfile.TemporaryDirectory() as base:
+                es = os.path.join(base, "ES-DE")
+                touch(os.path.join(es, "gamelists", "gba", "gamelist.xml"))
+                os.makedirs(os.path.join(base, "ROMs", "gba"))
+                for rel in roms:
+                    touch(os.path.join(base, rel))
+                stale = scrape_plan.stale_media("esde", [GBA], os.path.join(base, "ROMs"), es, base)
+                self.assertNotIn(os.path.join(es, "gamelists", "gba", "gamelist.xml"), stale)
 
 
 def sysdef(bucket, muos=None, catalogue=None):
