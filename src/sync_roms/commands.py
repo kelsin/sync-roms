@@ -210,6 +210,7 @@ def add_games(raw, system, keys):
     for key in keys:
         if key not in have:
             entry.append({"title": names.title(key), "bucket": key})
+            have.add(key)
             changes.append(("+", key))
     if not entry:
         del raw[system]
