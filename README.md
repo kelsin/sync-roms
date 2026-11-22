@@ -856,6 +856,9 @@ turns minutes of listing and stat calls into an instant read.
 - With no cache for the storage in use (none yet, or built from another bucket or folder), the first command that reads
   storage offers to build it. Saying no is remembered (`storage_cache_declined` in `settings.json`), and commands then
   list storage on every run as before. `sync-roms cache update` builds it any time.
+- `scrape review` and `clean scrapes` check storage itself for a ROM the cache doesn't list before they remove its
+  review marks or scraped metadata: one that another machine added since the cache was built is kept, with a note to
+  run `sync-roms cache update`.
 
 An old `~/.sync-roms/sizes.json` is no longer read; delete it.
 
