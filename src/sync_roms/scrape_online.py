@@ -273,6 +273,7 @@ class _Unreachable:
 
 
 _unreachable = _Unreachable()
+_media_skipped = {}  # this run's {(system folder, ROM): media files left out because their download kept failing}
 
 
 def make_client():
@@ -428,7 +429,7 @@ def _scrape_rom(client, system, item, tmp, skip, stop, game_id):
         scrape_state.mark_nomedia(system["bucket"], rom, set(screenscraper.MEDIA_MAP.values()) - set(media))
         stem = os.path.splitext(rom)[0]
         rom_tmp = tempfile.mkdtemp(dir=tmp)  # ROMs with the same stem (Game.zip, Game.7z) never share a file
-        files = {}
+        files, failing = {}, []  # failing: (media type, Transient error) of the downloads still failing after their retries
         for mtype, url in sorted(media.items()):
             if mtype in skip:
                 continue
@@ -443,10 +444,19 @@ def _scrape_rom(client, system, item, tmp, skip, stop, game_id):
             except screenscraper.MediaRefused as e:  # too large or off screenscraper.fr: skip just this file
                 print(ui.yellow(f"  ⚠️  {system['bucket']}/{rom}: {mtype} skipped ({e})"))
                 continue
+            except screenscraper.Transient as e:
+                failing.append((mtype, e))
+                continue
             ext = _media_ext(dest, mtype)
             if ext:
                 files[mtype] = dest + ext
                 os.replace(dest, files[mtype])
+        if failing and not files:  # no file came through: ScreenScraper's media can't be reached, so the ROM is left whole
+            raise failing[-1][1]
+        for mtype, e in failing:  # the others did: skip just these files
+            print(ui.yellow(f"  ⚠️  {system['bucket']}/{rom}: {mtype} skipped ({e})"))
+        if failing:
+            _media_skipped[system["bucket"], rom] = len(failing)
     except (screenscraper.QuotaExceeded, screenscraper.Refused) as e:
         stop.set()
         return "stop", e
@@ -832,6 +842,7 @@ def run_scrape(client, systems, todo, skip, ask=True, replace=False, forced=None
     listings, metadata = dict(listings or {}), metadata or {}
     before = set(scrape_state.notgames())
     _unreachable.reset()
+    _media_skipped.clear()
     try:
         listings.update(_each(lambda name: inventory.files(f"{scrape_plan.SCRAPES}/{name}/"), [n for n in todo if n not in listings]))
     except s3.ERRORS as e:
@@ -881,6 +892,9 @@ def run_scrape(client, systems, todo, skip, ask=True, replace=False, forced=None
         _offer_review(client, systems, todo, sorted(set(scrape_state.notgames()) - before))
     if not forced and any(how is None for got in outcomes.values() for how in got.values()):
         _hints()
+    skipped = sum(n for (name, rom), n in _media_skipped.items() if outcomes.get(name, {}).get(rom))  # of the ROMs recorded
+    if skipped:
+        print(ui.yellow(f"\n⚠️  {skipped} media file(s) skipped; run `sync-roms scrape --fill-media` to fetch them"))
     if halted:
         counts = (sum(1 for got in outcomes.values() for how in got.values() if how), count - sum(map(len, outcomes.values())))
         ui.failure(ui.yellow("\n" + _stop_message(halted, rerun, counts)))

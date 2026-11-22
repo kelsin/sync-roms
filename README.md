@@ -523,7 +523,11 @@ again on the next run. The run then says how many ROMs it saved and how many are
 continue. A second Ctrl-C aborts at once.
 
 **Errors.** A rate-limited request, a server error (HTTP 5xx) or a network failure is tried 3 more times, waiting 10, 20
-and 40 seconds; a ROM that still fails is skipped and tried again on the next run. The run stops the same clean way, and
+and 40 seconds; a ROM that still fails is skipped and tried again on the next run. A media file that still fails on a
+server error or network failure is skipped on its own when another of the ROM's media files downloaded: the ROM is saved
+without it, and the run ends by counting the files skipped, which `sync-roms scrape --fill-media` fetches. When none of
+the ROM's files downloaded, the ROM counts as one that couldn't reach ScreenScraper: nothing is saved for it and it is
+tried again on the next run. The run stops the same clean way, and
 says what to do, when ScreenScraper refuses the login (check it with `sync-roms scrape --set-credentials`), is closed to
 non-members or to everyone for now (try again later), or no longer accepts this version of sync-roms (update it), and
 when 3 ROMs in a row fail to reach ScreenScraper. A ROM that fails because a download can't be saved locally (a full disk)
