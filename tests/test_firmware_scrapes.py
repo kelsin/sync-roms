@@ -378,17 +378,38 @@ class SharedFolderTest(unittest.TestCase):
         self.assertEqual([os.path.basename(p) for p in stale], ["Gone.png"])
 
 class DerivedArtTest(unittest.TestCase):
-    def derived(self, found, system="gba", stem="A"):
-        return [(k, src, box) for k, src, box in scrape_files.derived_art(system, stem, found)]
+    def derived(self, found, system="gba", stem="A", size=None):
+        return scrape_files.derived_art(system, stem, found, size)
 
-    def test_art_makes_onion_art(self):
-        self.assertEqual([(k, box) for k, _, box in self.derived({"covers": "c.png"})], [("scrapes/gba/onion/A.png", (250, 360))])
+    def test_art_makes_onion_and_spruce_art(self):
+        self.assertEqual([(k, box) for k, _, box in self.derived({"covers": "c.png"})], [
+            ("scrapes/gba/onion/A.png", (250, 360)), ("scrapes/gba/spruce/A.qoi", (640, 480)),
+            ("scrapes/gba/spruce_med/A.qoi", (400, 300)), ("scrapes/gba/spruce_small/A.qoi", (200, 200))])
 
-    def test_a_rom_in_a_subfolder_gets_no_onion_art(self):
+    def test_miximage_is_used_when_there_is_no_cover(self):
+        self.assertEqual({src for _, src, _ in self.derived({"miximages": "m.png"})}, {"m.png"})
+
+    def test_cover_is_preferred_over_a_miximage(self):
+        self.assertEqual({src for _, src, _ in self.derived({"miximages": "m.png", "covers": "c.png"})}, {"c.png"})
+
+    def test_pico8_falls_back_to_the_cart_picture(self):
+        self.assertEqual({src for _, src, _ in self.derived({"cart": "c.p8.png"}, "pico8", "foo.p8")}, {"c.p8.png"})
+        self.assertEqual({src for _, src, _ in self.derived({"cart": "c.p8.png", "covers": "c.png"}, "pico8", "foo.p8")}, {"c.png"})
+        self.assertEqual({src for _, src, _ in self.derived({"cart": "c.p8.png"})}, set())
+
+    def test_three_dboxes_and_screenshots_are_no_longer_used(self):
+        self.assertEqual(self.derived({"3dboxes": "d.png", "screenshots": "s.png"}), [])
+
+    def test_a_rom_in_a_subfolder_gets_no_art(self):
         self.assertEqual(self.derived({"covers": "c.png"}, stem="hacks/B"), [])
 
-    def test_cover_is_preferred_over_a_screenshot(self):
-        self.assertEqual({src for _, src, _ in self.derived({"screenshots": "s.png", "covers": "c.png"})}, {"c.png"})
+    def test_small_source_gets_only_the_large_spruce_tier(self):
+        self.assertEqual([k for k, _, _ in self.derived({"covers": "c.png"}, size=(150, 100))],
+                         ["scrapes/gba/onion/A.png", "scrapes/gba/spruce/A.qoi"])
+
+    def test_no_spruce_art_without_pillow(self):
+        with mock.patch.object(scrape_plan, "can_make_qoi", return_value=False):
+            self.assertEqual([k for k, _, _ in self.derived({"covers": "c.png"})], ["scrapes/gba/onion/A.png"])
 
 
 class EsdeExtrasCleanTest(unittest.TestCase):

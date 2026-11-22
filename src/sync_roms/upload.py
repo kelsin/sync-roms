@@ -6,7 +6,7 @@ import queue
 import tempfile
 import threading
 import time
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 
 from botocore.exceptions import BotoCoreError, ClientError
 
@@ -91,7 +91,7 @@ def run_copies(todo, quiet=False):
         try:
             def write(tmp):
                 if len(job) > 3:
-                    scrape_plan.shrink_png(job[1], tmp, job[3])
+                    scrape_plan.make_art(job[1], tmp, job[3])
                 else:
                     s3.copy_file(job[1], tmp, lambda b: moved.add(n, b))
             s3.write_file(job[0], write)
@@ -176,8 +176,8 @@ def run_uploads(todo, quiet=False):
     bar = ui.ProgressBar(len(todo), moved.fraction, moved.total, active=lambda: moved.active(names))
     try:
         with tempfile.TemporaryDirectory() as tmp, ThreadPoolExecutor(os.cpu_count() or 4) as shrinkers, \
-                create_transfer_manager(client, config) as manager:
-            sent = {}  # job n -> bytes sent (a shrunk PNG is smaller than its file)
+                ProcessPoolExecutor(os.cpu_count() or 4) as procs, create_transfer_manager(client, config) as manager:
+            sent = {}  # job n -> bytes sent (shrunk art is smaller than its file)
 
             def send(job, path, n):
                 sent[n] = job[2] if path == job[1] else os.path.getsize(path)
@@ -188,8 +188,8 @@ def run_uploads(todo, quiet=False):
             def shrink_and_send(job, n):
                 moved.start(n)
                 try:
-                    art = os.path.join(tmp, f"{n}.png")
-                    scrape_plan.shrink_png(job[1], art, job[3])
+                    art = os.path.join(tmp, f"{n}{os.path.splitext(job[0])[1]}")
+                    procs.submit(scrape_plan.make_art, job[1], art, job[3]).result()  # QOI encoding holds the GIL
                     send(job, art, n)
                 except Exception as e:
                     done.put((n, job, FailedUpload(e)))
@@ -221,6 +221,7 @@ def run_uploads(todo, quiet=False):
                     bar.draw(i)
             except KeyboardInterrupt:
                 shrinkers.shutdown(wait=False, cancel_futures=True)
+                procs.shutdown(wait=False, cancel_futures=True)
                 raise
     except KeyboardInterrupt:
         bar.say(ui.yellow("🛑 Interrupted — dropping queued uploads, finishing the ones in flight..."))

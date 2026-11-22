@@ -8,6 +8,7 @@ import sys
 import tempfile
 import threading
 import unittest
+from concurrent.futures import ThreadPoolExecutor
 from types import SimpleNamespace
 from unittest import mock
 
@@ -111,7 +112,8 @@ class RunBase(StorageDir):
                   mock.patch.object(screenscraper, "Client", side_effect=lambda *a, **k: self.client),
                   mock.patch.object(ui, "confirm", self.confirm),
                   mock.patch.object(scrape_plan, "can_shrink", return_value=True),
-                  mock.patch.object(scrape_plan, "shrink_png", side_effect=lambda src, dst, box=None: shutil.copyfile(src, dst)),
+                  mock.patch.object(scrape_plan, "make_art", side_effect=lambda src, dst, box=None: shutil.copyfile(src, dst)),
+                  mock.patch.object(upload, "ProcessPoolExecutor", ThreadPoolExecutor),  # so the stub reaches the conversion
                   mock.patch.object(scrape_online, "RETRY_WAIT", 0)):
             p.start()
             self.addCleanup(p.stop)

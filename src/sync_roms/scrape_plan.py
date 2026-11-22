@@ -18,11 +18,14 @@ SCRAPES = "scrapes"
 MEDIA_TYPES = {"3dboxes", "backcovers", "covers", "custom", "fanart", "manuals", "marquees",
                "miximages", "physicalmedia", "screenshots", "titlescreens", "videos"}
 # Onion's box art is made at upload time (PNG, at most 250x360) from the first of ONION_ART found locally
-# and stored as scrapes/<system>/onion/<ROM name>.png, so a sync only downloads it.
+# and stored as scrapes/<system>/onion/<ROM name>.png, so a sync only downloads it. Spruce's is made the same way
+# from the same sources, as QOI in up to three sizes (a size is skipped when it would equal the next larger one).
 ONION_TYPE = "onion"
-ONION_ART = ("covers", "3dboxes", "screenshots")
+ONION_ART = ("covers", "miximages")
 ONION_MAX = (250, 360)
-BUCKET_MEDIA = MEDIA_TYPES | {ONION_TYPE}
+SPRUCE_TIERS = (("spruce", (640, 480)), ("spruce_med", (400, 300)), ("spruce_small", (200, 200)))
+SPRUCE_TYPES = tuple(t for t, _ in SPRUCE_TIERS)
+BUCKET_MEDIA = MEDIA_TYPES | {ONION_TYPE, *SPRUCE_TYPES}
 TEXT_FIELDS = ("name", "desc", "developer", "publisher", "genre", "players")
 
 
@@ -266,6 +269,45 @@ def shrink_png(src, dst, box=ONION_MAX):
     scale = min(1, box[0] / w, box[1] / h)
     subprocess.run(["sips", "-s", "format", "png", "-z", str(max(1, round(h * scale))), str(max(1, round(w * scale))),
                     src, "--out", dst], check=True, capture_output=True)
+
+
+def fit(size, box):
+    """The size an image of size becomes when shrunk to fit box (never enlarged, each side at least 1)."""
+    scale = min(1, box[0] / size[0], box[1] / size[1])
+    return max(1, round(size[0] * scale)), max(1, round(size[1] * scale))
+
+
+def spruce_tiers(size):
+    """The Spruce art types wanted for a source of size: the first always, a smaller one only when it differs."""
+    tiers = [SPRUCE_TIERS[0][0]]
+    for (_, larger), (kind, box) in zip(SPRUCE_TIERS, SPRUCE_TIERS[1:]):
+        if fit(size, box) != fit(size, larger):
+            tiers.append(kind)
+    return tiers
+
+
+def can_make_qoi():
+    try:
+        import PIL  # noqa: F401
+        return True
+    except ImportError:
+        return False
+
+
+def make_art(src, dst, box):
+    """Write src shrunk to fit box (never enlarged) to dst: QOI for a .qoi destination (also while it is a .part
+    file), else PNG. Top level so a process pool can run it."""
+    if not dst.removesuffix(".part").endswith(".qoi"):
+        return shrink_png(src, dst, box)
+    from PIL import Image
+    from . import qoi
+    with Image.open(src) as im:
+        im.load()
+        size = fit(im.size, box)
+        if size != im.size:
+            im = im.resize(size, Image.LANCZOS)
+        with open(dst, "wb") as f:
+            f.write(qoi.encode(im))
 
 
 def update_gamelist(path, entries):
