@@ -1,5 +1,6 @@
 """Art Book Next artwork for custom collections (Surprise and the ones given art) and sets on ES-DE, Knulli, EmuDeck,
 muOS, ROCKNIX and Spruce cards."""
+import contextlib
 import functools
 import json
 import unicodedata
@@ -279,10 +280,8 @@ def _esde_remove(dest, keep):
     stale = [n for n in owned if n not in keep]
     for folder in _esde_stale(dest, keep):
         for rel in _esde_paths(folder):
-            try:
+            with contextlib.suppress(FileNotFoundError):
                 os.remove(s3.safe_join(dest, rel))
-            except FileNotFoundError:
-                pass
         try:
             os.rmdir(os.path.join(dest, folder))  # only when that emptied it
         except OSError:
@@ -412,17 +411,13 @@ def _custom_remove(root, arts, files=CUSTOM_FILES):
     stale = _custom_stale(root, arts)
     for name in stale:
         for folder, ext in files:
-            try:
+            with contextlib.suppress(FileNotFoundError):
                 os.remove(os.path.join(root, folder, name + ext))
-            except FileNotFoundError:
-                pass
     if arts:
         cardfs.write_bytes(os.path.join(root, CUSTOM_OWNED), "".join(f"{n}\n" for n in sorted(arts)).encode())
     else:
-        try:
+        with contextlib.suppress(FileNotFoundError):
             os.remove(os.path.join(root, CUSTOM_OWNED))
-        except FileNotFoundError:
-            pass
     return stale
 
 

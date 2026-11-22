@@ -1,4 +1,5 @@
 """ES-DE/Knulli/EmuDeck/NextUI/ROCKNIX custom collection files."""
+import contextlib
 import os
 import re
 from xml.sax import saxutils
@@ -176,10 +177,8 @@ def apply_collections(plan, layout_name, base):
     (for rocknix, which has no settings on the card: when its install script was written or removed)."""
     write_files(plan)
     for path in plan["deletes"]:
-        try:
+        with contextlib.suppress(FileNotFoundError):
             os.remove(path)
-        except FileNotFoundError:
-            pass
     if layout_name == "rocknix":
         return rocknix_collections.write_script(base, bool(plan["owned"] or plan["deletes"]))
     if layout_name == "nextui" or not (plan["enable"] or plan["disable"]):

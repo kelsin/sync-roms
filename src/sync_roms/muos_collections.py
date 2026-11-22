@@ -1,4 +1,5 @@
 """muOS collections: where each storage choice is mounted on the device, and the collection entries on the card."""
+import contextlib
 import os
 import posixpath
 
@@ -75,10 +76,8 @@ def apply(plan):
     """Write and delete plan's collection entries."""
     frontend.write_files(plan)
     for path in plan["deletes"]:
-        try:
+        with contextlib.suppress(FileNotFoundError):
             os.remove(path)
-        except FileNotFoundError:
-            pass
         try:
             os.rmdir(os.path.dirname(path))  # only when the drop emptied it
         except OSError:
