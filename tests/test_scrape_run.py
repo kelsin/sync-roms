@@ -1545,6 +1545,19 @@ class ProgressTest(RunBase):
         self.assertIn("Interrupted. 0 ROM(s) scraped this run are saved and 2 are left", err)
 
 
+class MediaKeysTest(unittest.TestCase):
+    def test_every_media_key_of_the_stem_in_that_system(self):
+        keys = ["scrapes/gba/covers/a.png", "scrapes/gba/covers/a.jpg", "scrapes/gba/onion/a.png", "scrapes/gba/covers/ab.png",
+                "scrapes/gba/covers/sub/a.png", "scrapes/gba/extras/a.png", "scrapes/gba/metadata.json", "scrapes/gba/a.png",
+                "scrapes/nes/covers/a.png"]
+        listing = dict.fromkeys(keys, 1)
+        self.assertEqual(scrape_online._media_keys(listing, "gba", "a"),
+                         {"scrapes/gba/covers/a.png": "covers", "scrapes/gba/covers/a.jpg": "covers", "scrapes/gba/onion/a.png": "onion"})
+        self.assertEqual(scrape_online._media_keys(listing, "gba", "sub/a"), {"scrapes/gba/covers/sub/a.png": "covers"})
+        self.assertEqual(scrape_online._media_keys(listing, "nes", "a"), {"scrapes/nes/covers/a.png": "covers"})
+        self.assertEqual(scrape_online._media_keys(listing, "gb", "a"), {})
+
+
 class ReportTest(unittest.TestCase):
     def test_counts_and_unmatched(self):
         text = scrape_online.report({"gba": ["a.zip", "b.zip", "c.zip", "d.zip"]},

@@ -110,7 +110,7 @@ def gamelist_fields(meta):
     return out
 
 
-def _index_entry(key):
+def media_entry(key):
     """(ROM stem, media type) of a scrapes/<system>/<type>/<ROM path>.<ext> key, or None for any other key."""
     parts = key.split("/")
     if len(parts) > 3 and parts[2] in BUCKET_MEDIA:
@@ -128,14 +128,14 @@ def scrape_index(listing):
 
 def index_add(index, key, size):
     """Add one listing entry to a scrape_index (the first key of a stem and type stays)."""
-    entry = _index_entry(key)
+    entry = media_entry(key)
     if entry:
         index[entry[0]].setdefault(entry[1], (key, size))
 
 
 def index_drop(index, key):
     """Remove one listing entry from a scrape_index."""
-    entry = _index_entry(key)
+    entry = media_entry(key)
     if entry and index.get(entry[0], {}).get(entry[1], (None,))[0] == key:
         del index[entry[0]][entry[1]]
 

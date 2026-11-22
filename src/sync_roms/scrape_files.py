@@ -86,11 +86,10 @@ def plan_clean(existing, roms, remote_texts):
                 rewrites.append((key, scrape_plan.dump_json(keep)))
             else:
                 delete.append(key)
-        elif parts[2] in scrape_plan.BUCKET_MEDIA and len(parts) > 3:
-            if os.path.splitext("/".join(parts[3:]))[0] not in stems.get(system, ()):
-                delete.append(key)
-                per[system]["media"] += 1
-                per[system]["bytes"] += size
+        elif (entry := scrape_plan.media_entry(key)) and entry[0] not in stems.get(system, ()):
+            delete.append(key)
+            per[system]["media"] += 1
+            per[system]["bytes"] += size
     return delete, rewrites, per, warnings
 
 

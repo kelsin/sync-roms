@@ -535,10 +535,9 @@ def _media_keys(listing, system, stem):
     listing."""
     out = {}
     for key in listing:
-        parts = key.split("/", 3)
-        if len(parts) == 4 and parts[1] == system and parts[2] in scrape_plan.BUCKET_MEDIA \
-                and os.path.splitext(parts[3])[0] == stem:
-            out[key] = parts[2]
+        entry = scrape_plan.media_entry(key)
+        if entry and entry[0] == stem and key.split("/")[1] == system:
+            out[key] = entry[1]
     return out
 
 
