@@ -427,7 +427,7 @@ class BesideRomsTest(unittest.TestCase):
 CATALOG_SYSTEMS = [
     {"name": "Game Boy Advance", "bucket": "gba",
      "folders": {"onion": "GBA", "knulli": "gba", "esde": "gba", "allium": "GBA", "emudeck": "gba",
-                 "rocknix": "gba", "nextui": "Game Boy Advance (GBA)"}},
+                 "rocknix": "gba", "nextui": "Game Boy Advance (GBA)", "spruce": "GBA"}},
     {"name": "PlayStation", "bucket": "psx", "folders": {"nextui": "PlayStation (PS)"}},
     {"name": "Neo Geo Pocket", "bucket": "ngp", "folders": {"onion": "NGP", "knulli": "ngp"}},
     {"name": "Neo Geo Pocket Color", "bucket": "ngpc", "folders": {"onion": "NGP", "knulli": "ngpc"}},
@@ -860,6 +860,23 @@ class ApplyCommandTest(CommandTest):
         self.assertEqual(self.read_file(new, "roms/gba/Game.srm"), "save")
         self.assertEqual(self.read_file(new, "roms/savestates/gba/Game.state"), "state")
         self.assertFalse(os.path.exists(os.path.join(new, "roms/gba/Game.zip")))
+
+    def test_spruce_stash_and_apply_round_trip(self):
+        src = self.card("SP", "spruce")
+        helpers.touch(os.path.join(src, "Roms/GBA/Game.zip"), "r")
+        helpers.touch(os.path.join(src, "Saves/saves/gpSP/Game.srm"), "save")
+        helpers.touch(os.path.join(src, "Saves/states/gpSP/Game.state.auto"), "state")
+        all_on = lambda labels: [True] * len(labels)  # noqa: E731
+        self.lists(all_on, all_on)
+        code, out, err = self.run_cmd("saves", "stash", src)
+        self.assertEqual(code, 0, err)
+        self.assertIn("Stashed 2 file(s) of 1 game(s)", out)
+        new = self.card("SP2", "spruce")
+        self.lists([True])
+        code, out, err = self.run_cmd("saves", "apply", new)
+        self.assertEqual(code, 0, err)
+        self.assertEqual(self.read_file(new, "Saves/saves/gpSP/Game.srm"), "save")
+        self.assertEqual(self.read_file(new, "Saves/states/gpSP/Game.state.auto"), "state")
 
     def test_onto_esde_reuses_core(self):
         self.stash()
