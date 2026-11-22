@@ -627,6 +627,15 @@ class StashCommandTest(CommandTest):
         self.assertEqual(code, 2)
         self.assertIn("`saves stash` needs a terminal to pick from", err)
 
+    def test_missing_folder_is_reported_before_the_terminal(self):
+        base = self.onion_card()
+        os.rename(base, base + "-gone")
+        with mock.patch.object(ui, "has_terminal", lambda: False):
+            code, _, err = self.run_cmd("saves", "apply", base)
+        self.assertEqual(code, 2)
+        self.assertIn(f"No folder {base}", err)
+        self.assertNotIn("needs a terminal", err)
+
     def test_retroarch_flag(self):
         base = self.card("PHONE", "esde")
         helpers.touch(os.path.join(base, "ROMs/gba/Game.zip"), "r")

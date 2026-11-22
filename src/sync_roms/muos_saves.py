@@ -2,7 +2,6 @@
 `sram/<core>[/<ROM dir>]/<stem>.srm|.rtc` and states `state/<core>[/<ROM dir>]/<stem>/` (`slot_N.state` and
 `states.ini`, Pickles' own format) under the layout's `pickles` dir; `<ROM dir>` is the ROM's folder under `ROMS/`.
 Files are copied as they are, to the same relative path."""
-import filecmp
 import os
 import re
 
@@ -99,9 +98,5 @@ def plan_apply(stash, base, layout, system, core):
         else:
             folder = os.path.join(root, "state", core, *rel, stash["game"])
         src, dst = os.path.join(stash["dir"], f["name"]), os.path.join(folder, f["name"])
-        if not os.path.exists(dst):
-            state = "new"
-        else:
-            state = "same" if filecmp.cmp(src, dst, shallow=False) else "differs"
-        plan.append((src, dst, state))
+        plan.append((src, dst, saves.file_state(src, dst)))
     return plan

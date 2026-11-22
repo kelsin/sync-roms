@@ -28,6 +28,7 @@ ROCKNIX = runtime.ROCKNIX_PREFIX
 DD = ["sudo", "dd"]
 WRITE_BLOCK = 4 * 1024 * 1024
 SPARE = 64 * 1024 * 1024  # free space kept in the temp folder beyond the download
+HINT = "/ filter · j/k move · Enter continue · Esc quit"  # under each of flash's pickers
 
 
 class FlashError(Exception):
@@ -41,6 +42,10 @@ def raw(disk):
 
 # the kinds of image, asked for when storage has more than one: Knulli and BaseOS images are picked by device
 FIRMWARES = {"knulli": "Knulli or BaseOS", "muos": "muOS", "rocknix": "ROCKNIX", "oakmoss": "OakMoss"}
+IMAGES = {"knulli": re.escape(KNULLI) + r"knulli-[^/]*\.img\.gz|" + re.escape(BASEOS) + r"baseos-[^/]*\.img\.zip",
+          "muos": re.escape(MUOS) + r"muos-[^/]*\.img\.gz",
+          "rocknix": re.escape(ROCKNIX) + r"ROCKNIX-[^/]*\.img\.gz",
+          "oakmoss": re.escape(OAKMOSS) + r"oakmoss-[^/]*\.img\.xz"}  # each kind's image keys, as a pattern
 
 
 def devices_for(devices, firmware):
@@ -53,14 +58,7 @@ def images(listing, firmware="knulli"):
     with firmware "muos" the muOS images (os/muos/muos-*.img.gz), with "rocknix" the ROCKNIX images
     (os/rocknix/ROCKNIX-*.img.gz; not its update .tar files), with "oakmoss" the OakMoss images
     (os/oakmoss/oakmoss-*.img.xz; not its .omupd update files)."""
-    if firmware == "oakmoss":
-        return [k for k in listing if re.fullmatch(re.escape(OAKMOSS) + r"oakmoss-[^/]*\.img\.xz", k)]
-    if firmware == "rocknix":
-        return [k for k in listing if re.fullmatch(re.escape(ROCKNIX) + r"ROCKNIX-[^/]*\.img\.gz", k)]
-    if firmware == "muos":
-        return [k for k in listing if re.fullmatch(re.escape(MUOS) + r"muos-[^/]*\.img\.gz", k)]
-    return [k for k in listing if re.fullmatch(re.escape(KNULLI) + r"knulli-[^/]*\.img\.gz", k)
-            or re.fullmatch(re.escape(BASEOS) + r"baseos-[^/]*\.img\.zip", k)]
+    return [k for k in listing if re.fullmatch(IMAGES[firmware], k)]
 
 
 def _model(key):
@@ -102,14 +100,11 @@ def flashable_devices(devices, keys):
 
 
 def _newest(key):
-    """Sort key putting the newest image first: Knulli's (muOS's, ROCKNIX's) date, BaseOS's version."""
-    if key.startswith(OAKMOSS):
-        m = re.search(r"-v(\d+(?:\.\d+)*)", key)
-        return tuple(-int(n) for n in m.group(1).split(".")) if m else (0,)
+    """Sort key putting the newest image first: Knulli's (muOS's, ROCKNIX's) date, BaseOS's and OakMoss's version."""
     found = re.findall(r"(?<!\d)\d{8}(?!\d)", key)
-    if found and not key.startswith(BASEOS):
+    if found and not key.startswith((BASEOS, OAKMOSS)):
         return (-int(found[-1]),)
-    m = re.search(r"-(\d+(?:\.\d+)*)\.img\.zip$", key)
+    m = re.search(r"-v(\d+(?:\.\d+)*)" if key.startswith(OAKMOSS) else r"-(\d+(?:\.\d+)*)\.img\.zip$", key)
     return tuple(-int(n) for n in m.group(1).split(".")) if m else (0,)
 
 
@@ -330,8 +325,7 @@ def run(args):
         ui.failure(ui.red("❌ no Knulli, BaseOS, muOS, ROCKNIX or OakMoss images in storage's os/"))
         return 1
     if len(available) > 1:
-        i = picker.filter_list("🧩 Which firmware?", [FIRMWARES[f] for f in available],
-                               hint="/ filter · j/k move · Enter continue · Esc quit")
+        i = picker.filter_list("🧩 Which firmware?", [FIRMWARES[f] for f in available], hint=HINT)
         if i is None:
             return 0
         firmware = available[i]
@@ -345,8 +339,7 @@ def run(args):
         devices = devices_for(devices, firmware)
     else:
         devices = flashable_devices(devices, keys)
-    i = picker.filter_list("🎯 Which device?", [d["name"] for d in devices],
-                           hint="/ filter · j/k move · Enter continue · Esc quit")
+    i = picker.filter_list("🎯 Which device?", [d["name"] for d in devices], hint=HINT)
     if i is None:
         return 0
     device = devices[i]
@@ -357,7 +350,7 @@ def run(args):
     i = picker.filter_list(f"💾 Which image for {device['name']}?", [k[len(PREFIX):] for k, _ in found],
                            extras=[[(f"  {ui.human_size(listing[k])}", "dim"), ("  ✓ matches" if m else "", "green")]
                                    for k, m in found],
-                           hint="/ filter · j/k move · Enter continue · Esc quit")
+                           hint=HINT)
     if i is None:
         return 0
     key = found[i][0]
@@ -378,8 +371,7 @@ def run(args):
         if not cards:
             ui.failure(ui.red("❌ no SD card found"))
             return 1
-        i = picker.filter_list("🃏 Which SD card?", [_disk_label(d) for d in cards],
-                               hint="/ filter · j/k move · Enter continue · Esc quit")
+        i = picker.filter_list("🃏 Which SD card?", [_disk_label(d) for d in cards], hint=HINT)
         if i is None:
             return 0
         disk = cards[i]

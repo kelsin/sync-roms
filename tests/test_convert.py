@@ -335,6 +335,18 @@ class FixesTest(ConvertTest):
         self.assertEqual(sorted(convert._leftovers(self.base, SYSTEMS, "knulli", K)),
                          ["roms/gba/Game.zip.part", "roms/gba/gamelist.xml", "roms/gba/images", "roms/gba/videos"])
 
+    def test_shared_old_folder_moves_once_and_is_scanned_for_each_system(self):
+        """Two systems with one old ROM folder: its files move once, for the first system, while the files sync-roms
+        put there are listed as left in place whichever of the two systems they belong to."""
+        systems = [{"bucket": "other", "folders": {"rocknix": "ports", "nextui": "Other"}, "bios": {"files": []}},
+                   {"bucket": "ports", "folders": {"rocknix": "ports", "nextui": "Ports"}, "bios": {"files": []}}]
+        own = convert.downloads.ROCKNIX_PORTS_FILES[0]
+        for f in ("Game.sh", own):
+            touch(self.p("roms", "ports", f))
+        moves, _ = convert.plan_roms(self.base, systems, "rocknix", K, "nextui", N)
+        self.assertEqual(moves, [(self.p("roms", "ports", f), self.p("Roms", "Other", f)) for f in sorted(("Game.sh", own))])
+        self.assertEqual(convert._leftovers(self.base, systems, "rocknix", K), [f"roms/ports/{own}"])
+
     def test_onion_metadata_is_not_moved_and_is_listed(self):
         for f in ("Game.zip", "miyoogamelist.xml", "Imgs/a.png", "cache6.db"):
             touch(self.p("Roms", "GBA", f))
@@ -468,6 +480,17 @@ class ConvertCommandTest(unittest.TestCase):
         with open(os.path.join(self.data, "cards.json")) as f:
             return self.json.load(f)["SD"].get("layout")
 
+    def test_both_commands_list_the_media_by_folder(self):
+        for f in ("gba/gamelist.xml", "gba/images/a.png", "psx/gamelist.xml"):
+            touch(os.path.join(self.base, "roms", f))
+        listed = " (deleted)\n  roms/gba: gamelist.xml, images\n  roms/psx: gamelist.xml\n"
+        self.assertEqual(self.run_cmd(dry_run=True, yes=False), 0)
+        self.assertIn("Old knulli media" + listed, self.out.getvalue())
+        self.set_card({"device": "anbernic-rg34xx-sp", "layout": "nextui"})
+        self.assertEqual(self.run_clean(), 0)
+        self.assertIn("SD (nextui): media from other layouts" + listed, self.out.getvalue())
+        self.assertIn("deleted media in 2 folders", self.out.getvalue())
+
     def run_cmd(self, layout="nextui", dry_run=False, yes=True, terminal=False):
         args = self.argparse.Namespace(card=self.base, layout=layout, dry_run=dry_run, yes=yes)
         with mock.patch("sync_roms.ui.has_terminal", return_value=terminal), self.redirect(self.out), self.redirect_err(self.err):
@@ -570,6 +593,24 @@ class ConvertCommandTest(unittest.TestCase):
         self.assertEqual(self.run_cmd(), 2)
         self.assertIn("cards set", self.err.getvalue())
         self.assertFalse(self.moved())
+
+    def test_card_checks_come_in_order_for_both_commands(self):
+        """An unknown card is reported before its unusable layout, and that before a missing folder."""
+        os.rename(self.base, self.base + "-gone")
+        checks = ((None, "No card named 'SD'"), ({}, "'SD' has no usable layout"),
+                  ({"device": "anbernic-rg34xx-sp", "layout": "knulli"}, f"No folder {self.base}"))
+        for command in (convert.convert_command, convert.clean_command):
+            for i, (entry, said) in enumerate(checks):
+                self.set_card(entry)
+                self.err.truncate(0)
+                self.err.seek(0)
+                args = self.argparse.Namespace(card=self.base, layout="nextui", dry_run=False, yes=True)
+                with self.redirect_err(self.err), self.assertRaises(SystemExit) as caught:
+                    command(args)
+                self.assertEqual(caught.exception.code, 2)
+                self.assertIn(said, self.err.getvalue())
+                for _, later in checks[i + 1:]:
+                    self.assertNotIn(later, self.err.getvalue())
 
     def test_conflicts_reported_and_layout_still_saved(self):
         touch(os.path.join(self.base, "Roms", "Game Boy Advance (GBA)", "Game.zip"), b"other")

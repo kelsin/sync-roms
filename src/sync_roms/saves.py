@@ -305,6 +305,13 @@ def core_folders(base, layout, retroarch_dir=None):
     return sorted(names)
 
 
+def file_state(src, dst):
+    """What copying src to dst would do: "new" with no dst, else "same" or "differs" by their bytes."""
+    if not os.path.exists(dst):
+        return "new"
+    return "same" if filecmp.cmp(src, dst, shallow=False) else "differs"
+
+
 def plan_apply(stash, base, layout_name, layout, system, core, retroarch_dir=None):
     """[(src, dst, "new" | "same" | "differs")] for copying a stash's files to the card."""
     plan, roms = [], None
@@ -321,11 +328,7 @@ def plan_apply(stash, base, layout_name, layout, system, core, retroarch_dir=Non
                 ui.warn(f"{'several ROMs share the name of' if several else 'no ROM on the card for'} {name}; "
                         "copied under its RetroArch name")
         dst = os.path.join(target_dir(base, layout_name, layout, system, f["kind"], core, retroarch_dir), name)
-        if not os.path.exists(dst):
-            state = "new"
-        else:
-            state = "same" if filecmp.cmp(src, dst, shallow=False) else "differs"
-        plan.append((src, dst, state))
+        plan.append((src, dst, file_state(src, dst)))
     return plan
 
 
@@ -335,9 +338,9 @@ TYPE_CORE = "Type a name…"
 NO_CORE = "No core folder (sort by core off)"
 
 
-def _card(args, what):
-    """(base, card name, layout name, layout, device or None for Full, catalog) of the command's card; exits 2 when
-    it isn't a set-up card, or without a terminal."""
+def card_setup(args):
+    """(base, card name, its saved (device or None for Full, layout name), catalog) of the command's card: args.card,
+    else the current folder. Exits 2 when it is no saved card, has no usable layout or is no folder."""
     base = os.path.abspath(args.card or os.getcwd())
     name = os.path.basename(base)
     cards = store.load_cards()
@@ -349,9 +352,15 @@ def _card(args, what):
         ui.fail(f"{name!r} has no usable layout. Set it with `sync-roms cards set {name} --layout NAME`", 2)
     if not os.path.isdir(base):
         ui.fail(f"No folder {base}", 2)
+    return base, name, setup, catalog
+
+
+def _card(args, what):
+    """(base, card name, layout name, layout, device or None for Full, catalog) of the command's card; exits 2 when
+    it isn't a set-up card, or without a terminal."""
+    base, name, (device, layout_name), catalog = card_setup(args)
     if not ui.has_terminal():
         ui.fail(f"`saves {what}` needs a terminal to pick from", 2)
-    device, layout_name = setup
     return base, name, layout_name, catalog["layouts"][layout_name], device, catalog
 
 
