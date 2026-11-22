@@ -70,10 +70,10 @@ class FewerCardIO(unittest.TestCase):
         with open(path, "w") as f:
             f.write("old\n")
         with mock.patch.object(frontend, "_read", side_effect=AssertionError("read")):
-            self.assertFalse(frontend._same(path, "new line\n"))
-            self.assertFalse(frontend._same(path + "x", "a"))  # missing
-        self.assertTrue(frontend._same(path, "old\n"))
-        self.assertFalse(frontend._same(path, "olx\n"))  # same size, other text
+            self.assertFalse(frontend.same(path, "new line\n"))
+            self.assertFalse(frontend.same(path + "x", "a"))  # missing
+        self.assertTrue(frontend.same(path, "old\n"))
+        self.assertFalse(frontend.same(path, "olx\n"))  # same size, other text
 
     def test_art_file_of_another_size_is_not_read(self):
         path = os.path.join(self.dir, "a.png")
@@ -251,6 +251,14 @@ class Plan(unittest.TestCase):
         self.assertEqual(len(plan["warnings"]), 1)
         self.assertTrue(os.path.exists(outside))
 
+    def test_the_skipped_collection_is_warned_about_before_the_recorded_names(self):
+        self.put(frontend.collection_path("esde", self.base, "Mine"), "x\n")
+        plan = frontend.plan_collections("esde", self.base, {"Mine": ["%ROMPATH%/gba/A.zip"]}, ["a/b", "Old", "c/d"])
+        self.assertEqual([w.split(";")[0].split(" that ")[0] for w in plan["warnings"]],
+                         ["ES-DE already has a custom collection Mine", "ignoring the recorded collection name 'a/b'",
+                          "ignoring the recorded collection name 'c/d'"])
+        self.assertEqual((plan["disable"], plan["owned"]), ({"Old"}, []))
+
     def test_an_empty_owned_name_deletes_nothing(self):
         blank = frontend.collection_path("esde", self.base, "")
         self.put(blank, "keep\n")
@@ -278,6 +286,13 @@ class Wanted(unittest.TestCase):
         dots = {"name": "...", "games": [{"title": "X", "system": "gba", "bucket": "gba/X.zip"}]}
         got = frontend.wanted_collections("esde", [a, b, dots], [gba], lambda s, rel: True)
         self.assertEqual(got, {"AB": ["%ROMPATH%/gba/X.zip", "%ROMPATH%/gba/Y.zip"]})
+
+    def test_a_game_listed_again_is_one_line_where_it_first_was(self):
+        gba = {"bucket": "gba", "folders": {"esde": "gba"}}
+        games = [{"system": "gba", "bucket": f"gba/{n}.zip"} for n in "YXYZX"]
+        again = {"name": "Favs", "games": [{"system": "gba", "bucket": "gba/W.zip"}, {"system": "gba", "bucket": "gba/Z.zip"}]}
+        got = frontend.wanted_collections("esde", [{"name": "Favs", "games": games}, again], [gba], lambda s, rel: True)
+        self.assertEqual(got, {"Favs": [f"%ROMPATH%/gba/{n}.zip" for n in "YXZW"]})
 
     def test_lines_are_the_synced_games_on_systems_the_card_syncs(self):
         favs = {"name": "Fa.vs", "games": [

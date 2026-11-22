@@ -101,6 +101,35 @@ class PlanTests(unittest.TestCase):
         self.assertEqual(text, "/mnt/mmc/ROMS/GBA/Game.gba\nGBA\nGame")
         self.assertTrue(path.startswith("MUOS/info/collection/Fav/Game-"))
 
+    def test_wanted_merges_names_that_sanitise_alike_and_drops_an_empty_one(self):
+        systems = [{"bucket": "gba", "folders": {"muos": "GBA"}}, {"bucket": "ngp", "folders": {"muos": None}}]
+        games = [{"system": "gba", "bucket": "gba/A.gba"}, {"system": "ngp", "bucket": "ngp/N.ngp"},
+                 {"system": "gba", "bucket": "gba/Gone.gba"}, {"system": "gba", "bucket": "gba/A.gba"}]
+        colls = [{"name": "Fa.v", "games": games}, {"name": "Fav", "games": [{"system": "gba", "bucket": "gba/sub/B.gba"}]},
+                 {"name": "...", "games": games}, {"name": "Empty", "games": games[1:3]}]
+        got = muos_collections.wanted(colls, systems, lambda s, rel: rel != "Gone.gba", "/mnt/mmc")
+        self.assertEqual(list(got), ["Fav"])
+        self.assertEqual(list(got["Fav"].values()),
+                         ["/mnt/mmc/ROMS/GBA/A.gba\nGBA\nA", "/mnt/mmc/ROMS/GBA/sub/B.gba\nGBA/sub\nB"])
+
+    def test_the_skipped_collection_is_warned_about_before_the_recorded_names(self):
+        open(os.path.join(self.folder("Mine"), "Mine-00000000.cfg"), "w").close()
+        cfg = os.path.join(self.folder("Old"), "Game-00000000.cfg")
+        open(cfg, "w").close()
+        wanted = {"Mine": {"MUOS/info/collection/Mine/Game-00000000.cfg": "x"}}
+        plan = muos_collections.plan(self.base, wanted, ["a/b", "Old", "Old", ""])
+        self.assertEqual([w.split(";")[0].split(" that ")[0] for w in plan["warnings"]],
+                         ["muOS already has a collection folder Mine", "ignoring the recorded collection name 'a/b'",
+                          "ignoring the recorded collection name ''"])
+        self.assertEqual((plan["deletes"], plan["disable"], plan["owned"]), ([cfg], {"Old"}, []))
+
+    def test_an_entry_that_differs_only_in_size_or_text_is_rewritten(self):
+        rel = "MUOS/info/collection/Fav/Game-00000000.cfg"
+        muos_collections.apply(muos_collections.plan(self.base, {"Fav": {rel: "a\nb\nc"}}, []))
+        for text in ("a\nb\ncd", "a\nb\nd"):
+            plan = muos_collections.plan(self.base, {"Fav": {rel: text}}, ["Fav"])
+            self.assertEqual(plan["writes"], [(os.path.join(self.base, rel), text)])
+
 
 if __name__ == "__main__":
     unittest.main()

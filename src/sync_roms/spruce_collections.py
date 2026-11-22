@@ -2,7 +2,7 @@
 import json
 import os
 
-from . import downloads, frontend, store, ui
+from . import frontend, ui
 
 FILE = os.path.join("Collections", "collections.json")
 ROMS = "/mnt/SDCARD/Roms"
@@ -10,20 +10,10 @@ ROMS = "/mnt/SDCARD/Roms"
 
 def wanted(collections, systems, on_card):
     """{safe name: [game entries]} of the collections' games that are on the card, on the systems it syncs."""
-    by_bucket = {s["bucket"]: s for s in systems}
     result = {}
-    for collection in collections:
-        name = frontend.safe_name(collection["name"])
-        for game in collection["games"]:
-            system = by_bucket.get(game["system"])
-            folder = system and system["folders"].get("spruce")
-            if not folder:
-                continue
-            rel = downloads.rom_rel(game["bucket"])
-            if on_card(system, rel):
-                entry = {"rom_file_path": f"{ROMS}/{folder}/{rel}", "game_system_name": folder}
-                result.setdefault(name, []).append(entry)
-    return {name: games for name, games in result.items() if name and games}
+    for name, folder, rel in frontend.collection_roms("spruce", collections, systems, on_card):
+        result.setdefault(name, []).append({"rom_file_path": f"{ROMS}/{folder}/{rel}", "game_system_name": folder})
+    return result
 
 
 def _read(base):
@@ -59,11 +49,7 @@ def plan(base, wanted, owned):
         added.append({"collection_name": name, "game_list": wanted[name]})
         result["enable"].add(name)
     result["owned"] = sorted(result["enable"])
-    for name in dict.fromkeys(owned):
-        if not name or frontend.safe_name(name) != name:
-            result["warnings"].append(f"ignoring the recorded collection name {name!r}; it isn't a valid name")
-        elif name not in result["enable"]:
-            result["disable"].add(name)
+    frontend.retired(result, owned)
     text = json.dumps(kept + added, indent=4) + "\n"
     if (current or added) and json.dumps(current, indent=4) + "\n" != text:
         result["writes"].append((os.path.join(base, FILE), text))
@@ -72,9 +58,7 @@ def plan(base, wanted, owned):
 
 def apply(plan):
     """Write plan's collections file."""
-    for path, text in plan["writes"]:
-        os.makedirs(os.path.dirname(path), exist_ok=True)
-        store.replace_file(path, text, newline="\n")
+    frontend.write_files(plan)
 
 
 def describe(plan):

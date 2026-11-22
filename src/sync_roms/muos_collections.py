@@ -2,7 +2,7 @@
 import os
 import posixpath
 
-from . import downloads, frontend, store, ui
+from . import frontend, ui
 
 MOUNTS = {"sd1": "/mnt/mmc", "sd2": "/mnt/sdcard"}
 COLLECTION_DIR = os.path.join("MUOS", "info", "collection")
@@ -38,20 +38,10 @@ def entry_path(base, collection, folder, rel, mount):
 
 def wanted(collections, systems, on_card, mount):
     """{safe name: {path under the card: text}} of the collections' games that are on the card, on the systems it syncs."""
-    by_bucket = {s["bucket"]: s for s in systems}
     result = {}
-    for collection in collections:
-        name = frontend.safe_name(collection["name"])
-        for game in collection["games"]:
-            system = by_bucket.get(game["system"])
-            folder = system and system["folders"].get("muos")
-            if not folder:
-                continue
-            rel = downloads.rom_rel(game["bucket"])
-            if on_card(system, rel):
-                text = "\n".join(entry_lines(mount, folder, rel))
-                result.setdefault(name, {})[entry_path("", name, folder, rel, mount)] = text
-    return {name: files for name, files in result.items() if name and files}
+    for name, folder, rel in frontend.collection_roms("muos", collections, systems, on_card):
+        result.setdefault(name, {})[entry_path("", name, folder, rel, mount)] = "\n".join(entry_lines(mount, folder, rel))
+    return result
 
 
 def _cfgs(base, name):
@@ -63,14 +53,6 @@ def _cfgs(base, name):
         return []
 
 
-def _same(path, text):
-    try:
-        with open(path, encoding="utf-8", newline="") as f:
-            return f.read() == text
-    except (OSError, UnicodeDecodeError):
-        return False
-
-
 def plan(base, wanted, owned):
     """What to write and delete on the card for the wanted {name: {path: text}}, given the names sync-roms owns."""
     result = {"writes": [], "deletes": [], "enable": set(), "disable": set(), "owned": [], "warnings": []}
@@ -80,25 +62,18 @@ def plan(base, wanted, owned):
             result["warnings"].append(f"muOS already has a collection folder {name} that sync-roms didn't write; skipped")
             continue
         files = {os.path.join(base, rel): text for rel, text in wanted[name].items()}
-        result["writes"] += [(p, t) for p, t in sorted(files.items()) if not _same(p, t)]
+        result["writes"] += [(p, t) for p, t in sorted(files.items()) if not frontend.same(p, t)]
         result["deletes"] += [p for p in _cfgs(base, name) if p not in files]
         result["enable"].add(name)
     result["owned"] = sorted(result["enable"])
-    for name in dict.fromkeys(owned):
-        if not name or frontend.safe_name(name) != name:
-            result["warnings"].append(f"ignoring the recorded collection name {name!r}; it isn't a valid name")
-            continue
-        if name not in result["enable"]:
-            result["disable"].add(name)
-            result["deletes"] += _cfgs(base, name)
+    for name in frontend.retired(result, owned):
+        result["deletes"] += _cfgs(base, name)
     return result
 
 
 def apply(plan):
     """Write and delete plan's collection entries."""
-    for path, text in plan["writes"]:
-        os.makedirs(os.path.dirname(path), exist_ok=True)
-        store.replace_file(path, text, newline="\n")
+    frontend.write_files(plan)
     for path in plan["deletes"]:
         try:
             os.remove(path)

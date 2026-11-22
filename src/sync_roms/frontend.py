@@ -109,24 +109,31 @@ def plan_collections(layout_name, base, wanted, owned):
                                     f"that sync-roms didn't write; skipped")
             continue
         text = "\n".join(wanted[name]) + "\n"
-        if not _same(path, text):
+        if not same(path, text):
             plan["writes"].append((path, text))
         plan["enable"].add(name)
     plan["owned"] = sorted(plan["enable"])
-    for name in dict.fromkeys(owned):
-        if not name or safe_name(name) != name:
-            plan["warnings"].append(f"ignoring the recorded collection name {name!r}; it isn't a valid name")
-            continue
-        if name in plan["enable"]:
-            continue
-        plan["disable"].add(name)
+    for name in retired(plan, owned):
         path = collection_path(layout_name, base, name)
         if os.path.exists(path):
             plan["deletes"].append(path)
     return plan
 
 
-def _same(path, text):
+def retired(plan, owned):
+    """The names sync-roms owns that plan doesn't enable, added to its "disable"; a recorded name that isn't a valid
+    collection name is left out with a warning in plan."""
+    names = []
+    for name in dict.fromkeys(owned):
+        if not name or safe_name(name) != name:
+            plan["warnings"].append(f"ignoring the recorded collection name {name!r}; it isn't a valid name")
+        elif name not in plan["enable"]:
+            plan["disable"].add(name)
+            names.append(name)
+    return names
+
+
+def same(path, text):
     """Whether the file at path holds text; only a file of the same size is read."""
     try:
         return os.path.getsize(path) == len(text.encode("utf-8")) and _read(path) == text
@@ -157,12 +164,17 @@ def emudeck_problem(base, roms):
     return None
 
 
-def apply_collections(plan, layout_name, base):
-    """Write and delete plan's collection files and list or unlist them in the settings file; True when that file changed
-    (for rocknix, which has no settings on the card: when its install script was written or removed)."""
+def write_files(plan):
+    """Write plan's files (LF line ends)."""
     for path, text in plan["writes"]:
         os.makedirs(os.path.dirname(path), exist_ok=True)
         store.replace_file(path, text, newline="\n")
+
+
+def apply_collections(plan, layout_name, base):
+    """Write and delete plan's collection files and list or unlist them in the settings file; True when that file changed
+    (for rocknix, which has no settings on the card: when its install script was written or removed)."""
+    write_files(plan)
     for path in plan["deletes"]:
         try:
             os.remove(path)
@@ -176,25 +188,33 @@ def apply_collections(plan, layout_name, base):
     return cardfs.write_text(path, set_enabled(cardfs.text(path), layout_name, plan["enable"], plan["disable"]))
 
 
-def wanted_collections(layout_name, collections, systems, on_card, folders=None):
-    """{safe name: lines} of the collections' games that are on the card, on the systems it syncs.
+def collection_roms(layout_name, collections, systems, on_card, folders=None):
+    """(safe collection name, system folder, ROM path in it) of each of the collections' games that is on the card, on
+    the systems it syncs, in the collections' order. A collection whose name has no character left is left out.
 
     folders: {key: its game's folder} (m3u.game_folders), for layouts that keep each disc game in a folder of its own."""
     by_bucket = {s["bucket"]: s for s in systems}
-    wanted = {}
     for collection in collections:
         name = safe_name(collection["name"])
-        lines = []
         for game in collection["games"]:
             system = by_bucket.get(game["system"])
-            if not system or not system["folders"].get(layout_name):
+            folder = system and system["folders"].get(layout_name)
+            if not folder:
                 continue
             rel = downloads.rom_rel(game["bucket"], folders=folders)
-            if on_card(system, rel):
-                lines.append(collection_line(layout_name, system["folders"][layout_name], rel))
-        if name and lines:
-            merged = wanted.setdefault(name, [])
-            merged.extend(line for line in lines if line not in merged)
+            if on_card(system, rel) and name:
+                yield name, folder, rel
+
+
+def wanted_collections(layout_name, collections, systems, on_card, folders=None):
+    """{safe name: lines} of the collections' games that are on the card (collection_roms); collections of one name
+    share its lines, each line once."""
+    wanted = {}
+    for name, folder, rel in collection_roms(layout_name, collections, systems, on_card, folders):
+        lines = wanted.setdefault(name, [])
+        line = collection_line(layout_name, folder, rel)
+        if line not in lines:
+            lines.append(line)
     return wanted
 
 
