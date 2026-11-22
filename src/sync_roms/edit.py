@@ -235,16 +235,18 @@ def new_target(label, raw, setup=None):
     """The editing state of one games list: its systems, set references and what they were when opened."""
     data = {"systems": store.apply_games(store.repo_json("systems"), raw)}
     sets_on = store.list_sets(raw)
-    return {"label": label, "data": data, "sets_on": sets_on, "setup": setup, "was": snapshot(data),
+    return {"label": label, "data": data, "raw": dict(raw), "sets_on": sets_on, "setup": setup, "was": snapshot(data),
             "was_full": {s["bucket"]: s["full_system"] for s in data["systems"]}, "was_sets": list(sets_on),
             "was_notes": notes_snapshot(data)}
 
 
 def drop_inapplicable(t, setup):
-    """Empty the games and full-system flag of every system the card's device/firmware doesn't sync."""
+    """Empty the games and full-system flag of every system the card's device/firmware doesn't sync, and take its
+    entry out of the saved games list (t["raw"]); every other entry there stays as it was saved."""
     for s in t["data"]["systems"]:
         if not store.system_applies(s, *setup):
             s["games"], s["full_system"] = [], False
+            t["raw"].pop(s["bucket"], None)
 
 
 def target_changes(t):
@@ -514,8 +516,7 @@ def edit_manifest():
     for key, t in changed.items():
         if t["setup"]:
             store.save_card(key, *t["setup"])
-    saved = store.save_lists({k: store.dump_list(t["data"]["systems"], t["sets_on"])
-                              for k, t in changed.items() if any(target_changes(t))})
+    saved = store.save_lists({k: t["raw"] for k, t in changed.items() if any(target_changes(t))})
     if overlay_pending:
         store.save_overlay(overlay_pending)
     if not saved:
