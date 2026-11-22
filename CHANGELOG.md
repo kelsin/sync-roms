@@ -1,5 +1,17 @@
 # Changelog
 
+## [3.23.0](https://github.com/kelsin/sync-roms/compare/v3.22.0...v3.23.0) (2026-11-22)
+
+
+### :video_game: Features
+
+* **spruce:** stage personal boot logos and record device resolutions ([#511](https://github.com/kelsin/sync-roms/issues/511)) ([14fe91c](https://github.com/kelsin/sync-roms/commit/14fe91cc0289462d55047ead1881ad5da83895ca))
+
+
+### :bug: Bug Fixes
+
+* **spruce:** apply theme fixes to PyUI's resized theme copies ([#509](https://github.com/kelsin/sync-roms/issues/509)) ([cc9baeb](https://github.com/kelsin/sync-roms/commit/cc9baeb6a2985fbedb608dbc2c65b0f891173da5))
+
 ## [3.22.0](https://github.com/kelsin/sync-roms/compare/v3.21.0...v3.22.0) (2026-11-22)
 
 
