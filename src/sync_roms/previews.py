@@ -119,14 +119,9 @@ def game_thumb(key):
         picture = picture.convert("RGBA" if picture.has_transparency_data else "RGB")
         picture = picture.resize((GAME_WIDTH, max(1, round(picture.height * GAME_WIDTH / picture.width))))
         os.makedirs(folder, exist_ok=True)
-        fd, tmp = tempfile.mkstemp(dir=folder, suffix=".part")
-        try:
-            with os.fdopen(fd, "wb") as f:
-                picture.save(f, "WEBP", quality=85)
-            os.replace(tmp, path)
-        except BaseException:
-            os.remove(tmp)
-            raise
+        out = io.BytesIO()
+        picture.save(out, "WEBP", quality=85)
+        store.replace_file(path, out.getvalue())
         for old in os.listdir(folder):  # the same image's thumbnails of older versions (tags have no dots)
             if old != os.path.basename(path) and old.startswith(stem + ".") and old.endswith(".webp") \
                     and "." not in old[len(stem) + 1:-len(".webp")]:
