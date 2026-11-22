@@ -116,6 +116,17 @@ class CardFoldersTest(unittest.TestCase):
         self.assertEqual(sorted(k for k, _, _ in new), ["psx/Mine.m3u", "psx/Solo.chd", "psx/sub/Other.chd"])
         self.assertEqual((changed, same), ([], []))
 
+    def test_unreadable_playlist_is_planned_like_any_file(self):
+        with tempfile.TemporaryDirectory() as root:
+            path = os.path.join(root, "Game.m3u")
+            helpers.touch(path, "Game (Disc 1).chd\n")
+            os.chmod(path, 0)
+            if os.access(path, os.R_OK):
+                self.skipTest("chmod 000 does not stop reads here (root)")
+            new, _, _ = upload.plan_rom_upload(root, "psx", {})
+            self.assertEqual([k for k, _, _ in new], ["psx/Game.m3u"])
+            self.assertFalse(downloads.card_only(root, "Game.m3u"))
+
     def test_replace_leaves_them_out_too(self):
         with tempfile.TemporaryDirectory() as root:
             self.card(root)

@@ -243,7 +243,10 @@ def card_only(folder, rel):
     *dirs, name = rel.split("/")
     if (discs | {".media"}).intersection(dirs):
         return True
-    return name.lower().endswith(".m3u") and any(e.split("/")[0] in discs for e in m3u.m3u_entries(os.path.join(folder, *dirs, name)))
+    try:
+        return name.lower().endswith(".m3u") and any(e.split("/")[0] in discs for e in m3u.m3u_entries(os.path.join(folder, *dirs, name)))
+    except OSError:  # a playlist that can't be read is planned like any file
+        return False
 
 
 IGNORED_ROOT_DIRS = {"images", "videos", "manuals",                # Batocera / Knulli scraped media
