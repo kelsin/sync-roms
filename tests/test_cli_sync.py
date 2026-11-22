@@ -109,7 +109,7 @@ class SyncSmokeTest(RealDataDirGuard):
     def card_matches(self, layout, folder, files, keys, system_id="psx"):
         """What card_match answers for keys, with files (paths under the system folder) on the card."""
         got = []
-        system = {**SYSTEM, "name": "PS", "bucket": system_id, "folders": {"esde": folder, "onion": folder}}
+        system = {**SYSTEM, "name": "PS", "bucket": system_id, "folders": {"esde": folder, "onion": folder, "nextui": folder}}
 
         def prepare(card):
             for f in files:
@@ -122,7 +122,8 @@ class SyncSmokeTest(RealDataDirGuard):
             got.append(card_match(system, keys))
             return []
         layouts = {layout: {"label": layout, "roms_dir": "Roms" if layout == "onion" else "ROMs", "bios_dir": "BIOS",
-                            **({"disc_dir": ".multi-disc"} if layout == "esde" else {})}}
+                            **({"disc_dir": ".multi-disc"} if layout == "esde" else {}),
+                            **({"disc_folders": True} if layout == "nextui" else {})}}
         patches = ((store, {"load_manifest": lambda names=(): {**MANIFEST, "systems": [system], "layouts": layouts}}),
                    (cli.picker, {"saved_setup": lambda *a: (None, layout)}),
                    (cli.surprise, {"run_surprise": run_surprise}))
@@ -135,6 +136,14 @@ class SyncSmokeTest(RealDataDirGuard):
         found = self.card_matches("esde", "psx", [".multi-disc/Game (Disc 1).chd", ".multi-disc/Game (Disc 2).chd",
                                                   "Game.m3u"], keys)
         self.assertEqual(found, set(keys[:3]))
+
+    def test_a_disc_game_in_a_folder_of_its_own_matches_its_keys(self):
+        keys = ["psx/Game (Disc 1).chd", "psx/Game (Disc 2).chd", "psx/Game.m3u", "psx/Solo.cue", "psx/Solo.bin",
+                "psx/Other.chd"]
+        found = self.card_matches("nextui", "Sony PlayStation (PS)",
+                                  ["Game/Game (Disc 1).chd", "Game/Game (Disc 2).chd", "Game/Game.m3u", "Solo/Solo.cue",
+                                   "Solo/Solo.bin"], keys)
+        self.assertEqual(found, set(keys[:5]))
 
     def test_a_name_in_another_unicode_form_matches(self):
         import unicodedata
