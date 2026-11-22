@@ -43,13 +43,6 @@ KNULLI = f"os/knulli/RAOfflineProxy-Knulli-{V}-Install.sh"
 SCRIPT = os.path.join("roms", "tools", "RAOfflineProxy Install.sh")
 ROCKNIX = f"os/rocknix/RAOfflineProxy-Rocknix-{V}-Install.sh"
 PORTS_SCRIPT = os.path.join("roms", "ports", "RAOfflineProxy Install.sh")
-SPRUCE = f"os/spruceos/RAOfflineProxy-Spruce-{V}.zip"
-SPRUCE_ROOT = "App/RAOfflineProxy"
-
-
-def spruce_zip(common=True):
-    """Spruce's zip has no launch.sh: spruceOS starts the app through its common.sh."""
-    return make_zip(SPRUCE_ROOT, {f"{SPRUCE_ROOT}/common.sh": b"#!/bin/sh"} if common else None, launch=False)
 
 
 class Install(helpers.StorageDir):
@@ -119,41 +112,12 @@ class Install(helpers.StorageDir):
         self.run_install("rocknix")
         self.assertTrue(os.path.exists(self.cp(PORTS_SCRIPT)))
 
-    def test_spruce_installs_at_app_with_common_sh_as_its_marker(self):
-        self.put(SPRUCE, spruce_zip())
-        self.run_install("spruce")
-        self.assertEqual(self.failures, 0)
-        common = self.cp("App", "RAOfflineProxy", "common.sh")
-        self.assertTrue(os.stat(common).st_mode & stat.S_IXUSR)
-        self.assertTrue(os.path.isfile(self.cp("App", "RAOfflineProxy", "app", "main.py")))
-        self.assertEqual(self.recorded(), os.path.basename(SPRUCE))
-        with open(common, "w") as f:
-            f.write("mine")
-        self.run_install("spruce")
-        with open(common) as f:
-            self.assertEqual(f.read(), "mine")
-        os.remove(common)
-        self.run_install("spruce")
-        self.assertTrue(os.path.isfile(common))
-
-    def test_spruce_zip_without_common_sh_is_rejected(self):
-        self.put(SPRUCE, spruce_zip(common=False))
-        with contextlib.redirect_stderr(io.StringIO()):
-            self.run_install("spruce")
-        self.assertEqual(self.failures, 1)
-        self.assertEqual(self.snapshot(), [])
-
-    def test_spruce_release_7z_is_not_taken_for_the_proxy(self):
-        self.put("os/spruceos/spruceV4.5.0.7z", b"7z")
-        self.run_install("spruce")
-        self.assertEqual(self.snapshot(), [])
-
     def test_rocknix_prefix_is_listed(self):
         self.assertIn("os/rocknix/", raofflineproxy.prefixes())
 
     def test_other_layouts_get_nothing(self):
         self.put(LAYOUTS["onion"][0], make_zip("App/RAOfflineProxy"))
-        for layout in ("emudeck", "nextui", "esde"):
+        for layout in ("spruce", "emudeck", "nextui", "esde"):
             self.run_install(layout)
         self.assertEqual(self.snapshot(), [])
 
