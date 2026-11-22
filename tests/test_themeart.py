@@ -6,6 +6,7 @@ import tarfile
 import tempfile
 import unittest
 from unittest import mock
+from xml.dom import minidom
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
@@ -371,6 +372,14 @@ class Knulli(Card):
         settings = read(frontend.settings_path("knulli", self.base))
         self.assertIn("subset.東方.system-view-artwork", settings)
         self.assertNotIn("subset.東方.system-logos", settings)
+
+    def test_a_name_with_an_ampersand_keeps_the_settings_well_formed(self):
+        for _ in range(2):  # the second sync replaces the entries
+            themeart.install("knulli", self.base, {"Mario & Sonic": "surprise"})
+        entries = minidom.parse(frontend.settings_path("knulli", self.base)).getElementsByTagName("string")
+        self.assertEqual({e.getAttribute("name"): e.getAttribute("value") for e in entries},
+                         themeart.knulli_settings("Mario & Sonic"))
+        self.assertEqual(len(entries), 3)
 
     def test_a_grouping_choice_already_made_is_kept(self):
         path = frontend.settings_path("knulli", self.base)

@@ -7,6 +7,7 @@ import sys
 import tempfile
 import unittest
 from unittest import mock
+from xml.dom import minidom
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
@@ -141,6 +142,32 @@ class Enabled(unittest.TestCase):
         text = '<string name="CollectionSystemsCustom" value="Kel&apos;s,Say &quot;hi&quot;,A&amp;B" />\n'
         self.assertEqual(frontend.set_enabled(text, "esde", {"Favs"}, set()),
                          text.replace('B"', 'B,Favs"'))
+
+    def test_a_setting_name_is_xml_escaped(self):
+        name = 'subset.A & <B> "C".system-view-artwork'
+        text = frontend.set_string("", "knulli", name, "custom")
+        entry, = minidom.parseString(text).getElementsByTagName("string")
+        self.assertEqual((entry.getAttribute("name"), entry.getAttribute("value")), (name, "custom"))
+        self.assertEqual(frontend.get_string(text, name), "custom")
+
+    def test_setting_an_escaped_name_again_replaces_its_entry(self):
+        name = 'subset.A & <B> "C".system-view-artwork'
+        text = frontend.set_string(frontend.set_string("", "knulli", name, "custom"), "knulli", name, "theme")
+        self.assertEqual(len(minidom.parseString(text).getElementsByTagName("string")), 1)
+        self.assertEqual(frontend.get_string(text, name), "theme")
+
+    def test_an_unescaped_name_from_an_older_sync_is_replaced(self):
+        name = "subset.Mario & Sonic.system-view-artwork"
+        old = f'<config>\n\t<string name="{name}" value="custom" />\n</config>\n'
+        self.assertEqual(frontend.get_string(old, name), "custom")
+        self.assertEqual(frontend.set_string(old, "knulli", name, "custom"), old.replace("&", "&amp;"))
+
+    def test_a_name_escaped_the_way_emulationstation_writes_it_is_replaced(self):
+        name = "subset.Kel's R&B.system-logos"  # ES escapes the & and leaves the apostrophe
+        text = '<config>\n\t<string name="subset.Kel\'s R&amp;B.system-logos" value="custom" />\n</config>\n'
+        self.assertEqual(frontend.get_string(text, name), "custom")
+        self.assertEqual(frontend.set_string(text, "knulli", name, "theme"),
+                         text.replace("'", "&apos;").replace('"custom"', '"theme"'))
 
 
 class Plan(unittest.TestCase):
