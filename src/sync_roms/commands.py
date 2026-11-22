@@ -252,15 +252,25 @@ def games_remove(args):
     return finish(args, raw, save, changes)
 
 
+def full_entry(entry):
+    """A full system's entry replacing entry: a game list stays in it for `games full off`, as cardedit.toggle_full
+    keeps it."""
+    return {"full_system": True, **({"games": entry} if isinstance(entry, list) and entry else {})}
+
+
 def games_full(args):
     need_system(args.system)
     raw, save = load_target(args.card)
-    now = isinstance(raw.get(args.system), dict)
+    entry = raw.get(args.system)
+    now = isinstance(entry, dict)
     if args.state == "on" and not now:
-        raw[args.system] = {"full_system": True}
+        raw[args.system] = full_entry(entry)
         return finish(args, raw, save, [("+", f"{args.system} (full system)")])
     if args.state == "off" and now:
-        del raw[args.system]
+        if entry.get("games"):
+            raw[args.system] = entry["games"]
+        else:
+            del raw[args.system]
         return finish(args, raw, save, [("-", f"{args.system} (full system)")])
     return finish(args, raw, save, [])
 
@@ -396,7 +406,7 @@ def games_import(args):
             ui.warn(f"skipping {line!r}: expected SYSTEM/file or SYSTEM/*")
         elif name == "*":
             if not isinstance(raw.get(system), dict):
-                raw[system] = {"full_system": True}
+                raw[system] = full_entry(raw.get(system))
                 changes.append(("+", f"{system} (full system)"))
         else:
             by_system.setdefault(system, []).append(line)
