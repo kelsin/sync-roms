@@ -934,6 +934,19 @@ class SyncFlowTest(unittest.TestCase):
         self.assertEqual(code, 0)
         self.assertEqual(self.after, sorted([cli.themeart.ESDE_OWNED, "snes"]))
 
+    def test_a_dry_run_names_the_theme_art_that_would_be_removed(self):
+        def prepare(card_dir):
+            self.copy = os.path.join(card_dir, "ES-DE", "themes", cli.themeart.ESDE_COPY)
+            for rel in (cli.themeart.ESDE_OWNED, os.path.join("favs", "theme.xml")):
+                os.makedirs(os.path.dirname(os.path.join(self.copy, rel)), exist_ok=True)
+                with open(os.path.join(self.copy, rel), "w") as f:
+                    f.write("favs\n")
+        for cards, said in (({}, True), ({"theme": False}, False)):
+            _, out, *_ = self.run_sync(cards={"collections": [], "surprise": False, "frontend_collections": ["Favs"], **cards},
+                                       prepare=prepare, dry_run=True, after=lambda d: sorted(os.listdir(self.copy)))
+            self.assertEqual("would remove the art for favs" in out, said, cards)
+            self.assertEqual(self.after, sorted([cli.themeart.ESDE_OWNED, "favs"]))
+
     def test_theme_off_leaves_the_theme_art_alone(self):
         def prepare(card_dir):
             self.copy = os.path.join(card_dir, "ES-DE", "themes", cli.themeart.ESDE_COPY)

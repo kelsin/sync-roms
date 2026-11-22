@@ -211,9 +211,9 @@ def _esde_paths(folder):
 def _extract(archive_path, dest, commit):
     """Bring dest to the archive's files, writing only the ones that are missing or differ (each through a temp name and
     a rename), deleting the ones the archive lacks except sync-roms's own, and writing the commit marker last, so a
-    stopped sync leaves the old marker and the next one finishes."""
+    stopped sync leaves the old marker and the next one finishes. A collection folder on sync-roms's list that the
+    archive has metadata for is the theme's own from then on: it leaves the list."""
     shutil.rmtree(dest + "-disabled", ignore_errors=True)  # from the days the copy was staged there
-    keep = _sync_written(dest)
     wanted = set()
     with tarfile.open(archive_path, mode="r:gz") as archive:
         for member in archive:
@@ -232,7 +232,12 @@ def _extract(archive_path, dest, commit):
                 pass
             os.makedirs(os.path.dirname(path), exist_ok=True)
             store.replace_file(path, data)
-    kept = {downloads.name_key(os.path.join(dest, *k.split("/"))) for k in keep}
+    owned = _read(os.path.join(dest, ESDE_OWNED)).splitlines()
+    ours = [n for n in owned
+            if downloads.name_key(os.path.join(dest, "_inc", "systems", "_metadata-global", f"{n}.xml")) not in wanted]
+    if ours != owned:
+        _put(os.path.join(dest, ESDE_OWNED), "".join(f"{n}\n" for n in ours).encode())
+    kept = {downloads.name_key(os.path.join(dest, *k.split("/"))) for k in _sync_written(dest)}
     for folder, _, names in os.walk(dest, topdown=False):
         for name in names:
             path = os.path.join(folder, name)
@@ -281,14 +286,19 @@ def _theme_has(dest, folder):
     return folder not in owned and os.path.exists(os.path.join(dest, "_inc", "systems", "_metadata-global", f"{folder}.xml"))
 
 
+def _esde_stale(dest, keep):
+    """The collection folders on the list in the theme copy at dest that aren't in keep: their art is removed. A line
+    that isn't a name sync-roms writes is left out."""
+    return [n for n in _read(os.path.join(dest, ESDE_OWNED)).splitlines()
+            if n not in keep and n and frontend.safe_name(n) == n]
+
+
 def _esde_remove(dest, keep):
     """Remove from the theme copy at dest the files sync-roms wrote for the collection folders on its list that aren't
     in keep, and take them off the list. Returns whether anything changed."""
     owned = _read(os.path.join(dest, ESDE_OWNED)).splitlines()
     stale = [n for n in owned if n not in keep]
-    for folder in stale:
-        if not folder or frontend.safe_name(folder) != folder:  # not a name sync-roms writes
-            continue
+    for folder in _esde_stale(dest, keep):
         for rel in _esde_paths(folder):
             try:
                 os.remove(s3.safe_join(dest, rel))
@@ -340,7 +350,12 @@ def install_esde(layout_name, base, arts):
 
 
 def describe_esde(layout_name, base, arts):
-    if not esde_wanted(layout_name, base) or not arts:
+    if not esde_wanted(layout_name, base):
+        return
+    stale = _esde_stale(_esde_dir(layout_name, base), {n.lower() for n in arts})
+    if stale:
+        print(ui.dim(f"🎨 would remove the art for {', '.join(stale)} from {_shown(layout_name, base).replace(os.sep, '/')}"))
+    if not arts:
         return
     commit = _stored_commit()
     if not commit and not os.path.exists(os.path.join(_esde_dir(layout_name, base), ESDE_MARKER)):
@@ -404,11 +419,17 @@ def knulli_settings(name):
             "UseCustomCollectionsSystemEx": "false"}
 
 
+def _custom_stale(root, arts):
+    """The names on the list in the customizations folder root (the collections sync-roms gave art there) that aren't in
+    arts: their art is removed."""
+    return [n for n in _read(os.path.join(root, CUSTOM_OWNED)).splitlines()
+            if n and frontend.safe_name(n) == n and n not in arts]
+
+
 def _custom_remove(root, arts):
     """Remove from the customizations folder root the art sync-roms put there (the names on its list) for collections
     no longer in arts, and list the ones in arts instead. Returns the names it removed."""
-    owned = [n for n in _read(os.path.join(root, CUSTOM_OWNED)).splitlines() if n and frontend.safe_name(n) == n]
-    stale = [n for n in owned if n not in arts]
+    stale = _custom_stale(root, arts)
     for name in stale:
         for path in (os.path.join(root, "artwork", f"{name}.png"), os.path.join(root, "logos", f"{name}.svg")):
             try:
@@ -453,7 +474,12 @@ def install_knulli(base, arts):
 
 
 def describe_knulli(base, arts):
-    if knulli_wanted(base) and arts:
+    if not knulli_wanted(base):
+        return
+    stale = _custom_stale(os.path.join(base, KNULLI_DIR), arts)
+    if stale:
+        print(ui.dim(f"🎨 would remove the art and settings for {', '.join(stale)} from {KNULLI_DIR.replace(os.sep, '/')}/"))
+    if arts:
         print(ui.dim(f"🎨 would add art for {', '.join(arts)} to {KNULLI_DIR.replace(os.sep, '/')}/"))
 
 
@@ -474,7 +500,10 @@ def install_rocknix(base, arts):
     return changed
 
 
-def describe_rocknix(arts):
+def describe_rocknix(base, arts):
+    stale = _custom_stale(os.path.join(base, rocknix_collections.ART_DIR), arts)
+    if stale:
+        print(ui.dim(f"🎨 would remove the art for {', '.join(stale)} from {rocknix_collections.ART_DIR.replace(os.sep, '/')}/"))
     if arts:
         print(ui.dim(f"🎨 would add art for {', '.join(arts)} to {rocknix_collections.ART_DIR.replace(os.sep, '/')}/"))
 
@@ -535,5 +564,5 @@ def describe(layout_name, base, arts, owned=()):
     if layout_name == "muos":
         return muos_collections.describe_art(base, arts)
     if layout_name == "rocknix":
-        return describe_rocknix(arts)
+        return describe_rocknix(base, arts)
     describe_esde(layout_name, base, arts) if layout_name in frontend.ESDE_LAYOUTS else describe_knulli(base, arts)

@@ -1323,7 +1323,7 @@ def sync_card(args):
                 frontend.describe_collections(plan, layout_name)
             if layout_name == "spruce":
                 themeart.describe(layout_name, base, arts, {*owned, *plan["owned"]})
-            elif arts:
+            elif arts or store.card_flag(entry, "theme"):  # with no art to add it still names the art that would go
                 themeart.describe(layout_name, base, arts)
             return
         for warning in plan["warnings"]:

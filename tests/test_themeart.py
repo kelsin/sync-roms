@@ -308,6 +308,65 @@ class Esde(Card):
         self.assertEqual(read(self.copy(themeart.ESDE_MARKER)).strip(), "abc")
         self.assertEqual(read(frontend.settings_path("esde", self.base)), settings)
 
+    THEIRS = {"_inc/systems/_metadata-global/foo.xml": b"<theirs/>", "foo/theme.xml": b"<theirs/>"}
+
+    def foo_is_the_theme_s(self):
+        """Whether the theme copy has the theme's own foo, without the files only sync-roms wrote for it."""
+        metadata, folder = (read(self.copy("_inc", "systems", "_metadata-global", "foo.xml")), read(self.copy("foo", "theme.xml")))
+        return (metadata, folder, os.path.exists(self.copy("_inc", "systems", "artwork-outline", "foo.png"))) == ("<theirs/>", "<theirs/>", False)
+
+    def test_a_listed_name_a_theme_update_ships_is_the_theme_s_and_is_not_removed(self):
+        self.store("abc", self.THEME)
+        self.settings(themeart.ESDE_THEME)
+        with contextlib.redirect_stdout(io.StringIO()):
+            themeart.install("esde", self.base, {**SURPRISE, "Foo": "rpg"})
+            self.assertEqual(read(self.copy(themeart.ESDE_OWNED)).splitlines(), ["foo", "surprise"])
+            self.store("def", {**self.THEME, **self.THEIRS})
+            themeart.install("esde", self.base, dict(SURPRISE))  # Foo is gone in the sync that updates the theme
+            self.assertTrue(self.foo_is_the_theme_s())
+            self.assertEqual(read(self.copy(themeart.ESDE_OWNED)).splitlines(), ["surprise"])
+            themeart.install("esde", self.base, {})
+        self.assertTrue(self.foo_is_the_theme_s())
+
+    def test_a_listed_name_a_theme_update_ships_is_skipped_while_still_wanted_and_kept_after(self):
+        self.store("abc", self.THEME)
+        self.settings(themeart.ESDE_THEME)
+        with contextlib.redirect_stdout(io.StringIO()):
+            themeart.install("esde", self.base, {**SURPRISE, "Foo": "rpg"})
+            self.store("def", {**self.THEME, **self.THEIRS})
+            themeart.install("esde", self.base, {**SURPRISE, "Foo": "rpg"})
+            self.assertIn("Foo: Art Book Next already has art of its own", self.warned[-1])
+            self.assertTrue(self.foo_is_the_theme_s())
+            self.assertEqual(read(self.copy(themeart.ESDE_OWNED)).splitlines(), ["surprise"])
+            themeart.install("esde", self.base, dict(SURPRISE))  # Foo is gone
+        self.assertTrue(self.foo_is_the_theme_s())
+
+    def test_the_dry_run_names_the_art_that_would_be_removed(self):
+        self.store("abc", self.THEME)
+        self.settings(themeart.ESDE_THEME)
+        self.install()
+        with contextlib.redirect_stdout(io.StringIO()) as out:
+            themeart.describe("esde", self.base, dict(SURPRISE))
+        self.assertIn(f"would remove the art for my shmups from ES-DE/themes/{themeart.ESDE_COPY}", out.getvalue())
+        self.assertIn("would add art for Surprise", out.getvalue())
+        with contextlib.redirect_stdout(io.StringIO()) as out, mock.patch.object(themeart, "_stored_commit") as commit:
+            themeart.describe("esde", self.base, {})
+        commit.assert_not_called()
+        self.assertIn("would remove the art for my shmups, surprise from", out.getvalue())
+        self.assertEqual(out.getvalue().count("\n"), 1)
+        for path in self.art("my shmups") + self.art("surprise"):
+            self.assertTrue(os.path.exists(path), path)
+        self.assertEqual(read(self.copy(themeart.ESDE_OWNED)).splitlines(), ["my shmups", "surprise"])
+
+    def test_the_dry_run_says_nothing_when_no_art_would_be_removed(self):
+        self.store("abc", self.THEME)
+        self.settings(themeart.ESDE_THEME)
+        with contextlib.redirect_stdout(io.StringIO()) as out:
+            themeart.describe("esde", self.base, {})  # no theme copy, no list
+            self.install()
+            themeart.describe("esde", self.base, {**SURPRISE, "My Shmups": "shmups"})
+        self.assertNotIn("would remove", out.getvalue())
+
     def test_no_art_on_a_card_that_never_had_any_does_nothing(self):
         self.store("abc", self.THEME)
         self.assertFalse(themeart.install("esde", self.base, {}))
@@ -520,6 +579,26 @@ class Knulli(Card):
         self.assertIn('<string name="UseCustomCollectionsSystemEx" value="false" />', settings)
         self.assertFalse(themeart.install("knulli", self.base, {}))
 
+    def test_the_dry_run_names_the_art_and_settings_that_would_be_removed(self):
+        with contextlib.redirect_stdout(io.StringIO()) as out:
+            themeart.describe("knulli", self.base, {})  # no list: nothing to say
+        self.assertEqual(out.getvalue(), "")
+        themeart.install("knulli", self.base, {**SURPRISE, "Favs": "rpg"})
+        settings = read(frontend.settings_path("knulli", self.base))
+        with contextlib.redirect_stdout(io.StringIO()) as out:
+            themeart.describe("knulli", self.base, dict(SURPRISE))
+        self.assertIn("would remove the art and settings for Favs from theme-customizations/art-book-next/", out.getvalue())
+        self.assertIn("would add art for Surprise", out.getvalue())
+        with contextlib.redirect_stdout(io.StringIO()) as out:
+            themeart.describe("knulli", self.base, {})
+        self.assertIn("would remove the art and settings for Favs, Surprise from", out.getvalue())
+        self.assertEqual(out.getvalue().count("\n"), 1)
+        with contextlib.redirect_stdout(io.StringIO()) as out:
+            themeart.describe("knulli", self.base, {**SURPRISE, "Favs": "rpg"})
+        self.assertNotIn("would remove", out.getvalue())
+        self.assertTrue(os.path.exists(self.path("artwork", "Favs.png")))
+        self.assertEqual(read(frontend.settings_path("knulli", self.base)), settings)
+
     def test_art_and_settings_sync_roms_has_no_list_of_are_kept(self):
         self.assertFalse(themeart.install("knulli", self.base, {}))
         self.assertEqual(os.listdir(self.base), [])  # a card that never had art: nothing is written
@@ -596,6 +675,24 @@ class Rocknix(Card):
         for rel in (("artwork", "Surprise.png"), ("logos", "Surprise.svg"), (themeart.CUSTOM_OWNED,)):
             self.assertFalse(os.path.exists(self.path(*rel)), rel)
         self.assertFalse(themeart.install("rocknix", self.base, {}))
+
+    def test_the_dry_run_names_the_art_that_would_be_removed(self):
+        with contextlib.redirect_stdout(io.StringIO()) as out:
+            themeart.describe("rocknix", self.base, {})  # no list: nothing to say
+        self.assertEqual(out.getvalue(), "")
+        themeart.install("rocknix", self.base, {**SURPRISE, "Favs": "rpg"})
+        with contextlib.redirect_stdout(io.StringIO()) as out:
+            themeart.describe("rocknix", self.base, dict(SURPRISE))
+        self.assertIn("would remove the art for Favs from roms/_userdata/theme-customizations/art-book-next/", out.getvalue())
+        self.assertIn("would add art for Surprise", out.getvalue())
+        with contextlib.redirect_stdout(io.StringIO()) as out:
+            themeart.describe("rocknix", self.base, {})
+        self.assertIn("would remove the art for Favs, Surprise from", out.getvalue())
+        self.assertEqual(out.getvalue().count("\n"), 1)
+        with contextlib.redirect_stdout(io.StringIO()) as out:
+            themeart.describe("rocknix", self.base, {**SURPRISE, "Favs": "rpg"})
+        self.assertNotIn("would remove", out.getvalue())
+        self.assertTrue(os.path.exists(self.path("artwork", "Favs.png")))
 
     def test_art_sync_roms_has_no_list_of_is_kept(self):
         self.assertFalse(themeart.install("rocknix", self.base, {}))

@@ -690,6 +690,8 @@ its APK from `os/android/APKs/` in an ES-DE card's `APKs/`; off, none of them.
   copy's `.sync-roms-collections` (ES-DE) or the customizations folder's `.sync-roms-art` (Knulli, ROCKNIX), so the theme's
   own art and yours stay, as does art an older sync-roms put on a Knulli or ROCKNIX card before it kept that list. On
   ROCKNIX the install script turns the art's settings off on the device. With `"theme": false` nothing is removed.
+  When a newer copy of the theme for ES-DE brings art of its own for a listed name, that name leaves the list and the
+  theme's art stays. `--dry-run` names the collections whose art would be removed.
 
 ### Full systems
 
