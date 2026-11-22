@@ -1173,7 +1173,7 @@ def sync_card(args):
     # Android cards also get storage's os/android/APKs/ files (APKs, the Obtainium app list) in an APKs/ folder to install from
     apk_dir = os.path.join(base, "APKs")
     apk_jobs = ([(k, os.path.join(apk_dir, k[len(runtime.APKS_PREFIX):]), size) for k, size in sorted(inventory.files(runtime.APKS_PREFIX, sizes=False).items())
-                 if not k.endswith("/") and (store.card_flag(store.load_cards().get(card), "raofflineproxy")
+                 if not k.endswith("/") and (store.card_flag(store.saved_card(card), "raofflineproxy")
                                              or not re.fullmatch(r"RAOfflineProxy.*\.apk", os.path.basename(k)))] if layout_name == "esde" else [])
     apk_jobs = downloads.with_sizes(apk_jobs)
     # and the suggested GPU drivers for the device's Adreno GPU, kept up to date in storage first, in a Drivers/ folder
@@ -1283,8 +1283,7 @@ def sync_card(args):
         """Write the card's collections as the frontend's custom collections (ES-DE, Knulli, ROCKNIX, EmuDeck's ES-DE)."""
         if layout_name not in frontend.FRONTEND_LAYOUTS and layout_name not in ("muos", "spruce"):
             return
-        entry = store.load_cards().get(card)
-        entry = entry if isinstance(entry, dict) else {}
+        entry = store.saved_card(card)
 
         def names(field):
             """The card's list field as its text items (anything else stored there is ignored)."""

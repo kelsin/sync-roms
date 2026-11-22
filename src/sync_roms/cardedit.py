@@ -231,8 +231,7 @@ class FullSizes:
 
 def card_entry(name, setup, cards=None):
     """A card's saved entry, with the layout of the setup being edited (it may not be saved yet)."""
-    entry = (store.load_cards() if cards is None else cards).get(name)
-    return {**(entry if isinstance(entry, dict) else {}), "layout": setup[1]}
+    return {**store.saved_card(name, cards), "layout": setup[1]}
 
 
 def toggle_full(name, bucket):
@@ -468,8 +467,7 @@ def pick_collections(name, playable, card_status=None):
         edit.note(ui.yellow("ℹ️  No collections yet: make one in sync-roms collections edit "
                             "(or 💖 Collections in sync-roms edit)."))
         return
-    entry = store.load_cards().get(name)
-    saved = entry.get("collections") if isinstance(entry, dict) else None
+    saved = store.saved_card(name).get("collections")
     ids = [i for i in saved if isinstance(i, str)] if isinstance(saved, list) else []
     labels, counts = [], []
     for c in found:

@@ -228,16 +228,14 @@ def saved_card(card, cards=None):
 
 def card_games(card, cards=None):
     """The games list saved for a card in cards.json ({} when it has none). cards: cards.json already loaded."""
-    entry = (load_cards() if cards is None else cards).get(card)
-    games = entry.get("games") if isinstance(entry, dict) else None
+    games = saved_card(card, cards).get("games")
     return games if isinstance(games, dict) else {}
 
 
 def card_excluded(card, cards=None):
     """Games a card opted out of, {system bucket: [bucket keys]}: dropped from what its sets sync there.
     cards: cards.json already loaded."""
-    entry = (load_cards() if cards is None else cards).get(card)
-    excluded = entry.get("excluded") if isinstance(entry, dict) else None
+    excluded = saved_card(card, cards).get("excluded")
     return excluded if isinstance(excluded, dict) else {}
 
 
