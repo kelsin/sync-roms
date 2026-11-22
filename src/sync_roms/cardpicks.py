@@ -128,6 +128,8 @@ class CardPicks:
         bucket = key.partition("/")[0]
         if bucket in self._systems:
             return self._systems[bucket].states(self.cover()).get(key, False)
+        if key in self.locked_from.get(bucket, {}):
+            return True
         return self.full(bucket) or ((any(g.get("bucket") == key for g in self.picks_of(bucket)) or key in self.cover())
                                      and key not in self.excluded_of(bucket))
 

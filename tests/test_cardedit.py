@@ -813,6 +813,18 @@ class Flow(DataDir):
             self.assertEqual(self.read("cards.json"), before)
             self.assertEqual(store.card_excluded("c"), {})
 
+    def test_v_leaves_a_collection_variant_alone(self):
+        self.with_variants(self.RED)
+        self.favs()
+        self.card(collections=["favs"])
+        before = self.read("cards.json")
+
+        def on_then_v(labels, kw):
+            self.assertTrue(kw["row_note"](labels.index("Ruby.zip")).endswith("✅ on the card (v removes it)"))
+            return (cardedit.VARIANT_KEY, labels.index("Ruby.zip"))
+        self.run_system(on_then_v, lambda labels, kw: kw["session"]["sel"])
+        self.assertEqual(self.read("cards.json"), before)
+
     def test_v_with_two_variants_opens_a_picker(self):
         self.with_variants(self.RED, {"bucket": "psx/x.chd", "note": "PS1: x"})
         self.card()

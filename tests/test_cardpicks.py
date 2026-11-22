@@ -93,6 +93,23 @@ class Picks(Flow):
         sp, n = self.keep(self.picks(), "gba/Ruby.zip")
         self.assertEqual((n, sp.games), (0, []))
 
+    def test_a_collection_game_on_a_system_not_shown_is_on_the_card(self):
+        self.favs()
+        self.card(collections=["favs"])
+        p = self.picks()
+        self.assertTrue(p.on_card("gb/Red.gb"))
+        self.assertFalse(p.on_card("gb/Blue.gb"))
+        p.toggle_variant(self.RED)
+        self.assertFalse(p.save())
+        self.assertEqual(store.card_games("c"), {})
+
+    def test_a_surprise_game_on_a_system_not_shown_is_on_the_card(self):
+        self.card(surprises=[{"title": "Red", "system": "gb", "bucket": "gb/Red.gb"}])
+        p = self.picks()
+        self.assertTrue(p.on_card("gb/Red.gb"))
+        p.toggle_variant(self.RED)
+        self.assertFalse(p.save())
+
     def test_system_is_built_once_per_bucket(self):
         self.card()
         p = self.picks()
