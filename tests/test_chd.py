@@ -23,6 +23,7 @@ XISO = {"chd": {"mode": "xiso", "m3u": False}}
 ZAR = {"chd": {"mode": "zar", "m3u": False}}
 XISO_TAG = b"\0" * 31337 + b"in!xiso!2.7.1"
 CUE = 'FILE "Game (Track 1).bin" BINARY\n  TRACK 01 MODE2/2352\nFILE "Game (Track 2).bin" BINARY\n'
+SAME_DISC = "SHA1:         aa\n"  # chdman info, the same for every chd: an existing chd holds the disc being converted
 GDI = '3\n1 0 4 2352 track01.bin 0\n2 600 0 2352 "track 02.raw" 0\n3 45000 4 2352 track03.bin 0\n'
 
 
@@ -210,10 +211,52 @@ class ChdTest(unittest.TestCase):
         self.touch("Game.zip")
         self.touch("Game.chd")
         fake = FakeTools(archive=["Game.cue", "Game (Track 1).bin", "Game (Track 2).bin"])
-        with mock.patch.object(external, "run_tool", fake):
+        with mock.patch.object(external, "run_tool", fake), mock.patch.object(external, "tool_output", return_value=SAME_DISC):
             error = chd.chd_archive(self.tools, CD["chd"], os.path.join(self.dir, "Game.zip"))
         self.assertIsNone(error)
         self.assertEqual(self.files(), ["Game.chd"])
+        self.assertEqual([c[1] for c in fake.calls if c[0] == "chdman"], ["createcd", "verify"])
+
+    def test_source_whose_chd_name_holds_another_disc_is_kept(self):
+        iso = os.path.join(self.dir, "Game.iso")
+        for sha1 in (lambda cmd: "SHA1:         " + ("aa" if cmd[-1].endswith(".part") else "bb"), lambda cmd: None):
+            self.touch("Game.zip", "Game.iso")
+            self.touch("Game.chd", text="another disc")
+            fake = FakeTools(archive=["Game.cue", "Game (Track 1).bin", "Game (Track 2).bin"])
+            with mock.patch.object(external, "run_tool", fake), mock.patch.object(external, "tool_output", sha1):
+                self.assertEqual(chd.chd_archive(self.tools, CD["chd"], os.path.join(self.dir, "Game.zip")),
+                                 "Game.chd already exists and doesn't match this disc")
+                self.assertEqual(chd.chd_image(self.tools, CD["chd"], iso, [iso]), "Game.chd already exists and doesn't match this disc")
+            self.assertEqual(self.files(), ["Game.chd", "Game.iso", "Game.zip"])
+            with open(os.path.join(self.dir, "Game.chd")) as f:
+                self.assertEqual(f.read(), "another disc")
+
+    def test_two_archives_of_one_disc_name_keep_one(self):
+        self.touch("psx/Game (USA) (Rev 1).zip", "psx/Game (USA).zip")
+        psx = os.path.join(self.dir, "psx")
+
+        def fake_run(cmd, progress=None, tty=False):  # each archive's disc, and the chd made from it, hold the archive's name
+            if cmd[0] == "7z":
+                with open(os.path.join(next(a for a in cmd if a.startswith("-o"))[2:], "Game (USA).cue"), "w") as f:
+                    f.write(os.path.basename(cmd[-1]))
+            elif cmd[1] == "createcd":
+                with open(cmd[cmd.index("-i") + 1]) as f, open(cmd[cmd.index("-o") + 1], "w") as chd_file:
+                    chd_file.write(f.read())
+
+        def info(cmd):
+            with open(cmd[-1]) as f:
+                return "SHA1:         " + f.read().encode().hex()
+
+        with mock.patch.object(external, "run_tool", fake_run), mock.patch.object(external, "find_tool", lambda t: t), \
+                mock.patch.object(external, "tool_output", info), contextlib.redirect_stdout(io.StringIO()) as out:
+            self.assertEqual(chd.chd_command(SimpleNamespace(chd=self.dir, dry_run=False)), 1)
+        kept = [n for n in os.listdir(psx) if n.endswith(".zip")]  # the jobs run in parallel: either archive may come second
+        self.assertEqual(len(kept), 1)
+        self.assertEqual(sorted(os.listdir(psx)), sorted(kept + ["Game (USA).chd"]))
+        with open(os.path.join(psx, "Game (USA).chd")) as f:
+            self.assertEqual({f.read(), kept[0]}, {"Game (USA) (Rev 1).zip", "Game (USA).zip"})
+        self.assertIn(f"❌ psx/{kept[0]}: Game (USA).chd already exists and doesn't match this disc (kept)", out.getvalue())
+        self.assertIn("1 converted, 1 failed", out.getvalue())
 
     def test_failed_archive_is_kept_and_leaves_no_temp_folder(self):
         self.touch("Game.zip")
@@ -365,7 +408,7 @@ class ChdTest(unittest.TestCase):
 
     def test_chd_image_never_deletes_its_own_output(self):
         self.touch("Game.cue", "Game.chd")
-        with mock.patch.object(external, "run_tool", FakeTools()):
+        with mock.patch.object(external, "run_tool", FakeTools()), mock.patch.object(external, "tool_output", return_value=SAME_DISC):
             chd.chd_image(self.tools, CD["chd"], os.path.join(self.dir, "Game.cue"),
                           [os.path.join(self.dir, n) for n in ("Game.cue", "Game.chd")])
         self.assertEqual(self.files(), ["Game.chd"])
@@ -653,7 +696,7 @@ class ChdTest(unittest.TestCase):
         for fake_move in (move, full):
             self.touch("Game.zip")
             with mock.patch.object(external, "run_tool", FakeTools(archive=["Game.iso", "Game.pkg"])), \
-                    mock.patch.object(chd.shutil, "move", fake_move):
+                    mock.patch.object(chd.shutil, "move", fake_move), mock.patch.object(external, "tool_output", return_value=SAME_DISC):
                 error = chd.chd_archive(self.tools, PS3["chd"], os.path.join(self.dir, "Game.zip"), scratch=local)
             if fake_move is move:
                 self.assertIsNone(error)
