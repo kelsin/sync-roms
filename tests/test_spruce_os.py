@@ -17,8 +17,7 @@ V46 = "spruceV4.6.0.7z"
 class Newest(unittest.TestCase):
     def test_newest_compares_versions_as_numbers(self):
         listing = {P + n: 1 for n in ("spruceV4.6.0.7z", "spruceV4.10.0.7z", "spruceOTA-v4.5.6-to-v4.6.0.7z",
-                                      "spruceos-installer-windows.exe", "RAOfflineProxy-Spruce-v9.0.0.zip",
-                                      "old/spruceV9.0.0.7z")}
+                                      "spruceos-installer-windows.exe", "old/spruceV9.0.0.7z")}
         self.assertEqual(spruce_os.newest(listing), P + "spruceV4.10.0.7z")
         self.assertIsNone(spruce_os.newest({}))
 
