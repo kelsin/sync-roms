@@ -533,6 +533,77 @@ class SyncFlowTest(unittest.TestCase):
         _, _, _, root, _ = self.run_sync()
         self.assertIsNotNone(root)
 
+    def install_steps(self, games, dry_run, args=(), result=0, staged=False):
+        """A sync of a card with these games and nothing to download, its installer steps and the old-driver prune
+        replaced by stubs that return result: (exit code, the steps as they were called, whether the card is marked for
+        cleaning, output). PICO-8 says it wrote when it is given a list for that; spruceOS says so when staged."""
+        calls = []
+
+        def pico8_run(card, layout_name, base, dry_run, wrote=None):
+            calls.append(("pico8", dry_run, wrote is not None))
+            if wrote is not None:
+                wrote.append("pico8")
+            return result
+
+        def spruce_install(card, layout_name, base, dry_run, wrote=None, keep=False):
+            calls.append(("spruce", dry_run, keep))
+            if staged:
+                wrote.append("7z")
+            return result
+
+        def prune(card, drivers_dir, current, dry_run, keep=False):
+            calls.append(("prune", dry_run, None if dry_run else keep))  # a dry run never reads keep
+            return ["old.zip"]
+        code, out, _, root, _ = self.run_sync(
+            manifest={**MANIFEST, "systems": [{**MANIFEST["systems"][0], "games": games}]}, dry_run=dry_run, plan=[], args=args,
+            extra=[(cli.pico8, "run", pico8_run), (cli.spruce_os, "install", spruce_install), (cli.drivers, "prune", prune),
+                   (cli.onion_surprise, "install", lambda card, layout_name, base, dry_run: calls.append(("surprise app", dry_run)) or result),
+                   (cli.raofflineproxy, "install", lambda card, layout_name, base, dry_run: calls.append(("raofflineproxy", dry_run)) or result),
+                   (cli.onion_surprise, "write_list", lambda card, layout_name, base, roms_dir, systems, dry_run: calls.append(("surprise list", dry_run))),
+                   (cli.cardfs, "flush", lambda: calls.append("flush"))])
+        self.assertEqual(calls.pop(), "flush")  # the one every sync ends with
+        return code, calls, root is not None, out
+
+    def test_a_card_with_nothing_to_sync_still_runs_the_installers(self):
+        for dry_run in (False, True):
+            for args, keep in (((), False), (("--no-delete",), True)):
+                with self.subTest(dry_run=dry_run, keep=keep):
+                    code, calls, marked, out = self.install_steps([], dry_run, args)
+                    self.assertEqual(calls, [("pico8", dry_run, False), ("surprise app", dry_run), ("raofflineproxy", dry_run),
+                                             ("surprise list", dry_run), ("spruce", dry_run, keep)])
+                    self.assertEqual((code, marked), (0, False))  # PICO-8 isn't asked what it wrote: the card isn't marked
+                    self.assertIn("has nothing to sync", out)
+        self.assertEqual(self.install_steps([], False, result=1)[0], 1)
+
+    def test_staging_spruceos_marks_the_card_for_cleaning(self):
+        for args, marked in (((), True), (("--no-clean",), False)):
+            with self.subTest(args=args):
+                self.assertEqual(self.install_steps([], False, args, staged=True)[2], marked)
+
+    def test_a_dry_run_runs_the_installers_dry_and_lists_the_old_drivers(self):
+        for args, keep, line in (((), False, "would delete"), (("--no-delete",), True, "--no-delete: keeping 1 old driver(s)")):
+            with self.subTest(keep=keep):
+                code, calls, marked, out = self.install_steps(MANIFEST["systems"][0]["games"], True, args, result=1)
+                self.assertEqual(calls, [("prune", True, None), ("pico8", True, False), ("surprise app", True), ("raofflineproxy", True),
+                                         ("spruce", True, keep), ("surprise list", True)])
+                self.assertEqual((code, marked), (0, False))
+                self.assertEqual([x for x in out.split("\n") if "old.zip" in x or "old driver" in x][0].count(line), 1)
+                self.assertEqual("would delete" in out, not keep)
+                self.assertIn(os.path.join("Drivers", "old.zip"), out)
+
+    def test_a_sync_prunes_the_old_drivers_runs_the_installers_and_stages_spruceos_last(self):
+        for args, keep, line in (((), False, "🧹 Removed old driver old.zip"), (("--no-delete",), True, "--no-delete: keeping 1 old driver(s)")):
+            with self.subTest(keep=keep):
+                code, calls, marked, out = self.install_steps(MANIFEST["systems"][0]["games"], False, args)
+                self.assertEqual(calls, [("prune", False, keep), ("pico8", False, True), ("surprise app", False), ("raofflineproxy", False),
+                                         ("surprise list", False), "flush", ("spruce", False, keep)])
+                self.assertEqual((code, marked), (0, True))  # PICO-8 wrote: the card is marked for cleaning
+                self.assertIn(line, out)
+                self.assertEqual("Removed old driver" in out, not keep)
+        code, _, _, out = self.install_steps(MANIFEST["systems"][0]["games"], False, result=1)
+        self.assertEqual(code, 1)
+        self.assertIn("Done with 4 failure(s)", out)
+
     def test_stale_media_listed_before_removal(self):
         _, out, _, _, left = self.run_sync(stale=("a.png", "b.png"))
         self.assertIn("2 media file(s)", out)

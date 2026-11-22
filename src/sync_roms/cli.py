@@ -1063,17 +1063,26 @@ def sync_card(args):
     surprise.fill_surprises(card, (device, layout_name), systems, args.dry_run)
     if not args.dry_run:
         reload_changes()
+
+    def install_apps(dry_run, wrote=None):
+        """Put PICO-8 (wrote, a list, gets what it put), the Surprise app and RAOfflineProxy on the card. The failure count."""
+        return (pico8.run(card, layout_name, base, dry_run, wrote) + onion_surprise.install(card, layout_name, base, dry_run)
+                + raofflineproxy.install(card, layout_name, base, dry_run))
+
+    def stage_spruce(dry_run):
+        """Stage the newest spruceOS on a spruce card. The failure count."""
+        wrote = []
+        failed = spruce_os.install(card, layout_name, base, dry_run, wrote, keep=args.no_delete)
+        if clean_card and wrote:
+            clean._clean_root = base
+        return failed
+
     chosen = [s for s in systems if available(s)]
     if not chosen:
-        failed = pico8.run(card, layout_name, base, args.dry_run)
-        failed += onion_surprise.install(card, layout_name, base, args.dry_run)
-        failed += raofflineproxy.install(card, layout_name, base, args.dry_run)
+        failed = install_apps(args.dry_run)
         if onion_surprise.write_list(card, layout_name, base, roms_dir, systems, args.dry_run) and clean_card:
             clean._clean_root = base
-        spruce_wrote = []
-        failed += spruce_os.install(card, layout_name, base, args.dry_run, spruce_wrote, keep=args.no_delete)
-        if clean_card and spruce_wrote:
-            clean._clean_root = base
+        failed += stage_spruce(args.dry_run)
         print(ui.yellow(f"👋 {card} has nothing to sync."))
         return 1 if failed else 0
     print(ui.bold(f"\n🔎 Checking {len(chosen)} system(s) against storage..."))
@@ -1335,6 +1344,15 @@ def sync_card(args):
         if layout_name == "rocknix" and (plan["writes"] or plan["deletes"] or art):
             print(f"💖 Run {os.path.basename(rocknix_collections.SCRIPT)[:-3]} from Ports on the device to install them")
 
+    def prune_drivers(dry_run):
+        """Remove the drivers an earlier sync copied that the card doesn't get now, saying which (kept with --no-delete)."""
+        old = drivers.prune(card, drivers_dir, [os.path.basename(p) for _, p, _ in driver_jobs], dry_run, keep=args.no_delete)
+        if args.no_delete:
+            list_kept([os.path.join(drivers_dir, name) for name in old], "old driver(s)")
+        else:
+            for name in old:
+                print(f"  {ui.red('would delete')} {os.path.join(drivers_dir, name)}" if dry_run else ui.green(f"🧹 Removed old driver {name}"))
+
     capacity = budget.card_capacity(saved or {}) if surprise.enabled(saved or {}) else None
     if capacity:
         used = budget.card_usage(cardedit.card_entry(card, (device, layout_name)), systems).bytes
@@ -1364,16 +1382,9 @@ def sync_card(args):
             print(f"  {ui.yellow('would move')} {path} {ui.dim('→')} {job[1]}")
         for path in extras:
             print(f"  {ui.red('would delete')} {path}")
-        old_drivers = drivers.prune(card, drivers_dir, [os.path.basename(p) for _, p, _ in driver_jobs], True)
-        if args.no_delete:
-            list_kept([os.path.join(drivers_dir, name) for name in old_drivers], "old driver(s)")
-        else:
-            for name in old_drivers:
-                print(f"  {ui.red('would delete')} {os.path.join(drivers_dir, name)}")
-        pico8.run(card, layout_name, base, True)
-        onion_surprise.install(card, layout_name, base, True)
-        raofflineproxy.install(card, layout_name, base, True)
-        spruce_os.install(card, layout_name, base, True, keep=args.no_delete)
+        prune_drivers(True)
+        install_apps(True)
+        stage_spruce(True)
         stale_count = 0
         if scrapes:
             stale_files = scrape_plan.stale_media(layout_name, manifest['systems'], roms_dir, stale_es_dir, base)
@@ -1439,16 +1450,9 @@ def sync_card(args):
     if driver_entries:
         failed += downloads.run_downloads(driver_todo, "Drivers", "🎮", drivers_dir, failures)
     # also when the card gets no drivers now (another device or layout): the ones sync copied before go
-    old_drivers = drivers.prune(card, drivers_dir, [os.path.basename(p) for _, p, _ in driver_jobs], False, keep=args.no_delete)
-    if args.no_delete:
-        list_kept([os.path.join(drivers_dir, name) for name in old_drivers], "old driver(s)")
-    else:
-        for name in old_drivers:
-            print(ui.green(f"🧹 Removed old driver {name}"))
+    prune_drivers(False)
     pico8_wrote = []
-    failed += pico8.run(card, layout_name, base, False, pico8_wrote)
-    failed += onion_surprise.install(card, layout_name, base, False)
-    failed += raofflineproxy.install(card, layout_name, base, False)
+    failed += install_apps(False, pico8_wrote)
     if theme_todo:
         failed += downloads.run_downloads(theme_todo, "Themes", "🎨", os.path.join(base, themes_dir), failures)
     prefixed = 0
@@ -1493,10 +1497,7 @@ def sync_card(args):
     except OSError as e:
         failed += 1
         failures.append(("frontend settings", str(e)))
-    spruce_wrote = []  # last: the 7z is large, and the card's other writes come first
-    failed += spruce_os.install(card, layout_name, base, False, spruce_wrote, keep=args.no_delete)
-    if clean_card and spruce_wrote:
-        clean._clean_root = base
+    failed += stage_spruce(False)  # last: the 7z is large, and the card's other writes come first
     if failures:
         report_failures(failures)
     if not failed and not args.no_eject and usersettings.load_settings().get("eject", True) is not False:
