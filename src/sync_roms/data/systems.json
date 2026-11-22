@@ -439,7 +439,7 @@
       "rocknix": "fds",
       "nextui": "Famicom Disk System (FDS)"
     },
-    "muos_catalogue": "Nintendo Family Computer Disk System",
+    "muos_catalogue": "Nintendo Famicom Disk System",
     "bios": {
       "files": [
         "disksys.rom",
@@ -585,11 +585,12 @@
       "onion": null,
       "allium": null,
       "spruce": "PC98",
-      "muos": null,
+      "muos": "pc98",
       "emudeck": "pc98",
       "rocknix": "pc98",
       "nextui": null
     },
+    "muos_catalogue": "NEC PC98",
     "bios": {
       "files": [
         "np2kai/font.bmp",
@@ -1627,7 +1628,7 @@
       "rocknix": "ngp",
       "nextui": "Neo Geo Pocket (NGP)"
     },
-    "muos_catalogue": "SNK Neo Geo Pocket",
+    "muos_catalogue": "SNK Neo Geo Pocket - Color",
     "bios": {
       "files": [],
       "libretro_cores": [
@@ -2806,11 +2807,12 @@
       "onion": null,
       "allium": null,
       "spruce": "SEGASGONE",
-      "muos": null,
+      "muos": "sg1000",
       "emudeck": "sg-1000",
       "rocknix": "sg-1000",
       "nextui": "Sega SG-1000 (SG1000)"
     },
+    "muos_catalogue": "Sega SG-1000",
     "bios": {
       "files": [],
       "libretro_cores": [
@@ -2830,11 +2832,12 @@
       "onion": null,
       "allium": null,
       "spruce": "MSX",
-      "muos": null,
+      "muos": "msx1",
       "emudeck": "msx",
       "rocknix": "msx",
       "nextui": "MSX (MSX)"
     },
+    "muos_catalogue": "Microsoft MSX",
     "bios": {
       "files": [
         "MSX.ROM",
@@ -3183,11 +3186,12 @@
       "onion": null,
       "allium": null,
       "spruce": "MSX",
-      "muos": null,
+      "muos": "msx2",
       "emudeck": "msx2",
       "rocknix": "msx2",
       "nextui": "MSX2 (MSX)"
     },
+    "muos_catalogue": "Microsoft MSX",
     "bios": {
       "files": [
         "MSX.ROM",
@@ -3610,11 +3614,12 @@
       "onion": null,
       "allium": null,
       "spruce": "COMMODORE",
-      "muos": null,
+      "muos": "c64",
       "emudeck": "c64",
       "rocknix": "c64",
       "nextui": "Commodore 64 (C64)"
     },
+    "muos_catalogue": "Commodore C64",
     "bios": {
       "files": [],
       "libretro_cores": [
