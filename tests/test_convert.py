@@ -335,6 +335,14 @@ class FixesTest(ConvertTest):
             touch(self.p("Roms", "GBA", f))
         self.assertEqual(convert.plan_media(self.base, SYSTEMS, "onion", O, "onion", O), [])
 
+    def test_media_in_a_folder_the_new_layout_uses_for_another_system_stays(self):
+        A = {"roms_dir": "Roms"}
+        systems = [{"bucket": "mame", "folders": {"allium": "ARCADE", "rocknix": "mame"}},
+                   {"bucket": "arcade", "folders": {"allium": None, "rocknix": "arcade"}}]
+        touch(self.p("roms", "arcade", "gamelist.xml"))
+        self.assertEqual(convert.plan_media(self.base, systems, "allium", A, "rocknix", K), [])
+        self.assertEqual(convert.plan_media(self.base, systems, "rocknix", K, "allium", A), [])
+
     def test_remove_media_prunes_emptied_folder(self):
         for f in ("gamelist.xml", "images/a.png"):
             touch(self.p("roms", "gba", f))

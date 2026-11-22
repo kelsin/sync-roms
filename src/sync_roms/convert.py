@@ -307,19 +307,20 @@ def _media_names(layout_name):
 def plan_media(base, systems, old_name, old, new_name, new):
     """[path]: the old layout's scraped media in its ROM folders (gamelist and media folders), which the new layout
     doesn't use, so nothing reads them after the convert; sync scrapes the new layout's own. A name the new layout also
-    uses in the same folder stays."""
+    uses stays in any folder the new layout uses, for whichever system."""
     found, seen = [], set()
     old_names = _media_names(old_name)
     same = _media_names(new_name)
+    keep_dirs = {f"{new['roms_dir']}/{s['folders'][new_name]}".lower() for s in systems if s["folders"].get(new_name)}
     for system in systems:
-        old_folder, new_folder = system["folders"].get(old_name), system["folders"].get(new_name)
+        old_folder = system["folders"].get(old_name)
         if not old_folder or old_folder in seen:
             continue
         seen.add(old_folder)
         folder = _exact_dir(base, *old["roms_dir"].split("/"), *old_folder.split("/"))
         if not folder:
             continue
-        shared = same if old["roms_dir"].lower() == new["roms_dir"].lower() and old_folder.lower() == (new_folder or "").lower() else set()
+        shared = same if f"{old['roms_dir']}/{old_folder}".lower() in keep_dirs else set()
         found += [os.path.join(folder, n) for n in sorted(_listed(folder)) if n.lower() in old_names - shared]
     return found
 
