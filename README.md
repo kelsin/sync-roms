@@ -103,7 +103,7 @@ A run ends with one line: the files and bytes downloaded, the time it took, the 
 | `knulli` | `<system>/images`, `videos`, `manuals`, named `Game-image.png`, `-thumb`, `-marquee`, `-fanart`, `-boxback`, `-titleshot`, `-video`, `-manual` | `<system>/gamelist.xml` with name, description, rating, date and the media tags |
 | `rocknix` | same as `knulli` | same as `knulli` |
 | `onion` | `<system>/Imgs/Game.png`, the 250x360 box art [made when scraping](#scraping-from-screenscraper-scrape) | `<system>/miyoogamelist.xml` with name and image |
-| `spruce` | same `Imgs/` box art as `onion` | `<system>/miyoogamelist.xml` with name and image |
+| `spruce` | `<system>/Imgs/`, `Imgs_med/`, `Imgs_small/` QOI box art (`Game.qoi`), [made when scraping](#scraping-from-screenscraper-scrape) or by `scrape art`; never PNG, so PyUI doesn't prompt to convert | `<system>/miyoogamelist.xml` with name and, when the ROM has art, an `image` pointing at the `.qoi` |
 | `allium` | same `Imgs/` box art as `onion` | a full `<system>/gamelist.xml`: name, image, rating, date, developer, publisher and genre |
 | `muos` | `MUOS/info/catalogue/<system>/box/Game.png` (cover, then 3D box) and `preview/Game.png` (screenshot, then title screen), as uploaded | `text/Game.txt` with the description |
 | `nextui` | `Roms/<folder>/.media/<ROM name>.png` (the picture the theme shows) | none |
@@ -113,8 +113,8 @@ A run ends with one line: the files and bytes downloaded, the time it took, the 
 - muOS keeps its media in folders of its own, flat even for ROMs in subfolders. An existing `.txt` is rewritten only when the description differs.
 - Knulli's main image is the miximage, or the screenshot if there is none.
 - Existing gamelists are updated in place: only these tags are set, so favorites, play counts and an `<alternativeEmulator>` block stay.
-- ROMs in subfolders get no Onion art. NextUI's `.media` picture is the same kind of file, so ROMs of the same name in different subfolders of one system share it.
-- A PICO-8 `.p8.png` cart with no scraped picture is used as its own picture (not on muOS).
+- ROMs in subfolders get no Onion or Spruce art. NextUI's `.media` picture is the same kind of file, so ROMs of the same name in different subfolders of one system share it.
+- A PICO-8 `.p8.png` cart with no scraped picture is used as its own picture (not on muOS or Spruce).
 
 The clean-up of step 7 looks at every system in the layout, not only the ones you synced, and leaves systems whose ROM folder doesn't exist, and folders that aren't systems in `src/sync_roms/data/systems.json` (like ES-DE's `androidapps`), alone. It assumes the card's art comes from this app: on muOS it removes `box`, `preview` and `text` files in `MUOS/info/catalogue/<system>/` (names compared ignoring case; systems that share a catalogue folder, like the arcade ones, are judged together; `grid`, `manual`, `overlay` and the other catalogue areas are left alone). A muOS folder whose ROM folders hold no ROMs is skipped, so art isn't wiped from a card whose ROMs are elsewhere (muOS can keep them on SD2). Art you add by hand or install from a `.muxcat` set for ROMs that aren't on the card is removed too.
 
@@ -181,7 +181,7 @@ Every mode is a command (plain `sync-roms [CARD]` syncs a card):
 | `layouts [ID]` | list the layouts, or one layout's folders and the devices that run it | |
 | `upload [DIR]` | [upload ROMs](#uploading-roms-upload) to storage | `--upload` |
 | `diff [DIR]` | list the ROMs in only `DIR` or only the storage folder of a system you pick (guessed from the folder name, as in `upload`). Same path and size is the same file; the rest are matched by content, as `upload --replace` does | `--diff` |
-| `scrape [SYSTEM \| match SYSTEM ROM GAME \| review [SYSTEM] \| missing [SYSTEM]]` / `scrape --set-credentials` | [scrape ROMs](#scraping-from-screenscraper-scrape) with no metadata from ScreenScraper, review the non-game and unknown ones, or list them all | `--scrape`, `--scrape-match`, `--scrape-review`, `--scrape-missing` |
+| `scrape [SYSTEM \| match SYSTEM ROM GAME \| review [SYSTEM] \| missing [SYSTEM] \| art [SYSTEM]]` / `scrape --set-credentials` | [scrape ROMs](#scraping-from-screenscraper-scrape) with no metadata from ScreenScraper, review the non-game and unknown ones, list them all, or make Onion and Spruce art for what storage holds | `--scrape`, `--scrape-match`, `--scrape-review`, `--scrape-missing` |
 | `clean scrapes` | [remove scrapes](#cleaning-scraped-data-clean-scrapes) of ROMs not in storage | `--clean-scrapes` |
 | `playlist [DIR]` | [fix `.m3u` playlists](#fixing-playlists-playlist) | `--m3u` |
 | `convert [DIR]` | [convert disc images](#converting-disc-images-convert) to CHD, xiso or zar | `--cd`, `--chd` |
@@ -194,7 +194,7 @@ Every mode is a command (plain `sync-roms [CARD]` syncs a card):
 | `check` | validate your JSON data files (`cards.json`, `surprises.json`, the device overlay, the sets and your collections) | |
 | `completion bash\|zsh\|fish` | shell completion script | |
 
-The old flags keep working; each is its own mode and two can't be combined. Flags that make no sense for a command (`--dry-run` with `games edit`, `--replace` without `upload`) are refused rather than ignored, and abbreviations like `--up` are not accepted. A card folder named like a command: write `./edit`.
+The old flags keep working; each is its own mode and two can't be combined. Flags that make no sense for a command (`--dry-run` with `games edit`, `--replace` without `upload` or `scrape art`) are refused rather than ignored, and abbreviations like `--up` are not accepted. A card folder named like a command: write `./edit`.
 
 ### Options
 
@@ -220,8 +220,10 @@ For one command:
 | `--no-delete`, `--no-clean`, `--no-eject` | `sync` | Never delete from the card (what would have been deleted is listed instead); skip the end-of-run card tidy; leave the card mounted |
 | `--size SIZE` | `cards new`, `cards set` | The card's size as people read it (`256`, `512GB`, `1TB`), shown by `cards list` and on sync |
 | `--card NAME` | `games` | The card whose games to change (required) |
-| `--replace` | `upload` | Make the storage folder match `DIR` |
-| `--system ID` | `diff`, `scrape`, `scrape missing` | `diff`: the system to compare with, instead of the picker. `scrape`, `scrape missing`: only that storage folder (the same as `scrape SYSTEM`) |
+| `--replace` | `upload`, `scrape art` | `upload`: make the storage folder match `DIR`. `scrape art`: remake the art files that already exist |
+| `--system ID` | `diff`, `scrape`, `scrape missing`, `scrape art` | `diff`: the system to compare with, instead of the picker. `scrape`, `scrape missing`, `scrape art`: only that storage folder (the same as `scrape SYSTEM`) |
+| `--for onion\|spruce\|both` | `scrape art` | Which art to make (default both) |
+| `--workers N` | `scrape art` | How many images to convert at once (default: your CPU count) |
 | `--all` | `scrape`, `scrape missing` | Every ROM in storage, not only the games your cards reference |
 | `--retry` | `scrape` | Also try the ROMs ScreenScraper didn't know before (ROMs whose lookup failed are always tried again; non-games never are) and, with `--fill-media`, the ROMs missing only media it didn't offer |
 | `--fill-media` | `scrape` | Also scrape ROMs that have metadata but lack some media type in storage; their metadata is kept. Media types ScreenScraper didn't offer for a ROM are remembered, and a ROM missing only those isn't asked for again until `--retry` |
@@ -232,7 +234,7 @@ For one command:
 | `--retroarch DIR` | `saves stash`, `saves apply` | Read or write RetroArch's saves and states in `DIR` instead of the card's RetroArch folder |
 | `--count N` | `download pico8` | Stop after N carts to add or upgrade |
 | `--bucket-keys` | `check` | Also verify with the read-only profile that every game key in your cards and sets exists in storage |
-| `-e`, `--edit`, `--upload [DIR]`, `-c`, `--clean-scrapes`, `--m3u [DIR]`, `--cd [DIR]`, `--chd [DIR]`, `--install-tools`, `--mirror [DIR]`, `--use-mirror DIR`, `--clear-mirror`, `--diff [DIR]`, `--devices`, `--scrape`, `--scrape-match SYSTEM ROM GAME`, `--scrape-review [SYSTEM]`, `--scrape-missing [SYSTEM]` | (old flags) | Use the command beside each in the Commands table (`--chd` is the older name of `--cd`) |
+| `-e`, `--edit`, `--upload [DIR]`, `-c`, `--clean-scrapes`, `--m3u [DIR]`, `--cd [DIR]`, `--chd [DIR]`, `--install-tools`, `--mirror [DIR]`, `--use-mirror DIR`, `--clear-mirror`, `--diff [DIR]`, `--devices`, `--scrape`, `--scrape-match SYSTEM ROM GAME`, `--scrape-review [SYSTEM]`, `--scrape-missing [SYSTEM]`, `--scrape-art [SYSTEM]` | (old flags) | Use the command beside each in the Commands table (`--chd` is the older name of `--cd`) |
 
 | Environment variable | Description |
 | --- | --- |
@@ -560,7 +562,7 @@ Ignores are written when the review ends, by `q`, Ctrl-C or the last ROM, to `ig
 
 **What is written** under `scrapes/<system>/`: the entry in `metadata.json` (merged with what is there) and one folder per media type (`3dboxes`, `backcovers`, `covers`, `fanart`, `manuals`, `marquees`, `miximages`, `physicalmedia`, `screenshots`, `titlescreens`, `videos`), plus the Onion images. Media a ROM already has there is kept: those types aren't downloaded, and the confirm says how many files are kept. Media is downloaded only over https from screenscraper.fr, and only images and PDF manuals (up to 50 MiB each) and MP4 videos (up to 512 MiB) are stored; a file over its limit or outside screenscraper.fr is skipped with a warning and the ROM keeps its other media. `--skip-media TYPES` takes those folder names.
 
-**Onion images.** The box art of Onion, Allium and Spruce cards is made when the ROM is scraped: the cover (then the 3D box, then the screenshot) is resized to a PNG that fits 250x360 and stored as `scrapes/<system>/onion/<ROM>.png`, so a sync just downloads it. It is made only from art downloaded in the same run; when that art is already in storage, or the ROM already has the Onion image, none is made.
+**Onion and Spruce images.** The box art of Onion, Allium and Spruce cards is made when the ROM is scraped: the cover (then the miximage) is resized to a PNG that fits 250x360 and stored as `scrapes/<system>/onion/<ROM>.png`, and to QOI files shrunk to fit and never enlarged: `scrapes/<system>/spruce/<ROM>.qoi` (640x480), `spruce_med/` (400x300) and `spruce_small/` (200x200), the last two only when they differ from the size above. A PICO-8 cart with neither uses its own `.p8.png`. ROMs in subfolders get none. It is made only from art downloaded in the same run; when that art is already in storage, or the ROM already has the image, none is made. `scrape art [SYSTEM | --system ID] [--for onion|spruce|both] [--dry-run] [--replace] [--workers N]` makes them for what storage already holds: `--dry-run` reads only listings and reports counts per system and target, existing files are skipped unless `--replace`, and the conversion runs in one process per core. Spruce's need Pillow; Onion's also work with macOS `sips`. A ROM with no Spruce art gets none on the card, and a sync suggests `scrape art --for spruce`.
 
 **Shared state** in storage's `scrapes/`, so every machine sees it: per system `scrapes/<system>/matches.json` (your manual matches), `unknown.json` (the ROMs ScreenScraper didn't know), `nomedia.json` (the media types ScreenScraper didn't offer for each ROM) and `hashes.json` (file hashes), and `scrapes/notgames.json` (the non-games waiting for review, and the ROMs the review kept for later). Each is read through a copy in `storage/` in the data folder, and a write merges into the file in storage rather than replacing it.
 
