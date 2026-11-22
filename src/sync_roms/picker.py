@@ -187,18 +187,23 @@ def line_key(text, pos, k):
 
 
 def move_key(k, cur, last, view):
-    """The new cursor row for a movement key (arrows, ^N/^P, PgUp/PgDn/^V, Home/End), or None if k isn't one."""
-    if k in ("up", "ctrl+p"):
+    """The new cursor row for a movement key (arrows, ^N/^P, PgUp/PgDn/^V, Home/End, and vim's j/k, ^B/^F, g/G and
+    the half pages ^U/^D, which only get here while no text is being typed), or None if k isn't one."""
+    if k in ("up", "ctrl+p", "k"):
         return max(0, cur - 1)
-    if k in ("down", "ctrl+n"):
+    if k in ("down", "ctrl+n", "j"):
         return min(last, cur + 1)
-    if k == "pageup":
+    if k in ("pageup", "ctrl+b"):
         return max(0, cur - view)
-    if k in ("pagedown", "ctrl+v"):
+    if k in ("pagedown", "ctrl+v", "ctrl+f"):
         return min(last, cur + view)
-    if k == "home":
+    if k == "ctrl+u":
+        return max(0, cur - max(1, view // 2))
+    if k == "ctrl+d":
+        return min(last, cur + max(1, view // 2))
+    if k in ("home", "g"):
         return 0
-    if k == "end":
+    if k in ("end", "G"):
         return max(0, last)
     return None
 
@@ -392,22 +397,6 @@ class _ListModel:
         elif k == "?":
             self.help = help_lines(self.multi, self.hint, self.hidden_count, bool(self.on_note), self.key_help,
                                    self.select_all)
-        elif k == "j":
-            self.cur = min(len(vis) - 1, cur + 1)
-        elif k == "k":
-            self.cur = max(0, cur - 1)
-        elif k == "g":
-            self.cur = 0
-        elif k == "G":
-            self.cur = len(vis) - 1
-        elif k == "ctrl+d":
-            self.cur = min(len(vis) - 1, cur + max(1, self.view // 2))
-        elif k == "ctrl+u":
-            self.cur = max(0, cur - max(1, self.view // 2))
-        elif k == "ctrl+f":
-            self.cur = min(len(vis) - 1, cur + self.view)
-        elif k == "ctrl+b":
-            self.cur = max(0, cur - self.view)
         elif k in ("escape", "q", "ctrl+g"):
             if self.query:
                 self.query, self.qpos = "", 0
