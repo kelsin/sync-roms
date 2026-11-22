@@ -84,22 +84,22 @@ class Pure(unittest.TestCase):
         labels, extras = cardedit.system_labels(card, [GBA, GB, PSX], {"gb"}, usages, full)
         self.assertEqual([l.strip() for l in labels], ["Game Boy Advance", "⭐ Game Boy", "PlayStation"])  # the given order
         self.assertTrue(labels[1].startswith("⭐ "))
-        self.assertEqual(extras[0], [("  4 picked", "green"), ("  2 GB", "dim"), ("  🗂️  9 GB full", "dim")])
-        self.assertEqual(extras[1], [("", "green"), ("", "dim"), ("  🗂️  45 GB full", "dim")])  # nothing picked
-        self.assertEqual(extras[2], [("  1 file", "green"), ("  7 GB", "dim"), ("  🗂️  full system", "cyan")])
+        self.assertEqual(extras[0], [("  🟡 4 picked", "green"), ("  2 GB", "dim"), ("  🗂️  9 GB full", "dim")])
+        self.assertEqual(extras[1], [("  ⚪", "dim"), ("", "dim"), ("  🗂️  45 GB full", "dim")])  # nothing picked
+        self.assertEqual(extras[2], [("  🟢 1 file", "green"), ("  7 GB", "dim"), ("  🗂️  full system", "cyan")])
 
     def test_system_labels_while_full_sizes_are_unknown(self):
         card = {"games": {"psx": {"full_system": True}}}
         usages = {"gba": U(2 * 10 ** 9, 4, False), "gb": U(0, 0, False), "psx": U(0, 0, True)}
         for full in ({}, {"gba": U(0, 0, True), "gb": U(5, 0, True), "psx": U(0, 0, True)}):  # not worked out, no cache
             extras = cardedit.system_labels(card, [GBA, GB, PSX], set(), usages, full)[1]
-            self.assertEqual(extras[0], [("  4 picked", "green"), ("  2 GB", "dim"), ("  🗂️  … full", "dim")])
-            self.assertEqual(extras[1], [("", "green"), ("", "dim"), ("  🗂️  … full", "dim")])
-            self.assertEqual(extras[2], [("  … files", "green"), ("  …", "dim"), ("  🗂️  full system", "cyan")])
+            self.assertEqual(extras[0], [("  🟡 4 picked", "green"), ("  2 GB", "dim"), ("  🗂️  … full", "dim")])
+            self.assertEqual(extras[1], [("  ⚪", "dim"), ("", "dim"), ("  🗂️  … full", "dim")])
+            self.assertEqual(extras[2], [("  🟢 … files", "green"), ("  …", "dim"), ("  🗂️  full system", "cyan")])
 
     def test_an_empty_folder_shows_no_full_size(self):
         extras = cardedit.system_labels({}, [GB], set(), {"gb": U(0, 0, False)}, {"gb": U(16, 0, False)})[1]
-        self.assertEqual(extras, [[]])
+        self.assertEqual(extras, [[("  ⚪", "dim"), ("", "dim"), ("", "dim")]])
 
     def test_set_filter_is_one_system(self):
         self.assertEqual(cardedit.set_filter(SET, GBA), {"gba/Ruby.zip", "gba/Ruby.sav"})
@@ -443,7 +443,7 @@ class Flow(DataDir):
         kw = calls[0][2]
         self.assertEqual(counted(kw, kw["initial"]), 2)  # Ruby here, Red on Game Boy
         extras = self.run_card(returns(None))[0][2]["extras"]
-        self.assertIn(("  1 picked", "green"), extras[0])
+        self.assertIn(("  🟡 1 picked", "green"), extras[0])
 
     def test_system_list_previews_each_system_and_nothing_past_them(self):
         self.card()
@@ -605,7 +605,7 @@ class Flow(DataDir):
             calls = self.run_card(returns(None))
         title, labels, kw = calls[0]
         self.assertEqual([l.strip() for l in labels], ["⭐ Game Boy", "Game Boy Advance"])
-        self.assertEqual(kw["extras"][1], [("  1 picked", "green"), ("  5 B", "dim"), ("  🗂️  … full", "dim")])  # the ROM
+        self.assertEqual(kw["extras"][1], [("  🟡 1 picked", "green"), ("  5 B", "dim"), ("  🗂️  … full", "dim")])  # the ROM
         self.assertEqual(kw["status"](None), ("💾 21 B / 1 GB · 1 GB free · 1 file", "green"))  # ROM and the GBA BIOS
 
     def test_full_sizes_fill_in_when_the_worker_hands_them_over(self):
@@ -615,18 +615,18 @@ class Flow(DataDir):
         workers = []
 
         def check(labels, kw):
-            self.assertEqual(kw["extras"], [[("", "green"), ("", "dim"), ("  🗂️  … full", "dim")],
-                                            [("  1 picked", "green"), ("  5 B", "dim"), ("  🗂️  … full", "dim")]])
+            self.assertEqual(kw["extras"], [[("  ⚪", "dim"), ("", "dim"), ("  🗂️  … full", "dim")],
+                                            [("  🟡 1 picked", "green"), ("  5 B", "dim"), ("  🗂️  … full", "dim")]])
             kw["poll"]()  # nothing handed over yet
             self.assertIn(("  🗂️  … full", "dim"), kw["extras"][0])
             workers.pop()()
             kw["poll"]()
-            self.assertEqual(kw["extras"], [[("", "green"), ("", "dim"), ("  🗂️  1 KB full", "dim")],  # Red.gb and the Game Boy BIOS
-                                            [("  1 picked", "green"), ("  5 B", "dim"), ("  🗂️  32 B full", "dim")]])
+            self.assertEqual(kw["extras"], [[("  ⚪", "dim"), ("", "dim"), ("  🗂️  1 KB full", "dim")],  # Red.gb and the Game Boy BIOS
+                                            [("  🟡 1 picked", "green"), ("  5 B", "dim"), ("  🗂️  32 B full", "dim")]])
             return (cardedit.FULL_KEY, 1)  # in place: the full system shows its files from the kept sizes
 
         def full_on(labels, kw):
-            self.assertEqual(kw["extras"][1], [("  4 files", "green"), ("  32 B", "dim"), ("  🗂️  full system", "cyan")])
+            self.assertEqual(kw["extras"][1], [("  🟢 4 files", "green"), ("  32 B", "dim"), ("  🗂️  full system", "cyan")])
             return None
         with mock.patch.object(cardedit, "_spawn", workers.append):
             self.run_card(check, full_on)
