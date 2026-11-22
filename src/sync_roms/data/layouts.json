@@ -53,8 +53,8 @@
     "bios_dir": "BIOS",
     "retroarch": {
       "dir": "Saves",
-      "saves": "saves",
-      "states": "states"
+      "saves": "saves/{core}",
+      "states": "states/{core}"
     },
     "note": "Miyoo Mini family (SigmaStar SSD202D), Miyoo Flip (RK3566) and Miyoo A30 (Allwinner A33) running spruceOS. Card root is the FAT32 SD card. System folders are the upper-case spruce names (SFC for the SNES, MD for the Genesis, FC for the NES, PS for the PlayStation), and ROMs go straight into them. Spruce reads a miyoogamelist.xml (name, image) in each ROM folder and box art from its Imgs/ folder. BIOS files go in the root BIOS/ folder, keeping the libretro subfolders (dc/, nds/, neocd/, ...). Systems with spruce = null have no spruce folder. Sources: https://github.com/spruceUI/spruceOS/wiki/11.-Adding-Games, https://github.com/spruceUI/spruceOS/wiki/10.-Adding-BIOS"
   },
