@@ -162,6 +162,14 @@ class Enabled(unittest.TestCase):
         self.assertEqual(frontend.get_string(old, name), "custom")
         self.assertEqual(frontend.set_string(old, "knulli", name, "custom"), old.replace("&", "&amp;"))
 
+    def test_removing_a_setting_finds_its_name_escaped_or_not(self):
+        name = "subset.Mario & Sonic.system-view-artwork"
+        kept = '\t<string name="subset.Mario.system-view-artwork" value="custom" />\n'
+        for written in (name.replace("&", "&amp;"), name):  # as sync-roms writes it now, and as it did before
+            text = f'<config>\n{kept}\t<string name="{written}" value="custom" />\n</config>\n'
+            self.assertEqual(frontend.remove_string(text, name), f'<config>\n{kept}</config>\n', written)
+        self.assertEqual(frontend.remove_string(f'<config>\n{kept}</config>\n', name), f'<config>\n{kept}</config>\n')
+
     def test_a_name_escaped_the_way_emulationstation_writes_it_is_replaced(self):
         name = "subset.Kel's R&B.system-logos"  # ES escapes the & and leaves the apostrophe
         text = '<config>\n\t<string name="subset.Kel\'s R&amp;B.system-logos" value="custom" />\n</config>\n'

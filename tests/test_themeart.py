@@ -532,6 +532,21 @@ class Knulli(Card):
         self.assertEqual(read(self.path("artwork", "Old.png")), "old")
         self.assertIn('<string name="subset.Old.system-view-artwork" value="custom" />', read(path))
 
+    def test_settings_of_a_gone_collection_with_an_ampersand_are_removed_escaped_or_not(self):
+        path = frontend.settings_path("knulli", self.base)
+        for raw in (False, True):  # as sync-roms writes the names now, and as it did before
+            with self.subTest(raw=raw):
+                themeart.install("knulli", self.base, {"Mario & Sonic": "surprise", "Mario": "rpg"})
+                if raw:
+                    write(path, read(path).replace("&amp;", "&"))
+                self.assertEqual(read(path).count('name="subset.Mario &amp; Sonic.'), 0 if raw else 2)
+                self.assertEqual(read(path).count('name="subset.Mario & Sonic.'), 2 if raw else 0)
+                themeart.install("knulli", self.base, {"Mario": "rpg"})
+                entries = minidom.parse(path).getElementsByTagName("string")
+                self.assertEqual({e.getAttribute("name"): e.getAttribute("value") for e in entries},
+                                 themeart.knulli_settings("Mario"))
+                self.assertFalse(os.path.exists(self.path("artwork", "Mario & Sonic.png")))
+
     def test_a_collection_renamed_in_other_capitals_keeps_its_art(self):
         themeart.install("knulli", self.base, {"Favs": "rpg"})
         themeart.install("knulli", self.base, {"favs": "rpg"})
