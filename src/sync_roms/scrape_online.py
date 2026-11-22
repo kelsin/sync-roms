@@ -440,7 +440,8 @@ def _scrape_rom(client, system, item, tmp, skip, stop, game_id):
                 rc.download(url, dest, stop=stop, **({"limit": screenscraper.VIDEO_MAX} if mtype == "videos" else {}))
             except screenscraper.NotFound:  # ScreenScraper has no such file: not a failure
                 continue
-            except screenscraper.MediaRefused as e:  # too large or off screenscraper.fr: skip just this file
+            # too large or off screenscraper.fr, or still failing after its retries: skip just this file
+            except (screenscraper.MediaRefused, screenscraper.Transient) as e:
                 print(ui.yellow(f"  ⚠️  {system['bucket']}/{rom}: {mtype} skipped ({e})"))
                 continue
             ext = _media_ext(dest, mtype)

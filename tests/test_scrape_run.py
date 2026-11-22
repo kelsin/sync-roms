@@ -283,6 +283,28 @@ class ScrapeRunTest(RunBase):
         self.assertEqual(set(self.metadata()), {"a.zip"})
         self.assertIn("scrapes/gba/screenshots/a.png", self.stored())
 
+    def test_media_file_that_keeps_failing_is_skipped_and_the_rom_recorded(self):
+        for r in ("a.zip", "b.zip", "c.zip", "d.zip"):
+            self.put(f"gba/{r}")
+        self.client.threads = 1
+        for gid in (1, 2, 3):  # three ROMs in a row: the run isn't stopped as unreachable
+            self.client.download_errors[f"http://media/{gid}/ss"] = screenscraper.Transient("ScreenScraper download failed (IncompleteRead)")
+        self.assertEqual(self.run_scrape(), 0)
+        self.assertEqual(self.client.lookups, ["a.zip", "b.zip", "c.zip", "d.zip"])
+        self.assertEqual(self.client.downloads.count("http://media/1/ss"), scrape_online.RETRIES + 1)
+        self.assertEqual(set(self.metadata()), {"a.zip", "b.zip", "c.zip", "d.zip"})
+        self.assertIn("scrapes/gba/covers/a.png", self.stored())
+        self.assertNotIn("scrapes/gba/screenshots/a.png", self.stored())
+        self.assertIn("scrapes/gba/screenshots/d.png", self.stored())
+        self.assertIn("gba/a.zip: screenshots skipped (ScreenScraper download failed (IncompleteRead))", self.out.getvalue())
+        self.assertNotIn("couldn't be reached", self.out.getvalue() + self.err.getvalue())
+        self.assertNotIn("screenshots", scrape_state.snapshot().not_offered("gba", "a.zip"))  # it was offered
+        self.client.download_errors.clear()
+        self.client.lookups.clear()
+        self.assertEqual(self.run_scrape(fill_media=True), 0)  # so --fill-media asks for it again
+        self.assertEqual(self.client.lookups, ["a.zip", "b.zip", "c.zip"])
+        self.assertIn("scrapes/gba/screenshots/a.png", self.stored())
+
     def test_refused_login_stops_the_run_after_one_rom(self):
         for r in ("a.zip", "b.zip", "c.zip", "d.zip"):
             self.put(f"gba/{r}")
