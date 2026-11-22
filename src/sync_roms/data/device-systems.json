@@ -192,8 +192,7 @@
       "tier": "psp-n64-dc"
     },
     "anbernic-rg-vita-pro": {
-      "tier": "nds",
-      "note": "Stable through PS1 and NDS. N64, Dreamcast, Saturn and PSP are inconsistent, so left off."
+      "tier": "psp-n64-dc"
     },
     "anbernic-rg28xx": {
       "tier": "nds"
@@ -283,7 +282,7 @@
       "tier": "psp-n64-dc"
     },
     "ayaneo-pocket-air": {
-      "tier": "saturn"
+      "tier": "gc-ps2"
     },
     "ayaneo-pocket-air-mini": {
       "tier": "psp-n64-dc"
@@ -399,7 +398,7 @@
     },
     "retroid-pocket-duo": {
       "tier": "wii-3ds",
-      "note": "Snapdragon 7 Gen 4 is in the Snapdragon 865 class or better. Full speed through Dreamcast, Saturn and PSP; GameCube, Wii, 3DS and PS2 included (heavy PS2 titles need tuning). Switch is compromised and Wii U and PS3 are unplayable, so left off."
+      "note": "Dragonwing Q-7790 (Snapdragon 7 Gen 4 architecture) is in the Snapdragon 865 class or better. Full speed through Dreamcast, Saturn and PSP; GameCube, Wii, 3DS and PS2 included (heavy PS2 titles need tuning). Switch is compromised and Wii U and PS3 are unplayable, so left off."
     },
     "retroid-pocket-duo-lite": {
       "tier": "psp-n64-dc"
