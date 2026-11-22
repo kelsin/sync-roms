@@ -35,6 +35,7 @@ ARCHIVE_ERRORS = (tarfile.TarError, EOFError, zlib.error)  # what a damaged .tar
 # Knulli's Art Book Next is read-only, but takes artwork and logos from theme-customizations/ on the card for systems
 # whose "System Artwork" and "System Logos" options are Custom; those options can be set for one system alone.
 KNULLI_DIR = os.path.join("theme-customizations", "art-book-next")
+CUSTOM_OWNED = ".sync-roms-art"  # in Knulli's and ROCKNIX's customizations: the collection names sync-roms gave art
 
 
 def _write_settings(path, layout_name, values, only_if_unset=()):
@@ -196,9 +197,14 @@ def _sync_written(dest):
     for each collection folder in it (and Surprise), the files `_esde_files` gives it."""
     keep = {ESDE_MARKER, ESDE_OWNED}
     for folder in set(_read(os.path.join(dest, ESDE_OWNED)).splitlines()) | {SURPRISE_ART}:
-        keep |= {f"_inc/systems/artwork-outline/{folder}.png", f"_inc/systems/logos/{folder}.svg",
-                 f"_inc/systems/_metadata-global/{folder}.xml", f"{folder}/theme.xml"}
+        keep |= _esde_paths(folder)
     return keep
+
+
+def _esde_paths(folder):
+    """The paths in the theme (relative, with "/") of the files that give a collection folder its art."""
+    return {f"_inc/systems/artwork-outline/{folder}.png", f"_inc/systems/logos/{folder}.svg",
+            f"_inc/systems/_metadata-global/{folder}.xml", f"{folder}/theme.xml"}
 
 
 def _extract(archive_path, dest, commit):
@@ -274,11 +280,34 @@ def _theme_has(dest, folder):
     return folder not in owned and os.path.exists(os.path.join(dest, "_inc", "systems", "_metadata-global", f"{folder}.xml"))
 
 
+def _esde_remove(dest, keep):
+    """Remove from the theme copy at dest the files sync-roms wrote for the collection folders on its list that aren't
+    in keep, and take them off the list. Returns whether anything changed."""
+    owned = _read(os.path.join(dest, ESDE_OWNED)).splitlines()
+    stale = [n for n in owned if n not in keep]
+    for folder in stale:
+        if not folder or frontend.safe_name(folder) != folder:  # not a name sync-roms writes
+            continue
+        for rel in _esde_paths(folder):
+            try:
+                os.remove(s3.safe_join(dest, rel))
+            except FileNotFoundError:
+                pass
+        try:
+            os.rmdir(os.path.join(dest, folder))  # only when that emptied it
+        except OSError:
+            pass
+    return bool(stale) and _put(os.path.join(dest, ESDE_OWNED), "".join(f"{n}\n" for n in owned if n in keep).encode())
+
+
 def install_esde(layout_name, base, arts):
-    """Put Art Book Next with the collections' art in the card's ES-DE and select it. Returns whether anything changed."""
-    if not esde_wanted(layout_name, base) or not arts:
+    """Put Art Book Next with the collections' art in the card's ES-DE and select it, and remove the art sync-roms gave
+    collections no longer in arts. Returns whether anything changed."""
+    if not esde_wanted(layout_name, base):
         return False
     dest = _esde_dir(layout_name, base)
+    if not arts:  # nothing to add, so the theme is neither copied nor selected
+        return _esde_remove(dest, ())
     commit = _stored_commit()
     changed = False
     if not commit:
@@ -300,6 +329,7 @@ def install_esde(layout_name, base, arts):
     for name in [n for n in arts if _theme_has(dest, n.lower())]:
         ui.warn(f"{name}: Art Book Next already has art of its own for that name; skipped")
         del arts[name]
+    changed |= _esde_remove(dest, {n.lower() for n in arts})
     owned = set(_read(os.path.join(dest, ESDE_OWNED)).splitlines()) | {n.lower() for n in arts}
     changed |= _put(os.path.join(dest, ESDE_OWNED), "".join(f"{n}\n" for n in sorted(owned)).encode())
     for rel, data in _esde_files(arts).items():
@@ -373,12 +403,41 @@ def knulli_settings(name):
             "UseCustomCollectionsSystemEx": "false"}
 
 
+def _custom_remove(root, arts):
+    """Remove from the customizations folder root the art sync-roms put there (the names on its list) for collections
+    no longer in arts, and list the ones in arts instead. Returns the names it removed."""
+    owned = [n for n in _read(os.path.join(root, CUSTOM_OWNED)).splitlines() if n and frontend.safe_name(n) == n]
+    stale = [n for n in owned if n not in arts]
+    for name in stale:
+        for path in (os.path.join(root, "artwork", f"{name}.png"), os.path.join(root, "logos", f"{name}.svg")):
+            try:
+                os.remove(path)
+            except FileNotFoundError:
+                pass
+    if arts:
+        _put(os.path.join(root, CUSTOM_OWNED), "".join(f"{n}\n" for n in sorted(arts)).encode())
+    else:
+        try:
+            os.remove(os.path.join(root, CUSTOM_OWNED))
+        except FileNotFoundError:
+            pass
+    return stale
+
+
 def install_knulli(base, arts):
-    """Put the collections' art ({name: art png}) in Knulli's theme customizations. Returns whether files changed."""
-    if not knulli_wanted(base) or not arts:
+    """Put the collections' art ({name: art png}) in Knulli's theme customizations, and remove the art and settings
+    sync-roms gave collections no longer in arts. Returns whether files changed."""
+    if not knulli_wanted(base):
         return False
     root = os.path.join(base, KNULLI_DIR)
-    changed, settings = False, {}
+    path = frontend.settings_path("knulli", base)
+    stale = _custom_remove(root, arts)  # before the art is written: a card that ignores case has one file for Favs and favs
+    text = cardfs.text(path)
+    for name in stale:
+        for option in ("system-view-artwork", "system-logos"):
+            text = frontend.remove_string(text, f"subset.{name}.{option}")
+    cardfs.write_text(path, text)
+    changed, settings = bool(stale), {}
     for name, png in arts.items():
         with open(png, "rb") as f:
             changed |= _put(os.path.join(root, "artwork", f"{name}.png"), f.read())
@@ -388,8 +447,7 @@ def install_knulli(base, arts):
         settings.update(knulli_settings(name))
         if not logo:  # the theme shows the name as text
             del settings[f"subset.{name}.system-logos"]
-    _write_settings(frontend.settings_path("knulli", base), "knulli", settings,
-                    only_if_unset={"UseCustomCollectionsSystemEx"})
+    _write_settings(path, "knulli", settings, only_if_unset={"UseCustomCollectionsSystemEx"})
     return changed
 
 
@@ -401,10 +459,11 @@ def describe_knulli(base, arts):
 # --- ROCKNIX -------------------------------------------------------------------------------------------------------
 
 def install_rocknix(base, arts):
-    """Put the collections' art ({name: art png}) in Art Book Next's ROCKNIX customizations on the card. Its settings
-    are on internal storage: the collections' install script turns the art on. Returns whether files changed."""
+    """Put the collections' art ({name: art png}) in Art Book Next's ROCKNIX customizations on the card, and remove the
+    art sync-roms gave collections no longer in arts. Its settings are on internal storage: the collections' install
+    script turns the art on and off. Returns whether files changed."""
     root = os.path.join(base, rocknix_collections.ART_DIR)
-    changed = False
+    changed = bool(_custom_remove(root, arts))
     for name, png in arts.items():
         with open(png, "rb") as f:
             changed |= _put(os.path.join(root, "artwork", f"{name}.png"), f.read())

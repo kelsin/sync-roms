@@ -244,6 +244,83 @@ class Esde(Card):
         self.install()
         self.assertFalse(os.path.exists(self.copy() + "-disabled"))
 
+    THEME = {"theme.xml": b"<theme/>", "_inc/systems/artwork-outline/snes.png": b"png",
+             "_inc/systems/logos/snes.svg": b"<svg/>", "_inc/systems/_metadata-global/snes.xml": b"<theme/>",
+             "snes/theme.xml": b"<theme/>"}
+
+    def art(self, folder):
+        return [self.copy("_inc", "systems", "artwork-outline", f"{folder}.png"), self.copy("_inc", "systems", "logos", f"{folder}.svg"),
+                self.copy("_inc", "systems", "_metadata-global", f"{folder}.xml"), self.copy(folder, "theme.xml")]
+
+    def test_art_of_a_collection_that_is_gone_is_removed_and_the_rest_kept(self):
+        self.store("abc", self.THEME)
+        self.settings(themeart.ESDE_THEME)
+        self.install()
+        write(self.copy("_inc", "systems", "artwork-outline", "mine.png"), "mine")  # the user's own
+        for path in self.art("my shmups"):
+            self.assertTrue(os.path.exists(path), path)
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.assertTrue(themeart.install("esde", self.base, dict(SURPRISE)))
+        for path in self.art("my shmups"):
+            self.assertFalse(os.path.exists(path), path)
+        self.assertFalse(os.path.exists(self.copy("my shmups")))
+        for path in self.art("surprise") + self.art("snes") + [self.copy("_inc", "systems", "artwork-outline", "mine.png")]:
+            self.assertTrue(os.path.exists(path), path)
+        self.assertEqual(read(self.copy(themeart.ESDE_OWNED)).splitlines(), ["surprise"])
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.assertFalse(themeart.install("esde", self.base, dict(SURPRISE)))  # nothing left to remove
+
+    def test_art_of_a_collection_that_is_gone_does_not_survive_a_theme_update(self):
+        self.store("abc", self.THEME)
+        self.settings(themeart.ESDE_THEME)
+        self.install()
+        self.store("def", self.THEME)
+        with contextlib.redirect_stdout(io.StringIO()):
+            themeart.install("esde", self.base, dict(SURPRISE))
+        for path in self.art("my shmups"):
+            self.assertFalse(os.path.exists(path), path)
+        for path in self.art("surprise") + self.art("snes"):
+            self.assertTrue(os.path.exists(path), path)
+
+    def test_the_last_collection_s_art_is_removed_without_copying_the_theme(self):
+        self.store("abc", self.THEME)
+        self.settings(themeart.ESDE_THEME)
+        self.install()
+        self.store("def", {"theme.xml": b"<newer/>"})
+        settings = read(frontend.settings_path("esde", self.base))
+        with mock.patch.object(themeart.s3, "download") as download:
+            self.assertTrue(themeart.install("esde", self.base, {}))
+            self.assertFalse(themeart.install("esde", self.base, {}))
+        download.assert_not_called()
+        for path in self.art("my shmups") + self.art("surprise"):
+            self.assertFalse(os.path.exists(path), path)
+        for path in self.art("snes"):
+            self.assertTrue(os.path.exists(path), path)
+        self.assertEqual(read(self.copy(themeart.ESDE_OWNED)), "")
+        self.assertEqual(read(self.copy(themeart.ESDE_MARKER)).strip(), "abc")
+        self.assertEqual(read(frontend.settings_path("esde", self.base)), settings)
+
+    def test_no_art_on_a_card_that_never_had_any_does_nothing(self):
+        self.store("abc", self.THEME)
+        self.assertFalse(themeart.install("esde", self.base, {}))
+        self.assertEqual(os.listdir(self.base), [])
+        write(self.copy("_inc", "systems", "artwork-outline", "old.png"), "x")  # a copy with no list of sync-roms's art
+        self.assertFalse(themeart.install("esde", self.base, {}))
+        self.assertEqual(os.listdir(self.copy()), ["_inc"])
+        self.assertTrue(os.path.exists(self.copy("_inc", "systems", "artwork-outline", "old.png")))
+
+    def test_a_listed_name_that_is_no_collection_name_removes_nothing(self):
+        self.store("abc", self.THEME)
+        self.settings(themeart.ESDE_THEME)
+        self.install()
+        outside = self.copy("..", "theme.xml")
+        write(outside, "x")
+        write(self.copy(themeart.ESDE_OWNED), "..\nsurprise\n")
+        with contextlib.redirect_stdout(io.StringIO()):
+            themeart.install("esde", self.base, dict(SURPRISE))
+        self.assertTrue(os.path.exists(outside))
+        self.assertEqual(read(self.copy(themeart.ESDE_OWNED)).splitlines(), ["surprise"])
+
     def test_no_archive_in_storage_warns_and_keeps_the_theme(self):
         self.settings(themeart.ESDE_THEME)
         self.assertFalse(self.install())
@@ -302,6 +379,16 @@ class Emudeck(Esde):
         self.assertTrue(os.path.exists(os.path.join(copy, "my shmups", "theme.xml")))
         self.assertIn(f'<string name="Theme" value="{themeart.ESDE_COPY}" />',
                       read(os.path.join(self.appdata, "settings", "es_settings.xml")))
+        self.assertEqual(os.listdir(self.base), [])
+
+    def test_art_of_a_collection_that_is_gone_is_removed_from_es_de_on_this_computer(self):
+        self.store("abc", {"theme.xml": b"<theme/>"})
+        copy = os.path.join(self.appdata, "themes", themeart.ESDE_COPY)
+        with contextlib.redirect_stdout(io.StringIO()):
+            themeart.install("emudeck", self.base, {**SURPRISE, "My Shmups": "shmups"})
+            self.assertTrue(themeart.install("emudeck", self.base, {}))
+        self.assertFalse(os.path.exists(os.path.join(copy, "my shmups")))
+        self.assertFalse(os.path.exists(os.path.join(copy, "_inc", "systems", "artwork-outline", "surprise.png")))
         self.assertEqual(os.listdir(self.base), [])
 
     def test_the_dry_run_names_es_de_on_this_computer(self):
@@ -387,6 +474,57 @@ class Knulli(Card):
         self.assertFalse(os.path.exists(self.path()))
         self.assertNotIn("subset.", read(path))
 
+    def test_art_and_settings_of_a_collection_that_is_gone_are_removed_and_the_rest_kept(self):
+        themeart.install("knulli", self.base, {**SURPRISE, "Favs": "rpg"})
+        write(self.path("artwork", "Mine.png"), "mine")  # the user's own
+        path = frontend.settings_path("knulli", self.base)
+        write(path, read(path).replace("</config>", '\t<string name="subset.Mine.system-view-artwork" value="custom" />\n</config>'))
+        self.assertEqual(read(self.path(themeart.CUSTOM_OWNED)).splitlines(), ["Favs", "Surprise"])
+        self.assertTrue(themeart.install("knulli", self.base, dict(SURPRISE)))
+        for rel in (("artwork", "Favs.png"), ("logos", "Favs.svg")):
+            self.assertFalse(os.path.exists(self.path(*rel)), rel)
+        for rel in (("artwork", "Surprise.png"), ("logos", "Surprise.svg"), ("artwork", "Mine.png")):
+            self.assertTrue(os.path.exists(self.path(*rel)), rel)
+        self.assertEqual(read(self.path(themeart.CUSTOM_OWNED)).splitlines(), ["Surprise"])
+        settings = read(path)
+        self.assertNotIn("subset.Favs.", settings)
+        for name in ("subset.Surprise.system-view-artwork", "subset.Surprise.system-logos", "subset.Mine.system-view-artwork"):
+            self.assertIn(f'<string name="{name}" value="custom" />', settings)
+        self.assertIn('<string name="UseCustomCollectionsSystemEx" value="false" />', settings)
+        self.assertTrue(settings.endswith("</config>\n"))
+        self.assertFalse(themeart.install("knulli", self.base, dict(SURPRISE)))  # nothing left to remove
+
+    def test_the_last_collection_s_art_and_settings_are_removed(self):
+        themeart.install("knulli", self.base, dict(SURPRISE))
+        self.assertTrue(themeart.install("knulli", self.base, {}))
+        for rel in (("artwork", "Surprise.png"), ("logos", "Surprise.svg"), (themeart.CUSTOM_OWNED,)):
+            self.assertFalse(os.path.exists(self.path(*rel)), rel)
+        settings = read(frontend.settings_path("knulli", self.base))
+        self.assertNotIn("subset.", settings)
+        self.assertIn('<string name="UseCustomCollectionsSystemEx" value="false" />', settings)
+        self.assertFalse(themeart.install("knulli", self.base, {}))
+
+    def test_art_and_settings_sync_roms_has_no_list_of_are_kept(self):
+        self.assertFalse(themeart.install("knulli", self.base, {}))
+        self.assertEqual(os.listdir(self.base), [])  # a card that never had art: nothing is written
+        write(self.path("artwork", "Old.png"), "old")
+        path = frontend.settings_path("knulli", self.base)
+        write(path, '<config>\n\t<string name="subset.Old.system-view-artwork" value="custom" />\n</config>\n')
+        self.assertFalse(themeart.install("knulli", self.base, {}))
+        themeart.install("knulli", self.base, dict(SURPRISE))
+        themeart.install("knulli", self.base, {})
+        self.assertEqual(read(self.path("artwork", "Old.png")), "old")
+        self.assertIn('<string name="subset.Old.system-view-artwork" value="custom" />', read(path))
+
+    def test_a_collection_renamed_in_other_capitals_keeps_its_art(self):
+        themeart.install("knulli", self.base, {"Favs": "rpg"})
+        themeart.install("knulli", self.base, {"favs": "rpg"})
+        self.assertIn("favs.png", os.listdir(self.path("artwork")))
+        self.assertEqual(read(self.path(themeart.CUSTOM_OWNED)).splitlines(), ["favs"])
+        settings = read(frontend.settings_path("knulli", self.base))
+        self.assertNotIn("subset.Favs.", settings)
+        self.assertIn('<string name="subset.favs.system-view-artwork" value="custom" />', settings)
+
 
 class Rocknix(Card):
     """ROCKNIX's Art Book Next takes its customizations from ~/roms/_userdata/ (the card's roms/_userdata/)."""
@@ -408,6 +546,34 @@ class Rocknix(Card):
         themeart.install("rocknix", self.base, {"東方": "shmups"})
         self.assertTrue(os.path.exists(self.path("artwork", "東方.png")))
         self.assertFalse(os.path.exists(self.path("logos", "東方.svg")))
+
+    def test_art_of_a_collection_that_is_gone_is_removed_and_the_rest_kept(self):
+        themeart.install("rocknix", self.base, {**SURPRISE, "Favs": "rpg"})
+        write(self.path("artwork", "Mine.png"), "mine")  # the user's own
+        self.assertEqual(read(self.path(themeart.CUSTOM_OWNED)).splitlines(), ["Favs", "Surprise"])
+        self.assertTrue(themeart.install("rocknix", self.base, dict(SURPRISE)))
+        for rel in (("artwork", "Favs.png"), ("logos", "Favs.svg")):
+            self.assertFalse(os.path.exists(self.path(*rel)), rel)
+        for rel in (("artwork", "Surprise.png"), ("logos", "Surprise.svg"), ("artwork", "Mine.png")):
+            self.assertTrue(os.path.exists(self.path(*rel)), rel)
+        self.assertEqual(read(self.path(themeart.CUSTOM_OWNED)).splitlines(), ["Surprise"])
+        self.assertFalse(themeart.install("rocknix", self.base, dict(SURPRISE)))  # nothing left to remove
+
+    def test_the_last_collection_s_art_is_removed(self):
+        themeart.install("rocknix", self.base, dict(SURPRISE))
+        self.assertTrue(themeart.install("rocknix", self.base, {}))
+        for rel in (("artwork", "Surprise.png"), ("logos", "Surprise.svg"), (themeart.CUSTOM_OWNED,)):
+            self.assertFalse(os.path.exists(self.path(*rel)), rel)
+        self.assertFalse(themeart.install("rocknix", self.base, {}))
+
+    def test_art_sync_roms_has_no_list_of_is_kept(self):
+        self.assertFalse(themeart.install("rocknix", self.base, {}))
+        self.assertEqual(os.listdir(self.base), [])  # a card that never had art: nothing is written
+        write(self.path("artwork", "Old.png"), "old")
+        self.assertFalse(themeart.install("rocknix", self.base, {}))
+        themeart.install("rocknix", self.base, dict(SURPRISE))
+        themeart.install("rocknix", self.base, {})
+        self.assertEqual(read(self.path("artwork", "Old.png")), "old")
 
     def test_describe(self):
         out = io.StringIO()

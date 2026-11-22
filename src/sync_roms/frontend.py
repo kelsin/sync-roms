@@ -91,6 +91,11 @@ def set_string(text, layout_name, name, value):
     return text[:end] + "\t" + line + "\n" + text[end:]
 
 
+def remove_string(text, name):
+    """text (the frontend's settings file) without its <string name=...> entry and that entry's line."""
+    return re.sub(rf'[ \t]*{_string_setting(name).pattern}\n?', "", text)
+
+
 def plan_collections(layout_name, base, wanted, owned):
     """What to write and delete on the card for the wanted {name: lines}, given the names sync-roms owns."""
     plan = {"writes": [], "deletes": [], "enable": set(), "disable": set(), "owned": [], "warnings": []}

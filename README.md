@@ -685,7 +685,11 @@ its APK from `os/android/APKs/` in an ES-DE card's `APKs/`; off, none of them.
   [install script](#rocknix) enables it in `es_settings.cfg` on the device.
 - **muOS**: the art goes to the catalogue as `MUOS/info/catalogue/Collection/box/<Name>.png` and `grid/<Name>.png` (no
   logo); sync removes the ones it put there when a collection goes.
-- On ES-DE, Knulli and ROCKNIX, art for a collection that is renamed or removed stays in the theme folders; it is unused.
+- On ES-DE, Knulli and ROCKNIX, a sync removes the art it put there (on Knulli its `subset.<Name>.*` settings too) once the
+  collection is renamed, removed or has no art any more. It only removes what it wrote: the names listed in the theme
+  copy's `.sync-roms-collections` (ES-DE) or the customizations folder's `.sync-roms-art` (Knulli, ROCKNIX), so the theme's
+  own art and yours stay, as does art an older sync-roms put on a Knulli or ROCKNIX card before it kept that list. On
+  ROCKNIX the install script turns the art's settings off on the device. With `"theme": false` nothing is removed.
 
 ### Full systems
 
