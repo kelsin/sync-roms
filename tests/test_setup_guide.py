@@ -27,6 +27,25 @@ class SetupGuideTest(unittest.TestCase):
         self.assertNotIn("nextui", platform_of)  # falls through to the "linux" default
         self.assertTrue(platform_of.rstrip().endswith('return "linux";'))
 
+    def test_every_layout_is_known_and_hotkeys_cover_their_layouts(self):
+        import json
+        import re
+        with open(update_setup_guide.GUIDE) as f:
+            html = f.read()
+
+        def keys(name):
+            block = html.split(f"const {name} = {{", 1)[1].split("\n};", 1)[0]
+            return set(re.findall(r"^  (\w+): ", block, re.M))
+
+        with open(os.path.join(os.path.dirname(update_setup_guide.GUIDE), "layouts.json")) as f:
+            layouts = set(json.load(f))
+        self.assertLessEqual(layouts, keys("LAYOUTS"))
+        hotkey = set(re.findall(r"(\w+): \"", html.split("const HOTKEY = {", 1)[1].split("};", 1)[0]))
+        self.assertEqual(hotkey, keys("HOTKEY_LAYOUT"))
+        # The Hotkeys section indexes both tables by layout, so it must be limited to layouts they have.
+        hotkeys = html.split('id: "hotkeys",', 1)[1].split("items:", 1)[0]
+        self.assertIn("when: { layout: Object.keys(HOTKEY_LAYOUT) }", hotkeys)
+
     def test_guide_command_opens_the_packaged_page(self):
         from unittest import mock
         from sync_roms import commands

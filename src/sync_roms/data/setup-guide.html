@@ -765,7 +765,7 @@ const SECTIONS = [
         title: "4. Pick the theme and check Surprise",
         body: `
           <ol>
-            <li>Theme: <span class="path">${path("Tweaks > Appearance > Theme")}</span>, pick one of the synced themes.</li>
+            <li>Theme: open <span class="path">${path("Apps > Theme Switcher")}</span> and pick one of the synced themes.</li>
             <li>Surprise: open <b>Apps</b> and launch <b>Surprise</b>; it reads <code>Roms/surprise.json</code>. If it is missing, sync again with the card in the computer.</li>
           </ol>`,
       },
@@ -819,6 +819,7 @@ const SECTIONS = [
   {
     id: "hotkeys",
     title: "Hotkeys",
+    when: { layout: Object.keys(HOTKEY_LAYOUT) },
     lede: "One scheme everywhere: hold the device's hotkey button, then press the second button. Only the hotkey button differs by layout.",
     items: [
       {
@@ -869,7 +870,7 @@ const SECTIONS = [
           ["Settings > Saving > Auto Save State", "on"],
           ["Settings > Saving > Auto Load State", "on"],
           ["Settings > Saving > Increment Save State Index Automatically", "on"],
-          ["Settings > Saving > Max Save State Increments", "10"],
+          ["Settings > Saving > Maximum Auto-Increment Save States to Keep", "10"],
         ],
       },
     ],
@@ -926,10 +927,10 @@ const SECTIONS = [
           ["Cloud Sync > Cloud Storage URL", "https://cloud-saves.valefor.com/dav/", "Keep the trailing slash."],
           ["Cloud Sync > Username", "my cloud-saves username"],
           ["Cloud Sync > Password", "my cloud-saves password"],
-          ["Cloud Sync > Sync Saves", "on", "Save files and save states."],
-          ["Cloud Sync > Sync Configs", "off", "Core options and shader presets differ per device."],
-          ["Cloud Sync > Sync Thumbnails", "off"],
-          ["Cloud Sync > Sync System", "off", "BIOS comes from the card."],
+          ["Cloud Sync > Sync: Saves/States", "on", "Save files and save states."],
+          ["Cloud Sync > Sync: Configuration Files", "off", "Core options and shader presets differ per device."],
+          ["Cloud Sync > Sync: Thumbnail Images", "off"],
+          ["Cloud Sync > Sync: System Files", "off", "BIOS comes from the card."],
           ["Cloud Sync > Destructive Cloud Sync", "off", "Replaced files are kept in cloud_backups/."],
           ["Cloud Sync > Sync Mode", "automatic", "Syncs at start and when a core unloads."],
         ],
@@ -1211,8 +1212,8 @@ const SECTIONS = [
         title: "Install it",
         body: `
           <ol>
-            <li>In Knulli, enter your RetroAchievements account under <span class="path">${path("Game Settings > Retroachievement settings")}</span>.</li>
-            <li>Download the <b>KNULLI</b> installer from the <a href="https://github.com/misantronic/RAOfflineProxy/releases">RAOfflineProxy GitHub releases</a> and copy it to <code>/userdata/roms/tools</code> on the card.</li>
+            <li>In Knulli, enter your RetroAchievements account under <span class="path">${path("Game Settings > RetroAchievement Settings")}</span>.</li>
+            <li>Sync the card: with RAOfflineProxy on for the card (the default; card editor's S menu) it puts <b>RAOfflineProxy Install</b> in <code>roms/tools</code>.</li>
             <li>Update gamelists so <b>RAOfflineProxy Install</b> shows in the <b>Tools</b> menu, then launch it.</li>
           </ol>`,
       },
