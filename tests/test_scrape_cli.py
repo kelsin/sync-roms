@@ -40,6 +40,36 @@ class Translate(unittest.TestCase):
         self.assertEqual(cli.translate(["scrape", "missing", "--all"]), ["--scrape-missing", "--all"])
         self.assertEqual(cli.build_parser().parse_args(cli.translate(["scrape", "missing"])).scrape_missing, "")
 
+    def test_scrape_art_subcommand_translates(self):
+        self.assertEqual(cli.translate(["scrape", "art"]), ["--scrape-art"])
+        self.assertEqual(cli.translate(["scrape", "art", "gba", "--for", "spruce", "-n"]),
+                         ["--scrape-art", "gba", "--for", "spruce", "-n"])
+        self.assertEqual(cli.translate(["scrape", "art", "--for", "spruce", "gba"]), ["--scrape-art", "gba", "--for", "spruce"])
+        self.assertEqual(cli.build_parser().parse_args(cli.translate(["scrape", "art"])).scrape_art, "")
+
+    def test_scrape_art_flags(self):
+        args = cli.build_parser().parse_args(cli.translate(["scrape", "art", "gba", "--for", "spruce", "--dry-run"]))
+        self.assertEqual(cli.check_modes(args), "--scrape-art")
+        self.assertEqual((args.scrape_art, args.target, args.dry_run), ("gba", "spruce", True))
+        args = cli.build_parser().parse_args(cli.translate(["scrape", "art", "--system", "gba"]))
+        self.assertEqual(cli.check_modes(args), "--scrape-art")
+        self.assertEqual(args.scrape_art, "gba")
+        args = cli.build_parser().parse_args(cli.translate(["scrape", "art", "--replace", "--workers", "4"]))
+        self.assertEqual(cli.check_modes(args), "--scrape-art")
+        self.assertEqual((args.replace, args.workers, args.target), (True, 4, "both"))
+
+    def test_for_and_workers_only_apply_to_scrape_art(self):
+        for argv in (["scrape", "--for", "onion"], ["scrape", "missing", "--workers", "2"]):
+            with self.subTest(argv=argv), self.assertRaises(SystemExit) as e:
+                cli.check_modes(cli.build_parser().parse_args(cli.translate(argv)))
+            self.assertEqual(e.exception.code, 2)
+
+    def test_bad_for_and_workers_values_are_refused(self):
+        for argv in (["scrape", "art", "--for", "bogus"], ["scrape", "art", "--workers", "0"]):
+            with self.subTest(argv=argv), self.assertRaises(SystemExit) as e:
+                cli.check_modes(cli.build_parser().parse_args(cli.translate(argv)))
+            self.assertEqual(e.exception.code, 2)
+
     def test_match_values_starting_with_a_dash(self):
         self.assertEqual(cli.translate(["scrape", "match", "gba", "a.zip", "-1"]), ["--scrape-match", "gba", "a.zip", "-1"])
         self.assertEqual(cli.translate(["scrape", "match", "gba", "-x.zip", "-Foo", "-n"]),
@@ -318,7 +348,7 @@ class Completion(unittest.TestCase):
         text = script_for("bash")
         commands_line = re.search(r'-eq 1 \].*?compgen -W "([^"]*)"', text).group(1).split()
         self.assertIn("scrape", commands_line)
-        self.assertIn('scrape) COMPREPLY=($(compgen -W "match review missing"', text)
+        self.assertIn('scrape) COMPREPLY=($(compgen -W "match review missing art"', text)
         for word in ("--retry", "--all", "--skip-media", "--set-credentials", "--translated"):
             self.assertIn(word, text)
 

@@ -29,7 +29,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "layouts": ("[ID]", "list the firmware card layouts, or one layout's folders and devices"),
     "upload": ("[DIR]", "upload ROMs to the storage folder of a system you pick"),
     "diff": ("[DIR]", "list the ROMs in only DIR or only the bucket, ignoring renames"),
-    "scrape": ("[SYSTEM | match SYSTEM ROM GAME | review [SYSTEM] | missing [SYSTEM]]", "scrape the ROMs that have no metadata from ScreenScraper into storage's scrapes/ folder"),
+    "scrape": ("[SYSTEM | match SYSTEM ROM GAME | review [SYSTEM] | missing [SYSTEM] | art [SYSTEM]]", "scrape the ROMs that have no metadata from ScreenScraper into storage's scrapes/ folder"),
     "clean": ("scrapes", "remove scrapes/ media and metadata for ROMs that aren't in storage"),
     "playlist": ("[DIR]", "create or fix the .m3u playlist of every multi-disc game"),
     "convert": ("[DIR]", "unzip archives and convert disc images to verified .chd"),
@@ -242,6 +242,7 @@ TOPICS = {
   sync-roms scrape match SYSTEM ROM GAME_ID_OR_NAME [--skip-media TYPES] [--translated] [--dry-run]
   sync-roms scrape review [SYSTEM]
   sync-roms scrape missing [SYSTEM | --system ID] [--all]
+  sync-roms scrape art [SYSTEM | --system ID] [--for onion|spruce|both] [--dry-run] [--replace] [--workers N]
   sync-roms scrape --set-credentials
 
   Looks up every available ROM with no entry in scrapes/<system>/metadata.json on ScreenScraper and writes its
@@ -272,6 +273,11 @@ TOPICS = {
                      b take back the last ignore, q quit, I ignore all the rest
   missing            list every ROM with no metadata and why (non-game, not on ScreenScraper, matched but not scraped,
                      not looked up yet); nothing is looked up. --all: every ROM in the storage
+  art                make the Onion (PNG) and Spruce (QOI, up to three sizes) box art for the ROMs that have a cover or
+                     miximage in storage (a PICO-8 cart is its own picture), from the cover, else the miximage; files that
+                     exist are kept. --for picks Onion, Spruce or both (default). --dry-run lists what would be made with
+                     an estimated size and reads no image; --replace remakes existing files; --workers N bounds the
+                     parallel downloads (default: your CPU count). Spruce art needs Pillow
   --set-credentials  ask for your ScreenScraper username and password (saved in settings.json,
                      readable only by you; blank keeps the current value), then check them with one request
                      and show today's quota and threads, or the error (exit 1 when ScreenScraper refuses them)
@@ -533,7 +539,7 @@ LEGACY = {
     ("sync",): [], ("devices",): ["--devices"], ("diff",): ["--diff"], ("playlist",): ["--m3u"], ("convert",): ["--cd"],
     ("tools", "install"): ["--install-tools"], ("clean", "scrapes"): ["--clean-scrapes"],
     ("scrape", "match"): ["--scrape-match"], ("scrape", "review"): ["--scrape-review"],
-    ("scrape", "missing"): ["--scrape-missing"], ("scrape",): ["--scrape"],
+    ("scrape", "missing"): ["--scrape-missing"], ("scrape", "art"): ["--scrape-art"], ("scrape",): ["--scrape"],
     ("upload",): ["--upload"],
     ("mirror", "use"): ["--use-mirror"], ("mirror", "clear"): ["--clear-mirror"], ("mirror",): ["--mirror"],
     ("games", "edit"): ["--edit"], ("cards", "edit"): ["--edit"], ("edit",): ["--edit"],
@@ -543,7 +549,7 @@ TYPED = None  # (command words, mode flag) of the command translate() last rewro
 BOOL_FLAGS = {"-n", "--dry-run", "-y", "--yes", "-a", "--ask"}
 PLAIN_FLAGS = BOOL_FLAGS | {"--replace", "--json", "--no-clean", "--no-delete", "--no-eject", "--retry", "--all", "--fill-media", "--set-credentials",
                             "--translated"}
-VALUE_FLAGS = {"--system", "--device", "--layout", "--device-id", "--skip-media"}
+VALUE_FLAGS = {"--system", "--device", "--layout", "--device-id", "--skip-media", "--for", "--workers"}
 
 
 def translate(argv):
@@ -596,6 +602,9 @@ def build_parser():
     ap.add_argument("--scrape-match", nargs=3, metavar=("SYSTEM", "ROM", "GAME"))
     ap.add_argument("--scrape-review", nargs="?", const="", metavar="SYSTEM")
     ap.add_argument("--scrape-missing", nargs="?", const="", metavar="SYSTEM")
+    ap.add_argument("--scrape-art", nargs="?", const="", metavar="SYSTEM")
+    ap.add_argument("--for", dest="target")
+    ap.add_argument("--workers", type=commands._positive_int)
     ap.add_argument("--retry", action="store_true")
     ap.add_argument("--all", action="store_true")
     ap.add_argument("--fill-media", action="store_true")
@@ -630,6 +639,7 @@ def check_modes(args):
         ("--clean-scrapes", args.clean_scrapes),
         ("--scrape", args.scrape), ("--scrape-match", args.scrape_match is not None),
         ("--scrape-review", args.scrape_review is not None), ("--scrape-missing", args.scrape_missing is not None),
+        ("--scrape-art", args.scrape_art is not None),
         ("--mirror", args.mirror is not None), ("--use-mirror", bool(args.use_mirror)), ("--clear-mirror", args.clear_mirror),
         ("--m3u", args.m3u is not None), ("--cd", args.chd is not None), ("--install-tools", args.install_tools),
         ("--devices", args.devices)) if on]
@@ -637,8 +647,8 @@ def check_modes(args):
         ui.fail(f"{' and '.join(modes[:2])} can't be combined: use one command at a time", 2)
     mode = modes[0] if modes else None
     name = WORDS.get(mode)
-    if args.replace and mode != "--upload":
-        ui.fail("--replace only works with `upload` (--upload)", 2)
+    if args.replace and mode not in ("--upload", "--scrape-art"):
+        ui.fail("--replace only works with `upload` and `scrape art`", 2)
     if args.dry_run and mode in ("--edit", "--install-tools", "--clear-mirror", "--devices", "--scrape-missing", "--scrape-review", "--diff"):
         ui.fail(f"--dry-run has no effect on `{name}`", 2)
     if args.ask and mode:
@@ -655,7 +665,11 @@ def check_modes(args):
         if args.scrape_missing:
             ui.fail("`scrape missing` takes one system: `scrape missing SYSTEM` or `scrape missing --system SYSTEM`", 2)
         args.scrape_missing, args.system = args.system, None
-    given = {"--scrape": args.system, "--scrape-missing": args.scrape_missing, "--scrape-review": args.scrape_review,
+    if mode == "--scrape-art" and args.system:
+        if args.scrape_art:
+            ui.fail("`scrape art` takes one system: `scrape art SYSTEM` or `scrape art --system SYSTEM`", 2)
+        args.scrape_art, args.system = args.system, None
+    given = {"--scrape": args.system, "--scrape-missing": args.scrape_missing, "--scrape-art": args.scrape_art, "--scrape-review": args.scrape_review,
              "--scrape-match": (args.scrape_match or [None])[0]}.get(mode)
     if given and any(sep and sep in given for sep in (os.sep, os.altsep)):
         ui.fail(f"`{name}` expects a system id, not a path ({given!r})", 2)
@@ -666,7 +680,7 @@ def check_modes(args):
     if args.json and not (mode in ("--devices", "--diff") or (mode is None and args.dry_run)):
         ui.fail("--json only applies to `devices`, `layouts`, `diff`, `games list`, `cards list` and `sync --dry-run`", 2)
     if args.system and mode not in ("--diff", "--scrape"):
-        ui.fail("--system only applies to `diff`, `scrape` and `scrape missing`", 2)
+        ui.fail("--system only applies to `diff`, `scrape`, `scrape missing` and `scrape art`", 2)
     if args.retry and mode != "--scrape":
         ui.fail("--retry only applies to `scrape`", 2)
     if args.all and mode not in ("--scrape", "--scrape-missing"):
@@ -675,6 +689,14 @@ def check_modes(args):
         ui.fail("--fill-media only applies to `scrape`", 2)
     if args.set_credentials and (mode != "--scrape" or args.system or args.retry or args.all or args.fill_media or args.skip_media or args.dry_run):
         ui.fail("--set-credentials only goes with `scrape`, on its own", 2)
+    if args.target is not None and mode != "--scrape-art":
+        ui.fail("--for only applies to `scrape art`", 2)
+    if args.workers is not None and mode != "--scrape-art":
+        ui.fail("--workers only applies to `scrape art`", 2)
+    if mode == "--scrape-art":
+        args.target = args.target or "both"
+        if args.target not in ("onion", "spruce", "both"):
+            ui.fail(f"--for takes onion, spruce or both, not {args.target!r}", 2)
     if args.translated and mode != "--scrape-match":
         ui.fail("--translated only applies to `scrape match`", 2)
     if args.skip_media is not None:
@@ -806,6 +828,10 @@ def dispatch_mode(args, mode):
         from . import scrape_online
         args.system = args.scrape_missing or None
         return True, scrape_online.missing_command(args)
+    if args.scrape_art is not None:
+        from . import scrape_art
+        args.system = args.scrape_art or None
+        return True, scrape_art.art_command(args)
     if args.upload is not None:
         from . import upload
         return True, upload.upload_command(args)
