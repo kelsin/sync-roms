@@ -1319,6 +1319,21 @@ class BigFileHashTest(RunBase):
             self.assertEqual(self.run_scrape(), 0)
         self.assertIn("a.zip", seen[0])  # written before the first batch's entries, not only when the run ends
 
+    def test_a_run_writes_each_state_file_once_and_in_order(self):
+        """One batch with a scraped ROM (hashes, media not offered) and an unknown one: on the metadata timer the three
+        ledgers are written before the entries; without it the unknown one before them and the other two after."""
+        for interval, writes in ((60, ["unknown", "metadata", "hashes", "nomedia"]),
+                                 (0, ["unknown", "hashes", "nomedia", "metadata"])):
+            with self.subTest(interval=interval), mock.patch.object(scrape_online, "METADATA_INTERVAL", interval), \
+                    mock.patch.object(s3, "put_text", wraps=s3.put_text) as put:
+                self.put("gba/a.zip")
+                self.put("gba/zzz.zip")
+                self.assertEqual(self.run_scrape(), 0)
+                self.assertEqual([c.args[0] for c in put.call_args_list], [f"scrapes/gba/{w}.json" for w in writes])
+            shutil.rmtree(self.root)
+            os.makedirs(self.root)
+            scrape_state.reset()
+
 
 class ProgressTest(RunBase):
     def run_quiet(self, **kw):

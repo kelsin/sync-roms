@@ -803,9 +803,7 @@ def scrape_system(client, system, items, threads, skip, shrink, outcomes, listin
             failed += n
             halted = hit if isinstance(hit, KeyboardInterrupt) else halted or hit  # Ctrl-C wins over an earlier stop
             if time.monotonic() - last_write >= METADATA_INTERVAL:
-                scrape_state.flush_unknown()  # marks from a run that finds nothing must not wait for the final flush
-                scrape_state.flush_hashes()
-                scrape_state.flush_nomedia()
+                scrape_state.flush()  # marks from a run that finds nothing must not wait for the final flush
                 last_write = time.monotonic()
                 if pending:
                     n, halt = record(system, pending, outcomes, listing, index, skip, replace, rerun, fill, translated=translated)
@@ -825,9 +823,7 @@ def scrape_system(client, system, items, threads, skip, shrink, outcomes, listin
         stop.set()
         ex.shutdown(wait=True, cancel_futures=True)
         hasher.shutdown(wait=True, cancel_futures=True)
-        scrape_state.flush_hashes()
-        scrape_state.flush_unknown()
-        scrape_state.flush_nomedia()
+        scrape_state.flush()
         for _, begun in flight:
             shutil.rmtree(begun.tmp, ignore_errors=True)
 

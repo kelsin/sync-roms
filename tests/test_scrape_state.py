@@ -42,7 +42,7 @@ class ScrapeStateTest(StorageDir):
         self.assertIsNone(scrape_state.cached_hashes("gba", "a.zip", 10, 5))
         scrape_state.save_hashes("gba", "a.zip", 10, 5, H)
         self.assertEqual(scrape_state.cached_hashes("gba", "a.zip", 10, 5), H)
-        scrape_state.flush_hashes()
+        scrape_state.flush()
         self.assertEqual(self.stored("scrapes/gba/hashes.json"), {"a.zip": {"size": 10, "mtime": 5, "hashes": H}})
         self.new_run()
         self.assertEqual(scrape_state.cached_hashes("gba", "a.zip", 10, 5), H)
@@ -57,7 +57,7 @@ class ScrapeStateTest(StorageDir):
         scrape_state.save_hashes("gba", "a.zip", 10, 5, H)
         self.assertIsNone(self.stored("scrapes/gba/hashes.json"))
         self.assertEqual(scrape_state.cached_hashes("gba", "a.zip", 10, 5), H)  # served from memory
-        scrape_state.flush_hashes()
+        scrape_state.flush()
         self.assertEqual(set(self.stored("scrapes/gba/hashes.json")), {"a.zip"})
         with mock.patch.object(scrape_state, "HASH_FLUSH", 2):
             scrape_state.save_hashes("gba", "b.zip", 1, 1, H)
@@ -66,6 +66,22 @@ class ScrapeStateTest(StorageDir):
         self.assertEqual(set(self.stored("scrapes/gba/hashes.json")), {"a.zip", "b.zip"})
         self.assertEqual(set(self.stored("scrapes/nes/hashes.json")), {"c.zip"})
         self.assertEqual(scrape_state.cached_hashes("gba", "a.zip", 10, 5), H)  # earlier ones are kept
+
+    def test_a_full_hash_group_writes_hashes_only_and_flush_writes_every_kind(self):
+        scrape_state.mark_unknown("gba", "u.zip")
+        scrape_state.mark_nomedia("gba", "n.zip", {"manuals"})
+        with mock.patch.object(scrape_state, "HASH_FLUSH", 1), mock.patch.object(s3, "put_text", wraps=s3.put_text) as put:
+            scrape_state.save_hashes("gba", "a.zip", 10, 5, H)
+            self.assertEqual([c.args[0] for c in put.call_args_list], ["scrapes/gba/hashes.json"])
+            scrape_state.forget_hashes("gba", "a.zip")
+            put.reset_mock()
+            scrape_state.flush()
+            self.assertEqual([c.args[0] for c in put.call_args_list],
+                             [f"scrapes/gba/{name}.json" for name in ("unknown", "hashes", "nomedia")])
+            put.reset_mock()
+            scrape_state.flush()  # nothing left
+            put.assert_not_called()
+        self.assertEqual(self.stored("scrapes/gba/hashes.json"), {})
 
     def test_match_round_trip_is_written_at_once_per_system(self):
         self.assertIsNone(scrape_state.manual_match("gba", "a.zip"))
@@ -123,15 +139,14 @@ class ScrapeStateTest(StorageDir):
         self.assertEqual(scrape_state.snapshot().not_offered("nes", "b.zip"), {"fanart", "manuals"})
         self.assertIsNone(self.stored("scrapes/gba/unknown.json"))
         self.assertIsNone(self.stored("scrapes/nes/nomedia.json"))
-        scrape_state.flush_unknown()
-        scrape_state.flush_nomedia()
+        scrape_state.flush()
         self.assertEqual(self.stored("scrapes/gba/unknown.json"), {"a.zip": True})
         self.assertEqual(self.stored("scrapes/nes/nomedia.json"), {"b.zip": ["fanart", "manuals"]})
         self.new_run()
         self.assertEqual(scrape_state.unknown(), {"gba/a.zip"})
         scrape_state.mark_nomedia("nes", "b.zip", set())  # none forgets it
         self.assertEqual(scrape_state.nomedia(), {})
-        scrape_state.flush_nomedia()
+        scrape_state.flush()
         self.assertEqual(self.stored("scrapes/nes/nomedia.json"), {})
 
     # merging with another writer
@@ -152,7 +167,7 @@ class ScrapeStateTest(StorageDir):
         scrape_state.mark_nomedia("gba", "a.zip", {"manuals"})
         scrape_state.mark_nomedia("gba", "a.zip", {"fanart"})
         self.store("scrapes/gba/nomedia.json", {"x.zip": ["manuals"], "y.zip": ["fanart"]})
-        scrape_state.flush_nomedia()
+        scrape_state.flush()
         self.assertEqual(self.stored("scrapes/gba/nomedia.json"), {"x.zip": ["manuals"], "y.zip": ["fanart"], "a.zip": ["fanart"]})
 
     def test_match_and_notgame_writes_merge(self):
@@ -259,7 +274,7 @@ class ScrapeStateTest(StorageDir):
         scrape_state.clear_unknown("gba", "x.zip")  # a mark, then a clear, in one run
         scrape_state.flush_unknown()
         scrape_state.mark_nomedia("gba", "found.zip", set())
-        scrape_state.flush_nomedia()
+        scrape_state.flush()
         scrape_state.clear_unknown("nes")
         self.assertEqual(os.listdir(self.root), [])
 
