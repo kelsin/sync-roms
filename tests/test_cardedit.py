@@ -1977,6 +1977,23 @@ class SetupChange(DataDir):
         entry = self.read("cards.json")["c"]
         self.assertEqual((entry["device"], entry["games"]), ("d", {"gba": [g("gba/A.zip")]}))
 
+    def test_the_review_lists_the_first_dropped_games_and_counts_the_rest(self):
+        self.write_json("cards.json", {"c": {"device": "full", "layout": "esde",
+                                             "games": {"gb": [g(f"gb/{n}.gb") for n in "ABCDEFG"]}}})
+        picks = iter([0, (edit.SETUP_KEY, 0), None, 4])  # Cards, v on the card, back, Done
+        out = io.StringIO()
+        with mock.patch.object(store, "repo_json", side_effect=lambda name: [dict(s) for s in CATALOG[name]]), \
+                mock.patch.object(store, "load_manifest", return_value=CATALOG), \
+                mock.patch.object(store, "load_sets", return_value=[]), \
+                mock.patch.object(picker, "filter_list", side_effect=lambda *a, **k: next(picks)), \
+                mock.patch.object(picker, "choose_setup", return_value=({**DEVICE, "systems": ["gba"]}, "esde")), \
+                mock.patch.object(ui, "choose", return_value="d"), \
+                contextlib.redirect_stdout(out):
+            self.assertEqual(edit.edit_manifest(), 0)
+        lines = out.getvalue().splitlines()
+        at = lines.index("  ➖ gb: 7 removed")
+        self.assertEqual(lines[at + 1:at + 7], [f"       {n}.gb" for n in "ABCDE"] + ["       … and 2 more"])
+
 
 class GamesStatus(unittest.TestCase):
     def test_the_games_list_status_leaves_room_for_the_row_at_80_columns(self):

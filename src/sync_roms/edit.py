@@ -465,10 +465,7 @@ def edit_manifest():
             for label, group, sign, col in (("added", added, "➕", ui.green), ("removed", removed, "➖", ui.red)):
                 for esde, ks in group.items():
                     print(col(f"  {sign} {esde}: {len(ks)} {label}"))
-                    for k in ks[:cap]:
-                        print(ui.dim(f"       {k.split('/', 1)[1] if '/' in k else k}"))
-                    if len(ks) > cap:
-                        print(ui.dim(f"       … and {len(ks) - cap} more"))
+                    ui.print_head(ks, cap, lambda k: k.split("/", 1)[1] if "/" in k else k)
         for dev_id, (add, remove) in overlay_pending.items():
             dev = next(d for d in manifest["devices"] if d["id"] == dev_id)
             print(ui.bold(f"  🧩 {dev['name']} (device-systems.json)"))
