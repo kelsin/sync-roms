@@ -46,27 +46,17 @@ def set_note(s, key, text):
 FULL_SYSTEM_NOTE = "Full system: every file in its folder is synced, so it can't be toggled"
 
 
-def toggle_games(title, rows, extras=None, covered=None, excluded=None, hotkeys=(), hint=None, place=None, filters="",
-                 key_help=None, select_all=True):
+def toggle_games(title, rows, hotkeys=(), hint=None, place=None, filters="", key_help=None, select_all=True):
     """Multi-select over rows of (system, bucket key, game title, label); adds/removes games in each system in place.
 
-    extras: {bucket key: [more bucket keys]} added or removed together with that row's key.
-
     Rows of a full system are shown on and locked: its whole storage folder is synced.
-    covered: optional callable (system, bucket key) -> note or None; rows with a note are shown on and locked
-    with that note (e.g. games a set reference already syncs).
-    excluded: {system bucket: [keys]}, updated in place. When given, covered rows can be switched off (they start on
-    unless listed) and the off ones are recorded there; only full systems stay locked.
     hotkeys/hint/key_help: extra keys the list offers (the hint line to show, and the (keys, what they do) pairs ?
     lists). The toggles made so far are applied, and the key pressed is returned (None on Enter). place: a dict the caller keeps across calls, so a list of the same rows
     opens where the last one was left (picker.carry_place). filters: the caller's filters, for the filter line.
     select_all: False turns the list's `a` (toggle all shown) off.
     Ctrl-C applies the toggles made so far, then raises KeyboardInterrupt.
     """
-    notes = [FULL_SYSTEM_NOTE if s.get("full_system") else covered(s, key) if covered else None
-             for s, key, _, _ in rows]
-    optional = [bool(n) and excluded is not None and not s.get("full_system") for n, (s, *_) in zip(notes, rows)]
-    locked = [bool(n) and not o for n, o in zip(notes, optional)]
+    locked = [bool(s.get("full_system")) for s, *_ in rows]
     have = {}  # system bucket -> keys of its listed games, kept current as games are added and removed
 
     def listed(s):
@@ -74,8 +64,7 @@ def toggle_games(title, rows, extras=None, covered=None, excluded=None, hotkeys=
             have[s["bucket"]] = {g["bucket"] for g in s["games"] if g.get("bucket")}
         return have[s["bucket"]]
 
-    initial = [(key not in excluded.get(s["bucket"], ())) if o else l or key in listed(s)
-               for o, l, (s, key, _, _) in zip(optional, locked, rows)]
+    initial = [lock or key in listed(s) for lock, (s, key, _, _) in zip(locked, rows)]
     def note_text(i):
         game = next((g for g in rows[i][0]["games"] if g.get("bucket") == rows[i][1]), None)
         return game.get("note", "") if game else ""
@@ -94,7 +83,7 @@ def toggle_games(title, rows, extras=None, covered=None, excluded=None, hotkeys=
     interrupted = False
     try:
         state = picker.filter_list(title, [label for *_, label in rows], multi=True, initial=initial, locked=locked,
-                                   locked_note=[n or "" for n in notes], hint=hint or GAMES_HINT, key_help=key_help, note_text=note_text,
+                                   locked_note=[FULL_SYSTEM_NOTE if lock else "" for lock in locked], hint=hint or GAMES_HINT, key_help=key_help, note_text=note_text,
                                    on_note=on_note, hotkeys=hotkeys, session=session, filters=filters,
                                    row_note=lambda i: variant_line(rows[i][1], variants, parents, system_names),
                                    preview=lambda i: previews.game_thumb(rows[i][1]) if i < len(rows) else None,
@@ -106,27 +95,18 @@ def toggle_games(title, rows, extras=None, covered=None, excluded=None, hotkeys=
         state = session["sel"]
     removed = defaultdict(set)  # system bucket -> keys to drop from its games
     systems = {}
-    for (s, key, name, _), on, was, lock, opt in zip(rows, state, initial, locked, optional):
+    for (s, key, name, _), on, was, lock in zip(rows, state, initial, locked):
         if lock:
             continue
-        if opt:
-            if on != was:
-                keys = set(excluded.get(s["bucket"], ())) ^ {key}
-                excluded[s["bucket"]] = sorted(keys)
-            continue
-        keys = [key] + list((extras or {}).get(key, []))
         if on and not was:
-            for k in keys:
-                removed[s["bucket"]].discard(k)
-                if k not in listed(s):
-                    listed(s).add(k)
-                    s["games"].append({"title": name if k == key else names.title(k), "bucket": k})
+            if key not in listed(s):
+                listed(s).add(key)
+                s["games"].append({"title": name, "bucket": key})
         elif was and not on:
             systems[s["bucket"]] = s
-            removed[s["bucket"]].update(keys)
+            removed[s["bucket"]].add(key)
     for bucket, keys in removed.items():
-        if keys and bucket in systems:
-            systems[bucket]["games"] = [g for g in systems[bucket]["games"] if g.get("bucket") not in keys]
+        systems[bucket]["games"] = [g for g in systems[bucket]["games"] if g.get("bucket") not in keys]
     if interrupted:
         raise KeyboardInterrupt
     return pressed
