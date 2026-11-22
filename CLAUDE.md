@@ -51,7 +51,8 @@ Only one storage layout is supported; don't add support for others. Repo data an
 | `<system>/` | ROMs, one lowercase folder per system (`gba/`, `mame/`, ...): the system's `bucket` | `upload`, `download pico8` |
 | `BIOS/` | BIOS files, always `BIOS/<file>`: the path is derived, never stored, and whether a file exists comes from listing `BIOS/` | by hand |
 | `scrapes/` | Per system, `<system>/metadata.json`, media, and scrape state by ROM path: `matches.json` (manual matches, `{ROM path: ScreenScraper game id}`), `unknown.json` (ROMs ScreenScraper didn't know), `nomedia.json` (media types it didn't offer), `hashes.json` (file hashes). `notgames.json`: non-game scrape results waiting for review, and the ROMs the review kept for later, keyed `system/rom` | `scrape`, `scrape review`, `clean scrapes`, `download pico8`, the `match-translations` and `dedup-names` skills |
-| `sets/<id>.json`, `variants-checked.json` | Game sets (the id is the file name); the ROMs the `update-variants` skill already judged | `sets edit`, that skill |
+| `sets/<id>.json` | Game sets (the id is the file name) | `sets edit`, the `update-variants` skill |
+| `variants-checked.json` | The ROMs the `update-variants` skill already judged | the `update-variants` skill |
 | `ignored.json` | `{system folder: [ROM paths]}`: ROMs sync-roms never shows, syncs, uploads or scrapes | `scrape review` (`scrape match --translated` takes ROMs off) |
 | `os/` | Firmware images, apps, themes, drivers, PICO-8 zips | by hand; `os/drivers/` by sync only, `os/esde/themes/` by `themes update` |
 
