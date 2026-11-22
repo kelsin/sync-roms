@@ -165,14 +165,19 @@ def known(key):
     return None
 
 
+def path_tag(path):
+    """The tag (see tag) of a file of a storage folder, by its path."""
+    st = os.stat(path)
+    return f"{st.st_mtime_ns}-{st.st_size}"
+
+
 def tag(key):
     """A tag that changes whenever one storage file's contents do, read live (never from the cache or the mirror): its
     ETag in a bucket, "<mtime_ns>-<size>" in a storage folder. None when the file doesn't exist."""
     s3.check_root()  # an unmounted share, not a missing file
     try:
         if runtime.ROOT:
-            st = os.stat(s3.safe_join(runtime.ROOT, key))
-            return f"{st.st_mtime_ns}-{st.st_size}"
+            return path_tag(s3.safe_join(runtime.ROOT, key))
         return s3.s3_client().head_object(Bucket=runtime.BUCKET, Key=key)["ETag"]
     except s3.ERRORS as e:
         if s3.missing(e):

@@ -97,9 +97,9 @@ def load(key, parse, empty, fallback=True):
 
 
 def write(key, text):
-    """Put text in storage, then save the mirror and its tag."""
-    s3.put_text(key, text)
-    _save_mirror(key, inventory.tag(key), text)
+    """Put text in storage, then save the mirror with the tag of that write (a tag read afterwards could be the one of
+    another machine's write since, and the mirror would pass for that file)."""
+    _save_mirror(key, s3.put_text(key, text), text)
 
 
 def delete(key):
