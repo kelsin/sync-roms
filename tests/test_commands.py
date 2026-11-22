@@ -488,6 +488,16 @@ class CheckShapesTest(Cmd):
         self.write("device-systems.json", {dev: {"add": "gba", "remove": 3}, "x": []})
         self.assertGreaterEqual(len(commands.check_data()), 4)
 
+    def test_the_keys_of_a_cards_surprises_are_checked(self):
+        self.write("cards.json", {"c": {"device": "full", "layout": "esde", "surprises": [
+            {"system": "gba", "bucket": "gba/A.zip", "title": "A", "files": ["gba/A2.zip", "nes/B.zip"]},
+            {"system": "gba", "bucket": "nes/C.zip", "title": "C", "files": "gba/D.zip"}]}})
+        self.assertEqual(commands.check_data(lambda system: {"gba/A.zip"}),
+                         ["cards.json: c: surprises: 'nes/B.zip' isn't under gba/",
+                          "cards.json: c: surprises: nes/C.zip: 'files' must be a list of bucket keys",
+                          "cards.json: c: surprises: 'nes/C.zip' isn't under gba/",
+                          "cards.json: c: surprises: 'gba/A2.zip' isn't in storage"])
+
 
 class CliTest(unittest.TestCase):
     def test_translate_maps_subcommands_to_flags(self):
