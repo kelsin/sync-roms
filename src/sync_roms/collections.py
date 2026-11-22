@@ -60,15 +60,10 @@ def load_collections():
 
 
 def save_collection(collection):
-    """Write collection (a dict with id, name, optional description, games) to its file."""
-    data = {"name": collection["name"]}
-    if collection.get("description"):
-        data["description"] = collection["description"]
-    if collection.get("art"):
-        data["art"] = collection["art"]
-    data["games"] = collection["games"]
+    """Write collection (a dict with id, name, optional description and art, games) to its file, with a set file's
+    fields in a set file's order."""
     os.makedirs(collections_dir(), exist_ok=True)
-    store.write_json(os.path.join(collections_dir(), collection["id"] + ".json"), data, **store.PRETTY)
+    store.write_json(os.path.join(collections_dir(), collection["id"] + ".json"), store.set_data(collection), **store.PRETTY)
 
 
 def delete_collection(collection_id):

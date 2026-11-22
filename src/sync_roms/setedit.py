@@ -61,15 +61,13 @@ def edit_one(game_set, systems, keys_of):
         elif i == 3:
             games = [g for g in game_set["games"] if g.get("bucket")]
             j = picker.filter_list("✏️  Change which game's category?", [game_label(g, names) for g in games],
-                                preview=lambda k: previews.game_thumb(games[k]["bucket"]) if k < len(games) else None,
-                                preview_width=previews.GAME_WIDTH)
+                                **previews.game_pane([g["bucket"] for g in games]))
             if j is not None:
                 recategorize(game_set["games"], games[j], ask_category(game_set["games"], games[j].get("title", "it")))
         elif i == 4:
             games = [g for g in game_set["games"] if g.get("bucket")]
             j = picker.filter_list("✏️  Set which game's series?", [game_label(g, names) for g in games],
-                                preview=lambda k: previews.game_thumb(games[k]["bucket"]) if k < len(games) else None,
-                                preview_width=previews.GAME_WIDTH)
+                                **previews.game_pane([g["bucket"] for g in games]))
             if j is not None:
                 known = list(dict.fromkeys([*(n if isinstance(n, str) else n.get("name", "") for n in store.repo_json("series")),
                                             *(g["series"] for g in game_set["games"] if g.get("series"))]))

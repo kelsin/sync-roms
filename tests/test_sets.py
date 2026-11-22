@@ -403,6 +403,7 @@ class SetsTest(unittest.TestCase):
             edit.toggle_games("t", rows)
         self.assertEqual(fl.call_args.kwargs["initial"], [True, True, False, False])
         self.assertEqual(fl.call_args.kwargs["locked"], [True, False, False, False])
+        self.assertEqual(fl.call_args.kwargs["locked_note"], [edit.FULL_SYSTEM_NOTE, "", "", ""])
         self.assertIs(fl.call_args.kwargs["select_all"], True)  # on unless the caller turns it off
         self.assertEqual(by["ful"]["games"], [])
         self.assertEqual([g["bucket"] for g in by["gba"]["games"]], ["gba/Gone.zip"])
@@ -424,32 +425,6 @@ class SetsTest(unittest.TestCase):
         z = [r[1] for r in rows].index("gen/Zed.zip")
         self.assertEqual(row_note(a), "\u21b3 Variant: GB: x")
         self.assertEqual(row_note(z), "")
-
-    def test_toggle_extra_files(self):
-        by = systems()
-        game_set = {"name": "M", "games": [{"title": "Multi", "system": "gen", "bucket": "gen/M.m3u",
-                                            "files": ["gen/M (Disc 1).chd", "gen/M (Disc 2).chd"]}]}
-        rows = edit.set_rows(game_set, by, lambda s: {"gen/M.m3u", "gen/M (Disc 1).chd"})
-        self.assertIn("not in storage", rows[0][3])
-        extras = {"gen/M.m3u": game_set["games"][0]["files"]}
-        with mock.patch.object(picker, "filter_list", return_value=[True]):
-            edit.toggle_games("t", rows, extras)
-        self.assertEqual([g["bucket"] for g in by["gen"]["games"]],
-                         ["gen/M.m3u", "gen/M (Disc 1).chd", "gen/M (Disc 2).chd"])
-        with mock.patch.object(picker, "filter_list", return_value=[False]):
-            edit.toggle_games("t", rows, extras)
-        self.assertEqual(by["gen"]["games"], [])
-
-    def test_overlapping_extras_never_duplicate_a_game(self):
-        by = {"gen": {"bucket": "gen", "games": [{"title": "A1", "bucket": "gen/A1.chd"},
-                                                 {"title": "A2", "bucket": "gen/A2.chd"}]}}
-        rows = [(by["gen"], "gen/A1.chd", "A", ""), (by["gen"], "gen/B1.chd", "B", "")]
-        extras = {"gen/A1.chd": ["gen/A2.chd"], "gen/B1.chd": ["gen/A2.chd"]}
-        with mock.patch.object(picker, "filter_list", return_value=[False, True]):
-            edit.toggle_games("t", rows, extras)
-        buckets = [g["bucket"] for g in by["gen"]["games"]]
-        self.assertEqual(sorted(buckets), sorted(set(buckets)))
-        self.assertIn("gen/A2.chd", buckets)
 
     def test_locked_rows_cannot_toggle(self):
         keys = iter(["tab", "ctrl+a", "escape", "y"])
@@ -486,33 +461,6 @@ class SetsTest(unittest.TestCase):
 
     def test_hotkey_ignored_without_rows(self):
         self.assertIsNone(self.run_list(iter(["/", "z", "enter", "f", "escape", "escape"]), multi=False, hotkeys=("f",)))
-
-    def test_covered_rows_locked_with_note(self):
-        by = systems()
-        rows = edit.set_rows(SET, by, lambda s: set())
-        covered = lambda s, key: "Full set: x" if key == "gba/Gone.zip" else None  # noqa: E731
-        with mock.patch.object(picker, "filter_list", return_value=[True, True, True, True]) as fl:
-            edit.toggle_games("t", rows, covered=covered)
-        self.assertEqual(fl.call_args.kwargs["locked"], [True, False, True, False])
-        self.assertEqual(fl.call_args.kwargs["locked_note"][2], "Full set: x")
-        self.assertNotIn("gba/Gone.zip", [g["bucket"] for g in by["gba"]["games"]])
-
-    def test_excluded_unlocks_covered_rows_and_records_off_ones(self):
-        by = systems()
-        rows = edit.set_rows(SET, by, lambda s: set())
-        covered = lambda s, key: "From core" if key in ("gba/Gone.zip", "gba/A.zip") else None  # noqa: E731
-        excluded = {"gba": ["gba/A.zip"]}
-        with mock.patch.object(picker, "filter_list") as fl:
-            fl.side_effect = lambda *a, **k: [not x for x in k["initial"]]
-            edit.toggle_games("t", rows, covered=covered, excluded=excluded)
-        kw = fl.call_args.kwargs
-        keys = [r[1] for r in rows]
-        for key in ("gba/A.zip", "gba/Gone.zip"):
-            self.assertFalse(kw["locked"][keys.index(key)])
-        self.assertTrue(kw["locked"][keys.index("ful/Skip.zip")])  # full systems stay locked
-        self.assertFalse(kw["initial"][keys.index("gba/A.zip")])  # excluded starts off
-        self.assertTrue(kw["initial"][keys.index("gba/Gone.zip")])
-        self.assertEqual(excluded["gba"], ["gba/Gone.zip"])  # A switched on, Gone switched off
 
     def run_list(self, keys, locked=None, multi=True, hotkeys=()):
         return feed_list(keys, "t", ["x", "y"], multi=multi, locked=locked, hotkeys=hotkeys)

@@ -257,6 +257,21 @@ class Keys(unittest.TestCase):
         self.assertEqual(run_list(["G", "k", "enter"], self.LABELS), 2)
         self.assertEqual(run_list(["G", "g", "enter"], self.LABELS), 0)
 
+    def test_page_and_half_page_movement(self):
+        labels = [f"row {i}" for i in range(50)]  # the list model shows 20 rows until a screen sizes it
+        self.assertEqual(run_list(["ctrl+d", "enter"], labels), 10)
+        self.assertEqual(run_list(["ctrl+f", "enter"], labels), 20)
+        self.assertEqual(run_list(["ctrl+f", "ctrl+u", "enter"], labels), 10)
+        self.assertEqual(run_list(["ctrl+f", "ctrl+f", "ctrl+b", "enter"], labels), 20)
+        self.assertEqual(run_list(["ctrl+f", "ctrl+f", "ctrl+d", "enter"], labels), 49)  # stops on the last row
+        self.assertEqual(run_list(["ctrl+d", "ctrl+b", "enter"], labels), 0)  # and on the first
+        self.assertEqual(run_list(["ctrl+u", "enter"], labels), 0)
+        self.assertEqual(run_list(["ctrl+d", "ctrl+d", "ctrl+u", "ctrl+f", "enter"], labels), 30)
+
+    def test_a_hotkey_wins_over_a_movement_key(self):
+        self.assertEqual(run_list(["j", "g"], self.LABELS, hotkeys=("g",)), ("g", 1))
+        self.assertEqual(run_list(["ctrl+d"], self.LABELS, hotkeys=("ctrl+d",)), ("ctrl+d", 0))
+
     def test_letters_only_filter_after_slash(self):
         self.assertEqual(run_list(["b", "enter"], self.LABELS), 0)
         self.assertEqual(run_list(["/", "g", "a", "m", "enter", "enter"], self.LABELS), 2)

@@ -187,18 +187,23 @@ def line_key(text, pos, k):
 
 
 def move_key(k, cur, last, view):
-    """The new cursor row for a movement key (arrows, ^N/^P, PgUp/PgDn/^V, Home/End), or None if k isn't one."""
-    if k in ("up", "ctrl+p"):
+    """The new cursor row for a movement key (arrows, ^N/^P, PgUp/PgDn/^V, Home/End, and vim's j/k, ^B/^F, g/G and
+    the half pages ^U/^D, which only get here while no text is being typed), or None if k isn't one."""
+    if k in ("up", "ctrl+p", "k"):
         return max(0, cur - 1)
-    if k in ("down", "ctrl+n"):
+    if k in ("down", "ctrl+n", "j"):
         return min(last, cur + 1)
-    if k == "pageup":
+    if k in ("pageup", "ctrl+b"):
         return max(0, cur - view)
-    if k in ("pagedown", "ctrl+v"):
+    if k in ("pagedown", "ctrl+v", "ctrl+f"):
         return min(last, cur + view)
-    if k == "home":
+    if k == "ctrl+u":
+        return max(0, cur - max(1, view // 2))
+    if k == "ctrl+d":
+        return min(last, cur + max(1, view // 2))
+    if k in ("home", "g"):
         return 0
-    if k == "end":
+    if k in ("end", "G"):
         return max(0, last)
     return None
 
@@ -392,22 +397,6 @@ class _ListModel:
         elif k == "?":
             self.help = help_lines(self.multi, self.hint, self.hidden_count, bool(self.on_note), self.key_help,
                                    self.select_all)
-        elif k == "j":
-            self.cur = min(len(vis) - 1, cur + 1)
-        elif k == "k":
-            self.cur = max(0, cur - 1)
-        elif k == "g":
-            self.cur = 0
-        elif k == "G":
-            self.cur = len(vis) - 1
-        elif k == "ctrl+d":
-            self.cur = min(len(vis) - 1, cur + max(1, self.view // 2))
-        elif k == "ctrl+u":
-            self.cur = max(0, cur - max(1, self.view // 2))
-        elif k == "ctrl+f":
-            self.cur = min(len(vis) - 1, cur + self.view)
-        elif k == "ctrl+b":
-            self.cur = max(0, cur - self.view)
         elif k in ("escape", "q", "ctrl+g"):
             if self.query:
                 self.query, self.qpos = "", 0
@@ -1220,23 +1209,25 @@ class _Session:
 
     def ask(self, kind, payload):
         """On the worker: have the main thread show a list (kind "list", payload its model) or a prompt ("prompt", a
-        _PromptModel), or run a call ("call", payload a callable), and wait. Returns (result, error): at once, with
-        KeyboardInterrupt, once abandoned."""
+        _PromptModel), or run a call ("call", payload a callable), and wait. Returns its result or raises its error: at
+        once, KeyboardInterrupt, once abandoned."""
         reply = queue.Queue()
         with self.lock:
             if self.abandoned:
-                return None, KeyboardInterrupt()
+                raise KeyboardInterrupt
             self.working, self.pressed = False, None
             if self.app and not self.suspended and self.app.call_later(self.app.request, kind, payload, reply):
                 self.waiting = reply
             else:
                 self.requests.put((kind, payload, reply))
-        got = reply.get()
+        value, error = reply.get()
         with self.lock:
             self.waiting = None
             self.working = True
         self.answered_at = len(self.printed)
-        return got
+        if error is not None:
+            raise error
+        return value
 
     def probe(self, model):
         """Ask the terminal whether it draws images, once, when the first list with a preview comes (main thread, with
@@ -1263,19 +1254,13 @@ class _Session:
         if threading.get_ident() != self.worker:
             return ui.NOT_ASKED
         above = [self.printed.pop() for _ in range(len(self.printed) - self.answered_at)][::-1]
-        value, error = self.ask("prompt", _PromptModel(question, keys, above))
-        if error is not None:
-            raise error
-        return value
+        return self.ask("prompt", _PromptModel(question, keys, above))
 
     def outside(self, fn, *args, **kwargs):
         """ui.terminal_runner: fn called on the worker runs on the main thread, on the normal screen."""
         if threading.get_ident() != self.worker:
             return fn(*args, **kwargs)
-        value, error = self.ask("call", functools.partial(fn, *args, **kwargs))
-        if error is not None:
-            raise error
-        return value
+        return self.ask("call", functools.partial(fn, *args, **kwargs))
 
 
 def one_app(fn):
@@ -1308,10 +1293,7 @@ def _run(model):
             model.update()
             _session.kept += [text for text, keep in _session.notes if keep]
             _session.notes = []
-        result, error = _session.ask("list", model)
-        if error is not None:
-            raise error
-        return result
+        return _session.ask("list", model)
     app = _app_class()(model)
     result = app.run(mouse=False)
     if app.error:

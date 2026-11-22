@@ -164,6 +164,14 @@ class Hints(unittest.TestCase):
         self.assertTrue(edit.MENU_HINT.startswith("Enter open"))
 
 
+class Table(unittest.TestCase):
+    def test_columns_fit_the_widest_cell_with_wide_characters_as_two(self):
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            ui.table([("✅ a", 1), ("bb", "x")], ("Id", "N"))  # a cell needn't be text
+        self.assertEqual(out.getvalue().splitlines(), ["Id    N", "✅ a  1", "bb    x"])
+
+
 class MultiPickerKeys(unittest.TestCase):
     def run_keys(self, keys):
         result = feed_list(keys, "t", ["a", "b", "c"], multi=True)

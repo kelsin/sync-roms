@@ -1158,6 +1158,38 @@ class Flow(DataDir):
         self.assertEqual({x["bucket"] for x in entry["games"]["gba"]}, {"gba/Zelda.zip", "gba/Ruby.sav"})
         self.assertNotIn("sets", entry["games"])
 
+    def test_ctrl_c_in_the_set_list_only_saves(self):
+        self.card()
+
+        def ruby_on_then_sets(labels, kw):
+            kw["session"]["sel"][labels.index("Ruby.zip")] = True
+            return (cardedit.SET_KEY, 0)
+
+        def interrupted(labels, kw):
+            raise KeyboardInterrupt
+        with self.assertRaises(KeyboardInterrupt):  # Space twice in the set list: its games on, then off again
+            self.run_system(ruby_on_then_sets, returns((" ", 0)), returns((" ", 0)), interrupted)
+        self.assertEqual(store.card_games("c"), {})  # the pass before the set list isn't applied a second time
+
+    def test_ctrl_c_in_the_variant_list_saves_what_was_toggled(self):
+        self.with_variants(self.RED, {"bucket": "psx/x.chd", "note": "PS1: x"})
+        self.card()
+
+        def zelda_on_then_v(labels, kw):
+            kw["session"]["sel"][labels.index("Zelda.zip")] = True
+            return (cardedit.VARIANT_KEY, labels.index("Ruby.zip"))
+
+        def interrupted(labels, kw):
+            raise KeyboardInterrupt
+        with self.assertRaises(KeyboardInterrupt):
+            self.run_system(zelda_on_then_v, interrupted)
+        self.assertEqual(store.card_games("c"), {"gba": [g("gba/Zelda.zip")]})
+
+    def test_a_systems_games_keep_select_all(self):
+        self.card()
+        _, calls = self.run_system(returns([False] * 4))
+        self.assertIs(calls[0][2].get("select_all", True), True)
+
     def initial_of(self, kw, labels, name):
         return kw["initial"][labels.index(name)]
 
@@ -1626,6 +1658,21 @@ class SetFlow(Flow):
             self.run_set(interrupted)
         self.assertIn("gba/Ruby.zip", {x["bucket"] for x in self.read("cards.json")["c"]["games"]["gba"]})
 
+    def test_ctrl_c_in_the_series_list_saves_what_was_toggled(self):
+        self.card()
+        game_set = {**SET, "games": [{**x, "series": "A"} for x in SET["games"]]}
+
+        def red_on_then_series(labels, kw):
+            kw["session"]["sel"][labels.index("Game Boy — Red")] = True
+            return (cardedit.SERIES_KEY, None)
+
+        def interrupted(labels, kw):
+            self.assertEqual(labels, ["A  (2 games)"])
+            raise KeyboardInterrupt
+        with self.assertRaises(KeyboardInterrupt):
+            self.run_set(red_on_then_series, interrupted, game_set=game_set)
+        self.assertEqual(store.card_games("c"), {"gb": [g("gb/Red.gb")]})
+
     def run_series(self, game_set, pick, *steps):
         """Drives edit_set; the series list (no multi mode) answers with the index pick, and its labels are kept."""
         script, lists = Script(*steps), []
@@ -1929,6 +1976,23 @@ class SetupChange(DataDir):
             self.assertEqual(edit.edit_manifest(), 0)
         entry = self.read("cards.json")["c"]
         self.assertEqual((entry["device"], entry["games"]), ("d", {"gba": [g("gba/A.zip")]}))
+
+    def test_the_review_lists_the_first_dropped_games_and_counts_the_rest(self):
+        self.write_json("cards.json", {"c": {"device": "full", "layout": "esde",
+                                             "games": {"gb": [g(f"gb/{n}.gb") for n in "ABCDEFG"]}}})
+        picks = iter([0, (edit.SETUP_KEY, 0), None, 4])  # Cards, v on the card, back, Done
+        out = io.StringIO()
+        with mock.patch.object(store, "repo_json", side_effect=lambda name: [dict(s) for s in CATALOG[name]]), \
+                mock.patch.object(store, "load_manifest", return_value=CATALOG), \
+                mock.patch.object(store, "load_sets", return_value=[]), \
+                mock.patch.object(picker, "filter_list", side_effect=lambda *a, **k: next(picks)), \
+                mock.patch.object(picker, "choose_setup", return_value=({**DEVICE, "systems": ["gba"]}, "esde")), \
+                mock.patch.object(ui, "choose", return_value="d"), \
+                contextlib.redirect_stdout(out):
+            self.assertEqual(edit.edit_manifest(), 0)
+        lines = out.getvalue().splitlines()
+        at = lines.index("  ➖ gb: 7 removed")
+        self.assertEqual(lines[at + 1:at + 7], [f"       {n}.gb" for n in "ABCDE"] + ["       … and 2 more"])
 
 
 class GamesStatus(unittest.TestCase):
