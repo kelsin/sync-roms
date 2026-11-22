@@ -222,6 +222,17 @@ def forget_match(system, rom):
             _set_match(system, rom, _GONE)
 
 
+def move_match(system, old, new):
+    """Give the ROM new the match saved for old, in one write: when it fails, old's match is still in storage."""
+    with _lock:
+        value = _get(MATCHES, system, old)
+        if value is None:
+            return
+        changes = {old: _GONE, **({new: value} if _game_id(value) else {})}
+        _apply(_ledger(MATCHES, system), changes)
+        _write(_key(system, MATCHES), lambda data: _apply(data, changes))
+
+
 def is_unknown(system, rom):
     with _lock:
         return _get(UNKNOWN, system, rom) is not None

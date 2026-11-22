@@ -215,10 +215,7 @@ def _media_moves(old_file, new_file):
 def _move_state(old_file, new_file):
     """Give the new revision the old one's manual ScreenScraper match and forget the rest of the old one's scrape
     state (non-game, unknown, not-offered media, hashes): that was about another file."""
-    game_id = scrape_state.manual_match("pico8", old_file)
-    if game_id is not None:
-        scrape_state.save_match("pico8", new_file, game_id)
-    scrape_state.forget_match("pico8", old_file)
+    scrape_state.move_match("pico8", old_file, new_file)
     scrape_state.clear_notgame("pico8", old_file)
     scrape_state.clear_unknown("pico8", old_file)
     scrape_state.mark_nomedia("pico8", old_file, ())

@@ -332,6 +332,16 @@ class Download(helpers.StorageDir):
             return put_text(key, text)
         return mock.patch.object(bbs.s3, "put_text", flaky)
 
+    def test_failed_move_of_the_manual_match_keeps_it_on_the_old_revision(self):
+        self.put("pico8/x-1.p8.png")
+        self.put("scrapes/pico8/matches.json", json.dumps({"x-1.p8.png": 77}).encode())
+        with mock.patch.object(bbs, "retarget", return_value=[]), self.flaky_meta(2):
+            _, _, err, _ = self.run_download([page(("x-2", "X Two", "Ex")), EMPTY])
+        self.assertEqual(self.writes, [META, "scrapes/pico8/matches.json"])
+        self.assertIn("disk full", err)
+        with open(os.path.join(self.root, "scrapes/pico8/matches.json")) as f:
+            self.assertEqual(json.load(f), {"x-1.p8.png": 77})
+
     def test_metadata_is_written_once_per_batch_and_at_the_end(self):
         for every, writes in ((25, 1), (2, 2)):
             shutil.rmtree(self.root)
