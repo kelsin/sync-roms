@@ -99,6 +99,21 @@ class ChdTest(unittest.TestCase):
             self.assertIsNone(chd.chd_image(self.tools, CD["chd"], image, owned))
         self.assertEqual(self.files(), ["Game.chd", "out.cue"])
 
+    def test_cue_with_a_single_quoted_file_name_owns_its_track(self):
+        self.touch("Game.cue", text="FILE 'a b.bin' BINARY\n  TRACK 01 MODE2/2352\n  FILE 'It said \"hi\".bin' BINARY\n")
+        self.touch("out.cue", text="FILE '../secret.bin' BINARY\n")
+        self.touch("a b.bin", 'It said "hi".bin', "'a")
+        self.assertEqual(chd.sheet_tracks(os.path.join(self.dir, "Game.cue")), ["a b.bin", 'It said "hi".bin'])
+        paths = [os.path.join(self.dir, n) for n in ("'a", "Game.cue", "a b.bin", 'It said "hi".bin', "out.cue")]
+        skipped = []
+        (image, owned), = chd.disc_images(paths, skipped=skipped)
+        self.assertEqual(skipped, [paths[4]])
+        with mock.patch.object(external, "run_tool", FakeTools()):
+            self.assertIsNone(chd.chd_image(self.tools, CD["chd"], image, owned))
+        self.assertEqual(self.files(), ["'a", "Game.chd", "out.cue"])
+        self.touch("mixed.cue", text="FILE \"It's.bin\" BINARY\nFILE It's.bin BINARY\n")
+        self.assertEqual(chd.sheet_tracks(os.path.join(self.dir, "mixed.cue")), ["It's.bin", "It's.bin"])
+
     def test_plan_finds_system_from_folder_names(self):
         folders = {"psx": CD, "gc": EXTRACT}
         self.touch("roms/psx/A.zip", "roms/psx/B.cue", "roms/psx/B (Track 1).bin", "roms/gc/C.7z", "roms/gc/D.iso",
