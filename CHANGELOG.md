@@ -1,5 +1,51 @@
 # Changelog
 
+## [3.20.0](https://github.com/kelsin/sync-roms/compare/v3.19.0...v3.20.0) (2026-11-22)
+
+
+### :video_game: Features
+
+* **spruce:** make QOI box art for Spruce and use covers first for Onion ([#498](https://github.com/kelsin/sync-roms/issues/498)) ([87fc125](https://github.com/kelsin/sync-roms/commit/87fc125007af0ff00e89924dd2da7955ca3af17e))
+
+
+### :bug: Bug Fixes
+
+* **cardedit:** import the module on its own ([#492](https://github.com/kelsin/sync-roms/issues/492)) ([04afa40](https://github.com/kelsin/sync-roms/commit/04afa406791b0e4883bb89e3c5b2ccc1399e1dd3))
+* **chd:** keep a disc whose output another job just wrote ([#485](https://github.com/kelsin/sync-roms/issues/485)) ([ec72f7e](https://github.com/kelsin/sync-roms/commit/ec72f7ea4c5749a8bc0691e61d3b5f508eb52ebf))
+* **chd:** make discs whose names differ only by case take turns ([#478](https://github.com/kelsin/sync-roms/issues/478)) ([d512dd9](https://github.com/kelsin/sync-roms/commit/d512dd95038535d841403d5cabb4a61404919a06))
+* **chd:** read single-quoted file names in cue sheets ([#477](https://github.com/kelsin/sync-roms/issues/477)) ([95d5d4e](https://github.com/kelsin/sync-roms/commit/95d5d4ecf9a38aaaa82c4ac59808e70dac1d7039))
+* close fake http errors, tool pipes and test files so no cleanup warning lands in another test ([#497](https://github.com/kelsin/sync-roms/issues/497)) ([5fa9760](https://github.com/kelsin/sync-roms/commit/5fa976029f343b31e70b1e5bee9f7e631a9c4927))
+* **games:** keep a system's game list when games full switches it on and off ([#475](https://github.com/kelsin/sync-roms/issues/475)) ([60b9a5c](https://github.com/kelsin/sync-roms/commit/60b9a5c85287304228231cf75d074b2f15e48526))
+* **sync:** don't crash a dry run on a card entry that isn't an object ([#496](https://github.com/kelsin/sync-roms/issues/496)) ([d0e0152](https://github.com/kelsin/sync-roms/commit/d0e015297babc0f88c5d50c3f8f373a3c190547d))
+* **tools:** read tool output that isn't valid utf-8 ([#476](https://github.com/kelsin/sync-roms/issues/476)) ([5188326](https://github.com/kelsin/sync-roms/commit/51883265e2e366b1175030ef68c293ca18e6e099))
+
+
+### :book: Documentation
+
+* add handheld OS consolidation plan ([#491](https://github.com/kelsin/sync-roms/issues/491)) ([9d5736e](https://github.com/kelsin/sync-roms/commit/9d5736e95086cb5782b127df2f84a8e58215e50b))
+* **claude:** correct and reorganise the project instructions ([#484](https://github.com/kelsin/sync-roms/issues/484)) ([ce5ce9c](https://github.com/kelsin/sync-roms/commit/ce5ce9cc94c919e11caf4a1df4aa61d378830bc6))
+* **claude:** say who writes variants-checked.json ([#493](https://github.com/kelsin/sync-roms/issues/493)) ([3b8daff](https://github.com/kelsin/sync-roms/commit/3b8daffb87eb04c3eacd836018f449564f5610c6))
+* **help:** correct the built-in help and stale docstrings ([#481](https://github.com/kelsin/sync-roms/issues/481)) ([3edf768](https://github.com/kelsin/sync-roms/commit/3edf7681ebef20481a3f5707fc6038c2082ef5f2))
+* **readme:** correct and tidy the readme ([#490](https://github.com/kelsin/sync-roms/issues/490)) ([24c39cd](https://github.com/kelsin/sync-roms/commit/24c39cddd95c3d7d5292c4b5b7a11a0999abeb55))
+* **skills:** correct the skills and the screenscraper notes against the code ([#480](https://github.com/kelsin/sync-roms/issues/480)) ([8c4c197](https://github.com/kelsin/sync-roms/commit/8c4c1977c004685022d3b1d4237c0a5a35bfe150))
+
+
+### :hammer_and_wrench: Code Refactoring
+
+* **card:** share the collection and art writers' common code ([#483](https://github.com/kelsin/sync-roms/issues/483)) ([1bb9063](https://github.com/kelsin/sync-roms/commit/1bb9063c3327633d4dce16a718bae9ad0ce352c9))
+* **cards:** share repeated code in convert, saves and flash ([#487](https://github.com/kelsin/sync-roms/issues/487)) ([8dada16](https://github.com/kelsin/sync-roms/commit/8dada16249fd7e912b3034ff1cc388ce1176d713))
+* **cli:** share repeated steps in the sync flow and commands ([#488](https://github.com/kelsin/sync-roms/issues/488)) ([7b81788](https://github.com/kelsin/sync-roms/commit/7b81788870079ebaf2075631888ef7eb9756ccd9))
+* **edit:** share repeated code in the editors ([#489](https://github.com/kelsin/sync-roms/issues/489)) ([45dd875](https://github.com/kelsin/sync-roms/commit/45dd875cbc9fd688138c5279f0de61ef2f38a2dd))
+* **install:** share the newest-file pick and the card entry read ([#482](https://github.com/kelsin/sync-roms/issues/482)) ([6d8be44](https://github.com/kelsin/sync-roms/commit/6d8be448981783e51cf4d14b3f5e47ffdf8a25c4))
+* **scrape:** share the scrape modules' repeated parsing and flushing ([#486](https://github.com/kelsin/sync-roms/issues/486)) ([d3413d1](https://github.com/kelsin/sync-roms/commit/d3413d1cd3d136f1016774fe1a8b88c95341d779))
+* **tests:** set up temp folders and patches with enterContext ([#499](https://github.com/kelsin/sync-roms/issues/499)) ([e76f643](https://github.com/kelsin/sync-roms/commit/e76f643faf7a698764216a0c52263acad4246d32))
+* use the shared helpers at the remaining call sites ([#494](https://github.com/kelsin/sync-roms/issues/494)) ([bec5704](https://github.com/kelsin/sync-roms/commit/bec5704af7383015f8bb28d43371e362f6ba2731))
+
+
+### :traffic_light: Tests
+
+* share repeated fixtures through tests/helpers.py ([#495](https://github.com/kelsin/sync-roms/issues/495)) ([6dc972f](https://github.com/kelsin/sync-roms/commit/6dc972fb17cea217126db93dd8cae9ea8dcee109))
+
 ## [3.19.0](https://github.com/kelsin/sync-roms/compare/v3.18.0...v3.19.0) (2026-11-22)
 
 
