@@ -183,6 +183,10 @@ class StorageDir(RealDataDirGuard):
             f.write(data)
         return path
 
+    def read_json(self, key):
+        with open(os.path.join(self.root, key)) as f:
+            return json.load(f)
+
 
 class CardDir(StorageDir):
     """A StorageDir with an empty card folder (self.card), for the installers that put something on card "c" and
@@ -201,6 +205,23 @@ class CardDir(StorageDir):
 
     def snapshot(self):
         return sorted(os.path.join(d, f) for d, _, fs in os.walk(self.card) for f in fs)
+
+
+class ScriptDir(StorageDir):
+    """A StorageDir for a script's main(): usersettings.apply_settings does nothing, so storage stays this folder."""
+
+    def setUp(self):
+        super().setUp()
+        p = mock.patch.object(usersettings, "apply_settings")
+        p.start()
+        self.addCleanup(p.stop)
+
+    def run_script(self, main, *args):
+        """main(*args) with its output captured: (what it returned, what it printed)."""
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            code = main(*args)
+        return code, out.getvalue()
 
 
 def storage_sets(test, sets, root=None):

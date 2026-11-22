@@ -1,6 +1,4 @@
 import argparse
-import contextlib
-import io
 import json
 import os
 import sys
@@ -10,9 +8,9 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from helpers import StorageDir, load_script  # noqa: E402
+from helpers import ScriptDir, load_script  # noqa: E402
 
-from sync_roms import scrape_online, scrape_plan, usersettings  # noqa: E402
+from sync_roms import scrape_online, scrape_plan  # noqa: E402
 
 SCRIPTS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".claude", "skills", "dedup-names", "scripts")
 
@@ -78,14 +76,11 @@ GBA = {"name": "Game Boy Advance", "bucket": "gba", "screenscraper": 12, "folder
 KEY = "scrapes/gba/metadata.json"
 
 
-class ApplyNames(StorageDir):
+class ApplyNames(ScriptDir):
     def setUp(self):
         super().setUp()
         self.put(KEY, scrape_plan.dump_json({"A.zip": {"name": "A"}, "B (T).zip": {"name": "A - Translated",
                                                                                      "translated": True}}).encode())
-        p = mock.patch.object(usersettings, "apply_settings")
-        p.start()
-        self.addCleanup(p.stop)
         self.dir = tempfile.TemporaryDirectory()
         self.addCleanup(self.dir.cleanup)
 
@@ -93,14 +88,10 @@ class ApplyNames(StorageDir):
         path = os.path.join(self.dir.name, "decisions.json")
         with open(path, "w") as f:
             json.dump(decisions, f)
-        out = io.StringIO()
-        with contextlib.redirect_stdout(out):
-            code = apply_names.main([path, *flags])
-        return code, out.getvalue()
+        return self.run_script(apply_names.main, [path, *flags])
 
     def metadata(self):
-        with open(os.path.join(self.root, KEY)) as f:
-            return json.load(f)
+        return self.read_json(KEY)
 
     def test_qualifies(self):
         code, out = self.run_main({"qualify": [{"system": "gba", "rom": "B (T).zip", "qualifier": "Aeon"}]})

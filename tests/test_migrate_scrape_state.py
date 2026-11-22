@@ -8,19 +8,16 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from helpers import StorageDir, load_script  # noqa: E402
+from helpers import ScriptDir, load_script  # noqa: E402
 
-from sync_roms import inventory, runtime, scrape_state, usersettings  # noqa: E402
+from sync_roms import inventory, runtime, scrape_state  # noqa: E402
 
 migrate = load_script(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tools", "migrate_scrape_state.py"))
 
 
-class MigrateTest(StorageDir):
+class MigrateTest(ScriptDir):
     def setUp(self):
         super().setUp()
-        p = mock.patch.object(usersettings, "apply_settings")
-        p.start()
-        self.addCleanup(p.stop)
         os.makedirs(self.data)
         self.old = {
             "scrape-matches.json": {"gba/a.zip": 5, "snes/b.zip": 7},
@@ -38,14 +35,9 @@ class MigrateTest(StorageDir):
             json.dump(data, f)
 
     def run_main(self, *args):
-        out = io.StringIO()
-        with contextlib.redirect_stdout(out):
-            code = migrate.main(list(args))
-        return code, out.getvalue()
+        return self.run_script(migrate.main, list(args))
 
-    def stored(self, key):
-        with open(os.path.join(self.root, key)) as f:
-            return json.load(f)
+    stored = ScriptDir.read_json
 
     def tree(self):
         return sorted(os.path.join(d, f) for d, _, fs in os.walk(self.root) for f in fs)

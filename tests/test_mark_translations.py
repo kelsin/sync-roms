@@ -1,15 +1,12 @@
-import contextlib
-import io
 import os
 import sys
 import unittest
-from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from helpers import StorageDir, load_script  # noqa: E402
+from helpers import ScriptDir, load_script  # noqa: E402
 
-from sync_roms import scrape_plan, usersettings  # noqa: E402
+from sync_roms import scrape_plan  # noqa: E402
 
 _PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tools", "mark_translations.py")
 mark_translations = load_script(_PATH)
@@ -25,19 +22,13 @@ class Changes(unittest.TestCase):
         self.assertEqual(mark_translations.changes(meta), {"A (T).zip": {"name": "A - Translated", "translated": True}})
 
 
-class Main(StorageDir):
+class Main(ScriptDir):
     def setUp(self):
         super().setUp()
         self.path = self.put(KEY, scrape_plan.dump_json(DATA).encode())
-        p = mock.patch.object(usersettings, "apply_settings")
-        p.start()
-        self.addCleanup(p.stop)
 
     def run_main(self, argv):
-        out = io.StringIO()
-        with contextlib.redirect_stdout(out):
-            code = mark_translations.main(argv)
-        return code, out.getvalue()
+        return self.run_script(mark_translations.main, argv)
 
     def test_dry_run_writes_nothing(self):
         before = open(self.path, "rb").read()
