@@ -340,6 +340,12 @@ class CleanTest(unittest.TestCase):
         delete, rewrites, per, warnings = scrape_files.plan_clean(existing, {"gba": set()}, {})
         self.assertEqual((delete, rewrites, warnings), ([], [], []))
 
+    def test_clean_scrapes_removes_spruce_art_of_a_gone_rom(self):
+        existing = {f"scrapes/gba/{t}/gone.qoi": 5 for t in ("spruce", "spruce_med", "spruce_small")}
+        existing.update({f"scrapes/gba/{t}/a.qoi": 5 for t in ("spruce", "spruce_med", "spruce_small")})
+        delete = scrape_files.plan_clean(existing, {"gba": {"a.zip"}}, {})[0]
+        self.assertEqual(sorted(delete), sorted(f"scrapes/gba/{t}/gone.qoi" for t in ("spruce", "spruce_med", "spruce_small")))
+
 
 class CleanBadMetadataTest(StorageDir):
     """clean scrapes with a metadata.json that can't be used: the file is left alone, the system's media is still cleaned."""
