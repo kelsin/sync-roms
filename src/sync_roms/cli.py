@@ -10,7 +10,7 @@ from concurrent.futures import ThreadPoolExecutor
 from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError
 
 from . import __version__, budget, cardedit, cardfs, clean, commands, downloads, drivers, edit, external, frontend, inventory, m3u, mirroring, picker, runtime, s3, scrape_plan, store
-from . import muos_collections, nextui_folders, onion_surprise, pico8, raofflineproxy, rocknix_collections, saves, spruce_collections, spruce_os, surprise, themeart, ui, usersettings, vita
+from . import muos_collections, nextui_folders, onion_surprise, pico8, raofflineproxy, rocknix_collections, saves, spruce_collections, spruce_emu, spruce_os, surprise, themeart, ui, usersettings, vita
 from . import collections as colls
 
 
@@ -1001,6 +1001,10 @@ def sync_card(args):
     if unsupported:
         print(ui.dim(f"  {unsupported} system(s) have no {layout['label']} folder and are skipped"))
     systems = synced(systems)
+    if layout_name == "spruce":  # the folders an earlier sync used for a system that now uses another: all of it is unwanted
+        legacy = spruce_emu.legacy_systems(systems)
+        dropped += legacy
+        manifest["systems"] = [*manifest["systems"], *legacy]
     if not device and not unsupported:  # as it always was: a card that syncs every system has the manifest's own list,
         manifest["systems"] = systems  # which the stale-media check reads, in name order too
 
@@ -1391,6 +1395,25 @@ def sync_card(args):
         if layout_name == "rocknix" and (plan["writes"] or plan["deletes"] or art):
             print(f"💖 Run {os.path.basename(rocknix_collections.SCRIPT)[:-3]} from Ports on the device to install them")
 
+    def spruce_emu_step(dry_run):
+        """On a spruce card: hide the BIOS zips in the ROM folders from PyUI's game list (Emu/<folder>/config.json)."""
+        if layout_name != "spruce":
+            return
+        owned = store.saved_card(card).get("spruce_emu")
+        plan = spruce_emu.plan(base, spruce_emu.wanted(chosen, lambda s: bool(available(s))), owned)
+        if dry_run:
+            spruce_emu.describe(plan)
+            return
+        for warning in plan["warnings"]:
+            ui.warn(warning)
+        spruce_emu.apply(plan)
+        if plan["owned"] != (owned if isinstance(owned, dict) else {}):
+            store.update_card(card, spruce_emu=plan["owned"])
+        if plan["writes"]:
+            print(ui.green(f"🎮 Updated {len(plan['writes'])} Spruce emulator config(s)"))
+            if clean_card:
+                clean._clean_root = base
+
     def prune_drivers(dry_run):
         """Remove the drivers an earlier sync copied that the card doesn't get now, saying which (kept with --no-delete)."""
         old = drivers.prune(card, drivers_dir, [os.path.basename(p) for _, p, _ in driver_jobs], dry_run, keep=args.no_delete)
@@ -1441,6 +1464,7 @@ def sync_card(args):
                 stale_count = len(stale_files)
                 print(f"🧹 Media on the card for ROMs it doesn't have: {stale_count} file(s) to remove")
         frontend_step(True)
+        spruce_emu_step(True)
         onion_surprise.write_list(card, layout_name, base, roms_dir, systems, True)
         plan_json["stale_media"] = stale_count
         plan_json["totals"] = {"files": len(todo_all), "bytes": total_bytes(todo_all), "delete": len(extras),
@@ -1537,6 +1561,7 @@ def sync_card(args):
         print(ui.green(f"🧹 Removed empty system folder {os.path.relpath(folder, base)}"))
     cardfs.clear()
     frontend_step(False)
+    spruce_emu_step(False)
     if onion_surprise.write_list(card, layout_name, base, roms_dir, systems, False) and clean_card:
         clean._clean_root = base
     try:

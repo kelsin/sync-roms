@@ -1,5 +1,6 @@
 import contextlib
 import io
+import json
 import os
 import sys
 import tempfile
@@ -11,7 +12,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 
-from helpers import MANIFEST, SYSTEM, DataDir, list_sizes  # noqa: E402
+from helpers import MANIFEST, SYSTEM, DataDir, list_sizes, touch  # noqa: E402
 from sync_roms import cli, downloads, inventory, s3, scrape_plan, store, usersettings  # noqa: E402
 
 REAL_LOAD_CARDS = store.load_cards
@@ -1145,6 +1146,56 @@ class SyncSmokeTest(DataDir):
                     self.assertEqual(found, [(False, None)] if dry_run else [(True, "spruceV4.6.0.7z")])
                     if games and not dry_run:  # staged after the card's other writes
                         self.assertGreater(order.index("os/spruceos/spruceV4.6.0.7z"), order.index("flush"))
+
+    def test_spruce_sync_hides_fbneo_bios_zips_and_clears_the_old_folder(self):
+        layouts = {"spruce": {"label": "Spruce", "roms_dir": "Roms", "bios_dir": "BIOS"}}
+        fbneo = {**SYSTEM, "name": "FinalBurn Neo", "bucket": "fbneo", "folders": {"spruce": "ARCADE"},
+                 "bios": {"files": [], "rom_files": ["fbneo/pgm.zip"]}, "games": [{"bucket": "fbneo/b.zip"}]}
+        listed = {"fbneo/": {"fbneo/b.zip": 1}, "BIOS/": {"BIOS/fbneo/pgm.zip": 1}}
+        files = inventory.files
+
+        def fake_files(prefix, sizes=True):
+            return listed[prefix] if prefix in listed else files(prefix, sizes)
+
+        def download(job, *a):
+            touch(job[1])
+
+        config = {"ignoreList": ["neogeo.zip"]}
+
+        def prepare(card):
+            touch(os.path.join(card, "Emu", "ARCADE", "config.json"), json.dumps(config, indent=2) + "\n")
+            touch(os.path.join(card, "Roms", "FBNEO", "old.zip"))
+
+        manifest = {**MANIFEST, "layouts": layouts, "systems": [fbneo]}
+        patches = ((store, {"load_manifest": lambda names=(), m=manifest: m, "load_cards": REAL_LOAD_CARDS}),
+                   (cli.picker, {"saved_setup": lambda *a: (None, "spruce")}),
+                   (cli, {"free_space": lambda path: 10**9}),
+                   (cli.ui, {"choose": lambda *a, **k: "y"}),
+                   (inventory, {"files": fake_files, "stat": lambda keys: {k: 1 for k in keys}}),
+                   (cli.downloads, {"run_downloads": downloads.run_downloads}),
+                   (cli.s3, {"download": download}))
+        for dry_run in (True, False):
+            with self.subTest(dry_run=dry_run):
+                found = {}
+
+                def after(card):
+                    arcade = os.path.join(card, "Roms", "ARCADE")
+                    found["roms"] = sorted(os.listdir(arcade)) if os.path.isdir(arcade) else []
+                    found["old"] = os.path.exists(os.path.join(card, "Roms", "FBNEO", "old.zip"))
+                    with open(os.path.join(card, "Emu", "ARCADE", "config.json")) as f:
+                        found["config"] = json.load(f)
+                    found["owned"] = (store.load_cards().get(os.path.basename(card)) or {}).get("spruce_emu")
+                self.assertEqual(self.run_sync(dry_run, prepare=prepare, patches=patches, after=after), 0)
+                if dry_run:
+                    self.assertEqual(found["config"], config)
+                    self.assertTrue(found["old"])
+                    self.assertIn("Emu/ARCADE/config.json", self.out.getvalue())
+                    self.assertIn("would delete", self.out.getvalue())
+                else:
+                    self.assertEqual(found["roms"], ["b.zip", "pgm.zip"])
+                    self.assertFalse(found["old"])
+                    self.assertEqual(found["config"]["ignoreList"], ["neogeo.zip", "pgm.zip"])
+                    self.assertEqual(found["owned"], {"ARCADE": ["pgm.zip"]})
 
     def test_onion_card_with_nothing_to_sync_removes_a_stale_surprise_list(self):
         layouts = {"onion": {"label": "Onion", "roms_dir": "Roms", "bios_dir": "BIOS"}}

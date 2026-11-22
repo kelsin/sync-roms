@@ -972,6 +972,9 @@ def check_data(list_keys=None, repo_systems=None):
         for field in ("pico8", "spruce_os"):
             if field in entry and not (isinstance(entry[field], str) and entry[field]):
                 problems.append(f"cards.json: {name}: '{field}' must be a file name")
+        if "spruce_emu" in entry and not (isinstance(entry["spruce_emu"], dict) and all(
+                isinstance(v, list) and all(isinstance(i, str) for i in v) for v in entry["spruce_emu"].values())):
+            problems.append(f"cards.json: {name}: 'spruce_emu' must map folders to lists of file names")
         if "muos_storage" in entry and entry["muos_storage"] not in ("sd1", "sd2"):
             problems.append(f"cards.json: {name}: 'muos_storage' must be sd1 or sd2")
         if "surprise" in entry and not isinstance(entry["surprise"], bool):

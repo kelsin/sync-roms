@@ -292,7 +292,7 @@ A card is a folder name (the card root's name) with a remembered device, layout 
 | `custom_collections` | `false`: a sync writes no collections to the frontend, Surprise's included (and, on Onion, no Surprise app), and removes the ones it wrote before; the games themselves still sync, Surprise's too |
 | `raofflineproxy` | `false`: no RAOfflineProxy on the card |
 | `muos_storage` | `muos` cards: `"sd1"` (default, mounted at `/mnt/mmc`) or `"sd2"` (`/mnt/sdcard`), the storage muOS reads the ROMs from, which collection entries point at. Set it by hand; there is no editor for it |
-| `frontend_collections`, `drivers`, `pico8`, `surprise_app`, `raofflineproxy_app`, `spruce_os` | written by sync: the collections, driver zips, PICO-8 zip, Surprise app, RAOfflineProxy file and spruceOS file it put on the card, so each is copied once and only sync's own files are replaced or removed |
+| `frontend_collections`, `drivers`, `pico8`, `surprise_app`, `raofflineproxy_app`, `spruce_os`, `spruce_emu` | written by sync: the collections, driver zips, PICO-8 zip, Surprise app, RAOfflineProxy file and spruceOS file it put on the card, so each is copied once and only sync's own files are replaced or removed |
 
 ## Editing a card's games (`edit`, `games`)
 
