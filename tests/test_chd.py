@@ -260,6 +260,31 @@ class ChdTest(unittest.TestCase):
             with open(os.path.join(self.dir, "Game.chd")) as f:
                 self.assertEqual(f.read(), "another disc")
 
+    def test_discs_whose_chd_names_differ_only_by_case_or_unicode_form_take_turns(self):
+        self.touch("a.iso", "b.iso")
+        for a, b in (("Game (USA).chd", "GAME (USA).CHD"), ("Pok\u00e9mon.chd", "Poke\u0301mon.chd")):
+            inside, release, creating = threading.Event(), threading.Event(), []
+
+            def fake(cmd, progress=None, tty=False):
+                if cmd[1] == "createcd":
+                    creating.append(cmd)
+                    inside.set()
+                    release.wait(5)
+                    open(cmd[cmd.index("-o") + 1], "w").close()
+
+            with mock.patch.object(external, "run_tool", fake), mock.patch.object(external, "tool_output", return_value=SAME_DISC):
+                threads = [threading.Thread(target=chd.make_chd, args=(self.tools, CD["chd"], os.path.join(self.dir, image), os.path.join(self.dir, out)))
+                           for image, out in (("a.iso", a), ("b.iso", b))]
+                threads[0].start()
+                self.assertTrue(inside.wait(5))
+                threads[1].start()
+                threads[1].join(0.1)
+                started = len(creating)
+                release.set()
+                for thread in threads:
+                    thread.join()
+            self.assertEqual(started, 1)  # on a case-insensitive volume both write one file: the second waits for the first
+
     def test_two_archives_of_one_disc_name_keep_one(self):
         self.touch("psx/Game (USA) (Rev 1).zip", "psx/Game (USA).zip")
         psx = os.path.join(self.dir, "psx")
@@ -596,6 +621,28 @@ class ChdTest(unittest.TestCase):
         seen = []
         self.assertEqual(external.run_tool([sys.executable, "-c", code], seen.append), "bad input")
         self.assertEqual(seen, [12.5, 50.0])
+
+    def test_run_tool_reads_an_error_line_that_is_not_utf8(self):
+        code = "import sys; sys.stderr.buffer.write(b'bad \\x83name\\n'); sys.exit(1)"
+        self.assertEqual(external.run_tool([sys.executable, "-c", code]), "bad \ufffdname")
+
+    def test_run_tool_stops_the_tool_when_reading_its_output_fails(self):
+        code = "import sys, time; sys.stderr.write('Compressing, 12.5% complete... \\rmore'); sys.stderr.flush(); time.sleep(30)"
+        procs, popen = [], external.subprocess.Popen
+        self.addCleanup(lambda: [p.kill() for p in procs])
+
+        def bad(percent):
+            raise ValueError("boom")
+
+        with mock.patch.object(external.subprocess, "Popen", lambda *a, **k: procs.append(popen(*a, **k)) or procs[-1]):
+            with self.assertRaises(ValueError):
+                external.run_tool([sys.executable, "-c", code], bad)
+        self.assertIsNotNone(procs[0].returncode)
+        self.assertEqual(external._tool_procs, set())
+
+    def test_tool_output_reads_output_that_is_not_utf8(self):
+        code = "import sys; sys.stdout.buffer.write(b'Path = \\x83a.iso\\n'); sys.stderr.buffer.write(b'\\x83\\n')"
+        self.assertEqual(external.tool_output([sys.executable, "-c", code]), "Path = \ufffda.iso\n")
 
     def test_make_chd_reports_create_then_verify_progress(self):
         self.touch("Game.iso")
@@ -983,6 +1030,14 @@ class ChdTest(unittest.TestCase):
         self.assertIn("❌ Bad.zip: [Errno 13] Permission denied", out)
         self.assertIn("1 converted, 1 failed", out)
         self.assertEqual(sorted(os.listdir(os.path.join(self.dir, "psx"))), ["Bad.zip", "Game.chd"])
+
+    def test_job_that_raises_an_oserror_with_no_text_fails_too(self):
+        self.touch("psx/Bad.zip")
+        with mock.patch.object(tempfile, "mkdtemp", side_effect=OSError()):
+            code, out, _ = self.run_on_card(os.path.join(self.dir, "psx"))
+        self.assertEqual(code, 1)
+        self.assertIn("❌ Bad.zip: OSError", out)
+        self.assertIn("0 converted, 1 failed", out)
 
 
 if __name__ == "__main__":
