@@ -95,6 +95,39 @@ class SavesTest(unittest.TestCase):
             self.assertEqual([k for k, _, _ in upload.plan_rom_upload(root, "gba", {})[0]], ["gba/Game.gba"])
 
 
+class CardFoldersTest(unittest.TestCase):
+    """A card's ROM folder holds the layout's own dot folders: the discs of multi-disc games (Onion, Allium) and
+    NextUI's art. Only its ROMs go to storage."""
+
+    def card(self, root):
+        touch(root, "Solo.chd", 10)
+        touch(root, ".multi-disc/Game (Disc 1).chd", 20)
+        touch(root, ".media/Game.png")
+        touch(root, "sub/.media/x.png")
+        touch(root, "sub/Other.chd", 30)
+        helpers.touch(os.path.join(root, "Game.m3u"), ".multi-disc/Game (Disc 1).chd\n")  # as a sync rewrote it
+        helpers.touch(os.path.join(root, "Mine.m3u"), "Solo.chd\n")
+
+    def test_disc_and_media_folders_and_rewritten_playlists_are_never_uploaded(self):
+        with tempfile.TemporaryDirectory() as root:
+            self.card(root)
+            existing = {"psx/Game (Disc 1).chd": 20, "psx/Game.m3u": len("Game (Disc 1).chd\n")}
+            new, changed, same = upload.plan_rom_upload(root, "psx", existing)
+        self.assertEqual(sorted(k for k, _, _ in new), ["psx/Mine.m3u", "psx/Solo.chd", "psx/sub/Other.chd"])
+        self.assertEqual((changed, same), ([], []))
+
+    def test_replace_leaves_them_out_too(self):
+        with tempfile.TemporaryDirectory() as root:
+            self.card(root)
+            out = io.StringIO()
+            with mock.patch.object(inventory, "etags", lambda prefix: {}), contextlib.redirect_stdout(out):
+                upload.replace_command(argparse.Namespace(dry_run=True), root, SYSTEMS[0])
+        for rel in ("Mine.m3u", "Solo.chd", "sub/Other.chd"):
+            self.assertIn(f"  gba/{rel} ", out.getvalue())
+        for name in (".multi-disc", ".media", "Game.m3u"):
+            self.assertNotIn(name, out.getvalue())
+
+
 class IgnoredUploadTest(unittest.TestCase):
     def setUp(self):
         p = mock.patch.object(ignore, "_keys", frozenset({"gba/b.gba"}))

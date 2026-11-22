@@ -34,7 +34,7 @@ def plan_rom_upload(root, bucket, existing):
     new, changed, same = [], [], []
     for path, size in zip(paths, sizes):
         key = f"{bucket}/{os.path.relpath(path, root).replace(os.sep, '/')}"
-        if downloads.never_uploaded(bucket, os.path.relpath(path, root).replace(os.sep, "/")):
+        if downloads.never_uploaded(bucket, os.path.relpath(path, root).replace(os.sep, "/")) or downloads.card_only(root, os.path.relpath(path, root).replace(os.sep, "/")):
             continue  # sync-roms's own files in a card's ROM folder
         if ignore.is_ignored(key):  # never uploaded: storage keeps its own copy, or none
             continue
@@ -283,7 +283,7 @@ def replace_command(args, folder, system):
     """Make a storage folder match a local one: move renamed files, upload new and changed ones, and delete the rest
     that you pick."""
     bucket = system["bucket"]
-    local = {p: n for p, n in diff.local_sizes(folder).items() if not ignore.is_ignored(f"{bucket}/{p}") and not downloads.never_uploaded(bucket, p)}
+    local = {p: n for p, n in diff.local_sizes(folder).items() if not ignore.is_ignored(f"{bucket}/{p}") and not downloads.never_uploaded(bucket, p) and not downloads.card_only(folder, p)}
     md5 = functools.lru_cache(maxsize=None)(lambda p: diff.file_md5(os.path.join(folder, *p.split("/"))))  # each file hashed once
     on_samples = set()  # storage paths of big bucket files matched on samples
 
