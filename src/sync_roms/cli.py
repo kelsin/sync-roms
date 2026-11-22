@@ -707,7 +707,8 @@ def sync(reset=True):
     try:
         usersettings.apply_settings()
         if ui.VERBOSE:
-            for name, (value, source) in usersettings.resolve_settings().items():
+            saved = {} if usersettings.settings_problem() else None  # like apply_settings: a bad file is doctor's to report
+            for name, (value, source) in usersettings.resolve_settings(saved).items():
                 ui.debug(f"{name} = {value} ({source})")
         return run(argv)
     finally:
