@@ -529,6 +529,8 @@ def chd_command(args):
             if owned:
                 return chd_image(tools, system["chd"], path, owned, report)
             return chd_archive(tools, system["chd"], path, report, scratch[i])
+        except OSError as e:  # a folder that can't be written, a file that can't be removed: this job failed
+            return str(e)
         finally:
             progress[i] = 1.0
 

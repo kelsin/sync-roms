@@ -903,6 +903,15 @@ class ChdTest(unittest.TestCase):
         self.assertIn("❌ Bad.iso: verify failed", err)
         self.assertIn("0 converted, 1 failed", err)
 
+    def test_job_that_raises_an_oserror_fails_like_the_others(self):
+        self.touch("psx/Game.iso", "psx/Bad.zip")
+        with mock.patch.object(tempfile, "mkdtemp", side_effect=PermissionError(13, "Permission denied")):
+            code, out, _ = self.run_on_card(os.path.join(self.dir, "psx"))
+        self.assertEqual(code, 1)
+        self.assertIn("❌ Bad.zip: [Errno 13] Permission denied", out)
+        self.assertIn("1 converted, 1 failed", out)
+        self.assertEqual(sorted(os.listdir(os.path.join(self.dir, "psx"))), ["Bad.zip", "Game.chd"])
+
 
 if __name__ == "__main__":
     unittest.main()
