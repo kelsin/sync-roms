@@ -1,0 +1,10 @@
+{
+  "note": "Your own spruceOS preferences, safe on any spruce device. Left out: hardware, power, LED, audio, proxy, overclock and debug settings, and the button actions that depend on a device's keys, which differ per device.",
+  "sections": {
+    "Emulator Settings": ["raAutoSave", "raAutoLoad", "keepSavesBetweenCores", "showDSBootMenuStubs", "perfectOverlays", "genesisPlusGXWide", "raHotkeyMiyoo", "raHotkeyTrimUI"],
+    "In-Game Menu Settings": ["raInGameMenu", "raIgmColorway", "igmResume", "igmSave", "igmLoad", "igmFfSpeed", "igmReset", "igmRetroarch", "igmExit", "igmDisc", "igmScreenshot", "igmUndoSave", "igmUndoLoad", "igmShowFps", "igmMute", "igmRewind", "igmShader"],
+    "Button Settings": ["menuButton", "tapMenuAction", "holdMenuAction", "menuHoldTime", "menuShouldVibrate", "globalScreenshotShortcut", "powerButtonHoldTime", "brightnessHotkey"],
+    "System Settings": ["bootTo", "randomThemeAtBoot"],
+    "Network Settings": ["enableSamba", "enableSSH", "enableSyncthing", "enableSFTPGo", "enableNetworkADB", "otaUpdateType", "releaseChannel", "otaSkipVersionCheck"]
+  }
+}
