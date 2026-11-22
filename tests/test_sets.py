@@ -77,6 +77,14 @@ class StorageSetsTest(StorageDir):
         for key in ("sets/bad.json", "sets/list.json", "sets/nogames.json"):
             self.assertIn(key, err)
 
+    def test_a_set_file_that_isnt_utf8_is_skipped_with_a_warning(self):
+        storage_sets(self, {"mix": SET}, self.root)
+        self.put("sets/b.json", '{"name": "Café", "games": []}'.encode("latin-1"))
+        sets, err = self.load()
+        self.assertEqual([x["id"] for x in sets], ["mix"])
+        self.assertIn("sets/b.json isn't a set", err)
+        self.assertEqual(store.skipped_sets(), ["sets/b.json"])
+
     def test_sets_are_read_once_per_run_and_reset_reads_them_again(self):
         storage_sets(self, {"mix": SET}, self.root)
         self.load()
@@ -301,6 +309,11 @@ class StaleSetsTest(StorageDir):
         with mock.patch.object(runtime, "ROOT", self.root + "-unmounted"), self.assertRaises(FileNotFoundError):
             store.set_changed("new", None)  # an unmounted folder isn't a missing file
 
+    def test_a_set_file_that_isnt_utf8_counts_as_changed(self):
+        self.put("sets/b.json", '{"name": "Café", "games": []}'.encode("latin-1"))
+        self.assertTrue(store.set_changed("b", None))  # a new set whose id storage has, as an unreadable file
+        self.assertTrue(store.set_changed("b", store.set_files()[0]))
+
 
 class CheckStorageSetsTest(StorageDir):
     def check(self, sets):
@@ -338,6 +351,12 @@ class CheckStorageSetsTest(StorageDir):
         problems, keys, _ = self.check({"broken": "{not json", "list": "[]"})
         self.assertEqual(problems, ["sets/broken.json: isn't a set (a JSON object with a games list)",
                                     "sets/list.json: isn't a set (a JSON object with a games list)"])
+        self.assertEqual(keys, {})
+
+    def test_a_file_that_isnt_utf8_is_a_problem(self):
+        self.put("sets/b.json", '{"name": "Café", "games": []}'.encode("latin-1"))
+        problems, keys, _ = self.check({})
+        self.assertEqual(problems, ["sets/b.json: isn't a set (a JSON object with a games list)"])
         self.assertEqual(keys, {})
 
     def test_unknown_art_is_a_problem(self):

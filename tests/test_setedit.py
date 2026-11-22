@@ -268,6 +268,18 @@ class SaveStale(StorageDir):
         self.assertIn("new already in storage", str(e.exception))
         self.assertIn("sync-roms cache update", str(e.exception))
 
+    def test_a_new_set_whose_id_has_a_file_that_isnt_utf8_saves_nothing(self):
+        text = '{"name": "Café", "games": []}'.encode("latin-1")
+        path = self.put("sets/b.json", text)
+        with contextlib.redirect_stderr(io.StringIO()):
+            before = setedit.repo_sets()  # b.json is skipped, so the id looks free
+        after = {**copy.deepcopy(before), "b": {"name": "B", "description": "", "games": games()}}
+        with self.assertRaises(setedit.Stale) as e:
+            setedit.save_sets(before, after, listedit.diff_lists(before, after))
+        self.assertIn("b already in storage", str(e.exception))
+        with open(path, "rb") as f:
+            self.assertEqual(f.read(), text)
+
     def run_editor(self, picks, edit_one, choose="s"):
         picks = iter(picks)
         with mock.patch.object(setedit, "edit_one", edit_one), mock.patch.object(store, "repo_json", return_value=SYSTEMS), \
