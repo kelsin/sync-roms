@@ -184,6 +184,25 @@ class StorageDir(RealDataDirGuard):
         return path
 
 
+class CardDir(StorageDir):
+    """A StorageDir with an empty card folder (self.card), for the installers that put something on card "c" and
+    record it in that card's FIELD (set by the subclass)."""
+
+    def setUp(self):
+        super().setUp()
+        self.card = os.path.join(self.tmp.name, "card")
+        os.makedirs(self.card)
+
+    def cp(self, *parts):
+        return os.path.join(self.card, *parts)
+
+    def recorded(self):
+        return (store.load_cards().get("c") or {}).get(self.FIELD)
+
+    def snapshot(self):
+        return sorted(os.path.join(d, f) for d, _, fs in os.walk(self.card) for f in fs)
+
+
 def storage_sets(test, sets, root=None):
     """Put game sets in storage as sets/<id>.json and make store.load_sets() read them (once, as a run does).
 

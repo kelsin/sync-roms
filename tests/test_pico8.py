@@ -23,11 +23,9 @@ def zip_bytes():
     return buf.getvalue()
 
 
-class Pico8(helpers.StorageDir):
-    def setUp(self):
-        super().setUp()
-        self.card = os.path.join(self.tmp.name, "card")
-        os.makedirs(self.card)
+class Pico8(helpers.CardDir):
+    FIELD = "pico8"
+    card_path = helpers.CardDir.cp
 
     def run_setup(self, layout, dry_run=False):
         out = io.StringIO()
@@ -35,12 +33,6 @@ class Pico8(helpers.StorageDir):
             failures = pico8.run("c", layout, self.card, dry_run)
         self.assertEqual(failures, 0)
         return out.getvalue()
-
-    def recorded(self):
-        return (store.load_cards().get("c") or {}).get("pico8")
-
-    def card_path(self, *parts):
-        return os.path.join(self.card, *parts)
 
     def test_newest_zip_natural_sort(self):
         for v in ("0.2.7", "0.2.10", "0.2.9"):

@@ -40,27 +40,18 @@ def app_zip(members, symlink=None):
     return buf.getvalue()
 
 
-class Install(helpers.StorageDir):
+class Install(helpers.CardDir):
+    FIELD = "surprise_app"
+
     def setUp(self):
         super().setUp()
-        self.card = os.path.join(self.tmp.name, "card")
-        os.makedirs(self.card)
         store.update_card("c", surprise=True)
-
-    def cp(self, *parts):
-        return os.path.join(self.card, *parts)
 
     def run_install(self, layout="onion", dry_run=False):
         out = io.StringIO()
         with contextlib.redirect_stdout(out):
             self.failures = onion_surprise.install("c", layout, self.card, dry_run)
         return out.getvalue()
-
-    def recorded(self):
-        return (store.load_cards().get("c") or {}).get("surprise_app")
-
-    def snapshot(self):
-        return sorted(os.path.join(d, f) for d, _, fs in os.walk(self.card) for f in fs)
 
     def test_newest_zip_by_version(self):
         for n in ("v0.2.0", "v0.10.0", "v0.9.1", "eadef4e", "v1.0.0-dirty"):
