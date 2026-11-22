@@ -409,8 +409,9 @@ class FolderMtimeTest(helpers.StorageFolder):
         s3.write_file(f"{nfc}/b.zip", lambda tmp: open(tmp, "wb").write(b"1234"))
         self.assertEqual(self.disk()[f"{nfd}/b.zip"], 4)
         self.assertEqual(inventory.current().files, self.disk())
+        self.assertIsNone(inventory.current().dirs[nfd])  # storage that keeps both spellings may have made a second folder
         self.later()
-        self.assertEqual(self.update(), ((0, 0, 0), []))
+        self.assertEqual(self.update(), ((0, 0, 0), [nfd]))
         self.assertEqual(inventory.current().files, self.disk())
 
     def test_a_delete_under_another_spelling_of_the_name_drops_the_cached_file(self):
@@ -437,9 +438,25 @@ class FolderMtimeTest(helpers.StorageFolder):
         self.assertEqual(quiet(s3.move_keys, [(f"gba/{nfc}.zip", f"{nfc}/m.zip")])[0], 0)
         self.assertEqual(self.disk()[f"{nfd}/m.zip"], 4)
         self.assertEqual(inventory.current().files, self.disk())
+        self.assertIsNone(inventory.current().dirs[nfd])
+        self.assertEqual(inventory.current().dirs["gba"], self.mtime("gba"))
         self.later()
-        self.assertEqual(self.update(), ((0, 0, 0), []))
+        self.assertEqual(self.update(), ((0, 0, 0), [nfd]))
         self.assertEqual(inventory.current().files, self.disk())
+
+    def test_a_write_the_cache_has_only_under_the_other_spelling_leaves_its_folder_untrusted(self):
+        nfd, nfc = unicodedata.normalize("NFD", "Pokémon"), unicodedata.normalize("NFC", "Pokémon")
+        self.put(f"gba/{nfd}.zip", 4)
+        self.age()
+        self.update()
+        before = inventory.trusted([f"gba/{nfc}.zip"])
+        self.assertEqual(before, {"gba": self.mtime("gba")})
+        inventory.wrote(f"gba/{nfc}.zip", 9, before=before)  # storage that keeps both spellings made a second file
+        self.assertEqual(inventory.current().files[f"gba/{nfd}.zip"], 9)
+        self.assertNotIn(f"gba/{nfc}.zip", inventory.current().files)
+        self.assertIsNone(inventory.current().dirs["gba"])
+        self.later()
+        self.assertEqual(self.update()[1], ["gba"])
 
     def test_a_key_the_cache_cannot_match_leaves_its_folder_untrusted(self):
         nfc = unicodedata.normalize("NFC", "Pokémon")

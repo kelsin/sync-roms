@@ -224,15 +224,17 @@ def _stored(tree, key):
     """(key as the cache spells it, whether storage is sure to spell it so). In a storage folder a share may store a name
     decomposed, whatever spelling the caller gave (a bucket's keys are exact): a file the cache has under another
     spelling of its folder or name keeps that key, and one it doesn't have goes under its folder as tree.dirs spells
-    it, which is sure only when the file's name has one spelling."""
+    it. That is sure only for the key as given, when the cache has it or the file's name has one spelling: storage
+    that keeps both spellings of a name apart may have made a second file or folder under the other one."""
     if not runtime.ROOT:
         return key, True
     folder, sep, name = key.rpartition("/")
     folders = _spellings(folder) & tree.dirs.keys() or _spellings(folder)
     found = {f + sep + n for f in folders for n in _spellings(name)} & tree.files.keys()
-    if found:
-        return key if key in found else min(found), True
-    return (folder if folder in folders else min(folders)) + sep + name, len(_spellings(name)) == 1
+    if key in found:
+        return key, True
+    stored = min(found) if found else (folder if folder in folders else min(folders)) + sep + name
+    return stored, stored == key and len(_spellings(name)) == 1
 
 
 def _patch(change, keys, before=()):
