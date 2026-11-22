@@ -11,7 +11,7 @@ GPU_DEVICES = {
     "adreno-610": ["retroid-pocket-duo-lite"],
     "adreno-630": ["ayn-odin"],
     "adreno-650": [
-        "ayaneo-pocket-micro-2", "retroid-pocket-5", "retroid-pocket-flip-2",
+        "ayaneo-pocket-micro-2", "ayn-thor-lite", "retroid-pocket-5", "retroid-pocket-flip-2",
         "retroid-pocket-mini", "retroid-pocket-mini-v2",
     ],
     "adreno-722": ["retroid-pocket-duo", "retroid-pocket-duo-lite-plus"],
