@@ -74,6 +74,7 @@ def run_tool(cmd, progress=None, tty=False):
     finally:
         with _tool_lock:
             _tool_procs.discard(proc)
+        proc.stderr.close()
     if proc.returncode:
         return last or f"exit code {proc.returncode}"
 

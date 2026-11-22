@@ -39,12 +39,16 @@ class Main(StorageDir):
             code = mark_translations.main(argv)
         return code, out.getvalue()
 
+    def read(self):
+        with open(self.path, "rb") as f:
+            return f.read()
+
     def test_dry_run_writes_nothing(self):
-        before = open(self.path, "rb").read()
+        before = self.read()
         code, out = self.run_main([])
         self.assertEqual(code, 0)
         self.assertIn("snes/A (T).zip: A → A - Translated", out)
-        self.assertEqual(open(self.path, "rb").read(), before)
+        self.assertEqual(self.read(), before)
 
     def test_dry_run_names_an_entry_without_a_name(self):
         self.put(KEY, scrape_plan.dump_json({"C (T).zip": {"desc": "x"}}).encode())
@@ -56,7 +60,7 @@ class Main(StorageDir):
         code, out = self.run_main(["--write"])
         self.assertEqual(code, 0)
         expected = dict(DATA, **{"A (T).zip": {"name": "A - Translated", "desc": "x", "translated": True}})
-        self.assertEqual(open(self.path, encoding="utf-8").read(), scrape_plan.dump_json(expected))
+        self.assertEqual(self.read().decode(), scrape_plan.dump_json(expected))
 
 
 if __name__ == "__main__":

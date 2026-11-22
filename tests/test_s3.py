@@ -174,7 +174,8 @@ class DownloadTest(unittest.TestCase):
             with mock.patch.object(s3, "s3_client", return_value=client), mock.patch.object(s3, "read_root", return_value=None):
                 s3.download(("gba/g.zip", path, 3), lambda n: None, wrote.append)
             self.assertEqual(wrote, [3])
-            self.assertEqual(open(path, "rb").read(), b"abc")
+            with open(path, "rb") as f:
+                self.assertEqual(f.read(), b"abc")
             self.assertFalse(os.path.exists(path + ".part"))
 
     def test_failed_download_leaves_no_part_file(self):
