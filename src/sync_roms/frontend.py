@@ -55,7 +55,10 @@ def collection_line(layout_name, folder, rel):
 
 
 def _string_setting(name):
-    return re.compile(rf'<string name="{re.escape(name)}" value="([^"]*)"\s*/>')
+    """Matches name's entry, each XML special character escaped or not (ES and older sync-roms leave some as they are)."""
+    entities = {"&": "&amp;", "<": "&lt;", ">": "&gt;", **_ESCAPE}
+    name = "".join(f"(?:{entities[c]}|{re.escape(c)})" if c in entities else re.escape(c) for c in name)
+    return re.compile(rf'<string name="{name}" value="([^"]*)"\s*/>')
 
 
 def get_string(text, name):
@@ -76,7 +79,7 @@ def set_enabled(text, layout_name, add, remove):
 def set_string(text, layout_name, name, value):
     """text (the frontend's settings file) with its <string name=...> entry set to value, the rest left as it is."""
     match = _string_setting(name).search(text)
-    line = f'<string name="{name}" value="{saxutils.escape(value, _ESCAPE)}" />'
+    line = f'<string name="{saxutils.escape(name, _ESCAPE)}" value="{saxutils.escape(value, _ESCAPE)}" />'
     if match:
         return text[:match.start()] + line + text[match.end():]
     if layout_name in ESDE_LAYOUTS:

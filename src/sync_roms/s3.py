@@ -107,7 +107,8 @@ def remove_parts():
 
 
 def write_file(key, write):
-    """Create the file for a key under the storage folder; write(tmp_path) fills a temporary file that then replaces it."""
+    """Create the file for a key under the storage folder; write(tmp_path) fills a temporary file that then replaces it.
+    Returns the file's tag (inventory.tag), taken from the temporary file: only this write's, whoever writes next."""
     check_root()  # an unmounted share: never create the file on the local disk
     from . import inventory  # imported here: inventory reads storage through this module
     before = inventory.trusted([key])
@@ -117,6 +118,7 @@ def write_file(key, write):
     try:
         write(path + ".part")
         tmp = safe_join(runtime.ROOT, key + ".part")  # a share may have stored the new name in another spelling
+        tag = inventory.path_tag(tmp)
         os.replace(tmp, tmp[:-len(".part")])
     except BaseException:
         with contextlib.suppress(OSError):
@@ -126,6 +128,7 @@ def write_file(key, write):
         _writing.discard(key)
     path = safe_join(runtime.ROOT, key)
     inventory.wrote(key, os.path.getsize(path), before=before)
+    return tag
 
 
 def read_range(key, start, end):
@@ -335,6 +338,7 @@ def fetch_texts(keys):
 
 
 def put_text(key, text):
+    """Write text as the storage file of a key. Returns the tag (inventory.tag) of the file as written."""
     if runtime.ROOT:
         def write(tmp):
             with open(tmp, "w", encoding="utf-8") as f:
@@ -344,6 +348,7 @@ def put_text(key, text):
     out = s3_client(runtime.WRITE_PROFILE).put_object(Bucket=runtime.BUCKET, Key=key, Body=body)
     from . import inventory
     inventory.wrote(key, len(body), out.get("ETag"))
+    return out.get("ETag")
 
 
 def put_file(key, path):

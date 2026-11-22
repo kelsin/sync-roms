@@ -1034,7 +1034,8 @@ def sync_card(args):
             walks += downloads.walk_roms(os.path.join(dest, disc_dir), rename_temps=True)
         names = {downloads.name_key(os.path.relpath(os.path.join(root, f), dest)) for root, files in walks for f in files}
         disc_keys = m3u.disc_keys(keys) if disc_dir else ()
-        return {k for k in keys if downloads.name_key(downloads.rom_rel(k, disc_dir, disc_keys)) in names}
+        folders = m3u.game_folders(keys) if disc_folders else None
+        return {k for k in keys if downloads.name_key(downloads.rom_rel(k, disc_dir, disc_keys, folders)) in names}
 
     relist()
     interactive = not (ui.ASSUME_YES or args.json) and ui.has_terminal()
@@ -1311,7 +1312,7 @@ def sync_card(args):
         if surprise.COLLECTION in plan["enable"]:
             arts[surprise.COLLECTION] = themeart.SURPRISE_ART
         arts = {name: art for name, art in arts.items() if name in plan["enable"]}
-        if layout_name == "spruce" or not store.card_flag(entry, "theme"):  # no Art Book Next copy, no ES-DE theme and no custom art
+        if not store.card_flag(entry, "theme"):  # no Art Book Next copy, no ES-DE theme and no custom art
             arts = {}
         if dry_run:
             if layout_name == "muos":
@@ -1320,7 +1321,9 @@ def sync_card(args):
                 spruce_collections.describe(plan)
             else:
                 frontend.describe_collections(plan, layout_name)
-            if arts:
+            if layout_name == "spruce":
+                themeart.describe(layout_name, base, arts, {*owned, *plan["owned"]})
+            elif arts:
                 themeart.describe(layout_name, base, arts)
             return
         for warning in plan["warnings"]:
@@ -1335,8 +1338,10 @@ def sync_card(args):
             listed = frontend.apply_collections(plan, layout_name, base)
         if plan["owned"] != owned:
             store.update_card(card, frontend_collections=plan["owned"])
-        # with no art to add it still removes the art sync-roms wrote before
-        art = (bool(arts) or layout_name != "spruce" and store.card_flag(entry, "theme")) and themeart.install(layout_name, base, arts)
+        if layout_name == "spruce":  # also removes the pictures of collections that lost their art
+            art = themeart.install(layout_name, base, arts, {*owned, *plan["owned"]})
+        else:  # with no art to add it still removes the art sync-roms wrote before
+            art = (bool(arts) or store.card_flag(entry, "theme")) and themeart.install(layout_name, base, arts)
         # EmuDeck's ES-DE is on this computer, not the card, so its writes leave the card as it was
         if clean_card and layout_name != "emudeck" and (plan["writes"] or plan["deletes"] or listed or art):
             clean._clean_root = base

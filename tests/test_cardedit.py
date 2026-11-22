@@ -944,6 +944,45 @@ class Flow(DataDir):
                         lambda labels, kw: kw["session"]["sel"])
         self.assertEqual(store.card_games("c"), {})
 
+    def set_list_shows(self, count):
+        """A set list step that checks the first set's count and leaves the list."""
+        def step(labels, kw):
+            self.assertEqual(kw["extras"], [[(f"  {count}", "cyan")]])
+            return None
+        return step
+
+    def test_set_list_toggle_switches_on_a_game_excluded_from_a_referenced_set(self):
+        self.card(games={"sets": ["pk"]}, excluded={"gba": ["gba/Ruby.zip"]})
+        self.run_system(returns((cardedit.SET_KEY, 0)), returns((" ", 0)), self.set_list_shows("✅"),
+                        lambda labels, kw: kw["session"]["sel"])
+        entry = self.read("cards.json")["c"]
+        self.assertEqual(entry["games"], {"sets": ["pk"]})  # the set syncs it: no direct pick
+        self.assertNotIn("gba", entry.get("excluded", {}))
+
+    def test_set_list_toggle_switches_on_an_excluded_direct_pick(self):
+        self.card(games={"gba": [g("gba/Ruby.sav"), g("gba/Ruby.zip")]}, excluded={"gba": ["gba/Ruby.zip"]})
+        self.run_system(returns((cardedit.SET_KEY, 0)), returns((" ", 0)), self.set_list_shows("✅"),
+                        lambda labels, kw: kw["session"]["sel"])
+        entry = self.read("cards.json")["c"]
+        self.assertEqual(entry["games"], {"gba": [g("gba/Ruby.sav"), g("gba/Ruby.zip")]})  # still one pick each
+        self.assertNotIn("gba", entry.get("excluded", {}))
+
+    def test_set_list_toggle_on_a_referenced_set_excludes_its_games(self):
+        self.card(games={"sets": ["pk"]})
+        self.run_system(returns((cardedit.SET_KEY, 0)), returns((" ", 0)), self.set_list_shows("0/1"),
+                        lambda labels, kw: kw["session"]["sel"])
+        entry = self.read("cards.json")["c"]
+        self.assertEqual(entry["games"], {"sets": ["pk"]})  # the set syncs them: no direct picks to add or remove
+        self.assertEqual(entry["excluded"], {"gba": ["gba/Ruby.sav", "gba/Ruby.zip"]})
+
+    def test_set_list_toggle_again_on_a_referenced_set_brings_its_games_back(self):
+        self.card(games={"sets": ["pk"]})
+        before = self.read("cards.json")
+        changed, _ = self.run_system(returns((cardedit.SET_KEY, 0)), returns((" ", 0)), returns((" ", 0)),
+                                     self.set_list_shows("✅"), lambda labels, kw: kw["session"]["sel"])
+        self.assertFalse(changed)
+        self.assertEqual(self.read("cards.json"), before)
+
     def test_game_view_status_counts_pending_picks(self):
         self.card(size="1 GB")
         self.cache = {"gba/": self.files["gba/"], "scrapes/gba/": {}, "BIOS/": {"BIOS/gba_bios.bin": 16}, "gb/": {}}
@@ -1257,6 +1296,21 @@ class Flow(DataDir):
         with mock.patch.object(inventory, "version", lambda: version[0]), mock.patch.dict(budget._scrapes), \
                 self.workers_run_at_once():
             self.run_card(returns(1), leave, self.same_as_fresh)
+
+    def test_v_on_another_systems_variant_recounts_that_system(self):
+        self.with_variants(self.RED)
+        self.card(size="1 GB", games={"gba": [g("gba/Zelda.zip")]})
+        self.sized()
+        seen = []
+
+        def look(labels, kw):
+            seen.append(kw["status"](kw["session"]["sel"]))
+            return kw["session"]["sel"]
+        with self.workers_run_at_once():
+            self.run_card(returns(1), lambda labels, kw: (cardedit.VARIANT_KEY, labels.index("Ruby.zip")), look,
+                          self.same_as_fresh)
+        self.assertEqual(store.card_games("c"), {"gba": [g("gba/Zelda.zip")], "gb": [g("gb/Red.gb")]})
+        self.assertEqual(seen, [self.fresh(count=False)[0]])  # the games list counted Red and the Game Boy BIOS too
 
 
 G = "psvita/G [PCSE00349] [USA] [NoNpDRM].zip"
@@ -1703,6 +1757,23 @@ class SetFlow(Flow):
             changed, _ = self.run_set(press_v, now_on, game_set=vset)
         self.assertTrue(changed)
         self.assertEqual(store.card_games("c"), {"gba": [g("gba/Emerald.zip")]})
+
+    def test_v_counts_a_variant_on_a_system_the_set_has_no_games_of(self):
+        self.with_variants(self.RED)
+        self.card(size="1 GB", games={"gba": [g("gba/Zelda.zip")]})
+        self.sized()
+        seen = []
+
+        def look(labels, kw):
+            seen.append(kw["status"](kw["session"]["sel"]))
+            return kw["session"]["sel"]
+        with self.workers_run_at_once():
+            self.run_card(returns((cardedit.SET_KEY, 0)),
+                          lambda labels, kw: next(i for i, l in enumerate(labels) if "Variants" in l),
+                          lambda labels, kw: (cardedit.VARIANT_KEY, labels.index("Game Boy Advance — Ruby")), look,
+                          self.same_as_fresh)
+        self.assertEqual(store.card_games("c"), {"gba": [g("gba/Zelda.zip")], "gb": [g("gb/Red.gb")]})
+        self.assertEqual(seen, [self.fresh(count=False)[0]])
 
     def test_one_pass_changes_two_systems(self):
         self.card(games={"gba": [g("gba/Zelda.zip")], store.SETS_KEY: ["pk"]}, excluded={"gba": ["gba/Ruby.zip"]})

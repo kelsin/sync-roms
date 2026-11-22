@@ -6,6 +6,7 @@ import tarfile
 import tempfile
 import unittest
 from unittest import mock
+from xml.dom import minidom
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
@@ -43,6 +44,13 @@ class Assets(unittest.TestCase):
             self.assertTrue(themeart.art_png(art_id), art_id)
         self.assertIsNone(themeart.art_png("nope"))
         self.assertIsNone(themeart.art_png("../art/surprise"))
+
+    def test_every_art_has_a_square_spruce_picture(self):
+        from PIL import Image
+        for art_id in [*themeart.art_choices(), themeart.SURPRISE_ART]:
+            with Image.open(themeart.art_png(art_id, "art-spruce")) as im:
+                self.assertEqual((im.size, im.mode), ((300, 300), "RGBA"), art_id)
+                self.assertEqual(im.getpixel((299, 0))[3], 0, art_id)  # transparent outside the band
 
     def test_every_art_has_its_own_emoji_and_no_art_has_the_default(self):
         ids = [*themeart.art_choices(), themeart.SURPRISE_ART]
@@ -459,6 +467,14 @@ class Knulli(Card):
         self.assertIn("subset.東方.system-view-artwork", settings)
         self.assertNotIn("subset.東方.system-logos", settings)
 
+    def test_a_name_with_an_ampersand_keeps_the_settings_well_formed(self):
+        for _ in range(2):  # the second sync replaces the entries
+            themeart.install("knulli", self.base, {"Mario & Sonic": "surprise"})
+        entries = minidom.parse(frontend.settings_path("knulli", self.base)).getElementsByTagName("string")
+        self.assertEqual({e.getAttribute("name"): e.getAttribute("value") for e in entries},
+                         themeart.knulli_settings("Mario & Sonic"))
+        self.assertEqual(len(entries), 3)
+
     def test_a_grouping_choice_already_made_is_kept(self):
         path = frontend.settings_path("knulli", self.base)
         write(path, '<config>\n\t<string name="UseCustomCollectionsSystemEx" value="true" />\n</config>\n')
@@ -620,6 +636,55 @@ class Muos(Card):
             themeart.describe("muos", self.base, SURPRISE)
         self.assertIn("Surprise", out.getvalue())
         self.assertFalse(os.path.exists(self.path("box", "Surprise")))
+
+
+class Spruce(Card):
+    def path(self, name):
+        return os.path.join(self.base, "Collections", "Imgs", f"{name}.png")
+
+    def test_art_is_written_from_the_square_pictures_and_a_second_run_changes_nothing(self):
+        self.assertTrue(themeart.install("spruce", self.base, SURPRISE))
+        with open(self.path("Surprise"), "rb") as f, open(themeart.art_png("surprise", "art-spruce"), "rb") as g:
+            self.assertEqual(f.read(), g.read())
+        self.assertFalse(themeart.install("spruce", self.base, SURPRISE))
+
+    def test_changed_art_is_rewritten(self):
+        themeart.install("spruce", self.base, SURPRISE)
+        with open(self.path("Surprise"), "wb") as f:
+            f.write(b"old")
+        self.assertTrue(themeart.install("spruce", self.base, SURPRISE))
+        self.assertNotEqual(os.path.getsize(self.path("Surprise")), 3)
+
+    def test_a_name_of_a_system_or_built_in_collection_is_fine(self):
+        self.assertTrue(themeart.install("spruce", self.base, {"Favorites": "rpg"}))
+        self.assertTrue(os.path.exists(self.path("Favorites")))
+        self.assertEqual(self.warned, [])
+
+    def test_owned_collections_without_art_lose_their_picture_and_other_files_stay(self):
+        themeart.install("spruce", self.base, {"Surprise": "surprise", "Favs": "rpg"})
+        write(self.path("Mine"), "x")
+        self.assertTrue(themeart.install("spruce", self.base, SURPRISE, {"Surprise", "Favs"}))
+        self.assertFalse(os.path.exists(self.path("Favs")))
+        self.assertTrue(os.path.exists(self.path("Surprise")))
+        self.assertTrue(os.path.exists(self.path("Mine")))
+        self.assertTrue(themeart.install("spruce", self.base, {}, {"Surprise"}))
+        self.assertFalse(os.path.exists(self.path("Surprise")))
+        self.assertTrue(os.path.exists(self.path("Mine")))
+
+    def test_a_picture_of_a_collection_sync_roms_does_not_own_is_kept(self):
+        write(self.path("Mine"), "x")
+        self.assertFalse(themeart.install("spruce", self.base, {}, {"Surprise"}))
+        self.assertTrue(os.path.exists(self.path("Mine")))
+
+    def test_describe_prints_and_writes_nothing(self):
+        themeart.install("spruce", self.base, {"Favs": "rpg"})
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            themeart.describe("spruce", self.base, SURPRISE, {"Favs"})
+        self.assertIn("Surprise", out.getvalue())
+        self.assertIn("Favs.png", out.getvalue())
+        self.assertFalse(os.path.exists(self.path("Surprise")))
+        self.assertTrue(os.path.exists(self.path("Favs")))
 
 
 if __name__ == "__main__":

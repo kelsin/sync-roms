@@ -750,15 +750,6 @@ def sorted_list(raw):
     return out
 
 
-def dump_list(systems, sets_on):
-    """A games list as saved in a card's cards.json entry."""
-    out = {s["bucket"]: {"full_system": True} if s["full_system"] else s["games"]
-           for s in systems if s["full_system"] or s["games"]}
-    if sets_on:
-        out[SETS_KEY] = list(sets_on)
-    return out
-
-
 def save_lists(cards):
     """Write each card's games list into its cards.json entry."""
     if not cards:

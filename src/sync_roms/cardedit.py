@@ -552,11 +552,13 @@ def pick_card_set(name, setup, systems, current=None):
     return None if i is None else shown[i][0]
 
 
-def pick_set(system, sets, games, titles, catalog, current=None, synced=lambda: set()):
+def pick_set(system, sets, games, titles, catalog, current=None, synced=lambda: set(), switch=None):
     """The set to filter a system's games to, or None: sets with games in catalog (the system's bucket keys) are
     offered, starting on the one named current, each with how many of its games are synced out of those in storage
     (synced() gives the synced bucket keys). Space/Tab adds that set's games on this system to games (in place) as
-    direct picks, or removes them when all are already picked; other systems are untouched."""
+    direct picks, or removes them when all are already picked; other systems are untouched. With switch (the card
+    editor, where a game can also be on through a set or off by an exclusion), Space/Tab calls switch(keys, on)
+    instead: on unless every one of them is synced already."""
     shown = [(x, set_filter(x, system)) for x in sets]
     shown = [(x, keys) for x, keys in shown if keys & catalog]
     if not shown:
@@ -582,7 +584,9 @@ def pick_set(system, sets, games, titles, catalog, current=None, synced=lambda: 
             return False
         have = {g.get("bucket") for g in games}
         mine = shown[idx][1] & catalog
-        if mine <= have:
+        if switch:
+            switch(sorted(mine), not mine <= synced())
+        elif mine <= have:
             games[:] = [g for g in games if g.get("bucket") not in mine]
         else:
             for key in sorted(mine - have):
@@ -661,11 +665,16 @@ class GameFilters:
         return True
 
 
-def _work_out(picks, shown, others, card_usages, to_fetch):
+def _work_out(picks, shown, others, card_usages, to_fetch, variant=None):
     """What a games list's status adds its rows to, from the card as edited so far: the systems it doesn't show
     (others: their usage without BIOS, and those with something picked) and each shown SystemPicks' game costs.
-    card_usages: as for edit_system."""
+    card_usages: as for edit_system. variant: the system bucket v just changed; when it is one of the others, its
+    usage in card_usages is counted again."""
     card = picks.card()  # with the picks, set references and exclusions as edited so far
+    if card_usages is not None:
+        for x in others:
+            if x["bucket"] == variant:
+                card_usages[variant] = budget.system_usage(card, x)
     usages = budget.system_usages(card, others) if card_usages is None else {x["bucket"]: card_usages[x["bucket"]] for x in others}
     parts = list(usages.values())  # without BIOS: it is added once, with the shown systems', in _status
     costs = {sp.bucket: budget.game_costs(card, sp.system, [r[1] for r in sp.rows]) for sp in shown}
@@ -735,22 +744,24 @@ def _on_note(sp, key, text):
 
 
 def _toggle_variant(picks, key, title):
-    """v on a game row: toggle its variant on the card, picked from a list when it has several. Whether one was."""
+    """v on a game row: toggle its variant on the card, picked from a list when it has several. The variant's system
+    bucket, or None when none was."""
     found = picks.variants.get(key, [])
     if len(found) > 1:
         i = picker.filter_list(f"Variants of {title}",
                                [f"{'✅' if picks.on_card(v['bucket']) else '⬜'} {v['note']}" for v in found])
         found = [] if i is None else [found[i]]
-    if found:
-        picks.toggle_variant(found[0])
-    return bool(found)
+    if not found:
+        return None
+    picks.toggle_variant(found[0])
+    return found[0]["bucket"].partition("/")[0]
 
 
 def edit_system(name, system, setup, to_fetch=None, card_usages=None):
     """A card's games of one system: the whole storage folder, searchable, filterable to a set's games and by scraped
     metadata. Saves to cards.json when left; returns whether anything changed. to_fetch: as for edit_card.
     card_usages: budget.system_usages of the card as saved, over every system it can play (edit_card keeps them), so
-    the other systems aren't counted again."""
+    the other systems aren't counted again; v brings the usage of its variant's system up to date in it."""
     bucket = system["bucket"]
     cards = store.load_cards()
     picks = cardpicks.CardPicks(name, setup, cards)
@@ -808,12 +819,14 @@ def edit_system(name, system, setup, to_fetch=None, card_usages=None):
             if not isinstance(result, tuple):
                 break
             if result[0] == VARIANT_KEY:
-                if result[1] is not None and _toggle_variant(picks, keys[result[1]], sp.titles[keys[result[1]]]):
-                    work = _work_out(picks, [sp], others, card_usages, to_fetch)
+                variant = result[1] is not None and _toggle_variant(picks, keys[result[1]], sp.titles[keys[result[1]]])
+                if variant:
+                    work = _work_out(picks, [sp], others, card_usages, to_fetch, variant)
             else:
                 filters.handle(result[0], [r[1] for r in sp.rows], place, lambda current: pick_set(
                     system, list(picks.sets_by_id.values()), sp.games, sp.titles, {r[1] for r in sp.rows}, current,
-                    lambda: {k for k, v in sp.states(picks.cover()).items() if v}))
+                    lambda: {k for k, v in sp.states(picks.cover()).items() if v},
+                    lambda keys, on: sp.apply(keys, picks.cover(), sp.states(picks.cover()), [on] * len(keys))))
     except KeyboardInterrupt:  # Ctrl-C: keep the toggles
         if pending:
             keys, notes, base, session = pending
@@ -986,8 +999,10 @@ def edit_set(name, game_set, setup, to_fetch=None, card_usages=None, narrow_sets
                                                chosen and chosen["name"]) or chosen
             elif result[0] == SERIES_KEY:
                 series_filter = pick_series(game_set, series_filter) or series_filter
-            elif result[1] is not None and _toggle_variant(picks, keys[result[1]], shown[result[1]][2]):
-                work = _work_out(picks, list(sps.values()), others, card_usages, to_fetch)
+            elif result[1] is not None:
+                variant = _toggle_variant(picks, keys[result[1]], shown[result[1]][2])
+                if variant:
+                    work = _work_out(picks, list(sps.values()), others, card_usages, to_fetch, variant)
     except KeyboardInterrupt:  # Ctrl-C: keep the toggles
         if pending:
             apply, session = pending
