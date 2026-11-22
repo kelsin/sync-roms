@@ -150,10 +150,19 @@ def _move_all(games, old, new, title):
     return sum([_move(g, old, new, title) for g in games if isinstance(g, dict)]) > 0
 
 
+def _move_key(keys, old, new):
+    """Put new where old is in keys (a list of bucket keys), in place and listed once; True when old was there."""
+    if old not in keys:
+        return False
+    keys[:] = dict.fromkeys(new if k == old else k for k in keys)
+    return True
+
+
 def retarget(old, new, title):
-    """Move every personal reference to the cart key old onto new, retitled: cards' games and surprises, the
-    surprise history and collections, each file saved only when it changed. Returns the ids of the sets that
-    still name old, for the caller to warn about."""
+    """Move every personal reference to the cart key old onto new, retitled: cards' games (a full system's kept list
+    too), exclusions and surprises, the surprise history and collections, each file saved only when it changed.
+    Returns the ids of the sets that still name old (as a game, one of its files or a variant), for the caller to
+    warn about."""
     cards = store.load_cards()
     changed = False
     for card in cards.values():
@@ -161,8 +170,14 @@ def retarget(old, new, title):
             continue
         games = card.get("games")
         for entries in games.values() if isinstance(games, dict) else ():
+            if isinstance(entries, dict):  # a full system: the list it replaced
+                entries = entries.get("games")
             if isinstance(entries, list):
                 changed |= _move_all(entries, old, new, title)
+        excluded = card.get("excluded")
+        for keys in excluded.values() if isinstance(excluded, dict) else ():
+            if isinstance(keys, list):
+                changed |= _move_key(keys, old, new)
         if isinstance(card.get("surprises"), list):
             changed |= _move_all(card["surprises"], old, new, title)
     if changed:
@@ -174,7 +189,7 @@ def retarget(old, new, title):
         if _move_all(collection["games"], old, new, title):
             collections.save_collection(collection)
     return [s["id"] for s in store.load_sets()
-            if any(_names(g, old) for g in s["games"])]
+            if any(_names(g, old) or any(_names(v, old) for v in g.get("variants") or ()) for g in s["games"])]
 
 
 # --- sync-roms download pico8 ---------------------------------------------------------------------------------------
