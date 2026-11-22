@@ -1311,7 +1311,7 @@ def sync_card(args):
         if surprise.COLLECTION in plan["enable"]:
             arts[surprise.COLLECTION] = themeart.SURPRISE_ART
         arts = {name: art for name, art in arts.items() if name in plan["enable"]}
-        if layout_name == "spruce" or not store.card_flag(entry, "theme"):  # no Art Book Next copy, no ES-DE theme and no custom art
+        if not store.card_flag(entry, "theme"):  # no Art Book Next copy, no ES-DE theme and no custom art
             arts = {}
         if dry_run:
             if layout_name == "muos":
@@ -1320,7 +1320,9 @@ def sync_card(args):
                 spruce_collections.describe(plan)
             else:
                 frontend.describe_collections(plan, layout_name)
-            if arts:
+            if layout_name == "spruce":
+                themeart.describe(layout_name, base, arts, {*owned, *plan["owned"]})
+            elif arts:
                 themeart.describe(layout_name, base, arts)
             return
         for warning in plan["warnings"]:
@@ -1335,7 +1337,10 @@ def sync_card(args):
             listed = frontend.apply_collections(plan, layout_name, base)
         if plan["owned"] != owned:
             store.update_card(card, frontend_collections=plan["owned"])
-        art = (bool(arts) or layout_name == "muos" and store.card_flag(entry, "theme")) and themeart.install(layout_name, base, arts)
+        if layout_name == "spruce":  # also removes the pictures of collections that lost their art
+            art = themeart.install(layout_name, base, arts, {*owned, *plan["owned"]})
+        else:
+            art = (bool(arts) or layout_name == "muos" and store.card_flag(entry, "theme")) and themeart.install(layout_name, base, arts)
         # EmuDeck's ES-DE is on this computer, not the card, so its writes leave the card as it was
         if clean_card and layout_name != "emudeck" and (plan["writes"] or plan["deletes"] or listed or art):
             clean._clean_root = base
