@@ -264,11 +264,11 @@ class StaleMediaTest(unittest.TestCase):
         self.assertEqual(self.run_onion("onion", ["Roms/GBA/gamelist.xml", "Roms/GBA/miyoogamelist.xml"]),
                          ["Roms/GBA/gamelist.xml"])
 
-    def test_spruce_writes_a_miyoogamelist_with_name_and_image_only(self):
+    def test_spruce_writes_a_miyoogamelist_with_the_name_only(self):
         meta = {"a.zip": {"name": "A", "developer": "Dev", "rating": 0.8}}
-        _, entries, _ = scrape_plan.plan_scrapes("spruce", ["a.zip", "b.zip", "sub/c.zip"], {"scrapes/gba/onion/a.png": 5},
+        _, entries, _ = scrape_plan.plan_scrapes("spruce", ["a.zip", "b.zip", "sub/c.zip"], {"scrapes/gba/spruce/a.qoi": 5},
                                                  meta, "/m", "/r", lambda rom: True)
-        self.assertEqual(entries, {"a.zip": {"name": "A", "image": "./Imgs/a.png"}})
+        self.assertEqual(entries, {"a.zip": {"name": "A"}})
         self.assertEqual(scrape_plan.GAMELIST_FILES["spruce"], "miyoogamelist.xml")
 
     def test_spruce_removes_alliums_gamelist_once_its_own_exists(self):
@@ -680,3 +680,98 @@ class NextUIMediaTest(unittest.TestCase):
         self.assertEqual(self.stale(["Hacks/.media/Hack.png", "Hacks/.media/Gone.png", ".media/Hack.png"],
                                     roms=("Game.gba", "Hacks/Hack.gba")),
                          [os.path.join(".media", "Hack.png"), os.path.join("Hacks", ".media", "Gone.png")])
+
+
+class SpruceQoiTest(unittest.TestCase):
+    GBA = {"bucket": "gba", "folders": {"spruce": "GBA"}}
+    ALL = {"scrapes/gba/onion/a.png": 1, "scrapes/gba/spruce/a.qoi": 2, "scrapes/gba/spruce_med/a.qoi": 3,
+           "scrapes/gba/spruce_small/a.qoi": 4}
+    META = {"a.zip": {"name": "A"}}
+
+    def plan(self, layout, listing, rels=("a.zip",), meta=None):
+        return scrape_plan.plan_scrapes(layout, list(rels), listing, self.META if meta is None else meta, "/m", "/r", lambda rom: True)
+
+    def test_spruce_installs_qoi_in_three_folders(self):
+        jobs, _, _ = self.plan("spruce", self.ALL)
+        self.assertEqual(jobs, [("scrapes/gba/spruce/a.qoi", os.path.join("/r", "Imgs", "a.qoi"), 2),
+                                ("scrapes/gba/spruce_med/a.qoi", os.path.join("/r", "Imgs_med", "a.qoi"), 3),
+                                ("scrapes/gba/spruce_small/a.qoi", os.path.join("/r", "Imgs_small", "a.qoi"), 4)])
+
+    def test_spruce_installs_only_the_tiers_storage_has(self):
+        jobs, _, _ = self.plan("spruce", {"scrapes/gba/spruce/a.qoi": 2, "scrapes/gba/spruce_small/a.qoi": 4})
+        self.assertEqual([j[1] for j in jobs], [os.path.join("/r", "Imgs", "a.qoi"), os.path.join("/r", "Imgs_small", "a.qoi")])
+
+    def test_spruce_rom_with_only_an_onion_png_gets_no_image(self):
+        jobs, entries, _ = self.plan("spruce", {"scrapes/gba/onion/a.png": 1})
+        self.assertEqual(jobs, [])
+        self.assertEqual(entries, {"a.zip": {"name": "A"}})
+
+    def test_spruce_gamelist_has_no_png_image_tag(self):
+        _, entries, _ = self.plan("spruce", self.ALL)
+        self.assertEqual(entries, {"a.zip": {"name": "A"}})
+
+    def test_spruce_rom_in_a_subfolder_gets_no_art(self):
+        jobs, entries, _ = self.plan("spruce", {k.replace("/a.", "/sub/a."): v for k, v in self.ALL.items()},
+                                     ["sub/a.zip"], {"sub/a.zip": {"name": "A"}})
+        self.assertEqual((jobs, entries), ([], {}))
+
+    def test_onion_still_installs_the_png(self):
+        jobs, entries, _ = self.plan("onion", self.ALL)
+        self.assertEqual(jobs, [("scrapes/gba/onion/a.png", os.path.join("/r", "Imgs", "a.png"), 1)])
+        self.assertEqual(entries, {"a.zip": {"name": "A", "image": "./Imgs/a.png"}})
+
+    def test_allium_and_nextui_unchanged(self):
+        jobs, entries, _ = self.plan("allium", self.ALL)
+        self.assertEqual(jobs, [("scrapes/gba/onion/a.png", os.path.join("/r", "Imgs", "a.png"), 1)])
+        self.assertEqual(entries["a.zip"]["image"], "./Imgs/a.png")
+        jobs, entries, _ = self.plan("nextui", self.ALL)
+        self.assertEqual(jobs, [("scrapes/gba/onion/a.png", os.path.join("/r", ".media", "a.png"), 1)])
+        self.assertEqual(entries, {})
+
+    def stale(self, files, rom="Roms/GBA/a.zip"):
+        with tempfile.TemporaryDirectory() as base:
+            for rel in [*files, rom]:
+                touch(os.path.join(base, rel))
+            stale = scrape_plan.stale_media("spruce", [self.GBA], os.path.join(base, "Roms"), os.path.join(base, "ES-DE"), base)
+            return sorted(os.path.relpath(p, base) for p in stale)
+
+    def test_stale_spruce_pngs_are_removed(self):
+        self.assertEqual(self.stale(["Roms/GBA/Imgs/a.png", "Roms/GBA/Imgs/a.jpg", "Roms/GBA/Imgs/a.qoi"]),
+                         ["Roms/GBA/Imgs/a.jpg", "Roms/GBA/Imgs/a.png"])
+
+    def test_stale_spruce_qoi_of_a_gone_rom(self):
+        files = [f"Roms/GBA/{d}/{n}.qoi" for d in ("Imgs", "Imgs_med", "Imgs_small") for n in ("a", "gone")]
+        self.assertEqual(self.stale(files), [f"Roms/GBA/{d}/gone.qoi" for d in ("Imgs", "Imgs_med", "Imgs_small")])
+
+    def test_onion_keeps_its_pngs(self):
+        with tempfile.TemporaryDirectory() as base:
+            for rel in ("Roms/GBA/a.zip", "Roms/GBA/Imgs/a.png", "Roms/GBA/Imgs_med/a.qoi"):
+                touch(os.path.join(base, rel))
+            self.assertEqual(scrape_plan.stale_media("onion", [{"bucket": "gba", "folders": {"onion": "GBA"}}],
+                                                     os.path.join(base, "Roms"), "", base), [])
+
+    def test_empty_spruce_system_removes_all_three_art_folders(self):
+        with tempfile.TemporaryDirectory() as base:
+            for d in ("Imgs", "Imgs_med", "Imgs_small"):
+                os.makedirs(os.path.join(base, "Roms", "GBA", d))
+            removed = scrape_plan.prune_empty_systems("spruce", [self.GBA], os.path.join(base, "Roms"))
+            self.assertEqual(len(removed), 1)
+            self.assertFalse(os.path.exists(os.path.join(base, "Roms", "GBA")))
+
+
+class SprucePico8Test(Pico8CartImageTest):
+    PICO = {"name": "PICO-8", "bucket": "pico8", "folders": {"spruce": "pico8", "onion": "pico8"}}
+
+    def test_spruce_pico8_cart_picture_is_not_copied_to_imgs(self):
+        jobs, entries = self.plan("spruce", ["a.p8.png"])
+        self.assertEqual((jobs, entries), ([], {}))
+
+    def test_spruce_pico8_cart_art_from_storage_is_installed_as_qoi(self):
+        jobs, entries = self.plan("spruce", ["a.p8.png"], {"scrapes/pico8/spruce/a.p8.qoi": 1}, {"a.p8.png": {"name": "A"}})
+        self.assertEqual(jobs, [("scrapes/pico8/spruce/a.p8.qoi", os.path.join("ROMs", "pico8", "Imgs", "a.p8.qoi"))])
+        self.assertEqual(entries, {"a.p8.png": {"name": "A"}})
+
+    def test_onion_pico8_cart_without_art_still_copies_its_picture(self):
+        jobs, entries = self.plan("onion", ["a.p8.png"])
+        self.assertEqual(jobs, [("pico8/a.p8.png", os.path.join("ROMs", "pico8", "Imgs", "a.p8.png"))])
+        self.assertEqual(entries["a.p8.png"]["image"], "./Imgs/a.p8.png")

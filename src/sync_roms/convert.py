@@ -307,7 +307,8 @@ def _leftovers(base, systems, old_name, old):
 
 
 ROM_FOLDER_MEDIA_DIRS = {**{name: ("images", "videos", "manuals") for name in ("knulli", "rocknix")}, "nextui": (".media",),
-                         **{name: ("imgs",) for name in scrape_plan.ONION_LAYOUTS}}
+                         **{name: ("imgs",) for name in scrape_plan.ONION_LAYOUTS},
+                         "spruce": ("imgs", "imgs_med", "imgs_small")}
 
 
 def _media_names(layout_name):
