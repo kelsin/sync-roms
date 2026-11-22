@@ -329,8 +329,7 @@ def replace_command(args, folder, system):
                              only_bucket, multi=True, initial=[False] * len(only_bucket),
                              extras=[[(ui.human_size(remote[p][0]), "dim")] for p in only_bucket],
                              hint="/ filter · j/k move · Space toggle · a toggle all shown · Enter done",
-                             preview=lambda k: previews.game_thumb(f"{bucket}/{only_bucket[k]}") if k < len(only_bucket) else None,
-                             preview_width=previews.GAME_WIDTH)
+                             **previews.game_pane([f"{bucket}/{p}" for p in only_bucket]))
         delete = [f"{bucket}/{p}" for p, on in zip(only_bucket, picked) if on]
     uploads = [(f"{bucket}/{p}", os.path.join(folder, *p.split("/")), local[p]) for p in new + changed]
     if not (renames or uploads or delete):
