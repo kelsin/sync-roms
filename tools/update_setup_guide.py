@@ -12,7 +12,7 @@ ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 DEVICES = os.path.join(ROOT, "src", "sync_roms", "data", "devices.json")
 SYSTEMS = os.path.join(ROOT, "src", "sync_roms", "data", "device-systems.json")
 GUIDE = os.path.join(ROOT, "src", "sync_roms", "data", "setup-guide.html")
-KEYS = ("id", "name", "soc", "screen", "screen2", "firmwares")
+KEYS = ("id", "name", "soc", "screen", "screen2", "firmwares", "gpu")
 BLOCK = re.compile(r'(<script type="application/json" id="devices-data">\n)(.*?)(\n</script>)', re.S)
 SYSTEMS_BLOCK = re.compile(r'(<script type="application/json" id="systems-data">\n)(.*?)(\n</script>)', re.S)
 
