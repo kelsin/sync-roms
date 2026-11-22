@@ -30,7 +30,7 @@ def rom_stems(roms):
 
 def _image_size(path):
     """(width, height) of a local image, or None when it can't be read."""
-    from PIL import Image
+    Image = scrape_plan.pillow_image()
     try:
         with Image.open(path) as im:
             return im.size

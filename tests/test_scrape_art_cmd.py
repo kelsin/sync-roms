@@ -195,5 +195,12 @@ class CommandTest(CommandBase):
         self.assertIn("scrapes/pico8/spruce/x.p8.qoi", self.stored())
 
 
+class ScrapeListingTest(unittest.TestCase):
+    def test_empty_media_files_count_as_missing(self):
+        listing = {"scrapes/gba/covers/a.png": 0, "scrapes/gba/covers/b.png": 5, "scrapes/gba/metadata.json": 0}
+        with mock.patch("sync_roms.inventory.files", return_value=listing):
+            self.assertEqual(scrape_plan.scrape_listing("gba"), {"scrapes/gba/covers/b.png": 5, "scrapes/gba/metadata.json": 0})
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -26,8 +26,7 @@ def collection(art_id):
 
 def _index(system):
     if system not in _indexes:
-        _indexes[system] = scrape_plan.scrape_index(
-            inventory.files(f"{scrape_plan.SCRAPES}/{system}/", sizes=False))
+        _indexes[system] = scrape_plan.scrape_index(scrape_plan.scrape_listing(system, sizes=False))
     return _indexes[system]
 
 
