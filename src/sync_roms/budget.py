@@ -1,7 +1,8 @@
 """How much of a card's space its games take: ROM files plus the scraped files its layout installs, from the size cache."""
+import re
 from collections import namedtuple
 
-from . import collections as colls, commands, inventory, scrape_plan, store, vita
+from . import collections as colls, inventory, scrape_plan, store, vita
 
 Usage = namedtuple("Usage", "bytes count partial")
 
@@ -164,10 +165,19 @@ def card_usage(card, systems, usages=None):
                  bios.partial or any(p.partial for p in parts))
 
 
+def parse_size(text):
+    """A card size as written to cards.json ("512 GB", "1 TB") from "512", "512gb", "1 TB"; None when it isn't one."""
+    m = re.fullmatch(r"\s*(\d+(?:\.\d+)?)\s*(GB|TB|G|T)?\s*", text, re.I)
+    if not m or float(m.group(1)) <= 0:
+        return None
+    number = m.group(1).rstrip("0").rstrip(".") if "." in m.group(1) else m.group(1)
+    return f"{number} {'TB' if (m.group(2) or 'GB').upper().startswith('T') else 'GB'}"
+
+
 def card_capacity(card):
     """The card's size in bytes, or None when it has none or it isn't a size."""
     size = card.get("size")
-    size = commands.parse_size(size) if isinstance(size, str) else None
+    size = parse_size(size) if isinstance(size, str) else None
     if not size:
         return None
     number, unit = size.split()

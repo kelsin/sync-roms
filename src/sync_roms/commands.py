@@ -10,7 +10,7 @@ import sys
 import webbrowser
 
 from . import collections as colls
-from . import cardshare, external, inventory, m3u, names, picker, runtime, s3, setedit, store, surprise, themeart, ui, usersettings
+from . import budget, cardedit, cardshare, collectionedit, external, inventory, m3u, names, picker, runtime, s3, setedit, store, surprise, themeart, ui, usersettings
 
 
 UNKNOWN_SHOWN = 8  # device ids named in an "unknown device" error
@@ -440,17 +440,7 @@ def games_import(args):
 
 # --- Cards ------------------------------------------------------------------------------------------
 
-def parse_size(text):
-    """A card size as written to cards.json ("512 GB", "1 TB") from "512", "512gb", "1 TB"; None when it isn't one."""
-    m = re.fullmatch(r"\s*(\d+(?:\.\d+)?)\s*(GB|TB|G|T)?\s*", text, re.I)
-    if not m or float(m.group(1)) <= 0:
-        return None
-    number = m.group(1).rstrip("0").rstrip(".") if "." in m.group(1) else m.group(1)
-    return f"{number} {'TB' if (m.group(2) or 'GB').upper().startswith('T') else 'GB'}"
-
-
 def cards_list(args):
-    from . import budget, cardedit  # both import this module
     cards = store.load_cards()
     manifest = store.load_catalog()
     rows = []
@@ -529,7 +519,7 @@ def cards_save_setup(args, create):
     device, layout = setup_from_flags(manifest, current, args.device, args.layout)
     values = {"device": device["id"] if device else "full", "layout": layout}
     if args.size:
-        size = parse_size(args.size)
+        size = budget.parse_size(args.size)
         if not size:
             ui.fail(f"{args.size!r} isn't a card size. Use e.g. 256, 512GB or 1TB", 2)
         values["size"] = size
@@ -1164,7 +1154,6 @@ def all_flags():
 
 
 def collections_edit(args):
-    from . import collectionedit  # imported late: it reaches this module through edit
     return collectionedit.edit_collections()
 
 
