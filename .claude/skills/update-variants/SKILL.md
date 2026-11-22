@@ -18,7 +18,7 @@ Run every command from the repo root.
 ## 1. Find candidates
 
 ```bash
-sync-roms cache update
+uv run sync-roms cache update
 uv run --frozen python .claude/skills/update-variants/scripts/find_candidates.py > <scratchpad>/candidates.json
 ```
 
@@ -74,7 +74,7 @@ Write the approved decisions to `<scratchpad>/decisions.json`:
 
 ```bash
 uv run --frozen python .claude/skills/update-variants/scripts/apply_variants.py <scratchpad>/decisions.json
-sync-roms check
+uv run sync-roms check
 ```
 
 The apply script adds each variant to the game in every set that lists it, writes the changed sets to storage and

@@ -20,5 +20,5 @@ Drivers are loaded per app through libadrenotools (no root, no system change), s
    - An unpinned entry uses the newest non-draft release with any matching asset (prereleases only as a fallback), from releases fetched with `per_page=100`; more than one matching asset in that release is an error, not skipped. So each `asset` regex must match exactly one asset of the release it should pick.
    - When `gpu` fields in `devices.json` change, update `GPU_DEVICES` in `tests/test_drivers_data.py` to match, or step 4 fails.
    - Every `gpus` driver id must exist in `drivers`, and every device `gpu` in `gpus`.
-4. **Test**: `python -m unittest discover -s tests` must pass.
+4. **Test**: `uv run python -m unittest discover -s tests` must pass.
 5. **Ship**: if `git diff` is empty, say nothing changed and open nothing. Otherwise: `git fetch origin`, branch `chore/refresh-drivers-YYYY-MM-DD` off `origin/main`, commit `chore(drivers): refresh driver recommendations`, push, and `gh pr create` with that title and a body listing each change and its source. Merge is a squash.
