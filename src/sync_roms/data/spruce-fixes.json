@@ -1,0 +1,10 @@
+{
+  "pokemini": {
+    "title": "Pokémon Mini logo",
+    "upstream": "https://github.com/spruceUI/PyUI-Themes/pull/15"
+  },
+  "fds": {
+    "title": "Famicom Disk System logo",
+    "upstream": "https://github.com/spruceUI/PyUI-Themes/pull/16"
+  }
+}
