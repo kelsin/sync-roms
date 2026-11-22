@@ -1,4 +1,5 @@
 import contextlib
+import hashlib
 import io
 import json
 import os
@@ -159,6 +160,20 @@ class WriteTest(SharedTest):
         with mock.patch.object(shared, "read", side_effect=AssertionError("read again")):
             self.assertEqual(self.load("sets/a.json")[0], {"a": 1})
 
+    def test_the_tag_is_the_one_of_our_write_when_another_machine_writes_right_after(self):
+        put, ours = s3.put_text, []
+
+        def put_then_another_machine(key, text):
+            out = put(key, text)
+            ours.append(inventory.tag(key))
+            self.store_file(key, '{"b": 2}', mtime=1_000_000_000_000_000_000)
+            return out
+
+        with mock.patch.object(s3, "put_text", put_then_another_machine):
+            shared.write("x.json", '{"a": 1}')
+        self.assertEqual(self.tags()["x.json"], ours[0])
+        self.assertEqual(self.load()[0], {"b": 2})  # read again: the mirror isn't taken for storage's file
+
     def test_read_returns_storage_text(self):
         self.store_file("x.json", "hello")
         self.assertEqual(shared.read("x.json"), "hello")
@@ -166,6 +181,47 @@ class WriteTest(SharedTest):
     def test_read_missing_raises_a_storage_error(self):
         with self.assertRaises(s3.ERRORS):
             shared.read("nope.json")
+
+
+class BucketWriteTest(SharedTest):
+    """shared.write to a bucket: a fake client keeps the objects in self.objects."""
+
+    def setUp(self):
+        super().setUp()
+        self.objects = {}
+        client = mock.Mock()
+        client.put_object.side_effect = self.put_object
+        client.head_object.side_effect = lambda Bucket, Key: {"ETag": self.etag(self.objects[Key])}
+        client.get_object.side_effect = lambda Bucket, Key: {"Body": io.BytesIO(self.objects[Key])}
+        for p in (mock.patch.object(runtime, "ROOT", None), mock.patch.object(runtime, "BUCKET", "roms"),
+                  mock.patch.object(s3, "s3_client", return_value=client)):
+            p.start()
+            self.addCleanup(p.stop)
+
+    def etag(self, body):
+        return f'"{hashlib.md5(body).hexdigest()}"'
+
+    def put_object(self, Bucket, Key, Body):
+        self.objects[Key] = Body
+        return {"ETag": self.etag(Body)}
+
+    def test_write_saves_the_tag_storage_gives_for_the_file(self):
+        shared.write("sets/a.json", '{"a": 1}')
+        self.assertEqual(self.objects, {"sets/a.json": b'{"a": 1}'})
+        self.assertEqual(self.tags()["sets/a.json"], inventory.tag("sets/a.json"))
+        with mock.patch.object(shared, "read", side_effect=AssertionError("read again")):
+            self.assertEqual(self.load("sets/a.json")[0], {"a": 1})
+
+    def test_the_tag_is_the_one_of_our_write_when_another_machine_writes_right_after(self):
+        def put_then_another_machine(Bucket, Key, Body):
+            out = self.put_object(Bucket, Key, Body)
+            self.objects[Key] = b'{"b": 2}'
+            return out
+
+        s3.s3_client().put_object.side_effect = put_then_another_machine
+        shared.write("x.json", '{"a": 1}')
+        self.assertEqual(self.tags()["x.json"], self.etag(b'{"a": 1}'))
+        self.assertEqual(self.load()[0], {"b": 2})  # read again: the mirror isn't taken for storage's file
 
 
 class UpdateTest(SharedTest):
