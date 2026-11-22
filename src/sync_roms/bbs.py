@@ -6,7 +6,7 @@ import os
 import re
 import tempfile
 
-from . import collections, drivers, github, ignore, inventory, runtime, s3, scrape_plan, store, surprise, ui, usersettings
+from . import collections, drivers, github, ignore, inventory, runtime, s3, scrape_plan, scrape_state, store, surprise, ui, usersettings
 
 LISTING = "https://www.lexaloffle.com/bbs/?cat=7&sub=2&orderby=featured"
 _CARTS = "https://www.lexaloffle.com/bbs/cposts/"
@@ -212,6 +212,22 @@ def _media_moves(old_file, new_file):
     return moves
 
 
+def _move_state(old_file, new_file):
+    """Give the new revision the old one's manual ScreenScraper match and forget the rest of the old one's scrape
+    state (non-game, unknown, not-offered media, hashes): that was about another file."""
+    game_id = scrape_state.manual_match("pico8", old_file)
+    if game_id is not None:
+        scrape_state.save_match("pico8", new_file, game_id)
+    scrape_state.forget_match("pico8", old_file)
+    scrape_state.clear_notgame("pico8", old_file)
+    scrape_state.clear_unknown("pico8", old_file)
+    scrape_state.mark_nomedia("pico8", old_file, ())
+    scrape_state.forget_hashes("pico8", old_file)
+    scrape_state.flush_unknown()
+    scrape_state.flush_nomedia()
+    scrape_state.flush_hashes()
+
+
 def _download(cart, tmp):
     """The cart's .p8.png saved in tmp; None (a warning) when what came isn't a PNG."""
     data = _fetch(cart_url(cart["file"]))
@@ -283,6 +299,7 @@ def download_pico8(args):
             moves = _media_moves(old_file, c["file"])
             if moves and s3.move_keys(moves):
                 code = 1
+            _move_state(old_file, c["file"])
             try:
                 still = retarget(old, key, c["title"])
             except OSError as e:  # the references still name the old revision, so it stays

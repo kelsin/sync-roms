@@ -182,8 +182,14 @@ def save_hashes(system, rom, size, mtime, hashes):
             flush_hashes()
 
 
+def forget_hashes(system, rom):
+    """Forget a ROM's saved hashes (written by flush_hashes)."""
+    with _lock:
+        _mark(HASHES, system, rom, _GONE)
+
+
 def flush_hashes():
-    """Write the hashes saved so far."""
+    """Write the hashes saved and forgotten so far."""
     with _lock:
         _flush(HASHES)
 
