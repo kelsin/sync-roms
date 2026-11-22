@@ -1258,6 +1258,21 @@ class Flow(DataDir):
                 self.workers_run_at_once():
             self.run_card(returns(1), leave, self.same_as_fresh)
 
+    def test_v_on_another_systems_variant_recounts_that_system(self):
+        self.with_variants(self.RED)
+        self.card(size="1 GB", games={"gba": [g("gba/Zelda.zip")]})
+        self.sized()
+        seen = []
+
+        def look(labels, kw):
+            seen.append(kw["status"](kw["session"]["sel"]))
+            return kw["session"]["sel"]
+        with self.workers_run_at_once():
+            self.run_card(returns(1), lambda labels, kw: (cardedit.VARIANT_KEY, labels.index("Ruby.zip")), look,
+                          self.same_as_fresh)
+        self.assertEqual(store.card_games("c"), {"gba": [g("gba/Zelda.zip")], "gb": [g("gb/Red.gb")]})
+        self.assertEqual(seen, [self.fresh(count=False)[0]])  # the games list counted Red and the Game Boy BIOS too
+
 
 G = "psvita/G [PCSE00349] [USA] [NoNpDRM].zip"
 DLC = "psvita/D [PCSE00349] [USA] [DLC-X].zip"
@@ -1703,6 +1718,23 @@ class SetFlow(Flow):
             changed, _ = self.run_set(press_v, now_on, game_set=vset)
         self.assertTrue(changed)
         self.assertEqual(store.card_games("c"), {"gba": [g("gba/Emerald.zip")]})
+
+    def test_v_counts_a_variant_on_a_system_the_set_has_no_games_of(self):
+        self.with_variants(self.RED)
+        self.card(size="1 GB", games={"gba": [g("gba/Zelda.zip")]})
+        self.sized()
+        seen = []
+
+        def look(labels, kw):
+            seen.append(kw["status"](kw["session"]["sel"]))
+            return kw["session"]["sel"]
+        with self.workers_run_at_once():
+            self.run_card(returns((cardedit.SET_KEY, 0)),
+                          lambda labels, kw: next(i for i, l in enumerate(labels) if "Variants" in l),
+                          lambda labels, kw: (cardedit.VARIANT_KEY, labels.index("Game Boy Advance — Ruby")), look,
+                          self.same_as_fresh)
+        self.assertEqual(store.card_games("c"), {"gba": [g("gba/Zelda.zip")], "gb": [g("gb/Red.gb")]})
+        self.assertEqual(seen, [self.fresh(count=False)[0]])
 
     def test_one_pass_changes_two_systems(self):
         self.card(games={"gba": [g("gba/Zelda.zip")], store.SETS_KEY: ["pk"]}, excluded={"gba": ["gba/Ruby.zip"]})
