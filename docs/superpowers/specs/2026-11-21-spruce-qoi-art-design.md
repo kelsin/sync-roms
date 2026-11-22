@@ -26,7 +26,7 @@ Onion and Spruce also change which art they use: **covers first, then miximages*
 
 ## Constraints
 
-- Pillow reads and writes no QOI (checked with Pillow 13: `QOI` is in neither `Image.OPEN` nor `Image.SAVE`), and there is no ffmpeg here. We need our own QOI encoder (RGBA, 4 channels, as PyUI's ffmpeg path writes).
+- Pillow 13 reads and writes QOI after `Image.init()`, but we use our own RGBA encoder (4 channels, as PyUI's ffmpeg path writes) because it is about 2x faster than Pillow's pure-Python QOI writer (0.10 s vs 0.20 s per 640x480 image). There is no ffmpeg here.
 - Pillow is only a `dev` dependency today. QOI needs it, so it becomes a runtime dependency (`uv add`). The macOS `sips` fallback stays for Onion's PNG only.
 - Storage, cache and personal-data rules in `CLAUDE.md` apply: shared files are read through `inventory.py` (never `s3.list_*`), derived art lives in storage under `scrapes/<system>/`, nothing personal goes to storage.
 - Measured (14 random samples per type, QOI is lossless): 3 tiers cost about 540 KB per ROM from covers and 560 KB from miximages, about 150 KB per ROM for the Onion PNG; about 33.7k ROMs in storage have art, so Spruce art would be roughly 18-19 GB, Onion's regenerated art about 5 GB. Encoding takes 0.15 s per ROM (0.04 load, 0.10 encode) in pure Python.
@@ -47,9 +47,9 @@ You picked 2, with covers then miximages for Onion and Spruce.
 
 **PICO-8.** A cart with no cover or miximage uses its own picture (the `.p8.png` in storage) as the source for the Onion PNG and the Spruce QOI, in a normal scrape and in `scrape art`. The cart is never enlarged; by the tier rule it gets `spruce` and `spruce_small`. On a Spruce card sync copies no PNG of a cart's picture into `Imgs/`.
 
-**Encoder.** A small pure-Python QOI encoder (RGBA) in its own module. Tests check it against a reference decoder written in the test, since Pillow cannot read QOI. Resizing is Pillow's LANCZOS thumbnail. A `spruce_med` or `spruce_small` file is skipped when the image it would be made from is already no larger than that tier's box (PyUI falls back small, then med, then large).
+**Encoder.** A small pure-Python QOI encoder (RGBA) in its own module. Tests check it against a reference decoder written in the test and against Pillow's QOI reader. Resizing is Pillow's LANCZOS thumbnail. A `spruce_med` or `spruce_small` file is skipped when the image it would be made from is already no larger than that tier's box (PyUI falls back small, then med, then large).
 
-**Sync.** On a `spruce` card sync installs `Imgs/<ROM>.qoi`, `Imgs_med/<ROM>.qoi` and `Imgs_small/<ROM>.qoi` from storage instead of the `onion` PNG, and removes the `Imgs/<ROM>.png` it wrote there before so no PNG is left to trigger the prompt. A ROM with no `spruce` key in storage gets no image (never the Onion PNG, which would bring back the prompt), and sync hints to run the art command. The builder checks how `miyoogamelist.xml`'s `image` tag should read for QOI (omit it, or point at `./Imgs/<ROM>.qoi`) from PyUI's `rom_utils.py` and `rom_select_options_builder.py`. Pillow missing means no Spruce art and a warning, like `NO_SHRINK` now.
+**Sync.** On a `spruce` card sync installs `Imgs/<ROM>.qoi`, `Imgs_med/<ROM>.qoi` and `Imgs_small/<ROM>.qoi` from storage instead of the `onion` PNG, and removes the `Imgs/<ROM>.png` it wrote there before so no PNG is left to trigger the prompt. A ROM with no `spruce` key in storage gets no image (never the Onion PNG, which would bring back the prompt), and sync hints to run the art command. The ROM's `miyoogamelist.xml` entry carries an `image` pointing at `./Imgs/<ROM>.qoi`, so PyUI finds PICO-8 carts, whose names have a second extension (PyUI strips every extension of the system's list from a name, so `foo.p8.png` would look for `Imgs/foo.qoi`); sized versions come from replacing `/Imgs/`. Pillow missing means no Spruce art and a warning, like `NO_SHRINK` now.
 
 **The art command.** `sync-roms scrape art [SYSTEM ...]`:
 - `--for onion|spruce|both` (default `both`).
@@ -65,6 +65,5 @@ You picked 2, with covers then miximages for Onion and Spruce.
 
 - Module and function names, the progress display, and the exact column layout of the dry-run report.
 - Whether the `spruce_*` keys are one type with a size suffix or three types in `BUCKET_MEDIA` (they must be listed there and in `SCRAPER_TYPES`).
-- The gamelist `image` tag for QOI, from the PyUI source.
 - Tests: encoder round trip, tier sizes and skip rule, the planner (Spruce card installs QOI and removes old PNGs, a missing key installs nothing), dry-run counts, `derived_art` for the new order, `--for` selection.
 - Documenting the new storage prefixes and the command in `CLAUDE.md`.

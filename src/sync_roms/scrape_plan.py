@@ -214,6 +214,8 @@ def plan_scrapes(layout_name, rom_rels, listing, meta, media_root, rom_dir, pres
                 if mtype in found:
                     key, size = found[mtype]
                     add(key, rom_dir, f"{folder}/{base}.qoi", size)
+            if SPRUCE_TYPES[0] in found:  # PyUI strips every extension in the extlist, so a .p8.png cart's name finds nothing
+                tags["image"] = f"./Imgs/{base}.qoi"
         elif layout_name in ONION_LAYOUTS:
             if "/" in rom:  # Imgs is flat and the gamelist only lists the folder's own files
                 continue

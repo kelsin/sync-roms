@@ -264,11 +264,11 @@ class StaleMediaTest(unittest.TestCase):
         self.assertEqual(self.run_onion("onion", ["Roms/GBA/gamelist.xml", "Roms/GBA/miyoogamelist.xml"]),
                          ["Roms/GBA/gamelist.xml"])
 
-    def test_spruce_writes_a_miyoogamelist_with_the_name_only(self):
+    def test_spruce_writes_a_miyoogamelist_with_the_name_and_qoi_image(self):
         meta = {"a.zip": {"name": "A", "developer": "Dev", "rating": 0.8}}
         _, entries, _ = scrape_plan.plan_scrapes("spruce", ["a.zip", "b.zip", "sub/c.zip"], {"scrapes/gba/spruce/a.qoi": 5},
                                                  meta, "/m", "/r", lambda rom: True)
-        self.assertEqual(entries, {"a.zip": {"name": "A"}})
+        self.assertEqual(entries, {"a.zip": {"name": "A", "image": "./Imgs/a.qoi"}})
         self.assertEqual(scrape_plan.GAMELIST_FILES["spruce"], "miyoogamelist.xml")
 
     def test_spruce_removes_alliums_gamelist_once_its_own_exists(self):
@@ -706,9 +706,21 @@ class SpruceQoiTest(unittest.TestCase):
         self.assertEqual(jobs, [])
         self.assertEqual(entries, {"a.zip": {"name": "A"}})
 
-    def test_spruce_gamelist_has_no_png_image_tag(self):
+    def test_spruce_gamelist_points_image_at_the_qoi(self):
         _, entries, _ = self.plan("spruce", self.ALL)
-        self.assertEqual(entries, {"a.zip": {"name": "A"}})
+        self.assertEqual(entries, {"a.zip": {"name": "A", "image": "./Imgs/a.qoi"}})
+
+    def test_spruce_gamelist_replaces_a_stale_png_image_tag(self):
+        _, entries, _ = self.plan("spruce", self.ALL)
+        with tempfile.TemporaryDirectory() as d:
+            path = os.path.join(d, "miyoogamelist.xml")
+            with open(path, "w") as f:
+                f.write("<gameList><game><path>./a.zip</path><name>A</name><image>./Imgs/a.png</image></game></gameList>")
+            scrape_plan.update_gamelist(path, entries)
+            with open(path) as f:
+                text = f.read()
+        self.assertIn("<image>./Imgs/a.qoi</image>", text)
+        self.assertNotIn("a.png", text)
 
     def test_spruce_rom_in_a_subfolder_gets_no_art(self):
         jobs, entries, _ = self.plan("spruce", {k.replace("/a.", "/sub/a."): v for k, v in self.ALL.items()},
@@ -769,7 +781,7 @@ class SprucePico8Test(Pico8CartImageTest):
     def test_spruce_pico8_cart_art_from_storage_is_installed_as_qoi(self):
         jobs, entries = self.plan("spruce", ["a.p8.png"], {"scrapes/pico8/spruce/a.p8.qoi": 1}, {"a.p8.png": {"name": "A"}})
         self.assertEqual(jobs, [("scrapes/pico8/spruce/a.p8.qoi", os.path.join("ROMs", "pico8", "Imgs", "a.p8.qoi"))])
-        self.assertEqual(entries, {"a.p8.png": {"name": "A"}})
+        self.assertEqual(entries, {"a.p8.png": {"name": "A", "image": "./Imgs/a.p8.qoi"}})
 
     def test_onion_pico8_cart_without_art_still_copies_its_picture(self):
         jobs, entries = self.plan("onion", ["a.p8.png"])
