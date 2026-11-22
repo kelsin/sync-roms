@@ -220,20 +220,36 @@ def trusted(keys):
     return out
 
 
+def _stored(tree, key):
+    """(key as the cache spells it, whether storage is sure to spell it so). In a storage folder a share may store a name
+    decomposed, whatever spelling the caller gave (a bucket's keys are exact): a file the cache has under another
+    spelling of its folder or name keeps that key, and one it doesn't have goes under its folder as tree.dirs spells
+    it, which is sure only when the file's name has one spelling."""
+    if not runtime.ROOT:
+        return key, True
+    folder, sep, name = key.rpartition("/")
+    folders = _spellings(folder) & tree.dirs.keys() or _spellings(folder)
+    found = {f + sep + n for f in folders for n in _spellings(name)} & tree.files.keys()
+    if found:
+        return key if key in found else min(found), True
+    return (folder if folder in folders else min(folders)) + sep + name, len(_spellings(name)) == 1
+
+
 def _patch(change, keys, before=()):
     """Apply change to the cache, and stop trusting the mtimes of the keys' folders (spelled as given, NFC or NFD: a share
     may store a name decomposed), or of the nearest folder above that the cache knows, for a folder the write created:
     the next update lists them. A folder in before (from trusted(), taken before the write) holding a key gets its
-    new mtime instead, if the cache still holds the mtime trusted() saw."""
+    new mtime instead, if the cache still holds the mtime trusted() saw and change didn't return the key: it returns
+    the keys the cache couldn't be patched for under a spelling storage is sure to use."""
     global _dirty
     after = {name: _mtime(name) for name in before}  # outside the lock: each stat is a round trip on a network share
     with _lock:
         tree = current()
         if tree is not None:
-            change(tree)
+            unsure = change(tree)
             marks = {}
             for k in keys:
-                folder, direct = k, True
+                folder, direct = k, k not in unsure
                 while folder:
                     folder = folder.rpartition("/")[0]
                     names = _spellings(folder) & tree.dirs.keys()
@@ -251,11 +267,13 @@ def _patch(change, keys, before=()):
 def wrote(key, size, etag=None, before=()):
     """A file was written to storage (its ETag, when known); before is what trusted() gave before the write."""
     def change(tree):
-        tree.files[key] = size
+        name, sure = _stored(tree, key)
+        tree.files[name] = size
         if etag:
-            tree.etags[key] = etag
+            tree.etags[name] = etag
         else:
-            tree.etags.pop(key, None)
+            tree.etags.pop(name, None)
+        return () if sure else [key]
     _patch(change, [key], before)
 
 
@@ -264,19 +282,29 @@ def removed(keys, before=()):
     keys = list(keys)
 
     def change(tree):
+        missing = []
         for k in keys:
-            tree.files.pop(k, None)
-            tree.etags.pop(k, None)
+            name = _stored(tree, k)[0]
+            if name not in tree.files:
+                missing.append(k)
+            tree.files.pop(name, None)
+            tree.etags.pop(name, None)
+        return missing
     _patch(change, keys, before)
 
 
 def moved(old, new, before=()):
     """A file was moved in storage (its ETag is dropped: a copy can change it)."""
     def change(tree):
-        if old in tree.files:
-            tree.files[new] = tree.files.pop(old)
-            tree.etags.pop(old, None)
-            tree.etags.pop(new, None)
+        src = _stored(tree, old)[0]
+        if src not in tree.files:
+            return [old, new]
+        size = tree.files.pop(src)
+        tree.etags.pop(src, None)
+        dst, sure = _stored(tree, new)  # after the pop: a move that only respells the name isn't an overwrite
+        tree.files[dst] = size
+        tree.etags.pop(dst, None)
+        return () if sure else [new]
     _patch(change, [old, new], before)
 
 

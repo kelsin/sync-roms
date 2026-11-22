@@ -395,6 +395,65 @@ class FolderMtimeTest(helpers.StorageFolder):
         inventory.wrote(f"{nfc}/b.zip", 2)
         self.assertIsNone(inventory.current().dirs[nfd])
 
+    def disk(self):
+        """{key: size} of the files in the storage folder, spelled as it lists them."""
+        return {os.path.relpath(os.path.join(folder, name), self.root.name).replace(os.sep, "/"):
+                os.path.getsize(os.path.join(folder, name)) for folder, _, names in os.walk(self.root.name) for name in names}
+
+    def test_a_write_under_another_spelling_of_its_folder_is_cached_as_storage_spells_it(self):
+        nfd, nfc = unicodedata.normalize("NFD", "Pokémon"), unicodedata.normalize("NFC", "Pokémon")
+        self.put(f"{nfd}/a.zip", 1)
+        self.age()
+        self.update()
+        self.assertIn(nfd, os.listdir(self.root.name))  # stored decomposed, whichever spelling finds it
+        s3.write_file(f"{nfc}/b.zip", lambda tmp: open(tmp, "wb").write(b"1234"))
+        self.assertEqual(self.disk()[f"{nfd}/b.zip"], 4)
+        self.assertEqual(inventory.current().files, self.disk())
+        self.later()
+        self.assertEqual(self.update(), ((0, 0, 0), []))
+        self.assertEqual(inventory.current().files, self.disk())
+
+    def test_a_delete_under_another_spelling_of_the_name_drops_the_cached_file(self):
+        nfd, nfc = unicodedata.normalize("NFD", "Pokémon"), unicodedata.normalize("NFC", "Pokémon")
+        self.put(f"gba/{nfd}.zip", 4)
+        self.age()
+        self.update()
+        self.assertIn(f"{nfd}.zip", os.listdir(os.path.join(self.root.name, "gba")))
+        self.assertEqual(quiet(s3.delete_keys, [f"gba/{nfc}.zip"])[0], [])
+        self.assertEqual(self.disk(), {"gba/a.zip": 1, "gba/b.zip": 2, "BIOS/x.bin": 3})
+        self.assertEqual(inventory.current().files, self.disk())
+        self.later()
+        self.assertEqual(self.update(), ((0, 0, 0), []))
+        self.assertEqual(inventory.current().files, self.disk())
+
+    def test_a_move_under_another_spelling_of_the_names_moves_the_cached_file(self):
+        nfd, nfc = unicodedata.normalize("NFD", "Pokémon"), unicodedata.normalize("NFC", "Pokémon")
+        self.put(f"{nfd}/a.zip", 1)
+        self.put(f"gba/{nfd}.zip", 4)
+        self.age()
+        self.update()
+        self.assertIn(nfd, os.listdir(self.root.name))
+        self.assertIn(f"{nfd}.zip", os.listdir(os.path.join(self.root.name, "gba")))
+        self.assertEqual(quiet(s3.move_keys, [(f"gba/{nfc}.zip", f"{nfc}/m.zip")])[0], 0)
+        self.assertEqual(self.disk()[f"{nfd}/m.zip"], 4)
+        self.assertEqual(inventory.current().files, self.disk())
+        self.later()
+        self.assertEqual(self.update(), ((0, 0, 0), []))
+        self.assertEqual(inventory.current().files, self.disk())
+
+    def test_a_key_the_cache_cannot_match_leaves_its_folder_untrusted(self):
+        nfc = unicodedata.normalize("NFC", "Pokémon")
+        self.update()
+        s3.write_file(f"gba/{nfc}.zip", lambda tmp: open(tmp, "wb").write(b"1234"))  # a share may list it decomposed
+        self.put("BIOS/y.bin", 5)
+        self.age()  # another machine's write, in the same mtime tick as the cached one
+        quiet(s3.delete_keys, ["BIOS/y.bin"])
+        self.assertIsNone(inventory.current().dirs["gba"])
+        self.assertIsNone(inventory.current().dirs["BIOS"])
+        self.later()
+        self.assertEqual(self.update(), ((0, 0, 0), ["BIOS", "gba"]))
+        self.assertEqual(inventory.current().files, self.disk())
+
     def test_a_write_into_a_new_folder_drops_the_nearest_known_folder_mtime(self):
         self.update()
         inventory.wrote("gba/new/sub/z.zip", 9)
