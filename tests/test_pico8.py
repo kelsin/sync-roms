@@ -62,19 +62,25 @@ class Pico8(helpers.StorageDir):
     def test_recorded_name_skips_copy(self):
         self.put(f"os/pico8/{NEW}")
         store.update_card("c", pico8=NEW)
-        zip_path = self.card_path("roms", "pico8", NEW)
-        os.makedirs(os.path.dirname(zip_path))
-        open(zip_path, "wb").close()
-        self.assertEqual(self.run_setup("knulli"), "")
-        self.assertEqual(os.path.getsize(zip_path), 0)
+        self.run_setup("knulli")
+        self.assertFalse(os.path.exists(self.card_path("roms", "pico8", NEW)))
 
-    def test_recorded_zip_missing_from_the_card_is_copied_again(self):
+    def test_layout_change_puts_the_zip_where_the_new_layout_looks(self):
         self.put(f"os/pico8/{NEW}")
+        store.save_card("c", None, "esde")
         self.run_setup("esde")
-        self.assertTrue(os.path.isfile(self.card_path("PICO-8", NEW)))
-        self.run_setup("knulli")  # the card's layout changed: its pico8 field still names the zip
+        self.assertEqual(self.recorded(), NEW)
+        store.save_card("c", None, "knulli")
+        self.assertIsNone(self.recorded())
+        self.run_setup("knulli")
         self.assertTrue(os.path.isfile(self.card_path("roms", "pico8", NEW)))
-        self.assertTrue(os.path.isfile(self.card_path("PICO-8", NEW)))
+        self.assertEqual(self.recorded(), NEW)
+
+    def test_device_change_and_same_layout_keep_the_record(self):
+        store.update_card("c", device="full", layout="knulli", pico8=NEW)
+        store.save_card("c", {"id": "x"}, "knulli")
+        self.assertEqual(store.load_cards()["c"], {"device": "x", "layout": "knulli", "pico8": NEW})
+        store.update_card("c", device="y")
         self.assertEqual(self.recorded(), NEW)
 
     def test_newer_zip_replaces_old(self):

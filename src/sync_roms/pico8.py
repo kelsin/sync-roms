@@ -58,8 +58,7 @@ def _extract(key, size, folder, layout_name):
 
 
 def run(card, layout_name, base, dry_run, wrote=None):
-    """Put the newest PICO-8 zip on the card the way its layout installs it, once per zip (again when it is missing
-    from the card). The failure count.
+    """Put the newest PICO-8 zip on the card the way its layout installs it, once per zip. The failure count.
     wrote, a list, gets the card path of what was put there."""
     if layout_name not in TARGETS:
         return 0
@@ -75,7 +74,7 @@ def run(card, layout_name, base, dry_run, wrote=None):
     if kind == "extract":
         missing = any(not os.path.isfile(os.path.join(target, os.path.basename(m))) for m in members(layout_name))
     else:
-        missing = not os.path.isfile(target)
+        missing = False
     if old == name and not missing:
         return 0
     old_path = _path(base, layout_name, old)[1] if old and old != name and kind == "zip" else None
