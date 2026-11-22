@@ -193,6 +193,31 @@ class SyncSmokeTest(RealDataDirGuard):
         self.assertEqual(sum("1 system(s) have no NextUI folder" in x for x in lines), 1)
         self.assertEqual(synced, [["gba"]])
 
+    def test_the_systems_synced_are_those_the_device_runs_that_have_a_folder_by_name(self):
+        """In a dry run (the systems as first read) and a real one (read again once the card's games are saved). The
+        skipped count leaves out a system the device doesn't run."""
+        def system(name, bucket, folder):
+            return {"name": name, "bucket": bucket, "folders": {"nextui": folder}, "bios": {"files": []},
+                    "games": [{"bucket": f"{bucket}/Game.zip"}]}
+        systems = [system("Zeta", "zeta", "Zeta (Z)"), system("Game Boy Advance", "gba", "Game Boy Advance (GBA)"),
+                   system("Nintendo 64", "n64", None), system("Super Nintendo", "snes", None),
+                   system("Arcade", "fbneo", "Arcade (FBN)")]
+        device = {"id": "dev", "name": "Dev", "systems": ["zeta", "gba", "n64"], "note": ""}
+        for dry_run in (True, False):
+            with self.subTest(dry_run=dry_run):
+                manifest = {"systems": list(systems), "devices": [device],
+                            "layouts": {"nextui": {"label": "NextUI", "roms_dir": "Roms", "bios_dir": "Bios"}}}
+                lines, synced = [], []
+                patches = ((store, {"load_manifest": lambda names=(): manifest}),
+                           (cli.picker, {"saved_setup": lambda *a: (device, "nextui")}),
+                           (cli.surprise, {"fill_surprises": lambda card, setup, chosen, dry_run: synced.append(
+                               [s["bucket"] for s in chosen]) or []}),
+                           (cli.ui, {"dim": lambda text: lines.append(text) or text}))
+                self.assertEqual(self.run_sync(dry_run, patches=patches), 0)
+                self.assertEqual([x for x in lines if "system(s) have no" in x],
+                                 ["  1 system(s) have no NextUI folder and are skipped"])
+                self.assertEqual(synced, [["gba", "zeta"]])
+
     def test_nextui_bios_goes_in_per_tag_folders(self):
         """Each BIOS file lands in Bios/<TAG>/ for the system's tag and its extra tags; subpaths are kept; ROM files stay put."""
         gba = {**SYSTEM, "folders": {"nextui": "Game Boy Advance (GBA)"}, "nextui_bios_tags": ["MGBA"],
@@ -633,6 +658,25 @@ class SyncSmokeTest(RealDataDirGuard):
                    (cli.ui, {"choose": lambda q, *a, **k: asked.append(q) or "n"}))
         self.run_sync(False, prepare=prepare, patches=patches)
         self.assertEqual([q for q in asked if q.startswith("Delete these")], ["Delete these 1 local file(s) (0 B)?"])
+
+    def test_the_stale_media_check_gets_every_system_by_name_only_when_the_card_syncs_them_all(self):
+        """The check reads the manifest's own list of systems: a card that syncs all of them has it in name order, any
+        other card in the manifest's order."""
+        zeta = {"name": "Zeta", "bucket": "zeta", "folders": {"esde": "zeta"}, "bios": {"files": []}, "games": []}
+        n64 = {"name": "Nintendo 64", "bucket": "n64", "folders": {}, "bios": {"files": []}, "games": []}
+        device = {"id": "dev", "name": "Dev", "systems": ["zeta", "gba"], "note": ""}
+        for systems, setup, want in (([zeta, SYSTEM], None, ["gba", "zeta"]),
+                                     ([zeta, SYSTEM, n64], None, ["zeta", "gba", "n64"]),
+                                     ([zeta, SYSTEM], device, ["zeta", "gba"])):
+            for dry_run in (True, False):
+                with self.subTest(systems=len(systems), device=bool(setup), dry_run=dry_run):
+                    manifest, seen = {**MANIFEST, "systems": list(systems), "devices": [device]}, []
+                    patches = ((store, {"load_manifest": lambda names=(): manifest}),
+                               (cli.picker, {"saved_setup": lambda *a: (setup, "esde")}),
+                               (scrape_plan, {"stale_media": lambda layout, all_systems, *a: seen.append(
+                                   [s["bucket"] for s in all_systems]) or []}))
+                    self.assertEqual(self.run_sync(dry_run, patches=patches), 0)
+                    self.assertEqual(seen, [want])
 
     def card_rom(self, rel, size):
         """A prepare that puts a file of size bytes at ROMs/rel on the card, keeping the card's path in self.card."""

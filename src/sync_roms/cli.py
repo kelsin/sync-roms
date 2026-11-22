@@ -939,25 +939,22 @@ def sync_card(args):
             print(ui.dim(f"  📦 {'would rename' if args.dry_run else 'Renamed'} {old} → {new}"))
         cardfs.clear()
     clean_card = not args.dry_run and not args.no_clean
+
+    def synced(all_systems):
+        """The systems of all_systems this card syncs, by name: its device runs them and its layout has a folder for them."""
+        return sorted((s for s in all_systems if store.system_applies(s, device, layout_name)), key=lambda s: s["name"].lower())
+
     dropped = []  # systems the device no longer lists: whatever they left on the card is unwanted
     if device:
-        wanted_ids = set(device["systems"])
-        dropped = [s for s in systems if s["bucket"] not in wanted_ids]
-        systems = [s for s in systems if s["bucket"] in wanted_ids]
+        dropped = [s for s in systems if s["bucket"] not in device["systems"]]
         if device["note"]:
             print(ui.dim(f"  {device['name']}: {device['note']}"))
-    unsupported = [s for s in systems if not s["folders"].get(layout_name)]
+    unsupported = len(systems) - len(dropped) - len(synced(systems))  # of the systems the device runs
     if unsupported:
-        systems = [s for s in systems if s["folders"].get(layout_name)]
-        print(ui.dim(f"  {len(unsupported)} system(s) have no {layout['label']} folder and are skipped"))
-    systems.sort(key=lambda s: s["name"].lower())
-
-    def reload_systems():
-        """The systems this card syncs, with the card's games as they are saved now."""
-        fresh = store.load_manifest([card])["systems"]
-        if device:
-            fresh = [s for s in fresh if s["bucket"] in wanted_ids]
-        return sorted((s for s in fresh if s["folders"].get(layout_name)), key=lambda s: s["name"].lower())
+        print(ui.dim(f"  {unsupported} system(s) have no {layout['label']} folder and are skipped"))
+    systems = synced(systems)
+    if not device and not unsupported:  # as it always was: a card that syncs every system has the manifest's own list,
+        manifest["systems"] = systems  # which the stale-media check reads, in name order too
 
     print("📏 Reading ROM sizes...")
     listings = {}  # {system id: {key: size}}, kept until the system's games change
@@ -1041,7 +1038,7 @@ def sync_card(args):
         def picks(s):
             return s.get("full_system"), store.listed(s)
         before = {s["bucket"]: picks(s) for s in systems}
-        systems = reload_systems()
+        systems = synced(store.load_manifest([card])["systems"])  # with the card's games as they are saved now
         changed = [s["bucket"] for s in systems if picks(s) != before.get(s["bucket"])]
         if changed and runtime._mirror_root:  # the new picks reach the mirror before they are copied from it
             root = runtime._mirror_root
