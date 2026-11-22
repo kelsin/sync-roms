@@ -50,10 +50,11 @@ class NextUIDataTest(unittest.TestCase):
         got = {b: s["nextui_bios_tags"] for b, s in by_bucket.items() if "nextui_bios_tags" in s}
         self.assertEqual(got, {"gba": ["MGBA"], "snes": ["SUPA"]})
 
-    def test_the_sp_devices_default_to_nextui_then_knulli(self):
+    def test_the_sp_devices_default_to_nextui(self):
         devices = {d["id"]: d for d in store.repo_json("devices")}
         for id in ("anbernic-rg-sp", "anbernic-rg34xx-sp"):
-            self.assertEqual(devices[id]["firmwares"][:2], ["nextui", "knulli"], id)
+            self.assertEqual(devices[id]["firmwares"][0], "nextui", id)
+        self.assertEqual(devices["anbernic-rg34xx-sp"]["firmwares"][1], "knulli")
 
     def test_layout(self):
         layout = store.repo_json("layouts")["nextui"]

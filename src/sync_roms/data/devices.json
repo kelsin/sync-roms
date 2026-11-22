@@ -17,7 +17,8 @@
       "knulli",
       "muos",
       "rocknix",
-      "nextui"
+      "nextui",
+      "spruce"
     ],
     "rocknix_image": "H700"
   },
@@ -61,9 +62,9 @@
     "screen": "3:2",
     "firmwares": [
       "nextui",
-      "knulli",
       "muos",
-      "rocknix"
+      "rocknix",
+      "spruce"
     ],
     "rocknix_image": "H700"
   },
@@ -91,7 +92,6 @@
     "soc": "Rockchip RK3576",
     "screen": "16:9",
     "firmwares": [
-      "knulli",
       "muos",
       "rocknix"
     ],
@@ -106,7 +106,8 @@
       "knulli",
       "muos",
       "rocknix",
-      "nextui"
+      "nextui",
+      "spruce"
     ],
     "rocknix_image": "H700",
     "network": false
@@ -120,7 +121,8 @@
       "knulli",
       "muos",
       "rocknix",
-      "nextui"
+      "nextui",
+      "spruce"
     ],
     "rocknix_image": "H700"
   },
@@ -133,7 +135,8 @@
       "nextui",
       "knulli",
       "muos",
-      "rocknix"
+      "rocknix",
+      "spruce"
     ],
     "rocknix_image": "H700"
   },
@@ -168,7 +171,8 @@
       "knulli",
       "muos",
       "rocknix",
-      "nextui"
+      "nextui",
+      "spruce"
     ],
     "rocknix_image": "H700",
     "network": false
@@ -182,7 +186,8 @@
       "knulli",
       "muos",
       "rocknix",
-      "nextui"
+      "nextui",
+      "spruce"
     ],
     "rocknix_image": "H700"
   },
@@ -195,7 +200,8 @@
       "knulli",
       "muos",
       "rocknix",
-      "nextui"
+      "nextui",
+      "spruce"
     ],
     "rocknix_image": "H700"
   },
@@ -208,7 +214,8 @@
       "knulli",
       "muos",
       "rocknix",
-      "nextui"
+      "nextui",
+      "spruce"
     ],
     "rocknix_image": "H700"
   },
@@ -221,7 +228,8 @@
       "knulli",
       "muos",
       "rocknix",
-      "nextui"
+      "nextui",
+      "spruce"
     ],
     "rocknix_image": "H700"
   },
@@ -270,7 +278,8 @@
       "knulli",
       "muos",
       "rocknix",
-      "nextui"
+      "nextui",
+      "spruce"
     ],
     "rocknix_image": "H700"
   },
@@ -283,7 +292,8 @@
       "knulli",
       "muos",
       "rocknix",
-      "nextui"
+      "nextui",
+      "spruce"
     ],
     "rocknix_image": "H700"
   },

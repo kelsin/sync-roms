@@ -424,7 +424,7 @@ class ConvertCommandTest(unittest.TestCase):
         self.addCleanup(patch.stop)
         self.base = os.path.join(root, "SD")
         os.makedirs(self.base)
-        self.set_card({"device": "anbernic-rg-sp", "layout": "knulli"})
+        self.set_card({"device": "anbernic-rg34xx-sp", "layout": "knulli"})
         touch(os.path.join(self.base, "roms", "gba", "Game.zip"))
         self.out, self.err = io.StringIO(), io.StringIO()
         self.redirect = contextlib.redirect_stdout
@@ -479,7 +479,7 @@ class ConvertCommandTest(unittest.TestCase):
             return convert.clean_command(args)
 
     def test_clean_deletes_other_layouts_media_only(self):
-        self.set_card({"device": "anbernic-rg-sp", "layout": "nextui"})
+        self.set_card({"device": "anbernic-rg34xx-sp", "layout": "nextui"})
         touch(os.path.join(self.base, "Roms", "Game Boy Advance (GBA)", "Game.zip"))
         touch(os.path.join(self.base, "Roms", "Game Boy Advance (GBA)", ".media", "Game.png"))
         for f in ("gamelist.xml", "images/a.png", "videos/a.mp4"):
