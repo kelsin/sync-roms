@@ -324,11 +324,8 @@ def edit_card(name, setup=None, to_fetch=None, card_match=None):
         if i is None:
             return
         if isinstance(i, tuple):
-            key, pos = i
-            if key == FULL_KEY:
-                toggle_full(name, systems[pos]["bucket"])
-                changed = systems[pos]
-            elif key == ALL_KEY:
+            key, pos = i  # never f: on_hotkey takes it
+            if key == ALL_KEY:
                 edit_all(name, setup, systems, to_fetch, usages)
                 changed = ALL
             elif key == SET_KEY:
