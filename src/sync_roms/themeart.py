@@ -1,5 +1,5 @@
-"""Art Book Next artwork for custom collections (Surprise and the ones given art) and sets on ES-DE, Knulli and EmuDeck
-cards."""
+"""Art Book Next artwork for custom collections (Surprise and the ones given art) and sets on ES-DE, Knulli, EmuDeck,
+muOS, ROCKNIX and Spruce cards."""
 import functools
 import json
 import unicodedata
@@ -89,11 +89,12 @@ def collection_emoji(collection):
     return art_emoji(collection.get("art"))
 
 
-def art_png(art_id):
-    """The artwork file for art_id, or None when there is none."""
+def art_png(art_id, folder="art"):
+    """The artwork file for art_id (in art/, or art-spruce/ for Spruce's square pictures), or None when there is
+    none."""
     if art_id != SURPRISE_ART and art_id not in art_choices():
         return None
-    return os.path.join(THEME_DATA, "art", f"{art_id}.png")
+    return os.path.join(THEME_DATA, folder, f"{art_id}.png")
 
 
 def logo_svg(text):
@@ -148,10 +149,10 @@ def usable(layout_name, arts):
     """The {collection name: art png} of arts ({name: art id}) that can be installed, warning about the rest."""
     out, taken = {}, set()
     for name, art_id in sorted(arts.items()):
-        png = art_png(art_id)
+        png = art_png(art_id, "art-spruce" if layout_name == "spruce" else "art")
         if not png:
             ui.warn(f"{name}: there is no theme art called {art_id!r}; skipped")
-        elif name.lower() in _reserved(layout_name) or name.lower().startswith("auto-"):
+        elif layout_name != "spruce" and (name.lower() in _reserved(layout_name) or name.lower().startswith("auto-")):
             ui.warn(f"{name}: a collection named like a system or a built-in collection can't have its own theme art")
         elif name.lower() in taken:  # cards ignore case, and ES-DE themes a collection by its name in lower case
             ui.warn(f"{name}: another collection with this name in other capitals already has theme art; skipped")
@@ -419,12 +420,46 @@ def describe_rocknix(arts):
         print(ui.dim(f"🎨 would add art for {', '.join(arts)} to {rocknix_collections.ART_DIR.replace(os.sep, '/')}/"))
 
 
-def install(layout_name, base, arts):
+# --- Spruce --------------------------------------------------------------------------------------------------------
+
+SPRUCE_DIR = os.path.join("Collections", "Imgs")  # PyUI shows Imgs/<collection name>.png
+
+
+def _spruce_stale(base, arts, owned):
+    """The Imgs files of the collections sync-roms owns (owned) that have no art in arts any more."""
+    paths = (os.path.join(base, SPRUCE_DIR, f"{name}.png") for name in dict.fromkeys(owned) if name not in arts)
+    return [p for p in paths if os.path.exists(p)]
+
+
+def install_spruce(base, arts, owned):
+    """Put the collections' art ({name: art png}) in Collections/Imgs/ and remove the picture of each collection in owned
+    that has none now. Other files there are left alone. Returns whether files changed."""
+    changed = False
+    for name, png in arts.items():
+        with open(png, "rb") as f:
+            changed |= _put(os.path.join(base, SPRUCE_DIR, f"{name}.png"), f.read())
+    for path in _spruce_stale(base, arts, owned):
+        os.remove(path)
+        changed = True
+    return changed
+
+
+def describe_spruce(base, arts, owned):
+    if arts:
+        print(ui.dim(f"🎨 would add art for {', '.join(arts)} to {SPRUCE_DIR.replace(os.sep, '/')}/"))
+    for path in _spruce_stale(base, arts, owned):
+        print(ui.dim(f"🎨 would remove {os.path.relpath(path, base).replace(os.sep, '/')}"))
+
+
+def install(layout_name, base, arts, owned=()):
     """Give the custom collections in arts ({name: art id}) their art in the frontend's theme. Returns whether files
-    changed. NextUI has no theme to put it in."""
+    changed. NextUI has no theme to put it in. owned (Spruce only): the collections sync-roms writes, whose art is
+    removed when they have none."""
     if layout_name == "nextui":
         return False
     arts = usable(layout_name, arts)
+    if layout_name == "spruce":
+        return install_spruce(base, arts, owned)
     if layout_name == "muos":
         return muos_collections.install_art(base, arts)
     if layout_name == "rocknix":
@@ -432,10 +467,12 @@ def install(layout_name, base, arts):
     return install_esde(layout_name, base, arts) if layout_name in frontend.ESDE_LAYOUTS else install_knulli(base, arts)
 
 
-def describe(layout_name, base, arts):
+def describe(layout_name, base, arts, owned=()):
     if layout_name == "nextui":
         return
     arts = usable(layout_name, arts)
+    if layout_name == "spruce":
+        return describe_spruce(base, arts, owned)
     if layout_name == "muos":
         return muos_collections.describe_art(base, arts)
     if layout_name == "rocknix":

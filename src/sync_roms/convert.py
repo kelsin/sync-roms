@@ -2,9 +2,10 @@
 import os
 import shutil
 
-from sync_roms import commands, downloads, frontend, m3u, picker, saves, scrape_plan, store, ui
+from sync_roms import commands, downloads, frontend, m3u, muos_saves, picker, saves, scrape_plan, store, ui
 
 PLAYLIST_NOTE = "playlist paths differ between layouts; sync rewrites it"
+PICKLES_NOTE = "muOS uses Pickles' saves and states, not RetroArch's; left in place"
 
 
 def _listed(path):
@@ -163,8 +164,12 @@ def plan_saves(base, systems, old_name, old, new_name, new, rom_moves=()):
     (a MinUI save renamed to or from its ROM's file name). Plan it before the ROM moves are applied, passing them as
     rom_moves: the old layout's ROMs say which games are on the card, and the moves give the new layout's ROM file
     names. Files whose game has no ROM on the card are left alone; so are those the new layout can't place (no core,
-    no folder) or can't name (several ROMs share the name), which are reported."""
-    games, _ = saves.scan(base, old_name, old, systems)
+    no folder) or can't name (several ROMs share the name), which are reported. muOS uses Pickles' files, which aren't
+    RetroArch's: a convert to or from it moves none, and reports the old layout's."""
+    pickles = "pickles" in old, "pickles" in new
+    if all(pickles):
+        return [], []
+    games, _ = muos_saves.scan(base, old, systems) if pickles[0] else saves.scan(base, old_name, old, systems)
     stems = saves.rom_stems(base, old_name, old, systems)
     by_bucket = {s["bucket"]: s for s in systems}
     minui = new.get("save_naming") == "minui"
@@ -177,6 +182,9 @@ def plan_saves(base, systems, old_name, old, new_name, new, rom_moves=()):
         for e in entries:
             kind, name = ("save" if e["kind"] == "save" else "state"), e["name"]
             label = f"{bucket}/{name}"
+            if any(pickles):
+                skipped.append((os.path.relpath(e["path"], base), PICKLES_NOTE))
+                continue
             try:
                 folder = saves.target_dir(base, new_name, new, system, kind, e["core"])
             except ValueError as err:

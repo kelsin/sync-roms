@@ -296,6 +296,36 @@ class RocknixSavesTest(ConvertTest):
         self.assertEqual(moves, [(self.p("roms", "pico-8", "cart.p8.png"), self.p("Roms", "PICO", "cart.p8.png"))])
 
 
+class MuosSavesTest(ConvertTest):
+    """muOS uses Pickles' saves and states, not RetroArch's: a convert to or from it leaves both kinds in place."""
+    M = {"roms_dir": "ROMS", "bios_dir": "MUOS/bios", "pickles": {"dir": "MUOS/pickles"}}
+    SYSTEMS = [{**SYSTEMS[0], "folders": {**SYSTEMS[0]["folders"], "muos": "gba"}}]
+
+    def test_knulli_to_muos_leaves_retroarch_files_and_reports_them(self):
+        for name in ("Game.srm", "Game.state", "Old.srm"):
+            touch(self.p("saves", "gba", name))
+        touch(self.p("roms", "gba", "Game.gba"))
+        moves, skipped = convert.plan_saves(self.base, self.SYSTEMS, "knulli", K, "muos", self.M)
+        self.assertEqual(moves, [])
+        self.assertEqual(skipped, [(os.path.join("saves", "gba", name), convert.PICKLES_NOTE)
+                                   for name in ("Game.srm", "Game.state")])
+
+    def test_muos_to_knulli_leaves_pickles_files_and_reports_them(self):
+        files = [("sram", "mGBA", "gba", "Game.srm"), ("state", "mGBA", "gba", "Game", "slot_1.state"),
+                 ("state", "mGBA", "gba", "Game", "states.ini")]
+        for parts in files + [("sram", "mGBA", "gba", "Old.srm")]:
+            touch(self.p("MUOS", "pickles", *parts))
+        touch(self.p("ROMS", "gba", "Game.gba"))
+        moves, skipped = convert.plan_saves(self.base, self.SYSTEMS, "muos", self.M, "knulli", K)
+        self.assertEqual(moves, [])
+        self.assertEqual(skipped, [(os.path.join("MUOS", "pickles", *parts), convert.PICKLES_NOTE) for parts in files])
+
+    def test_muos_to_muos_plans_nothing(self):
+        touch(self.p("MUOS", "pickles", "sram", "mGBA", "gba", "Game.srm"))
+        touch(self.p("ROMS", "gba", "Game.gba"))
+        self.assertEqual(convert.plan_saves(self.base, self.SYSTEMS, "muos", self.M, "muos", self.M), ([], []))
+
+
 class FixesTest(ConvertTest):
     def test_frontend_metadata_is_not_moved_and_is_listed(self):
         for f in ("Game.zip", "gamelist.xml", "images/a.png", "videos/a.mp4", "Game.zip.part"):
@@ -495,6 +525,30 @@ class ConvertCommandTest(unittest.TestCase):
         touch(os.path.join(self.base, "saves", "gba", "Game.srm"))
         self.assertEqual(self.run_cmd(), 0)
         self.assertTrue(os.path.exists(os.path.join(self.base, "Saves", "GBA", "Game.zip.sav")))
+
+    def test_to_muos_leaves_retroarch_saves_and_says_so(self):
+        save = os.path.join(self.base, "saves", "gba", "Game.srm")
+        touch(save)
+        self.assertEqual(self.run_cmd(layout="muos"), 0)
+        self.assertTrue(os.path.exists(save))
+        self.assertIn("ROMS", os.listdir(self.base))
+        self.assertEqual(self.layout(), "muos")
+        self.assertIn(f"{os.path.join('saves', 'gba', 'Game.srm')} ", self.out.getvalue())
+        self.assertIn(convert.PICKLES_NOTE, self.out.getvalue())
+
+    def test_from_muos_leaves_pickles_saves_and_says_so(self):
+        import shutil
+        shutil.rmtree(os.path.join(self.base, "roms"))
+        self.set_card({"device": "anbernic-rg34xx-sp", "layout": "muos"})
+        touch(os.path.join(self.base, "ROMS", "gba", "Game.zip"))
+        save = os.path.join(self.base, "MUOS", "pickles", "sram", "mGBA", "gba", "Game.srm")
+        touch(save)
+        self.assertEqual(self.run_cmd(layout="knulli"), 0)
+        self.assertTrue(os.path.exists(save))
+        self.assertIn("roms", os.listdir(self.base))
+        self.assertEqual(self.layout(), "knulli")
+        self.assertIn(f"{os.path.relpath(save, self.base)} ", self.out.getvalue())
+        self.assertIn(convert.PICKLES_NOTE, self.out.getvalue())
 
     def test_unsupported_layout_fails(self):
         self.assertEqual(self.run_cmd(layout="windows-pc-nope"), 2)
