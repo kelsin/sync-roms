@@ -99,6 +99,62 @@ class ChdTest(unittest.TestCase):
             self.assertIsNone(chd.chd_image(self.tools, CD["chd"], image, owned))
         self.assertEqual(self.files(), ["Game.chd", "out.cue"])
 
+    def test_cue_with_a_single_quoted_file_name_owns_its_track(self):
+        self.touch("Game.cue", text="FILE 'a b.bin' BINARY\n  TRACK 01 MODE2/2352\n  FILE 'It said \"hi\".bin' BINARY\n")
+        self.touch("out.cue", text="FILE '../secret.bin' BINARY\n")
+        self.touch("a b.bin", 'It said "hi".bin', "'a")
+        self.assertEqual(chd.sheet_tracks(os.path.join(self.dir, "Game.cue")), ["a b.bin", 'It said "hi".bin'])
+        paths = [os.path.join(self.dir, n) for n in ("'a", "Game.cue", "a b.bin", 'It said "hi".bin', "out.cue")]
+        skipped = []
+        (image, owned), = chd.disc_images(paths, skipped=skipped)
+        self.assertEqual(skipped, [paths[4]])
+        with mock.patch.object(external, "run_tool", FakeTools()):
+            self.assertIsNone(chd.chd_image(self.tools, CD["chd"], image, owned))
+        self.assertEqual(self.files(), ["'a", "Game.chd", "out.cue"])
+        self.touch("mixed.cue", text="FILE \"It's.bin\" BINARY\nFILE It's.bin BINARY\n")
+        self.assertEqual(chd.sheet_tracks(os.path.join(self.dir, "mixed.cue")), ["It's.bin", "It's.bin"])
+
+    def test_only_a_line_that_starts_with_a_file_command_names_a_track(self):
+        sheet = os.path.join(self.dir, "s.cue")
+        for text in ('TITLE "Profile \'x.bin\'"\n', 'TITLE \'Profile "x.bin"\'\n', 'REM COMMENT "see file \'x.bin\'"\n',
+                     'REM see file "x.bin"\n', "REM see file 'x.bin'\n", "REM FILE x.bin BINARY\n",
+                     'PERFORMER "Rank and File \'x.bin\'"\n', 'PERFORMER \'Rank and File "x.bin"\'\n',
+                     '  TITLE "datafile \'x.bin\'"\n', '\tREM audiofile "x.bin"\n'):
+            for lines in (text, text.replace("\n", "\r\n"), "﻿" + text):
+                self.touch("s.cue", text=lines + "FILE a.bin BINARY\n")
+                self.assertEqual(chd.sheet_tracks(sheet), ["a.bin"], lines)
+        self.touch("s.cue", text='FILE "a\nb.bin" BINARY\nFILE \'c\nd.bin\' BINARY\nFILE "e.bin" BINARY\n')
+        self.assertEqual(chd.sheet_tracks(sheet), ["e.bin"])  # a quoted name never runs over a line end
+
+    def test_a_file_named_in_a_title_or_comment_is_not_deleted(self):
+        self.touch("Game.cue", text='TITLE "Profile \'x.bin\'"\nREM COMMENT "see file \'y.bin\'"\nREM see file "z.bin"\n'
+                                    "FILE 'a b.bin' BINARY\n  TRACK 01 MODE2/2352\n")
+        self.touch("a b.bin", "x.bin", "y.bin", "z.bin")
+        paths = [os.path.join(self.dir, n) for n in ("Game.cue", "a b.bin", "x.bin", "y.bin", "z.bin")]
+        (image, owned), = chd.disc_images(paths)
+        self.assertEqual(owned, paths[:2])
+        with mock.patch.object(external, "run_tool", FakeTools()):
+            self.assertIsNone(chd.chd_image(self.tools, CD["chd"], image, owned))
+        self.assertEqual(self.files(), ["Game.chd", "x.bin", "y.bin", "z.bin"])
+
+    def test_sheet_file_lines_read_with_tabs_crlf_and_a_bom(self):
+        sheet = os.path.join(self.dir, "s.cue")
+        for line, name in (('FILE "a b.bin" BINARY', "a b.bin"), ("FILE 'a b.bin' BINARY", "a b.bin"), ("FILE a.bin BINARY", "a.bin"),
+                           ('file "a.bin" binary', "a.bin"), ('FILE "It\'s.bin" BINARY', "It's.bin"),
+                           ("FILE 'Say \"hi\".bin' BINARY", 'Say "hi".bin'), ("FILE It's.bin BINARY", "It's.bin")):
+            for text in (line + "\n", "\t" + line + "\n", " \t " + line + "\n", line + "\r\n  TRACK 01 AUDIO\r\n",
+                         "﻿" + line + "\n", "﻿\t" + line + "\r\n", "REM x\n\n" + line + "\n"):
+                self.touch("s.cue", text=text + '  FILE "last.bin" BINARY\n')
+                self.assertEqual(chd.sheet_tracks(sheet), [name, "last.bin"], text)
+        self.touch("s.toc", text='CD_ROM\n\nTRACK MODE1_RAW\nDATAFILE "d.bin"\n\nTRACK AUDIO\nAUDIOFILE "a.bin" 0 02:00:00\n'
+                                 'TRACK AUDIO\nFILE "f.bin" 0\n\tDATAFILE "g.bin" 00:00:00 // length\n')
+        self.assertEqual(chd.sheet_tracks(os.path.join(self.dir, "s.toc")), ["d.bin", "a.bin", "f.bin", "g.bin"])
+        for bad in ("'../x.bin'", '"../x.bin"', "../x.bin", "'/abs/x.bin'", '"/abs/x.bin"', "/abs/x.bin", "'sub\\x.bin'"):
+            self.touch("s.cue", text=f"FILE {bad} BINARY\n")
+            skipped = []
+            self.assertEqual(chd.disc_images([sheet], skipped=skipped), [], bad)
+            self.assertEqual(skipped, [sheet], bad)
+
     def test_plan_finds_system_from_folder_names(self):
         folders = {"psx": CD, "gc": EXTRACT}
         self.touch("roms/psx/A.zip", "roms/psx/B.cue", "roms/psx/B (Track 1).bin", "roms/gc/C.7z", "roms/gc/D.iso",
