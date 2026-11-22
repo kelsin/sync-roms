@@ -10,7 +10,7 @@ from concurrent.futures import ThreadPoolExecutor
 from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError
 
 from . import __version__, budget, cardedit, cardfs, clean, commands, downloads, drivers, edit, external, frontend, inventory, m3u, mirroring, picker, runtime, s3, scrape_plan, store
-from . import muos_collections, nextui_folders, onion_surprise, pico8, raofflineproxy, rocknix_collections, saves, spruce_collections, spruce_emu, spruce_os, spruce_settings, surprise, themeart, ui, usersettings, vita
+from . import muos_collections, nextui_folders, onion_surprise, pico8, raofflineproxy, rocknix_collections, saves, spruce_collections, spruce_emu, spruce_os, spruce_settings, spruce_theme_fix, surprise, themeart, ui, usersettings, vita
 from . import collections as colls
 
 
@@ -1480,6 +1480,7 @@ def sync_card(args):
                 print(f"🧹 Media on the card for ROMs it doesn't have: {stale_count} file(s) to remove")
         frontend_step(True)
         spruce_emu_step(True)
+        spruce_theme_fix.install(layout_name, base, True)
         onion_surprise.write_list(card, layout_name, base, roms_dir, systems, True)
         plan_json["stale_media"] = stale_count
         plan_json["totals"] = {"files": len(todo_all), "bytes": total_bytes(todo_all), "delete": len(extras),
@@ -1577,6 +1578,11 @@ def sync_card(args):
     cardfs.clear()
     frontend_step(False)
     spruce_emu_step(False)
+    fixed = spruce_theme_fix.install(layout_name, base, False)
+    if fixed:
+        print(ui.green(f"🎨 Fixed the Famicom Disk System logo in {len(fixed)} Spruce theme(s)"))
+        if clean_card:
+            clean._clean_root = base
     if onion_surprise.write_list(card, layout_name, base, roms_dir, systems, False) and clean_card:
         clean._clean_root = base
     try:
