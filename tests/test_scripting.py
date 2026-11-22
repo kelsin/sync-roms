@@ -152,6 +152,16 @@ class LayoutsTest(Isolated):
         code, out, _ = self.run_layouts(["layouts", "onion", "--json"])
         self.assertEqual((code, json.loads(out)), (0, {"id": "onion", **self.LAYOUTS["onion"], "devices": ["dev-b"]}))
 
+    def test_json_may_come_before_the_command(self):
+        code, out, err = self.run_layouts(["--json", "layouts"])
+        self.assertEqual((code, err), (0, ""))
+        self.assertEqual((code, out, err), self.run_layouts(["layouts", "--json"]))
+        for argv in (["--json", "cards", "list"], ["--json", "cards"]):
+            with self.subTest(argv=argv):
+                code, out, err = self.sync(argv, {})
+                self.assertEqual((code, err), (0, ""))
+                self.assertEqual((code, out, err), self.sync(["cards", "list", "--json"], {}))
+
     def test_unknown_layout_is_a_usage_error(self):
         code, _, err = self.run_layouts(["layouts", "nope"])
         self.assertEqual(code, 2)

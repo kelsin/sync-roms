@@ -717,7 +717,7 @@ def sync(reset=True):
 
 def run(argv):
     lead = 0
-    while lead < len(argv) and argv[lead] in BOOL_FLAGS:
+    while lead < len(argv) and argv[lead] in BOOL_FLAGS | {"--json"}:
         lead += 1
     if lead < len(argv) and argv[lead] in commands.COMMANDS and argv[lead:lead + 2] not in (["games", "edit"], ["cards", "edit"]):
         cmd = argv[lead:] + argv[:lead]  # leading global flags go after the command, where its parser reads them
