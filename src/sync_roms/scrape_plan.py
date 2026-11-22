@@ -30,6 +30,15 @@ def metadata_key(system):
     return f"{SCRAPES}/{system}/metadata.json"
 
 
+def parse_metadata(text, key):
+    """The object in a metadata.json's text (key: the file, for the message). Raises ValueError if it isn't valid JSON
+    or isn't a JSON object."""
+    data = json.loads(text)
+    if not isinstance(data, dict):
+        raise ValueError(f"{key} isn't a JSON object")
+    return data
+
+
 def load_metadata(system, fresh=False):
     """A system's metadata.json from storage ({} when there is none), read through the local mirror when a sync has one,
     or with fresh from storage itself. Raises ValueError if it isn't a JSON object."""
@@ -42,10 +51,7 @@ def load_metadata(system, fresh=False):
         if not s3.missing(e):
             raise
         return {}
-    data = json.loads(text)
-    if not isinstance(data, dict):
-        raise ValueError(f"{key} isn't a JSON object")
-    return data
+    return parse_metadata(text, key)
 
 
 def dump_json(data):
@@ -309,7 +315,7 @@ def load_scrape_data(systems):
     for s, listing in zip(systems, listings):
         key = metadata_key(s["bucket"])
         try:
-            meta = json.loads(texts[key]) if key in texts else {}
+            meta = parse_metadata(texts[key], key) if key in texts else {}
         except ValueError:
             meta = {}
         data[s["bucket"]] = (listing, meta)

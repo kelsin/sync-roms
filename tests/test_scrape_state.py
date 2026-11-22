@@ -342,6 +342,36 @@ class CleanTest(unittest.TestCase):
         self.assertEqual((delete, rewrites, warnings), ([], [], []))
 
 
+class CleanBadMetadataTest(StorageDir):
+    """clean scrapes with a metadata.json that can't be used: the file is left alone, the system's media is still cleaned."""
+    META = "scrapes/gba/metadata.json"
+
+    def test_metadata_that_is_not_an_object_is_skipped_like_invalid_json(self):
+        self.put("gba/a.zip")
+        self.put("scrapes/gba/covers/a.png")
+        self.put("scrapes/gba/covers/gone.png")
+        inventory.reset()
+        self.addCleanup(inventory.reset)
+        for text in ("{nope", "[]", '["a.zip"]', '[{"name": "A"}]', "5", '"a.zip"', "null"):
+            with self.subTest(text=text):
+                self.put(self.META, text.encode())
+                out = io.StringIO()
+                with mock.patch.object(scrape_files.store, "load_manifest", return_value={"systems": [{"bucket": "gba"}]}), \
+                        contextlib.redirect_stdout(out):
+                    self.assertEqual(scrape_files.clean_scrapes(mock.Mock(dry_run=True)), 0)
+                self.assertIn(f"⚠️  {self.META} isn't valid JSON, skipped", out.getvalue())
+                self.assertIn("gba: 1 media file(s) (3 B), 0 metadata entries", out.getvalue())
+                self.assertIn("scrapes/gba/covers/gone.png", out.getvalue())
+
+    def test_plan_leaves_such_a_file_out_of_the_deletes_and_rewrites(self):
+        for text in ("{nope", "[]", '["a.zip"]', "5", '"a.zip"', "null"):
+            with self.subTest(text=text):
+                self.assertEqual(scrape_files.metadata_roms({self.META: text}), set())
+                delete, rewrites, per, warnings = scrape_files.plan_clean({self.META: 9}, {"gba": {"a.zip"}}, {self.META: text})
+                self.assertEqual((delete, rewrites, dict(per)), ([], [], {}))
+                self.assertEqual(warnings, [f"{self.META} isn't valid JSON, skipped"])
+
+
 class CleanStaleCacheTest(StorageDir):
     """--clean-scrapes with a storage cache built before another machine added gba/new.zip and scraped it."""
     META = "scrapes/gba/metadata.json"
