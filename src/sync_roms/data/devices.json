@@ -4,6 +4,7 @@
     "name": "Anbernic RG Cube",
     "soc": "UNISOC Tiger T820",
     "screen": "1:1",
+    "resolution": "720x720",
     "firmwares": [
       "esde"
     ]
@@ -13,6 +14,7 @@
     "name": "Anbernic RG CubeXX",
     "soc": "Allwinner H700",
     "screen": "1:1",
+    "resolution": "720x720",
     "firmwares": [
       "knulli",
       "muos",
@@ -27,7 +29,9 @@
     "name": "Anbernic RG DS",
     "soc": "Rockchip RK3568",
     "screen": "4:3",
+    "resolution": "640x480",
     "screen2": "4:3",
+    "resolution2": "640x480",
     "firmwares": [
       "esde",
       "rocknix"
@@ -39,7 +43,9 @@
     "name": "Anbernic RG DS Plus",
     "soc": "Rockchip RK3568",
     "screen": "4:3",
+    "resolution": "1024x768",
     "screen2": "4:3",
+    "resolution2": "1024x768",
     "firmwares": [
       "knulli",
       "rocknix"
@@ -51,6 +57,7 @@
     "name": "Anbernic RG Rotate",
     "soc": "UNISOC T618",
     "screen": "1:1",
+    "resolution": "720x720",
     "firmwares": [
       "esde"
     ]
@@ -60,6 +67,7 @@
     "name": "Anbernic RG SP",
     "soc": "Allwinner H700",
     "screen": "3:2",
+    "resolution": "720x480",
     "firmwares": [
       "nextui",
       "muos",
@@ -73,6 +81,7 @@
     "name": "Anbernic RG Slide",
     "soc": "UNISOC Tiger T820",
     "screen": "4:3",
+    "resolution": "1280x960",
     "firmwares": [
       "esde"
     ]
@@ -82,6 +91,7 @@
     "name": "Anbernic RG Vita",
     "soc": "UNISOC T618",
     "screen": "16:9",
+    "resolution": "1280x720",
     "firmwares": [
       "esde"
     ]
@@ -91,6 +101,7 @@
     "name": "Anbernic RG Vita Pro",
     "soc": "Rockchip RK3576",
     "screen": "16:9",
+    "resolution": "1920x1080",
     "firmwares": [
       "muos",
       "rocknix"
@@ -102,6 +113,7 @@
     "name": "Anbernic RG28XX",
     "soc": "Allwinner H700",
     "screen": "4:3",
+    "resolution": "640x480",
     "firmwares": [
       "knulli",
       "muos",
@@ -117,6 +129,7 @@
     "name": "Anbernic RG34XX",
     "soc": "Allwinner H700",
     "screen": "3:2",
+    "resolution": "720x480",
     "firmwares": [
       "knulli",
       "muos",
@@ -131,6 +144,7 @@
     "name": "Anbernic RG34XX SP",
     "soc": "Allwinner H700",
     "screen": "3:2",
+    "resolution": "720x480",
     "firmwares": [
       "nextui",
       "knulli",
@@ -145,6 +159,7 @@
     "name": "Anbernic RG353PS",
     "soc": "Rockchip RK3566",
     "screen": "4:3",
+    "resolution": "640x480",
     "firmwares": [
       "knulli",
       "rocknix"
@@ -156,6 +171,7 @@
     "name": "Anbernic RG353VS",
     "soc": "Rockchip RK3566",
     "screen": "4:3",
+    "resolution": "640x480",
     "firmwares": [
       "knulli",
       "rocknix"
@@ -167,6 +183,7 @@
     "name": "Anbernic RG35XX 2024",
     "soc": "Allwinner H700",
     "screen": "4:3",
+    "resolution": "640x480",
     "firmwares": [
       "knulli",
       "muos",
@@ -182,6 +199,7 @@
     "name": "Anbernic RG35XX H",
     "soc": "Allwinner H700",
     "screen": "4:3",
+    "resolution": "640x480",
     "firmwares": [
       "knulli",
       "muos",
@@ -196,6 +214,7 @@
     "name": "Anbernic RG35XX Plus",
     "soc": "Allwinner H700",
     "screen": "4:3",
+    "resolution": "640x480",
     "firmwares": [
       "knulli",
       "muos",
@@ -210,6 +229,7 @@
     "name": "Anbernic RG35XX Pro",
     "soc": "Allwinner H700",
     "screen": "4:3",
+    "resolution": "640x480",
     "firmwares": [
       "knulli",
       "muos",
@@ -224,6 +244,7 @@
     "name": "Anbernic RG35XX SP",
     "soc": "Allwinner H700",
     "screen": "4:3",
+    "resolution": "640x480",
     "firmwares": [
       "knulli",
       "muos",
@@ -238,6 +259,7 @@
     "name": "Anbernic RG405M",
     "soc": "UNISOC T618",
     "screen": "4:3",
+    "resolution": "640x480",
     "firmwares": [
       "esde"
     ]
@@ -247,6 +269,7 @@
     "name": "Anbernic RG405V",
     "soc": "UNISOC T618",
     "screen": "4:3",
+    "resolution": "640x480",
     "firmwares": [
       "esde"
     ]
@@ -256,6 +279,7 @@
     "name": "Anbernic RG406H",
     "soc": "UNISOC Tiger T820",
     "screen": "4:3",
+    "resolution": "960x720",
     "firmwares": [
       "esde"
     ]
@@ -265,6 +289,7 @@
     "name": "Anbernic RG406V",
     "soc": "UNISOC Tiger T820",
     "screen": "4:3",
+    "resolution": "960x720",
     "firmwares": [
       "esde"
     ]
@@ -274,6 +299,7 @@
     "name": "Anbernic RG40XX H",
     "soc": "Allwinner H700",
     "screen": "4:3",
+    "resolution": "640x480",
     "firmwares": [
       "knulli",
       "muos",
@@ -288,6 +314,7 @@
     "name": "Anbernic RG40XX V",
     "soc": "Allwinner H700",
     "screen": "4:3",
+    "resolution": "640x480",
     "firmwares": [
       "knulli",
       "muos",
@@ -302,6 +329,7 @@
     "name": "Anbernic RG476H",
     "soc": "UNISOC Tiger T820",
     "screen": "4:3",
+    "resolution": "1280x960",
     "firmwares": [
       "esde"
     ]
@@ -311,6 +339,7 @@
     "name": "Anbernic RG477M",
     "soc": "MediaTek Dimensity 8300",
     "screen": "4:3",
+    "resolution": "1280x960",
     "firmwares": [
       "esde"
     ]
@@ -320,6 +349,7 @@
     "name": "Anbernic RG477V",
     "soc": "MediaTek Dimensity 8300",
     "screen": "4:3",
+    "resolution": "1280x960",
     "firmwares": [
       "esde"
     ]
@@ -329,6 +359,7 @@
     "name": "Anbernic RG503",
     "soc": "Rockchip RK3566",
     "screen": "16:9",
+    "resolution": "960x544",
     "firmwares": [
       "knulli",
       "rocknix"
@@ -340,6 +371,7 @@
     "name": "Anbernic RG505",
     "soc": "UNISOC T618",
     "screen": "16:9",
+    "resolution": "960x544",
     "firmwares": [
       "esde"
     ]
@@ -349,6 +381,7 @@
     "name": "Anbernic RG556",
     "soc": "UNISOC Tiger T820",
     "screen": "16:9",
+    "resolution": "1920x1080",
     "firmwares": [
       "esde"
     ]
@@ -358,6 +391,7 @@
     "name": "Anbernic RG557",
     "soc": "MediaTek Dimensity 8300",
     "screen": "16:9",
+    "resolution": "1920x1080",
     "firmwares": [
       "esde"
     ]
@@ -368,6 +402,7 @@
     "soc": "Snapdragon G1 Gen 2",
     "gpu": "adreno-a12",
     "screen": "16:9",
+    "resolution": "1920x1080",
     "firmwares": [
       "esde",
       "rocknix"
@@ -380,6 +415,7 @@
     "soc": "Snapdragon G3 Gen 3",
     "gpu": "adreno-g3-gen-3",
     "screen": "16:9",
+    "resolution": "1920x1080",
     "firmwares": [
       "esde",
       "rocknix"
@@ -392,6 +428,7 @@
     "soc": "Snapdragon G3x Gen 2",
     "gpu": "adreno-a32",
     "screen": "3:2",
+    "resolution": "1620x1080",
     "firmwares": [
       "esde",
       "rocknix"
@@ -403,6 +440,7 @@
     "name": "AYANEO KONKR Pocket Advance",
     "soc": "MediaTek Helio G90T",
     "screen": "3:2",
+    "resolution": "960x640",
     "firmwares": [
       "esde"
     ]
@@ -412,6 +450,7 @@
     "name": "AYANEO Pocket Air",
     "soc": "MediaTek Dimensity 1200",
     "screen": "16:9",
+    "resolution": "1920x1080",
     "firmwares": [
       "esde"
     ]
@@ -421,6 +460,7 @@
     "name": "AYANEO Pocket Air Mini",
     "soc": "MediaTek Helio G90T",
     "screen": "4:3",
+    "resolution": "1280x960",
     "firmwares": [
       "esde"
     ]
@@ -431,6 +471,7 @@
     "soc": "Snapdragon G3x Gen 2",
     "gpu": "adreno-a32",
     "screen": "31:27",
+    "resolution": "1240x1080",
     "firmwares": [
       "esde",
       "rocknix"
@@ -443,7 +484,9 @@
     "soc": "Snapdragon G3x Gen 2",
     "gpu": "adreno-a32",
     "screen": "16:9",
+    "resolution": "1920x1080",
     "screen2": "4:3",
+    "resolution2": "1024x768",
     "firmwares": [
       "esde",
       "rocknix"
@@ -456,6 +499,7 @@
     "soc": "Snapdragon G3x Gen 2",
     "gpu": "adreno-a32",
     "screen": "16:9",
+    "resolution": "1920x1080",
     "firmwares": [
       "esde",
       "rocknix"
@@ -467,6 +511,7 @@
     "name": "AYANEO Pocket Micro",
     "soc": "MediaTek Helio G99",
     "screen": "3:2",
+    "resolution": "960x640",
     "firmwares": [
       "esde"
     ]
@@ -477,6 +522,7 @@
     "soc": "Snapdragon 865",
     "gpu": "adreno-650",
     "screen": "3:2",
+    "resolution": "960x640",
     "firmwares": [
       "esde"
     ]
@@ -486,6 +532,7 @@
     "name": "AYANEO Pocket Micro Classic",
     "soc": "MediaTek Helio G99",
     "screen": "3:2",
+    "resolution": "960x640",
     "firmwares": [
       "esde"
     ]
@@ -496,6 +543,7 @@
     "soc": "Snapdragon G3x Gen 2",
     "gpu": "adreno-a32",
     "screen": "16:9",
+    "resolution": "1920x1080",
     "firmwares": [
       "esde",
       "rocknix"
@@ -508,6 +556,7 @@
     "soc": "Snapdragon G3x Gen 2",
     "gpu": "adreno-a32",
     "screen": "4:3",
+    "resolution": "1280x960",
     "firmwares": [
       "esde",
       "rocknix"
@@ -520,6 +569,7 @@
     "soc": "Snapdragon G3 Gen 3",
     "gpu": "adreno-g3-gen-3",
     "screen": "16:9",
+    "resolution": "2560x1440",
     "firmwares": [
       "esde",
       "rocknix"
@@ -532,6 +582,7 @@
     "soc": "Snapdragon G3 Gen 3",
     "gpu": "adreno-g3-gen-3",
     "screen": "16:9",
+    "resolution": "2560x1440",
     "firmwares": [
       "esde"
     ]
@@ -542,6 +593,7 @@
     "soc": "Snapdragon 8+ Gen 1",
     "gpu": "adreno-730",
     "screen": "10:9",
+    "resolution": "1600x1440",
     "firmwares": [
       "esde"
     ]
@@ -552,6 +604,7 @@
     "soc": "Snapdragon 845",
     "gpu": "adreno-630",
     "screen": "16:9",
+    "resolution": "1920x1080",
     "firmwares": [
       "esde",
       "rocknix"
@@ -564,6 +617,7 @@
     "soc": "Snapdragon 8 Gen 2",
     "gpu": "adreno-740",
     "screen": "16:9",
+    "resolution": "1920x1080",
     "firmwares": [
       "esde",
       "rocknix"
@@ -576,6 +630,7 @@
     "soc": "Snapdragon 8 Gen 2",
     "gpu": "adreno-740",
     "screen": "16:9",
+    "resolution": "1920x1080",
     "firmwares": [
       "esde",
       "rocknix"
@@ -588,6 +643,7 @@
     "soc": "Snapdragon 8 Gen 2",
     "gpu": "adreno-740",
     "screen": "16:9",
+    "resolution": "1920x1080",
     "firmwares": [
       "esde",
       "rocknix"
@@ -600,6 +656,7 @@
     "soc": "Snapdragon 8 Elite",
     "gpu": "adreno-830",
     "screen": "16:9",
+    "resolution": "1920x1080",
     "firmwares": [
       "esde",
       "rocknix"
@@ -611,6 +668,7 @@
     "name": "AYN Odin Lite",
     "soc": "MediaTek Dimensity 900",
     "screen": "16:9",
+    "resolution": "1920x1080",
     "firmwares": [
       "esde"
     ]
@@ -621,7 +679,9 @@
     "soc": "Snapdragon 865",
     "gpu": "adreno-650",
     "screen": "16:9",
+    "resolution": "1920x1080",
     "screen2": "31:27",
+    "resolution2": "1240x1080",
     "firmwares": [
       "esde",
       "rocknix"
@@ -634,7 +694,9 @@
     "soc": "Snapdragon 8 Gen 2",
     "gpu": "adreno-740",
     "screen": "16:9",
+    "resolution": "1920x1080",
     "screen2": "31:27",
+    "resolution2": "1240x1080",
     "firmwares": [
       "esde",
       "rocknix"
@@ -646,6 +708,7 @@
     "name": "MagicX Zero 40",
     "soc": "Allwinner A133P",
     "screen": "3:5",
+    "resolution": "480x800",
     "firmwares": [
       "esde",
       "spruce"
@@ -656,6 +719,7 @@
     "name": "Miyoo A30",
     "soc": "Allwinner A33",
     "screen": "4:3",
+    "resolution": "640x480",
     "firmwares": [
       "spruce"
     ]
@@ -665,6 +729,7 @@
     "name": "Miyoo Flip",
     "soc": "Rockchip RK3566",
     "screen": "4:3",
+    "resolution": "640x480",
     "firmwares": [
       "knulli",
       "spruce"
@@ -675,6 +740,7 @@
     "name": "Miyoo Mini",
     "soc": "SigmaStar SSD202D",
     "screen": "4:3",
+    "resolution": "640x480",
     "firmwares": [
       "onion",
       "allium",
@@ -687,6 +753,7 @@
     "name": "Miyoo Mini Flip",
     "soc": "SigmaStar SSD202D",
     "screen": "4:3",
+    "resolution": "750x560",
     "firmwares": [
       "onion",
       "allium",
@@ -698,6 +765,7 @@
     "name": "Miyoo Mini Plus",
     "soc": "SigmaStar SSD202D",
     "screen": "4:3",
+    "resolution": "640x480",
     "firmwares": [
       "onion",
       "allium",
@@ -709,6 +777,7 @@
     "name": "Retroid Pocket 2S",
     "soc": "UNISOC T610",
     "screen": "4:3",
+    "resolution": "640x480",
     "firmwares": [
       "esde"
     ]
@@ -718,6 +787,7 @@
     "name": "Retroid Pocket 3",
     "soc": "UNISOC T310",
     "screen": "16:9",
+    "resolution": "1334x750",
     "firmwares": [
       "esde"
     ]
@@ -727,6 +797,7 @@
     "name": "Retroid Pocket 3 Plus",
     "soc": "UNISOC T618",
     "screen": "16:9",
+    "resolution": "1334x750",
     "firmwares": [
       "esde"
     ]
@@ -736,6 +807,7 @@
     "name": "Retroid Pocket 4",
     "soc": "MediaTek Dimensity 900",
     "screen": "16:9",
+    "resolution": "1334x750",
     "firmwares": [
       "esde"
     ]
@@ -745,6 +817,7 @@
     "name": "Retroid Pocket 4 Pro",
     "soc": "MediaTek Dimensity 1100",
     "screen": "16:9",
+    "resolution": "1334x750",
     "firmwares": [
       "esde"
     ]
@@ -755,6 +828,7 @@
     "soc": "Snapdragon 865",
     "gpu": "adreno-650",
     "screen": "16:9",
+    "resolution": "1920x1080",
     "firmwares": [
       "esde",
       "rocknix",
@@ -768,6 +842,7 @@
     "soc": "Snapdragon 8 Gen 2",
     "gpu": "adreno-740",
     "screen": "16:9",
+    "resolution": "1920x1080",
     "firmwares": [
       "esde",
       "rocknix"
@@ -780,6 +855,7 @@
     "soc": "Snapdragon G1 Gen 2",
     "gpu": "adreno-a12",
     "screen": "31:27",
+    "resolution": "1240x1080",
     "firmwares": [
       "esde",
       "rocknix"
@@ -792,7 +868,9 @@
     "soc": "Dragonwing Q-7790",
     "gpu": "adreno-722",
     "screen": "16:9",
+    "resolution": "1920x1080",
     "screen2": "4:3",
+    "resolution2": "1280x960",
     "firmwares": [
       "esde"
     ]
@@ -803,7 +881,9 @@
     "soc": "Snapdragon 665",
     "gpu": "adreno-610",
     "screen": "16:9",
+    "resolution": "1920x1080",
     "screen2": "4:3",
+    "resolution2": "1280x960",
     "firmwares": [
       "esde",
       "rocknix"
@@ -816,7 +896,9 @@
     "soc": "Snapdragon 7 Gen 4",
     "gpu": "adreno-722",
     "screen": "16:9",
+    "resolution": "1920x1080",
     "screen2": "4:3",
+    "resolution2": "1280x960",
     "firmwares": [
       "esde"
     ]
@@ -826,6 +908,7 @@
     "name": "Retroid Pocket Flip",
     "soc": "UNISOC T618",
     "screen": "16:9",
+    "resolution": "1334x750",
     "firmwares": [
       "esde"
     ]
@@ -836,6 +919,7 @@
     "soc": "Snapdragon 865",
     "gpu": "adreno-650",
     "screen": "16:9",
+    "resolution": "1920x1080",
     "firmwares": [
       "esde",
       "rocknix",
@@ -849,6 +933,7 @@
     "soc": "Snapdragon G2 Gen 2",
     "gpu": "adreno-a22",
     "screen": "16:9",
+    "resolution": "1920x1080",
     "firmwares": [
       "esde"
     ]
@@ -859,6 +944,7 @@
     "soc": "Snapdragon 865",
     "gpu": "adreno-650",
     "screen": "4:3",
+    "resolution": "1280x960",
     "firmwares": [
       "esde",
       "rocknix",
@@ -872,6 +958,7 @@
     "soc": "Snapdragon 865",
     "gpu": "adreno-650",
     "screen": "31:27",
+    "resolution": "1240x1080",
     "firmwares": [
       "esde",
       "rocknix",
@@ -885,6 +972,7 @@
     "soc": "Qualcomm QCS8550 (Snapdragon 8 Gen 2)",
     "gpu": "adreno-740",
     "screen": "4:3",
+    "resolution": "1280x960",
     "firmwares": [
       "esde",
       "rocknix"
@@ -896,6 +984,7 @@
     "name": "Steam Deck",
     "soc": "AMD Custom APU (Van Gogh)",
     "screen": "16:10",
+    "resolution": "1280x800",
     "firmwares": [
       "emudeck"
     ]

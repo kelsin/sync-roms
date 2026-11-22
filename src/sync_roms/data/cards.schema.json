@@ -28,6 +28,11 @@
         "type": "array",
         "items": {"type": "string"}
       },
+      "boot_logos": {
+        "description": "Boot logo file names sync-roms copied to a spruce card's App/BootLogo/Imgs",
+        "type": "array",
+        "items": {"type": "string"}
+      },
       "spruce_emu": {
         "description": "Per ROM folder, the BIOS zip names sync-roms added to the ignoreList of the folder's Spruce Emu config",
         "type": "object",
