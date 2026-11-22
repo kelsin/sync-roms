@@ -81,7 +81,8 @@ def reconcile(games, shown, category=""):
     for key, (system, g) in now.items():
         if key not in have:
             insert_game(out, {"title": g["title"], **({"category": category} if category else {}),
-                              "system": system, "bucket": key})
+                              "system": system, "bucket": key,  # then the entry's other fields: a note, files
+                              **{k: v for k, v in g.items() if k not in ("title", "category", "system", "bucket")}})
     return out
 
 

@@ -55,6 +55,14 @@ class Reconcile(unittest.TestCase):
         self.assertEqual([g["bucket"] for g in out], ["gba/A.zip", "gba/B.zip", "gen/C.zip", "gen/New.zip", "nes/Odd.zip"])
         self.assertEqual(list(out[3]), ["title", "category", "system", "bucket"])
 
+    def test_added_game_keeps_its_other_fields(self):
+        shown = shown_without(set(), [("gen", "gen/New.zip")])
+        shown["gen"]["games"][-1].update(note="try it", files=["gen/New2.zip"])
+        out = setedit.reconcile(games(), shown, "Cave")
+        self.assertEqual(out[3], {"title": "New", "category": "Cave", "system": "gen", "bucket": "gen/New.zip",
+                                  "note": "try it", "files": ["gen/New2.zip"]})
+        self.assertEqual(list(out[3])[:4], ["title", "category", "system", "bucket"])
+
     def test_typed_category_matches_an_existing_one_ignoring_case(self):
         with mock.patch.object(ui, "ask", return_value=" cave "), mock.patch("builtins.print"):
             self.assertEqual(setedit.ask_category(games(), "x"), "Cave")
