@@ -1270,6 +1270,19 @@ const SECTIONS = [
     ],
   },
   {
+    id: "spruce-update",
+    title: "Update spruceOS",
+    lede: "A sync stages the newest spruceOS release at the card root for the device's own updater.",
+    when: { layout: ["spruce"] },
+    items: [
+      {
+        title: "Run EZ Updater",
+        body: `
+          <p>After a sync that staged a new spruceOS release, run <b>Apps → EZ Updater</b> on the device. It backs up your settings, applies the update and shuts down. It can't jump major versions (3.x to 4.x).</p>`,
+      },
+    ],
+  },
+  {
     id: "home",
     title: "Make ES-DE the home app",
     lede: "Last, so the device boots straight into ES-DE.",

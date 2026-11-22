@@ -1010,6 +1010,41 @@ class SyncSmokeTest(RealDataDirGuard):
                 if not dry_run:
                     self.assertIn("Surprise-v0.1.0.zip", self.out.getvalue())
 
+    def test_spruce_sync_stages_spruceos(self):
+        layouts = {"spruce": {"label": "Spruce", "roms_dir": "Roms", "bios_dir": "BIOS"}}
+        files = inventory.files
+        order = []
+
+        def fake_files(prefix, sizes=True):
+            return {"os/spruceos/spruceV4.6.0.7z": 5} if prefix == "os/spruceos/" else files(prefix, sizes)
+
+        def download(job, *a):
+            order.append(job[0])
+            os.makedirs(os.path.dirname(job[1]), exist_ok=True)
+            with open(job[1], "wb") as f:
+                f.write(b"x" * 5)
+
+        flush = cli.cardfs.flush
+        for games in (SYSTEM["games"], []):  # a sync, and a card with nothing to sync
+            manifest = {**MANIFEST, "layouts": layouts, "systems": [{**SYSTEM, "games": games, "folders": {"spruce": "GBA"}}]}
+            patches = ((store, {"load_manifest": lambda names=(), m=manifest: m, "load_cards": REAL_LOAD_CARDS}),
+                       (cli.picker, {"saved_setup": lambda *a: (None, "spruce")}),
+                       (cli, {"free_space": lambda path: 10**9}),
+                       (inventory, {"files": fake_files}),
+                       (cli.downloads, {"run_downloads": downloads.run_downloads}),
+                       (cli.cardfs, {"flush": lambda: order.append("flush") or flush()}),
+                       (cli.s3, {"download": download}))
+            for dry_run in (False, True):
+                with self.subTest(games=bool(games), dry_run=dry_run):
+                    found = []
+                    order.clear()
+                    self.assertEqual(self.run_sync(dry_run, patches=patches, after=lambda card: found.append(
+                        (os.path.exists(os.path.join(card, "spruceV4.6.0.7z")),
+                         (store.load_cards().get(os.path.basename(card)) or {}).get("spruce_os")))), 0)
+                    self.assertEqual(found, [(False, None)] if dry_run else [(True, "spruceV4.6.0.7z")])
+                    if games and not dry_run:  # staged after the card's other writes
+                        self.assertGreater(order.index("os/spruceos/spruceV4.6.0.7z"), order.index("flush"))
+
     def test_onion_card_with_nothing_to_sync_removes_a_stale_surprise_list(self):
         layouts = {"onion": {"label": "Onion", "roms_dir": "Roms", "bios_dir": "BIOS"}}
         manifest = {**MANIFEST, "layouts": layouts, "systems": [{**SYSTEM, "games": [], "folders": {"onion": "GBA"}}]}

@@ -2,7 +2,6 @@
 import argparse
 import os
 import re
-import shutil
 import sys
 import time
 from collections import defaultdict
@@ -11,7 +10,7 @@ from concurrent.futures import ThreadPoolExecutor
 from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError
 
 from . import __version__, budget, cardedit, cardfs, clean, commands, downloads, drivers, edit, external, frontend, inventory, m3u, mirroring, picker, runtime, s3, scrape_plan, store
-from . import muos_collections, onion_surprise, pico8, raofflineproxy, rocknix_collections, saves, spruce_collections, surprise, themeart, ui, usersettings, vita
+from . import muos_collections, onion_surprise, pico8, raofflineproxy, rocknix_collections, saves, spruce_collections, spruce_os, surprise, themeart, ui, usersettings, vita
 from . import collections as colls
 
 
@@ -1074,6 +1073,10 @@ def sync_card(args):
         failed += raofflineproxy.install(card, layout_name, base, args.dry_run)
         if onion_surprise.write_list(card, layout_name, base, roms_dir, systems, args.dry_run) and clean_card:
             clean._clean_root = base
+        spruce_wrote = []
+        failed += spruce_os.install(card, layout_name, base, args.dry_run, spruce_wrote, keep=args.no_delete)
+        if clean_card and spruce_wrote:
+            clean._clean_root = base
         print(ui.yellow(f"👋 {card} has nothing to sync."))
         return failed
     print(ui.bold(f"\n🔎 Checking {len(chosen)} system(s) against storage..."))
@@ -1377,6 +1380,7 @@ def sync_card(args):
         pico8.run(card, layout_name, base, True, syncs=any(s["bucket"] == "pico8" for s in chosen))
         onion_surprise.install(card, layout_name, base, True)
         raofflineproxy.install(card, layout_name, base, True)
+        spruce_os.install(card, layout_name, base, True, keep=args.no_delete)
         stale_count = 0
         if scrapes:
             stale_files = scrape_plan.stale_media(layout_name, manifest['systems'], roms_dir, stale_es_dir, base)
@@ -1496,6 +1500,10 @@ def sync_card(args):
     except OSError as e:
         failed += 1
         failures.append(("frontend settings", str(e)))
+    spruce_wrote = []  # last: the 7z is large, and the card's other writes come first
+    failed += spruce_os.install(card, layout_name, base, False, spruce_wrote, keep=args.no_delete)
+    if clean_card and spruce_wrote:
+        clean._clean_root = base
     if failures:
         report_failures(failures)
     if not failed and not args.no_eject and usersettings.load_settings().get("eject", True) is not False:
@@ -1511,7 +1519,4 @@ def sync_card(args):
     return 1 if failed else 0
 
 
-def free_space(path):
-    while not os.path.exists(path):
-        path = os.path.dirname(path)
-    return shutil.disk_usage(path).free
+free_space = downloads.free_space

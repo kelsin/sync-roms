@@ -391,6 +391,14 @@ class EsdeExtrasSyncTest(unittest.TestCase):
             wanted = mirroring.mirror_wanted(manifest)
         self.assertEqual(wanted, {"os/onion/Surprise-v0.10.0.zip": 9})
 
+    def test_mirror_wanted_includes_the_newest_spruceos_7z(self):
+        listings = {"os/spruceos/": {"os/spruceos/spruceV4.5.6.7z": 1, "os/spruceos/spruceV4.6.0.7z": 2,
+                                     "os/spruceos/spruceOTA-v4.5.6-to-v4.6.0.7z": 3}}
+        with mock.patch.object(mirroring.s3, "read_root", return_value=None), \
+                mock.patch.object(mirroring.s3, "list_sizes", side_effect=lambda p, sizes=True: listings.get(p, {})):
+            wanted = mirroring.mirror_wanted({"systems": []})
+        self.assertEqual(wanted, {"os/spruceos/spruceV4.6.0.7z": 2})
+
     def test_mirror_wanted_includes_the_newest_raofflineproxy_file_of_each_layout(self):
         listings = {"os/allium/": {"os/allium/RAOfflineProxy-Allium-v3.9.0.zip": 1, "os/allium/RAOfflineProxy-Allium-v3.10.0.zip": 2},
                     "os/muOS/": {"os/muOS/RAOfflineProxy-muOS-v3.1.0.muxapp": 3, "os/muOS/muos.img.gz": 9},

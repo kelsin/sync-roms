@@ -397,12 +397,13 @@ class DataSafetyTest(Cmd):
         problems = commands.check_data()
         self.assertEqual(len(problems), 3)
 
-    def test_check_flags_a_bad_pico8_name(self):
-        for bad in (3, ""):
-            with self.subTest(bad=bad):
-                with open(self.path("cards.json"), "w") as f:
-                    json.dump({"c": {"device": "full", "layout": "esde", "pico8": bad}}, f)
-                self.assertIn("cards.json: c: 'pico8' must be a file name", commands.check_data())
+    def test_check_flags_a_bad_pico8_or_spruce_os_name(self):
+        for field in ("pico8", "spruce_os"):
+            for bad in (3, ""):
+                with self.subTest(field=field, bad=bad):
+                    with open(self.path("cards.json"), "w") as f:
+                        json.dump({"c": {"device": "full", "layout": "esde", field: bad}}, f)
+                    self.assertIn(f"cards.json: c: '{field}' must be a file name", commands.check_data())
 
     def test_check_flags_a_bad_muos_storage(self):
         with open(self.path("cards.json"), "w") as f:
