@@ -801,8 +801,7 @@ def _games_pass(title, shown, picks, sps, files_of, start, work, capacity, to_fe
                                                  picks.on_card),
             session=session, note_text=lambda i: edit.note_text(sp_of[i].games, keys[i]),
             on_note=lambda i, text: edit.save_note(sp_of[i].games, keys[i], text),
-            preview=lambda i: previews.game_thumb(keys[i]) if i < len(keys) else None,
-            preview_width=previews.GAME_WIDTH, links=links,
+            **previews.game_pane(keys), links=links,
             locked=[sp is None or k in sp.locked_from for k, sp in zip(keys, sp_of)],
             locked_note=[edit.FULL_SYSTEM_NOTE if sp is None else _locked_note(sp, k) for k, sp in zip(keys, sp_of)],
             **list_kw)

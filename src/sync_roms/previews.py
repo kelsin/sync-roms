@@ -136,6 +136,11 @@ def game_thumb(key):
         return None
 
 
+def game_pane(keys):
+    """filter_list's preview arguments for a list whose rows are the games at bucket keys: each one's game_thumb."""
+    return {"preview": lambda i: game_thumb(keys[i]) if i < len(keys) else None, "preview_width": GAME_WIDTH}
+
+
 def _download(image):
     path = os.path.join(store.cache_dir(), "previews", image)
     if not os.path.exists(path):
