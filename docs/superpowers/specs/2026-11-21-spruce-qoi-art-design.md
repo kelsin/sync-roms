@@ -45,7 +45,7 @@ You picked 2, with covers then miximages for Onion and Spruce.
 
 **Sources.** Both targets take the first of `covers`, `miximages` found for the ROM (`ONION_ART` changes to `("covers", "miximages")`; Spruce uses the same list).
 
-**PICO-8.** A cart with no cover or miximage uses its own picture (the `.p8.png` in storage) as the source for the Onion PNG and the Spruce QOI, in a normal scrape and in `scrape art`. The cart is never enlarged, so it gets only the `spruce` tier. On a Spruce card sync copies no PNG of a cart's picture into `Imgs/`.
+**PICO-8.** A cart with no cover or miximage uses its own picture (the `.p8.png` in storage) as the source for the Onion PNG and the Spruce QOI, in a normal scrape and in `scrape art`. The cart is never enlarged; by the tier rule it gets `spruce` and `spruce_small`. On a Spruce card sync copies no PNG of a cart's picture into `Imgs/`.
 
 **Encoder.** A small pure-Python QOI encoder (RGBA) in its own module. Tests check it against a reference decoder written in the test, since Pillow cannot read QOI. Resizing is Pillow's LANCZOS thumbnail. A `spruce_med` or `spruce_small` file is skipped when the image it would be made from is already no larger than that tier's box (PyUI falls back small, then med, then large).
 
