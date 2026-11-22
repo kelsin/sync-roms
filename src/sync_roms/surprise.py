@@ -1,4 +1,6 @@
-"""Surprise: a few random full English games per system, rotated on a schedule."""
+"""Surprise: SLOTS random full English games per card, spread across its systems. Each sync replaces them (all of them
+when nobody can be asked, else the ones the user doesn't keep); the history, kept for ttl_days(), only puts games
+picked before behind those that weren't."""
 import datetime
 import json
 import os

@@ -1,4 +1,5 @@
-"""Scriptable subcommands: games, cards, layouts, config, doctor, check and completion; plus helpers the sync flow uses."""
+"""Scriptable subcommands: games, sets, collections, themes, download, flash, cards, saves, layouts, cache, config,
+doctor, guide, check and completion; plus helpers the sync flow uses."""
 import argparse
 import datetime
 import json
@@ -598,7 +599,7 @@ def cards_copy(args):
         ui.fail(f"Card {args.dst!r} has no usable device and layout", 2)
     playable = {s["bucket"] for s in catalog["systems"] if store.system_applies(s, *setup)}
     dst_synced = {s["bucket"]: set(store.listed(s)) for s in store.load_manifest([args.dst])["systems"]}
-    cards = store.load_cards()  # load_manifest may have pruned unknown sets from cards.json
+    cards = store.load_cards()
     entry, counts, skipped = cardshare.copy_selections(cards[args.src], cards[args.dst], playable, dst_synced)
     shown = f"{counts['games']} games, {counts['full']} full systems, {counts['sets']} sets, {counts['collections']} collections, {counts['excluded']} exclusions"
     if args.dry_run:

@@ -1,4 +1,5 @@
-"""`cards convert`: plan and apply the renames that take a card's files from one layout to another on the same filesystem."""
+"""`cards convert`: plan and apply the renames that take a card's files from one layout to another on the same filesystem,
+and delete the old layout's scraped media. `cards clean`: delete the media other layouts left in the card's ROM folders."""
 import os
 import shutil
 

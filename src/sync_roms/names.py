@@ -1,4 +1,4 @@
-"""Proper game names for MAME and FBNeo sets, whose file names are short codes ("1941j.zip").
+"""Proper game names for MAME and FBNeo sets, whose file names are short codes ("1941j.zip"), and for PICO-8 carts.
 
 A set's name comes from the system's scraped metadata.json in storage, else the file name. A copy of each metadata file's names is kept in the data folder with the storage file's tag, and the file is
 downloaded again once per run when that tag changes."""
