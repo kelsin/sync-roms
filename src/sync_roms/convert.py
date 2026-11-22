@@ -81,20 +81,25 @@ def _flat(files, bucket, layout):
     return flat
 
 
+def _old_rom_dirs(base, systems, old_name, old):
+    """(system, folder, path as spelled on disk) of each old-layout ROM folder on the card, once: its first system's."""
+    seen = set()
+    for system in systems:
+        folder = system["folders"].get(old_name)
+        path = _exact_dir(base, *old["roms_dir"].split("/"), *folder.split("/")) if folder and folder not in seen else None
+        if path:
+            seen.add(folder)
+            yield system, folder, path
+
+
 def plan_roms(base, systems, old_name, old, new_name, new):
     """([(src, dst)], [(label, reason)]): each system's ROMs moved from its old-layout folder to its new one.
     A system with no folder in the new layout, and a playlist that sync must rewrite, stay where they are."""
-    moves, skipped, planned = [], [], set()
-    old_root, new_root = old["roms_dir"], new["roms_dir"]
+    moves, skipped = [], []
+    new_root = new["roms_dir"]
     playlists_differ = bool(old.get("disc_dir")) != bool(new.get("disc_dir"))
-    for system in systems:
-        old_folder, new_folder = system["folders"].get(old_name), system["folders"].get(new_name)
-        if not old_folder or old_folder in planned:
-            continue
-        src_dir = _exact_dir(base, *old_root.split("/"), *old_folder.split("/"))
-        if not src_dir:
-            continue
-        planned.add(old_folder)
+    for system, old_folder, src_dir in _old_rom_dirs(base, systems, old_name, old):
+        new_folder = system["folders"].get(new_name)
         files, _ = _scan(src_dir, old.get("disc_dir"), old_name in scrape_plan.ONION_LAYOUTS, downloads.layout_files(old_name, system),
                          saves.beside_roms(old))
         if not files:
@@ -316,18 +321,11 @@ def plan_media(base, systems, old_name, old, new_name, new):
     """[path]: the old layout's scraped media in its ROM folders (gamelist and media folders), which the new layout
     doesn't use, so nothing reads them after the convert; sync scrapes the new layout's own. A name the new layout also
     uses stays in any folder the new layout uses, for whichever system."""
-    found, seen = [], set()
+    found = []
     old_names = _media_names(old_name)
     same = _media_names(new_name)
     keep_dirs = {f"{new['roms_dir']}/{s['folders'][new_name]}".lower() for s in systems if s["folders"].get(new_name)}
-    for system in systems:
-        old_folder = system["folders"].get(old_name)
-        if not old_folder or old_folder in seen:
-            continue
-        seen.add(old_folder)
-        folder = _exact_dir(base, *old["roms_dir"].split("/"), *old_folder.split("/"))
-        if not folder:
-            continue
+    for _, old_folder, folder in _old_rom_dirs(base, systems, old_name, old):
         shared = same if f"{old['roms_dir']}/{old_folder}".lower() in keep_dirs else set()
         found += [os.path.join(folder, n) for n in sorted(_listed(folder)) if n.lower() in old_names - shared]
     return found
@@ -350,6 +348,17 @@ def remove_media(paths, base=None):
     return failures
 
 
+def _print_media(title, media, base):
+    """Print title and the media paths, a line per folder; returns how many folders they are in."""
+    by_folder = {}
+    for path in media:
+        by_folder.setdefault(os.path.relpath(os.path.dirname(path), base), []).append(os.path.basename(path))
+    print(ui.bold(title))
+    for folder, names in by_folder.items():
+        print(f"  {folder}: {', '.join(names)}")
+    return len(by_folder)
+
+
 def convert_command(args):
     """`cards convert [CARD] --layout ID [--dry-run] [--yes]`: move the card's ROMs, BIOS and RetroArch saves and
     states to the folders of another layout, then save that layout for the card."""
@@ -366,13 +375,7 @@ def convert_command(args):
     _summary("ROMs", rom_moves, rom_skipped, os.path.join(base, old["roms_dir"]))
     _summary("BIOS", bios_moves, bios_skipped)
     _summary("Saves and states", save_moves, save_skipped)
-    if media:
-        print(ui.bold(f"Old {old_name} media (deleted)"))
-        by_folder = {}
-        for path in media:
-            by_folder.setdefault(os.path.relpath(os.path.dirname(path), base), []).append(os.path.basename(path))
-        for folder, names in by_folder.items():
-            print(f"  {folder}: {', '.join(names)}")
+    folders = _print_media(f"Old {old_name} media (deleted)", media, base) if media else 0
     left = [x for x in _leftovers(base, systems, old_name, old) if os.path.join(base, x) not in media]
     if left:
         print(ui.dim("Left in place (frontend files and folders): " + ", ".join(left)))
@@ -385,7 +388,7 @@ def convert_command(args):
         if not args.yes:
             if not ui.has_terminal():
                 ui.fail("Pass --yes to convert without a terminal to confirm on", 2)
-            if not ui.confirm(f"Move {len(planned)} files" + (f" and delete the old media in {len(by_folder)} folders?" if media else "?")):
+            if not ui.confirm(f"Move {len(planned)} files" + (f" and delete the old media in {folders} folders?" if media else "?")):
                 return 1
         failures = []
         for moves in (save_moves, bios_moves, rom_moves):
@@ -416,22 +419,17 @@ def clean_command(args):
     if not media:
         print(ui.green(f"{name}: no media from other layouts"))
         return 0
-    print(ui.bold(f"{name} ({keep_name}): media from other layouts (deleted)"))
-    by_folder = {}
-    for path in media:
-        by_folder.setdefault(os.path.relpath(os.path.dirname(path), base), []).append(os.path.basename(path))
-    for folder, names in by_folder.items():
-        print(f"  {folder}: {', '.join(names)}")
+    folders = _print_media(f"{name} ({keep_name}): media from other layouts (deleted)", media, base)
     if args.dry_run:
         print(ui.yellow("🧪 Dry run: nothing deleted"))
         return 0
     if not args.yes:
         if not ui.has_terminal():
             ui.fail("Pass --yes to delete without a terminal to confirm on", 2)
-        if not ui.confirm(f"Delete the media in {len(by_folder)} folders?"):
+        if not ui.confirm(f"Delete the media in {folders} folders?"):
             return 1
     failures = remove_media(media, base)
     for path, err in failures:
         ui.warn(f"could not delete {path}: {err}")
-    print(ui.green(f"🧹 deleted media in {len(by_folder)} folders") if not failures else ui.red(f"{len(failures)} failed"))
+    print(ui.green(f"🧹 deleted media in {folders} folders") if not failures else ui.red(f"{len(failures)} failed"))
     return 3 if failures else 0

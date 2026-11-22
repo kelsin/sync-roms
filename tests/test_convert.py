@@ -335,6 +335,18 @@ class FixesTest(ConvertTest):
         self.assertEqual(sorted(convert._leftovers(self.base, SYSTEMS, "knulli", K)),
                          ["roms/gba/Game.zip.part", "roms/gba/gamelist.xml", "roms/gba/images", "roms/gba/videos"])
 
+    def test_shared_old_folder_moves_once_and_is_scanned_for_each_system(self):
+        """Two systems with one old ROM folder: its files move once, for the first system, while the files sync-roms
+        put there are listed as left in place whichever of the two systems they belong to."""
+        systems = [{"bucket": "other", "folders": {"rocknix": "ports", "nextui": "Other"}, "bios": {"files": []}},
+                   {"bucket": "ports", "folders": {"rocknix": "ports", "nextui": "Ports"}, "bios": {"files": []}}]
+        own = convert.downloads.ROCKNIX_PORTS_FILES[0]
+        for f in ("Game.sh", own):
+            touch(self.p("roms", "ports", f))
+        moves, _ = convert.plan_roms(self.base, systems, "rocknix", K, "nextui", N)
+        self.assertEqual(moves, [(self.p("roms", "ports", f), self.p("Roms", "Other", f)) for f in sorted(("Game.sh", own))])
+        self.assertEqual(convert._leftovers(self.base, systems, "rocknix", K), [f"roms/ports/{own}"])
+
     def test_onion_metadata_is_not_moved_and_is_listed(self):
         for f in ("Game.zip", "miyoogamelist.xml", "Imgs/a.png", "cache6.db"):
             touch(self.p("Roms", "GBA", f))
@@ -467,6 +479,17 @@ class ConvertCommandTest(unittest.TestCase):
     def layout(self):
         with open(os.path.join(self.data, "cards.json")) as f:
             return self.json.load(f)["SD"].get("layout")
+
+    def test_both_commands_list_the_media_by_folder(self):
+        for f in ("gba/gamelist.xml", "gba/images/a.png", "psx/gamelist.xml"):
+            touch(os.path.join(self.base, "roms", f))
+        listed = " (deleted)\n  roms/gba: gamelist.xml, images\n  roms/psx: gamelist.xml\n"
+        self.assertEqual(self.run_cmd(dry_run=True, yes=False), 0)
+        self.assertIn("Old knulli media" + listed, self.out.getvalue())
+        self.set_card({"device": "anbernic-rg34xx-sp", "layout": "nextui"})
+        self.assertEqual(self.run_clean(), 0)
+        self.assertIn("SD (nextui): media from other layouts" + listed, self.out.getvalue())
+        self.assertIn("deleted media in 2 folders", self.out.getvalue())
 
     def run_cmd(self, layout="nextui", dry_run=False, yes=True, terminal=False):
         args = self.argparse.Namespace(card=self.base, layout=layout, dry_run=dry_run, yes=yes)
