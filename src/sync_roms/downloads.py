@@ -221,15 +221,13 @@ IGNORED_ROOT_FILES = {
 }
 # sync-roms's scripts, run from ROCKNIX's Ports (raofflineproxy's KINDS names the second; it imports downloads, through onion_surprise)
 ROCKNIX_PORTS_FILES = (os.path.basename(rocknix_collections.SCRIPT), "RAOfflineProxy Install.sh")
+PICO8_FILES = tuple(os.path.basename(m) for m in pico8.members("rocknix"))  # the PICO-8 runtime pico8.py extracts into ROCKNIX's pico8 ROM folder
+OWN_ROOT_FILES = {"ports": ROCKNIX_PORTS_FILES, "pico8": PICO8_FILES}
 
 
 def layout_files(layout_name, system):
     """Names at the top of the system's ROM folder that sync-roms put there for this layout: never offered for deletion."""
-    return ROCKNIX_PORTS_FILES if layout_name == "rocknix" and system["bucket"] == "ports" else ()
-
-
-PICO8_FILES = tuple(os.path.basename(m) for m in pico8.members("rocknix"))  # the PICO-8 runtime pico8.py extracts into ROCKNIX's pico8 ROM folder
-OWN_ROOT_FILES = {"ports": ROCKNIX_PORTS_FILES, "pico8": PICO8_FILES}
+    return OWN_ROOT_FILES.get(system["bucket"], ()) if layout_name == "rocknix" else ()
 
 
 def never_uploaded(bucket, rel):

@@ -288,6 +288,13 @@ class RocknixSavesTest(ConvertTest):
         moves, _ = convert.plan_roms(self.base, self.SYSTEMS, "knulli", K, "esde", LAYOUTS["esde"])
         self.assertEqual(moves, [(self.p("roms", "gba", "Game.srm"), self.p("ROMs", "gba", "Game.srm"))])
 
+    def test_pico8_runtime_is_not_moved_as_roms(self):
+        system = {"bucket": "pico8", "folders": {"rocknix": "pico-8", "onion": "PICO"}, "bios": {"files": []}}
+        for name in ("pico8_dyn", "pico8.dat", "pico8_64", "cart.p8.png"):
+            touch(self.p("roms", "pico-8", name))
+        moves, _ = convert.plan_roms(self.base, [system], "rocknix", self.R, "onion", O)
+        self.assertEqual(moves, [(self.p("roms", "pico-8", "cart.p8.png"), self.p("Roms", "PICO", "cart.p8.png"))])
+
 
 class FixesTest(ConvertTest):
     def test_frontend_metadata_is_not_moved_and_is_listed(self):
