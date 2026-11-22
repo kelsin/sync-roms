@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.20.1](https://github.com/kelsin/sync-roms/compare/v3.20.0...v3.20.1) (2026-11-22)
+
+
+### :bug: Bug Fixes
+
+* **scrape:** read PNGs with a bad optional chunk checksum and treat 0-byte media as missing ([#500](https://github.com/kelsin/sync-roms/issues/500)) ([0f7bf75](https://github.com/kelsin/sync-roms/commit/0f7bf759c4feca3311896b7e7c62416a7bdfb458))
+
 ## [3.20.0](https://github.com/kelsin/sync-roms/compare/v3.19.0...v3.20.0) (2026-11-22)
 
 
