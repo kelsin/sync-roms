@@ -11,7 +11,7 @@ import tempfile
 from xml.sax import saxutils
 import zlib
 
-from . import cardfs, downloads, frontend, github, muos_collections, rocknix_collections, runtime, s3, store, ui
+from . import cardfs, downloads, frontend, github, rocknix_collections, runtime, s3, store, ui
 
 THEME_DATA = os.path.join(store.REPO_DATA, "themes", "art-book-next")
 SURPRISE_ART = "surprise"
@@ -35,7 +35,9 @@ ARCHIVE_ERRORS = (tarfile.TarError, EOFError, zlib.error)  # what a damaged .tar
 # Knulli's Art Book Next is read-only, but takes artwork and logos from theme-customizations/ on the card for systems
 # whose "System Artwork" and "System Logos" options are Custom; those options can be set for one system alone.
 KNULLI_DIR = os.path.join("theme-customizations", "art-book-next")
-CUSTOM_OWNED = ".sync-roms-art"  # in Knulli's and ROCKNIX's customizations: the collection names sync-roms gave art
+# In Knulli's and ROCKNIX's customizations and muOS's collection catalogue: the collection names sync-roms gave art
+CUSTOM_OWNED = ".sync-roms-art"
+CUSTOM_FILES = (("artwork", ".png"), ("logos", ".svg"))  # a name's art in the customizations: (folder, extension)
 
 
 def _write_settings(path, layout_name, values, only_if_unset=()):
@@ -426,14 +428,15 @@ def _custom_stale(root, arts):
             if n and frontend.safe_name(n) == n and n not in arts]
 
 
-def _custom_remove(root, arts):
-    """Remove from the customizations folder root the art sync-roms put there (the names on its list) for collections
-    no longer in arts, and list the ones in arts instead. Returns the names it removed."""
+def _custom_remove(root, arts, files=CUSTOM_FILES):
+    """Remove from the customizations folder root the art sync-roms put there (the names on its list, each name's files
+    being <folder>/<name><extension> for files) for collections no longer in arts, and list the ones in arts instead.
+    Returns the names it removed."""
     stale = _custom_stale(root, arts)
     for name in stale:
-        for path in (os.path.join(root, "artwork", f"{name}.png"), os.path.join(root, "logos", f"{name}.svg")):
+        for folder, ext in files:
             try:
-                os.remove(path)
+                os.remove(os.path.join(root, folder, name + ext))
             except FileNotFoundError:
                 pass
     if arts:
@@ -444,6 +447,16 @@ def _custom_remove(root, arts):
         except FileNotFoundError:
             pass
     return stale
+
+
+def _custom_describe(base, rel_dir, arts, what="art"):
+    """Print what installing arts in the customizations folder rel_dir of the card at base would do."""
+    shown = rel_dir.replace(os.sep, "/")
+    stale = _custom_stale(os.path.join(base, rel_dir), arts)
+    if stale:
+        print(ui.dim(f"🎨 would remove the {what} for {', '.join(stale)} from {shown}/"))
+    if arts:
+        print(ui.dim(f"🎨 would add art for {', '.join(arts)} to {shown}/"))
 
 
 def install_knulli(base, arts):
@@ -474,13 +487,8 @@ def install_knulli(base, arts):
 
 
 def describe_knulli(base, arts):
-    if not knulli_wanted(base):
-        return
-    stale = _custom_stale(os.path.join(base, KNULLI_DIR), arts)
-    if stale:
-        print(ui.dim(f"🎨 would remove the art and settings for {', '.join(stale)} from {KNULLI_DIR.replace(os.sep, '/')}/"))
-    if arts:
-        print(ui.dim(f"🎨 would add art for {', '.join(arts)} to {KNULLI_DIR.replace(os.sep, '/')}/"))
+    if knulli_wanted(base):
+        _custom_describe(base, KNULLI_DIR, arts, "art and settings")
 
 
 # --- ROCKNIX -------------------------------------------------------------------------------------------------------
@@ -500,12 +508,23 @@ def install_rocknix(base, arts):
     return changed
 
 
-def describe_rocknix(base, arts):
-    stale = _custom_stale(os.path.join(base, rocknix_collections.ART_DIR), arts)
-    if stale:
-        print(ui.dim(f"🎨 would remove the art for {', '.join(stale)} from {rocknix_collections.ART_DIR.replace(os.sep, '/')}/"))
-    if arts:
-        print(ui.dim(f"🎨 would add art for {', '.join(arts)} to {rocknix_collections.ART_DIR.replace(os.sep, '/')}/"))
+# --- muOS ----------------------------------------------------------------------------------------------------------
+
+MUOS_DIR = os.path.join("MUOS", "info", "catalogue", "Collection")
+MUOS_FILES = (("box", ".png"), ("grid", ".png"))  # muOS shows <collection folder>.png of both
+
+
+def install_muos(base, arts):
+    """Put the collections' art ({name: art png}) in muOS's catalogue as box and grid pictures, and remove what
+    sync-roms put there for collections no longer in arts. Returns whether files changed."""
+    root = os.path.join(base, MUOS_DIR)
+    changed = bool(_custom_remove(root, arts, MUOS_FILES))  # before the art is written, as in install_knulli
+    for name, png in arts.items():
+        with open(png, "rb") as f:
+            data = f.read()
+        for folder, ext in MUOS_FILES:
+            changed |= _put(os.path.join(root, folder, name + ext), data)
+    return changed
 
 
 # --- Spruce --------------------------------------------------------------------------------------------------------
@@ -549,7 +568,7 @@ def install(layout_name, base, arts, owned=()):
     if layout_name == "spruce":
         return install_spruce(base, arts, owned)
     if layout_name == "muos":
-        return muos_collections.install_art(base, arts)
+        return install_muos(base, arts)
     if layout_name == "rocknix":
         return install_rocknix(base, arts)
     return install_esde(layout_name, base, arts) if layout_name in frontend.ESDE_LAYOUTS else install_knulli(base, arts)
@@ -562,7 +581,7 @@ def describe(layout_name, base, arts, owned=()):
     if layout_name == "spruce":
         return describe_spruce(base, arts, owned)
     if layout_name == "muos":
-        return muos_collections.describe_art(base, arts)
+        return _custom_describe(base, MUOS_DIR, arts)
     if layout_name == "rocknix":
-        return describe_rocknix(base, arts)
+        return _custom_describe(base, rocknix_collections.ART_DIR, arts)
     describe_esde(layout_name, base, arts) if layout_name in frontend.ESDE_LAYOUTS else describe_knulli(base, arts)
