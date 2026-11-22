@@ -25,7 +25,8 @@ def sheet_tracks(path):
     if path.lower().endswith(".gdi"):
         names = re.findall(r'^[ \t]*\d+[ \t]+\d+[ \t]+\d+[ \t]+\d+[ \t]+("[^"]+"|\S+)', text, re.M)
         return [n.strip('"') for n in names]
-    return re.findall(r'(?:FILE|DATAFILE|AUDIOFILE)\s+"([^"]+)"', text, re.I)
+    names = re.findall(r'(?:FILE|DATAFILE|AUDIOFILE)\s+"([^"]+)"|^[\s\ufeff]*FILE[ \t]+([^\s"]+)[ \t]+\S', text, re.I | re.M)
+    return [quoted or bare for quoted, bare in names]  # a cue's FILE name needs no quotes when it has no spaces
 
 
 def disc_images(paths, strict=True, skipped=None):
