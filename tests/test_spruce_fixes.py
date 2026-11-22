@@ -7,7 +7,9 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
+import io  # noqa: E402
 import re  # noqa: E402
+from PIL import Image  # noqa: E402
 from sync_roms import cardfs, spruce_fixes, store  # noqa: E402
 from sync_roms.spruce_fixes import fds, pokemini  # noqa: E402
 
@@ -64,6 +66,16 @@ class PokeminiTests(Base):
         self.assertEqual(writes, [])
         self.assertIn("already has poke.png", skip)
 
+    def test_resized_copies(self):
+        self.put("ART_BOOK_NEXT/icons_720x480/overlay/pokemini.png", b"scaled")
+        self.put("ART_BOOK_NEXT/icons_old/overlay/pokemini.png", b"old")
+        count, out = self.run_fixes()
+        self.assertEqual(count, 1)
+        self.assertIn("Fixing 720x480 theme variation", out)
+        self.assertEqual(self.get("ART_BOOK_NEXT/icons_720x480/overlay/poke.png"), b"scaled")
+        self.assertFalse(os.path.exists(os.path.join(self.base, "Themes", "ART_BOOK_NEXT", "icons_old", "overlay",
+                                                     "poke.png")))
+
     def test_other_themes_untouched(self):
         self.put("SPRUCE/icons/pokemini.png")
         self.assertEqual(pokemini.plan(self.base), ([], spruce_fixes.ABSENT))
@@ -88,6 +100,7 @@ class FdsTests(Base):
         count, out = self.run_fixes()
         self.assertEqual(count, 3)
         self.assertIn("applied to 3 file(s)", self.line(out, fds))
+        self.assertNotIn("theme variation", out)
         for theme in fds.THEMES:
             self.assertEqual(self.read(theme), self.image)
             self.assertEqual(self.read(theme, "fc.png"), NES)
@@ -107,6 +120,41 @@ class FdsTests(Base):
         self.assertIn("an earlier sync applied it", self.line(out, fds))
         self.assertNotIn("upstream fixed", self.line(out, fds))
         self.assertEqual(self.read("ART_BOOK_NOIR"), self.image)
+
+    def background(self, theme, size):
+        out = io.BytesIO()
+        Image.new("RGB", size).save(out, "PNG")
+        self.put(f"{theme}/skin/background.png", out.getvalue())
+
+    def test_resized_copy_at_scale_one(self):
+        self.background("ART_BOOK_NEXT", (640, 480))
+        self.put("ART_BOOK_NEXT/icons_720x480/overlay/fc.png", NES)
+        self.put("ART_BOOK_NEXT/icons_720x480/overlay/fds.png", NES)
+        self.put("ART_BOOK_NEXT/icons_old/overlay/fc.png", NES)
+        self.put("ART_BOOK_NEXT/icons_old/overlay/fds.png", NES)
+        count, out = self.run_fixes()
+        self.assertEqual(count, 1)
+        self.assertIn("Fixing 720x480 theme variation", out)
+        self.assertEqual(self.get("ART_BOOK_NEXT/icons_720x480/overlay/fds.png"), self.image)
+        self.assertEqual(self.get("ART_BOOK_NEXT/icons_old/overlay/fds.png"), NES)
+        count, out = self.run_fixes()
+        self.assertEqual(count, 0)
+        self.assertIn("an earlier sync applied it", self.line(out, fds))
+
+    def test_resized_copy_is_scaled(self):
+        self.background("ART_BOOK_NOIR", (640, 480))
+        self.put_pair("ART_BOOK_NOIR", NES, NES)
+        self.put("ART_BOOK_NOIR/icons_1280x960/overlay/fc.png", NES)
+        self.put("ART_BOOK_NOIR/icons_1280x960/overlay/fds.png", NES)
+        count, _ = self.run_fixes()
+        self.assertEqual(count, 2)
+        self.assertEqual(self.read("ART_BOOK_NOIR"), self.image)
+        scaled = Image.open(io.BytesIO(self.get("ART_BOOK_NOIR/icons_1280x960/overlay/fds.png")))
+        self.assertEqual(scaled.size, (800, 144))
+        count, out = self.run_fixes()
+        self.assertEqual(count, 0)
+        self.assertIn("an earlier sync applied it", self.line(out, fds))
+        self.assertNotIn("upstream fixed", self.line(out, fds))
 
     def test_absent_theme_or_files(self):
         self.assertEqual(fds.plan(self.base), ([], spruce_fixes.ABSENT))
