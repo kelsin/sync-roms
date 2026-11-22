@@ -1,5 +1,72 @@
 # Changelog
 
+## [3.19.0](https://github.com/kelsin/sync-roms/compare/v3.18.0...v3.19.0) (2026-11-22)
+
+
+### :video_game: Features
+
+* **devices:** add miyoo a30 ([#432](https://github.com/kelsin/sync-roms/issues/432)) ([b6304a1](https://github.com/kelsin/sync-roms/commit/b6304a10655346d5753c529642439a65bb9a2daf))
+* **flash:** offer OakMoss .img.xz images ([#431](https://github.com/kelsin/sync-roms/issues/431)) ([55acc53](https://github.com/kelsin/sync-roms/commit/55acc5310fc13aa0f7c0a4c6e3468287903859ef))
+* **muos:** install the official pico-8 runtime ([#439](https://github.com/kelsin/sync-roms/issues/439)) ([440b8eb](https://github.com/kelsin/sync-roms/commit/440b8eba6d10a3ab2a397671d17cdc3ffdbb0536))
+* **rocknix:** add ROCKNIX layout ([#429](https://github.com/kelsin/sync-roms/issues/429)) ([40e743c](https://github.com/kelsin/sync-roms/commit/40e743c7f8387033114ecca4d08efddd47f81657))
+* **spruce:** add Art Book Next collection art in Collections/Imgs ([#450](https://github.com/kelsin/sync-roms/issues/450)) ([e92559b](https://github.com/kelsin/sync-roms/commit/e92559b6ee81459e0e0e528252843172e2002c27))
+* **spruce:** install RAOfflineProxy on spruce cards ([#444](https://github.com/kelsin/sync-roms/issues/444)) ([e043cbe](https://github.com/kelsin/sync-roms/commit/e043cbed528827a9f39b545b57b38a434e102f20))
+* **spruce:** stage the newest spruceOS release for EZ Updater ([#433](https://github.com/kelsin/sync-roms/issues/433)) ([c77924b](https://github.com/kelsin/sync-roms/commit/c77924b60ad6ac588e1b474dbe2113332b8315e1))
+
+
+### :bug: Bug Fixes
+
+* **cache:** patch the storage cache under the name's stored spelling ([#463](https://github.com/kelsin/sync-roms/issues/463)) ([1870146](https://github.com/kelsin/sync-roms/commit/1870146522dab9afd0eaedb0e83737090d8b5ba4))
+* **cardedit:** count collection and surprise games as on the card for variants ([#465](https://github.com/kelsin/sync-roms/issues/465)) ([fca558d](https://github.com/kelsin/sync-roms/commit/fca558d6459bdc463b136f71332c11eafdd62896))
+* **cardedit:** let space in the sets list switch on excluded games ([#453](https://github.com/kelsin/sync-roms/issues/453)) ([d2ea421](https://github.com/kelsin/sync-roms/commit/d2ea421b9229fd382c44c92216e69885a7451281))
+* **cardedit:** recount the other system after adding a variant ([#449](https://github.com/kelsin/sync-roms/issues/449)) ([43e2c57](https://github.com/kelsin/sync-roms/commit/43e2c57be65660d535123d70b60ed84ee33e03a4))
+* **cards:** keep media in folders the card's layout uses on clean ([#437](https://github.com/kelsin/sync-roms/issues/437)) ([b78fb1e](https://github.com/kelsin/sync-roms/commit/b78fb1ee993a26b3c2dc4da6b00f3b1b19d022ce))
+* **chd:** count a job that raises an OSError as a failed job ([#473](https://github.com/kelsin/sync-roms/issues/473)) ([091bad3](https://github.com/kelsin/sync-roms/commit/091bad31844791f7204d211390d00058d323c8eb))
+* **chd:** keep a source whose chd name already holds another disc ([#468](https://github.com/kelsin/sync-roms/issues/468)) ([048a121](https://github.com/kelsin/sync-roms/commit/048a1214853b919e55dbffd71519c0e8e0a36711))
+* **chd:** read unquoted file names in cue sheets ([#472](https://github.com/kelsin/sync-roms/issues/472)) ([7aa93de](https://github.com/kelsin/sync-roms/commit/7aa93de4679378b196e8e5a96baed9dc9b6f64a2))
+* **cli:** accept a leading --json before a command ([#462](https://github.com/kelsin/sync-roms/issues/462)) ([5c7d799](https://github.com/kelsin/sync-roms/commit/5c7d799325bf16f6bb67ba3f4f2d08b099e969c5))
+* **cli:** exit 1 when a card with nothing to sync has failures ([#448](https://github.com/kelsin/sync-roms/issues/448)) ([4888db8](https://github.com/kelsin/sync-roms/commit/4888db83ef3344acaef993da9c392686a68933a6))
+* **cli:** let --verbose doctor report an unparseable settings.json ([#467](https://github.com/kelsin/sync-roms/issues/467)) ([7500f28](https://github.com/kelsin/sync-roms/commit/7500f288f94f5ee1857fbde4c76833eeb055ca0e))
+* **collections:** keep a note typed on a newly added game ([#457](https://github.com/kelsin/sync-roms/issues/457)) ([5a9951b](https://github.com/kelsin/sync-roms/commit/5a9951bde3ce976045c104d7bc126f675ad7a4eb))
+* **convert:** convert cards to and from muos without crashing on saves ([#461](https://github.com/kelsin/sync-roms/issues/461)) ([6a04b84](https://github.com/kelsin/sync-roms/commit/6a04b84786bafdf35330c2cca99fec92992ddcdc))
+* **convert:** leave rocknix's pico-8 runtime out of the roms it moves ([#436](https://github.com/kelsin/sync-roms/issues/436)) ([134e0e6](https://github.com/kelsin/sync-roms/commit/134e0e6911aea3af3acc12f640ce0463674c3f12))
+* **devices:** correct firmware support and gpu data ([#445](https://github.com/kelsin/sync-roms/issues/445)) ([0691898](https://github.com/kelsin/sync-roms/commit/069189854f14027990bfc5a350793ce8a89840fa))
+* **edit:** keep a full system's saved game list when the card's device changes ([#459](https://github.com/kelsin/sync-roms/issues/459)) ([20d0038](https://github.com/kelsin/sync-roms/commit/20d0038739623ff71ed72204f44d0ee4342c70d1))
+* **games:** import a game listed twice only once ([#470](https://github.com/kelsin/sync-roms/issues/470)) ([9437039](https://github.com/kelsin/sync-roms/commit/9437039b21bfefe39bde1961636fe41d6808e7e9))
+* **guide:** stop rocknix crashing the setup guide and fix stale steps ([#438](https://github.com/kelsin/sync-roms/issues/438)) ([6732212](https://github.com/kelsin/sync-roms/commit/673221286cc6c3044726f5a0523cced04215cf62))
+* **knulli:** escape setting names in es_settings.cfg ([#454](https://github.com/kelsin/sync-roms/issues/454)) ([2d14887](https://github.com/kelsin/sync-roms/commit/2d14887f5422bf9016c70f8f105ecd6f5af49a53))
+* **mirror:** keep the android apks in the mirror ([#455](https://github.com/kelsin/sync-roms/issues/455)) ([604e7c0](https://github.com/kelsin/sync-roms/commit/604e7c081803a475cbaeb0567aa839d0d321159b))
+* **muos:** correct catalogue names and add missing muOS systems ([#440](https://github.com/kelsin/sync-roms/issues/440)) ([da28242](https://github.com/kelsin/sync-roms/commit/da28242a7a12a9b073ea25580488fb6321aa2466))
+* **nextui:** match multi-disc games on the card for the keep key ([#451](https://github.com/kelsin/sync-roms/issues/451)) ([5ac10ce](https://github.com/kelsin/sync-roms/commit/5ac10ce43db9f2e2a195a3258dbadf061f1df455))
+* **nextui:** put game art in the rom's own folder's .media ([#443](https://github.com/kelsin/sync-roms/issues/443)) ([103c28e](https://github.com/kelsin/sync-roms/commit/103c28e56dac35fe4aa7043086b197fb87dcfff1))
+* **nextui:** use nextui's own system folder names ([#446](https://github.com/kelsin/sync-roms/issues/446)) ([adf5b30](https://github.com/kelsin/sync-roms/commit/adf5b303a0281ffbbf3b8084cb24c40b02d5afba))
+* **pico8:** install pico-8 again after a card's layout changes ([#464](https://github.com/kelsin/sync-roms/issues/464)) ([178c93c](https://github.com/kelsin/sync-roms/commit/178c93cd4eb096e6505920aa7b7c516d2f05d7a2))
+* **pico8:** move a cart's scrape state when it is upgraded ([#466](https://github.com/kelsin/sync-roms/issues/466)) ([1522926](https://github.com/kelsin/sync-roms/commit/15229260040af93f291cc5e7a9e75beba492f8b5))
+* **pico8:** retarget a card's exclusions when a cart is upgraded ([#456](https://github.com/kelsin/sync-roms/issues/456)) ([f0faa33](https://github.com/kelsin/sync-roms/commit/f0faa332022da2ee3389596d1bf76ee5f10932ef))
+* **scrape:** check storage before clearing a rom's shared scrape state ([#469](https://github.com/kelsin/sync-roms/issues/469)) ([9abfb0f](https://github.com/kelsin/sync-roms/commit/9abfb0f18c700848e2c258d80844c475573ab6d8))
+* **scrape:** skip a media file that keeps failing instead of the whole rom ([#474](https://github.com/kelsin/sync-roms/issues/474)) ([670984f](https://github.com/kelsin/sync-roms/commit/670984f4f753d74901e98706d3997f02a2ef91dd))
+* **sets:** skip a set file that isn't valid utf-8 ([#452](https://github.com/kelsin/sync-roms/issues/452)) ([f76a497](https://github.com/kelsin/sync-roms/commit/f76a49746190d83c7e278600113008685096e77c))
+* **shared:** tag the mirror with the write's own tag ([#458](https://github.com/kelsin/sync-roms/issues/458)) ([c9b7ad0](https://github.com/kelsin/sync-roms/commit/c9b7ad05a466a9913d8861f4ab57e203328ee601))
+* **spruce:** keep the owned collections when collections.json can't be read ([#435](https://github.com/kelsin/sync-roms/issues/435)) ([4519bb7](https://github.com/kelsin/sync-roms/commit/4519bb7ceed0269a8e16a1bcf5f627d227329db8))
+* **spruce:** read saves and states from their core folders ([#441](https://github.com/kelsin/sync-roms/issues/441)) ([c5a5c8a](https://github.com/kelsin/sync-roms/commit/c5a5c8a744bc51b62d0ec851ba1ac3edb51ef57a))
+* **themes:** remove collection art sync wrote once its collection is gone ([#471](https://github.com/kelsin/sync-roms/issues/471)) ([dfbe173](https://github.com/kelsin/sync-roms/commit/dfbe173f2d6f6935aba7df66e617e646acff7408))
+* **upload:** leave a card's disc and media folders out of uploads ([#460](https://github.com/kelsin/sync-roms/issues/460)) ([f8ff0ac](https://github.com/kelsin/sync-roms/commit/f8ff0ac3715b183f5dd8292517cf686117f1270e))
+
+
+### :rewind: Reverts
+
+* install RAOfflineProxy on spruce cards ([#447](https://github.com/kelsin/sync-roms/issues/447)) ([67c0b18](https://github.com/kelsin/sync-roms/commit/67c0b183c2960bd54b220827ea4db56bce4aa8d9))
+
+
+### :book: Documentation
+
+* **guide:** add the steps sync-roms needs on each device ([#442](https://github.com/kelsin/sync-roms/issues/442)) ([61c68d8](https://github.com/kelsin/sync-roms/commit/61c68d8026659094004fe51d64c27412edf49b9c))
+
+
+### :traffic_light: Tests
+
+* **esde:** guard favorites already in a card's gamelists ([#434](https://github.com/kelsin/sync-roms/issues/434)) ([eac43bb](https://github.com/kelsin/sync-roms/commit/eac43bbbc352af5b1f0ccde0ee7f105d828039f7))
+
 ## [3.18.0](https://github.com/kelsin/sync-roms/compare/v3.17.0...v3.18.0) (2026-11-20)
 
 
