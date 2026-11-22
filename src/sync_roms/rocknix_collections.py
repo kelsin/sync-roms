@@ -5,7 +5,8 @@ ROCKNIX's EmulationStation reads custom collections and its settings only from i
 card's ROM folder (on the device always /storage/roms, the card's roms/ bind-mounted there) and puts SCRIPT in Ports;
 run there, it copies them to EmulationStation's folder, lists them in CollectionSystemsCustom, turns on the Art Book Next
 art sync put in ART_DIR, and restarts EmulationStation (which keeps its settings in memory and doesn't save them when
-stopped), so they show. It only removes or unlists collections it installed itself (recorded on the device)."""
+stopped), so they show. It only removes or unlists collections it installed itself (recorded on the device), and turns
+the art off again only for those, once sync took their art off the card."""
 import os
 
 from . import store
@@ -72,6 +73,11 @@ def put(name, value):
         text = text[:end] + "\t" + line + "\n" + text[end:]
 
 
+def drop(name):
+    global text
+    text = re.sub(r"[ \t]*" + entry(name).pattern + r"\n?", "", text)
+
+
 try:
     with open(manifest, encoding="utf-8") as f:
         installed = [n for n in f.read().split("\n") if n]
@@ -106,6 +112,11 @@ put("CollectionSystemsCustom", ",".join(enabled + [n for n in new if n not in en
 theme = get("ThemeSet") or ""
 if theme in ("", "system-theme") or "art-book-next" in theme:  # system-theme is ROCKNIX's link to Art Book Next
     with_art = False
+    for name in installed:  # a collection this installed whose art sync took off the card
+        for option, path in (("system-view-artwork", os.path.join(art, "artwork", name + ".png")),
+                             ("system-logos", os.path.join(art, "logos", name + ".svg"))):
+            if not os.path.isfile(path) and get("subset.%s.%s" % (name, option)) == "custom":
+                drop("subset.%s.%s" % (name, option))
     for name in new:
         if os.path.isfile(os.path.join(art, "artwork", name + ".png")):
             put("subset.%s.system-view-artwork" % name, "custom")

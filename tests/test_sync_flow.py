@@ -913,14 +913,50 @@ class SyncFlowTest(unittest.TestCase):
     def test_a_collection_with_art_but_no_games_on_the_card_gets_none(self):
         installed = []
         self.run_sync(cards={"collections": ["favs"], "surprise": False}, colls=[{**FAVS, "art": "rpg"}],
-                      extra=((cli.themeart, "install", lambda *a: installed.append(a)),))
-        self.assertEqual(installed, [])
+                      extra=((cli.themeart, "install", lambda layout, base, arts: installed.append(arts)),))
+        self.assertEqual(installed, [{}])  # still run: it removes the art sync-roms wrote before
 
     def test_collections_without_art_get_none(self):
         installed = []
         self.run_sync(cards={"collections": ["favs"], "surprise": False}, colls=[FAVS], files=["ROMs/gba/Game.zip"],
-                      extra=((cli.themeart, "install", lambda *a: installed.append(a)),))
-        self.assertEqual(installed, [])
+                      extra=((cli.themeart, "install", lambda layout, base, arts: installed.append(arts)),))
+        self.assertEqual(installed, [{}])
+
+    def test_the_last_collection_s_theme_art_is_removed_with_it(self):
+        def prepare(card_dir):
+            self.copy = os.path.join(card_dir, "ES-DE", "themes", cli.themeart.ESDE_COPY)
+            for rel in (cli.themeart.ESDE_OWNED, os.path.join("favs", "theme.xml"), os.path.join("snes", "theme.xml")):
+                os.makedirs(os.path.dirname(os.path.join(self.copy, rel)), exist_ok=True)
+                with open(os.path.join(self.copy, rel), "w") as f:
+                    f.write("favs\n")
+        code, *_ = self.run_sync(cards={"collections": [], "surprise": False, "frontend_collections": ["Favs"]}, prepare=prepare,
+                                 after=lambda d: sorted(os.listdir(self.copy)))
+        self.assertEqual(code, 0)
+        self.assertEqual(self.after, sorted([cli.themeart.ESDE_OWNED, "snes"]))
+
+    def test_a_dry_run_names_the_theme_art_that_would_be_removed(self):
+        def prepare(card_dir):
+            self.copy = os.path.join(card_dir, "ES-DE", "themes", cli.themeart.ESDE_COPY)
+            for rel in (cli.themeart.ESDE_OWNED, os.path.join("favs", "theme.xml")):
+                os.makedirs(os.path.dirname(os.path.join(self.copy, rel)), exist_ok=True)
+                with open(os.path.join(self.copy, rel), "w") as f:
+                    f.write("favs\n")
+        for cards, said in (({}, True), ({"theme": False}, False)):
+            _, out, *_ = self.run_sync(cards={"collections": [], "surprise": False, "frontend_collections": ["Favs"], **cards},
+                                       prepare=prepare, dry_run=True, after=lambda d: sorted(os.listdir(self.copy)))
+            self.assertEqual("would remove the art for favs" in out, said, cards)
+            self.assertEqual(self.after, sorted([cli.themeart.ESDE_OWNED, "favs"]))
+
+    def test_theme_off_leaves_the_theme_art_alone(self):
+        def prepare(card_dir):
+            self.copy = os.path.join(card_dir, "ES-DE", "themes", cli.themeart.ESDE_COPY)
+            for rel in (cli.themeart.ESDE_OWNED, os.path.join("favs", "theme.xml")):
+                os.makedirs(os.path.dirname(os.path.join(self.copy, rel)), exist_ok=True)
+                with open(os.path.join(self.copy, rel), "w") as f:
+                    f.write("favs\n")
+        self.run_sync(cards={"collections": [], "surprise": False, "frontend_collections": ["Favs"], "theme": False},
+                      prepare=prepare, after=lambda d: sorted(os.listdir(self.copy)))
+        self.assertEqual(self.after, sorted([cli.themeart.ESDE_OWNED, "favs"]))
 
     def test_surprise_off_removes_its_collection_file(self):
         def prepare(card_dir):

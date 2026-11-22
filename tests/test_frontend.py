@@ -162,6 +162,14 @@ class Enabled(unittest.TestCase):
         self.assertEqual(frontend.get_string(old, name), "custom")
         self.assertEqual(frontend.set_string(old, "knulli", name, "custom"), old.replace("&", "&amp;"))
 
+    def test_removing_a_setting_finds_its_name_escaped_or_not(self):
+        name = "subset.Mario & Sonic.system-view-artwork"
+        kept = '\t<string name="subset.Mario.system-view-artwork" value="custom" />\n'
+        for written in (name.replace("&", "&amp;"), name):  # as sync-roms writes it now, and as it did before
+            text = f'<config>\n{kept}\t<string name="{written}" value="custom" />\n</config>\n'
+            self.assertEqual(frontend.remove_string(text, name), f'<config>\n{kept}</config>\n', written)
+        self.assertEqual(frontend.remove_string(f'<config>\n{kept}</config>\n', name), f'<config>\n{kept}</config>\n')
+
     def test_a_name_escaped_the_way_emulationstation_writes_it_is_replaced(self):
         name = "subset.Kel's R&B.system-logos"  # ES escapes the & and leaves the apostrophe
         text = '<config>\n\t<string name="subset.Kel\'s R&amp;B.system-logos" value="custom" />\n</config>\n'
@@ -475,6 +483,25 @@ class Rocknix(unittest.TestCase):
                             ("UseCustomCollectionsSystemEx", "false")):
             self.assertEqual(frontend.get_string(settings, name), value, name)
         self.assertIsNone(frontend.get_string(settings, "subset.東方.system-logos"))  # no logo: the theme shows the name
+
+    def test_the_script_turns_off_the_art_sync_took_off_the_card(self):
+        games = ["/storage/roms/snes/A.sfc"]
+        self.stage({"Favs": games, "Old": games, "Plain": games})
+        themeart.install("rocknix", self.base, {"Favs": "surprise", "Old": "rpg", "Plain": "horror"})
+        self.run_script()
+        self.write_settings(self.es_file("es_settings.cfg").split("<config>\n")[1].split("</config>")[0]
+                            + '\t<string name="subset.Mine.system-view-artwork" value="custom" />\n')
+        self.stage({"Favs": games, "Plain": games}, ["Favs", "Old", "Plain"])  # Old is gone, Plain lost its art
+        themeart.install("rocknix", self.base, {"Favs": "surprise"})
+        self.run_script()
+        settings = self.es_file("es_settings.cfg")
+        for name in ("subset.Old.system-view-artwork", "subset.Old.system-logos", "subset.Plain.system-view-artwork",
+                     "subset.Plain.system-logos"):
+            self.assertIsNone(frontend.get_string(settings, name), name)
+        for name in ("subset.Favs.system-view-artwork", "subset.Favs.system-logos", "subset.Mine.system-view-artwork"):
+            self.assertEqual(frontend.get_string(settings, name), "custom", name)
+        self.assertEqual(frontend.get_string(settings, "CollectionSystemsCustom"), "Favs,Plain")
+        self.assertTrue(settings.endswith("</config>\n"))
 
     def test_the_script_leaves_another_theme_and_choices_already_made_alone(self):
         self.stage({"Favs": ["/storage/roms/snes/A.sfc"]})
