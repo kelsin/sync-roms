@@ -48,10 +48,7 @@ class Install(helpers.StorageDir):
     def snapshot(self):
         return sorted(os.path.join(d, f) for d, _, fs in os.walk(self.card) for f in fs)
 
-    def touch(self, path, data=b"x"):
-        os.makedirs(os.path.dirname(path), exist_ok=True)
-        with open(path, "wb") as f:
-            f.write(data)
+    touch = staticmethod(helpers.touch)
 
     def test_other_layouts_get_nothing(self):
         self.put(P + V46, b"new")
