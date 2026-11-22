@@ -178,6 +178,15 @@ class GamesTest(CardCmd):
         self.assertEqual(saved["nes"], {"full_system": True})
         self.assertEqual(saved["gba"][0]["bucket"], "gba/A.zip")
 
+    def test_import_adds_a_game_listed_twice_once(self):
+        path = self.path("list.txt")
+        with open(path, "w") as f:
+            f.write("gba/Foo.zip\ngba/Foo.zip\n")
+        code, out, _ = self.run_cmd("games", "import", path)
+        self.assertEqual(code, 0)
+        self.assertEqual([g["bucket"] for g in self.games()["gba"]], ["gba/Foo.zip"])
+        self.assertEqual(out.count("+ gba/Foo.zip"), 1)
+
     def test_export_and_import_carry_collections_and_frontend_names(self):
         from sync_roms import collections
         collections.save_collection({"id": "favs", "name": "Favs", "games": []})
