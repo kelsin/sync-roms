@@ -63,7 +63,7 @@ def main():
     metadata, stored = {}, set()
     for s in store.repo_json("systems"):
         name = s["bucket"]
-        stored.update(k for k in inventory.files(f"{name}/", sizes=False) if not k.endswith("/"))
+        stored.update(store.folder_keys(name, say=False))
         try:
             metadata[name] = scrape_online.load_metadata(name)
         except ValueError as e:

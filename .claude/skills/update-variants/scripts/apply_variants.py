@@ -12,7 +12,7 @@ import json
 import os
 import sys
 
-from sync_roms import runtime, s3, shared, store, usersettings
+from sync_roms import runtime, s3, scrape_plan, shared, store, usersettings
 
 CHECKED = "variants-checked.json"  # a storage key
 
@@ -69,8 +69,7 @@ def main(path):
             for k in [a["bucket"], *a.get("files", [])]:
                 checked[k] = f"variant of {a['game']}"
 
-    shared.update(CHECKED, json.loads, {}, change,
-                  lambda c: json.dumps(c, indent=1, ensure_ascii=False, sort_keys=True))
+    shared.update(CHECKED, json.loads, {}, change, scrape_plan.dump_json)
     print(f"Sets changed: {', '.join(sorted(touched)) or 'none'}")
 
 
