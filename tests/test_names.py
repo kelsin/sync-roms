@@ -97,6 +97,18 @@ class LocalCopyTest(Names):
         self.assertEqual(title, "Stand Alone")
         self.assertIn("names", err)
 
+    def test_metadata_that_is_not_an_object_uses_local_copy_with_warning(self):
+        self.metadata({"zzstand.zip": {"name": "Stand Alone"}}, mtime=1_000_000_000)
+        names.title("mame/zzstand.zip")
+        for bad in (["zzstand.zip"], "zzstand.zip", 5, None):
+            with self.subTest(bad=bad):
+                names.reset()
+                self.metadata(bad, mtime=2_000_000_000)
+                title, err = self.lookup("mame/zzstand.zip")
+                self.assertEqual(title, "Stand Alone")
+                self.assertIn("Couldn't check scraped names for mame (scrapes/mame/metadata.json isn't a JSON object); "
+                              "using the local copy", err)
+
     def test_metadata_read_once_per_run(self):
         self.metadata({"zzstand.zip": {"name": "Stand Alone"}})
         with mock.patch.object(shared, "read", wraps=shared.read) as read:

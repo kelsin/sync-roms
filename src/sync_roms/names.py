@@ -56,9 +56,7 @@ def _load(system):
                     raise
                 tag = None
             else:
-                data = json.loads(text)
-                if not isinstance(data, dict):
-                    raise ValueError(f"{key} isn't a JSON object")
+                data = scrape_plan.parse_metadata(text, key)
                 found = {rom: v["name"] for rom, v in data.items()
                          if isinstance(v, dict) and isinstance(v.get("name"), str) and v["name"]}
                 local[system] = {"tag": tag, "names": found}
