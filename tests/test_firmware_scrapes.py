@@ -185,9 +185,7 @@ class FavoritesKeptTest(unittest.TestCase):
     """ES-DE keeps favorites in its gamelists; nothing a sync does may drop one already on the card."""
 
     def setUp(self):
-        self._tmp = tempfile.TemporaryDirectory()
-        self.addCleanup(self._tmp.cleanup)
-        self.path = os.path.join(self._tmp.name, "gamelist.xml")
+        self.path = os.path.join(self.enterContext(tempfile.TemporaryDirectory()), "gamelist.xml")
         with open(self.path, "w") as f:
             f.write(FAVORITED)
 

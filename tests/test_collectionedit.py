@@ -392,9 +392,7 @@ class FolderLister(unittest.TestCase):
 class Editor(DataDir):
     def setUp(self):
         super().setUp()
-        patch = mock.patch.object(edit, "note")  # what the editor says at its end
-        self.note = patch.start()
-        self.addCleanup(patch.stop)
+        self.note = self.enterContext(mock.patch.object(edit, "note"))  # what the editor says at its end
         self.asked, self.reviewed = [], []  # the review's questions, and the changes it showed
 
     def run_editor(self, picks, asks=(), confirm=True, edit_one=None, choose=()):

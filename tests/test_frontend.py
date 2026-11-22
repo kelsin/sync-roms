@@ -180,9 +180,7 @@ class Enabled(unittest.TestCase):
 
 class Plan(unittest.TestCase):
     def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory()
-        self.addCleanup(self.tmp.cleanup)
-        self.base = self.tmp.name
+        self.base = self.enterContext(tempfile.TemporaryDirectory())
 
     def put(self, path, text):
         os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -309,9 +307,7 @@ class Wanted(unittest.TestCase):
 
 class NextUI(unittest.TestCase):
     def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory()
-        self.addCleanup(self.tmp.cleanup)
-        self.base = self.tmp.name
+        self.base = self.enterContext(tempfile.TemporaryDirectory())
 
     def test_path_and_line(self):
         self.assertEqual(frontend.collection_path("nextui", self.base, "Favs"),
@@ -372,10 +368,9 @@ class Rocknix(unittest.TestCase):
     """ROCKNIX's EmulationStation reads custom collections from internal storage only: sync stages them in the card's
     ROM folder, and an install script in Ports copies them there."""
     def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory()
-        self.addCleanup(self.tmp.cleanup)
-        self.base = os.path.join(self.tmp.name, "card")
-        self.es = os.path.join(self.tmp.name, "storage", ".config", "emulationstation")
+        self.tmp = self.enterContext(tempfile.TemporaryDirectory())
+        self.base = os.path.join(self.tmp, "card")
+        self.es = os.path.join(self.tmp, "storage", ".config", "emulationstation")
         self.script = os.path.join(self.base, "roms", "ports", "Install Collections.sh")
 
     def stage(self, wanted, owned=()):
@@ -384,11 +379,11 @@ class Rocknix(unittest.TestCase):
 
     def run_script(self):
         """Run the card's install script as ROCKNIX would (bash, from Ports), with ES's folder at self.es."""
-        bin_dir = os.path.join(self.tmp.name, "bin")
+        bin_dir = os.path.join(self.tmp, "bin")
         os.makedirs(bin_dir, exist_ok=True)
         if not os.path.exists(os.path.join(bin_dir, "python3")):
             os.symlink(sys.executable, os.path.join(bin_dir, "python3"))
-        env = {"PATH": bin_dir, "SYNC_ROMS_ES_DIR": self.es, "HOME": self.tmp.name}
+        env = {"PATH": bin_dir, "SYNC_ROMS_ES_DIR": self.es, "HOME": self.tmp}
         return subprocess.run([shutil.which("bash"), self.script], env=env, capture_output=True, text=True,
                               check=True).stdout
 

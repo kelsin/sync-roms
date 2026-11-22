@@ -153,9 +153,7 @@ class CardFoldersTest(unittest.TestCase):
 
 class IgnoredUploadTest(unittest.TestCase):
     def setUp(self):
-        p = mock.patch.object(ignore, "_keys", frozenset({"gba/b.gba"}))
-        p.start()
-        self.addCleanup(p.stop)
+        self.enterContext(mock.patch.object(ignore, "_keys", frozenset({"gba/b.gba"})))
 
     def test_plan_rom_upload_skips_ignored(self):
         with tempfile.TemporaryDirectory() as root:
@@ -202,11 +200,9 @@ class ReplaceContentTest(unittest.TestCase):
     """upload --replace on a storage folder: raw files that only share a size are not a rename."""
 
     def setUp(self):
-        self.storage = tempfile.TemporaryDirectory()
-        self.addCleanup(self.storage.cleanup)
-        for p in (mock.patch.object(runtime, "ROOT", self.storage.name), mock.patch.object(runtime, "_mirror_root", None)):
-            p.start()
-            self.addCleanup(p.stop)
+        self.storage = self.enterContext(tempfile.TemporaryDirectory())
+        for p in (mock.patch.object(runtime, "ROOT", self.storage), mock.patch.object(runtime, "_mirror_root", None)):
+            self.enterContext(p)
 
     def replace(self, local, remote):
         with tempfile.TemporaryDirectory() as root:
@@ -214,8 +210,8 @@ class ReplaceContentTest(unittest.TestCase):
                 with open(os.path.join(root, rel), "wb") as f:
                     f.write(data)
             for rel, data in remote.items():
-                os.makedirs(os.path.join(self.storage.name, "gba"), exist_ok=True)
-                with open(os.path.join(self.storage.name, "gba", rel), "wb") as f:
+                os.makedirs(os.path.join(self.storage, "gba"), exist_ok=True)
+                with open(os.path.join(self.storage, "gba", rel), "wb") as f:
                     f.write(data)
             listing = {rel: (len(data), "-") for rel, data in remote.items()}
             out = io.StringIO()
@@ -260,18 +256,16 @@ class OverwriteListTest(unittest.TestCase):
     rest counted."""
 
     def setUp(self):
-        self.storage = tempfile.TemporaryDirectory()
-        self.addCleanup(self.storage.cleanup)
-        for p in (mock.patch.object(runtime, "ROOT", self.storage.name), mock.patch.object(runtime, "_mirror_root", None)):
-            p.start()
-            self.addCleanup(p.stop)
+        self.storage = self.enterContext(tempfile.TemporaryDirectory())
+        for p in (mock.patch.object(runtime, "ROOT", self.storage), mock.patch.object(runtime, "_mirror_root", None)):
+            self.enterContext(p)
 
     def overwrites(self, replace):
         names = [f"{i:02}.gba" for i in range(12)]
         with tempfile.TemporaryDirectory() as root:
             for name in names:
                 touch(root, name, 10)
-                touch(self.storage.name, f"gba/{name}", 20)
+                touch(self.storage, f"gba/{name}", 20)
             args = argparse.Namespace(upload=root, replace=replace, dry_run=True)
             with mock.patch.object(store, "load_manifest", lambda: {"systems": SYSTEMS}), \
                     mock.patch.object(upload.picker, "filter_list", lambda *a, **k: 0), \
@@ -292,13 +286,11 @@ class RenameChainTest(unittest.TestCase):
     """upload --replace on a storage folder: renames through a name another rename moves away never overwrite it."""
 
     def setUp(self):
-        self.storage = tempfile.TemporaryDirectory()
-        self.addCleanup(self.storage.cleanup)
-        for p in (mock.patch.object(runtime, "ROOT", self.storage.name), mock.patch.object(runtime, "_mirror_root", None),
+        self.storage = self.enterContext(tempfile.TemporaryDirectory())
+        for p in (mock.patch.object(runtime, "ROOT", self.storage), mock.patch.object(runtime, "_mirror_root", None),
                   mock.patch.object(runtime, "WORKERS", 1)):  # one worker runs the moves in the order they are given
-            p.start()
-            self.addCleanup(p.stop)
-        self.folder = os.path.join(self.storage.name, "gba")
+            self.enterContext(p)
+        self.folder = os.path.join(self.storage, "gba")
         os.makedirs(self.folder)
 
     def stored(self):

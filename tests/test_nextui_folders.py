@@ -13,9 +13,8 @@ SNES_OLD, SNES_NEW = "Super Nintendo (SFC)", "Super Nintendo Entertainment Syste
 
 class MigrateTest(unittest.TestCase):
     def setUp(self):
-        tmp = tempfile.TemporaryDirectory()
-        self.addCleanup(tmp.cleanup)
-        self.roms = os.path.join(tmp.name, "Roms")
+        tmp = self.enterContext(tempfile.TemporaryDirectory())
+        self.roms = os.path.join(tmp, "Roms")
 
     def test_an_old_folder_is_renamed_with_its_contents(self):
         touch(os.path.join(self.roms, SNES_OLD, "game.sfc"))

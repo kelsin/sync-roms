@@ -26,12 +26,8 @@ class Budget(DataDir):
         super().setUp()
         self.cache = {"gba/": SIZES, "scrapes/gba/": SCRAPES}
         for target, new in (("cached", lambda p: self.cache.get(p)), ):
-            p = mock.patch.object(inventory, target, new)
-            p.start()
-            self.addCleanup(p.stop)
-        p = mock.patch("sync_roms.store.load_sets", lambda: [SET])
-        p.start()
-        self.addCleanup(p.stop)
+            self.enterContext(mock.patch.object(inventory, target, new))
+        self.enterContext(mock.patch("sync_roms.store.load_sets", lambda: [SET]))
 
     def usage(self, card, layout="onion"):
         return budget.system_usage({"layout": layout, **card}, GBA)
@@ -184,9 +180,7 @@ class ScrapeIndex(DataDir):
         real = inventory.cached
         for target, name, new in ((inventory, "current", lambda: self.tree), (ignore, "keys", frozenset),
                                   (inventory, "cached", lambda p: self.asked.append(p) or real(p))):
-            p = mock.patch.object(target, name, new)
-            p.start()
-            self.addCleanup(p.stop)
+            self.enterContext(mock.patch.object(target, name, new))
 
     def costs(self, *keys):
         return budget.game_costs({"layout": "onion"}, GBA, list(keys))[0]

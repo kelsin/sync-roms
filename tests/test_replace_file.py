@@ -11,9 +11,7 @@ from sync_roms import cardfs, m3u, scrape_plan, store, themeart  # noqa: E402
 
 class ReplaceFileTest(unittest.TestCase):
     def setUp(self):
-        self._tmp = tempfile.TemporaryDirectory()
-        self.dir = self._tmp.name
-        self.addCleanup(self._tmp.cleanup)
+        self.dir = self.enterContext(tempfile.TemporaryDirectory())
         self.path = os.path.join(self.dir, "gamelist.xml")
 
     def read(self, path=None):

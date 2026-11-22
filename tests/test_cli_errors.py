@@ -216,12 +216,9 @@ class ExitCodeTest(Isolated):
 class MissingStorageOrCardTest(Isolated):
     def setUp(self):
         super().setUp()
-        tmp = tempfile.TemporaryDirectory()
-        self.addCleanup(tmp.cleanup)
-        self.tmp = tmp.name
+        self.tmp = self.enterContext(tempfile.TemporaryDirectory())
         for p in (mock.patch.object(runtime, "ROOT", None), mock.patch.object(ui, "ASSUME_YES", False)):
-            p.start()
-            self.addCleanup(p.stop)
+            self.enterContext(p)
 
     def test_missing_storage_folder_stops_a_sync_before_planning(self):
         gone = os.path.join(self.tmp, "roms")

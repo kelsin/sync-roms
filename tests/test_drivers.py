@@ -69,10 +69,9 @@ def entry(i, **extra):
 
 class Refresh(unittest.TestCase):
     def setUp(self):
-        tmp = tempfile.TemporaryDirectory()
-        self.addCleanup(tmp.cleanup)
-        self.storage = os.path.join(tmp.name, "storage")
-        self.mirror = os.path.join(tmp.name, "mirror")
+        tmp = self.enterContext(tempfile.TemporaryDirectory())
+        self.storage = os.path.join(tmp, "storage")
+        self.mirror = os.path.join(tmp, "mirror")
         os.makedirs(self.storage)  # a storage folder that isn't there is an unmounted share
         self.warned, self.calls, self.downloads, self.order = [], [], [], []
         self.real_put_file, self.real_put_text = s3.put_file, s3.put_text
@@ -81,8 +80,7 @@ class Refresh(unittest.TestCase):
                   mock.patch.object(ui, "warn", self.warned.append), mock.patch.object(github, "json", self.fake_json),
                   mock.patch.object(github, "get", self.fake_get), mock.patch.object(s3, "put_file", self.put_file),
                   mock.patch.object(s3, "put_text", self.put_text)):
-            p.start()
-            self.addCleanup(p.stop)
+            self.enterContext(p)
         self.body = b"PK\x05\x06" + b"\0" * 18  # an empty zip
 
     def fake_json(self, url):
@@ -244,15 +242,13 @@ class Refresh(unittest.TestCase):
 
 class Prune(unittest.TestCase):
     def setUp(self):
-        tmp = tempfile.TemporaryDirectory()
-        self.addCleanup(tmp.cleanup)
-        self.dir = os.path.join(tmp.name, "Drivers")
+        tmp = self.enterContext(tempfile.TemporaryDirectory())
+        self.dir = os.path.join(tmp, "Drivers")
         os.makedirs(self.dir)
         self.cards = {"SD": {"device": "rp5", "layout": "esde"}}
         for p in (mock.patch.object(store, "load_cards", lambda: {k: dict(v) for k, v in self.cards.items()}),
                   mock.patch.object(store, "write_cards", self.write_cards)):
-            p.start()
-            self.addCleanup(p.stop)
+            self.enterContext(p)
 
     def write_cards(self, cards):
         self.cards = cards

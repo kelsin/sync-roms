@@ -179,8 +179,7 @@ class Download(helpers.StorageDir):
         super().setUp()
         for p in (mock.patch.object(usersettings, "ensure_bucket"),
                   mock.patch.object(ignore, "keys", return_value=frozenset())):
-            p.start()
-            self.addCleanup(p.stop)
+            self.enterContext(p)
 
     def serve(self, pages, carts=None, errors=()):
         """bbs._fetch serving listing pages in turn and carts by URL (PNG by default); URLs in errors raise."""

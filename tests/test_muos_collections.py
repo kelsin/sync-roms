@@ -48,9 +48,7 @@ class EntryTests(unittest.TestCase):
 
 class PlanTests(unittest.TestCase):
     def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory()
-        self.addCleanup(self.tmp.cleanup)
-        self.base = self.tmp.name
+        self.base = self.enterContext(tempfile.TemporaryDirectory())
 
     def folder(self, name):
         path = os.path.join(self.base, "MUOS", "info", "collection", name)

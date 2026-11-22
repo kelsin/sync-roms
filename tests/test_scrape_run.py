@@ -123,8 +123,7 @@ class RunBase(StorageDir):
                   mock.patch.object(scrape_plan, "make_art", side_effect=lambda src, dst, box=None: shutil.copyfile(src, dst)),
                   mock.patch.object(upload, "ProcessPoolExecutor", ThreadPoolExecutor),  # so the stub reaches the conversion
                   mock.patch.object(scrape_online, "RETRY_WAIT", 0)):
-            p.start()
-            self.addCleanup(p.stop)
+            self.enterContext(p)
         threads = set(threading.enumerate())
         self.addCleanup(self.join_threads, threads)  # runs before the patches stop
 
@@ -1313,9 +1312,7 @@ class BigFileHashTest(RunBase):
         super().setUp()
         patches = (mock.patch.object(self.client, "lookup", wraps=self.client.lookup),
                    mock.patch.object(scrape_online, "hash_file", wraps=scrape_online.hash_file))
-        self.lookup, self.hash_file = (p.start() for p in patches)
-        for p in patches:
-            self.addCleanup(p.stop)
+        self.lookup, self.hash_file = (self.enterContext(p) for p in patches)
 
     def sent(self):
         return [c.kwargs.get("md5") for c in self.lookup.call_args_list]

@@ -125,9 +125,7 @@ class GameThumbTests(unittest.TestCase):
         cache = os.path.join(store.cache_dir(), "preview-cache")
         shutil.rmtree(cache, ignore_errors=True)
         self.addCleanup(shutil.rmtree, cache, ignore_errors=True)
-        tmp = tempfile.TemporaryDirectory()
-        self.addCleanup(tmp.cleanup)
-        self.root = tmp.name
+        self.root = self.enterContext(tempfile.TemporaryDirectory())
         self.source = os.path.join(self.root, self.KEY)
         os.makedirs(os.path.dirname(self.source))
         self.write((600, 900), "RGBA")

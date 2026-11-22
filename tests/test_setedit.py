@@ -108,9 +108,7 @@ class Save(StorageDir):
         super().setUp()
         storage_sets(self, {"keep": {"name": "Keep", "games": games()}, "edit": {"name": "Edit", "games": games()},
                             "gone": {"name": "Gone", "games": games()}}, self.root)
-        patch = mock.patch.object(edit, "note")
-        self.note = patch.start()
-        self.addCleanup(patch.stop)
+        self.note = self.enterContext(mock.patch.object(edit, "note"))
 
     def path(self, sid):
         return os.path.join(self.root, "sets", sid + ".json")
@@ -218,9 +216,7 @@ class SaveStale(StorageDir):
         super().setUp()
         storage_sets(self, {"keep": {"name": "Keep", "games": games()}, "edit": {"name": "Edit", "games": games()},
                             "gone": {"name": "Gone", "games": games()}}, self.root)
-        patch = mock.patch.object(edit, "note")
-        self.note = patch.start()
-        self.addCleanup(patch.stop)
+        self.note = self.enterContext(mock.patch.object(edit, "note"))
 
     def listing(self):
         folder = os.path.join(self.root, "sets")
@@ -427,9 +423,7 @@ class SeriesEditor(unittest.TestCase):
 
 class Editor(unittest.TestCase):
     def setUp(self):
-        patch = mock.patch.object(edit, "note")  # what the editor says at its end
-        self.note = patch.start()
-        self.addCleanup(patch.stop)
+        self.note = self.enterContext(mock.patch.object(edit, "note"))  # what the editor says at its end
         self.addCleanup(setattr, store, "_sets", "[]")  # edit_sets resets the sets; back to none, as isolate leaves it
 
     def test_new_set_flow_saves(self):
