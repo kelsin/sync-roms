@@ -626,7 +626,7 @@ On the Cards list, `v` changes a card's device and firmware, `r` renames a card 
 ```bash
 sync-roms games add gba 'Metroid*' --card SD      # a name, SYSTEM/name, or a glob matched against storage
 sync-roms games remove gba 'Metroid Fusion.zip' --card SD
-sync-roms games full psx on --card SD              # sync a whole system
+sync-roms games full psx on --card SD              # sync a whole system (off brings its game list back)
 sync-roms games sets add pinball --card SD
 sync-roms games list --json --card SD
 sync-roms games export --card SD > list.txt      # SYSTEM/file per line, SYSTEM/* for a full system, then @collections ID, @frontend_collections NAME, @surprise false (only when Surprise is off) and @surprises SYSTEM/file (one per surprise) lines

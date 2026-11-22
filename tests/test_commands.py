@@ -178,6 +178,26 @@ class GamesTest(CardCmd):
         self.assertEqual(saved["nes"], {"full_system": True})
         self.assertEqual(saved["gba"][0]["bucket"], "gba/A.zip")
 
+    def test_full_keeps_the_game_list_and_off_brings_it_back(self):
+        self.run_cmd("games", "add", "gba", "B.zip", "A.zip")
+        listed = self.games()["gba"]
+        code, out, _ = self.run_cmd("games", "full", "gba", "on")
+        self.assertEqual(code, 0)
+        self.assertIn("+ gba (full system)", out)
+        self.assertEqual(self.games()["gba"], {"full_system": True, "games": listed})  # as cardedit.toggle_full saves it
+        self.assertEqual(self.run_cmd("games", "full", "gba", "on")[1].strip(), "Nothing to change.")
+        self.assertEqual(self.games()["gba"], {"full_system": True, "games": listed})
+        self.assertEqual(json.loads(self.run_cmd("games", "list", "--json")[1]),
+                         {"full_systems": ["gba"], "sets": [], "games": []})
+        self.run_cmd("games", "full", "gba", "off", "--dry-run")
+        self.assertEqual(self.games()["gba"], {"full_system": True, "games": listed})
+        code, out, _ = self.run_cmd("games", "full", "gba", "off")
+        self.assertEqual(code, 0)
+        self.assertIn("- gba (full system)", out)
+        self.assertEqual(self.games()["gba"], listed)
+        self.assertEqual(self.run_cmd("games", "full", "gba", "off")[1].strip(), "Nothing to change.")
+        self.assertEqual(self.games()["gba"], listed)
+
     def test_import_adds_a_game_listed_twice_once(self):
         path = self.path("list.txt")
         with open(path, "w") as f:

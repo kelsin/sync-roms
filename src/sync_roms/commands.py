@@ -255,12 +255,16 @@ def games_remove(args):
 def games_full(args):
     need_system(args.system)
     raw, save = load_target(args.card)
-    now = isinstance(raw.get(args.system), dict)
-    if args.state == "on" and not now:
-        raw[args.system] = {"full_system": True}
+    entry = raw.get(args.system)
+    now = isinstance(entry, dict)
+    if args.state == "on" and not now:  # the game list stays in the entry for `off`, as cardedit.toggle_full keeps it
+        raw[args.system] = {"full_system": True, **({"games": entry} if isinstance(entry, list) and entry else {})}
         return finish(args, raw, save, [("+", f"{args.system} (full system)")])
     if args.state == "off" and now:
-        del raw[args.system]
+        if entry.get("games"):
+            raw[args.system] = entry["games"]
+        else:
+            del raw[args.system]
         return finish(args, raw, save, [("-", f"{args.system} (full system)")])
     return finish(args, raw, save, [])
 
