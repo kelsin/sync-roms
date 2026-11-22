@@ -5,7 +5,7 @@ Interactive script that downloads ROMs and the BIOS files they need from your st
 The first run asks where storage is and saves the answer in `settings.json` in the [data folder](#data-folder):
 
 - **A bucket name** is saved as `bucket`. It then asks for an optional custom S3 endpoint URL (blank for AWS), saved as `endpoint`, for S3-compatible storage such as MinIO or Cloudflare R2 (requests then use path-style addressing).
-- **An absolute folder path** (for example a mounted network share, `/Volumes/roms`, or `~/roms`) is saved as `root` and replaces the bucket and AWS entirely, with the same layout (`<system>/…`, `BIOS/…`, `scrapes/…`). An answer with a `/` (other than `s3://…`) or naming an existing folder is a folder, never a bucket name.
+- **An absolute folder path** (a mounted network share, `/Volumes/roms`, or `~/roms`) is saved as `root` and replaces the bucket and AWS entirely, with the same layout (`<system>/…`, `BIOS/…`, `scrapes/…`). An answer with a `/` (other than `s3://…`) or naming an existing folder is a folder, never a bucket name.
 - **With no terminal to ask on**, set `ROMS_BUCKET` or `ROMS_ROOT` (or pass `--bucket` or `--root`).
 
 It can also keep a [local mirror](#local-mirror-mirror) of storage and sync from that. The device setup guide (`sync-roms guide` opens it in a browser) lists the steps to finish a device by hand once its card is synced: apps to install and the frontend, RetroArch and emulator settings to change, for the device and layout you pick.
@@ -43,7 +43,7 @@ Your settings and cards in the data folder are never touched by an install or up
 
 - **python3** (3.12+); boto3, textual and textual-image (which brings Pillow) are installed with the package
 - An AWS profile named **`roms-readonly`** with read access to storage (not needed with a storage folder; set `ROMS_PROFILE` to use a different profile name), defined in `~/.aws/config` and `~/.aws/credentials`
-- Only for `convert`: **7z**, **chdman** and, for `.rar` archives, **unar** (`sync-roms tools install` installs them with Homebrew), plus **extract-xiso** for Xbox (no Homebrew formula: build it from [XboxDev/extract-xiso](https://github.com/XboxDev/extract-xiso) with `cmake -B build && cmake --build build`) and **iso2zar** for Xbox 360 (no formula: build it from [iso2zar](https://codeberg.org/NeverAnswers/iso2zar) with `cargo build --release`)
+- Only for `convert`: **7z** and **chdman**, and optionally **unar** (used for `.rar` when installed; `sync-roms tools install` installs all three with Homebrew), plus **extract-xiso** for Xbox (no Homebrew formula: build it from [XboxDev/extract-xiso](https://github.com/XboxDev/extract-xiso) with `cmake -B build && cmake --build build`) and **iso2zar** for Xbox 360 (no formula: build it from [iso2zar](https://codeberg.org/NeverAnswers/iso2zar) with `cargo build --release`)
 
 ### AWS profiles
 
@@ -61,12 +61,12 @@ sync-roms sync CARD     # or just: sync-roms CARD
 sync-roms               # the current directory is the card
 ```
 
-`CARD` is the root folder of the card (or any folder to sync into); from a clone of the repo, run `uv run sync-roms` in place of `sync-roms`. You pick a device, then the layout, which is the firmware the card is for (a device with only one isn't asked). The layout decides the ROMs and BIOS folders inside `CARD` (`src/sync_roms/data/layouts.json`), and each device lists its layouts as `firmwares` in `devices.json`, the first being the default:
+`CARD` is the root folder of the card (or any folder to sync into); from a clone of the repo, run `uv run --project CLONE sync-roms` in place of `sync-roms`. You pick a device, then the layout, which is the firmware the card is for (a device with only one isn't asked). The layout decides the ROMs and BIOS folders inside `CARD` (`src/sync_roms/data/layouts.json`), and each device lists its layouts as `firmwares` in `devices.json`, the first being the default:
 
 | Firmware | ROMs / BIOS folders | Notes |
 | --- | --- | --- |
 | `esde` | `ROMs/` `BIOS/` | Android devices with ES-DE |
-| `knulli` | `roms/` `bios/` (SD card SHARE partition, `/userdata`) | Default for the Anbernic H700 handhelds (not the RG SP, which doesn't run it, or the RG34XX SP), the Anbernic RG DS Plus, RG353PS, RG353VS and RG503, and the Miyoo Flip |
+| `knulli` | `roms/` `bios/` (SD card SHARE partition, `/userdata`) | Default for the Anbernic H700 handhelds (not the RG SP or RG34XX SP), the Anbernic RG DS Plus, RG353PS, RG353VS and RG503, and the Miyoo Flip |
 | `muos` | `ROMS/` `MUOS/bios/` | [muOS](https://muos.dev/) on the Anbernic H700 handhelds and the RG Vita Pro (its default). Folder names are matched ignoring case and separators |
 | `onion` | `Roms/` `BIOS/` | Miyoo Mini, Mini Plus and Mini Flip, on [Onion](https://onionui.github.io/) |
 | `allium` | `Roms/` `BIOS/` | The same devices, on [Allium](https://github.com/goweiwen/Allium), with the same folders |
@@ -83,7 +83,7 @@ The device and layout you pick are saved in `cards.json` in the [data folder](#d
 
 ### What a sync does
 
-1. **Pick a device and a layout** (a card's first sync). Only the systems that run well on the device are listed: those of the tier it names in `src/sync_roms/data/device-systems.json` (`tiers` lists each tier's systems), adjusted by your own overlay. Its first layout is highlighted. Or choose Full (every system) and any layout. Systems with no folder in the chosen layout are skipped.
+1. **Pick a device and a layout** (a card's first sync). Only the systems that run well on the device are listed: those of the tier it names in `src/sync_roms/data/device-systems.json` (`tiers` is an ordered chain: the first lists its systems, each later one `add`s to the tier before), adjusted by your own overlay. Its first layout is highlighted. Or choose Full (every system) and any layout. Systems with no folder in the chosen layout are skipped.
 2. **Edit the card**: every system with games picked on the card syncs. After the [Surprise](#surprise) step, a sync in a terminal opens the [card editor](#editing-a-cards-games-edit-games) on the card; `Esc` there goes on with the sync. Its bottom line also shows how much a sync would download (`⬇️  12.3 GB to download`: ROMs not on the card yet; scraped files and BIOS aren't counted), updated as you add games, sets and collections.
 3. **Confirm the plan**: a summary shows how many files will be fetched and their total size (e.g. `💿 ROMs: 120 to download (3.4 GB), 5 already present`). Local ROMs no longer in the card's games are listed and deleted first (after you confirm, default no), so the free space shown is accurate. A card file whose name differs from storage's only in case or Unicode form is renamed, and an unwanted one with the name (compared the same way) and size of a missing file is moved to its place; neither is downloaded or deleted. Then the totals (scraped media included, on layouts that take it) and the card's free space are shown and you confirm. When there isn't enough space and nobody can be asked (`--yes`, or no terminal), the sync fails with exit 1.
 4. **ROMs, then BIOS**: ROMs download into the layout's ROMs folder (`<system>/`), then the BIOS files for the card's systems into its BIOS folder (RetroArch system-dir layout). A system's `rom_files` (MAME-style BIOS zips such as `gamate.zip`) are kept in storage's `BIOS/` too, but copied into that system's ROM folder instead, while it has ROMs to sync. Each file prints as soon as it finishes, as `[i/N] ✅ gba/Game.gba` (`i` is the count finished so far, not the file's place in the queue); in a terminal the files downloading right now are listed under the progress bar (fewer when the terminal is short). When the local folder name differs from storage's (e.g. a Knulli device), it prints `[i/N] ✅ genesis → megadrive/Game.md` (storage folder → local folder/file).
@@ -163,7 +163,7 @@ While typing a filter (or a note, which `w` opens in the game list): `^A` `^E` s
 
 ## Commands
 
-Every mode is a command (`sync-roms COMMAND --help` explains one; plain `sync-roms [CARD]` syncs a card):
+Every mode is a command (plain `sync-roms [CARD]` syncs a card):
 
 | Command | Does | Old flag |
 | --- | --- | --- |
@@ -279,7 +279,7 @@ A card is a folder name (the card root's name) with a remembered device, layout 
 | `device`, `layout` | the device id (or `full`) and the layout |
 | `size` | the card's size, from `--size` |
 | `games` | system ids mapped to the games picked there, a multi-disc game with one entry per file |
-| a system in `games` set to `{"full_system": true}` | sync every file in the system's storage folder (subfolders included) instead of a list, so adding a file to storage is enough to publish it. No system is one by default. Toggled by `f` in the card editor (🗂️) or `games full SYSTEM on\|off` |
+| a system in `games` set to `{"full_system": true}` | sync every file in the system's storage folder (subfolders included) instead of a list, so adding a file to storage is enough to publish it. No system is one by default. Toggled by `f` in the card editor (🗂️) or `games full SYSTEM on\|off`; the list the system had stays in the entry as `games` and comes back when it is switched off |
 | `sets` in `games` | ids of sets to sync whole. The reference is live: games added to the set later are synced too, for the systems the card's device can play. `games sets add ID --card NAME` adds one (the card editor's `s` picks a set's games one by one instead) |
 | `excluded` | `{"gba": ["gba/A.zip"]}`: set games this card opts out of, by switching them off (and back on) in a system's game list, where they show as 📦 |
 | `collections` | ids of your collections synced whole; `excluded` never applies to them |
@@ -353,7 +353,7 @@ Add one to a card with `l` in the card editor; a sync then writes it as a custom
 
 #### Theme art
 
-In the collection editor, **Theme art** picks one of the pictures listed in `art.json` (one for each set, under the set's id, and more for genres and the usual kinds of personal collection), drawn in the Outline style of the [Art Book Next](https://github.com/anthonycaccese/art-book-next-es-de) theme (`src/sync_roms/data/themes/art-book-next/art/`; the collection file gets `"art": "<id>"`). `tools/gen_theme_art.py` draws them. When an ES-DE, EmuDeck, Knulli or ROCKNIX card using that theme gets the collection, it shows on its own in the system carousel with that art and a logo of its name, drawn with the theme's logo font (Changa One, SIL Open Font License: `OFL.txt` there). A collection named like a system or one of the frontend's own collections gets no art, and a name the font can't draw (accents are dropped first) gets no logo, so the frontend shows it as text. Where the art goes is listed under [What each layout gets](#what-each-layout-gets).
+In the collection editor, **Theme art** picks one of the pictures listed in `art.json` (one for each set, under the set's id, and more for genres and the usual kinds of personal collection), drawn in the Outline style of the [Art Book Next](https://github.com/anthonycaccese/art-book-next-es-de) theme (`src/sync_roms/data/themes/art-book-next/art/`; the collection file gets `"art": "<id>"`). `tools/gen_theme_art.py` draws them. When an ES-DE, EmuDeck, Knulli or ROCKNIX card using that theme gets the collection, it shows on its own in the system carousel with that art and a logo of its name, drawn with the theme's logo font (Changa One, SIL Open Font License: `OFL.txt` there). A collection named like a system or one of the frontend's own collections gets no art, and a name the font can't draw (accents are dropped first) gets no logo, so the frontend shows it as text.
 
 ### Surprise
 
@@ -373,9 +373,9 @@ Besides ROMs, BIOS and scraped data, a sync writes the card's [collections](#col
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | `esde` | `ES-DE/collections/custom-<Name>.cfg` | in a copy of the theme | collection | zip in `PICO-8/` | APK in `APKs/` | RetroArch | APKs, [GPU drivers](#gpu-drivers) |
 | `emudeck` | as `esde`, on the machine | as `esde`, on the machine | collection | none | none | RetroArch | none |
-| `knulli` | `system/configs/emulationstation/collections/custom-<Name>.cfg` | theme customizations | collection | zip in `roms/pico8/` | `roms/tools/RAOfflineProxy Install.sh` | RetroArch | image for `flash` |
-| `rocknix` | staged on the card, installed from Ports | theme customizations | collection | `pico8_64`, `pico8_dyn`, `pico8.dat` in `roms/pico-8/` | `roms/ports/RAOfflineProxy Install.sh` | RetroArch | image for `flash` |
-| `muos` | `MUOS/info/collection/<Name>/` | in the catalogue | collection | `pico8_64`, `pico8.dat` in `MUOS/bios/pico8/` | `MUOS/application/RAOfflineProxy/` | Pickles | image for `flash` |
+| `knulli` | `system/configs/emulationstation/collections/custom-<Name>.cfg` | theme customizations | collection | zip in `roms/pico8/` | `roms/tools/RAOfflineProxy Install.sh` | RetroArch | none |
+| `rocknix` | staged on the card, installed from Ports | theme customizations | collection | `pico8_64`, `pico8_dyn`, `pico8.dat` in `roms/pico-8/` | `roms/ports/RAOfflineProxy Install.sh` | RetroArch | none |
+| `muos` | `MUOS/info/collection/<Name>/` | in the catalogue | collection | `pico8_64`, `pico8.dat` in `MUOS/bios/pico8/` | `MUOS/application/RAOfflineProxy/` | Pickles | none |
 | `nextui` | `Collections/<Name>.txt`, one `/Roms/<system folder>/<path on card>` line per game | none | collection | none: carts are plain ROMs | none | RetroArch, MinUI save names | none |
 | `spruce` | `Collections/collections.json` | `Collections/Imgs/<Name>.png` | collection | `pico8_dyn`, `pico8_64`, `pico8.dat` in `BIOS/` | none | RetroArch | spruceOS update file |
 | `onion` | none | none | Surprise app | `pico8_dyn`, `pico8.dat` in `RApp/PICO-8/bin/` | `App/RAOfflineProxy/` | RetroArch | themes |
@@ -392,7 +392,7 @@ Besides ROMs, BIOS and scraped data, a sync writes the card's [collections](#col
 
 **PICO-8 app** (the app itself, not games). Put the official PICO-8 Raspberry Pi zip in storage's `os/pico8/` (the newest `pico-8_*_raspi.zip` is used). A card gets the zip where its frontend's installer looks (run the installer once on the device) or the extracted files, once per zip, whether or not it syncs pico8 games.
 
-**RAOfflineProxy** (the RetroAchievements offline proxy). A sync puts the newest `RAOfflineProxy-<layout>-v<version>` file from storage's `os/onion|allium|muOS|knulli|rocknix/` on the card, once per file.
+**RAOfflineProxy** (the RetroAchievements offline proxy). A sync puts the newest `RAOfflineProxy-<Onion|Allium|muOS|Knulli|Rocknix>-v<version>` file (`.zip` for Onion and Allium, `.muxapp` for muOS, `-Install.sh` for Knulli and ROCKNIX) from storage's `os/onion|allium|muOS|knulli|rocknix/` on the card, once per file.
 
 ### ES-DE
 
@@ -418,7 +418,6 @@ BIOS files sit flat in `roms/bios`. RetroArch saves sit beside the ROMs: a sync 
 - **Collections and Surprise**: ES reads collections only from the device's internal `/storage/.config/emulationstation/collections`, so a sync can't write them to the card. It stages them in `roms/.sync-roms-collections/` and writes `roms/ports/Install Collections.sh`. Launch **Install Collections** once from Ports on the device: it copies the collections to ES's folder, enables them and their art in `es_settings.cfg` (and turns off the settings of art a sync removed) and restarts ES. Its messages aren't visible on the device. Run it again after a sync changes collections.
 - **Art** goes to `roms/_userdata/theme-customizations/art-book-next/artwork/<Name>.png` and `logos/<Name>.svg`.
 - **RAOfflineProxy**: enter your RetroAchievements account in ES Game Settings first, then run the install script once from Ports; the app then appears under Tools.
-- No GPU drivers and no Onion Surprise app.
 
 ### muOS
 
@@ -428,6 +427,7 @@ BIOS files sit flat in `roms/bios`. RetroArch saves sit beside the ROMs: a sync 
 ### Spruce
 
 - **Collections and Surprise**: the one `Collections/collections.json` holds every collection; collections made on the device are kept as they are.
+- **Art**: a sync also removes the picture of a collection it wrote that has no art any more, even with `"theme": false`.
 - **spruceOS**: the newest `spruceV<version>.7z` from storage's `os/spruceos/` is copied to the card root, unextracted, for Apps → EZ Updater on the device: once per file, after the card's other writes, and only when the card has room for it with 64 MiB to spare. The one staged before is removed (kept with `--no-delete`).
 
 ### Onion and Allium
@@ -491,7 +491,7 @@ States only load in the core they were made with (`gpSP` states don't load in `m
 Run it on a downloaded rom pack, or one system folder of it, before you [upload](#uploading-roms-upload) it to storage:
 
 ```bash
-sync-roms tools install                  # once: brew install sevenzip unar rom-tools
+sync-roms tools install                  # once
 sync-roms convert --dry-run ~/roms
 sync-roms convert ~/roms/psx
 ```
@@ -612,7 +612,7 @@ The repo ships [Claude Code](https://claude.com/claude-code) skills in `.claude/
 - Reads the systems, layouts, devices and BIOS requirements from `src/sync_roms/data/` in the package, each device's playable systems (`device-systems.json`) too, and your cards from the [data folder](#data-folder), never from storage.
 - System folders in storage use the ES-DE system name (e.g. `gba/`, `dreamcast/`). BIOS files are always `BIOS/<file>` in storage.
 - Reads each synced system's files from the storage cache and compares file sizes, so only missing or changed files are downloaded (for `full_system` systems, every file in the folder) (8 in parallel, via boto3).
-- The local ROMs a sync offers to delete (`--dry-run` shows them) are the files in a synced system's folder that are no longer in the card's games, the ROMs of a system the card has no games picked for, and those of a system its device no longer lists. BIOS files and dotfiles are never touched. Files frontends add to ROM folders are ignored too (never counted as "already has files", never deleted): ES-DE `systeminfo.txt` / `noload.txt`, Knulli/Batocera `_info.txt`, `gamelist.xml` and the `images/`, `videos/`, `manuals/` folders (and, on ROCKNIX, `Install Collections.sh` and `RAOfflineProxy Install.sh` in `ports/`), Onion `miyoogamelist.xml`, `*.db` ROM list caches (on Onion cards only) and `Imgs/` (top level of a system folder only), and Windows `Thumbs.db` / `desktop.ini`.
+- The local ROMs a sync offers to delete (`--dry-run` shows them) are the files in a synced system's folder that are no longer in the card's games, the ROMs of a system the card has no games picked for, and those of a system its device no longer lists (only when the card has something to sync: a card with no games, or none in storage, is left as it is). BIOS files and dotfiles are never touched. Files frontends add to ROM folders are ignored too (never counted as "already has files", never deleted): ES-DE `systeminfo.txt` / `noload.txt`, Knulli/Batocera `_info.txt`, `gamelist.xml` and the `images/`, `videos/`, `manuals/` folders (and, on ROCKNIX, `Install Collections.sh` and `RAOfflineProxy Install.sh` in `ports/`), Onion `miyoogamelist.xml`, `*.db` ROM list caches (on Onion cards only) and `Imgs/` (top level of a system folder only), and Windows `Thumbs.db` / `desktop.ini`.
 - Some systems share a local folder on a device (Onion: `WS` = WonderSwan + Color, `NGP` = Neo Geo Pocket + Color). A folder's expected files are the union of all those systems' lists, so syncing one never offers the other's ROMs for deletion.
 - Every BIOS file listed for a synced system is downloaded; there is no required/optional distinction. BIOS lists cover every emulator a system can use (default and alternate libretro cores, standalone emulators); on Knulli check Game Settings > Missing Bios Check.
 
