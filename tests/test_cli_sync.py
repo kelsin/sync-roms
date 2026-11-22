@@ -642,6 +642,32 @@ class SyncSmokeTest(RealDataDirGuard):
                 if expected:
                     self.assertTrue(got[0][1].endswith(os.path.join("Themes", "A", "config.json")))
 
+    def test_a_file_whose_path_would_leave_its_card_folder_is_skipped_with_a_warning(self):
+        """A ROM, a BIOS file and a theme file. The ROM that isn't in storage is still the one reported missing."""
+        system = {**SYSTEM, "folders": {"onion": "GBA"}, "bios": {"files": ["ok.bin", "../evil.bin"]},
+                  "games": [{"bucket": "gba/Game.zip"}, {"bucket": "gba/../evil.zip"}, {"bucket": "gba/Gone.zip"}]}
+        listings = {"gba/": {"gba/Game.zip": 5, "gba/../evil.zip": 5}, "BIOS/": {"BIOS/ok.bin": 3, "BIOS/../evil.bin": 3},
+                    "os/onion/Themes/": {"os/onion/Themes/A/config.json": 5, "os/onion/Themes/../evil.json": 5}}
+        manifest = {**MANIFEST, "systems": [system],
+                    "layouts": {"onion": {"label": "Onion", "roms_dir": "Roms", "bios_dir": "BIOS", "themes_dir": "Themes"}}}
+        for dry_run in (True, False):
+            with self.subTest(dry_run=dry_run):
+                got = []
+                patches = ((cli, {"free_space": lambda path: 10**9}),
+                           (store, {"load_manifest": lambda names=(): manifest}),
+                           (cli.picker, {"saved_setup": lambda *a: (None, "onion")}),
+                           (cli.downloads, {"run_downloads": lambda todo, *a: got.extend(j[0] for j in todo) or 0}),
+                           (cli.s3, {"list_sizes": lambda prefix, sizes=True: listings.get(prefix, {})}))
+                self.assertEqual(self.run_sync(dry_run, patches=patches), 0)
+                lines = self.out.getvalue().split("\n")
+                self.assertEqual([line for line in lines if "skipping" in line],
+                                 [f"  ⚠️  skipping unsafe path: '../evil.{ext}'" for ext in ("zip", "bin", "json")])
+                self.assertEqual([line.strip() for line in lines if "evil" in line and "skipping" not in line], [])
+                self.assertEqual([line.strip() for line in lines[lines.index("  ⚠️  1 ROM(s) listed in manifest but not in storage") + 1:]
+                                  if line.startswith("       ")], ["gba/Gone.zip"])
+                if not dry_run:
+                    self.assertEqual(got, ["gba/Game.zip", "BIOS/ok.bin", "os/onion/Themes/A/config.json"])
+
     def test_roms_of_systems_the_device_dropped_are_extras(self):
         """A system the card's device no longer lists is scanned too, so its leftovers are offered for deletion."""
         dropped = {"name": "Arcade", "bucket": "fbneo", "folders": {"esde": "fbneo"}, "bios": {"files": []}, "games": [{"bucket": "fbneo/a.zip"}]}

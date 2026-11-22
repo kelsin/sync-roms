@@ -79,10 +79,7 @@ def refresh_mirror(root, dry_run=False):
     have = {k: s for k, s in s3.mirror_sizes(root, parts=True).items() if k != runtime.MIRROR_MARKER}
     jobs = []
     for k, s in wanted.items():
-        try:
-            jobs.append((k, s3.safe_join(root, k), s))
-        except ValueError as e:
-            print(ui.yellow(f"  ⚠️  skipping {e}"))
+        downloads.add_job(jobs, k, root, k, s)
     todo = [j for j in jobs if have.get(j[0]) != j[2]  # the mirror listing already has every size
             or j[0] == themeart.ESDE_COMMIT and commit_changed(j[1])]
     commit = next((j for j in todo if j[0] == themeart.ESDE_COMMIT), None)

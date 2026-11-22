@@ -96,6 +96,14 @@ class FolderStorageTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             s3.put_text("../evil", "x")
 
+    def test_add_job_joins_the_path_and_skips_an_unsafe_one_saying_so(self):
+        jobs = []
+        with contextlib.redirect_stdout(io.StringIO()) as out:
+            downloads.add_job(jobs, "gba/a.zip", self.root, "sub/a.zip", 4)
+            downloads.add_job(jobs, "gba/../b.zip", self.root, "../b.zip", 5)
+        self.assertEqual(jobs, [("gba/a.zip", os.path.join(self.root, "sub", "a.zip"), 4)])
+        self.assertEqual(out.getvalue(), "  ⚠️  skipping unsafe path: '../b.zip'\n")
+
 
 class RootSettingTest(unittest.TestCase):
     def test_root_setting_applies_and_wins(self):

@@ -720,6 +720,20 @@ class DownloadsTest(unittest.TestCase):
                 self.assertEqual(mirroring.refresh_mirror(root), 0)
             self.assertEqual(os.listdir(os.path.join(root, "gba")), ["Keep.zip"])
 
+    def test_mirror_skips_a_key_that_would_leave_it_with_a_warning(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as root:
+            open(os.path.join(root, ".sync-roms-mirror"), "w").close()
+            got = []
+            with mock.patch.object(mirroring.store, "load_manifest", return_value={}), \
+                    mock.patch.object(mirroring.store, "all_card_names", return_value=[]), \
+                    mock.patch.object(mirroring, "mirror_wanted", return_value={"../evil.zip": 3, "gba/New.zip": 3}), \
+                    mock.patch.object(mirroring.downloads, "run_downloads", side_effect=lambda jobs, *a: got.extend(jobs) or 0), \
+                    contextlib.redirect_stdout(io.StringIO()) as out:
+                self.assertEqual(mirroring.refresh_mirror(root), 0)
+            self.assertEqual(got, [("gba/New.zip", os.path.join(root, "gba/New.zip"), 3)])
+        self.assertIn("\n  ⚠️  skipping unsafe path: '../evil.zip'\n", out.getvalue())
+
     def test_mirror_lists_the_first_ten_files_it_asks_about_deleting(self):
         import tempfile
         with tempfile.TemporaryDirectory() as root:

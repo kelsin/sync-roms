@@ -1099,10 +1099,7 @@ def sync_card(args):
             moved.update(downloads.hide_discs(dest, disc_dir, disc_keys, args.dry_run))
         for key in wanted:
             if key in have:
-                try:
-                    rom_jobs.append((key, s3.safe_join(dest, downloads.rom_rel(key, disc_dir, disc_keys, folders_of(s))), have[key]))
-                except ValueError as e:
-                    print(ui.yellow(f"  ⚠️  skipping {e}"))
+                downloads.add_job(rom_jobs, key, dest, downloads.rom_rel(key, disc_dir, disc_keys, folders_of(s)), have[key])
             else:
                 missing.append(key)
     ui.report_missing(missing, "ROM(s)")
@@ -1141,10 +1138,7 @@ def sync_card(args):
     bios_jobs = []
     for k, folder, rel in sorted(bios_dests):
         if k in bios_have:
-            try:
-                bios_jobs.append((k, s3.safe_join(folder, rel), bios_have[k]))
-            except ValueError as e:
-                print(ui.yellow(f"  ⚠️  skipping {e}"))
+            downloads.add_job(bios_jobs, k, folder, rel, bios_have[k])
     ui.report_missing([k for k in bios_keys if k not in bios_have], "BIOS file(s)")
     # Android cards also get storage's os/android/APKs/ files (APKs, the Obtainium app list) in an APKs/ folder to install from
     apk_dir = os.path.join(base, "APKs")
@@ -1170,10 +1164,7 @@ def sync_card(args):
             rel = k[len(runtime.THEMES_PREFIX):]
             if k.endswith("/") or os.path.basename(rel) == ".DS_Store":
                 continue
-            try:
-                theme_jobs.append((k, s3.safe_join(os.path.join(base, themes_dir), rel), size))
-            except ValueError as e:
-                print(ui.yellow(f"  ⚠️  skipping {e}"))
+            downloads.add_job(theme_jobs, k, os.path.join(base, themes_dir), rel, size)
 
     theme_jobs = downloads.with_sizes(theme_jobs)
 

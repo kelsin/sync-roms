@@ -57,6 +57,14 @@ def bios_folders(system, layout_name, layout, bios_dir):
     return [os.path.join(bios_dir, t) for t in [tag, *system.get("nextui_bios_tags", [])]]
 
 
+def add_job(jobs, key, folder, rel, size):
+    """Add key's download to folder/rel, as (key, path, size), to jobs; a rel that would leave folder is skipped, saying so."""
+    try:
+        jobs.append((key, s3.safe_join(folder, rel), size))
+    except ValueError as e:
+        print(ui.yellow(f"  ⚠️  skipping {e}"))
+
+
 def with_sizes(jobs):
     """jobs with any size left unread (None, from a folder listing without sizes) read now, in parallel; a file that
     has gone is dropped. Bucket listings carry every size, so for them this changes nothing."""
