@@ -5,6 +5,7 @@ import re
 import shutil
 import tempfile
 import threading
+import unicodedata
 import zipfile
 from collections import defaultdict
 from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
@@ -142,6 +143,11 @@ def chd_sha1(chdman, path):
 _chd_locks = defaultdict(threading.Lock)  # one per output path: two jobs for the same disc take turns
 
 
+def out_lock(out):
+    """The lock of the output file out: names that differ only by case or Unicode form are one file on a case-insensitive volume."""
+    return _chd_locks[unicodedata.normalize("NFC", os.path.normcase(out).lower())]
+
+
 def part_path(out):
     """The hidden name a file is written under until it is complete."""
     return os.path.join(os.path.dirname(out), "." + os.path.basename(out) + ".part")
@@ -161,7 +167,7 @@ def make_chd(tools, cfg, image, out, report=None):
         return (lambda percent: report(start + percent / 100 * width)) if report else None
 
     part = part_path(out)
-    with _chd_locks[out]:
+    with out_lock(out):
         if os.path.exists(part):  # left by a run that was killed
             os.remove(part)
         own = os.path.normcase(image).lower() == os.path.normcase(out).lower()
@@ -222,7 +228,7 @@ def make_zar(tools, image, out, report=None):
     so out is never half written. The tool has no verify option or progress output.
     """
     part = part_path(out)
-    with _chd_locks[out]:
+    with out_lock(out):
         try:
             if os.path.exists(part):  # left by a run that was killed
                 os.remove(part)
@@ -543,7 +549,7 @@ def chd_command(args):
                 return chd_image(tools, system["chd"], path, owned, report)
             return chd_archive(tools, system["chd"], path, report, scratch[i])
         except OSError as e:  # a folder that can't be written, a file that can't be removed: this job failed
-            return str(e)
+            return str(e) or type(e).__name__
         finally:
             progress[i] = 1.0
 
