@@ -1083,7 +1083,7 @@ def sync_card(args):
         if clean_card and spruce_wrote:
             clean._clean_root = base
         print(ui.yellow(f"👋 {card} has nothing to sync."))
-        return failed
+        return 1 if failed else 0
     print(ui.bold(f"\n🔎 Checking {len(chosen)} system(s) against storage..."))
 
     def dest_of(s):

@@ -1097,6 +1097,15 @@ class SyncSmokeTest(RealDataDirGuard):
                 self.assertIn("has nothing to sync", self.out.getvalue())
                 self.assertEqual(found, [False])
 
+    def test_a_card_with_nothing_to_sync_exits_1_however_many_installs_failed(self):
+        manifest = {**MANIFEST, "systems": [{**SYSTEM, "games": []}]}
+        patches = ((store, {"load_manifest": lambda names=(): manifest}),
+                   (cli.pico8, {"run": lambda *a, **k: 1}),
+                   (cli.onion_surprise, {"install": lambda *a, **k: 1}),
+                   (cli.raofflineproxy, {"install": lambda *a, **k: 1}))
+        self.assertEqual(self.run_sync(False, patches=patches), 1)
+        self.assertIn("has nothing to sync", self.out.getvalue())
+
     def test_a_run_ends_with_what_it_downloaded(self):
         manifest = {**MANIFEST, "systems": [{**SYSTEM, "games": SYSTEM["games"] + [{"bucket": "gba/Gone.zip"}]}]}
         patches = ((store, {"load_manifest": lambda names=(): manifest}), (cli, {"free_space": lambda path: 10**9}))
