@@ -132,6 +132,12 @@ def wrong_codec(chdman, cfg, path):
     return wanted if wanted and used != [wanted] else None
 
 
+def chd_sha1(chdman, path):
+    """The SHA1 `chdman info` shows for a chd, of its disc data and metadata whatever the codec; None when it shows none."""
+    match = re.search(r"^SHA1:\s*(\w+)", external.tool_output([chdman, "info", "-i", path]) or "", re.M)
+    return match.group(1) if match else None
+
+
 _chd_locks = defaultdict(threading.Lock)  # one per output path: two jobs for the same disc take turns
 
 
@@ -141,8 +147,9 @@ def part_path(out):
 
 
 def make_chd(tools, cfg, image, out, report=None):
-    """Create out from image (an existing out is only verified, or recompressed if its codec is wrong);
-    None on success, else the error.
+    """Create out from image; None on success, else the error. A chd that is its own image is only verified, or
+    recompressed if its codec is wrong. An out that exists already (from a run that was stopped, or another job) is
+    replaced when it holds the same disc as the chd made from image (see chd_sha1); else it is left and that is the error.
 
     The chd is built under a hidden .part name and renamed once it verifies, so out is never half written.
     report(fraction) gets 0-1 progress: creating is the first 90%, verifying the last 10%.
@@ -156,7 +163,8 @@ def make_chd(tools, cfg, image, out, report=None):
     with _chd_locks[out]:
         if os.path.exists(part):  # left by a run that was killed
             os.remove(part)
-        if os.path.exists(out):
+        own = os.path.normcase(image).lower() == os.path.normcase(out).lower()
+        if own:
             codec = wrong_codec(chdman, cfg, out) if cfg.get("codec") else None
             if not codec:
                 return external.run_tool([chdman, "verify", "-i", out], stage(0, 1))
@@ -165,6 +173,10 @@ def make_chd(tools, cfg, image, out, report=None):
             command = chd_command_line(chdman, cfg, image, part, tools["np"])
         error = (external.run_tool(command, stage(0, 0.9))
                  or external.run_tool([chdman, "verify", "-i", part], stage(0.9, 0.1)))
+        if not error and not own and os.path.exists(out):  # never taken for this image's chd unless it is the same disc
+            sha1 = chd_sha1(chdman, part)
+            if not sha1 or sha1 != chd_sha1(chdman, out):
+                error = f"{os.path.basename(out)} already exists and doesn't match this disc"
         if error:
             if os.path.exists(part):
                 os.remove(part)
