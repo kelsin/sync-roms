@@ -564,6 +564,20 @@ class NextUIMediaTest(unittest.TestCase):
         self.assertEqual([p for _, p, _ in jobs], [os.path.join("/card/Roms/GBA", ".media", "Final Fantasy VII.png")])
         self.assertEqual(entries, {})
 
+    def test_a_rom_in_a_subfolder_gets_art_in_that_subfolders_media(self):
+        jobs, _, _ = self.plan(["Hacks/Game.gba", "Hacks/More/Deep.gba"],
+                               {"scrapes/gba/onion/Hacks/Game.png": 3, "scrapes/gba/onion/Hacks/More/Deep.png": 4})
+        self.assertEqual([p for _, p, _ in jobs], [os.path.join("/card/Roms/GBA", "Hacks", ".media", "Game.png"),
+                                                   os.path.join("/card/Roms/GBA", "Hacks", "More", ".media", "Deep.png")])
+
+    def test_a_game_folder_in_a_subfolder_gets_art_beside_the_folder(self):
+        jobs, _, _ = self.plan(["Hacks/Game/Game.cue"], {"scrapes/psx/onion/Hacks/Game/Game.png": 3})
+        self.assertEqual([p for _, p, _ in jobs], [os.path.join("/card/Roms/GBA", "Hacks", ".media", "Game.png")])
+
+    def test_a_playlist_not_named_after_its_folder_gets_art_in_the_folder(self):
+        jobs, _, _ = self.plan(["Pack/Game.m3u"], {"scrapes/psx/onion/Pack/Game.png": 3})
+        self.assertEqual([p for _, p, _ in jobs], [os.path.join("/card/Roms/GBA", "Pack", ".media", "Game.png")])
+
     def test_a_rom_not_on_the_card_gets_no_art(self):
         jobs, _, _ = self.plan(["Game.gba"], {"scrapes/gba/onion/Game.png": 5}, present=lambda rom: False)
         self.assertEqual(jobs, [])
@@ -598,6 +612,12 @@ class NextUIMediaTest(unittest.TestCase):
                               ("scrapes/pico8/onion/b.p8.png", os.path.join("Roms", "PICO-8 (P8)", ".media", "b.p8.png"))])
             self.assertEqual(plan["gamelists"], {})
 
+    def test_a_pico8_cart_in_a_subfolder_is_its_own_art_in_that_subfolder(self):
+        with tempfile.TemporaryDirectory() as base:
+            plan = self.build(self.PICO_NX, ["Jam/a.p8.png"], {}, base)
+            self.assertEqual([(k, os.path.relpath(p, base)) for k, p, _ in plan["jobs"]],
+                             [("pico8/Jam/a.p8.png", os.path.join("Roms", "PICO-8 (P8)", "Jam", ".media", "a.p8.png"))])
+
     def stale(self, files, roms=("Game.gba",)):
         with tempfile.TemporaryDirectory() as base:
             for rel in [os.path.join("Game Boy Advance (GBA)", r) for r in roms] + \
@@ -612,3 +632,8 @@ class NextUIMediaTest(unittest.TestCase):
 
     def test_stale_media_keeps_art_of_games_in_subfolders(self):
         self.assertEqual(self.stale([".media/FF.png"], roms=("FF/FF.m3u", "FF/FF (Disc 1).chd")), [])
+
+    def test_stale_media_checks_each_subfolders_media(self):
+        self.assertEqual(self.stale(["Hacks/.media/Hack.png", "Hacks/.media/Gone.png", ".media/Hack.png"],
+                                    roms=("Game.gba", "Hacks/Hack.gba")),
+                         [os.path.join(".media", "Hack.png"), os.path.join("Hacks", ".media", "Gone.png")])

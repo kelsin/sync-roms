@@ -140,6 +140,16 @@ def index_drop(index, key):
         del index[entry[0]][entry[1]]
 
 
+def nextui_art(rom):
+    """Where NextUI looks for a ROM's art (rom: its path in the system folder), without the extension: .media/ in the
+    entry's own folder, named by the entry (nextui.c's thumbnail path). A folder holding a .cue or .m3u of its own name
+    is the entry (NextUI launches it), so that game's art sits beside the folder."""
+    folder, stem = os.path.split(os.path.splitext(rom)[0])
+    if folder and os.path.basename(folder) == stem and rom.lower().endswith((".cue", ".m3u")):
+        folder = os.path.dirname(folder)
+    return os.path.join(folder, ".media", stem)
+
+
 def plan_scrapes(layout_name, rom_rels, listing, meta, media_root, rom_dir, present, join=s3.safe_join, index=None):
     """Media downloads, gamelist entries and text files for one system's ROMs.
 
@@ -198,11 +208,11 @@ def plan_scrapes(layout_name, rom_rels, listing, meta, media_root, rom_dir, pres
                 key, size = found[ONION_TYPE]
                 add(key, rom_dir, f"Imgs/{base}.png", size)
                 tags["image"] = f"./Imgs/{base}.png"
-        elif layout_name == "nextui":  # no gamelist: .media/<ROM name>.png in the system folder, even for a game in a subfolder
+        elif layout_name == "nextui":  # no gamelist: the art is found by name in .media/ beside the game
             tags = {}
             if ONION_TYPE in found:
                 key, size = found[ONION_TYPE]
-                add(key, rom_dir, f".media/{base}.png", size)
+                add(key, rom_dir, nextui_art(rom) + ".png", size)
         if tags:
             entries[rom] = tags
     return jobs, entries, texts
@@ -352,7 +362,7 @@ def build_scrape_plan(layout_name, systems, data, rom_rels, dest_of, es_dir, pre
                 if layout_name == "nextui":
                     if ONION_TYPE in found:
                         continue
-                    root, rel = rom_dir, f".media/{os.path.basename(rom)}"
+                    root, rel = rom_dir, nextui_art(rom) + ".png"
                 elif layout_name in ONION_LAYOUTS:
                     if "/" in rom or ONION_TYPE in found:  # Imgs is flat
                         continue
@@ -477,10 +487,14 @@ def stale_media(layout_name, systems, roms_dir, es_dir, base=None):
                     if name not in stems and not any(name.endswith("-" + x) and name[:-len(x) - 1] in stems
                                                      for x in KNULLI_SUFFIXES):
                         stale.append(full)
-        elif layout_name == "nextui":  # only the PNGs in .media/ (a hidden folder walk_files skips) that no ROM names
-            media = os.path.join(rom_dir, ".media")
-            stale += [os.path.join(media, f) for f in sorted(cardfs.listing(media))
-                      if f.lower().endswith(".png") and os.path.splitext(f)[0] not in stems] if cardfs.is_dir(media) else []
+        elif layout_name == "nextui":  # only the PNGs in each folder's .media/ (a hidden folder walk_files skips) that no ROM names
+            walked = list(downloads.walk_roms(rom_dir))
+            arts = {nextui_art(os.path.relpath(os.path.join(root, f), rom_dir)) for root, files in walked for f in files}
+            for root, _ in walked:
+                media = os.path.join(root, ".media")
+                stale += [os.path.join(media, f) for f in sorted(cardfs.listing(media))
+                          if f.lower().endswith(".png") and os.path.relpath(os.path.join(media, os.path.splitext(f)[0]), rom_dir) not in arts] \
+                    if cardfs.is_dir(media) else []
         elif layout_name in ONION_LAYOUTS:
             base = os.path.join(rom_dir, "Imgs")
             stale += [full for rel, full in walk_files(base) if os.path.splitext(os.path.basename(rel))[0] not in stems] \
