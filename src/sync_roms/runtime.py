@@ -20,5 +20,5 @@ ALLIUM_PREFIX = "os/allium/"  # RAOfflineProxy for Allium cards in storage
 MUOS_PREFIX = "os/muOS/"  # RAOfflineProxy for muOS cards in storage
 KNULLI_PREFIX = "os/knulli/"  # RAOfflineProxy's install script for Knulli cards in storage (next to the Knulli images)
 ROCKNIX_PREFIX = "os/rocknix/"  # RAOfflineProxy's install script for ROCKNIX cards in storage
-SPRUCE_PREFIX = "os/spruceos/"  # spruceOS release 7z files for spruce cards in storage; the newest is staged at the card root for EZ Updater
+SPRUCE_PREFIX = "os/spruceos/"  # spruceOS release 7z files for spruce cards in storage (the newest is staged at the card root for EZ Updater), and RAOfflineProxy for them
 _mirror_root = None  # set once a sync reads from the local mirror instead of storage
