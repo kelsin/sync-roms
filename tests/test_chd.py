@@ -582,6 +582,28 @@ class ChdTest(unittest.TestCase):
         self.assertEqual(external.run_tool([sys.executable, "-c", code], seen.append), "bad input")
         self.assertEqual(seen, [12.5, 50.0])
 
+    def test_run_tool_reads_an_error_line_that_is_not_utf8(self):
+        code = "import sys; sys.stderr.buffer.write(b'bad \\x83name\\n'); sys.exit(1)"
+        self.assertEqual(external.run_tool([sys.executable, "-c", code]), "bad \ufffdname")
+
+    def test_run_tool_stops_the_tool_when_reading_its_output_fails(self):
+        code = "import sys, time; sys.stderr.write('Compressing, 12.5% complete... \\rmore'); sys.stderr.flush(); time.sleep(30)"
+        procs, popen = [], external.subprocess.Popen
+        self.addCleanup(lambda: [p.kill() for p in procs])
+
+        def bad(percent):
+            raise ValueError("boom")
+
+        with mock.patch.object(external.subprocess, "Popen", lambda *a, **k: procs.append(popen(*a, **k)) or procs[-1]):
+            with self.assertRaises(ValueError):
+                external.run_tool([sys.executable, "-c", code], bad)
+        self.assertIsNotNone(procs[0].returncode)
+        self.assertEqual(external._tool_procs, set())
+
+    def test_tool_output_reads_output_that_is_not_utf8(self):
+        code = "import sys; sys.stdout.buffer.write(b'Path = \\x83a.iso\\n'); sys.stderr.buffer.write(b'\\x83\\n')"
+        self.assertEqual(external.tool_output([sys.executable, "-c", code]), "Path = \ufffda.iso\n")
+
     def test_make_chd_reports_create_then_verify_progress(self):
         self.touch("Game.iso")
         seen = []
