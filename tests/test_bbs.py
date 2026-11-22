@@ -127,6 +127,30 @@ class Retarget(helpers.StorageDir):
         self.assertEqual((mine["games"][0]["bucket"], mine["games"][0]["title"], mine["art"]), (NEW, "Mole Mole 2", "x"))
         self.assertEqual(os.stat(untouched).st_mtime, 1)
 
+    def test_rewrites_a_cards_exclusions_without_duplicates(self):
+        self.write("cards.json", data={
+            "c": {"excluded": {"pico8": ["pico8/a.p8.png", OLD], "gba": ["gba/x.zip"]}},
+            "d": {"excluded": {"pico8": [NEW, OLD]}}})
+        with mock.patch.object(store, "load_sets", return_value=[]):
+            bbs.retarget(OLD, NEW, "Mole Mole 2")
+        cards = self.read("cards.json")
+        self.assertEqual(cards["c"]["excluded"], {"pico8": ["pico8/a.p8.png", NEW], "gba": ["gba/x.zip"]})
+        self.assertEqual(cards["d"]["excluded"], {"pico8": [NEW]})
+
+    def test_rewrites_the_list_kept_under_a_full_system(self):
+        self.write("cards.json", data={"c": {"games": {"pico8": {"full_system": True, "games": [
+            {"title": "Mole Mole", "bucket": OLD}]}}}})
+        with mock.patch.object(store, "load_sets", return_value=[]):
+            bbs.retarget(OLD, NEW, "Mole Mole 2")
+        self.assertEqual(self.read("cards.json")["c"]["games"]["pico8"], {"full_system": True, "games": [
+            {"title": "Mole Mole 2", "bucket": NEW}]})
+
+    def test_names_the_sets_whose_variants_name_the_old_cart(self):
+        with mock.patch.object(store, "load_sets", return_value=[
+                {"id": "s1", "games": [{"bucket": "x", "variants": [{"bucket": "y", "note": "n"}]}]},
+                {"id": "s2", "games": [{"bucket": "z", "variants": [{"bucket": OLD, "note": "n"}]}]}]):
+            self.assertEqual(bbs.retarget(OLD, NEW, "Mole Mole 2"), ["s2"])
+
     def test_nothing_named_writes_nothing(self):
         path = self.write("cards.json", data={"c": {"games": {"pico8": [{"title": "T", "bucket": "pico8/o.p8.png"}]}}})
         os.utime(path, (1, 1))
