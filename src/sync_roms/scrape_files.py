@@ -45,6 +45,20 @@ def text_keys(existing):
     return [k for k in existing if k.endswith("/metadata.json")]
 
 
+def metadata_roms(remote_texts):
+    """The storage keys ("system/rom") of the ROMs the scrapes/<system>/metadata.json texts have entries for."""
+    out = set()
+    for key, text in remote_texts.items():
+        parts = key.split("/")
+        if len(parts) != 3:
+            continue
+        try:
+            out |= {f"{parts[1]}/{rom}" for rom in json.loads(text)}
+        except ValueError:  # plan_clean warns about it
+            pass
+    return out
+
+
 def plan_clean(existing, roms, remote_texts):
     """What in scrapes/ no longer matches an available ROM.
 
@@ -90,8 +104,14 @@ def clean_scrapes(args):
         print("☁️  Listing scrapes/...")
         existing = inventory.files(scrape_plan.SCRAPES + "/")
         remote_texts = s3.fetch_texts(text_keys(existing))
+        uncached = inventory.uncached(metadata_roms(remote_texts))
     except s3.ERRORS as e:
         ui.fail(f"{e}", 3)
+    for key in uncached:  # in storage all the same: what was scraped for them stays
+        roms.setdefault(key.split("/", 1)[0], set()).add(key.split("/", 1)[1])
+    if uncached:
+        print(ui.yellow(f"  ⚠️  {len(uncached)} ROM(s) are in storage but not in the storage cache; their scrapes are kept "
+                        f"(run {inventory.UPDATE_HINT})"))
     delete, rewrites, per, warnings = plan_clean(existing, roms, remote_texts)
     for w in warnings:
         print(ui.yellow(f"  ⚠️  {w}"))

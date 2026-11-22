@@ -173,9 +173,13 @@ def review_command(args):
         sizes = {k: n for k, n in sizes.items() if k in wanted}
     if not sizes and inventory.current() is None and s3.read_root() and not os.path.isdir(s3.read_root()):
         ui.fail(f"{s3.read_root()} isn't there (is the share mounted?); nothing reviewed", 3)  # keep every mark
+    uncached = inventory.uncached(k for k in keys if k not in sizes)  # in storage all the same: their marks stay
     for key in keys:
-        if key not in sizes:
+        if key not in sizes and key not in uncached:
             _clear(key)
+    if uncached:
+        print(ui.yellow(f"⚠️  {len(uncached)} ROM(s) are in storage but not in the storage cache, so they aren't reviewed: "
+                        f"run {inventory.UPDATE_HINT}"), file=_out())
     keys = [k for k in keys if k in sizes]
     if not keys:
         print(ui.green(NOTHING))

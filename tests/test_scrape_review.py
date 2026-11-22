@@ -324,6 +324,49 @@ class ReviewCommandTest(ReviewBase):
         self.assertEqual(seen, [(["gb/b.zip"], {"gb/b.zip": 5})])
         self.assertEqual(self.pending(), ["gb/b.zip"])
 
+    def cached(self, *keys):
+        """A storage cache built while storage held only these ROMs."""
+        for key in keys:
+            self.put(key)
+        inventory.reset()
+        self.addCleanup(inventory.reset)
+        with contextlib.redirect_stdout(io.StringIO()):
+            inventory.update()
+
+    def test_review_command_keeps_the_marks_of_a_rom_the_cache_lacks(self):
+        scrape_state.mark_unknown("gb", "u.zip")
+        scrape_state.flush_unknown()
+        scrape_state.keep("gb", "b.zip")
+        self.cached("gb/a.zip")
+        self.put("gb/b.zip")  # added by another machine since the cache was built, and scraped there
+        self.put("gb/u.zip")
+        self.patch(scrape_review, "_systems", lambda name: {"gb": GB})
+        seen = []
+        self.patch(scrape_review, "review", lambda systems, keys, sizes, client=None: seen.append(keys) or 0)
+        self.assertEqual(self.run_cmd(), 0)
+        self.assertEqual(seen, [["gb/a.zip"]])
+        self.assertEqual(self.pending(), ["gb/a.zip", "gb/b.zip"])  # c.zip is in neither: cleared
+        self.assertEqual(scrape_state.unknown(), {"gb/u.zip"})
+        self.assertEqual(scrape_state.kept(), {"gb/b.zip"})
+        self.assertIn("2 ROM(s) are in storage but not in the storage cache", self.out.getvalue())
+        self.assertIn("sync-roms cache update", self.out.getvalue())
+
+    def test_review_command_clears_nothing_when_storage_cannot_be_checked(self):
+        self.cached("gb/a.zip")
+        self.patch(inventory, "tag", mock.Mock(side_effect=OSError("share dropped")))
+        with self.assertRaises(OSError):
+            self.run_cmd()
+        self.assertEqual(self.pending(), KEYS)
+
+    def test_review_command_clears_an_ignored_rom_the_cache_lacks(self):
+        self.cached("gb/a.zip")
+        self.put("gb/b.zip")
+        self.patch(ignore, "_keys", frozenset({"gb/b.zip"}))
+        self.patch(scrape_review, "_systems", lambda name: {"gb": GB})
+        self.patch(scrape_review, "review", lambda systems, keys, sizes, client=None: 0)
+        self.assertEqual(self.run_cmd(), 0)
+        self.assertEqual(self.pending(), ["gb/a.zip"])
+
     def test_review_command_bucket_without_cache_lists_sizes(self):
         scrape_state.unknown()  # the scrape state is the storage folder's, read before the switch
         self.patch(scrape_review, "_clear", lambda key: None)  # it would be written to the bucket

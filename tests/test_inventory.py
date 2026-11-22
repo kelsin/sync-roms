@@ -51,6 +51,19 @@ class FolderCacheTest(helpers.StorageFolder):
             self.assertEqual(inventory.etags("gba/"), {"a.zip": (1, "-"), "b.zip": (2, "-")})
             self.assertEqual(inventory.cached("BIOS/"), {"BIOS/x.bin": 3})
 
+    def test_uncached_is_what_storage_has_and_the_cache_lacks(self):
+        self.assertEqual(inventory.uncached(["gba/c.zip"]), set())  # no cache: nothing is checked
+        self.build()
+        self.put("gba/c.zip", 4)  # added since
+        os.remove(os.path.join(self.root.name, "gba/a.zip"))
+        self.assertEqual(inventory.uncached(["gba/a.zip", "gba/b.zip", "gba/c.zip", "gba/gone.zip"]), {"gba/c.zip"})
+
+    def test_uncached_checks_only_the_keys_the_cache_lacks(self):
+        self.build()
+        with mock.patch.object(inventory, "tag", return_value=None) as live:
+            inventory.uncached(["gba/a.zip", "gba/c.zip"])
+        live.assert_called_once_with("gba/c.zip")
+
     def test_ds_store_is_never_cached_or_read(self):
         self.put(".DS_Store", 4)
         self.put("gba/.DS_Store", 4)
@@ -610,6 +623,12 @@ class IgnoredTest(helpers.StorageFolder):
 
     def test_etags_drops_ignored(self):
         self.each(lambda: self.assertEqual(set(inventory.etags("gba/")), {"a.zip"}))
+
+    def test_uncached_drops_ignored(self):
+        self.build()
+        self.put("gba/c.zip", 4)
+        with mock.patch.object(ignore, "_keys", frozenset({"gba/c.zip"})):
+            self.assertEqual(inventory.uncached(["gba/c.zip"]), set())
 
     def test_cache_file_still_holds_ignored(self):
         self.build()

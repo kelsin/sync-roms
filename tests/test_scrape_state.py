@@ -1,3 +1,5 @@
+import contextlib
+import io
 import json
 import os
 import sys
@@ -7,7 +9,7 @@ from unittest import mock
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from helpers import StorageDir  # noqa: E402
-from sync_roms import inventory, runtime, s3, scrape_files, scrape_state, shared  # noqa: E402
+from sync_roms import ignore, inventory, runtime, s3, scrape_files, scrape_state, shared  # noqa: E402
 
 H = {"md5": "a", "sha1": "b", "crc": "c"}
 INFO = {"name": "Bios", "genre": "", "year": "1985", "desc": ""}
@@ -314,6 +316,42 @@ class CleanTest(unittest.TestCase):
         existing["scrapes/notgames.json"] = 5
         delete, rewrites, per, warnings = scrape_files.plan_clean(existing, {"gba": set()}, {})
         self.assertEqual((delete, rewrites, warnings), ([], [], []))
+
+
+class CleanStaleCacheTest(StorageDir):
+    """--clean-scrapes with a storage cache built before another machine added gba/new.zip and scraped it."""
+    META = "scrapes/gba/metadata.json"
+
+    def setUp(self):
+        super().setUp()
+        self.put("gba/a.zip")
+        self.put(self.META, json.dumps({"a.zip": {"name": "A"}, "gone.zip": {"name": "Gone"}}).encode())
+        inventory.reset()
+        self.addCleanup(inventory.reset)
+        with contextlib.redirect_stdout(io.StringIO()):
+            inventory.update()
+        self.put("gba/new.zip")
+        self.put(self.META, json.dumps({"a.zip": {"name": "A"}, "gone.zip": {"name": "Gone"},
+                                        "new.zip": {"name": "New"}}).encode())
+
+    def clean(self):
+        """Run it, saying yes; returns (what it printed, the ROMs metadata.json has entries for afterwards)."""
+        out = io.StringIO()
+        with mock.patch.object(scrape_files.store, "load_manifest", return_value={"systems": [{"bucket": "gba"}]}), \
+                mock.patch.object(scrape_files.ui, "confirm", return_value=True), contextlib.redirect_stdout(out):
+            self.assertEqual(scrape_files.clean_scrapes(mock.Mock(dry_run=False)), 0)
+        with open(os.path.join(self.root, self.META)) as f:
+            return out.getvalue(), sorted(json.load(f))
+
+    def test_clean_keeps_the_entry_of_a_rom_the_cache_lacks(self):
+        said, entries = self.clean()
+        self.assertEqual(entries, ["a.zip", "new.zip"])  # gone.zip is in neither: dropped
+        self.assertIn("1 ROM(s) are in storage but not in the storage cache", said)
+        self.assertIn("sync-roms cache update", said)
+
+    def test_clean_drops_the_entry_of_an_ignored_rom_the_cache_lacks(self):
+        with mock.patch.object(ignore, "_keys", frozenset({"gba/new.zip"})):
+            self.assertEqual(self.clean()[1], ["a.zip"])
 
 
 if __name__ == "__main__":

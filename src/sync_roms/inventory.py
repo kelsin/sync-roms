@@ -180,6 +180,18 @@ def tag(key):
         raise
 
 
+def uncached(keys):
+    """The keys the cache doesn't list that are in storage itself: files added (by another machine, say) since the cache
+    was built. One live check each (as tag), so it is for the few files a caller would otherwise treat as gone, before
+    it removes shared state about them. Empty without a cache, when the reads above are storage's own."""
+    tree = current()
+    if tree is None:
+        return set()
+    keys = [k for k in _unignored(dict.fromkeys(keys)) if k not in tree.files]
+    with ThreadPoolExecutor(s3.STAT_WORKERS) as ex:
+        return {k for k, t in zip(keys, ex.map(tag, keys)) if t is not None}
+
+
 def folders():
     """Names of the top-level folders in storage."""
     tree = current()
