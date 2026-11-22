@@ -115,6 +115,7 @@ Old personal sets in `sets/` are left on disk and never read; a sync reads an ol
 | `frontend_collections` | sync | The collection names sync wrote to the card's frontend, so only those are touched. |
 | `drivers` | sync | The `Drivers/` zip names sync put on the card; only those are removed when they go stale. |
 | `pico8`, `surprise_app`, `raofflineproxy_app`, `spruce_os` | sync | The file sync last put on the card: each is installed once per file name. `store.update_card` drops `pico8` when the layout changes. |
+| `spruce_emu` | sync | `{ROM folder: [file names]}`: the BIOS zips sync added to that folder's `Emu/<folder>/config.json` `ignoreList` on a `spruce` card; only these are removed when the file stops being synced. |
 | `muos_storage` | by hand | `sd1` (default) or `sd2`: the mount (`/mnt/mmc` or `/mnt/sdcard`) written into a `muos` card's collection entries. |
 
 ### Sets and collections
@@ -161,6 +162,7 @@ Rules for sets:
 - On `onion` cards with Surprise and `custom_collections` on, `onion_surprise.py` installs the newest `os/onion/Surprise-v<version>.zip` as `App/Surprise/` (its icon, when the zip has one, as `Icons/Default/app/surprise.png`) and writes `Roms/surprise.json` from the card's surprises that are on the card (removed when there are none).
 - `raofflineproxy.py` takes the newest `RAOfflineProxy-<Onion|Allium|muOS|Knulli|Rocknix>-v<version>...` in `os/onion/`, `os/allium/`, `os/muOS/` (that spelling), `os/knulli/` or `os/rocknix/`. An extracted app is overwritten file by file, never wiped (it keeps its login and settings in that folder), and reinstalled when its `launch.sh` is missing. The `esde` APK is left out when the setting is off.
 - Sync keeps each GPU driver's zip and `.tag` in `os/drivers/`, and `esde` cards get them as `Drivers/<id>-<tag>.zip`.
+- `spruce_emu.py` keeps each ROM folder's BIOS zips (`bios.rom_files` basenames of the systems with ROMs to sync there) in `Emu/<folder>/config.json`'s `ignoreList` on `spruce` cards, so PyUI doesn't list them as games (merged, never overwritten, re-added every sync since a Spruce update can replace the file; skipped with a warning when the config is missing). Spruce's `mame` folder is `MAME2003PLUS` (its core is fixed), `fbneo` shares `ARCADE`; sync clears what an earlier sync left in `Roms/FBNEO` (`spruce_emu.OLD_FOLDERS`).
 - `spruce_os.py` copies the newest `os/spruceos/spruceV<version>.7z` unextracted to the root of `spruce` cards, for Apps → EZ Updater on the device, after the card's other writes and only when the card has room for it with 64 MiB to spare. Only the previously staged file is removed (kept with `--no-delete`). OTA deltas (`spruceOTA-*`) and installers are ignored. The local mirror keeps the newest 7z too.
 - `saves stash` and `apply` use Pickles' `MUOS/pickles/sram|state` on muOS (`muos_saves.py`), copied as they are; a Pickles stash applies only to muOS cards.
 

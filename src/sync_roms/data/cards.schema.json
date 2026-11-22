@@ -28,6 +28,11 @@
         "type": "array",
         "items": {"type": "string"}
       },
+      "spruce_emu": {
+        "description": "Per ROM folder, the BIOS zip names sync-roms added to the ignoreList of the folder's Spruce Emu config",
+        "type": "object",
+        "additionalProperties": {"type": "array", "items": {"type": "string"}}
+      },
       "surprise": {"type": "boolean", "description": "false turns Surprise off (absent: on)"},
       "surprises": {
         "type": "array",
