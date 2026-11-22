@@ -21,6 +21,8 @@ FAVS = {"id": "favs", "name": "Favs", "games": [GAME]}
 REAL_LOAD_COLLECTIONS = collections_mod.load_collections
 REAL_BUILD_SCRAPE_PLAN, REAL_APPLY_SCRAPE_PLAN = scrape_plan.build_scrape_plan, scrape_plan.apply_scrape_plan
 REAL_STALE_MEDIA = scrape_plan.stale_media
+REAL_LOAD_CARDS, REAL_SAVE_CARD, REAL_UPDATE_CARD = store.load_cards, store.save_card, store.update_card
+REAL_SAVED_SETUP = cli.picker.saved_setup
 SCRAPED = {"gba": ({"scrapes/gba/covers/Game.png": 5}, {"Game.zip": {"name": "The Game"}})}
 
 
@@ -859,6 +861,35 @@ class SyncFlowTest(unittest.TestCase):
                 with self.subTest(entry=entry, dry_run=dry_run):
                     self.assertEqual(self.run_with_user_files(None, dry_run=dry_run, extra=[(store, "load_cards", lambda: cards)]),
                                      (0, ["F", "a", "Favs"]))
+
+    def dry_run_with_cards_file(self, entry):
+        """A dry run of a card whose entry in a real cards.json is entry (None: it has none), with the real saved_setup,
+        save_card and update_card, so only --dry-run keeps the card from being saved.
+        Returns (exit code, what it printed with the card's name as CARD, the card's entry in cards.json afterwards)."""
+        data = tempfile.TemporaryDirectory()
+        self.addCleanup(data.cleanup)
+
+        def prepare(card_dir):
+            store.write_json(os.path.join(data.name, "cards.json"), {} if entry is None else {os.path.basename(card_dir): entry})
+        err = io.StringIO()
+        with contextlib.redirect_stderr(err):
+            code, out, *_ = self.run_sync(dry_run=True, prepare=prepare, extra=(
+                (store, "data_dir", lambda: data.name), (store, "load_cards", REAL_LOAD_CARDS),
+                (store, "save_card", REAL_SAVE_CARD), (store, "update_card", REAL_UPDATE_CARD),
+                (cli.picker, "saved_setup", REAL_SAVED_SETUP), (cli.picker, "choose_setup", lambda manifest: (None, "esde")),
+                (cli, "free_space", lambda path: 10**9)))
+        with mock.patch.object(store, "data_dir", lambda: data.name):
+            after = store.load_cards().get(self.card)
+        return code, (out + err.getvalue()).replace(self.card, "CARD"), after
+
+    def test_dry_run_of_a_card_whose_entry_is_not_an_object_runs_like_one_with_no_entry(self):
+        code, expected, after = self.dry_run_with_cards_file(None)
+        self.assertEqual((code, after), (0, None))
+        self.assertIn("Dry run", expected)
+        self.assertNotIn("Saved setup", expected)  # no entry is not a saved setup to warn about
+        for entry in (["junk"], "x", 5):
+            with self.subTest(entry=entry):
+                self.assertEqual(self.dry_run_with_cards_file(entry), (0, expected, entry))
 
     def surprise_calls(self, result=(), **kw):
         calls = []

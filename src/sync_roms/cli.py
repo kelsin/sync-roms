@@ -945,8 +945,9 @@ def sync_card(args):
     old_list = os.path.join(store.data_dir(), "games.json")  # the core list from before cards had their own games
     if os.path.exists(old_list) and store.personal_json("games.json"):
         ui.warn(f"{old_list} is no longer read; pick its games for {card} in 'sync-roms edit'.")
-    saved = store.load_cards().get(card)
-    chosen_setup = choose_card_setup(args, base, card, manifest, saved)
+    cards = store.load_cards()
+    saved = store.saved_card(card, cards)
+    chosen_setup = choose_card_setup(args, base, card, manifest, cards.get(card))
     if chosen_setup is None:
         return 0
     device, layout_name, dirs = chosen_setup
@@ -1073,7 +1074,7 @@ def sync_card(args):
         for bucket in changed:
             listings.pop(bucket, None)
         relist()
-        saved = store.load_cards().get(card)
+        saved = store.saved_card(card)
 
     # surprises come in two steps: which ones to replace first (then the card editor, which shows the ones kept), and
     # the empty slots last, right before the sync, from every system the card's device supports, games picked or not
@@ -1271,7 +1272,7 @@ def sync_card(args):
     if renames or card_moves:
         print(f"📦 Card files to rename or move instead of downloading: {ui.bold(str(len(renames) + len(card_moves)))}")
     todo_all = rom_todo + bios_todo + apk_todo + driver_todo + theme_todo + scrape_todo
-    size = (saved or {}).get("size")
+    size = saved.get("size")
 
     def space(free):
         """Show the card's free space; the "Not enough space" text when the downloads don't fit."""
@@ -1373,7 +1374,7 @@ def sync_card(args):
             for name in old:
                 print(f"  {ui.red('would delete')} {os.path.join(drivers_dir, name)}" if dry_run else ui.green(f"🧹 Removed old driver {name}"))
 
-    capacity = budget.card_capacity(saved or {}) if surprise.enabled(saved or {}) else None
+    capacity = budget.card_capacity(saved) if surprise.enabled(saved) else None
     if capacity:
         used = budget.card_usage(cardedit.card_entry(card, (device, layout_name)), systems).bytes
         if used > capacity:
