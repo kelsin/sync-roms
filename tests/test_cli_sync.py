@@ -193,6 +193,31 @@ class SyncSmokeTest(RealDataDirGuard):
         self.assertEqual(sum("1 system(s) have no NextUI folder" in x for x in lines), 1)
         self.assertEqual(synced, [["gba"]])
 
+    def test_the_systems_synced_are_those_the_device_runs_that_have_a_folder_by_name(self):
+        """In a dry run (the systems as first read) and a real one (read again once the card's games are saved). The
+        skipped count leaves out a system the device doesn't run."""
+        def system(name, bucket, folder):
+            return {"name": name, "bucket": bucket, "folders": {"nextui": folder}, "bios": {"files": []},
+                    "games": [{"bucket": f"{bucket}/Game.zip"}]}
+        systems = [system("Zeta", "zeta", "Zeta (Z)"), system("Game Boy Advance", "gba", "Game Boy Advance (GBA)"),
+                   system("Nintendo 64", "n64", None), system("Super Nintendo", "snes", None),
+                   system("Arcade", "fbneo", "Arcade (FBN)")]
+        device = {"id": "dev", "name": "Dev", "systems": ["zeta", "gba", "n64"], "note": ""}
+        for dry_run in (True, False):
+            with self.subTest(dry_run=dry_run):
+                manifest = {"systems": list(systems), "devices": [device],
+                            "layouts": {"nextui": {"label": "NextUI", "roms_dir": "Roms", "bios_dir": "Bios"}}}
+                lines, synced = [], []
+                patches = ((store, {"load_manifest": lambda names=(): manifest}),
+                           (cli.picker, {"saved_setup": lambda *a: (device, "nextui")}),
+                           (cli.surprise, {"fill_surprises": lambda card, setup, chosen, dry_run: synced.append(
+                               [s["bucket"] for s in chosen]) or []}),
+                           (cli.ui, {"dim": lambda text: lines.append(text) or text}))
+                self.assertEqual(self.run_sync(dry_run, patches=patches), 0)
+                self.assertEqual([x for x in lines if "system(s) have no" in x],
+                                 ["  1 system(s) have no NextUI folder and are skipped"])
+                self.assertEqual(synced, [["gba", "zeta"]])
+
     def test_nextui_bios_goes_in_per_tag_folders(self):
         """Each BIOS file lands in Bios/<TAG>/ for the system's tag and its extra tags; subpaths are kept; ROM files stay put."""
         gba = {**SYSTEM, "folders": {"nextui": "Game Boy Advance (GBA)"}, "nextui_bios_tags": ["MGBA"],
@@ -617,6 +642,32 @@ class SyncSmokeTest(RealDataDirGuard):
                 if expected:
                     self.assertTrue(got[0][1].endswith(os.path.join("Themes", "A", "config.json")))
 
+    def test_a_file_whose_path_would_leave_its_card_folder_is_skipped_with_a_warning(self):
+        """A ROM, a BIOS file and a theme file. The ROM that isn't in storage is still the one reported missing."""
+        system = {**SYSTEM, "folders": {"onion": "GBA"}, "bios": {"files": ["ok.bin", "../evil.bin"]},
+                  "games": [{"bucket": "gba/Game.zip"}, {"bucket": "gba/../evil.zip"}, {"bucket": "gba/Gone.zip"}]}
+        listings = {"gba/": {"gba/Game.zip": 5, "gba/../evil.zip": 5}, "BIOS/": {"BIOS/ok.bin": 3, "BIOS/../evil.bin": 3},
+                    "os/onion/Themes/": {"os/onion/Themes/A/config.json": 5, "os/onion/Themes/../evil.json": 5}}
+        manifest = {**MANIFEST, "systems": [system],
+                    "layouts": {"onion": {"label": "Onion", "roms_dir": "Roms", "bios_dir": "BIOS", "themes_dir": "Themes"}}}
+        for dry_run in (True, False):
+            with self.subTest(dry_run=dry_run):
+                got = []
+                patches = ((cli, {"free_space": lambda path: 10**9}),
+                           (store, {"load_manifest": lambda names=(): manifest}),
+                           (cli.picker, {"saved_setup": lambda *a: (None, "onion")}),
+                           (cli.downloads, {"run_downloads": lambda todo, *a: got.extend(j[0] for j in todo) or 0}),
+                           (cli.s3, {"list_sizes": lambda prefix, sizes=True: listings.get(prefix, {})}))
+                self.assertEqual(self.run_sync(dry_run, patches=patches), 0)
+                lines = self.out.getvalue().split("\n")
+                self.assertEqual([line for line in lines if "skipping" in line],
+                                 [f"  ⚠️  skipping unsafe path: '../evil.{ext}'" for ext in ("zip", "bin", "json")])
+                self.assertEqual([line.strip() for line in lines if "evil" in line and "skipping" not in line], [])
+                self.assertEqual([line.strip() for line in lines[lines.index("  ⚠️  1 ROM(s) listed in manifest but not in storage") + 1:]
+                                  if line.startswith("       ")], ["gba/Gone.zip"])
+                if not dry_run:
+                    self.assertEqual(got, ["gba/Game.zip", "BIOS/ok.bin", "os/onion/Themes/A/config.json"])
+
     def test_roms_of_systems_the_device_dropped_are_extras(self):
         """A system the card's device no longer lists is scanned too, so its leftovers are offered for deletion."""
         dropped = {"name": "Arcade", "bucket": "fbneo", "folders": {"esde": "fbneo"}, "bios": {"files": []}, "games": [{"bucket": "fbneo/a.zip"}]}
@@ -633,6 +684,25 @@ class SyncSmokeTest(RealDataDirGuard):
                    (cli.ui, {"choose": lambda q, *a, **k: asked.append(q) or "n"}))
         self.run_sync(False, prepare=prepare, patches=patches)
         self.assertEqual([q for q in asked if q.startswith("Delete these")], ["Delete these 1 local file(s) (0 B)?"])
+
+    def test_the_stale_media_check_gets_every_system_by_name_only_when_the_card_syncs_them_all(self):
+        """The check reads the manifest's own list of systems: a card that syncs all of them has it in name order, any
+        other card in the manifest's order."""
+        zeta = {"name": "Zeta", "bucket": "zeta", "folders": {"esde": "zeta"}, "bios": {"files": []}, "games": []}
+        n64 = {"name": "Nintendo 64", "bucket": "n64", "folders": {}, "bios": {"files": []}, "games": []}
+        device = {"id": "dev", "name": "Dev", "systems": ["zeta", "gba"], "note": ""}
+        for systems, setup, want in (([zeta, SYSTEM], None, ["gba", "zeta"]),
+                                     ([zeta, SYSTEM, n64], None, ["zeta", "gba", "n64"]),
+                                     ([zeta, SYSTEM], device, ["zeta", "gba"])):
+            for dry_run in (True, False):
+                with self.subTest(systems=len(systems), device=bool(setup), dry_run=dry_run):
+                    manifest, seen = {**MANIFEST, "systems": list(systems), "devices": [device]}, []
+                    patches = ((store, {"load_manifest": lambda names=(): manifest}),
+                               (cli.picker, {"saved_setup": lambda *a: (setup, "esde")}),
+                               (scrape_plan, {"stale_media": lambda layout, all_systems, *a: seen.append(
+                                   [s["bucket"] for s in all_systems]) or []}))
+                    self.assertEqual(self.run_sync(dry_run, patches=patches), 0)
+                    self.assertEqual(seen, [want])
 
     def card_rom(self, rel, size):
         """A prepare that puts a file of size bytes at ROMs/rel on the card, keeping the card's path in self.card."""
@@ -1179,6 +1249,33 @@ class SyncSmokeTest(RealDataDirGuard):
         self.assertEqual(self.run_sync(False, prepare=prepare, patches=patches), 0)
         self.assertEqual(sorted(jobs), sorted([dlc, new]))
         self.assertTrue(any(q.startswith("Delete these 1") for q in asked), asked)
+
+
+class ShownPathsTest(unittest.TestCase):
+    """The card files a sync deletes are listed dimmed, 5 spaces in: the first few, then the rest counted."""
+
+    def shown(self, call, count):
+        with tempfile.TemporaryDirectory() as card:
+            paths = [os.path.join(card, f"{i:02}.zip") for i in range(count)]
+            for path in paths:
+                open(path, "w").close()
+            with mock.patch.object(cli.ui, "_COLOR", True), mock.patch.object(cli.ui, "choose", lambda *a: "n"), \
+                    contextlib.redirect_stdout(io.StringIO()) as out:
+                call(paths)
+        dimmed = [line for line in out.getvalue().split("\n") if line.startswith("\x1b[2m")]
+        return dimmed[:-1], dimmed[-1], [f"\x1b[2m     {p}\x1b[0m" for p in paths]
+
+    def test_unwanted_roms_show_the_first_ten(self):
+        head, last, lines = self.shown(cli.delete_extras, 12)
+        self.assertEqual((head, last), (lines[:10], "\x1b[2m     … and 2 more\x1b[0m"))
+        head, last, lines = self.shown(cli.delete_extras, 10)
+        self.assertEqual(head + [last], lines)
+
+    def test_stale_media_show_the_first_five(self):
+        head, last, lines = self.shown(cli.remove_stale_media, 7)
+        self.assertEqual((head, last), (lines[:5], "\x1b[2m     … and 2 more\x1b[0m"))
+        head, last, lines = self.shown(cli.remove_stale_media, 5)
+        self.assertEqual(head + [last], lines)
 
 
 class BiosFoldersTest(unittest.TestCase):

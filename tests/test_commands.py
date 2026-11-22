@@ -488,6 +488,16 @@ class CheckShapesTest(Cmd):
         self.write("device-systems.json", {dev: {"add": "gba", "remove": 3}, "x": []})
         self.assertGreaterEqual(len(commands.check_data()), 4)
 
+    def test_the_keys_of_a_cards_surprises_are_checked(self):
+        self.write("cards.json", {"c": {"device": "full", "layout": "esde", "surprises": [
+            {"system": "gba", "bucket": "gba/A.zip", "title": "A", "files": ["gba/A2.zip", "nes/B.zip"]},
+            {"system": "gba", "bucket": "nes/C.zip", "title": "C", "files": "gba/D.zip"}]}})
+        self.assertEqual(commands.check_data(lambda system: {"gba/A.zip"}),
+                         ["cards.json: c: surprises: 'nes/B.zip' isn't under gba/",
+                          "cards.json: c: surprises: nes/C.zip: 'files' must be a list of bucket keys",
+                          "cards.json: c: surprises: 'nes/C.zip' isn't under gba/",
+                          "cards.json: c: surprises: 'gba/A2.zip' isn't in storage"])
+
 
 class CliTest(unittest.TestCase):
     def test_translate_maps_subcommands_to_flags(self):
@@ -709,6 +719,38 @@ class DownloadsTest(unittest.TestCase):
                     contextlib.redirect_stdout(io.StringIO()):
                 self.assertEqual(mirroring.refresh_mirror(root), 0)
             self.assertEqual(os.listdir(os.path.join(root, "gba")), ["Keep.zip"])
+
+    def test_mirror_skips_a_key_that_would_leave_it_with_a_warning(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as root:
+            open(os.path.join(root, ".sync-roms-mirror"), "w").close()
+            got = []
+            with mock.patch.object(mirroring.store, "load_manifest", return_value={}), \
+                    mock.patch.object(mirroring.store, "all_card_names", return_value=[]), \
+                    mock.patch.object(mirroring, "mirror_wanted", return_value={"../evil.zip": 3, "gba/New.zip": 3}), \
+                    mock.patch.object(mirroring.downloads, "run_downloads", side_effect=lambda jobs, *a: got.extend(jobs) or 0), \
+                    contextlib.redirect_stdout(io.StringIO()) as out:
+                self.assertEqual(mirroring.refresh_mirror(root), 0)
+            self.assertEqual(got, [("gba/New.zip", os.path.join(root, "gba/New.zip"), 3)])
+        self.assertIn("\n  ⚠️  skipping unsafe path: '../evil.zip'\n", out.getvalue())
+
+    def test_mirror_lists_the_first_ten_files_it_asks_about_deleting(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as root:
+            open(os.path.join(root, ".sync-roms-mirror"), "w").close()
+            os.makedirs(os.path.join(root, "gba"))
+            for i in range(12):
+                open(os.path.join(root, "gba", f"{i:02}.zip"), "w").close()
+            with mock.patch.object(mirroring.store, "load_manifest", return_value={}), \
+                    mock.patch.object(mirroring.store, "all_card_names", return_value=[]), \
+                    mock.patch.object(mirroring, "mirror_wanted", return_value={}), \
+                    mock.patch.object(mirroring.downloads, "run_downloads", return_value=0), \
+                    mock.patch.object(mirroring.ui, "confirm", return_value=False), \
+                    mock.patch.object(ui, "_COLOR", True), contextlib.redirect_stdout(io.StringIO()) as out:
+                self.assertEqual(mirroring.refresh_mirror(root), 0)
+            self.assertEqual(len(os.listdir(os.path.join(root, "gba"))), 12)
+        self.assertEqual([line for line in out.getvalue().split("\n") if line.startswith("\x1b[2m")],
+                         [f"\x1b[2m     gba/{i:02}.zip\x1b[0m" for i in range(10)] + ["\x1b[2m     … and 2 more\x1b[0m"])
 
 
 def etag(data):

@@ -791,15 +791,22 @@ def check_game_data(problems, data, where, systems):
             problems.append(f"{where}: {g['bucket']}: 'category' must be a string")
         if not isinstance(g.get("series", ""), str):
             problems.append(f"{where}: {g['bucket']}: 'series' must be a string")
-        files = g.get("files", [])
-        if not isinstance(files, list) or not all(isinstance(k, str) for k in files):
-            problems.append(f"{where}: {g['bucket']}: 'files' must be a list of bucket keys")
-            files = []
-        for k in [g["bucket"]] + files:
-            if not k.startswith(system + "/"):
-                problems.append(f"{where}: {k!r} isn't under {system}/")
-            else:
-                listed.append((system, k))
+        listed += check_keys(problems, where, system, g)
+    return listed
+
+
+def check_keys(problems, where, system, game):
+    """[(system, key)] of a game's bucket key and 'files' that are under system/; the rest go to problems."""
+    files = game.get("files", [])
+    if not isinstance(files, list) or not all(isinstance(k, str) for k in files):
+        problems.append(f"{where}: {game['bucket']}: 'files' must be a list of bucket keys")
+        files = []
+    listed = []
+    for k in [game["bucket"]] + files:
+        if not k.startswith(system + "/"):
+            problems.append(f"{where}: {k!r} isn't under {system}/")
+        else:
+            listed.append((system, k))
     return listed
 
 
@@ -968,12 +975,10 @@ def check_data(list_keys=None, repo_systems=None):
             problems.append(f"cards.json: {name}: 'collections' must be a list of collection ids")
         else:
             problems.extend(f"cards.json: {name}: unknown collection {i!r}" for i in picked if i not in collection_ids)
-        names = entry.get("frontend_collections", [])
-        if not isinstance(names, list) or not all(isinstance(i, str) for i in names):
-            problems.append(f"cards.json: {name}: 'frontend_collections' must be a list of names")
-        names = entry.get("drivers", [])
-        if not isinstance(names, list) or not all(isinstance(i, str) for i in names):
-            problems.append(f"cards.json: {name}: 'drivers' must be a list of names")
+        for field in ("frontend_collections", "drivers"):
+            names = entry.get(field, [])
+            if not isinstance(names, list) or not all(isinstance(i, str) for i in names):
+                problems.append(f"cards.json: {name}: '{field}' must be a list of names")
         for field in ("pico8", "spruce_os"):
             if field in entry and not (isinstance(entry[field], str) and entry[field]):
                 problems.append(f"cards.json: {name}: '{field}' must be a file name")
@@ -995,15 +1000,8 @@ def check_data(list_keys=None, repo_systems=None):
                 elif g["system"] not in systems:
                     problems.append(f"cards.json: {name}: surprises: unknown system {g['system']!r}")
                 else:
-                    files = g.get("files", [])
-                    if not isinstance(files, list) or not all(isinstance(k, str) for k in files):
-                        problems.append(f"cards.json: {name}: surprises: {g['bucket']}: 'files' must be a list of bucket keys")
-                        files = []
-                    for k in [g["bucket"]] + files:
-                        if not k.startswith(g["system"] + "/"):
-                            problems.append(f"cards.json: {name}: surprises: {k!r} isn't under {g['system']}/")
-                        else:
-                            wanted.setdefault(f"cards.json: {name}: surprises", []).append((g["system"], k))
+                    where = f"cards.json: {name}: surprises"
+                    wanted.setdefault(where, []).extend(check_keys(problems, where, g["system"], g))
     history = load("surprises.json")
     if history is not None and not isinstance(history, list):
         problems.append("surprises.json: must be a list")

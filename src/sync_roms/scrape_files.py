@@ -120,10 +120,7 @@ def clean_scrapes(args):
     for system in sorted(per):
         c = per[system]
         print(f"  {system}: {c['media']} media file(s) ({ui.human_size(c['bytes'])}), {c['entries']} metadata entr{'y' if c['entries'] == 1 else 'ies'}")
-    for key in delete[:10]:
-        print(ui.dim(f"     {key}"))
-    if len(delete) > 10:
-        print(ui.dim(f"     … and {len(delete) - 10} more"))
+    ui.print_head(delete, 10, indent=5)
     if args.dry_run:
         print(ui.yellow("\n🧪 Dry run — nothing deleted"))
         return 0

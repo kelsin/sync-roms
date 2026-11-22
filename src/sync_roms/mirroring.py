@@ -79,10 +79,7 @@ def refresh_mirror(root, dry_run=False):
     have = {k: s for k, s in s3.mirror_sizes(root, parts=True).items() if k != runtime.MIRROR_MARKER}
     jobs = []
     for k, s in wanted.items():
-        try:
-            jobs.append((k, s3.safe_join(root, k), s))
-        except ValueError as e:
-            print(ui.yellow(f"  ⚠️  skipping {e}"))
+        downloads.add_job(jobs, k, root, k, s)
     todo = [j for j in jobs if have.get(j[0]) != j[2]  # the mirror listing already has every size
             or j[0] == themeart.ESDE_COMMIT and commit_changed(j[1])]
     commit = next((j for j in todo if j[0] == themeart.ESDE_COMMIT), None)
@@ -108,10 +105,7 @@ def refresh_mirror(root, dry_run=False):
         stale = []
     elif stale and (len(stale) > MIRROR_PRUNE_ASK or len(stale) * 10 > len(have)):
         # a lot of the mirror going at once is more likely a listing glitch or a trimmed list than intent
-        for key in stale[:10]:
-            print(ui.dim(f"     {key}"))
-        if len(stale) > 10:
-            print(ui.dim(f"     … and {len(stale) - 10} more"))
+        ui.print_head(stale, 10, indent=5)
         if not ui.confirm(f"🗑️  Delete these {len(stale)} file(s) no longer referenced?", default=False):
             print(ui.yellow("  ↩️  Keeping them"))
             stale = []

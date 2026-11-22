@@ -868,10 +868,7 @@ def total_bytes(jobs):
 def delete_extras(extras):
     """List the local ROMs that are no longer wanted and, after confirming, delete them."""
     print(ui.bold(f"\n🗑️  {len(extras)} local ROM(s) are no longer in the selection"))
-    for path in extras[:10]:
-        print(ui.dim(f"     {path}"))
-    if len(extras) > 10:
-        print(ui.dim(f"     … and {len(extras) - 10} more"))
+    ui.print_head(extras, 10, indent=5)
     answer = ui.choose(f"Delete these {len(extras)} local file(s) ({ui.human_size(sum(os.path.getsize(p) for p in extras))})?", "ynl", "n", "y yes · n no · l list all")
     while answer == "l":
         for path in extras:
@@ -904,10 +901,7 @@ def remove_stale_media(stale):
     """Delete the media files left for ROMs that aren't on the card, saying so."""
     if stale:
         print(ui.bold(f"\n🧹 Removing {len(stale)} media file(s) for ROMs that aren't on this card"))
-        for path in stale[:5]:
-            print(ui.dim(f"     {path}"))
-        if len(stale) > 5:
-            print(ui.dim(f"     … and {len(stale) - 5} more"))
+        ui.print_head(stale, 5, indent=5)
     for path in stale:
         try:
             os.remove(path)
@@ -966,25 +960,22 @@ def sync_card(args):
             print(ui.dim(f"  📦 {'would rename' if args.dry_run else 'Renamed'} {old} → {new}"))
         cardfs.clear()
     clean_card = not args.dry_run and not args.no_clean
+
+    def synced(all_systems):
+        """The systems of all_systems this card syncs, by name: its device runs them and its layout has a folder for them."""
+        return sorted((s for s in all_systems if store.system_applies(s, device, layout_name)), key=lambda s: s["name"].lower())
+
     dropped = []  # systems the device no longer lists: whatever they left on the card is unwanted
     if device:
-        wanted_ids = set(device["systems"])
-        dropped = [s for s in systems if s["bucket"] not in wanted_ids]
-        systems = [s for s in systems if s["bucket"] in wanted_ids]
+        dropped = [s for s in systems if s["bucket"] not in device["systems"]]
         if device["note"]:
             print(ui.dim(f"  {device['name']}: {device['note']}"))
-    unsupported = [s for s in systems if not s["folders"].get(layout_name)]
+    unsupported = len(systems) - len(dropped) - len(synced(systems))  # of the systems the device runs
     if unsupported:
-        systems = [s for s in systems if s["folders"].get(layout_name)]
-        print(ui.dim(f"  {len(unsupported)} system(s) have no {layout['label']} folder and are skipped"))
-    systems.sort(key=lambda s: s["name"].lower())
-
-    def reload_systems():
-        """The systems this card syncs, with the card's games as they are saved now."""
-        fresh = store.load_manifest([card])["systems"]
-        if device:
-            fresh = [s for s in fresh if s["bucket"] in wanted_ids]
-        return sorted((s for s in fresh if s["folders"].get(layout_name)), key=lambda s: s["name"].lower())
+        print(ui.dim(f"  {unsupported} system(s) have no {layout['label']} folder and are skipped"))
+    systems = synced(systems)
+    if not device and not unsupported:  # as it always was: a card that syncs every system has the manifest's own list,
+        manifest["systems"] = systems  # which the stale-media check reads, in name order too
 
     print("📏 Reading ROM sizes...")
     listings = {}  # {system id: {key: size}}, kept until the system's games change
@@ -1068,7 +1059,7 @@ def sync_card(args):
         def picks(s):
             return s.get("full_system"), store.listed(s)
         before = {s["bucket"]: picks(s) for s in systems}
-        systems = reload_systems()
+        systems = synced(store.load_manifest([card])["systems"])  # with the card's games as they are saved now
         changed = [s["bucket"] for s in systems if picks(s) != before.get(s["bucket"])]
         if changed and runtime._mirror_root:  # the new picks reach the mirror before they are copied from it
             root = runtime._mirror_root
@@ -1093,17 +1084,26 @@ def sync_card(args):
     surprise.fill_surprises(card, (device, layout_name), systems, args.dry_run)
     if not args.dry_run:
         reload_changes()
+
+    def install_apps(dry_run, wrote=None):
+        """Put PICO-8 (wrote, a list, gets what it put), the Surprise app and RAOfflineProxy on the card. The failure count."""
+        return (pico8.run(card, layout_name, base, dry_run, wrote) + onion_surprise.install(card, layout_name, base, dry_run)
+                + raofflineproxy.install(card, layout_name, base, dry_run))
+
+    def stage_spruce(dry_run):
+        """Stage the newest spruceOS on a spruce card. The failure count."""
+        wrote = []
+        failed = spruce_os.install(card, layout_name, base, dry_run, wrote, keep=args.no_delete)
+        if clean_card and wrote:
+            clean._clean_root = base
+        return failed
+
     chosen = [s for s in systems if available(s)]
     if not chosen:
-        failed = pico8.run(card, layout_name, base, args.dry_run)
-        failed += onion_surprise.install(card, layout_name, base, args.dry_run)
-        failed += raofflineproxy.install(card, layout_name, base, args.dry_run)
+        failed = install_apps(args.dry_run)
         if onion_surprise.write_list(card, layout_name, base, roms_dir, systems, args.dry_run) and clean_card:
             clean._clean_root = base
-        spruce_wrote = []
-        failed += spruce_os.install(card, layout_name, base, args.dry_run, spruce_wrote, keep=args.no_delete)
-        if clean_card and spruce_wrote:
-            clean._clean_root = base
+        failed += stage_spruce(args.dry_run)
         print(ui.yellow(f"👋 {card} has nothing to sync."))
         return 1 if failed else 0
     print(ui.bold(f"\n🔎 Checking {len(chosen)} system(s) against storage..."))
@@ -1129,10 +1129,7 @@ def sync_card(args):
             moved.update(downloads.hide_discs(dest, disc_dir, disc_keys, args.dry_run))
         for key in wanted:
             if key in have:
-                try:
-                    rom_jobs.append((key, s3.safe_join(dest, downloads.rom_rel(key, disc_dir, disc_keys, folders_of(s))), have[key]))
-                except ValueError as e:
-                    print(ui.yellow(f"  ⚠️  skipping {e}"))
+                downloads.add_job(rom_jobs, key, dest, downloads.rom_rel(key, disc_dir, disc_keys, folders_of(s)), have[key])
             else:
                 missing.append(key)
     ui.report_missing(missing, "ROM(s)")
@@ -1171,10 +1168,7 @@ def sync_card(args):
     bios_jobs = []
     for k, folder, rel in sorted(bios_dests):
         if k in bios_have:
-            try:
-                bios_jobs.append((k, s3.safe_join(folder, rel), bios_have[k]))
-            except ValueError as e:
-                print(ui.yellow(f"  ⚠️  skipping {e}"))
+            downloads.add_job(bios_jobs, k, folder, rel, bios_have[k])
     ui.report_missing([k for k in bios_keys if k not in bios_have], "BIOS file(s)")
     # Android cards also get storage's os/android/APKs/ files (APKs, the Obtainium app list) in an APKs/ folder to install from
     apk_dir = os.path.join(base, "APKs")
@@ -1200,10 +1194,7 @@ def sync_card(args):
             rel = k[len(runtime.THEMES_PREFIX):]
             if k.endswith("/") or os.path.basename(rel) == ".DS_Store":
                 continue
-            try:
-                theme_jobs.append((k, s3.safe_join(os.path.join(base, themes_dir), rel), size))
-            except ValueError as e:
-                print(ui.yellow(f"  ⚠️  skipping {e}"))
+            downloads.add_job(theme_jobs, k, os.path.join(base, themes_dir), rel, size)
 
     theme_jobs = downloads.with_sizes(theme_jobs)
 
@@ -1374,6 +1365,15 @@ def sync_card(args):
         if layout_name == "rocknix" and (plan["writes"] or plan["deletes"] or art):
             print(f"💖 Run {os.path.basename(rocknix_collections.SCRIPT)[:-3]} from Ports on the device to install them")
 
+    def prune_drivers(dry_run):
+        """Remove the drivers an earlier sync copied that the card doesn't get now, saying which (kept with --no-delete)."""
+        old = drivers.prune(card, drivers_dir, [os.path.basename(p) for _, p, _ in driver_jobs], dry_run, keep=args.no_delete)
+        if args.no_delete:
+            list_kept([os.path.join(drivers_dir, name) for name in old], "old driver(s)")
+        else:
+            for name in old:
+                print(f"  {ui.red('would delete')} {os.path.join(drivers_dir, name)}" if dry_run else ui.green(f"🧹 Removed old driver {name}"))
+
     capacity = budget.card_capacity(saved or {}) if surprise.enabled(saved or {}) else None
     if capacity:
         used = budget.card_usage(cardedit.card_entry(card, (device, layout_name)), systems).bytes
@@ -1403,16 +1403,9 @@ def sync_card(args):
             print(f"  {ui.yellow('would move')} {path} {ui.dim('→')} {job[1]}")
         for path in extras:
             print(f"  {ui.red('would delete')} {path}")
-        old_drivers = drivers.prune(card, drivers_dir, [os.path.basename(p) for _, p, _ in driver_jobs], True)
-        if args.no_delete:
-            list_kept([os.path.join(drivers_dir, name) for name in old_drivers], "old driver(s)")
-        else:
-            for name in old_drivers:
-                print(f"  {ui.red('would delete')} {os.path.join(drivers_dir, name)}")
-        pico8.run(card, layout_name, base, True)
-        onion_surprise.install(card, layout_name, base, True)
-        raofflineproxy.install(card, layout_name, base, True)
-        spruce_os.install(card, layout_name, base, True, keep=args.no_delete)
+        prune_drivers(True)
+        install_apps(True)
+        stage_spruce(True)
         stale_count = 0
         if scrapes:
             stale_files = scrape_plan.stale_media(layout_name, manifest['systems'], roms_dir, stale_es_dir, base)
@@ -1478,16 +1471,9 @@ def sync_card(args):
     if driver_entries:
         failed += downloads.run_downloads(driver_todo, "Drivers", "🎮", drivers_dir, failures)
     # also when the card gets no drivers now (another device or layout): the ones sync copied before go
-    old_drivers = drivers.prune(card, drivers_dir, [os.path.basename(p) for _, p, _ in driver_jobs], False, keep=args.no_delete)
-    if args.no_delete:
-        list_kept([os.path.join(drivers_dir, name) for name in old_drivers], "old driver(s)")
-    else:
-        for name in old_drivers:
-            print(ui.green(f"🧹 Removed old driver {name}"))
+    prune_drivers(False)
     pico8_wrote = []
-    failed += pico8.run(card, layout_name, base, False, pico8_wrote)
-    failed += onion_surprise.install(card, layout_name, base, False)
-    failed += raofflineproxy.install(card, layout_name, base, False)
+    failed += install_apps(False, pico8_wrote)
     if theme_todo:
         failed += downloads.run_downloads(theme_todo, "Themes", "🎨", os.path.join(base, themes_dir), failures)
     prefixed = 0
@@ -1532,10 +1518,7 @@ def sync_card(args):
     except OSError as e:
         failed += 1
         failures.append(("frontend settings", str(e)))
-    spruce_wrote = []  # last: the 7z is large, and the card's other writes come first
-    failed += spruce_os.install(card, layout_name, base, False, spruce_wrote, keep=args.no_delete)
-    if clean_card and spruce_wrote:
-        clean._clean_root = base
+    failed += stage_spruce(False)  # last: the 7z is large, and the card's other writes come first
     if failures:
         report_failures(failures)
     if not failed and not args.no_eject and usersettings.load_settings().get("eject", True) is not False:

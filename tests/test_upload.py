@@ -72,6 +72,17 @@ class PlanRomUploadTest(unittest.TestCase):
         self.assertEqual([(k, s) for k, _, s in changed], [("gba/c.gba", 30)])
         self.assertEqual([(k, s) for k, _, s in same], [("gba/b.gba", 20)])
 
+    def test_files_come_in_name_order_within_each_folder_as_walked(self):
+        with tempfile.TemporaryDirectory() as root:
+            walked = [(root, ["b.gba", "a.gba"]), (os.path.join(root, "Z"), ["d.gba", "c.gba"]), (os.path.join(root, "A"), ["e.gba"])]
+            for folder, files in walked:
+                for name in files:
+                    helpers.touch(os.path.join(folder, name), b"x")
+            with mock.patch.object(downloads, "walk_roms", lambda *a, **k: iter(walked)):
+                new, _, _ = upload.plan_rom_upload(root, "gba", {})
+            self.assertEqual([(k, os.path.relpath(p, root)) for k, p, _ in new],
+                             [(f"gba/{rel}", os.path.join(*rel.split("/"))) for rel in ("a.gba", "b.gba", "Z/c.gba", "Z/d.gba", "A/e.gba")])
+
 
 class OwnFilesTest(unittest.TestCase):
     def test_runtime_and_scripts_are_never_uploaded_or_compared(self):
@@ -241,6 +252,39 @@ class ReplaceContentTest(unittest.TestCase):
         for i in range(n):
             self.assertIn(f"old{i:02}.gba → new{i:02}.gba", out)
         self.assertNotIn("more", out)
+
+
+class OverwriteListTest(unittest.TestCase):
+    """upload and upload --replace list the files they would overwrite in yellow, 5 spaces in: the first ten, then the
+    rest counted."""
+
+    def setUp(self):
+        self.storage = tempfile.TemporaryDirectory()
+        self.addCleanup(self.storage.cleanup)
+        for p in (mock.patch.object(runtime, "ROOT", self.storage.name), mock.patch.object(runtime, "_mirror_root", None)):
+            p.start()
+            self.addCleanup(p.stop)
+
+    def overwrites(self, replace):
+        names = [f"{i:02}.gba" for i in range(12)]
+        with tempfile.TemporaryDirectory() as root:
+            for name in names:
+                touch(root, name, 10)
+                touch(self.storage.name, f"gba/{name}", 20)
+            args = argparse.Namespace(upload=root, replace=replace, dry_run=True)
+            with mock.patch.object(store, "load_manifest", lambda: {"systems": SYSTEMS}), \
+                    mock.patch.object(upload.picker, "filter_list", lambda *a, **k: 0), \
+                    mock.patch.object(inventory, "files", lambda prefix: {f"gba/{n}": 20 for n in names}), \
+                    mock.patch.object(inventory, "etags", lambda prefix: {n: (20, "-") for n in names}), \
+                    mock.patch.object(ui, "_COLOR", True), contextlib.redirect_stdout(io.StringIO()) as out:
+                self.assertEqual(upload.upload_command(args), 0)
+        return [line for line in out.getvalue().split("\n") if line.startswith("\x1b[33m     ")]
+
+    def test_upload_and_replace_show_the_first_ten(self):
+        want = [f"\x1b[33m     overwrite gba/{i:02}.gba \x1b[2m{ui.human_size(10)}\x1b[0m\x1b[0m" for i in range(10)]
+        for replace in (False, True):
+            with self.subTest(replace=replace):
+                self.assertEqual(self.overwrites(replace), want + ["\x1b[33m     … and 2 more\x1b[0m"])
 
 
 class RenameChainTest(unittest.TestCase):
