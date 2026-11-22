@@ -21,7 +21,7 @@ from . import ignore, inventory, runtime, s3, scrape_files, scrape_plan, scrape_
 CHUNK = 8 << 20
 
 
-PICO8_PICTURES = {"miximages", scrape_plan.ONION_TYPE}  # what sync uses instead of a pico8 cart's own picture
+PICO8_PICTURES = {"miximages", "covers"}  # the scraped pictures that stand in for a pico8 cart's own (onion can be made from the cart)
 
 
 def find_candidates(systems, roms, metadata, retry=False, fill=None, listings=None):
