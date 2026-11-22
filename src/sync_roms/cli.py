@@ -10,7 +10,7 @@ from concurrent.futures import ThreadPoolExecutor
 from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError
 
 from . import __version__, budget, cardedit, cardfs, clean, commands, downloads, drivers, edit, external, frontend, inventory, m3u, mirroring, picker, runtime, s3, scrape_plan, store
-from . import muos_collections, nextui_folders, onion_surprise, pico8, raofflineproxy, rocknix_collections, saves, spruce_collections, spruce_emu, spruce_os, surprise, themeart, ui, usersettings, vita
+from . import muos_collections, nextui_folders, onion_surprise, pico8, raofflineproxy, rocknix_collections, saves, spruce_collections, spruce_emu, spruce_os, spruce_settings, surprise, themeart, ui, usersettings, vita
 from . import collections as colls
 
 
@@ -36,7 +36,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "tools": ("install", "brew install the 7z, unar and chdman that `convert` needs"),
     "mirror": ("[DIR] | use DIR | clear", "make or refresh a local copy of everything your lists reference"),
     "cache": ("[update [--full]]", "show the storage cache every command reads file lists and sizes from, or update it"),
-    "config": ("show|path|set NAME VALUE|unset NAME", "show the effective settings and where each comes from, or change one"),
+    "config": ("show|path|set NAME VALUE|unset NAME|import [CARD]", "show the effective settings and where each comes from, or change one"),
     "guide": ("", "open the device setup guide (steps to finish a device by hand) in a browser"),
     "doctor": ("", "check the AWS profile, storage access, tools and your data files"),
     "check": ("", "validate cards.json, surprises.json, the device overlay, the sets and your collections"),
@@ -326,12 +326,26 @@ TOPICS = {
   sync-roms config path                 the data folder
   sync-roms config set NAME VALUE       save one setting in settings.json
   sync-roms config unset NAME           remove it (back to its default)
+  sync-roms config import [CARD]        save a card's own settings (spruceOS preferences) in settings.json
 
   NAME is bucket, root, endpoint, profile, write_profile, mirror, screenscraper_user or screenscraper_password (text),
   eject or storage_cache_declined (true or false), surprise_ttl_days (a positive number of days) or
   surprise_excluded_systems (comma-separated system ids, e.g. gba,snes). root and mirror must be absolute
   paths (~ is expanded). The password is saved but never printed;
   `scrape --set-credentials` asks for it without echoing it.
+
+  spruce_ra_mode (Manual, Disabled, Casual, Softcore or Hardcore), spruce_ra_username, spruce_ra_password and
+  spruce_ra_api_key (text, the last two never printed), spruce_ra_offline_proxy and spruce_ra_proxy_stats (true or
+  false): the RetroAchievements settings every sync writes into a spruce card's Saves/spruce/spruce-config.json.
+  Set them with `config set`; `config import` doesn't read them from the card.
+
+  config import takes CARD (a card name from cards.json, found at /Volumes/<name>, or the card's folder; default the current
+  folder) and picks what to import from the card's saved layout (only spruce so far). For a spruce card it copies the current values of the spruceOS settings that are your preferences (emulator, in-game menu,
+  button, boot and network options; not hardware, LED, battery, audio or proxy ones) from Saves/spruce/spruce-config.json
+  into settings.json's spruce_settings, merged with what is there. It lists the settings identical to the saved ones and
+  those that differ or are new, then asks Yes (all of them), No or Pick (one by one); no answer is assumed, and with no
+  terminal input nothing is saved. Every sync of a spruce card then sets those that the card's file already has. spruce_settings isn't a `config set` name: import it, or edit settings.json by hand
+  ({"section": {"key": value}}, values as the card holds them).
 """,
     "cache": """
   sync-roms cache [update [--full]]
@@ -1125,6 +1139,7 @@ def sync_card(args):
         """Stage the newest spruceOS on a spruce card. The failure count."""
         wrote = []
         failed = spruce_os.install(card, layout_name, base, dry_run, wrote, keep=args.no_delete)
+        failed += spruce_settings.install(card, layout_name, base, dry_run)
         if clean_card and wrote:
             clean._clean_root = base
         return failed

@@ -10,7 +10,7 @@ import sys
 import webbrowser
 
 from . import collections as colls
-from . import budget, cardedit, cardshare, collectionedit, external, inventory, m3u, names, picker, runtime, s3, setedit, store, surprise, themeart, ui, usersettings
+from . import budget, cardedit, cardshare, collectionedit, external, inventory, m3u, names, picker, runtime, s3, setedit, spruce_settings, store, surprise, themeart, ui, usersettings
 
 
 UNKNOWN_SHOWN = 8  # device ids named in an "unknown device" error
@@ -673,8 +673,10 @@ def effective_settings():
 
 CONFIG_KINDS = {"bucket": str, "root": str, "endpoint": str, "profile": str, "write_profile": str, "mirror": str,
                 "eject": bool, "storage_cache_declined": bool, "surprise_ttl_days": int, "surprise_excluded_systems": list,
-                "screenscraper_user": str, "screenscraper_password": str}  # the settings `config set` and `config unset` take
-HIDDEN = {"screenscraper_password"}  # set, never printed
+                "screenscraper_user": str, "screenscraper_password": str, "spruce_ra_mode": str, "spruce_ra_username": str,
+                "spruce_ra_password": str, "spruce_ra_api_key": str, "spruce_ra_offline_proxy": bool,
+                "spruce_ra_proxy_stats": bool}  # the settings `config set` and `config unset` take
+HIDDEN = {"screenscraper_password", "spruce_ra_password", "spruce_ra_api_key"}  # set, never printed
 
 
 def config_value(name, text):
@@ -696,6 +698,8 @@ def config_value(name, text):
             ui.fail(f"{name} takes comma-separated system ids; unknown: {', '.join(unknown) or '(none given)'}\n"
                     "   `sync-roms completion list systems` lists them.", 2)
         return ids
+    if name == "spruce_ra_mode" and text not in spruce_settings.MODES:
+        ui.fail(f"{name} is one of {', '.join(spruce_settings.MODES)}, not {text!r}", 2)
     if not text:
         ui.fail(f"{name} can't be empty: `sync-roms config unset {name}` removes it", 2)
     if name in ("root", "mirror"):  # saved absolute, as the first-run prompt and `mirror use` do, so it doesn't move with the cwd
@@ -705,8 +709,36 @@ def config_value(name, text):
     return text
 
 
+IMPORTERS = {"spruce": spruce_settings.import_settings}  # card layout -> importer(card folder): saves the card's settings in settings.json
+
+
+def import_settings(card):
+    """`config import [CARD]`: CARD is a card name saved in cards.json (its folder /Volumes/<name>) or a folder, whose basename is
+    the card name, else the current folder. The importer comes from the card's saved layout."""
+    if card and not os.path.isdir(os.path.expanduser(card)) and os.sep not in card:
+        base, name = os.path.join("/Volumes", card), card
+    else:
+        base = os.path.abspath(os.path.expanduser(card or os.getcwd()))
+        name = os.path.basename(base)
+    saved = store.saved_card(name)
+    if not saved:
+        ui.fail(f"No card named {name!r}. Set it up with `sync-roms cards new {name} --device ID|full --layout NAME`", 2)
+    layout = saved.get("layout")
+    if not layout:
+        ui.fail(f"{name!r} has no layout. Set it with `sync-roms cards set {name} --layout NAME`, or sync the card once", 2)
+    if layout not in IMPORTERS:
+        ui.fail(f"importing settings from {layout} cards isn't supported yet (supported: {', '.join(IMPORTERS)})", 2)
+    if not os.path.isdir(base):
+        ui.fail(f"No folder {base}: give the card's mounted folder, e.g. `sync-roms config import /Volumes/{name}`", 2)
+    return IMPORTERS[layout](base)
+
+
 def config_cmd(args):
     name, value = getattr(args, "name", None), getattr(args, "value", None)
+    if args.action == "import":
+        if value is not None:
+            ui.fail("`config import` takes only a card name or folder", 2)
+        return import_settings(name)
     if args.action in ("set", "unset"):
         if name not in CONFIG_KINDS:
             ui.fail((f"Unknown setting {name!r}" if name else f"`config {args.action}` needs a setting's name")
@@ -1200,7 +1232,7 @@ def second_words():
     words["download"] = ["pico8"]
     words["cards"] = ["edit", "list", "new", "set", "rename", "convert", "clean", "delete", "copy", "export", "import"]
     words["saves"] = ["stash", "apply"]
-    words["config"] = ["show", "path", "set", "unset"]
+    words["config"] = ["show", "path", "set", "unset", "import"]
     words["cache"] = ["update"]
     words["completion"] = ["bash", "zsh", "fish"]
     return words
@@ -1336,7 +1368,7 @@ def build_parser():
         p.add_argument("--retroarch", metavar="DIR"); p.set_defaults(fn=fn)
 
     p = sub.add_parser("layouts", allow_abbrev=False); common(p, card=False); p.add_argument("layout_id", nargs="?"); p.add_argument("--json", action="store_true"); p.set_defaults(fn=layouts_cmd)
-    p = sub.add_parser("config", allow_abbrev=False); common(p, card=False); p.add_argument("action", choices=["show", "path", "set", "unset"], nargs="?", default="show")
+    p = sub.add_parser("config", allow_abbrev=False); common(p, card=False); p.add_argument("action", choices=["show", "path", "set", "unset", "import"], nargs="?", default="show")
     p.add_argument("name", nargs="?"); p.add_argument("value", nargs="?"); p.set_defaults(fn=config_cmd)
     p = sub.add_parser("cache", allow_abbrev=False); common(p, card=False); p.add_argument("action", choices=["update"], nargs="?"); p.add_argument("--full", action="store_true"); p.set_defaults(fn=cache_cmd)
     p = sub.add_parser("doctor", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=doctor_cmd)

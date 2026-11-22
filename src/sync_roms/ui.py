@@ -279,6 +279,20 @@ def choose(question, letters, default, legend=""):
             return a[0]
 
 
+def choose_required(question, letters):
+    """Ask for one of `letters` (single characters) with no default: Enter re-asks, and end of input stops (exit 2)
+    rather than answering for the user. --yes doesn't apply."""
+    suffix = "/".join(letters)
+    while True:
+        try:
+            a = _input(f"{question} [{suffix}] ").strip().lower()
+        except EOFError:
+            print()
+            fail("No answer to give (no terminal input); nothing was saved.", 2)
+        if a and a[0] in letters:
+            return a[0]
+
+
 def human_size(n):
     for unit in ("B", "KB", "MB", "GB"):
         if n < 1024:
