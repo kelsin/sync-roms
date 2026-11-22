@@ -349,6 +349,16 @@ def _each(fn, names):
 metadata_key, load_metadata = scrape_plan.metadata_key, scrape_plan.load_metadata
 
 
+def _load_all(systems):
+    """{storage folder: the system's metadata.json, or None when it isn't a JSON object} for each of systems."""
+    def loaded(name):
+        try:
+            return load_metadata(name)
+        except ValueError:
+            return None
+    return _each(loaded, [s["bucket"] for s in systems])
+
+
 def planned_match(system, rom, size, etag):
     """How match() will look a ROM up first, without asking ScreenScraper."""
     if scrape_state.manual_match(system, rom) is not None:
@@ -954,13 +964,8 @@ def _scrape_command(args):
         print("📏 Listing the ROMs available in storage...")
         roms = scrape_files.bucket_roms(systems, all_files=getattr(args, "all", False))
         listed = [s for s in systems if roms.get(s["bucket"])]
-        def loaded(name):
-            try:
-                return load_metadata(name)
-            except ValueError:
-                return None
         metadata = {}
-        for name, data in _each(loaded, [s["bucket"] for s in listed]).items():
+        for name, data in _load_all(listed).items():
             if data is None:
                 print(ui.yellow(f"  ⚠️  {metadata_key(name)} isn't valid JSON; skipping {name}"))
                 roms[name] = set()
@@ -1118,13 +1123,7 @@ def missing_command(args):
     try:
         roms = scrape_files.bucket_roms(systems, all_files=getattr(args, "all", False))
         listed = [s for s in systems if roms.get(s["bucket"])]
-
-        def loaded(name):
-            try:
-                return load_metadata(name)
-            except ValueError:
-                return None
-        metadata = _each(loaded, [s["bucket"] for s in listed])
+        metadata = _load_all(listed)
     except s3.ERRORS as e:
         ui.fail(f"{e}", 3)
     state, total = scrape_state.snapshot(), 0

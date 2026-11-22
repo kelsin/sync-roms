@@ -528,6 +528,21 @@ class MissingCommandTest(StorageDir):
             scrape_online.missing_command(argparse.Namespace(system=None, all=False))
         self.assertIn("isn't valid JSON; skipping gb", out.getvalue())
 
+    def test_bad_metadata_warnings_come_in_sorted_order_among_the_other_systems(self):
+        def load(name):
+            if name == "gba":
+                return {}
+            raise ValueError("bad")
+        systems = [{**GB, "bucket": "nes"}, GBA, GB]
+        out = io.StringIO()
+        with mock.patch.object(scrape_online, "_pick_systems", lambda name: systems), \
+                mock.patch.object(scrape_files, "bucket_roms", lambda systems, all_files=False: {s["bucket"]: {"a.zip"} for s in systems}), \
+                mock.patch.object(scrape_online, "load_metadata", load), contextlib.redirect_stdout(out):
+            scrape_online.missing_command(argparse.Namespace(system=None, all=False))
+        lines = [line.strip() for line in out.getvalue().splitlines()]
+        self.assertEqual(lines[1:5], ["⚠️  scrapes/gb/metadata.json isn't valid JSON; skipping gb", "gba (1): 1 not looked up yet",
+                                      "⏳ a.zip", "⚠️  scrapes/nes/metadata.json isn't valid JSON; skipping nes"])
+
 
 if __name__ == "__main__":
     unittest.main()
