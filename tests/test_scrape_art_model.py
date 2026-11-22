@@ -46,6 +46,12 @@ class MakeArtTest(unittest.TestCase):
         self.assertEqual(data[:4], b"qoif")
         self.assertEqual((int.from_bytes(data[4:8], "big"), int.from_bytes(data[8:12], "big")), (200, 133))
 
+    def test_make_art_writes_qoi_for_a_part_file_of_a_qoi(self):
+        dst = os.path.join(self.dir, "x.qoi.part")
+        scrape_plan.make_art(self.src, dst, (200, 200))
+        with open(dst, "rb") as f:
+            self.assertEqual(f.read(4), b"qoif")
+
     def test_make_art_writes_png_otherwise(self):
         dst = os.path.join(self.dir, "x.png")
         scrape_plan.make_art(self.src, dst, (200, 200))

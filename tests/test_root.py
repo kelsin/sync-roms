@@ -10,7 +10,12 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "src"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from sync_roms import downloads, mirroring, runtime, s3, store, usersettings, upload  # noqa: E402
+from sync_roms import downloads, mirroring, runtime, s3, scrape_plan, store, usersettings, upload  # noqa: E402
+
+
+def write_pid(src, dst, box):
+    with open(dst, "w") as f:
+        f.write(str(os.getpid()))
 
 
 class IsolationTest(unittest.TestCase):
@@ -91,6 +96,16 @@ class FolderStorageTest(unittest.TestCase):
         with contextlib.redirect_stdout(io.StringIO()):
             self.assertEqual(upload.run_uploads([("gba/x.zip", src, 4)]), 0)
         self.assertEqual(s3.get_text("gba/x.zip"), "data")
+
+    def test_qoi_conversion_into_a_folder_uses_worker_processes(self):
+        src = os.path.join(self.root, "src.png")
+        with open(src, "w") as f:
+            f.write("x")
+        todo = [(f"gba/{c}.qoi", src, 1, (640, 480)) for c in "ab"]
+        with mock.patch.object(scrape_plan, "make_art", write_pid), contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(upload.run_uploads(todo), 0)
+        pids = [int(s3.get_text(f"gba/{c}.qoi")) for c in "ab"]
+        self.assertNotIn(os.getpid(), pids)
 
     def test_unsafe_key_is_rejected(self):
         with self.assertRaises(ValueError):

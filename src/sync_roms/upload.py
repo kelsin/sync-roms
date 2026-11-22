@@ -91,7 +91,7 @@ def run_copies(todo, quiet=False):
         try:
             def write(tmp):
                 if len(job) > 3:
-                    scrape_plan.make_art(job[1], tmp, job[3])
+                    procs.submit(scrape_plan.make_art, job[1], tmp, job[3]).result()  # QOI encoding holds the GIL
                 else:
                     s3.copy_file(job[1], tmp, lambda b: moved.add(n, b))
             s3.write_file(job[0], write)
@@ -101,6 +101,7 @@ def run_copies(todo, quiet=False):
 
     failed, futs = 0, []
     ex = ThreadPoolExecutor(runtime.WORKERS)
+    procs = ProcessPoolExecutor(os.cpu_count() or 4)  # starts its workers only when art is converted
     try:
         finishing = queue.Queue()  # each future queues itself as it ends: a wait() per file would be O(files in flight)
         futs += [ex.submit(copy, n) for n in range(len(order))]
@@ -121,6 +122,7 @@ def run_copies(todo, quiet=False):
             bar.draw(finished)
     except KeyboardInterrupt:
         ex.shutdown(wait=False, cancel_futures=True)
+        procs.shutdown(wait=False, cancel_futures=True)
         running = [(n, f) for n, f in enumerate(futs) if f.running()]
         bar.say(ui.yellow(f"🛑 Interrupted — finishing {len(running)} copy(ies) in flight. ^C again to abort now."))
         try:
@@ -139,6 +141,7 @@ def run_copies(todo, quiet=False):
         raise
     finally:
         ex.shutdown(wait=True, cancel_futures=True)
+        procs.shutdown(wait=True, cancel_futures=True)
         bar.clear()
     return failed
 
