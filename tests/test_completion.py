@@ -65,6 +65,9 @@ class BashCompletion(unittest.TestCase):
     def test_subcommands(self):
         self.assertIn("sets", self.complete("sync-roms", "games", ""))
         self.assertEqual(self.complete("sync-roms", "clean", "s"), ["scrapes"])
+        self.assertIn("art", self.complete("sync-roms", "scrape", ""))
+        self.assertEqual(self.complete("sync-roms", "scrape", "art", "--fo"), ["--for"])
+        self.assertEqual(self.complete("sync-roms", "scrape", "art", "--wor"), ["--workers"])
         self.assertEqual(self.complete("sync-roms", "games", "add", "gb"), ["gba", "gbc"])
         self.assertIn("convert", self.complete("sync-roms", "cards", "con"))
         self.assertEqual(self.complete("sync-roms", "config", "s"), ["show", "set"])

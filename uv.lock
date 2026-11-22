@@ -231,6 +231,7 @@ name = "sync-roms"
 source = { editable = "." }
 dependencies = [
     { name = "boto3" },
+    { name = "pillow" },
     { name = "textual" },
     { name = "textual-image" },
 ]
@@ -248,6 +249,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "boto3" },
+    { name = "pillow", specifier = ">=13.0.0" },
     { name = "pillow", marker = "extra == 'images'" },
     { name = "textual" },
     { name = "textual-image", specifier = ">=0.14" },

@@ -28,15 +28,36 @@ def rom_stems(roms):
     return {system: {os.path.splitext(r)[0] for r in paths} for system, paths in roms.items()}
 
 
-def derived_art(system, stem, found):
-    """[(key, source path or None, (max width, max height))] of the Onion box art a ROM gets.
+def _image_size(path):
+    """(width, height) of a local image, or None when it can't be read."""
+    from PIL import Image
+    try:
+        with Image.open(path) as im:
+            return im.size
+    except (OSError, Image.DecompressionBombError):
+        return None
 
-    found: {media type: local path} of the ROM's art. Onion's Imgs folder is flat, so ROMs in subfolders get
-    none.
+
+def derived_art(system, stem, found, size=None):
+    """[(key, source path or None, (max width, max height))] of the Onion and Spruce box art a ROM gets.
+
+    found: {media type: local path} of the ROM's art (PICO-8 may add its cart picture as "cart"); size: the source's
+    (width, height), read from the file when not given, to leave out Spruce sizes that would equal a larger one (an
+    unreadable image leaves none out). Both Imgs folders are flat, so ROMs in subfolders get none.
     """
-    wanted = [(scrape_plan.ONION_TYPE, scrape_plan.ONION_ART, scrape_plan.ONION_MAX)] if "/" not in stem else []
-    return [(f"{scrape_plan.SCRAPES}/{system}/{kind}/{stem}.png", next((found[t] for t in order if t in found), None), box)
-            for kind, order, box in wanted]
+    order = scrape_plan.ONION_ART + (("cart",) if system == "pico8" else ())
+    first = next((t for t in order if t in found), None)
+    if "/" in stem or first is None:
+        return []
+    src = found[first]  # None for a type already in storage: the caller makes nothing from it
+    base = f"{scrape_plan.SCRAPES}/{system}"
+    out = [(f"{base}/{scrape_plan.ONION_TYPE}/{stem}.png", src, scrape_plan.ONION_MAX)]
+    if scrape_plan.can_make_qoi():
+        if size is None and src:
+            size = _image_size(src)
+        wanted = scrape_plan.spruce_tiers(size) if size else scrape_plan.SPRUCE_TYPES
+        out += [(f"{base}/{kind}/{stem}.qoi", src, box) for kind, box in scrape_plan.SPRUCE_TIERS if kind in wanted]
+    return out
 
 
 def text_keys(existing):

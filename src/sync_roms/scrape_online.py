@@ -21,7 +21,7 @@ from . import ignore, inventory, runtime, s3, scrape_files, scrape_plan, scrape_
 CHUNK = 8 << 20
 
 
-PICO8_PICTURES = {"miximages", scrape_plan.ONION_TYPE}  # what sync uses instead of a pico8 cart's own picture
+PICO8_PICTURES = {"miximages", "covers"}  # the scraped pictures that stand in for a pico8 cart's own (onion can be made from the cart)
 
 
 def find_candidates(systems, roms, metadata, retry=False, fill=None, listings=None):
@@ -215,7 +215,7 @@ CREDENTIALS = ("screenscraper_user", "screenscraper_password")
 ROM_ERRORS = (screenscraper.ApiError, OSError, ValueError, http.client.HTTPException)
 IMAGE_MAGIC = ((b"\x89PNG", ".png"), (b"\xff\xd8\xff", ".jpg"), (b"GIF8", ".gif"))
 SHOWN = 10
-SCRAPER_TYPES = set(screenscraper.MEDIA_MAP.values()) | {scrape_plan.ONION_TYPE}  # never custom/
+SCRAPER_TYPES = set(screenscraper.MEDIA_MAP.values()) | {scrape_plan.ONION_TYPE, *scrape_plan.SPRUCE_TYPES}  # never custom/
 
 
 class _RomClient:
@@ -638,7 +638,7 @@ def run_batch(system, batch, started, shrink, outcomes, listing, index, pending,
         halt = KeyboardInterrupt() if interrupted else next((p for s, p in results if s == "stop"), _unreachable.error)
         jobs = {}  # ROM -> its upload jobs
         done = {}
-        for (rom, _, _), (status, payload) in zip(batch, results):
+        for (rom, rom_size, _), (status, payload) in zip(batch, results):
             if status in ("unknown", "notgame") and rom in forced:
                 failed += 1
                 outcomes[rom] = None
@@ -661,6 +661,10 @@ def run_batch(system, batch, started, shrink, outcomes, listing, index, pending,
                             for mtype, path in sorted(files.items())]
                 if shrink:  # a type already in storage counts as found, so art is never made from a lesser image
                     found = {**{t: None for t in kept[rom]}, **files}
+                    if name == "pico8" and not set(scrape_plan.ONION_ART) & found.keys():  # the cart is its own picture
+                        cart = _download_cart(rom, rom_size, started.tmp)
+                        if cart:
+                            found["cart"] = cart
                     rom_jobs += [(key, src, os.path.getsize(src), box)
                                  for key, src, box in scrape_files.derived_art(name, stem, found)
                                  if src and (replace or key not in listing)]
@@ -691,6 +695,18 @@ def run_batch(system, batch, started, shrink, outcomes, listing, index, pending,
             scrape_plan.index_add(index, j[0], j[2])
         pending[rom] = (how, meta, jobs[rom])
     return failed, halt
+
+
+def _download_cart(rom, size, tmp):
+    """The local path of a pico8 cart's picture (the cart itself, from storage), or None when it can't be had."""
+    if not rom.endswith(".p8.png"):
+        return None
+    path = os.path.join(tmp, "cart", rom)
+    try:
+        s3.download((f"pico8/{rom}", path, size))
+    except s3.ERRORS:
+        return None
+    return path
 
 
 def _bad_entries(name, data):
@@ -880,6 +896,8 @@ def run_scrape(client, systems, todo, skip, ask=True, replace=False, forced=None
     shrink = scrape_plan.can_shrink()
     if not shrink:
         print(ui.yellow(f"  ⚠️  {scrape_plan.NO_SHRINK}; not making them"))
+    elif not scrape_plan.can_make_qoi():
+        print(ui.yellow("  ⚠️  Spruce box art needs Pillow to make QOI images; not making it"))
     outcomes = {} if outcomes is None else outcomes
     failed, halted = 0, None
     for name, items in sorted(todo.items()):

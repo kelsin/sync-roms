@@ -258,7 +258,7 @@ def card_only(folder, rel):
 
 
 IGNORED_ROOT_DIRS = {"images", "videos", "manuals",                # Batocera / Knulli scraped media
-                     "imgs"}                                       # Onion scraped box art
+                     "imgs", "imgs_med", "imgs_small"}             # Onion and Spruce scraped box art
 IGNORED_FILES = {"thumbs.db", "desktop.ini"}                       # Windows
 TEMP_DOWNLOAD = re.compile(r"\.(?:part|[0-9a-fA-F]{8})$")             # a download in progress or cut short (boto3 temp name)
 # Dotfiles/folders that are OS litter; walk_roms(keep_dotfiles=True) drops only these and sync-roms's own temp names.

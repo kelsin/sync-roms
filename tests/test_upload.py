@@ -6,6 +6,7 @@ import tempfile
 import threading
 import unittest
 import zipfile
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -861,9 +862,14 @@ class FakeManager:
             sub.on_done(future)
 
 
+def write_pid(src, dst, box):
+    with open(dst, "w") as f:
+        f.write(str(os.getpid()))
+
+
 class RunRomUploadsTest(unittest.TestCase):
-    def run_uploads(self, todo, manager, **kw):
-        with mock.patch.object(runtime, "BUCKET", "test-bucket"), \
+    def run_uploads(self, todo, manager, pool=ThreadPoolExecutor, **kw):  # a thread pool, so mocks reach the conversion
+        with mock.patch.object(runtime, "BUCKET", "test-bucket"), mock.patch.object(upload, "ProcessPoolExecutor", pool), \
                 mock.patch("boto3.s3.transfer.create_transfer_manager", return_value=manager) as create, \
                 mock.patch.object(s3, "s3_client") as client, \
                 contextlib.redirect_stdout(io.StringIO()) as out:
@@ -912,7 +918,7 @@ class RunRomUploadsTest(unittest.TestCase):
 
         manager = FakeManager()
         todo = [("scrapes/onion/a.png", "/x/a.png", 500, (250, 360)), ("scrapes/b.png", "/x/b.png", 1)]
-        with mock.patch.object(scrape_plan, "shrink_png", side_effect=shrink) as shrunk:
+        with mock.patch.object(scrape_plan, "make_art", side_effect=shrink) as shrunk:
             failed, _, _, _ = self.run_uploads(todo, manager)
         self.assertEqual(failed, 0)
         shrunk.assert_called_once()
@@ -923,9 +929,35 @@ class RunRomUploadsTest(unittest.TestCase):
         self.assertNotEqual(art[0], "/x/a.png")
         self.assertEqual(art[3], {"ContentType": "image/png"})
 
+    def test_qoi_jobs_are_uploaded_as_qoi(self):
+        seen = []
+        manager = FakeManager()
+        with mock.patch.object(scrape_plan, "make_art", side_effect=lambda src, dst, box: (seen.append(dst), open(dst, "wb").close())):
+            failed, _, _, _ = self.run_uploads([("scrapes/gba/spruce/a.qoi", "/x/a.png", 500, (640, 480))], manager)
+        self.assertEqual(failed, 0)
+        self.assertEqual(len(seen), 1)
+        self.assertTrue(seen[0].endswith(".qoi"))
+        self.assertTrue(manager.uploads[0][0].endswith(".qoi"))
+
+    def test_qoi_conversion_uses_worker_processes(self):
+        pids = []
+
+        class Recording(FakeManager):
+            def upload(self, path, bucket, key, extra_args, subscribers):
+                with open(path) as f:
+                    pids.append(int(f.read()))
+                super().upload(path, bucket, key, extra_args, subscribers)
+
+        todo = [(f"scrapes/gba/spruce/{c}.qoi", f"/x/{c}.png", 500, (640, 480)) for c in "ab"]
+        with mock.patch.object(scrape_plan, "make_art", write_pid):
+            failed, _, _, _ = self.run_uploads(todo, Recording(), pool=ProcessPoolExecutor)
+        self.assertEqual(failed, 0)
+        self.assertEqual(len(pids), 2)
+        self.assertNotIn(os.getpid(), pids)
+
     def test_failed_shrink_is_reported_not_uploaded(self):
         manager = FakeManager()
-        with mock.patch.object(scrape_plan, "shrink_png", side_effect=RuntimeError("bad png")):
+        with mock.patch.object(scrape_plan, "make_art", side_effect=RuntimeError("bad png")):
             failed, out, _, _ = self.run_uploads([("scrapes/onion/a.png", "/x/a.png", 5, (250, 360))], manager)
         self.assertEqual(failed, 1)
         self.assertIn("bad png", out)

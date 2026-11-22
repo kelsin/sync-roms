@@ -18,11 +18,15 @@ SCRAPES = "scrapes"
 MEDIA_TYPES = {"3dboxes", "backcovers", "covers", "custom", "fanart", "manuals", "marquees",
                "miximages", "physicalmedia", "screenshots", "titlescreens", "videos"}
 # Onion's box art is made at upload time (PNG, at most 250x360) from the first of ONION_ART found locally
-# and stored as scrapes/<system>/onion/<ROM name>.png, so a sync only downloads it.
+# and stored as scrapes/<system>/onion/<ROM name>.png, so a sync only downloads it. Spruce's is made the same way
+# from the same sources, as QOI in up to three sizes (a size is skipped when it would equal the next larger one).
 ONION_TYPE = "onion"
-ONION_ART = ("covers", "3dboxes", "screenshots")
+ONION_ART = ("covers", "miximages")
 ONION_MAX = (250, 360)
-BUCKET_MEDIA = MEDIA_TYPES | {ONION_TYPE}
+SPRUCE_TIERS = (("spruce", (640, 480)), ("spruce_med", (400, 300)), ("spruce_small", (200, 200)))
+SPRUCE_TYPES = tuple(t for t, _ in SPRUCE_TIERS)
+SPRUCE_FOLDERS = ("Imgs", "Imgs_med", "Imgs_small")  # where each tier goes on a Spruce card
+BUCKET_MEDIA = MEDIA_TYPES | {ONION_TYPE, *SPRUCE_TYPES}
 TEXT_FIELDS = ("name", "desc", "developer", "publisher", "genre", "players")
 
 
@@ -202,10 +206,20 @@ def plan_scrapes(layout_name, rom_rels, listing, meta, media_root, rom_dir, pres
                     name = f"{base}-{suffix}{os.path.splitext(key)[1]}"
                     add(key, rom_dir, f"{folder}/{name}", size)
                     tags[tag] = f"./{folder}/{name}"
+        elif layout_name == "spruce":  # QOI only: PyUI finds Imgs/<ROM name>.qoi by name, and converts any PNG it finds
+            if "/" in rom:  # Imgs is flat and the gamelist only lists the folder's own files
+                continue
+            tags = {k: v for k, v in tags.items() if k == "name"}
+            for mtype, folder in zip(SPRUCE_TYPES, SPRUCE_FOLDERS):
+                if mtype in found:
+                    key, size = found[mtype]
+                    add(key, rom_dir, f"{folder}/{base}.qoi", size)
+            if SPRUCE_TYPES[0] in found:  # PyUI strips every extension in the extlist, so a .p8.png cart's name finds nothing
+                tags["image"] = f"./Imgs/{base}.qoi"
         elif layout_name in ONION_LAYOUTS:
             if "/" in rom:  # Imgs is flat and the gamelist only lists the folder's own files
                 continue
-            # Onion's and Spruce's miyoogamelist.xml take name and image only; Allium's gamelist.xml also reads the rest
+            # Onion's miyoogamelist.xml takes name and image only; Allium's gamelist.xml also reads the rest
             keep = ("name",) if layout_name != "allium" else ("name", "developer", "publisher", "genre", "rating", "releasedate")
             tags = {k: v for k, v in tags.items() if k in keep}
             if layout_name == "allium":  # Allium fails to parse the whole list if a <game> has no <name>
@@ -266,6 +280,45 @@ def shrink_png(src, dst, box=ONION_MAX):
     scale = min(1, box[0] / w, box[1] / h)
     subprocess.run(["sips", "-s", "format", "png", "-z", str(max(1, round(h * scale))), str(max(1, round(w * scale))),
                     src, "--out", dst], check=True, capture_output=True)
+
+
+def fit(size, box):
+    """The size an image of size becomes when shrunk to fit box (never enlarged, each side at least 1)."""
+    scale = min(1, box[0] / size[0], box[1] / size[1])
+    return max(1, round(size[0] * scale)), max(1, round(size[1] * scale))
+
+
+def spruce_tiers(size):
+    """The Spruce art types wanted for a source of size: the first always, a smaller one only when it differs."""
+    tiers = [SPRUCE_TIERS[0][0]]
+    for (_, larger), (kind, box) in zip(SPRUCE_TIERS, SPRUCE_TIERS[1:]):
+        if fit(size, box) != fit(size, larger):
+            tiers.append(kind)
+    return tiers
+
+
+def can_make_qoi():
+    try:
+        import PIL  # noqa: F401
+        return True
+    except ImportError:
+        return False
+
+
+def make_art(src, dst, box):
+    """Write src shrunk to fit box (never enlarged) to dst: QOI for a .qoi destination (also while it is a .part
+    file), else PNG. Top level so a process pool can run it."""
+    if not dst.removesuffix(".part").endswith(".qoi"):
+        return shrink_png(src, dst, box)
+    from PIL import Image
+    from . import qoi
+    with Image.open(src) as im:
+        im.load()
+        size = fit(im.size, box)
+        if size != im.size:
+            im = im.resize(size, Image.LANCZOS)
+        with open(dst, "wb") as f:
+            f.write(qoi.encode(im))
 
 
 def update_gamelist(path, entries):
@@ -355,6 +408,13 @@ def build_scrape_plan(layout_name, systems, data, rom_rels, dest_of, es_dir, pre
         carts = s["bucket"] == "pico8" and layout_name in CART_LAYOUTS
         jobs, entries, texts = plan_scrapes(layout_name, rom_rels.get(s["bucket"], ()), listing, meta,
                                             media_root, rom_dir, lambda rom, d=rom_dir: present(os.path.join(d, rom)))
+        if layout_name == "spruce":  # old PNGs are removed, so say when storage has the sources but no QOI
+            index = scrape_index(listing)
+            plan["no_spruce_art"] = plan.get("no_spruce_art", 0) + sum(
+                1 for rom in rom_rels.get(s["bucket"], ())
+                if "/" not in rom and present(os.path.join(rom_dir, rom))
+                and (found := index.get(os.path.splitext(rom)[0], {}))
+                and SPRUCE_TYPES[0] not in found and {ONION_TYPE, "covers", "miximages"} & set(found))
         if carts:  # a cart without a scraped picture is its own picture
             index = scrape_index(listing)
             for rom in sorted(rom_rels.get(s["bucket"], ())):
@@ -369,6 +429,8 @@ def build_scrape_plan(layout_name, systems, data, rom_rels, dest_of, es_dir, pre
                     if ONION_TYPE in found:
                         continue
                     root, rel = rom_dir, nextui_art(rom) + ".png"
+                elif layout_name == "spruce":  # only QOI in Imgs; the cart's own art comes from storage
+                    continue
                 elif layout_name in ONION_LAYOUTS:
                     if "/" in rom or ONION_TYPE in found:  # Imgs is flat
                         continue
@@ -400,6 +462,9 @@ def describe_scrape_plan(plan):
     print(f"🖼️  Scraped data: {ui.bold(str(len(jobs)))} file(s) to download "
           f"({ui.human_size(sum(j[2] or 0 for j in jobs))}), {len(plan['gamelists'])} gamelist file(s) to update"
           + (f", {len(plan['writes'])} text file(s)" if plan["writes"] else ""))
+    if plan.get("no_spruce_art"):
+        print(ui.yellow(f"   {plan['no_spruce_art']} ROM(s) have no Spruce art in storage: "
+                        "run `sync-roms scrape art --for spruce`"))
 
 
 def apply_scrape_plan(plan, base, failures=None):
@@ -502,9 +567,12 @@ def stale_media(layout_name, systems, roms_dir, es_dir, base=None):
                           if f.lower().endswith(".png") and os.path.relpath(os.path.join(media, os.path.splitext(f)[0]), rom_dir) not in arts] \
                     if cardfs.is_dir(media) else []
         elif layout_name in ONION_LAYOUTS:
-            base = os.path.join(rom_dir, "Imgs")
-            stale += [full for rel, full in walk_files(base) if os.path.splitext(os.path.basename(rel))[0] not in stems] \
-                if cardfs.is_dir(base) else []
+            for folder in SPRUCE_FOLDERS if layout_name == "spruce" else ("Imgs",):
+                base = os.path.join(rom_dir, folder)
+                # Spruce: PyUI converts any non-QOI file in Imgs, so those all go
+                stale += [full for rel, full in walk_files(base)
+                          if os.path.splitext(os.path.basename(rel))[0] not in stems
+                          or layout_name == "spruce" and not rel.lower().endswith(".qoi")] if cardfs.is_dir(base) else []
             # the other Onion-family firmware's gamelist, once this layout's own has replaced it
             other = GAMELIST_FILES["onion" if layout_name == "allium" else "allium"]
             if cardfs.exists(os.path.join(rom_dir, GAMELIST_FILES[layout_name])) \
@@ -526,12 +594,12 @@ def prune_empty_systems(layout_name, systems, roms_dir):
     for rom_dir in sorted({os.path.join(roms_dir, s["folders"][layout_name]) for s in systems if s["folders"].get(layout_name)}):
         if not cardfs.is_dir(rom_dir) or card_stems(rom_dir, False, True):
             continue
-        imgs = os.path.join(rom_dir, "Imgs")
-        for dp, _, _ in sorted(cardfs.walk(imgs), reverse=True):  # deepest first
-            try:
-                os.rmdir(dp)
-            except OSError:
-                pass
+        for folder in SPRUCE_FOLDERS if layout_name == "spruce" else ("Imgs",):
+            for dp, _, _ in sorted(cardfs.walk(os.path.join(rom_dir, folder)), reverse=True):  # deepest first
+                try:
+                    os.rmdir(dp)
+                except OSError:
+                    pass
         try:
             os.rmdir(rom_dir)
             removed.append(rom_dir)

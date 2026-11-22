@@ -8,17 +8,26 @@ import sys
 import tempfile
 import threading
 import unittest
+from concurrent.futures import ThreadPoolExecutor
 from types import SimpleNamespace
 from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from helpers import StorageDir  # noqa: E402
+from PIL import Image  # noqa: E402
 from sync_roms import ignore, s3, scrape_online, scrape_plan, scrape_review, scrape_state, screenscraper, store, ui, upload, usersettings  # noqa: E402
 
 GBA = {"name": "Game Boy Advance", "bucket": "gba", "screenscraper": 12, "full_system": True, "folders": {}}
 NES = {"name": "NES", "bucket": "nes", "screenscraper": 3, "full_system": True, "folders": {}}
 PNG = b"\x89PNG\r\n\x1a\n" + b"x" * 8
+REAL_MAKE_ART = scrape_plan.make_art
+
+
+def image_bytes(size=(600, 400)):
+    out = io.BytesIO()
+    Image.new("RGB", size, (200, 10, 10)).save(out, "PNG")
+    return out.getvalue()
 CREDS = {"screenscraper_user": "me", "screenscraper_password": "hunter2"}
 STATE = ("/matches.json", "/unknown.json", "/nomedia.json", "/hashes.json", "scrapes/notgames.json")
 
@@ -111,7 +120,8 @@ class RunBase(StorageDir):
                   mock.patch.object(screenscraper, "Client", side_effect=lambda *a, **k: self.client),
                   mock.patch.object(ui, "confirm", self.confirm),
                   mock.patch.object(scrape_plan, "can_shrink", return_value=True),
-                  mock.patch.object(scrape_plan, "shrink_png", side_effect=lambda src, dst, box=None: shutil.copyfile(src, dst)),
+                  mock.patch.object(scrape_plan, "make_art", side_effect=lambda src, dst, box=None: shutil.copyfile(src, dst)),
+                  mock.patch.object(upload, "ProcessPoolExecutor", ThreadPoolExecutor),  # so the stub reaches the conversion
                   mock.patch.object(scrape_online, "RETRY_WAIT", 0)):
             p.start()
             self.addCleanup(p.stop)
@@ -135,6 +145,10 @@ class RunBase(StorageDir):
             return {}
         with open(path) as f:
             return json.load(f)
+
+    def read(self, key):
+        with open(os.path.join(self.root, key), "rb") as f:
+            return f.read()
 
     def stored(self, prefix="scrapes/"):
         """The media and metadata keys under prefix (not the scrape state files)."""
@@ -553,10 +567,6 @@ class FixRoundOneTest(RunBase):
 
 
 class FinalReviewTest(RunBase):
-    def read(self, key):
-        with open(os.path.join(self.root, key), "rb") as f:
-            return f.read()
-
     def test_notgame_result_is_pending_and_writes_nothing(self):
         self.put("gba/a.zip")
         self.client.games["a.zip"] = dict(game(1, "ZZZ(notgame):Test Cart"), id=1)
@@ -723,6 +733,19 @@ class Pico8RecordTest(RunBase):
     def test_a_cart_with_no_entry_gets_the_scraped_one(self):
         self.assertEqual(self.scrape("a.p8.png"), 0)
         self.assertEqual(self.metadata("pico8")["a.p8.png"]["name"], "One")
+
+    def test_pico8_cart_without_scraped_art_gets_art_from_the_cart(self):
+        self.put("pico8/foo.p8.png", image_bytes((128, 128)))
+        self.client.games["foo.p8.png"] = game(1, "Foo", media=())
+        with contextlib.redirect_stdout(self.out), contextlib.redirect_stderr(self.err), \
+                mock.patch.object(scrape_plan, "make_art", REAL_MAKE_ART):
+            self.assertEqual(scrape_online.run_scrape(self.client, {"pico8": self.PICO}, {"pico8": [("foo.p8.png", 1, "e")]},
+                                                      set(), ask=False), 0)
+        have = self.stored()
+        self.assertIn("scrapes/pico8/onion/foo.p8.png", have)
+        self.assertIn("scrapes/pico8/spruce/foo.p8.qoi", have)
+        self.assertEqual(self.read("scrapes/pico8/spruce/foo.p8.qoi")[:4], b"qoif")
+        self.assertFalse(any("/spruce_" in k for k in have))  # a 128x128 cart is smaller than the medium size
 
 
 class QualifierRecordTest(RunBase):
@@ -1081,10 +1104,6 @@ class MatchRoundTwoTest(RunBase):
             self.put(f"scrapes/gba/{key}", b"old " + key.encode())
         self.client.games["x"] = game(7, "Seven")
 
-    def read(self, key):
-        with open(os.path.join(self.root, key), "rb") as f:
-            return f.read()
-
     def test_replace_keeps_custom_and_overwrites_onion(self):
         self.existing()
         self.assertEqual(self.run_match(), 0)
@@ -1193,6 +1212,57 @@ class SystemsTest(RunBase):
         self.assertFalse(any("/onion/" in k for k in have))
         self.assertIn("Pillow", self.out.getvalue())
         self.assertEqual(set(self.metadata()), {"a.zip"})
+
+    def real_art(self):
+        """Download real pictures and convert them for real (the base class copies the file instead)."""
+        def download(url, dest, limit=None, stop=None):
+            with open(dest, "wb") as f:
+                f.write(image_bytes())
+        self.client.download = download
+        patch = mock.patch.object(scrape_plan, "make_art", REAL_MAKE_ART)
+        patch.start()
+        self.addCleanup(patch.stop)
+
+    def test_scrape_makes_spruce_art_with_the_onion_art(self):
+        self.put("gba/a.zip")
+        self.real_art()
+        self.assertEqual(self.run_scrape(), 0)
+        have = self.stored()
+        for key in ("spruce/a.qoi", "spruce_med/a.qoi", "spruce_small/a.qoi", "onion/a.png"):
+            self.assertIn(f"scrapes/gba/{key}", have)
+        self.assertEqual(self.read("scrapes/gba/spruce/a.qoi")[:4], b"qoif")
+
+    def test_scrape_skips_spruce_art_without_pillow(self):
+        self.put("gba/a.zip")
+        with mock.patch.object(scrape_plan, "can_make_qoi", return_value=False):
+            self.assertEqual(self.run_scrape(), 0)
+        have = self.stored()
+        self.assertIn("scrapes/gba/onion/a.png", have)
+        self.assertFalse(any("/spruce" in k for k in have))
+        self.assertIn("Pillow", self.out.getvalue())
+
+    def test_existing_spruce_art_is_kept(self):
+        self.put("gba/a.zip")
+        self.put("scrapes/gba/spruce/a.qoi", b"old spruce")
+        self.real_art()
+        self.assertEqual(self.run_scrape(), 0)
+        self.assertEqual(self.read("scrapes/gba/spruce/a.qoi"), b"old spruce")
+        self.assertIn("scrapes/gba/spruce_med/a.qoi", self.stored())
+
+    def test_a_small_source_makes_only_the_large_spruce_size(self):
+        self.put("gba/a.zip")
+        self.real_art()
+        self.client.download = lambda url, dest, limit=None, stop=None: open(dest, "wb").write(image_bytes((150, 100)))
+        self.assertEqual(self.run_scrape(), 0)
+        have = self.stored()
+        self.assertIn("scrapes/gba/spruce/a.qoi", have)
+        self.assertFalse(any("/spruce_" in k for k in have))
+
+    def test_an_unreadable_source_still_gets_every_spruce_size(self):
+        self.put("gba/a.zip")  # the stub's picture is not an image, so its size is unknown
+        self.assertEqual(self.run_scrape(), 0)
+        self.assertLessEqual({"scrapes/gba/spruce/a.qoi", "scrapes/gba/spruce_med/a.qoi", "scrapes/gba/spruce_small/a.qoi"},
+                             self.stored())
 
     def test_system_without_screenscraper_id_is_skipped_with_warning(self):
         self.put("noid/x.zip")
