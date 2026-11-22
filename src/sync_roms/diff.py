@@ -209,8 +209,8 @@ def plan_replace(local, remote, local_print, remote_print, differs=None, md5=Non
 
 
 def local_sizes(folder):
-    """{relative path: size} of the ROM files under folder."""
-    paths = [os.path.join(dirpath, f) for dirpath, files in downloads.walk_roms(folder, keep_dotfiles=True) for f in files]
+    """{relative path: size} of the ROM files under folder, each folder's files in name order."""
+    paths = [os.path.join(dirpath, f) for dirpath, files in downloads.walk_roms(folder, keep_dotfiles=True) for f in sorted(files)]
     with ThreadPoolExecutor(s3.STAT_WORKERS) as ex:  # the stats wait on the network when the folder is a share
         return {os.path.relpath(p, folder).replace(os.sep, "/"): n for p, n in zip(paths, ex.map(os.path.getsize, paths))}
 

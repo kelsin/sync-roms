@@ -23,21 +23,21 @@ def upload_workers():
     return min(16, 4 * (os.cpu_count() or 4))
 
 
+def local_roms(folder, bucket):
+    """{relative path: size} of the files under folder that are ROMs of the storage folder bucket: not sync-roms's own
+    files in a card's ROM folder, and not an ignored ROM (never uploaded: storage keeps its own copy, or none)."""
+    return {p: n for p, n in diff.local_sizes(folder).items()
+            if not ignore.is_ignored(f"{bucket}/{p}") and not downloads.never_uploaded(bucket, p) and not downloads.card_only(folder, p)}
+
+
 def plan_rom_upload(root, bucket, existing):
     """(new, changed, same) lists of (key, path, size) for the ROM files under root, keyed bucket/relative path.
 
     existing: {key: size} listing of storage folder; a file whose size matches is the same.
     """
-    paths = [os.path.join(dirpath, f) for dirpath, files in downloads.walk_roms(root, keep_dotfiles=True) for f in sorted(files)]
-    with ThreadPoolExecutor(s3.STAT_WORKERS) as ex:  # the stats wait on the network when the folder is a share
-        sizes = list(ex.map(os.path.getsize, paths))
     new, changed, same = [], [], []
-    for path, size in zip(paths, sizes):
-        key = f"{bucket}/{os.path.relpath(path, root).replace(os.sep, '/')}"
-        if downloads.never_uploaded(bucket, os.path.relpath(path, root).replace(os.sep, "/")) or downloads.card_only(root, os.path.relpath(path, root).replace(os.sep, "/")):
-            continue  # sync-roms's own files in a card's ROM folder
-        if ignore.is_ignored(key):  # never uploaded: storage keeps its own copy, or none
-            continue
+    for rel, size in local_roms(root, bucket).items():
+        key, path = f"{bucket}/{rel}", os.path.join(root, *rel.split("/"))
         if key not in existing:
             new.append((key, path, size))
         elif existing[key] == size:
@@ -280,7 +280,7 @@ def replace_command(args, folder, system):
     """Make a storage folder match a local one: move renamed files, upload new and changed ones, and delete the rest
     that you pick."""
     bucket = system["bucket"]
-    local = {p: n for p, n in diff.local_sizes(folder).items() if not ignore.is_ignored(f"{bucket}/{p}") and not downloads.never_uploaded(bucket, p) and not downloads.card_only(folder, p)}
+    local = local_roms(folder, bucket)
     md5 = functools.lru_cache(maxsize=None)(lambda p: diff.file_md5(os.path.join(folder, *p.split("/"))))  # each file hashed once
     on_samples = set()  # storage paths of big bucket files matched on samples
 

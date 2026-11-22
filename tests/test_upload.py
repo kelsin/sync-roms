@@ -72,6 +72,17 @@ class PlanRomUploadTest(unittest.TestCase):
         self.assertEqual([(k, s) for k, _, s in changed], [("gba/c.gba", 30)])
         self.assertEqual([(k, s) for k, _, s in same], [("gba/b.gba", 20)])
 
+    def test_files_come_in_name_order_within_each_folder_as_walked(self):
+        with tempfile.TemporaryDirectory() as root:
+            walked = [(root, ["b.gba", "a.gba"]), (os.path.join(root, "Z"), ["d.gba", "c.gba"]), (os.path.join(root, "A"), ["e.gba"])]
+            for folder, files in walked:
+                for name in files:
+                    helpers.touch(os.path.join(folder, name), b"x")
+            with mock.patch.object(downloads, "walk_roms", lambda *a, **k: iter(walked)):
+                new, _, _ = upload.plan_rom_upload(root, "gba", {})
+            self.assertEqual([(k, os.path.relpath(p, root)) for k, p, _ in new],
+                             [(f"gba/{rel}", os.path.join(*rel.split("/"))) for rel in ("a.gba", "b.gba", "Z/c.gba", "Z/d.gba", "A/e.gba")])
+
 
 class OwnFilesTest(unittest.TestCase):
     def test_runtime_and_scripts_are_never_uploaded_or_compared(self):
