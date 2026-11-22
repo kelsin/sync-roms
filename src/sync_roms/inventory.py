@@ -1,10 +1,11 @@
 """What is in storage: every file's key and size (and, for a bucket, its ETag), read from a cache in the data folder.
 
 Every command asks this module what storage holds; only file contents are read from storage itself. `sync-roms cache
-update` builds the cache by reading all of storage (a bucket listing, or a walk and a stat of every file in a storage
-folder), and sync-roms's own writes to storage patch it as they go (saved by flush()). Nothing refreshes it in the
-background and it never expires. A cache built from other storage (another bucket or folder) is not used. Without a
-usable cache the reads go to storage, as they always did (from the local mirror, when a sync reads from one)."""
+update` builds the cache by reading storage (a bucket listing, or a walk of a storage folder that lists only folders
+whose mtime changed and stats only new files, unless --full), and sync-roms's own writes to storage patch it as they go
+(saved by flush()). Nothing refreshes it in the background and it never expires. A cache built from other storage
+(another bucket or folder) is not used. Without a usable cache the reads go to storage, as they always did (from the
+local mirror, when a sync reads from one)."""
 import bisect
 import datetime
 import json

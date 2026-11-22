@@ -1,7 +1,7 @@
 """ScreenScraper API client and response parsing (stdlib only).
 
-Every ScreenScraper-specific string (endpoints, JSON keys, media types, HTTP codes) is in the
-CONSTANTS block below. The JSON nesting is from memory and unverified against live responses, so
+The endpoints, media types and HTTP codes are in the CONSTANTS block below; JSON keys and query
+parameters are written where they are read. The JSON nesting is from memory and unverified against live responses, so
 parsing skips anything missing instead of failing.
 """
 import base64

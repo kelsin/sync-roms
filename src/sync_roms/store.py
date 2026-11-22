@@ -274,7 +274,7 @@ def card_locked_games(entry, collections_by_id):
 
 
 def card_flag(entry, field):
-    """A card's on/off setting (`theme`, `custom_collections`): its bool in cards.json, on when absent."""
+    """A card's on/off setting (`theme`, `custom_collections`, `raofflineproxy`): its bool in cards.json, on when absent."""
     on = entry.get(field) if isinstance(entry, dict) else None
     return on if isinstance(on, bool) else True
 
