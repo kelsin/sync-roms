@@ -1068,7 +1068,7 @@ def sync_card(args):
         reload_changes()
     chosen = [s for s in systems if available(s)]
     if not chosen:
-        failed = pico8.run(card, layout_name, base, args.dry_run, syncs=False)
+        failed = pico8.run(card, layout_name, base, args.dry_run)
         failed += onion_surprise.install(card, layout_name, base, args.dry_run)
         failed += raofflineproxy.install(card, layout_name, base, args.dry_run)
         if onion_surprise.write_list(card, layout_name, base, roms_dir, systems, args.dry_run) and clean_card:
@@ -1377,7 +1377,7 @@ def sync_card(args):
         else:
             for name in old_drivers:
                 print(f"  {ui.red('would delete')} {os.path.join(drivers_dir, name)}")
-        pico8.run(card, layout_name, base, True, syncs=any(s["bucket"] == "pico8" for s in chosen))
+        pico8.run(card, layout_name, base, True)
         onion_surprise.install(card, layout_name, base, True)
         raofflineproxy.install(card, layout_name, base, True)
         spruce_os.install(card, layout_name, base, True, keep=args.no_delete)
@@ -1453,7 +1453,7 @@ def sync_card(args):
         for name in old_drivers:
             print(ui.green(f"🧹 Removed old driver {name}"))
     pico8_wrote = []
-    failed += pico8.run(card, layout_name, base, False, pico8_wrote, syncs=any(s["bucket"] == "pico8" for s in chosen))
+    failed += pico8.run(card, layout_name, base, False, pico8_wrote)
     failed += onion_surprise.install(card, layout_name, base, False)
     failed += raofflineproxy.install(card, layout_name, base, False)
     if theme_todo:
