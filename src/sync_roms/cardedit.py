@@ -730,19 +730,6 @@ def _locked_note(sp, key):
     return f"From {sp.locked_from[key]}; take it off the card to remove this game" if key in sp.locked_from else ""
 
 
-def _note_text(sp, key):
-    """The note of a game picked on its system ("" when it has none)."""
-    game = next((g for g in sp.games if g.get("bucket") == key), None)
-    return game.get("note", "") if game else ""
-
-
-def _on_note(sp, key, text):
-    """Save a game's note (`w`); the message the list shows."""
-    if not edit.set_note({"games": sp.games}, key, text):
-        return "Switch the game on and press Enter first, then add its note"
-    return "Note saved" if text else "Note cleared"
-
-
 def _toggle_variant(picks, key, title):
     """v on a game row: toggle its variant on the card, picked from a list when it has several. The variant's system
     bucket, or None when none was."""
@@ -808,8 +795,8 @@ def edit_system(name, system, setup, to_fetch=None, card_usages=None):
                                         key_help=GAMES_KEYS, filters=filters.describe(),
                                         status=status, row_note=lambda i: edit.variant_line(
                                             keys[i], picks.variants, picks.parents, picks.system_names, picks.on_card),
-                                        session=session, note_text=lambda i: _note_text(sp, keys[i]),
-                                        on_note=lambda i, text: _on_note(sp, keys[i], text),
+                                        session=session, note_text=lambda i: edit.note_text(sp.games, keys[i]),
+                                        on_note=lambda i, text: edit.save_note(sp.games, keys[i], text),
                                         preview=lambda i: previews.game_thumb(keys[i]) if i < len(keys) else None,
                                         preview_width=previews.GAME_WIDTH,
                                         links=links, locked=[k in sp.locked_from for k in keys],
@@ -980,8 +967,8 @@ def edit_set(name, game_set, setup, to_fetch=None, card_usages=None, narrow_sets
                 hint=hint, hotkeys=hotkeys, key_help=key_help, status=status, filters=filters,
                 row_note=lambda i: edit.variant_line(keys[i], picks.variants, picks.parents, picks.system_names,
                                                      picks.on_card),
-                session=session, note_text=lambda i: _note_text(sp_of[i], keys[i]),
-                on_note=lambda i, text: _on_note(sp_of[i], keys[i], text),
+                session=session, note_text=lambda i: edit.note_text(sp_of[i].games, keys[i]),
+                on_note=lambda i, text: edit.save_note(sp_of[i].games, keys[i], text),
                 preview=lambda i: previews.game_thumb(keys[i]) if i < len(keys) else None,
                 preview_width=previews.GAME_WIDTH, links=links, select_all=False,
                 locked=[sp is None or k in sp.locked_from for k, sp in zip(keys, sp_of)],

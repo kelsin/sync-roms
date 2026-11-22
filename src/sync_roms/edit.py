@@ -43,6 +43,19 @@ def set_note(s, key, text):
     return True
 
 
+def note_text(games, key):
+    """The note of the game listed under key in games ("" when it has none, or isn't listed)."""
+    game = next((g for g in games if g.get("bucket") == key), None)
+    return game.get("note", "") if game else ""
+
+
+def save_note(games, key, text):
+    """Save the note typed after `w` for the game listed under key in games; the message the list shows."""
+    if not set_note({"games": games}, key, text):
+        return "Switch the game on and press Enter first, then add its note"
+    return "Note saved" if text else "Note cleared"
+
+
 FULL_SYSTEM_NOTE = "Full system: every file in its folder is synced, so it can't be toggled"
 
 
@@ -65,16 +78,6 @@ def toggle_games(title, rows, hotkeys=(), hint=None, place=None, filters="", key
         return have[s["bucket"]]
 
     initial = [lock or key in listed(s) for lock, (s, key, _, _) in zip(locked, rows)]
-    def note_text(i):
-        game = next((g for g in rows[i][0]["games"] if g.get("bucket") == rows[i][1]), None)
-        return game.get("note", "") if game else ""
-
-    def on_note(i, text):
-        s, key = rows[i][:2]
-        if not set_note(s, key, text):
-            return "Switch the game on and press Enter first, then add its note"
-        return "Note saved" if text else "Note cleared"
-
     variants, parents = store.variant_index(store.load_sets())
     system_names = {s["bucket"]: s["name"] for s in store.repo_json("systems")}
     session = {"sel": list(initial)}
@@ -83,8 +86,10 @@ def toggle_games(title, rows, hotkeys=(), hint=None, place=None, filters="", key
     interrupted = False
     try:
         state = picker.filter_list(title, [label for *_, label in rows], multi=True, initial=initial, locked=locked,
-                                   locked_note=[FULL_SYSTEM_NOTE if lock else "" for lock in locked], hint=hint or GAMES_HINT, key_help=key_help, note_text=note_text,
-                                   on_note=on_note, hotkeys=hotkeys, session=session, filters=filters,
+                                   locked_note=[FULL_SYSTEM_NOTE if lock else "" for lock in locked], hint=hint or GAMES_HINT, key_help=key_help,
+                                   note_text=lambda i: note_text(rows[i][0]["games"], rows[i][1]),
+                                   on_note=lambda i, text: save_note(rows[i][0]["games"], rows[i][1], text),
+                                   hotkeys=hotkeys, session=session, filters=filters,
                                    row_note=lambda i: variant_line(rows[i][1], variants, parents, system_names),
                                    preview=lambda i: previews.game_thumb(rows[i][1]) if i < len(rows) else None,
                                    preview_width=previews.GAME_WIDTH, select_all=select_all)
