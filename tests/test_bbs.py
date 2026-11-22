@@ -280,6 +280,29 @@ class Download(helpers.StorageDir):
                                          "scrapes/pico8/covers/x-10.p8.png", META})
         self.assertEqual(self.meta(), {"x-2.p8.png": {"name": "X Two", "developer": "Ex", "genre": "g"}})
 
+    def test_upgrade_moves_the_manual_match_and_forgets_the_old_revisions_scrape_state(self):
+        self.put("pico8/x-1.p8.png")
+        hashes = {"size": 3, "mtime": 1, "hashes": {"md5": "a"}}
+        state = {"matches": {"x-1.p8.png": 77, "o.p8.png": 5}, "unknown": {"x-1.p8.png": True, "o.p8.png": True},
+                 "nomedia": {"x-1.p8.png": ["miximages"], "o.p8.png": ["videos"]},
+                 "hashes": {"x-1.p8.png": hashes, "o.p8.png": hashes}}
+        for name, data in state.items():
+            self.put(f"scrapes/pico8/{name}.json", json.dumps(data).encode())
+        self.put("scrapes/notgames.json", json.dumps({"pico8/x-1.p8.png": {"name": "X"}, "pico8/o.p8.png": {"name": "O"},
+                                                      "kept": ["pico8/o.p8.png", "pico8/x-1.p8.png"]}).encode())
+        with mock.patch.object(bbs, "retarget", return_value=[]):
+            code, _, err, _ = self.run_download([page(("x-2", "X Two", "Ex")), EMPTY])
+        self.assertEqual((code, err), (0, ""))
+
+        def saved(key):
+            with open(os.path.join(self.root, "scrapes", key)) as f:
+                return json.load(f)
+        self.assertEqual(saved("pico8/matches.json"), {"x-2.p8.png": 77, "o.p8.png": 5})
+        self.assertEqual(saved("pico8/unknown.json"), {"o.p8.png": True})
+        self.assertEqual(saved("pico8/nomedia.json"), {"o.p8.png": ["videos"]})
+        self.assertEqual(saved("pico8/hashes.json"), {"o.p8.png": hashes})
+        self.assertEqual(saved("notgames.json"), {"pico8/o.p8.png": {"name": "O"}, "kept": ["pico8/o.p8.png"]})
+
     def test_not_a_png_is_skipped(self):
         code, _, err, _ = self.run_download([PAGE1, EMPTY], carts={"molemole-1.p8.png": b"<html>"})
         self.assertIn("molemole-1.p8.png", err)
@@ -332,6 +355,16 @@ class Download(helpers.StorageDir):
                 raise OSError("disk full")
             return put_text(key, text)
         return mock.patch.object(bbs.s3, "put_text", flaky)
+
+    def test_failed_move_of_the_manual_match_keeps_it_on_the_old_revision(self):
+        self.put("pico8/x-1.p8.png")
+        self.put("scrapes/pico8/matches.json", json.dumps({"x-1.p8.png": 77}).encode())
+        with mock.patch.object(bbs, "retarget", return_value=[]), self.flaky_meta(2):
+            _, _, err, _ = self.run_download([page(("x-2", "X Two", "Ex")), EMPTY])
+        self.assertEqual(self.writes, [META, "scrapes/pico8/matches.json"])
+        self.assertIn("disk full", err)
+        with open(os.path.join(self.root, "scrapes/pico8/matches.json")) as f:
+            self.assertEqual(json.load(f), {"x-1.p8.png": 77})
 
     def test_metadata_is_written_once_per_batch_and_at_the_end(self):
         for every, writes in ((25, 1), (2, 2)):

@@ -182,8 +182,14 @@ def save_hashes(system, rom, size, mtime, hashes):
             flush_hashes()
 
 
+def forget_hashes(system, rom):
+    """Forget a ROM's saved hashes (written by flush_hashes)."""
+    with _lock:
+        _mark(HASHES, system, rom, _GONE)
+
+
 def flush_hashes():
-    """Write the hashes saved so far."""
+    """Write the hashes saved and forgotten so far."""
     with _lock:
         _flush(HASHES)
 
@@ -214,6 +220,17 @@ def forget_match(system, rom):
     with _lock:
         if _get(MATCHES, system, rom) is not None:
             _set_match(system, rom, _GONE)
+
+
+def move_match(system, old, new):
+    """Give the ROM new the match saved for old, in one write: when it fails, old's match is still in storage."""
+    with _lock:
+        value = _get(MATCHES, system, old)
+        if value is None:
+            return
+        changes = {old: _GONE, **({new: value} if _game_id(value) else {})}
+        _apply(_ledger(MATCHES, system), changes)
+        _write(_key(system, MATCHES), lambda data: _apply(data, changes))
 
 
 def is_unknown(system, rom):

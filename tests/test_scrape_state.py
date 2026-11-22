@@ -79,6 +79,15 @@ class ScrapeStateTest(StorageDir):
         self.assertIsNone(scrape_state.manual_match("gba", "a.zip"))
         self.assertEqual(self.stored("scrapes/gba/matches.json"), {})
 
+    def test_move_match_is_one_write(self):
+        self.store("scrapes/gba/matches.json", {"a.zip": 42, "c.zip": 7})
+        with mock.patch.object(s3, "put_text", wraps=s3.put_text) as put_text:
+            scrape_state.move_match("gba", "a.zip", "b.zip")
+            scrape_state.move_match("gba", "none.zip", "d.zip")
+        self.assertEqual(put_text.call_count, 1)
+        self.assertEqual((scrape_state.manual_match("gba", "a.zip"), scrape_state.manual_match("gba", "b.zip")), (None, 42))
+        self.assertEqual(self.stored("scrapes/gba/matches.json"), {"b.zip": 42, "c.zip": 7})
+
     def test_mark_and_clear_notgame(self):
         scrape_state.mark_notgame("fbneo", "bubsys.zip", INFO)
         self.assertEqual(self.stored("scrapes/notgames.json"), {"fbneo/bubsys.zip": INFO})
