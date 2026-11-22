@@ -11,7 +11,7 @@ import unicodedata
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 
-from . import cardfs, external, inventory, m3u, pico8, rocknix_collections, runtime, s3, saves, store, ui
+from . import cardfs, external, inventory, m3u, pico8, raofflineproxy, rocknix_collections, runtime, s3, saves, store, ui
 
 STALE_HINT = " (not in storage any more: run sync-roms cache update)"  # a file the cache lists is gone from the storage folder
 
@@ -219,8 +219,8 @@ IGNORED_ROOT_FILES = {
     "_info.txt", "gamelist.xml",                                   # Batocera / Knulli
     "miyoogamelist.xml",                                           # Onion
 }
-# sync-roms's scripts, run from ROCKNIX's Ports (raofflineproxy's KINDS names the second; it imports downloads, through onion_surprise)
-ROCKNIX_PORTS_FILES = (os.path.basename(rocknix_collections.SCRIPT), "RAOfflineProxy Install.sh")
+# sync-roms's scripts, run from ROCKNIX's Ports
+ROCKNIX_PORTS_FILES = (os.path.basename(rocknix_collections.SCRIPT), os.path.basename(raofflineproxy.KINDS["rocknix"][3]))
 PICO8_FILES = tuple(os.path.basename(m) for m in pico8.members("rocknix"))  # the PICO-8 runtime pico8.py extracts into ROCKNIX's pico8 ROM folder
 OWN_ROOT_FILES = {"ports": ROCKNIX_PORTS_FILES, "pico8": PICO8_FILES}
 

@@ -37,15 +37,15 @@ def mirror_wanted(manifest):
             if "BIOS/" + f in bios:
                 wanted["BIOS/" + f] = bios["BIOS/" + f]
     wanted.update((k, v) for k, v in {**themes, **esde_themes, **driver_zips, **pico8_zips, **apks}.items() if not k.endswith("/"))
-    app = onion_surprise._newest(onion)
+    app = inventory.newest(onion, runtime.ONION_PREFIX, onion_surprise.PATTERN)
     if app:
         wanted[app] = onion[app]
-    spruce_key = spruce_os.newest(spruce)
+    spruce_key = inventory.newest(spruce, runtime.SPRUCE_PREFIX, spruce_os.PATTERN)
     if spruce_key:
         wanted[spruce_key] = spruce[spruce_key]
-    for layout, (prefix, *_) in raofflineproxy.KINDS.items():
+    for prefix, pattern, *_ in raofflineproxy.KINDS.values():
         listing = proxy_listings[prefix].result()
-        key = raofflineproxy.newest(layout, listing)
+        key = inventory.newest(listing, prefix, pattern)
         if key:
             wanted[key] = listing[key]
     return wanted

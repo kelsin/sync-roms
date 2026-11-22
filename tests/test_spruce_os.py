@@ -8,7 +8,7 @@ from unittest import mock
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 import helpers  # noqa: E402
-from sync_roms import s3, spruce_os, store  # noqa: E402
+from sync_roms import inventory, s3, spruce_os, store  # noqa: E402
 
 P = "os/spruceos/"
 V46 = "spruceV4.6.0.7z"
@@ -18,8 +18,12 @@ class Newest(unittest.TestCase):
     def test_newest_compares_versions_as_numbers(self):
         listing = {P + n: 1 for n in ("spruceV4.6.0.7z", "spruceV4.10.0.7z", "spruceOTA-v4.5.6-to-v4.6.0.7z",
                                       "spruceos-installer-windows.exe", "old/spruceV9.0.0.7z")}
-        self.assertEqual(spruce_os.newest(listing), P + "spruceV4.10.0.7z")
-        self.assertIsNone(spruce_os.newest({}))
+        self.assertEqual(inventory.newest(listing, P, spruce_os.PATTERN), P + "spruceV4.10.0.7z")
+        self.assertIsNone(inventory.newest({}, P, spruce_os.PATTERN))
+
+    def test_newest_skips_a_key_outside_the_prefix(self):
+        listing = {"x" * len(P) + "spruceV9.0.0.7z": 1, P + V46: 1}
+        self.assertEqual(inventory.newest(listing, P, spruce_os.PATTERN), P + V46)
 
 
 class Install(helpers.StorageDir):

@@ -11,25 +11,12 @@ from pathlib import PurePosixPath
 from . import downloads, inventory, runtime, s3, store, surprise, ui
 
 LAYOUT = "onion"
+PATTERN = r"Surprise-v\d+(\.\d+)*\.zip"
 ROOT = "App/Surprise"
 REQUIRED = (f"{ROOT}/config.json", f"{ROOT}/surprise")
 EXECUTABLE = ("surprise", "launch.sh")
 ICON = "Icons/Default/app/surprise.png"  # the app's icon, optional in the zip, written to the same path on the card
 ICON_DIRS = ("Icons/", "Icons/Default/", "Icons/Default/app/")
-
-
-def _natural(name):
-    return [int(p) if p.isdigit() else p for p in re.split(r"(\d+)", name)]
-
-
-def _newest(listing):
-    keys = [k for k in listing if re.fullmatch(r"Surprise-v\d+(\.\d+)*\.zip", k[len(runtime.ONION_PREFIX):])]
-    return max(keys, key=lambda k: _natural(k[len(runtime.ONION_PREFIX):]), default=None)
-
-
-def newest_zip():
-    """The storage key of the newest Surprise-v<version>.zip in os/onion/ (digit runs compared as numbers), or None."""
-    return _newest(inventory.files(runtime.ONION_PREFIX, sizes=False))
 
 
 def _check(z):
@@ -70,7 +57,7 @@ def install(card, layout_name, base, dry_run):
     if not surprise.enabled(entry) or not store.card_flag(entry, "custom_collections"):
         return 0
     listing = inventory.files(runtime.ONION_PREFIX)
-    key = _newest(listing)
+    key = inventory.newest(listing, runtime.ONION_PREFIX, PATTERN)
     if not key:
         return 0
     name = key[len(runtime.ONION_PREFIX):]

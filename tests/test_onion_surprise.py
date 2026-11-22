@@ -10,7 +10,7 @@ import zipfile
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 import helpers  # noqa: E402
-from sync_roms import onion_surprise, store  # noqa: E402
+from sync_roms import inventory, onion_surprise, store  # noqa: E402
 
 NAME = "Surprise-v0.1.0.zip"
 GOOD = {"App/Surprise/config.json": b"{}", "App/Surprise/surprise": b"bin", "App/Surprise/launch.sh": b"#!/bin/sh",
@@ -65,7 +65,8 @@ class Install(helpers.StorageDir):
     def test_newest_zip_by_version(self):
         for n in ("v0.2.0", "v0.10.0", "v0.9.1", "eadef4e", "v1.0.0-dirty"):
             self.put(f"os/onion/Surprise-{n}.zip")
-        self.assertEqual(onion_surprise.newest_zip(), "os/onion/Surprise-v0.10.0.zip")
+        listing = inventory.files("os/onion/", sizes=False)
+        self.assertEqual(inventory.newest(listing, "os/onion/", onion_surprise.PATTERN), "os/onion/Surprise-v0.10.0.zip")
 
     def test_installs_and_records(self):
         self.put(f"os/onion/{NAME}", app_zip(GOOD))

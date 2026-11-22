@@ -1,11 +1,10 @@
 """RAOfflineProxy (the RetroAchievements offline proxy) from storage's os/<layout>/ folders, put on cards that have it on."""
 import os
-import re
 import tempfile
 import zipfile
 from pathlib import PurePosixPath
 
-from . import inventory, onion_surprise, runtime, s3, store, ui
+from . import inventory, runtime, s3, store, ui
 
 # layout: (storage prefix, file name pattern, folder in the zip holding the app (None: the file is copied as it is), where it goes on the card)
 KINDS = {
@@ -21,13 +20,6 @@ LAUNCH = "launch.sh"
 
 def prefixes():
     return sorted({k[0] for k in KINDS.values()})
-
-
-def newest(layout, listing):
-    """The storage key of the newest RAOfflineProxy file for the layout in the listing (digit runs compared as numbers), or None."""
-    prefix, pattern = KINDS[layout][:2]
-    keys = [k for k in listing if re.fullmatch(pattern, k[len(prefix):]) and k.startswith(prefix)]
-    return max(keys, key=lambda k: onion_surprise._natural(k[len(prefix):]), default=None)
 
 
 def _check(z, root):
@@ -69,9 +61,9 @@ def install(card, layout_name, base, dry_run):
     entry = store.load_cards().get(card)
     if not store.card_flag(entry, "raofflineproxy"):
         return 0
-    prefix, _, root, dest = KINDS[layout_name]
+    prefix, pattern, root, dest = KINDS[layout_name]
     listing = inventory.files(prefix)
-    key = newest(layout_name, listing)
+    key = inventory.newest(listing, prefix, pattern)
     if not key:
         return 0
     name = key[len(prefix):]

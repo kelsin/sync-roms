@@ -9,7 +9,7 @@ import zipfile
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 import helpers  # noqa: E402
-from sync_roms import pico8, store  # noqa: E402
+from sync_roms import inventory, pico8, store  # noqa: E402
 
 NEW = "pico-8_0.2.10_raspi.zip"
 OLD = "pico-8_0.2.9_raspi.zip"
@@ -46,7 +46,12 @@ class Pico8(helpers.StorageDir):
         for v in ("0.2.7", "0.2.10", "0.2.9"):
             self.put(f"os/pico8/pico-8_{v}_raspi.zip")
         self.put("os/pico8/pico-8_0.2.11_windows.zip")
-        self.assertEqual(pico8.newest_zip(), "os/pico8/pico-8_0.2.10_raspi.zip")
+        listing = inventory.files("os/pico8/", sizes=False)
+        self.assertEqual(inventory.newest(listing, "os/pico8/", pico8.PATTERN), "os/pico8/pico-8_0.2.10_raspi.zip")
+
+    def test_newest_zip_letter_revision_is_above_the_plain_version(self):
+        listing = {f"os/pico8/pico-8_{v}_raspi.zip": 1 for v in ("0.2.6", "0.2.6b", "0.2.5g")}
+        self.assertEqual(inventory.newest(listing, "os/pico8/", pico8.PATTERN), "os/pico8/pico-8_0.2.6b_raspi.zip")
 
     def test_no_zip_does_nothing(self):
         self.assertEqual(pico8.run("c", "knulli", self.card, False), 0)

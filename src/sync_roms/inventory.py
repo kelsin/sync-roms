@@ -9,6 +9,7 @@ import bisect
 import datetime
 import json
 import os
+import re
 import stat as statmode
 import sys
 import threading
@@ -131,6 +132,13 @@ def files(prefix, sizes=True):
     Ignored ROMs are left out here and in every read below."""
     tree = current()
     return _unignored(s3.list_sizes(prefix, sizes) if tree is None else tree.under(prefix))
+
+
+def newest(listing, prefix, pattern):
+    """The key in the listing with the highest version (digit runs compared as numbers) among those under prefix whose
+    name after it fully matches pattern, or None."""
+    keys = [k for k in listing if k.startswith(prefix) and re.fullmatch(pattern, k[len(prefix):])]
+    return max(keys, key=lambda k: [int(p) if p.isdigit() else p for p in re.split(r"(\d+)", k[len(prefix):])], default=None)
 
 
 def cached(prefix):
