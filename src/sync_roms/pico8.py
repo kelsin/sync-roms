@@ -13,14 +13,16 @@ TARGETS = {
     "allium": ("extract", "Apps/pico.pak/bin"),
     "spruce": ("extract", "BIOS"),
     "rocknix": ("extract", "roms/pico-8"),
+    "muos": ("extract", "MUOS/bios/pico8"),
 }
 EXTRACT = ("pico-8/pico8_dyn", "pico-8/pico8.dat")
 EXTRACT_MORE = {"spruce": ("pico-8/pico8_64",),  # spruce also wants the 64-bit binary, for its Miyoo Flip
                 "rocknix": ("pico-8/pico8_64",)}  # and so does ROCKNIX (aarch64)
+ONLY = {"muos": ("pico-8/pico8_64", "pico-8/pico8.dat")}  # muOS's launcher runs pico8_64 alone
 
 
 def members(layout_name):
-    return EXTRACT + EXTRACT_MORE.get(layout_name, ())
+    return ONLY.get(layout_name) or EXTRACT + EXTRACT_MORE.get(layout_name, ())
 
 
 def _natural(name):
@@ -55,20 +57,10 @@ def _extract(key, size, folder, layout_name):
                     os.chmod(target, 0o755)
 
 
-def muos_notice(layout_name, syncs):
-    """True for a muOS card; says so when the card syncs PICO-8 games, which have nothing to run them."""
-    if layout_name != "muos":
-        return False
-    if syncs:
-        ui.warn("PICO-8 isn't installed on muOS: where an installable package must go isn't documented")
-    return True
-
-
-def run(card, layout_name, base, dry_run, wrote=None, syncs=True):
+def run(card, layout_name, base, dry_run, wrote=None):
     """Put the newest PICO-8 zip on the card the way its layout installs it, once per zip. The failure count.
-    wrote, a list, gets the card path of what was put there. syncs: whether the card syncs PICO-8 carts (a muOS card is
-    told only then)."""
-    if muos_notice(layout_name, syncs) or layout_name not in TARGETS:
+    wrote, a list, gets the card path of what was put there."""
+    if layout_name not in TARGETS:
         return 0
     listing = inventory.files(runtime.PICO8_PREFIX)
     key = _newest(listing)
