@@ -1,6 +1,7 @@
 import contextlib
 import io
 import os
+import shutil
 import sys
 import tempfile
 import threading
@@ -352,6 +353,107 @@ class ChdTest(unittest.TestCase):
             self.assertEqual({f.read(), kept[0]}, {"Game (USA) (Rev 1).zip", "Game (USA).zip"})
         self.assertIn(f"❌ psx/{kept[0]}: Game (USA).chd already exists and doesn't match this disc (kept)", out.getvalue())
         self.assertIn("1 converted, 1 failed", out.getvalue())
+
+    def race(self, gate, first, second, after=False):
+        """[first's error, second's] for two jobs with one output, run at once. second starts when first is at self.hold()
+        (called by the test's fake, in the middle of first's work). first goes on when second, past its own checks, has
+        reached chd.<gate> (with after: come back from it) and had the time to finish, were nothing making it wait."""
+        real, held, passed, results = getattr(chd, gate), threading.Event(), threading.Event(), [None, None]
+
+        def gated(*args, **kwargs):
+            if after:
+                result = real(*args, **kwargs)
+            if threading.current_thread() is threads[1]:
+                passed.set()
+            return result if after else real(*args, **kwargs)
+
+        def hold():
+            if threading.current_thread() is threads[0] and not held.is_set():
+                held.set()
+                passed.wait(5)
+                threads[1].join(0.1)
+
+        def run(i, job):
+            try:
+                results[i] = job()
+            except Exception as e:  # shown by the caller's assert
+                results[i] = e
+
+        threads = [threading.Thread(target=run, args=(i, job)) for i, job in enumerate((first, second))]
+        self.hold = hold
+        with mock.patch.object(chd, gate, gated):
+            threads[0].start()
+            self.assertTrue(held.wait(5))
+            threads[1].start()
+            for thread in threads:
+                thread.join()
+        return results
+
+    def racing_tools(self, name):
+        """A run_tool for race: an archive unpacks to the file name, which holds the archive's own name, and a converter
+        stops at self.hold(), then gives its output its input's data."""
+        def fake(cmd, progress=None, tty=False):
+            if cmd[0] == "7z":
+                touch(os.path.join(next(a for a in cmd if a.startswith("-o"))[2:], name), os.path.basename(cmd[-1]))
+            elif cmd[0] == "iso2zar":
+                self.hold()
+                shutil.copyfile(cmd[1], cmd[2])
+            elif cmd[0] == "extract-xiso" and cmd[-2] == "-r":
+                self.hold()
+                os.replace(cmd[-1], os.path.join(cmd[cmd.index("-d") + 1], os.path.basename(cmd[-1])))
+        return fake
+
+    def read(self, name):
+        with open(os.path.join(self.dir, name)) as f:
+            return f.read()
+
+    def test_two_jobs_for_one_zar_keep_the_source_of_the_second(self):
+        iso, archive = os.path.join(self.dir, "Game.iso"), os.path.join(self.dir, "Game.zip")
+        jobs = {"Game.iso": lambda: chd.chd_image(self.tools, ZAR["chd"], iso, [iso]),
+                "Game.zip": lambda: chd.chd_archive(self.tools, ZAR["chd"], archive)}
+        for first, second in (("Game.iso", "Game.zip"), ("Game.zip", "Game.iso")):  # the second passes its check, then waits
+            self.touch("Game.iso", text="Game.iso")
+            self.touch("Game.zip")
+            with mock.patch.object(external, "run_tool", self.racing_tools("Game.iso")):
+                errors = self.race("make_zar", jobs[first], jobs[second])
+            self.assertEqual(errors, [None, "Game.zar already exists"])
+            self.assertEqual(self.files(), sorted(["Game.zar", second]))
+            self.assertEqual(self.read("Game.zar"), first)
+            os.remove(os.path.join(self.dir, "Game.zar"))
+
+    def test_two_archives_of_one_iso_name_keep_the_second_archive(self):
+        self.touch("A.zip", "B.zip")
+        jobs = [lambda n=n: chd.chd_archive(self.tools, XISO["chd"], os.path.join(self.dir, n)) for n in ("A.zip", "B.zip")]
+        with mock.patch.object(external, "run_tool", self.racing_tools("Game.iso")):
+            errors = self.race("make_xiso", *jobs)
+        self.assertEqual(errors, [None, "Game.iso already exists"])
+        self.assertEqual(self.files(), ["B.zip", "Game.iso"])
+        self.assertEqual(self.read("Game.iso"), "A.zip")
+
+    def test_two_archives_extracting_one_file_name_keep_the_second_archive(self):
+        self.touch("A.7z", "B.7z")
+        real_move = shutil.move
+
+        def move(src, dst):
+            self.hold()
+            return real_move(src, dst)
+
+        jobs = [lambda n=n: chd.chd_archive(self.tools, EXTRACT["chd"], os.path.join(self.dir, n)) for n in ("A.7z", "B.7z")]
+        with mock.patch.object(external, "run_tool", self.racing_tools("G.rvz")), mock.patch.object(chd.shutil, "move", move):
+            errors = self.race("plan_moves", *jobs, after=True)
+        self.assertEqual(errors, [None, "G.rvz already exists"])
+        self.assertEqual(self.files(), ["B.7z", "G.rvz"])
+        self.assertEqual(self.read("G.rvz"), "A.7z")
+
+    def test_oserror_with_no_text_is_an_error_and_keeps_the_source(self):
+        iso = os.path.join(self.dir, "Game.iso")
+        self.touch("Game.iso", "Game.7z")
+        with mock.patch.object(external, "run_tool", side_effect=OSError()):
+            self.assertEqual(chd.chd_image(self.tools, ZAR["chd"], iso, [iso]), "OSError")
+            self.assertEqual(chd.chd_image(self.tools, XISO["chd"], iso, [iso]), "OSError")
+        with self.extract_with(["G.rvz"]), mock.patch.object(chd.shutil, "move", side_effect=OSError()):
+            self.assertEqual(chd.chd_archive(self.tools, EXTRACT["chd"], os.path.join(self.dir, "Game.7z")), "OSError")
+        self.assertEqual(self.files(), ["Game.7z", "Game.iso"])
 
     def test_failed_archive_is_kept_and_leaves_no_temp_folder(self):
         self.touch("Game.zip")

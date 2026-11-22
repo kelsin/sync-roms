@@ -1,4 +1,5 @@
 """CHD, xiso and zar conversion and archive extraction."""
+import contextlib
 import filecmp
 import os
 import re
@@ -198,28 +199,33 @@ def make_xiso(tools, image, out, report=None, disposable=False):
     extract-xiso rewrites the image into a hidden folder beside out, and the result replaces out only once it lists
     cleanly, so out (the image itself when converting in place) is never half written. The image is copied there first
     unless it is disposable (just unpacked), since the rewrite deletes it; a disposable image that is already
-    optimized is moved there instead.
+    optimized is moved there instead. An out that is not the image and exists already (another job's) is left, and
+    that is the error.
     """
     xiso = tools["extract-xiso"]
-    work = tempfile.mkdtemp(prefix=".xiso-", dir=os.path.dirname(out))
-    try:
-        copy = os.path.join(work, os.path.basename(image))
-        rewrite = image if disposable and not is_optimized_xiso(image) else copy
-        if rewrite == copy:  # -r skips an image that is already optimized and writes nothing into -d
-            (shutil.move if disposable else shutil.copyfile)(image, copy)
-        if report:
-            report(0.2)
-        error = external.run_tool([xiso, "-q", "-D", "-d", work, "-r", rewrite])
-        if report:
-            report(0.8)
-        error = error or external.run_tool([xiso, "-q", "-l", copy])
-        if not error:
-            os.replace(copy, out)
-        return error
-    except OSError as e:
-        return str(e)
-    finally:
-        shutil.rmtree(work, ignore_errors=True)
+    own = out == image  # rewritten in place: no other job makes this file
+    with contextlib.nullcontext() if own else out_lock(out):
+        if not own and os.path.lexists(out):  # written by another job since the caller looked
+            return f"{os.path.basename(out)} already exists"
+        work = tempfile.mkdtemp(prefix=".xiso-", dir=os.path.dirname(out))
+        try:
+            copy = os.path.join(work, os.path.basename(image))
+            rewrite = image if disposable and not is_optimized_xiso(image) else copy
+            if rewrite == copy:  # -r skips an image that is already optimized and writes nothing into -d
+                (shutil.move if disposable else shutil.copyfile)(image, copy)
+            if report:
+                report(0.2)
+            error = external.run_tool([xiso, "-q", "-D", "-d", work, "-r", rewrite])
+            if report:
+                report(0.8)
+            error = error or external.run_tool([xiso, "-q", "-l", copy])
+            if not error:
+                os.replace(copy, out)
+            return error
+        except OSError as e:
+            return str(e) or type(e).__name__
+        finally:
+            shutil.rmtree(work, ignore_errors=True)
 
 
 def make_zar(tools, image, out, report=None):
@@ -227,10 +233,13 @@ def make_zar(tools, image, out, report=None):
 
     iso2zar writes a hidden .part file, renamed once the tool succeeds and the file is not empty,
     so out is never half written. The tool has no verify option or progress output.
+    An out that exists already (another job's) is left, and that is the error.
     """
     part = part_path(out)
     with out_lock(out):
         try:
+            if os.path.lexists(out):  # written by another job since the caller looked
+                return f"{os.path.basename(out)} already exists"
             if os.path.exists(part):  # left by a run that was killed
                 os.remove(part)
             error = external.run_tool([tools["iso2zar"], image, part], tty=True)
@@ -244,7 +253,7 @@ def make_zar(tools, image, out, report=None):
                 report(0.9)
             os.replace(part, out)
         except OSError as e:
-            return str(e)
+            return str(e) or type(e).__name__
 
 
 def plan_moves(pairs):
@@ -265,19 +274,23 @@ def plan_moves(pairs):
 
 def move_flat(pairs):
     """Move each (src, dst), skipping leftovers of an interrupted run (see plan_moves); None on success, else the error.
-    Each file goes under its hidden .part name first (a copy when src is on another device) and is renamed once whole."""
+    Each file goes under its hidden .part name first (a copy when src is on another device) and is renamed once whole.
+    A dst another job wrote meanwhile is left, and that is the error."""
     moves, error = plan_moves(pairs)
     if error:
         return error
     for src, dst in moves:
         part = part_path(dst)
-        try:
-            shutil.move(src, part)
-            os.replace(part, dst)
-        except OSError as e:
-            if os.path.lexists(part):
-                os.remove(part)
-            return str(e)
+        with out_lock(dst):
+            try:
+                if os.path.lexists(dst):  # written by another job since plan_moves looked
+                    return f"{os.path.basename(dst)} already exists"
+                shutil.move(src, part)
+                os.replace(part, dst)
+            except OSError as e:
+                if os.path.lexists(part):
+                    os.remove(part)
+                return str(e) or type(e).__name__
 
 
 def convert_all(pairs, clash, make, exists_ok=False):
