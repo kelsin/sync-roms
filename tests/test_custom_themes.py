@@ -344,7 +344,7 @@ class Publish(helpers.StorageDir):
         custom_themes.publish(["Pixel Consoles"], PAL)
         calls, run = self.recorder()
 
-        def preview(dest, spec):
+        def preview(dest, kind, palette):
             Image.new("RGBA", (640, 480), (1, 2, 3, 255)).save(os.path.join(dest, "preview.png"))
         with mock.patch.object(pixel_build, "preview", preview), mock.patch.object(upload, "run_uploads", run):
             self.assertEqual(custom_themes.publish(["Pixel Consoles"], PAL), 0)

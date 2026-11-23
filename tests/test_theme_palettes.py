@@ -359,20 +359,20 @@ def hexrgb(h):
 class PaletteSheet(helpers.StorageDir):
     def test_render_panel_size_and_colors(self):
         from sync_roms.custom_themes import palette_sheet
+        from sync_roms.custom_themes.pixel import preview
         p = palettes.get("Gruvbox")
         img = palette_sheet.render_panel(p)
-        self.assertEqual(img.size, (300, 215))
-        self.assertEqual(img.mode, "RGB")
-        self.assertEqual(img.getpixel((2, 56 + 30 + 2)), hexrgb(p.bar))
-        self.assertEqual(img.getpixel((297, 56 + 30 + 2)), hexrgb(p.bar))
-        row = [img.getpixel((8 + 46 * i + 20, 196 + 6)) for i in range(6)]
-        self.assertEqual(row, [hexrgb(c) for c in (p.text, p.list, p.selected, p.accent, p.dim, p.bar)])
+        self.assertEqual((img.size, img.mode), ((320, 240), "RGB"))
+        half = lambda pt: (pt[0] // 2, pt[1] // 2)
+        self.assertEqual(img.getpixel(half(preview.LAYOUT["row_bar"])), hexrgb(p.bar))
+        self.assertEqual([img.getpixel(half(pt)) for pt in preview.LAYOUT["swatches"]],
+                         [hexrgb(c) for c in (p.text, p.list, p.selected, p.accent, p.dim, p.bar)])
 
     def test_render_sheet_size(self):
         from sync_roms.custom_themes import palette_sheet
         img = palette_sheet.render_sheet(palettes.PALETTES.values())
         self.assertEqual(len(palettes.PALETTES), 28)
-        self.assertEqual(img.size, (5 * 300 + 6 * 8, 6 * 215 + 7 * 8))
+        self.assertEqual(img.size, (5 * 320 + 6 * 8, 6 * 240 + 7 * 8))
         self.assertEqual(img.getpixel((0, 0)), (28, 28, 28))
 
     def test_write_sheet_creates_png(self):
@@ -469,7 +469,7 @@ class Picker(helpers.StorageDir):
         path = kw["preview"](0)
         self.assertEqual(path, os.path.join(self.data, "cache", "themes", "palette-previews", "Gruvbox.png"))
         with Image.open(path) as img:
-            self.assertEqual((img.format, img.size), ("PNG", (300, 215)))
+            self.assertEqual((img.format, img.size), ("PNG", (320, 240)))
         with mock.patch.object(self.pp.picker, "filter_list", return_value=None):
             self.assertIsNone(self.pp.pick("Palettes", []))
 
