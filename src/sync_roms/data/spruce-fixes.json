@@ -7,8 +7,8 @@
     "title": "Famicom Disk System logo",
     "upstream": "https://github.com/spruceUI/PyUI-Themes/pull/16"
   },
-  "reopen_collection": {
-    "title": "Reopen last collection setting",
+  "highlight_last_collection": {
+    "title": "Highlight last collection",
     "upstream": "https://github.com/spruceUI/spruceOS/pull/2070"
   }
 }
