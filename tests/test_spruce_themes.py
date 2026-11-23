@@ -8,7 +8,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import helpers  # noqa: E402,F401
-from sync_roms import commands, external, inventory, picker, runtime, spruce_themes, store, ui, usersettings  # noqa: E402
+from sync_roms import commands, external, inventory, picker, runtime, s3, spruce_themes, store, ui, usersettings  # noqa: E402
 from sync_roms.spruce_fixes import fds  # noqa: E402
 
 PREFIX = runtime.SPRUCE_THEMES_PREFIX
@@ -30,10 +30,13 @@ class Themes(helpers.StorageDir):
         self.enterContext(mock.patch.object(external, "find_tool", return_value="/bin/7z"))
         self.archives = {}  # asset name -> (folder or None, {rel: bytes})
         self.downloads = []
+        self.broken = set()  # download URLs that fail
 
     def run_update(self, assets, dry_run=False):
-        def download(url, path):
+        def download(url, path, callback=None):
             self.downloads.append(url)
+            if url in self.broken:
+                raise OSError("connection reset")
             with open(path, "wb") as f:
                 f.write(url.encode())
 
@@ -48,7 +51,7 @@ class Themes(helpers.StorageDir):
                     f.write(data)
             return folder
         with mock.patch.object(spruce_themes, "_release", return_value=assets), \
-                mock.patch.object(spruce_themes, "_download", download), \
+                mock.patch.object(spruce_themes.github, "download", download), \
                 mock.patch.object(spruce_themes, "_unpack", unpack), \
                 contextlib.redirect_stdout(io.StringIO()) as out:
             self.out = out
@@ -150,16 +153,16 @@ class Themes(helpers.StorageDir):
 
     def test_failed_upload_of_new_asset_completes_next_run(self):
         self.archives[NAME] = (FOLDER, {"a.png": b"a", "config.json": b"{}"})
-        real, calls = spruce_themes.s3.put_file, []
+        real = s3.copy_file
 
-        def flaky(key, path):
-            calls.append(key)
-            if len(calls) == 2:
+        def flaky(src, dst, *args):
+            if os.path.basename(src) == "a.png":
                 raise OSError("share went away")
-            return real(key, path)
-        with mock.patch.object(spruce_themes.s3, "put_file", flaky):
+            return real(src, dst, *args)
+        with mock.patch.object(s3, "copy_file", flaky):
             self.assertEqual(self.run_update([asset()]), 1)
-        self.assertEqual(self.state()[NAME]["folder"], FOLDER)
+        self.assertEqual(self.state()[NAME], {"folder": FOLDER, "updated_at": None, "size": None})
+        self.assertTrue(any("didn't upload" in w for w in self.warned))
         inventory.reset()
         self.warned.clear()
         self.assertEqual(self.run_update([asset()]), 0, self.warned)
@@ -172,16 +175,29 @@ class Themes(helpers.StorageDir):
             pass
         self.archives[NAME] = (FOLDER, {"config.json": b"{}"})
         self.archives["Other.7z"] = ("Other", {"config.json": b"{}"})
-        real = spruce_themes.s3.put_file
+        real = s3.copy_file
+        calls = []
 
-        def put_file(key, path):
-            if "/Other/" in key:
+        def copy_file(src, dst, *args):
+            calls.append(src)
+            if len(calls) == 2:  # the second theme's file
                 raise Abort()
-            return real(key, path)
-        with mock.patch.object(spruce_themes.s3, "put_file", put_file), self.assertRaises(Abort):
+            return real(src, dst, *args)
+        with mock.patch.object(s3, "copy_file", copy_file), self.assertRaises(Abort):
             self.run_update([asset(), asset("Other.7z")])
         self.assertEqual(self.state()[NAME], {"updated_at": "2026-01-01T00:00:00Z", "size": 10, "folder": FOLDER})
         self.assertEqual(self.state()["Other.7z"]["folder"], "Other")
+
+    def test_a_failed_download_skips_only_that_asset(self):
+        self.archives[NAME] = (FOLDER, {"config.json": b"{}"})
+        self.archives["Other.7z"] = ("Other", {"config.json": b"{}"})
+        self.broken.add(f"https://example.invalid/{NAME}")
+        self.assertEqual(self.run_update([asset(), asset("Other.7z")]), 1)
+        self.assertNotIn(NAME, self.state())
+        self.assertEqual(self.state()["Other.7z"]["folder"], "Other")
+        self.assertTrue(self.exists(f"{PREFIX}Other/config.json"))
+        self.assertFalse(self.exists(f"{PREFIX}{FOLDER}/config.json"))
+        self.assertTrue(any(NAME in w for w in self.warned))
 
     def test_unmounted_root_changes_nothing(self):
         gone = os.path.join(self.root, "gone")
