@@ -157,8 +157,6 @@ def preview(name):
     """Local path of the theme's preview.png (downloaded once), or None when storage has none."""
     key = f"{runtime.SPRUCE_THEMES_PREFIX}{name}/preview.png"
     try:
-        if key not in inventory.files(f"{runtime.SPRUCE_THEMES_PREFIX}{name}/", sizes=False):
-            return None
         return previews._download(key)
     except (OSError, *s3.ERRORS):
         return None

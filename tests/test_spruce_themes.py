@@ -155,11 +155,12 @@ class Themes(helpers.StorageDir):
         self.assertEqual(self.downloads, [])
 
 
-if __name__ == "__main__":
-    unittest.main()
+class Pick(helpers.StorageDir):
+    def setUp(self):
+        super().setUp()
+        inventory.reset()
+        self.addCleanup(inventory.reset)
 
-
-class Pick(Themes):
     def themes(self, *names):
         for n in names:
             self.put(f"{PREFIX}{n}/config.json")
@@ -224,3 +225,7 @@ class Pick(Themes):
         path = spruce_themes.preview("a")
         with open(path, "rb") as f:
             self.assertEqual(f.read(), b"png")
+
+
+if __name__ == "__main__":
+    unittest.main()
