@@ -471,6 +471,7 @@ class Publish(helpers.StorageDir):
         with mock.patch.object(ui, "ASSUME_YES", False), mock.patch.object(ui, "confirm", return_value=False) as ask:
             self.assertEqual(commands.run(["themes", "publish", "--palette", "Gruvbox"]), 0)
         ask.assert_called_once()
+        self.assertIs(ask.call_args.kwargs["default"], True)  # Enter uploads
         self.assertEqual(self.stored(P), set())
 
 

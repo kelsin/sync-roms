@@ -181,7 +181,7 @@ def publish(styles, palettes, dry_run=False):
         f" in {s3.location()}/{runtime.SPRUCE_THEMES_PREFIX}?"
     if ui.ASSUME_YES:
         print(f"{question} (--yes)")
-    elif not ui.confirm(question, default=False):
+    elif not ui.confirm(question, default=True):
         print(ui.yellow("👋 Cancelled."))
         return 1 if skipped else 0
     active = [p for p in plans if not p.skipped]
