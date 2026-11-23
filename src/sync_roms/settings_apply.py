@@ -7,7 +7,7 @@ from . import adb, android, android_settings, applied, picker, spruce_settings, 
 VOLUMES = "/Volumes"
 
 
-def _mounted(card, cards):
+def _mounted(card):
     """The mounted folder and card name for CARD (a folder, or a saved card's name found at /Volumes), else the current folder."""
     if card and not os.path.isdir(os.path.expanduser(card)) and os.sep not in card:
         base = os.path.join(VOLUMES, card)
@@ -30,13 +30,15 @@ def run(card_arg, dry_run):
     cards = store.load_cards()
     if card_arg and (os.path.isdir(os.path.expanduser(card_arg)) or not android.is_android(store.saved_card(card_arg, cards))) or \
             not card_arg and os.path.basename(os.getcwd()) in cards:
-        base, name = _mounted(card_arg, cards)
+        base, name = _mounted(card_arg)
         saved = store.saved_card(name, cards)
         if not saved:
             ui.fail(f"No card named {name!r}. Set it up with `sync-roms cards new {name} --device ID|full --layout NAME`", 2)
         if android.is_android(saved):
             ui.fail(f"Android cards are applied over adb: run `sync-roms config apply {name}` without a folder", 2)
         layout = saved.get("layout")
+        if not layout:
+            ui.fail(f"{name!r} has no layout. Set it with `sync-roms cards set {name} --layout NAME`, or sync the card once", 2)
         if layout != "spruce":
             ui.fail(f"config apply supports spruce cards and Android devices, not {layout}", 2)
         if not os.path.isdir(base):

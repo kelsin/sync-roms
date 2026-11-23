@@ -194,7 +194,7 @@ Every mode is a command (plain `sync-roms [CARD]` syncs a card):
 | `tools install` | `brew install` whichever of 7z (`sevenzip`), unar and chdman (`rom-tools`) are missing, and say how to build extract-xiso and iso2zar | `--install-tools` |
 | `mirror [DIR]` / `mirror use DIR` / `mirror clear` | [local mirror](#local-mirror-mirror) | `--mirror`, `--use-mirror`, `--clear-mirror` |
 | `cache [update [--full]]` | show the [storage cache](#storage-cache-cache), or read all of storage into it | |
-| `config show\|path` / `config set NAME VALUE` / `config unset NAME` / `config apply [CARD]` | effective [settings](#settings-config) and where each came from, or the data folder's path; change or remove a setting | |
+| `config show\|path` / `config set NAME VALUE` / `config unset NAME` / `config apply [CARD]` | effective [settings](#settings-config) and where each came from, or the data folder's path; change or remove a setting; apply the saved settings to a spruce card or an Android device | |
 | `guide` | open the device setup guide in a browser | |
 | `doctor` | check AWS profile, storage, tools and data files | |
 | `check` | validate your JSON data files (`cards.json`, `surprises.json`, the device overlay, the sets and your collections) | |
@@ -208,7 +208,7 @@ For every command they make sense with:
 
 | Flag | Description |
 | --- | --- |
-| `-n`, `--dry-run` | Show what would be done (a sync: what would be downloaded, with total sizes; `mirror`: what it would download and delete) and change nothing. Commands that only read (`diff`, `check`, `doctor`, `guide`, `cache`, `config`, `completion`, `games list`/`export`/`sets list`) or can't honor it (`edit`, `scrape review`, `scrape missing`, ...) refuse it with exit 2 |
+| `-n`, `--dry-run` | Show what would be done (a sync: what would be downloaded, with total sizes; `mirror`: what it would download and delete) and change nothing. Commands that only read (`diff`, `check`, `doctor`, `guide`, `cache`, `config` (except `config apply`, which lists what it would set), `completion`, `games list`/`export`/`sets list`) or can't honor it (`edit`, `scrape review`, `scrape missing`, ...) refuse it with exit 2 |
 | `-y`, `--yes` | Answer prompts with their default |
 | `--json` | `devices`, `layouts`, `games list`, `cards list`, `diff` and `sync --dry-run`: one JSON document on stdout, nothing else (pass `--device`/`--layout` so no picker is needed; `diff` also needs `--system ID` unless the folder is named after a system) |
 | `--quiet` | Print only errors (failed files and a sync's failure count included, and `check`'s problems), warnings and `--json` data, all on stderr except the JSON; prompts are asked on stderr |

@@ -47,9 +47,9 @@ class Apply(helpers.Cmd):
             return json.load(f)["menuOptions"]["RetroAchievements Settings"]["modeToggle"]["selected"]
 
     def test_apply_spruce_card_by_name(self):
-        base, cfg = self.spruce(value="Disabled")
+        _, cfg = self.spruce(value="Disabled")
         with mock.patch.object(settings_apply, "VOLUMES", self.root):
-            code, out, _ = self.run_cmd("config", "apply", "s")
+            code, _, _ = self.run_cmd("config", "apply", "s")
         self.assertEqual(code, 0)
         self.assertEqual(self.mode(cfg), "Casual")
 
@@ -58,7 +58,7 @@ class Apply(helpers.Cmd):
         old = os.getcwd()
         os.chdir(base)
         self.addCleanup(os.chdir, old)
-        code, out, _ = self.run_cmd("config", "apply")
+        code, _, _ = self.run_cmd("config", "apply")
         self.assertEqual(code, 0)
         self.assertEqual(self.mode(cfg), "Casual")
 
@@ -115,6 +115,22 @@ class Apply(helpers.Cmd):
         code, _, err = self.run_cmd("config", "apply", "a")
         self.assertEqual(code, 1)
         self.assertIn("Lost the connection to the device: gone", err)
+
+    def test_apply_unsaved_card_refused(self):
+        code, _, err = self.run_cmd("config", "apply", "nope")
+        self.assertEqual(code, 2)
+        self.assertIn("No card named 'nope'", err)
+
+    def test_apply_card_without_layout_refused(self):
+        base = self.card("n", "spruce")
+        self.cards["n"] = {"device": "full"}
+        helpers.write_json(self.path("cards.json"), self.cards)
+        code, _, err = self.run_cmd("config", "apply", base)
+        self.assertEqual(code, 2)
+        self.assertIn("has no layout", err)
+
+    def test_show_dry_run_still_refused(self):
+        self.assertEqual(self.run_cmd("config", "show", "--dry-run")[0], 2)
 
     def test_parser(self):
         for argv in (("config", "apply"), ("config", "apply", "c")):
