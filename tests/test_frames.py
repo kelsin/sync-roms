@@ -440,20 +440,19 @@ class Frames(unittest.TestCase):
         self.assertTrue(frames_keys.tree_rows(6, 12))  # narrower than the grid, but a tree
 
     def test_shift_arrow_fills_its_key(self):
-        """The shift arrow is as big in its key as the backspace arrow: one cell of padding above and below it, and
-        at least as many cells as the backspace head's span."""
+        """The shift arrow fills its glyph's height (tip on the top row, stem on the bottom row), centered across with
+        equal margins."""
         s = frames.shades(GRUVBOX)
-        for size, cell in (((26, 16), 2), ((29, 17), 2), ((39, 25), 3)):
+        for size, cell in (((26, 16), 2), ((29, 17), 2), ((31, 19), 2), ((39, 25), 3)):
             canvas = frames.Canvas(size, cell, (0, 0) + size)
             with self.subTest(grid=(canvas.cols, canvas.rows)):
                 frames_keys.shift(canvas, s)
-                arrow = [(x, y) for x, y in canvas.cells if 1 < x < canvas.cols - 2 and 1 < y < canvas.rows - 2]
-                ys = [y for _, y in arrow]
-                xs = [x for x, _ in arrow]
-                self.assertEqual((min(ys), max(ys)), (2, canvas.rows - 3))
-                self.assertEqual(min(xs) - 1, canvas.cols - 2 - max(xs))
-                self.assertGreaterEqual(max(xs) - min(xs) + 1, canvas.rows - 3)
-                self.assertGreaterEqual(len(arrow), 10)
+                xs = [x for x, _ in canvas.cells]
+                ys = [y for _, y in canvas.cells]
+                self.assertEqual((min(ys), max(ys)), (0, canvas.rows - 1))
+                self.assertGreater(min(xs), 0)  # the arrow alone: no key outline at the sides
+                self.assertEqual(min(xs), canvas.cols - 1 - max(xs))
+                self.assertGreaterEqual(max(xs) - min(xs) + 1, 7)
 
     def test_star_is_a_classic_star(self):
         """The star: a narrow peak, arms tapering to 1-cell points, legs tapering to 1-cell feet straight under the
@@ -492,17 +491,41 @@ class Frames(unittest.TestCase):
                 self.assertEqual({start for start, _ in legs}, {legs[0][0]})  # a straight outer edge
                 self.assertEqual([n for _, n in legs], list(range(legs[0][1], 0, -1)))  # 1:1 to a pointed foot
 
+    def test_tree_tiers_keep_their_widest_rows(self):
+        """The loading and charging tree: every tier reaches the same full width (its widest row is kept where the
+        tiers overlap), each lower tier shows its last three rows from 2 cells a side narrower than the widest row
+        above it (no neck), on the real base's grids (640 12x21, 720x540 13x23, 720x720 13x31, 752x560 11x19,
+        1024x768 12x22) and others."""
+        for cols, rows in ((12, 21), (13, 24), (13, 23), (13, 31), (11, 19), (12, 22)):
+            layout = frames_keys.tree_rows(cols, rows)
+            with self.subTest(grid=(cols, rows)):
+                crown = layout[:layout.index(None)]
+                full = cols - 2
+                tops = {part: max(w for w, p in crown if p == part) for part in range(3)}
+                self.assertEqual(tops, {0: full, 1: full, 2: full})
+                widths = [w for w, _ in crown]
+                self.assertEqual(widths[0], 2 - full % 2)
+                for a, b in zip(widths, widths[1:]):
+                    self.assertIn(b - a, (2, -4))  # 1:1 sides; a lower tier starts 2 a side narrower than the row above
+                for part in (1, 2):
+                    first = next(i for i, (_, p) in enumerate(crown) if p == part)
+                    self.assertEqual(crown[first - 1][0], full)  # it starts right under the tier above's widest row
+                    self.assertEqual([w for w, _ in crown[first:first + 3]], [full - 4, full - 2, full])
+                self.assertEqual((rows - len(layout)) % 2, 0)
+
     def test_shift_arrow_is_solid(self):
-        """The shift arrow is a solid head (a filled 1:1 triangle of three rows) over a stem as wide as its tip."""
+        """The shift arrow is a solid head (a filled 1:1 triangle of four rows) over a stem two cells wider than its
+        tip and at least as tall as the head, so it reads as an arrow, not a plus."""
         s = frames.shades(GRUVBOX)
-        for size, cell in (((26, 16), 2), ((29, 17), 2), ((39, 25), 3)):
+        for size, cell in (((26, 16), 2), ((29, 17), 2), ((31, 19), 2), ((39, 25), 3)):
             canvas = frames.Canvas(size, cell, (0, 0) + size)
             with self.subTest(grid=(canvas.cols, canvas.rows)):
                 frames_keys.shift(canvas, s)
-                widths = [sum(1 for x in range(2, canvas.cols - 2) if (x, y) in canvas.cells)
-                          for y in range(2, canvas.rows - 2)]
+                widths = [sum(1 for x in range(canvas.cols) if (x, y) in canvas.cells) for y in range(canvas.rows)]
                 tip = 2 - canvas.cols % 2
-                self.assertEqual(widths, [tip, tip + 2, tip + 4] + [tip] * (len(widths) - 3))
+                self.assertEqual(widths[:4], [tip, tip + 2, tip + 4, tip + 6])
+                self.assertEqual(widths[4:], [tip + 2] * (len(widths) - 4))
+                self.assertGreaterEqual(len(widths) - 4, 4)
 
     def test_registry_has_all_panel_files(self):
         names = {key.split("/", 1)[1][:-len(".png")] for key in frames.FRAMES}

@@ -64,17 +64,16 @@ def delete(canvas, s):
 
 
 def shift(canvas, s):
-    """Shift: a key outline with a solid up arrow centered in it, one cell of padding above and below: a filled 1:1
-    head of three rows (fewer in a very short key) over a solid stem as wide as its tip."""
-    ring(canvas, s.text)
-    w, h = canvas.cols - 2, canvas.rows - 2
-    t = 2 - w % 2  # the tip and the stem: the arrow's width has the inner width's parity, so it centers exactly
-    tall = max(2, h - 2)
-    head = min(3, tall - 1, (w - 2 - t) // 2 + 1)
-    y0 = 1 + (h - tall) // 2
+    """Shift: a solid up arrow filling the glyph's height, centered across: a filled 1:1 head of up to four rows over
+    a stem two cells wider than its tip and at least as tall as the head. No key outline (the keyboard's key tile is
+    behind it): inside one, the key's few rows leave no room for an arrow that reads as one."""
+    c, r = canvas.cols, canvas.rows
+    t = 2 - c % 2  # the tip: the arrow's width has the grid's parity, so it centers exactly
+    head = max(1, min(4, r // 2, (c - t) // 2 + 1))
+    stem = t + 2 if head >= 3 else t
     for i in range(head):
-        canvas.rect(1 + (w - t - 2 * i) // 2, y0 + i, t + 2 * i, 1, s.text)
-    canvas.rect(1 + (w - t) // 2, y0 + head, t, tall - head, s.text)
+        canvas.rect((c - t - 2 * i) // 2, i, t + 2 * i, 1, s.text)
+    canvas.rect((c - stem) // 2, head, stem, r - head, s.text)
 
 
 def space(canvas, s):
@@ -229,22 +228,28 @@ def hint(text):
 
 def tree_rows(cols, rows):
     """The tree's rows as (width, part) from the top, part 0 the top tier to 2 the bottom tier, 3 the trunk, None the
-    gap above the trunk: three equal 1:1 tiers, each overlapping the one above by a row, one cell of margin at the
-    sides and equal margins above and below. A grid too short for that width gets a narrower tree (still centered);
-    one too small for any, none."""
+    gap above the trunk: three equal 1:1 tiers (peak to full width) three rows apart (two in a tiny tree), where they
+    overlap the wider row kept (the tier above), so every tier keeps its widest row and each lower tier shows its
+    last three rows, from 4 cells (2 a side) narrower than the widest row above it; one cell of margin at the sides,
+    equal margins above and below. A grid too short for that width gets a narrower tree (still centered); one too
+    small for any, none."""
     width = cols - 2
     peak = 2 - width % 2
     tier = [peak + 2 * i for i in range((width - peak) // 2 + 1)]
     trunk_width = peak if peak == 2 else 3
-    for step in range(len(tier) - 1, 0, -1):
+    step = 3 if len(tier) >= 4 else 2  # each lower tier shows its last three rows, as the title tree's tiers do
+    crown = {}
+    for part in range(3):
+        for i, w in enumerate(tier):
+            y = part * step + i
+            if y not in crown or w > crown[y][0]:
+                crown[y] = (w, part)
+    crown = [crown[y] for y in sorted(crown)]
+    if len(tier) >= 2:
         for trunk in range(max(2, len(tier)), 0, -1):
-            height = len(tier) + 2 * step + 1 + trunk
+            height = len(crown) + 1 + trunk
             if height <= rows - 2 and (rows - height) % 2 == 0:
-                out = [None] * (len(tier) + 2 * step)
-                for part in range(3):
-                    for i, w in enumerate(tier):
-                        out[part * step + i] = (w, part)
-                return out + [None] + [(trunk_width, 3)] * trunk
+                return crown + [None] + [(trunk_width, 3)] * trunk
     return tree_rows(cols - 2, rows) if cols > 4 else []  # too short for this width: a narrower tree, else none
 
 
@@ -273,7 +278,7 @@ register("skin/bg-btn-shift-active.png", key(True), symmetric=True, flush=ALL)
 register("skin/bg-btn-nor.png", key(False), symmetric=True, flush=ALL)
 register("skin/num-bg.png", key(False), symmetric=True, flush=ALL)
 register("skin/btn-delete.png", delete, flush=ALL)
-register("skin/btn-shift.png", shift, symmetric=True, flush=ALL)
+register("skin/btn-shift.png", shift, symmetric=True, flush=("top", "bottom"))
 register("skin/btn-space.png", space, symmetric=True, flush=ALL)
 register("skin/btn-empty.png", trash, symmetric=True, flush=ALL)
 register("skin/progress-dot.png", dot, symmetric=True, flush=ALL)

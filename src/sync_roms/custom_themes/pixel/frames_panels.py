@@ -205,6 +205,7 @@ register("skin/loading-bg.png", loading_frame, symmetric=True, flush=ALL)
 register("skin/preview-nameFrame.png", name_frame, symmetric=True, flush=ALL)
 register("skin/thumb-default.png", thumb, symmetric=True, flush=ALL)
 register("skin/div-line-v-02.png", divider, symmetric=True, flush=("left", "right"))
+# the tiling (left + mid... + right) only matters to the legacy UI: PyUI doesn't load these pieces
 register("skin/loading-progress-left.png", progress(("cap", "body")), flush=ALL)
 register("skin/loading-progress-mid.png", progress(("divider", "body")), flush=ALL)
 register("skin/loading-progress-right.png", progress(("head", "cap")), flush=ALL)
