@@ -1,22 +1,13 @@
-"""Builds the "Pixel Consoles" and "Pixel Controllers" spruceOS (PyUI) themes from the default SPRUCE theme.
-
-    uv run python tools/gen_pixel_theme.py --base <path to Themes/SPRUCE> --out <folder> [--sheet sheet.png]
-
---base is the default theme folder (spruceUI/spruceOS: Themes/SPRUCE). Each theme is a copy of it with a black
-background, pixel-art main-menu icons and pixel-art system icons (icons/<id>.png and icons/sel/<id>.png).
-"""
-import argparse
+"""Builds a pixel-art spruceOS (PyUI) theme from the default SPRUCE theme: black backgrounds, pixel-art menu and
+system icons (icons/<id>.png and icons/sel/<id>.png), app and UI icons, and the pre-scaled copies."""
 import json
 import os
 import shutil
-import sys
 
 from PIL import Image
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from pixel_theme import app_icons, arcade, extras, handhelds, menu, nintendo_sega, others, ui_settings, ui_status, variants  # noqa: E402
-from pixel_theme.ids import IDS  # noqa: E402
-from pixel_theme.sprite import place, render  # noqa: E402
+from . import app_icons, arcade, extras, handhelds, menu, nintendo_sega, others, ui_settings, ui_status, variants
+from .sprite import place, render
 
 BATCHES = (handhelds, nintendo_sega, others, arcade, extras)
 ICON_MODULES = (app_icons, ui_settings, ui_status)  # {path in the theme: draw fn}, sized to the base theme's file
@@ -34,10 +25,6 @@ def systems(kind):
     return out
 
 
-THEMES = {
-    "Pixel Consoles": {"systems": systems("CONSOLES"), "game": menu.handheld, "description": "Cute pixel-art consoles on black."},
-    "Pixel Controllers": {"systems": systems("CONTROLLERS"), "game": menu.controller, "description": "Cute pixel-art controllers on black."},
-}
 ICON_SIZE, ICON_CENTER = (120, 130), (60, 50)
 MENU_SIZE, MENU_CENTER = (100, 140), (50, 50)
 BLACK = (0, 0, 0, 255)
@@ -80,7 +67,16 @@ def write_pair(img_for, directory, name_n, name_f, size, center):
         place(img_for(state), size, center).save(os.path.join(directory, name))
 
 
-def build(base, out, name, spec):
+SPECS = {
+    "CONSOLES": {"game": menu.handheld, "description": "Cute pixel-art consoles on black."},
+    "CONTROLLERS": {"game": menu.controller, "description": "Cute pixel-art controllers on black."},
+}
+
+
+def build_theme(base_dir, out_dir, name, kind):
+    """Write <out_dir>/<name>/, a copy of base_dir with the pixel-art overlays (kind: CONSOLES or CONTROLLERS)."""
+    spec = dict(SPECS[kind], systems=systems(kind))
+    base, out = base_dir, out_dir
     dest = os.path.join(out, name)
     if os.path.exists(dest):
         shutil.rmtree(dest)
@@ -117,6 +113,8 @@ def build(base, out, name, spec):
     for module in ICON_MODULES:
         for rel, draw in module.ICONS.items():
             target = os.path.join(dest, rel)
+            if not os.path.exists(target):
+                continue
             size = Image.open(target).size
             sprite = draw()
             scale = max(1, min(4, size[0] // (sprite.w + 2), size[1] // (sprite.h + 2)))
@@ -125,10 +123,7 @@ def build(base, out, name, spec):
     resize_variants(dest, drawn)
     preview(dest, spec)
     with open(os.path.join(dest, "CREDITS.txt"), "a") as f:
-        f.write(f"\n{name}: the SPRUCE theme with a black background and pixel-art icons drawn for sync-roms (tools/gen_pixel_theme.py).\n")
-    missing = sorted(set(IDS) - set(spec["systems"]))
-    if missing:
-        print(f"  {name}: no art yet for {', '.join(missing)}")
+        f.write(f"\n{name}: the SPRUCE theme with a black background and pixel-art icons drawn for sync-roms.\n")
     return dest
 
 
@@ -143,33 +138,3 @@ def preview(dest, spec):
         tile = Image.open(os.path.join(dest, "icons", "sel" if n == 0 else "", f"{icon}.png")).convert("RGBA").resize((100, 108), Image.NEAREST)
         img.paste(tile, (20 + (n % 6) * 104, 140 + (n // 6) * 110), tile)
     img.save(os.path.join(dest, "preview.png"))
-
-
-def sheet(dest, spec, path):
-    """Contact sheet: menu icons and systems, selected over unselected, on black."""
-    cells = [(os.path.join(dest, "skin", f"ic-{k}-f.png")) for k in list(menu.SPRITES) + ["game"]]
-    cells += [os.path.join(dest, "icons", "sel", f"{i}.png") for i in spec["systems"]]
-    cols = 6
-    rows = -(-len(cells) // cols)
-    img = Image.new("RGBA", (cols * 130, rows * 150), BLACK)
-    for n, p in enumerate(cells):
-        tile = Image.open(p).convert("RGBA")
-        img.paste(tile, ((n % cols) * 130 + 5, (n // cols) * 150), tile)
-    img.save(path)
-
-
-def main():
-    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("--base", required=True)
-    ap.add_argument("--out", required=True)
-    ap.add_argument("--sheet", help="write <sheet>-<theme>.png contact sheets")
-    args = ap.parse_args()
-    for name, spec in THEMES.items():
-        dest = build(args.base, args.out, name, spec)
-        print("built", dest)
-        if args.sheet:
-            sheet(dest, spec, f"{args.sheet}-{name.split()[-1].lower()}.png")
-
-
-if __name__ == "__main__":
-    main()
