@@ -36,7 +36,7 @@ def pick(title, chosen):
             drawn[names[i]] = _preview(names[i])
         return drawn[names[i]]
     states = picker.filter_list(title, names, multi=True, initial=[n in chosen for n in names],
-                                extras=[swatches(palettes.get(n)) for n in names], preview=preview,
+                                extras=[swatches(palettes.get(n)) for n in names], preview=preview, esc_asks=False,
                                 hint="Space toggle · Enter done · / filter · a all · Esc cancel")
     if states is None:
         return None

@@ -1205,7 +1205,7 @@ def style_args(args):
     unknown = [n for n in args.names if n not in custom_themes.STYLES]
     if unknown:
         ui.fail(f"Unknown theme style {', '.join(unknown)}; the custom theme styles are: {', '.join(custom_themes.styles())}", 2)
-    return args.names or None
+    return list(dict.fromkeys(args.names)) or None
 
 
 def palette_args(args):
@@ -1448,7 +1448,8 @@ def build_parser():
     p = tsub.add_parser("update", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=themes_update)
     for action, fn in (("build", themes_build), ("publish", themes_publish)):
         p = tsub.add_parser(action, allow_abbrev=False); common(p, card=False); p.add_argument("names", nargs="*")
-        p.add_argument("--palette", action="append", metavar="NAME"); p.add_argument("--all-palettes", action="store_true")
+        group = p.add_mutually_exclusive_group()
+        group.add_argument("--palette", action="append", metavar="NAME"); group.add_argument("--all-palettes", action="store_true")
         if action == "build":
             p.add_argument("--out", metavar="DIR")
         p.set_defaults(fn=fn)

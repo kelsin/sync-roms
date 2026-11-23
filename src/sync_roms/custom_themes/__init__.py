@@ -121,6 +121,9 @@ def _tags(keys):
         return dict(zip(keys, ex.map(inventory.tag, keys)))
 
 
+COMPACT_OVER = 4  # more themes than this in one publish: one line each
+
+
 def publish(styles, palettes, dry_run=False):
     """Build the named styles (all when None) in each palette and make their storage folders match: upload new and changed files,
     delete the files a build no longer makes, and record each file's hash in the manifest. Returns the exit code.
@@ -151,6 +154,14 @@ def publish(styles, palettes, dry_run=False):
 
         def size(rels):
             return ui.human_size(sum(trees[name][r][1] for r in rels))
+        if len(built) > COMPACT_OVER:
+            print(f"🎨 {name}: new {len(plan.new)} ({size(plan.new)}) · changed {len(plan.changed)} ({size(plan.changed)})"
+                  f" · same {len(plan.same)} · stale {len(plan.stale)}")
+            if plan.adopt:
+                print(ui.yellow(f"   Adopting the existing folder {prefix}: every file is uploaded, the others deleted"))
+            if plan.stale:
+                ui.print_head(plan.stale, 5, indent=6, paint=ui.yellow)
+            continue
         print(ui.bold(f"\n🎨 {name}") + ui.dim(f"  → {s3.location()}/{prefix}"))
         if plan.adopt:
             print(ui.yellow("   Adopting the existing folder: every file is uploaded, the others deleted"))

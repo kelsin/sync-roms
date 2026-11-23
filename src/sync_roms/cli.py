@@ -129,17 +129,17 @@ TOPICS = {
 
   sync-roms themes pick                       choose the PyUI themes every spruce card gets by default (saved as spruce_themes)
 
-  sync-roms themes build [STYLE...] [--palette NAME... | --all-palettes] [--out DIR]   build custom spruce themes
+  sync-roms themes build [STYLE...] [--palette NAME (repeatable) | --all-palettes] [--out DIR]   build custom spruce themes
 
   Builds each named custom theme style (Pixel Consoles, Pixel Controllers; all of them without names) in each chosen
   palette: --palette NAME, repeatable, or --all-palettes for all 28 (Gruvbox, Arcade, Candy, ..., Monochrome).
   Without either, a terminal shows the palette picker (each palette's six colors as a bar, and a preview where the
   terminal draws images), starting from the saved selection; Enter saves the palettes on as custom_theme_palettes
   and builds them, Esc builds nothing. With --yes or no terminal the saved palettes are built (none saved: exit 2).
-  The flags never change the saved palettes. Each
-  theme is named "<style> - <palette>", e.g. "Pixel Consoles - Gruvbox", and goes into the cache's themes/build/
-  folder, or into DIR/<theme> with --out (replaced); the folders are printed. The base theme is read from
-  os/spruceos/themes/SPRUCE/ in storage, so run `sync-roms themes update` first. Nothing is written to storage.
+  The flags never change the saved palettes. Each theme is named "<style> - <palette>", e.g. "Pixel Consoles -
+  Gruvbox", and goes into the cache's themes/build/ folder, or into DIR/<theme> with --out (replaced); the folders
+  are printed. The base theme is read from os/spruceos/themes/SPRUCE/ in storage, so run `sync-roms themes update`
+  first. Nothing is written to storage.
 
   sync-roms themes palettes                   write the overview image of all the palettes and open it
 
@@ -147,17 +147,18 @@ TOPICS = {
   (the path is printed) and opens it in the default viewer. The picker of themes build/publish shows the same
   panels as its previews.
 
-  sync-roms themes publish [STYLE...] [--palette NAME... | --all-palettes] [--dry-run] [--yes]   put them in storage
+  sync-roms themes publish [STYLE...] [--palette NAME (repeatable) | --all-palettes] [--dry-run] [--yes]   put them in storage
 
-  Builds as above (the palettes chosen the same way), then makes each theme's os/spruceos/themes/<theme>/ match the build (write profile): uploads the
-  files whose content changed and deletes the files the build no longer makes, after one confirmation. Only the
-  themes built this run are touched: other palettes' folders stay as they are, and so do the folders of the earlier
-  single-palette themes (Pixel Consoles, Pixel Controllers), which are never adopted. Each file's
-  hash is kept in os/spruceos/custom-themes.json, so an unchanged rebuild uploads nothing and a failed upload is retried
-  next time. A custom theme's name is reserved: an existing folder of that name is adopted (every file uploaded, the
-  others deleted), except a theme `themes update` downloaded, which is left alone (exit code 1). `themes pick` and
-  sync then treat it like any other theme. Other machines see custom themes a publish added or removed after
-  `sync-roms cache update`.
+  Builds as above (the palettes chosen the same way; a choice made in the picker is saved even with --dry-run), then
+  makes each theme's os/spruceos/themes/<theme>/ match the build (write profile): uploads the files whose content
+  changed and deletes the files the build no longer makes, after one confirmation. Only the themes built this run
+  are touched: other palettes' folders stay as they are, and so do the folders of the earlier single-palette themes
+  (Pixel Consoles, Pixel Controllers), which are never adopted. Each file's hash is kept in
+  os/spruceos/custom-themes.json, so an unchanged rebuild uploads nothing and a failed upload is retried next time.
+  A custom theme's name is reserved: an existing folder of that name is adopted (every file uploaded, the others
+  deleted), except a theme `themes update` downloaded, which is left alone (exit code 1). `themes pick` and sync
+  then treat it like any other theme. Other machines see custom themes a publish added or removed after `sync-roms
+  cache update`.
 """,
     "download": """
   sync-roms download pico8 [--count N] [--dry-run] [--yes]   add the BBS Featured carts to storage's pico8/

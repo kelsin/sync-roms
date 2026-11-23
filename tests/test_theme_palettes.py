@@ -224,6 +224,18 @@ class Command(helpers.StorageDir):
         self.assertIn("Nope", text)
         self.assertIn("Gruvbox", text)
 
+    def test_palette_and_all_palettes_exclusive(self):
+        for command in ("build", "publish"):
+            code, text = self.fails(["themes", command, "--palette", "Arcade", "--all-palettes"])
+            self.assertEqual(code, 2)
+            self.assertIn("not allowed with", text)
+
+    def test_duplicate_styles_collapse(self):
+        import argparse
+        args = argparse.Namespace(names=["Pixel Consoles", "Pixel Controllers", "Pixel Consoles"])
+        self.assertEqual(commands.style_args(args), ["Pixel Consoles", "Pixel Controllers"])
+        self.assertIsNone(commands.style_args(argparse.Namespace(names=[])))
+
     def test_unknown_style_lists_styles(self):
         code, text = self.fails(["themes", "publish", "Nope", "--palette", "Gruvbox"])
         self.assertEqual(code, 2)
@@ -262,6 +274,40 @@ class Publish(helpers.StorageDir):
             self.assertEqual(custom_themes.publish(["Pixel Consoles"], chosen), 0)
         run.assert_not_called()
         self.assertEqual(self.read_json(runtime.CUSTOM_THEMES_STATE), before)
+
+
+    def test_old_single_palette_folder_left_alone(self):
+        old = self.put(T + "Pixel Consoles/config.json", b"old")
+        entry = {"files": {"config.json": ["a" * 64, 3]}}
+        custom_themes.manifest.update(lambda d: d.update({"Pixel Consoles": copy.deepcopy(entry)}))
+        chosen = [palettes.get("Gruvbox"), palettes.get("Candy")]
+        self.assertEqual(custom_themes.publish(["Pixel Consoles"], chosen), 0)
+        with open(old, "rb") as f:
+            self.assertEqual(f.read(), b"old")
+        self.assertEqual(os.listdir(os.path.dirname(old)), ["config.json"])
+        state = self.read_json(runtime.CUSTOM_THEMES_STATE)
+        self.assertEqual(state["Pixel Consoles"], entry)
+        self.assertIn("Pixel Consoles - Gruvbox", state)
+
+    def test_many_themes_one_line_each(self):
+        stale = self.put(T + "Pixel Consoles - Gruvbox/old.png", b"x")
+        custom_themes.manifest.update(lambda d: d.update({"Pixel Consoles - Gruvbox": {"files": {"old.png": ["b" * 64, 1]}}}))
+        chosen = [palettes.get(n) for n in ("Gruvbox", "Candy", "Mint")]
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            custom_themes.publish(None, chosen, dry_run=True)
+        lines = out.getvalue().splitlines()
+        names = [custom_themes.theme_name(s, p.name) for s in custom_themes.styles() for p in chosen]
+        self.assertGreater(len(names), custom_themes.COMPACT_OVER)
+        themed = [line for line in lines if line.startswith("🎨 Pixel ")]
+        self.assertEqual(sorted(line.split(":")[0][2:] for line in themed), sorted(names))
+        for line in themed:
+            self.assertRegex(line, r"new \d+ \(.+\) · changed \d+ \(.+\) · same \d+ · stale \d+$")
+        self.assertFalse([line for line in lines if "New:" in line])
+        self.assertEqual(sum("old.png" in line for line in lines), 1)
+        self.assertTrue(os.path.exists(stale))
+        at = next(i for i, line in enumerate(lines) if line.startswith("🎨 Pixel Consoles - Gruvbox:"))
+        self.assertIn("old.png", lines[at + 1])
 
 
 class Names(unittest.TestCase):
@@ -384,6 +430,7 @@ class Picker(helpers.StorageDir):
         self.assertEqual(kw["initial"], [n in ("Candy", "Monochrome") for n in NAMES])
         self.assertEqual(kw["extras"], [self.pp.swatches(palettes.get(n)) for n in NAMES])
         self.assertTrue(kw["hint"])
+        self.assertIs(kw["esc_asks"], False)
         path = kw["preview"](0)
         self.assertEqual(path, os.path.join(self.data, "cache", "themes", "palette-previews", "Gruvbox.png"))
         with Image.open(path) as img:
@@ -404,6 +451,12 @@ class Picker(helpers.StorageDir):
         self.assertEqual(usersettings.load_settings()["custom_theme_palettes"], ["Gruvbox", "Candy", "Monochrome"])
         self.assertEqual(usersettings.load_settings()["bucket"], "b")
         self.assertEqual(self.pp.saved(), ["Gruvbox", "Candy", "Monochrome"])
+
+
+from sync_roms import picker  # noqa: E402
+from sync_roms.custom_themes import palette_picker as _palette_picker  # noqa: E402
+
+real_pick = _palette_picker.pick
 
 
 class PaletteArgs(helpers.StorageDir):
@@ -464,6 +517,23 @@ class PaletteArgs(helpers.StorageDir):
         self.terminal.return_value = True
         self.picked.return_value = None
         code, text = self.exits(self.args())
+        self.assertEqual(code, 0)
+        self.assertIn("cancel", text.lower())
+        self.assertEqual(self.pp.saved(), ["Candy"])
+
+    def test_esc_in_the_real_list_cancels_without_saving(self):
+        self.pp.save(["Candy"])
+        self.terminal.return_value = True
+
+        def run(model):  # the list's own model: toggle a row, then Esc
+            for k in ("space", "escape"):
+                got = model.key(k)
+                if got is not picker.KEEP:
+                    return got
+            raise AssertionError("the list is still open after Esc")
+        with mock.patch.object(self.pp, "pick", real_pick), mock.patch.object(picker, "_run", run), \
+                mock.patch.object(picker, "_draws_images", return_value=False):
+            code, text = self.exits(self.args())
         self.assertEqual(code, 0)
         self.assertIn("cancel", text.lower())
         self.assertEqual(self.pp.saved(), ["Candy"])
