@@ -19,6 +19,10 @@ class BaseMissing(ValueError):
         self.base = base
 
 
+class DownloadFailed(OSError):
+    """Some files of the base theme couldn't be downloaded."""
+
+
 def fetch_base(base):
     """Local folder holding the base theme's files from storage (missing or different-size ones downloaded).
     Raises BaseMissing when storage has no such folder; an unmounted share raises the storage error instead."""
@@ -31,8 +35,22 @@ def fetch_base(base):
     jobs = []
     for key, size in sorted(listing.items()):
         downloads.add_job(jobs, key, folder, key[len(prefix):], size)
-    downloads.run_downloads(downloads.plan_downloads(jobs), "Base theme", "🎨", folder)
+    failed = downloads.run_downloads(downloads.plan_downloads(jobs), "Base theme", "🎨", folder)
+    if failed:
+        raise DownloadFailed(f"{failed} file(s) of the base theme {base} failed to download")
+    _prune(folder, {p for _, p, _ in jobs})
     return folder
+
+
+def _prune(folder, keep):
+    """Delete the files under folder that aren't in keep (gone from storage), then any emptied folders."""
+    for dirpath, _, files in os.walk(folder, topdown=False):
+        for file in files:
+            path = os.path.join(dirpath, file)
+            if path not in keep:
+                os.remove(path)
+        if dirpath != folder and not os.listdir(dirpath):
+            os.rmdir(dirpath)
 
 
 def build(selected, out=None):

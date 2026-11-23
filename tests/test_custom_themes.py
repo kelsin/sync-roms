@@ -137,6 +137,37 @@ class Fetch(helpers.StorageDir):
             with self.assertRaises(FileNotFoundError):
                 custom_themes.fetch_base("SPRUCE")
 
+    def test_fetch_base_failed_download_stops(self):
+        self.put("os/spruceos/themes/SPRUCE/config.json", b"{}")
+        with mock.patch.object(downloads, "run_downloads", return_value=1):
+            with self.assertRaisesRegex(custom_themes.DownloadFailed, "1 file"):
+                custom_themes.fetch_base("SPRUCE")
+
+    def test_build_command_failed_download_exits_1(self):
+        make_base(os.path.join(self.root, "os", "spruceos", "themes", "SPRUCE"))
+        with self.assertRaises(SystemExit) as raised, mock.patch("sys.stderr"), \
+                mock.patch.object(downloads, "run_downloads", return_value=2):
+            commands.run(["themes", "build", "--out", os.path.join(self.tmp.name, "out")])
+        self.assertEqual(raised.exception.code, 1)
+        self.assertFalse(os.path.exists(os.path.join(self.tmp.name, "out")))
+
+    def test_fetch_base_prunes_files_gone_from_storage(self):
+        old = self.put("os/spruceos/themes/SPRUCE/icons/old/a.png")
+        self.put("os/spruceos/themes/SPRUCE/config.json", b"{}")
+        folder = custom_themes.fetch_base("SPRUCE")
+        self.assertTrue(os.path.exists(os.path.join(folder, "icons", "old", "a.png")))
+        os.remove(old)
+        custom_themes.fetch_base("SPRUCE")
+        self.assertFalse(os.path.exists(os.path.join(folder, "icons")))
+        self.assertTrue(os.path.exists(os.path.join(folder, "config.json")))
+
+    def test_build_command_unmounted_storage_exits_1(self):
+        with mock.patch.object(runtime, "ROOT", os.path.join(self.tmp.name, "gone")):
+            with self.assertRaises(SystemExit) as raised, mock.patch("sys.stderr") as err:
+                commands.run(["themes", "build"])
+        self.assertEqual(raised.exception.code, 1)
+        self.assertIn("gone", "".join(c.args[0] for c in err.write.call_args_list))
+
     def test_build_command_writes_to_out(self):
         make_base(os.path.join(self.root, "os", "spruceos", "themes", "SPRUCE"))
         out = os.path.join(self.tmp.name, "out")
