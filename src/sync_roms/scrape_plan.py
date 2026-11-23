@@ -428,7 +428,7 @@ def build_scrape_plan(layout_name, systems, data, rom_rels, dest_of, es_dir, pre
                 1 for rom in rom_rels.get(s["bucket"], ())
                 if "/" not in rom and present(os.path.join(rom_dir, rom))
                 and (found := index.get(os.path.splitext(rom)[0], {}))
-                and SPRUCE_TYPES[0] not in found and {ONION_TYPE, "covers", "miximages"} & set(found))
+                and SPRUCE_TYPES[0] not in found and set(ONION_ART) & set(found))  # what `scrape art` makes it from
         if carts:  # a cart without a scraped picture is its own picture
             index = scrape_index(listing)
             for rom in sorted(rom_rels.get(s["bucket"], ())):
