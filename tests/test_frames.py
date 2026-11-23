@@ -696,7 +696,7 @@ class Frames(unittest.TestCase):
         row = [cx for cx in range(canvas.cols) if cells[(cx, 1)][3]]
         self.assertEqual((row[0], row[-1]), (2, canvas.cols - 3))
         self.assertEqual(img.load()[7, 5][3], 0)
-        self.assertEqual(img.load()[8, 5][:3], frames.shades(GRUVBOX).ink)
+        self.assertEqual(img.load()[8, 5][:3], frames.shades(GRUVBOX).hi)  # the light rim, visible on black
         self.assertEqual(load(os.path.join(dest, "skin", "bg-list-l.png")).size, (640, 90))
 
     def test_resize_variants_leaves_native_files(self):

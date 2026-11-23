@@ -3,8 +3,9 @@ from .frames import register
 
 
 def bar(canvas, s):
-    """A full-width selection bar, inset one cell at the top and bottom."""
-    canvas.panel(0, 1, canvas.cols, canvas.rows - 2, s.bar, s.hi, s.sh, s.ink)
+    """A full-width selection bar, inset one cell at the top and bottom: a flat fill in a light rim the same on all four
+    sides (a dark outline or bevel vanishes on the black screen, leaving a lone light line along the top)."""
+    canvas.panel(0, 1, canvas.cols, canvas.rows - 2, s.bar, s.bar, s.bar, s.hi)
 
 
 def outlined_box(canvas, s):
