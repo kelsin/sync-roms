@@ -286,7 +286,7 @@ A card is a folder name (the card root's name) with a remembered device, layout 
 | a system in `games` set to `{"full_system": true}` | sync every file in the system's storage folder (subfolders included) instead of a list, so adding a file to storage is enough to publish it. No system is one by default. Toggled by `f` in the card editor (🗂️) or `games full SYSTEM on\|off`; the list the system had stays in the entry as `games` and comes back when it is switched off |
 | `sets` in `games` | ids of sets to sync whole. The reference is live: games added to the set later are synced too, for the systems the card's device can play. `games sets add ID --card NAME` adds one (the card editor's `s` picks a set's games one by one instead) |
 | `excluded` | `{"gba": ["gba/A.zip"]}`: set and collection games this card opts out of, by switching them off (and back on) in a system's game list, where they show as 📦 or 💖 |
-| `collections` | ids of your collections synced whole; their games can be switched off one by one in a system's game list (kept in `excluded`) |
+| `collections` | ids of your collections on this card; their games can be switched off one by one in a system's game list (into `excluded`) |
 | `systems_off` | system ids turned off on this card with `x` in the card editor: nothing syncs for them and Surprise skips them, while their picks, sets and collections stay saved. Absent when none |
 | `surprise` | Surprise on or off, only when it differs from the layout's default |
 | `surprises` | the current surprises, `[{"system", "bucket", "title", "files"?}]`, `files` being a multi-disc game's other keys |

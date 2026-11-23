@@ -398,6 +398,17 @@ class CardsTest(Cmd):
         self.assertEqual(b["collections"], ["c"])
         self.assertEqual((b["device"], b["layout"]), ("full", "esde"))
 
+    def test_copy_counts_what_dst_syncs_in_a_system_it_turned_off(self):
+        cards = self._two_cards()
+        cards["A"]["excluded"] = {"gba": ["gba/Y.zip"]}
+        storage_sets(self, {"mix": {"name": "Mix", "games": [{"title": "Y", "system": "gba", "bucket": "gba/Y.zip"}]}})
+        cards["B"]["games"] = {"sets": ["mix"]}
+        cards["B"]["systems_off"] = ["gba"]
+        with open(self.path("cards.json"), "w") as f:
+            json.dump(cards, f)
+        self.assertEqual(self.run_cmd("cards", "copy", "A", "B")[0], 0)
+        self.assertNotIn("excluded", self.read("cards.json")["B"])
+
     def test_copy_dry_run_writes_nothing(self):
         before = self._two_cards()
         self.assertEqual(self.run_cmd("cards", "copy", "A", "B", "--dry-run")[0], 0)
@@ -629,6 +640,14 @@ class CardSizeTest(Cmd):
         self.assertEqual(lines[1], "SD2  full  esde  0 B /     ❔  0 full systems  0 games  🎁🎨💖🏆")
         self.assertIn("* Not sized", lines[3])
         self.assertIn("sync-roms cache update", lines[4])
+
+    def test_list_leaves_an_off_full_system_out_of_the_full_count(self):
+        self.run_cmd("cards", "new", "SD", "--device", "full", "--layout", "esde")
+        store.update_card("SD", games={"nes": {"full_system": True}, "gba": {"full_system": True}}, systems_off=["nes"])
+        cache = {"nes/": {"nes/X.zip": 5}, "gba/": {"gba/X.zip": 5}, "scrapes/nes/": {}, "scrapes/gba/": {}, "BIOS/": {}}
+        with mock.patch.object(inventory, "cached", cache.get):
+            row = json.loads(self.run_cmd("cards", "list", "--json")[1])[0]
+        self.assertEqual(row["full_systems"], 1)
 
     def test_list_shows_theme_and_collections_off(self):
         self.run_cmd("cards", "new", "SD", "--device", "full", "--layout", "esde")

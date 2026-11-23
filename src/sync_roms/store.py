@@ -240,7 +240,7 @@ def card_excluded(card, cards=None):
 
 
 def systems_off(entry):
-    """System ids a card turns off ({} of games synced there), from its cards.json entry's `systems_off`."""
+    """The set of system ids nothing syncs for on a card, from its cards.json entry's `systems_off`."""
     ids = entry.get("systems_off") if isinstance(entry, dict) else None
     return {i for i in ids if isinstance(i, str)} if isinstance(ids, list) else set()
 
@@ -417,10 +417,11 @@ def load_catalog():
     return catalog
 
 
-def load_manifest(card_names=()):
+def load_manifest(card_names=(), keep_off=False):
     """Systems, devices and layouts from the repo, joined with the games of the named cards (their picks, set
     references and full systems, plus the games of their collections and, with Surprise on, their current
-    surprises) and the device-system overlay. No cards means no games."""
+    surprises) and the device-system overlay. No cards means no games. A one-card manifest empties the card's
+    systems_off, unless keep_off."""
     sets = load_sets()
     cards = load_cards()
     warn_unknown_sets(sets, cards)
@@ -438,9 +439,10 @@ def load_manifest(card_names=()):
     for n in card_names:
         merge_locked(manifest["systems"], card_locked_games(cards.get(n) or {}, by_id,
                                                             card_excluded(n, cards) if n == one else None))
-    if one:
+    if one and not keep_off:
+        off = systems_off(cards.get(one))
         for s in manifest["systems"]:
-            if s["bucket"] in systems_off(cards.get(one)):
+            if s["bucket"] in off:
                 s["games"], s["full_system"] = [], False
     apply_device_overlay(manifest["devices"], manifest["systems"], load_overlay())
     return manifest

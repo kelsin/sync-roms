@@ -190,6 +190,15 @@ class ExportExcludedTest(unittest.TestCase):
         self.assertEqual(out["excluded"], {"psx": ["psx/E.cue"]})
         self.assertEqual(entry["excluded"], {"gba": ["gba/B.zip"], "psx": ["psx/D.cue", "psx/E.cue"]})
 
+    def test_unticked_collection_game_stays_excluded_and_unflattened(self):
+        entry = {"games": {"gba": []}, "collections": ["c"], "excluded": {"gba": ["gba/B.zip"]},
+                 "surprises": [{"system": "gba", "bucket": "gba/S.zip", "title": "S"}]}
+        coll = {"c": {"games": [{"system": "gba", "bucket": "gba/A.zip", "title": "A"},
+                                {"system": "gba", "bucket": "gba/B.zip", "title": "B"}]}}
+        out = cardshare.export_entry(entry, coll)
+        self.assertEqual([g["bucket"] for g in out["games"]["gba"]], ["gba/A.zip", "gba/S.zip"])
+        self.assertEqual(out["excluded"], {"gba": ["gba/B.zip"]})
+
     def test_excluded_dropped_when_empty(self):
         entry = {"excluded": {"gba": ["gba/B.zip"]}, "surprises": [{"system": "gba", "bucket": "gba/B.zip", "title": "B"}]}
         self.assertNotIn("excluded", cardshare.export_entry(entry, {}))
