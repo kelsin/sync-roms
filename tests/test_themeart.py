@@ -489,6 +489,20 @@ class Update(Esde):
         with open(os.path.join(self.storage, themeart.ESDE_ARCHIVE), "rb") as f:
             self.assertEqual(f.read(), tarball)
 
+    def test_a_failed_download_with_a_length_clears_the_bar(self):
+        class Response(io.BytesIO):
+            headers = {"Content-Length": "10"}
+
+            def read(self, n=-1):
+                raise OSError("reset")
+
+        def fake(url, accept=None):
+            return io.BytesIO(b"abc") if "api.github.com" in url else Response()
+        with mock.patch.object(github, "get", fake), mock.patch.object(themeart.ui.ProgressBar, "clear") as clear, \
+                contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(themeart.update_storage(), 1)
+        clear.assert_called()
+
     def test_the_latest_already_in_storage_is_left_alone(self):
         self.store("abc", {"theme.xml": b"<theme/>"})
         self.assertEqual(self.run_update("abc", b"not used"), 0)

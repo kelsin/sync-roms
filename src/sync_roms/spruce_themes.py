@@ -3,8 +3,8 @@ import glob
 import http.client
 import json
 import os
-import shutil
 import queue
+import shutil
 import subprocess
 import tempfile
 from concurrent.futures import ThreadPoolExecutor
@@ -96,10 +96,6 @@ def _download_all(todo, tmp):
             except (OSError, http.client.HTTPException) as e:
                 bar.say(f"  {prog} ❌ {ui.red(names[i])}: {e}")
             bar.draw(finished)
-    except KeyboardInterrupt:
-        ex.shutdown(wait=False, cancel_futures=True)
-        bar.clear()
-        raise
     finally:
         ex.shutdown(wait=False, cancel_futures=True)
         bar.clear()

@@ -375,9 +375,12 @@ def update_storage(dry_run=False):
                     moved = ui.ByteProgress([size])
                     bar = ui.ProgressBar(1, moved.fraction, moved.total, active=lambda: moved.active(["Art Book Next"]))
                     print(ui.bold("⬇️  Downloading Art Book Next") + ui.dim(f"  {ui.human_size(size)}"))
-                    with ThreadPoolExecutor(1) as ex:
+                    ex = ThreadPoolExecutor(1)
+                    try:
                         ui.wait_drawing(bar, 0, ex.submit(github.save, r, path, lambda n: moved.add(0, n)).result)
-                    bar.clear()
+                    finally:  # no wait: ^C must not sit out the rest of the download
+                        ex.shutdown(wait=False, cancel_futures=True)
+                        bar.clear()
                 else:
                     print("⬇️  Downloading Art Book Next…")
                     github.save(r, path)
