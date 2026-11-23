@@ -95,7 +95,7 @@ The data folder is `store.data_dir()`: `$XDG_DATA_HOME/sync-roms`, `%APPDATA%\sy
 - `surprises.json`: history of Surprise picks: system, bucket, title, card, ISO date. Pruned past `surprise_ttl_days` (default 183) on write.
 - `device-systems.json`: optional overlay, `{device id: {"add": [...], "remove": [...]}}` of system ids, applied to the repo defaults. Notes always come from the defaults.
 - `collections/<id>.json`: one per collection (`collections.py`); never in the repo or storage.
-- `saves/`: RetroArch saves and states, `<system>/<stem>/<stamp>-<card>/` with `stash.json`, written by `saves stash`, read by `saves apply`.
+- `saves/`: RetroArch saves and states, `<system>/<stem>/<stamp>-<card>/` with `stash.json`, written by `saves stash`, read by `saves apply`; `saves manage` labels, moves and deletes stashes, and `stash.json` may hold an optional `note`.
 - `bootlogos/<W>x<H>/`: your own boot logos (`.png`, `.bmp`), one folder per device `resolution`; never in the repo or storage.
 - `cache/`: what can be rebuilt: `storage-cache.json`, `preview-cache/` (the editors' 300 px WebP game pictures, `<image key without extension>.<ETag or s<size>>.webp`), `previews/`, `theme-art/`, `names.json`.
 
@@ -186,11 +186,11 @@ Rules for sets:
 
 - `art.json`: the art ids, one per set among them (`surprise` has art too).
 - `art/<id>.png`, drawn by `tools/gen_theme_art.py`, with a generated `art/README.md` gallery for GitHub that sync never copies.
-- `art-spruce/<id>.png`: the same pictures as 300x300 transparent squares for SpruceOS. `tools/gen_spruce_art.py` makes them from `art/`: run it after `gen_theme_art.py` and commit both.
+- `art-box/Imgs|Imgs_med|Imgs_small/<id>.png`: retro game boxes for SpruceOS, 336x480, 210x300 and 140x200, drawn by `tools/gen_box_art.py` from `sprites/<id>.txt` (32x32 pixel sprites, colours in `box-palette.json`) with the art's title in `box-font.json` and a badge picked by the id's hash. Run it after changing a sprite and commit both.
 - `emoji.json`: each art id's own emoji, for the editors.
 - `logo-font.json`: the logo font's outlines (OFL).
 
-With the card's `theme` on, sync copies the art into the copy of the theme in ES-DE's folder (the theme itself is a GitHub archive in `os/esde/themes/`, refreshed by `sync-roms themes update`), the theme customizations (Knulli, ROCKNIX), `MUOS/info/catalogue/Collection/box|grid` (muOS) or `Collections/Imgs/<name>.png` (Spruce: PyUI shows it by exact name, PNG only; the theme plays no part).
+With the card's `theme` on, sync copies the art into the copy of the theme in ES-DE's folder (the theme itself is a GitHub archive in `os/esde/themes/`, refreshed by `sync-roms themes update`), the theme customizations (Knulli, ROCKNIX), `MUOS/info/catalogue/Collection/box|grid` (muOS) or `Collections/Imgs/<name>.png` plus `Imgs_med/` and `Imgs_small/` from `art-box/` (Spruce: PyUI shows them by exact name, PNG only, never QOI; the theme plays no part).
 
 The names sync gave art are listed in the theme copy's `.sync-roms-collections` (ES-DE; not ROCKNIX's staging folder of that name) or in `.sync-roms-art` (Knulli, ROCKNIX, muOS), and only those lose their art (on Knulli their `subset.<name>.*` settings too) when the collection or its art goes; on Spruce, only the collections sync owns do. With no art left to add, the theme isn't copied for that. A theme update that ships metadata for a listed name takes it off the ES-DE list (the theme's from then on, never removed).
 
@@ -215,16 +215,22 @@ Size and placement:
 
 Subject:
 
-- One picture per meaning. Before adding one, check `art.json` for an entry that already means the same thing (a genre and a set of the same genre, two kinds of fist). If two exist, ask which to keep; the kept picture goes under the set's id, and the other id is removed from `ART`, `art.json`, `emoji.json`, `art/`, `art-spruce/` and the tests.
+- One picture per meaning. Before adding one, check `art.json` for an entry that already means the same thing (a genre and a set of the same genre, two kinds of fist). If two exist, ask which to keep; the kept picture goes under the set's id, and the other id is removed from `ART`, `art.json`, `emoji.json`, `art/`, `sprites/`, `art-box/` and the tests.
 - Draw the thing from the games, not a real-world lookalike: a console light gun (long thin barrel, boxy body, cable), not a pistol.
 - A series may get its character when asked. Get the proportions of the right form: Pikachu has long slim ears with a short tip band, a head smaller than its chubby body, small solid eyes and a large stepped tail; wide triangular ears on a big head is Pichu.
 - When asked to redo a picture without a subject, say which subject was chosen. When two concepts are equally plausible, show both and let the user pick.
+
+Sprites (`sprites/<id>.txt`, the box art's picture, rendered by `tools/gen_box_art.py`):
+
+- 32x32 with a clear border, `K` for the outline, lit from the top left, 2 to 3 tones per colour, and standing out against the id's box colour.
+- Clean lines: symmetric shapes exactly mirrored, straight and diagonal edges in regular 1:1, 2:1 or 1:2 pixel steps, curves stepping evenly, one-pixel outlines with no jogs or stray pixels. Crooked sprites are rejected.
+- Before finishing, enlarge a contact sheet (`gen_box_art.py --sheet`) and look at it.
 
 Checking:
 
 - Never finish without looking at the result. Read the generated PNG (the drawing is in y 600..1050), and also crop that part and enlarge it 2x to check every join, line end and overlap.
 - Compare with the pictures next to it in a contact sheet of all of `art/`, and show the user that sheet or the changed pictures. Keep review images out of the commit.
-- The tests check that every `art.json` id has a PNG in `art/` and `art-spruce/` and its own emoji; `sync-roms check` notes sets in storage that have no art or share one.
+- The tests check that every `art.json` id has a PNG in `art/`, a sprite (and no sprite lacks an id), the three `art-box/` sizes (equal to what the sprite renders to) and its own emoji; `sync-roms check` notes sets in storage that have no art or share one.
 
 ## Devices
 

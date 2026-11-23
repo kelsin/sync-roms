@@ -576,7 +576,8 @@ def _apply(args, base, card, layout_name, layout, device, catalog, session):
     extras = [[(system.get("name", system["bucket"]), "dim"), (f"from {stash['card']}", ""),
                (stash["stashed"][:16].replace("T", " "), "dim"), (_counts([f["kind"] for f in stash["files"]]), ""),
                (stash["core"] or "", "cyan"),
-               ("" if system["bucket"] in stems.get(stash["game"], ()) else "not on card", "red")]
+               ("" if system["bucket"] in stems.get(stash["game"], ()) else "not on card", "red"),
+               (stash.get("note", ""), "dim")]
               for stash, system in rows]
     rels = [muos_saves.stash_rel(stash) for stash, _ in rows]  # None: RetroArch; a game per ROM dir on muOS
     chosen = pick_apply([stash["game"] + (f" · {rel}" if rel else "") for (stash, _), rel in zip(rows, rels)], extras,
