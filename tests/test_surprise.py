@@ -347,6 +347,20 @@ class Step(StorageCase):
         self.assertEqual(len(got), 10)
         self.assertEqual({g["system"] for g in got}, {"gba"})
 
+    def test_off_systems_are_never_picked_and_their_surprises_are_replaced(self):
+        self.card(surprises=[self.surprise("gba", 0), self.surprise("gb", 0)], systems_off=["gb"])
+        got = self.both(False, False, 3)
+        self.assertEqual(len(got), 10)
+        self.assertEqual({g["system"] for g in got}, {"gba"})
+
+    def test_a_kept_surprise_on_a_system_turned_off_after_the_question_is_refilled(self):
+        self.card(surprises=[self.surprise("gba", 0), self.surprise("gb", 0)])
+        store.update_card("SD", systems_off=["gb"])  # the editor's toggle, after the keep/replace question
+        got = surprise.fill_surprises("SD", (None, "esde"), self.chosen(), False, rng=random.Random(3))
+        self.assertEqual(len(got), surprise.SLOTS)
+        self.assertNotIn("gb", {g["system"] for g in got})
+        self.assertIn(self.surprise("gba", 0), got)
+
     def test_card_and_global_exclusions_both_apply(self):
         usersettings.save_setting("surprise_excluded_systems", ["gb"])
         entry = {"surprise_excluded_systems": ["gba", 3]}
