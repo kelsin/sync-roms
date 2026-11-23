@@ -1,6 +1,7 @@
 """spruce_fixes.highlight_last_collection against copies of PyUI's files (fixtures): spruceOS 4.6.0 and Development,
 each with spruceOS PR 2070 applied (`4.6.0-patched`, `development-patched`), and Development with the earlier "Reopen
-last collection" patch sync-roms applied (`old-patched`). Delete with the fix."""
+last collection" patch sync-roms applied (`old-patched`), and a real 4.6.0 card's files after a draft of that patch
+(`4.6.0-old-draft`). Delete with the fix."""
 import os
 import shutil
 import sys
@@ -91,6 +92,18 @@ class ApplyTests(Base):
             self.assertEqual(self.read(rel), self.read(rel, "development-patched"), rel)
         for rel in set(OLD_FILES) - set(FILES):
             self.assertEqual(self.read(rel), self.read(rel, "development"), rel)
+
+    def test_earlier_draft_setting_is_taken_out(self):
+        """4.6.0-old-draft is a real card's PyUI files after a draft of the earlier patch, which put user_config.py's
+        methods before set_ignore_articles_when_sorting."""
+        self.card("4.6.0", "4.6.0-old-draft")
+        count, line, err = self.run_fixes()
+        self.assertEqual(count, 7)
+        self.assertEqual(err, "")
+        for rel in FILES:
+            self.assertEqual(self.read(rel), self.read(rel, "4.6.0-patched"), rel)
+        for rel in set(OLD_FILES) - set(FILES):
+            self.assertEqual(self.read(rel), self.read(rel, "4.6.0"), rel)
 
     def test_lf_files_stay_lf(self):
         self.card("development")

@@ -11,7 +11,8 @@ warning. Line ends (CRLF on spruce cards) are kept.
 
 An earlier sync-roms patched cards with a "Reopen last collection" setting (an earlier draft of the same PR). Its
 insertions in five files (OLD) are taken out again, exactly, in the same write, so those cards end up as if they had
-never had it."""
+never had it. A draft of that patch put user_config.py's methods before set_ignore_articles_when_sorting instead of after
+it, so either placement is taken out."""
 import os
 import re
 
@@ -135,14 +136,7 @@ EDITS = (
     ]),
 )
 
-# The earlier "Reopen last collection" patch: (path, its marker, [(anchor, inserted text, inserted before the anchor)])
-OLD = (
-    ("lang/English.json", '"reopenLastCollection"', [
-        ('    "ignoreArticlesWhenSorting": "Ignore articles when sorting",\n',
-         '    "reopenLastCollection": "Reopen last collection",\n', False)]),
-    ("main-ui/devices/miyoo/user_config.py", "get_reopen_last_collection", [
-        ('        cls.config["ignoreArticlesWhenSorting"] = value\n        cls.save_config()\n', """\
-
+REOPEN_METHODS = """\
     @classmethod
     def get_reopen_last_collection(cls):
         return cls.config.get("reopenLastCollection", True)
@@ -151,7 +145,17 @@ OLD = (
     def set_reopen_last_collection(cls, value):
         cls.config["reopenLastCollection"] = value
         cls.save_config()
-""", False)]),
+"""
+# The earlier "Reopen last collection" patch: (path, its marker, [(anchor, inserted text, inserted before the anchor)]),
+# or for a file it patched in more than one way, (path, its marker, ([...], [...])), the first that matches taken out
+OLD = (
+    ("lang/English.json", '"reopenLastCollection"', [
+        ('    "ignoreArticlesWhenSorting": "Ignore articles when sorting",\n',
+         '    "reopenLastCollection": "Reopen last collection",\n', False)]),
+    ("main-ui/devices/miyoo/user_config.py", "get_reopen_last_collection", (
+        [('        cls.config["ignoreArticlesWhenSorting"] = value\n        cls.save_config()\n',
+          "\n" + REOPEN_METHODS, False)],
+        [("    @classmethod\n    def set_ignore_articles_when_sorting(cls, value):\n", REOPEN_METHODS + "\n", True)])),
     ("main-ui/menus/language/language.py", "def reopen_last_collection", [
         ('        return cls._data.get("ignoreArticlesWhenSorting","Ignore articles when sorting")\n', """\
 
@@ -204,12 +208,12 @@ def plan(base):
     if any(old) and not all(old):
         return [], _mismatch("only some of its files have the earlier Reopen last collection setting")
     if all(old):
-        for rel, _, inserts in OLD:
-            for anchor, insert, before in inserts:
-                patched = insert + anchor if before else anchor + insert
-                if edited[rel].count(patched) != 1:
-                    return [], _mismatch(f"{rel} isn't as the earlier Reopen last collection patch left it")
-                edited[rel] = edited[rel].replace(patched, anchor)
+        for rel, _, forms in OLD:
+            texts_out = (_take_out(edited[rel], form) for form in (forms if isinstance(forms, tuple) else (forms,)))
+            text = next((t for t in texts_out if t is not None), None)
+            if text is None:
+                return [], _mismatch(f"{rel} isn't as the earlier Reopen last collection patch left it")
+            edited[rel] = text
 
     done = [marker in edited[rel] for rel, marker, _ in EDITS]
     if any(done) and not all(done):
@@ -230,6 +234,16 @@ def plan(base):
     if not writes:
         return [], "the card's PyUI already has it"
     return writes, None
+
+
+def _take_out(text, inserts):
+    """text without the inserts, None when one isn't there exactly once."""
+    for anchor, insert, before in inserts:
+        patched = insert + anchor if before else anchor + insert
+        if text.count(patched) != 1:
+            return None
+        text = text.replace(patched, anchor)
+    return text
 
 
 def _state_key_calls(text):
