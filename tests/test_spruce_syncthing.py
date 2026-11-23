@@ -25,6 +25,8 @@ class Data(unittest.TestCase):
             for key, value in keys.items():
                 self.assertIn(key, sections.get(section, []))
                 self.assertIsInstance(value, str)
+        for core in d["cores"].values():
+            self.assertIn(core, d["esde_labels"])
         for value in d["retroarch"].values():
             self.assertIsInstance(value, str)
 
