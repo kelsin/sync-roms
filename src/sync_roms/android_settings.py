@@ -63,7 +63,7 @@ def gamelist_entry(system_folder, text, label):
 
 def gamelist_apply(text, label):
     """The gamelist with its alternativeEmulator block set to label; a missing file is made."""
-    if text is None:
+    if text is None or not text.strip():
         text = XML_DECLARATION + "<gameList />\n"
     eol = "\r\n" if "\r\n" in text else "\n"
     block = f"<alternativeEmulator>{eol}\t<label>{escape(label)}</label>{eol}</alternativeEmulator>{eol}"

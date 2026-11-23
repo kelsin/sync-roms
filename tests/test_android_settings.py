@@ -67,6 +67,12 @@ class CfgEntries(unittest.TestCase):
         entries = android_settings.cfg_entries(text, {"webdav_url": "", "b": "2"})
         self.assertEqual(android_settings.cfg_apply(text, entries), 'a = "1"\r\nwebdav_url = ""\r\nb = "2"\r\n')
 
+    def test_apply_replaces_every_occurrence_literally(self):
+        text = 'a = "1"\r\nwebdav_password = "x"\r\nb = "2"\r\nwebdav_password = "y"\r\n'
+        entries = android_settings.cfg_entries(text, {"webdav_password": "p\\1\\g<0>"})
+        self.assertEqual(android_settings.cfg_apply(text, entries),
+                         'a = "1"\r\nwebdav_password = "p\\1\\g<0>"\r\nb = "2"\r\nwebdav_password = "p\\1\\g<0>"\r\n')
+
     def test_apply_appends_missing_key(self):
         entries = android_settings.cfg_entries('a = "1"', {"webdav_url": ""})
         self.assertEqual(android_settings.cfg_apply('a = "1"', entries), 'a = "1"\nwebdav_url = ""\n')
@@ -93,6 +99,10 @@ class Gamelist(unittest.TestCase):
         self.assertIsNone(android_settings.gamelist_entry("nes", None, "FCEUmm").old)
         self.assertEqual(android_settings.gamelist_apply(None, "Snes9x & Co"),
                          '<?xml version="1.0"?>\n' + BLOCK.replace("FCEUmm", "Snes9x &amp; Co") + "<gameList />\n")
+
+    def test_empty_file_is_made(self):
+        for text in ("", " \n"):
+            self.assertEqual(android_settings.gamelist_apply(text, "FCEUmm"), android_settings.gamelist_apply(None, "FCEUmm"))
 
     def test_unchanged_label_unescaped(self):
         text = BLOCK.replace("FCEUmm", "A &amp; B") + "<gameList />\n"
