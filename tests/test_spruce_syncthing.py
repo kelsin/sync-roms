@@ -25,6 +25,8 @@ class Data(unittest.TestCase):
             for key, value in keys.items():
                 self.assertIn(key, sections.get(section, []))
                 self.assertIsInstance(value, str)
+        for core in d["cores"].values():
+            self.assertIn(core, d["esde_labels"])
         for value in d["retroarch"].values():
             self.assertIsInstance(value, str)
 
@@ -94,6 +96,43 @@ class Card(helpers.CardDir):
         self.assertIn('\n  "menuOptions"', text)
         self.assertTrue(text.endswith("\n"))
         self.assertIn("Emu/SFC: snes9x", out)
+
+    def test_entries_lists_unchanged_too(self):
+        self.put("Emu/SFC/config.json", self.emu())
+        self.put("Saves/ra-configs/retroarch-A.cfg", 'autosave_interval = "10"\nother = "1"\n')
+        found = {(e.where, e.key): e for e in spruce_syncthing.entries("c", self.card)}
+        core = found[("Emu/SFC/config.json", "core")]
+        self.assertEqual((core.old, core.new), ("mednafen_supafaust", "snes9x"))
+        same = found[("Saves/ra-configs/retroarch-A.cfg", "autosave_interval")]
+        self.assertEqual((same.old, same.new), ("10", "10"))
+        added = found[("Saves/ra-configs/retroarch-A.cfg", "savestates_in_content_dir")]
+        self.assertEqual((added.old, added.new), (None, "false"))
+        self.assertFalse(any(e.secret for e in found.values()))
+
+    def test_entries_empty_when_off(self):
+        usersettings.save_settings({"spruce_syncthing": False})
+        self.put("Emu/SFC/config.json", self.emu())
+        self.assertEqual(spruce_syncthing.entries("c", self.card), [])
+
+    def entries_err(self):
+        err = io.StringIO()
+        with contextlib.redirect_stderr(err):
+            found = spruce_syncthing.entries("c", self.card)
+        return found, err.getvalue()
+
+    def test_entries_warn_like_run(self):
+        self.put("Emu/SFC/config.json", "{nope")
+        path = self.cp("Saves", "ra-configs", "retroarch-A.cfg")
+        os.makedirs(os.path.dirname(path))
+        with open(path, "wb") as f:
+            f.write(b"\xff\xfe = bad")
+        found, err = self.entries_err()
+        self.assertEqual(found, [])
+        self.assertIn("Emu/SFC/config.json can't be read; its core left as it is", err)
+        self.assertIn("Saves/ra-configs/retroarch-A.cfg can't be read; its save settings left as they are", err)
+
+    def test_entries_warn_without_a_cfg(self):
+        self.assertIn("Saves/ra-configs has no retroarch-*.cfg yet", self.entries_err()[1])
 
     def test_missing_emu_config_is_skipped_quietly(self):
         self.put("Saves/ra-configs/retroarch-A.cfg", self.CFG)

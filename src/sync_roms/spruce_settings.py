@@ -3,7 +3,7 @@ import json
 import os
 import re
 
-from . import cardfs, store, ui, usersettings
+from . import applied, cardfs, store, ui, usersettings
 
 FILE = os.path.join("Saves", "spruce", "spruce-config.json")
 BLOCK = "RetroAchievements Settings"
@@ -78,6 +78,61 @@ def wanted_settings():
     return result
 
 
+def _options(base, shown):
+    """(file text, parsed data, its menuOptions dict) of the card's spruce-config.json, or None with a warning when it's missing or can't be read."""
+    path = os.path.join(base, FILE)
+    if not os.path.isfile(path):
+        ui.warn(f"{shown} is missing; spruce settings skipped (start the card in the device once first)")
+        return None
+    old = cardfs.text(path)
+    try:
+        data = json.loads(old)
+    except ValueError:
+        data = None
+    options = data.get("menuOptions") if isinstance(data, dict) else None
+    if not isinstance(options, dict):
+        ui.warn(f"{shown} can't be read as Spruce settings; spruce settings skipped")
+        return None
+    return old, data, options
+
+
+def _selected(options, section, key):
+    """The entry dict of section / key, or None."""
+    found = options.get(section)
+    entry = found.get(key) if isinstance(found, dict) else None
+    return entry if isinstance(entry, dict) else None
+
+
+def entries(card, base):
+    """[Entry] for every saved spruce setting that applies to the card's spruce-config.json, changed or not; [] when it can't be used."""
+    from . import spruce_syncthing
+    values = wanted()
+    extra = wanted_settings()
+    forced = spruce_syncthing.forced_settings(card)
+    if not values and not extra and not forced:
+        return []
+    shown = FILE.replace(os.sep, "/")
+    found = _options(base, shown)
+    if not found:
+        return []
+    options = found[2]
+    result = []
+    for key, value in values.items():
+        entry = _selected(options, BLOCK, key)
+        result.append(applied.Entry(shown, f"{BLOCK} / {key}", entry.get("selected") if entry else None, value, key in HIDDEN))
+    for section, key, value in extra:
+        entry = _selected(options, section, key)
+        if entry:
+            result.append(applied.Entry(shown, f"{section} / {key}", entry.get("selected"), value, False))
+    for section, key, value in forced:
+        entry = _selected(options, section, key)
+        if entry:
+            result.append(applied.Entry(shown, f"{section} / {key} (Syncthing)", entry.get("selected"), value, False))
+        else:
+            ui.warn(f"{shown} has no {section} / {key}; update spruceOS for Syncthing saves to work")
+    return result
+
+
 def install(card, layout_name, base, dry_run):
     """Set the saved spruce settings in a spruce card's spruce-config.json, keeping everything else in it: the RetroAchievements
     ones, and the allowlisted spruce_settings whose section and key the file already has.
@@ -90,20 +145,11 @@ def install(card, layout_name, base, dry_run):
     forced = spruce_syncthing.forced_settings(card)
     if not values and not extra and not forced:
         return 0
-    path = os.path.join(base, FILE)
     shown = FILE.replace(os.sep, "/")
-    if not os.path.isfile(path):
-        ui.warn(f"{shown} is missing; spruce settings skipped (start the card in the device once first)")
+    found = _options(base, shown)
+    if not found:
         return 0
-    old = cardfs.text(path)
-    try:
-        data = json.loads(old)
-    except ValueError:
-        data = None
-    options = data.get("menuOptions") if isinstance(data, dict) else None
-    if not isinstance(options, dict):
-        ui.warn(f"{shown} can't be read as Spruce settings; spruce settings skipped")
-        return 0
+    old, data, options = found
     lines = []
     if values:
         block = options.get(BLOCK)
@@ -117,12 +163,12 @@ def install(card, layout_name, base, dry_run):
                 block[key] = {"selected": value}
         lines += _lines(values)
     for section, key, value in extra:
-        entry = (options.get(section) or {}).get(key) if isinstance(options.get(section), dict) else None
+        entry = _selected(options, section, key)
         if isinstance(entry, dict) and entry.get("selected") != value:
             entry["selected"] = value
             lines.append(f"   {section} / {key} = {value}")
     for section, key, value in forced:
-        entry = (options.get(section) or {}).get(key) if isinstance(options.get(section), dict) else None
+        entry = _selected(options, section, key)
         if not isinstance(entry, dict):
             ui.warn(f"{shown} has no {section} / {key}; update spruceOS for Syncthing saves to work")
         elif entry.get("selected") != value:
@@ -135,7 +181,7 @@ def install(card, layout_name, base, dry_run):
         print(ui.dim(f"🧪 Dry run: would set {len(lines)} spruce setting(s) in {shown}"))
         print(ui.dim("\n".join(lines)))
         return 0
-    cardfs.write_text(path, new)
+    cardfs.write_text(os.path.join(base, FILE), new)
     print(f"🏆 Spruce settings → {shown} ({len(lines)} set)")
     print("\n".join(lines))
     return 0

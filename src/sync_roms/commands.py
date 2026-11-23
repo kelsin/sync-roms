@@ -740,6 +740,11 @@ def config_cmd(args):
         if value is not None:
             ui.fail("`config import` takes only a card name or folder", 2)
         return import_settings(name)
+    if args.action == "apply":
+        if value is not None:
+            ui.fail("`config apply` takes only a card name or folder", 2)
+        from . import settings_apply
+        return settings_apply.run(name, args.dry_run)
     if args.action in ("set", "unset"):
         if name not in CONFIG_KINDS:
             ui.fail((f"Unknown setting {name!r}" if name else f"`config {args.action}` needs a setting's name")
@@ -1345,7 +1350,7 @@ def second_words():
     words["download"] = ["pico8"]
     words["cards"] = ["edit", "list", "new", "set", "rename", "convert", "clean", "delete", "copy", "export", "import"]
     words["saves"] = ["stash", "apply", "manage"]
-    words["config"] = ["show", "path", "set", "unset", "import"]
+    words["config"] = ["show", "path", "set", "unset", "import", "apply"]
     words["cache"] = ["update"]
     words["completion"] = ["bash", "zsh", "fish"]
     return words
@@ -1493,7 +1498,7 @@ def build_parser():
     p = svsub.add_parser("manage", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=saves_manage)
 
     p = sub.add_parser("layouts", allow_abbrev=False); common(p, card=False); p.add_argument("layout_id", nargs="?"); p.add_argument("--json", action="store_true"); p.set_defaults(fn=layouts_cmd)
-    p = sub.add_parser("config", allow_abbrev=False); common(p, card=False); p.add_argument("action", choices=["show", "path", "set", "unset", "import"], nargs="?", default="show")
+    p = sub.add_parser("config", allow_abbrev=False); common(p, card=False); p.add_argument("action", choices=["show", "path", "set", "unset", "import", "apply"], nargs="?", default="show")
     p.add_argument("name", nargs="?"); p.add_argument("value", nargs="?"); p.set_defaults(fn=config_cmd)
     p = sub.add_parser("cache", allow_abbrev=False); common(p, card=False); p.add_argument("action", choices=["update"], nargs="?"); p.add_argument("--full", action="store_true"); p.set_defaults(fn=cache_cmd)
     p = sub.add_parser("doctor", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=doctor_cmd)
@@ -1510,7 +1515,7 @@ def run(argv):
     ap = build_parser()
     ap.prog = f"sync-roms {argv[0]}"  # its errors (unrecognized arguments) point at the command's help
     args = ap.parse_args(argv)
-    if getattr(args, "dry_run", False) and (args.fn in (games_list, games_export, layouts_cmd, config_cmd, cache_cmd, doctor_cmd, guide_cmd, check_cmd, completion_cmd)
+    if getattr(args, "dry_run", False) and not (args.fn is config_cmd and args.action == "apply") and (args.fn in (games_list, games_export, layouts_cmd, config_cmd, cache_cmd, doctor_cmd, guide_cmd, check_cmd, completion_cmd)
                                             or (args.fn is games_sets and args.verb == "list")):
         name = " ".join(w for w in (args.command, getattr(args, "action", None), getattr(args, "verb", None)) if w)
         if args.fn is config_cmd and args.action in ("set", "unset"):

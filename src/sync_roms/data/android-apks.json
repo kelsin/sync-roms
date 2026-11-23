@@ -1,0 +1,10 @@
+{
+  "note": "dawn-zero isn't needed; the Steam apps (gamenative, DroidDeck) only from the Retroid Pocket Nova's tier up; Eden only where the device plays Switch; gba-ds needs two screens.",
+  "apks": [
+    {"prefix": "dawn-zero", "never": true},
+    {"prefix": "gamenative", "tier": "switch"},
+    {"prefix": "DroidDeck", "tier": "switch"},
+    {"prefix": "Eden", "systems": ["switch"]},
+    {"prefix": "gba-ds", "dualscreen": true}
+  ]
+}

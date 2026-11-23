@@ -1,4 +1,5 @@
 """The adb binary: the only module that runs it."""
+import re
 import shlex
 import shutil
 import subprocess
@@ -63,6 +64,11 @@ def is_dir(serial, path):
     return shell(serial, "sh", "-c", 'test -d "$1" && echo y || echo n', "_", path).strip() == "y"
 
 
+def is_file(serial, path):
+    """Whether the device has the file; a failed adb raises AdbError rather than reading as missing."""
+    return shell(serial, "sh", "-c", 'test -f "$1" && echo y || echo n', "_", path).strip() == "y"
+
+
 def mdns_services():
     """(name, kind, "host:port") of the services adb discovered."""
     out = []
@@ -87,3 +93,26 @@ def pull(serial, remote, local):
 
 def push(serial, local, remote):
     run("push", local, remote, serial=serial, timeout=None)
+
+
+def exec_out(serial, *words):
+    """The binary stdout of a command run on the device; a failure raises AdbError."""
+    cmd = [require(), "-s", serial, "exec-out", " ".join(shlex.quote(w) for w in words)]
+    try:
+        done = subprocess.run(cmd, capture_output=True, timeout=60)
+    except subprocess.TimeoutExpired:
+        raise AdbError("timed out") from None
+    if done.returncode:
+        raise AdbError((done.stderr or done.stdout).decode(errors="replace").strip())
+    return done.stdout
+
+
+def install(serial, local, replace=False):
+    """Install the APK on the device (replace: upgrade in place, keeping data); a failure raises AdbError."""
+    run("install", *(["-r"] if replace else []), local, serial=serial, timeout=None)
+
+
+def installed_version(serial, pkg):
+    """The installed package's versionCode (dumpsys's first), or None when it isn't shown."""
+    found = re.search(r"versionCode=(\d+)", shell(serial, "dumpsys", "package", pkg))
+    return int(found.group(1)) if found else None
