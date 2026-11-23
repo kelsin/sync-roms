@@ -1,5 +1,7 @@
 """The palette overview image: one small mock of a PyUI list screen per palette, drawn from the palette data."""
+import contextlib
 import os
+import tempfile
 
 from PIL import Image, ImageDraw, ImageFont
 
@@ -67,8 +69,23 @@ def render_sheet(palettes, font_path=None, columns=5):
     return sheet
 
 
+def save_image(img, path):
+    """Save img as a PNG at path (folders made) through a temp file in the same folder, so a failed write leaves the
+    old file as it was."""
+    folder = os.path.dirname(path)
+    os.makedirs(folder, exist_ok=True)
+    fd, tmp = tempfile.mkstemp(prefix=".palettes-", suffix=".png", dir=folder)
+    os.close(fd)
+    try:
+        img.save(tmp, "PNG")
+        os.replace(tmp, path)
+    except BaseException:
+        with contextlib.suppress(OSError):
+            os.remove(tmp)
+        raise
+    return path
+
+
 def write_sheet(path):
     from . import palettes
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    render_sheet(palettes.PALETTES.values(), font_path()).save(path)
-    return path
+    return save_image(render_sheet(palettes.PALETTES.values(), font_path()), path)

@@ -1209,18 +1209,32 @@ def style_args(args):
 
 
 def palette_args(args):
-    """The palettes --palette names (duplicates dropped, first order kept) or every one with --all-palettes; none
-    given or an unknown name exits 2 naming the palettes."""
-    from .custom_themes import palettes
+    """The palettes to build: every one with --all-palettes; else the --palette names (duplicates dropped, first order
+    kept; an unknown one exits 2 naming the palettes); else, with a terminal and without --yes, the picker, starting
+    from the saved selection, which a confirmed choice replaces (Esc exits 0, nothing on exits 2); else the saved
+    selection, and none saved exits 2 naming the palettes. Flags never change the saved selection."""
+    from .custom_themes import palette_picker, palettes
     known = ", ".join(palettes.names())
     if args.all_palettes:
         return list(palettes.PALETTES.values())
     chosen = list(dict.fromkeys(args.palette or []))
-    if not chosen:
-        ui.fail(f"Choose the palettes with --palette NAME (repeatable) or --all-palettes; the palettes are: {known}", 2)
-    unknown = [n for n in chosen if n not in palettes.PALETTES]
-    if unknown:
-        ui.fail(f"Unknown palette {', '.join(unknown)}; the palettes are: {known}", 2)
+    if chosen:
+        unknown = [n for n in chosen if n not in palettes.PALETTES]
+        if unknown:
+            ui.fail(f"Unknown palette {', '.join(unknown)}; the palettes are: {known}", 2)
+    elif ui.has_terminal() and not ui.ASSUME_YES:
+        chosen = palette_picker.pick("🎨 Palettes to build the custom themes in", palette_picker.saved())
+        if chosen is None:
+            print("Cancelled: nothing built")
+            sys.exit(0)
+        if not chosen:
+            ui.fail("No palette chosen: nothing built", 2)
+        palette_picker.save(chosen)
+    else:
+        chosen = palette_picker.saved()
+        if not chosen:
+            ui.fail("No palettes saved: choose them with --palette NAME (repeatable) or --all-palettes, or in the "
+                    f"picker (run it in a terminal without --yes); the palettes are: {known}", 2)
     return [palettes.get(n) for n in chosen]
 
 
@@ -1258,7 +1272,10 @@ def themes_publish(args):
 def themes_palettes(args):
     """Write the palette overview image and open it in the default viewer."""
     from .custom_themes import palette_sheet
-    path = palette_sheet.write_sheet(os.path.join(store.cache_dir(), "themes", "palettes.png"))
+    try:
+        path = palette_sheet.write_sheet(os.path.join(store.cache_dir(), "themes", "palettes.png"))
+    except OSError as e:
+        ui.fail(f"Couldn't write the palette overview: {e}", 1)
     print(path)
     if not webbrowser.open(pathlib.Path(path).as_uri()):
         ui.fail("Couldn't open a viewer: open the file above yourself", 1)
