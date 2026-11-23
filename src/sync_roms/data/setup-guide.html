@@ -627,6 +627,7 @@ const retroarchBinds = h => [
   ["Settings > Input > Hotkeys > Fast-Forward (Hold)", "R1", "Leave Fast-Forward (Toggle) unbound so fast-forward only runs while held."],
   ["Settings > Input > Hotkeys > Show FPS (Toggle)", "Y"],
   ["Settings > Input > Hotkeys > Quit RetroArch", "Start", "Closes RetroArch and returns to the frontend."],
+  ["Main Menu > Configuration File > Save Current Configuration", "run once after binding", "Hotkeys live in the global retroarch.cfg."],
 ];
 // What each layout's own hotkey layer does by default and what to change to reach HOTKEY_SCHEME.
 // `src` marks what could not be confirmed on the vendor's docs, to check on the device.
@@ -1039,7 +1040,7 @@ const SECTIONS = [
           <p class="note">On a Steam Deck, Flatpak emulators keep saves under <code>~/.var</code>; Syncthing may need access granted to those folders. EmuDeck also has its own cloud save feature.</p>
           <p><b>Android, RetroArch:</b></p>
           <ol>
-            <li>Run <code>sync-roms config apply</code> with the device on Wireless debugging: it sets RetroArch's save and state folders and save settings, turns Cloud Sync off, and sets each system's ES-DE emulator to its core in "RetroArch cores" (RetroArch closed; ES-DE restarts).</li>
+            <li>Run <code>sync-roms config apply</code> with the device on Wireless debugging: it sets RetroArch's save and state folders and save settings, turns Cloud Sync off, and sets each system's ES-DE emulator to its core in "RetroArch cores" (RetroArch closed; it asks before restarting ES-DE, and declining skips the ES-DE part).</li>
             <li>In Syncthing-Fork share <code>ra-saves</code> (<code>jkx7j-mnlfo</code>) and <code>ra-states</code> (<code>w5nqg-xmpq6</code>) to those two folders, and set its run conditions so it runs when switching devices.</li>
           </ol>`,
       },
