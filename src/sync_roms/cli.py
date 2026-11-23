@@ -21,7 +21,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "games": ("edit|list|add|remove|full|sets|export|import", "edit a card's games, interactively or from scripts"),
     "sets": ("edit", "edit the game sets in storage by hand and save the changes there"),
     "collections": ("edit", "edit your collections of favourite games (saved in ~/.sync-roms/collections/)"),
-    "themes": ("update|pick|build", "copy the latest Art Book Next for ES-DE and the PyUI themes for spruce from GitHub into storage; build custom spruce themes"),
+    "themes": ("update|pick|build|publish", "copy the latest Art Book Next for ES-DE and the PyUI themes for spruce from GitHub into storage; build and publish custom spruce themes"),
     "download": ("pico8", "add the PICO-8 BBS Featured carts storage doesn't have, and newer revisions of those it has"),
     "flash": ("", "write a Knulli, BaseOS, muOS, ROCKNIX or OakMoss image from storage's os/ to an SD card"),
     "umount": ("", "clean the macOS junk off an SD card and unmount it"),
@@ -134,6 +134,16 @@ TOPICS = {
   Builds each named custom theme (all of them without names) into the cache's themes/build/ folder, or into DIR/<theme>
   with --out, and prints the folders. The base theme is read from os/spruceos/themes/SPRUCE/ in storage, so run
   `sync-roms themes update` first. Nothing is written to storage.
+
+  sync-roms themes publish [THEME...] [--dry-run] [--yes]   build custom spruce themes and put them in storage
+
+  Builds as above, then makes each theme's os/spruceos/themes/<theme>/ match the build (write profile): uploads the
+  files whose content changed and deletes the files the build no longer makes, after one confirmation. Each file's
+  hash is kept in os/spruceos/custom-themes.json, so an unchanged rebuild uploads nothing and a failed upload is retried
+  next time. A custom theme's name is reserved: an existing folder of that name is adopted (every file uploaded, the
+  others deleted), except a theme `themes update` downloaded, which is left alone (exit code 1). `themes pick` and
+  sync then treat it like any other theme. After adding or removing themes in storage, run `sync-roms cache update`:
+  storage listings come from the cache.
 """,
     "download": """
   sync-roms download pico8 [--count N] [--dry-run] [--yes]   add the BBS Featured carts to storage's pico8/

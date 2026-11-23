@@ -12,7 +12,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import helpers  # noqa: E402,F401  (imports isolate first)
 from PIL import Image  # noqa: E402
 
-from sync_roms import commands, custom_themes, downloads, runtime, usersettings  # noqa: E402
+from sync_roms import commands, custom_themes, downloads, runtime, s3, ui, upload, usersettings  # noqa: E402
+from sync_roms.custom_themes.pixel import build as pixel_build  # noqa: E402
 
 CONFIG = {"name": "SPRUCE", "author": "spruce", "description": "x", "screensaver": {"bgColor": "#282828"}, "extra": 1}
 
@@ -262,6 +263,172 @@ class Manifest(helpers.StorageDir):
         tmp = os.path.join(self.tmp.name, "t")
         tree(tmp, {"a.png": b"a", ".DS_Store": b"x", "d/._b": b"x", "d/b.png": b"b"})
         self.assertEqual(sorted(custom_themes.manifest.hash_tree(tmp)), ["a.png", "d/b.png"])
+
+
+C = "os/spruceos/themes/Pixel Controllers/"
+
+
+def snapshot(root):
+    """{relative path: bytes} of every file under root."""
+    out = {}
+    for dirpath, _, files in os.walk(root):
+        for file in files:
+            p = os.path.join(dirpath, file)
+            with open(p, "rb") as f:
+                out[os.path.relpath(p, root)] = f.read()
+    return out
+
+
+class Publish(helpers.StorageDir):
+    def setUp(self):
+        super().setUp()
+        self.enterContext(mock.patch.object(usersettings, "apply_settings"))
+        self.out = self.enterContext(contextlib.redirect_stdout(io.StringIO()))
+        self.enterContext(mock.patch.object(ui, "ASSUME_YES", True))
+        make_base(os.path.join(self.root, "os", "spruceos", "themes", "SPRUCE"))
+
+    def manifest(self):
+        return self.read_json(runtime.CUSTOM_THEMES_STATE)
+
+    def stored(self, prefix):
+        return {k[len(prefix):] for k in snapshot(self.root) if (k.replace(os.sep, "/")).startswith(prefix)}
+
+    def recorder(self):
+        calls, real = [], upload.run_uploads
+
+        def run(jobs, quiet=False):
+            calls.append(sorted(j[0] for j in jobs))
+            return real(jobs, quiet)
+        return calls, run
+
+    def test_first_publish_uploads_and_writes_manifest(self):
+        self.assertEqual(custom_themes.publish(None), 0)
+        built = os.path.join(self.data, "cache", "themes", "build")
+        for name, prefix in (("Pixel Consoles", P), ("Pixel Controllers", C)):
+            tree_ = custom_themes.manifest.hash_tree(os.path.join(built, name))
+            self.assertEqual(self.stored(prefix), set(tree_))
+            self.assertEqual(self.manifest()[name]["files"], {rel: list(v) for rel, v in tree_.items()})
+
+    def test_second_publish_uploads_nothing(self):
+        custom_themes.publish(None)
+        calls, run = self.recorder()
+        with mock.patch.object(upload, "run_uploads", run), mock.patch.object(s3, "delete_keys") as delete:
+            self.assertEqual(custom_themes.publish(None), 0)
+        self.assertEqual(calls, [])
+        delete.assert_not_called()
+        self.assertIn("Nothing to upload", self.out.getvalue())
+
+    def test_changed_file_uploads_only_that_file(self):
+        custom_themes.publish(["Pixel Consoles"])
+        calls, run = self.recorder()
+
+        def preview(dest, spec):
+            Image.new("RGBA", (640, 480), (1, 2, 3, 255)).save(os.path.join(dest, "preview.png"))
+        with mock.patch.object(pixel_build, "preview", preview), mock.patch.object(upload, "run_uploads", run):
+            self.assertEqual(custom_themes.publish(["Pixel Consoles"]), 0)
+        self.assertEqual(calls, [[P + "preview.png"]])
+        digest = custom_themes.manifest.hash_tree(os.path.join(self.data, "cache", "themes", "build", "Pixel Consoles"))["preview.png"]
+        self.assertEqual(self.manifest()["Pixel Consoles"]["files"]["preview.png"], list(digest))
+
+    def test_stale_files_deleted_and_manifest_updated(self):
+        custom_themes.publish(["Pixel Consoles"])
+        self.put(P + "old.png")
+        sibling = self.put("os/spruceos/themes/Pixel Consoles 2/old.png")
+        custom_themes.manifest.update(lambda d: d["Pixel Consoles"]["files"].update({"old.png": ["x" * 64, 3]}))
+        self.assertEqual(custom_themes.publish(["Pixel Consoles"]), 0)
+        self.assertFalse(os.path.exists(os.path.join(self.root, P, "old.png")))
+        self.assertTrue(os.path.exists(sibling))
+        self.assertNotIn("old.png", self.manifest()["Pixel Consoles"]["files"])
+
+    def test_adopts_existing_unmanifested_folder(self):
+        self.put(P + "config.json", b"{}")
+        self.put(P + "extra/hand-made.png")
+        self.assertEqual(custom_themes.publish(["Pixel Consoles"]), 0)
+        self.assertIn("dopting", self.out.getvalue())
+        self.assertFalse(os.path.exists(os.path.join(self.root, P, "extra", "hand-made.png")))
+        built = custom_themes.manifest.hash_tree(os.path.join(self.data, "cache", "themes", "build", "Pixel Consoles"))
+        self.assertEqual(self.stored(P), set(built))
+        with open(os.path.join(self.root, P, "config.json"), "rb") as f:
+            self.assertNotEqual(f.read(), b"{}")
+        self.assertEqual(set(self.manifest()["Pixel Consoles"]["files"]), set(built))
+
+    def test_downloaded_theme_name_is_skipped(self):
+        self.put(runtime.SPRUCE_THEMES_STATE, json.dumps({"x.7z": {"folder": "Pixel Consoles"}}).encode())
+        mine = self.put(P + "config.json", b"theirs")
+        self.assertEqual(custom_themes.publish(None), 1)
+        with open(mine, "rb") as f:
+            self.assertEqual(f.read(), b"theirs")
+        self.assertEqual(self.stored(P), {"config.json"})
+        self.assertNotIn("Pixel Consoles", self.manifest())
+        self.assertIn("Pixel Controllers", self.manifest())
+
+    def test_dry_run_writes_nothing(self):
+        custom_themes.publish(["Pixel Consoles"])
+        self.put(P + "old.png")
+        before = snapshot(self.root)
+        self.assertEqual(custom_themes.publish(None, dry_run=True), 0)
+        self.assertEqual(snapshot(self.root), before)
+        self.assertIn("Dry run", self.out.getvalue())
+
+    def test_failed_upload_keeps_old_manifest_entry(self):
+        custom_themes.manifest.update(lambda d: d.update({"Pixel Consoles": {"files": {"preview.png": ["old", 1]}}}))
+        failing = P + "preview.png"
+        real = upload.run_uploads
+
+        def run(jobs, quiet=False):
+            real([j for j in jobs if j[0] != failing])
+            return 1
+        with mock.patch.object(upload, "run_uploads", run):
+            self.assertEqual(custom_themes.publish(["Pixel Consoles"]), 1)
+        files = self.manifest()["Pixel Consoles"]["files"]
+        self.assertEqual(files["preview.png"], ["old", 1])
+        built = custom_themes.manifest.hash_tree(os.path.join(self.data, "cache", "themes", "build", "Pixel Consoles"))
+        self.assertEqual(files["config.json"], list(built["config.json"]))
+        self.assertEqual(set(files), set(built))
+
+    def test_failed_upload_of_changed_same_size_file_keeps_old_entry(self):
+        custom_themes.publish(["Pixel Consoles"])
+        old = self.manifest()["Pixel Consoles"]["files"]["config.json"]
+        custom_themes.manifest.update(lambda d: d["Pixel Consoles"]["files"].update({"config.json": ["0" * 64, old[1]]}))
+        with mock.patch.object(upload, "run_uploads", return_value=1):
+            self.assertEqual(custom_themes.publish(["Pixel Consoles"]), 1)
+        self.assertEqual(self.manifest()["Pixel Consoles"]["files"]["config.json"], ["0" * 64, old[1]])
+
+    def test_base_missing_changes_nothing(self):
+        os.rename(os.path.join(self.root, "os", "spruceos", "themes", "SPRUCE"), os.path.join(self.tmp.name, "moved"))
+        with self.assertRaises(SystemExit) as raised, mock.patch("sys.stderr") as err:
+            commands.run(["themes", "publish", "--yes"])
+        self.assertEqual(raised.exception.code, 1)
+        self.assertIn("themes update", "".join(c.args[0] for c in err.write.call_args_list))
+        self.assertEqual(snapshot(self.root), {})
+
+    def test_unmounted_share(self):
+        gone = os.path.join(self.tmp.name, "gone")
+        with mock.patch.object(runtime, "ROOT", gone):
+            with self.assertRaises(SystemExit) as raised, mock.patch("sys.stderr") as err:
+                commands.run(["themes", "publish", "--yes"])
+        self.assertEqual(raised.exception.code, 1)
+        self.assertIn("gone", "".join(c.args[0] for c in err.write.call_args_list))
+        self.assertFalse(os.path.exists(gone))
+
+    def test_malformed_manifest_exits_3(self):
+        self.put(runtime.CUSTOM_THEMES_STATE, b"{nope")
+        with self.assertRaises(SystemExit) as raised, mock.patch("sys.stderr") as err:
+            commands.run(["themes", "publish", "--yes"])
+        self.assertEqual(raised.exception.code, 3)
+        self.assertIn("custom-themes.json", "".join(c.args[0] for c in err.write.call_args_list))
+
+    def test_interrupt_leaves_manifest_consistent(self):
+        with mock.patch.object(upload, "run_uploads", side_effect=KeyboardInterrupt):
+            with self.assertRaises(KeyboardInterrupt):
+                custom_themes.publish(["Pixel Consoles"])
+        self.assertEqual(self.manifest().get("Pixel Consoles", {}).get("files", {}), {})
+
+    def test_command_cancelled_without_yes(self):
+        with mock.patch.object(ui, "ASSUME_YES", False), mock.patch.object(ui, "confirm", return_value=False) as ask:
+            self.assertEqual(commands.run(["themes", "publish"]), 0)
+        ask.assert_called_once()
+        self.assertEqual(self.stored(P), set())
 
 
 if __name__ == "__main__":

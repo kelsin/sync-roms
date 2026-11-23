@@ -1,5 +1,6 @@
 """Custom spruceOS themes sync-roms builds from a base theme. THEMES maps each theme's name to its module."""
 import os
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 
 from .. import downloads, inventory, runtime, s3, store
@@ -103,3 +104,93 @@ def plan_publish(name, built, listing, state, downloaded):
             plan.same.append(rel)
     plan.stale = sorted(k for k in listing if k[len(prefix):] not in tree)
     return plan
+
+
+def _tags(keys):
+    with ThreadPoolExecutor(s3.STAT_WORKERS) as ex:
+        return dict(zip(keys, ex.map(inventory.tag, keys)))
+
+
+def publish(selected, dry_run=False):
+    """Build the named themes (all when None) and make their storage folders match: upload new and changed files,
+    delete the files a build no longer makes, and record each file's hash in the manifest. Returns the exit code.
+    Raises BaseMissing, DownloadFailed, a storage error, or ValueError for a malformed manifest or themes.json."""
+    from .. import spruce_themes, ui, upload
+    s3.check_root()  # an unmounted share must never read as empty theme folders
+    built = build(selected)
+    state = manifest.read()
+    downloaded = {v["folder"] for v in spruce_themes._read_state().values()}
+    plans, trees, jobs, stale, sizes = [], {}, [], [], {}
+    for name, folder in built.items():
+        prefix = f"{runtime.SPRUCE_THEMES_PREFIX}{name}/"
+        listing = inventory.files(prefix)
+        plan = plan_publish(name, folder, listing, state, downloaded)
+        plans.append(plan)
+        if plan.skipped:
+            print(ui.yellow(f"⚠️  {plan.skipped} (in {runtime.SPRUCE_THEMES_STATE}): left alone"))
+            continue
+        trees[name] = manifest.hash_tree(folder)
+        recorded = (state.get(name) or {}).get("files", {})
+        gone = [prefix + rel for rel in recorded if rel not in trees[name] and prefix + rel not in listing]
+        plan.stale = sorted(set(plan.stale) | inventory.uncached(gone))  # published by another machine since the cache
+        for rel in plan.new + plan.changed:
+            sizes[prefix + rel] = trees[name][rel][1]
+            jobs.append((prefix + rel, os.path.join(folder, *rel.split("/")), trees[name][rel][1]))
+        stale += plan.stale
+
+        def size(rels):
+            return ui.human_size(sum(trees[name][r][1] for r in rels))
+        print(ui.bold(f"\n🎨 {name}") + ui.dim(f"  → {s3.location()}/{prefix}"))
+        if plan.adopt:
+            print(ui.yellow("   Adopting the existing folder: every file is uploaded, the others deleted"))
+        print(f"   💿 New: {ui.bold(str(len(plan.new)))} ({size(plan.new)})")
+        print(f"   ♻️  Changed: {ui.bold(str(len(plan.changed)))} ({size(plan.changed)})")
+        print(f"   ⚡ Same: {len(plan.same)}")
+        print(f"   🗑️  Stale, would delete: {ui.bold(str(len(plan.stale)))}")
+        ui.print_head(plan.stale, 5, indent=6, paint=ui.yellow)
+    skipped = any(p.skipped for p in plans)
+    if not jobs and not stale:
+        print(ui.green("\nNothing to upload ✨"))
+        return 1 if skipped else 0
+    if dry_run:
+        print(ui.yellow("\n🧪 Dry run — nothing uploaded or deleted"))
+        return 1 if skipped else 0
+    question = f"☁️  Upload {len(jobs)} file(s)" + (f" and delete {len(stale)} stale file(s)" if stale else "") + \
+        f" in {s3.location()}/{runtime.SPRUCE_THEMES_PREFIX}?"
+    if ui.ASSUME_YES:
+        print(f"{question} (--yes)")
+    elif not ui.confirm(question, default=False):
+        print(ui.yellow("👋 Cancelled."))
+        return 0
+    active = [p for p in plans if not p.skipped]
+
+    def claim(data):  # before the first upload: an interrupted run leaves folders the next one knows as its own
+        for p in active:
+            data.setdefault(p.name, {}).setdefault("files", {})
+    manifest.update(claim)
+    before = _tags([f"{runtime.SPRUCE_THEMES_PREFIX}{p.name}/{r}" for p in active for r in p.changed])
+    failed = upload.run_uploads(jobs) if jobs else 0
+    done = set(sizes)
+    if failed:  # only files verifiably in storage with the built size (a changed one: its tag changed too) count
+        listed = {}
+        for p in active:
+            listed.update(inventory.files(f"{runtime.SPRUCE_THEMES_PREFIX}{p.name}/"))
+        after = _tags(list(before))
+        done = {k for k in sizes if listed.get(k) == sizes[k] and (k not in before or after[k] != before[k])}
+    errors = s3.delete_keys(stale) if stale else []
+    for e in errors:
+        print(ui.red(f"  ❌ couldn't delete {e.get('Key')}: {e.get('Message')}"))
+
+    def record(data):
+        for p in active:
+            prefix = f"{runtime.SPRUCE_THEMES_PREFIX}{p.name}/"
+            files = data.setdefault(p.name, {}).setdefault("files", {})
+            for rel in list(files):
+                if rel not in trees[p.name]:
+                    del files[rel]
+            for rel in p.same + [r for r in p.new + p.changed if prefix + r in done]:
+                files[rel] = list(trees[p.name][rel])
+    manifest.update(record)
+    bad = max(failed, len(sizes) - len(done)) + len(errors)
+    print(ui.green("\n🎉 Done!") if not bad else ui.red(f"\n⚠️  Done with {bad} failure(s)"))
+    return 1 if bad or skipped else 0

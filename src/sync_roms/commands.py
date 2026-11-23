@@ -1216,6 +1216,24 @@ def themes_build(args):
     return 0
 
 
+def themes_publish(args):
+    from . import custom_themes
+    usersettings.ensure_bucket()
+    unknown = [n for n in args.names if n not in custom_themes.THEMES]
+    if unknown:
+        ui.fail(f"Unknown theme {', '.join(unknown)}; the custom themes are: {', '.join(custom_themes.names())}", 2)
+    try:
+        return custom_themes.publish(args.names or None, args.dry_run)
+    except custom_themes.BaseMissing as e:
+        ui.fail(f"{e}: run `sync-roms themes update` first", 1)
+    except custom_themes.DownloadFailed as e:
+        ui.fail(f"{e}", 1)
+    except json.JSONDecodeError as e:
+        ui.fail(f"{runtime.CUSTOM_THEMES_STATE} or {runtime.SPRUCE_THEMES_STATE} in {s3.location()} isn't valid JSON ({e}). Fix or move it first.", 3)
+    except s3.ERRORS as e:
+        ui.fail(f"Couldn't publish to {s3.location()}: {e}", 1)
+
+
 def themes_pick(args):
     from . import spruce_themes
     usersettings.ensure_bucket()
@@ -1270,7 +1288,7 @@ def second_words():
     words["games"] = sorted(set(words.get("games", [])) | {"list", "add", "remove", "full", "sets", "export", "import"})
     words["sets"] = ["edit"]
     words["collections"] = ["edit"]
-    words["themes"] = ["update", "pick", "build"]
+    words["themes"] = ["update", "pick", "build", "publish"]
     words["download"] = ["pico8"]
     words["cards"] = ["edit", "list", "new", "set", "rename", "convert", "clean", "delete", "copy", "export", "import"]
     words["saves"] = ["stash", "apply", "manage"]
@@ -1381,6 +1399,7 @@ def build_parser():
     tsub = themes.add_subparsers(dest="action", required=True)
     p = tsub.add_parser("update", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=themes_update)
     p = tsub.add_parser("build", allow_abbrev=False); common(p, card=False); p.add_argument("names", nargs="*"); p.add_argument("--out", metavar="DIR"); p.set_defaults(fn=themes_build)
+    p = tsub.add_parser("publish", allow_abbrev=False); common(p, card=False); p.add_argument("names", nargs="*"); p.set_defaults(fn=themes_publish)
     p = tsub.add_parser("pick", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=themes_pick)
 
     download = sub.add_parser("download", add_help=False, allow_abbrev=False)
