@@ -1199,6 +1199,89 @@ def themes_update(args):
     return max(themeart.update_storage(args.dry_run), spruce_themes.update_storage(args.dry_run))
 
 
+def style_args(args):
+    """The style names given (None for all of them); an unknown one exits 2 naming the styles."""
+    from . import custom_themes
+    unknown = [n for n in args.names if n not in custom_themes.STYLES]
+    if unknown:
+        ui.fail(f"Unknown theme style {', '.join(unknown)}; the custom theme styles are: {', '.join(custom_themes.styles())}", 2)
+    return list(dict.fromkeys(args.names)) or None
+
+
+def palette_args(args):
+    """The palettes to build: every one with --all-palettes; else the --palette names (duplicates dropped, first order
+    kept; an unknown one exits 2 naming the palettes); else, with a terminal and without --yes, the picker, starting
+    from the saved selection, which a confirmed choice replaces (Esc exits 0, nothing on exits 2); else the saved
+    selection, and none saved exits 2 naming the palettes. Flags never change the saved selection."""
+    from .custom_themes import palette_picker, palettes
+    known = ", ".join(palettes.names())
+    if args.all_palettes:
+        return list(palettes.PALETTES.values())
+    chosen = list(dict.fromkeys(args.palette or []))
+    if chosen:
+        unknown = [n for n in chosen if n not in palettes.PALETTES]
+        if unknown:
+            ui.fail(f"Unknown palette {', '.join(unknown)}; the palettes are: {known}", 2)
+    elif ui.has_terminal() and not ui.ASSUME_YES:
+        chosen = palette_picker.pick("🎨 Palettes to build the custom themes in", palette_picker.saved())
+        if chosen is None:
+            print("Cancelled: nothing built")
+            sys.exit(0)
+        if not chosen:
+            ui.fail("No palette chosen: nothing built", 2)
+        palette_picker.save(chosen)
+    else:
+        chosen = palette_picker.saved()
+        if not chosen:
+            ui.fail("No palettes saved: choose them with --palette NAME (repeatable) or --all-palettes, or in the "
+                    f"picker (run it in a terminal without --yes); the palettes are: {known}", 2)
+    return [palettes.get(n) for n in chosen]
+
+
+def themes_build(args):
+    from . import custom_themes
+    usersettings.ensure_bucket()
+    styles, chosen = style_args(args), palette_args(args)
+    try:
+        built = custom_themes.build(styles, chosen, args.out)
+    except custom_themes.BaseMissing as e:
+        ui.fail(f"{e}: run `sync-roms themes update` first (or `sync-roms cache update` if another machine put it there)", 1)
+    except s3.ERRORS as e:
+        ui.fail(f"Couldn't read the base theme from {s3.location()}: {e}", 1)
+    for name, folder in built.items():
+        print(f"🎨 {name}: {folder}")
+    return 0
+
+
+def themes_publish(args):
+    from . import custom_themes
+    usersettings.ensure_bucket()
+    styles, chosen = style_args(args), palette_args(args)
+    try:
+        return custom_themes.publish(styles, chosen, args.dry_run)
+    except custom_themes.BaseMissing as e:
+        ui.fail(f"{e}: run `sync-roms themes update` first (or `sync-roms cache update` if another machine put it there)", 1)
+    except custom_themes.DownloadFailed as e:
+        ui.fail(f"{e}", 1)
+    except json.JSONDecodeError as e:
+        ui.fail(f"{runtime.CUSTOM_THEMES_STATE} or {runtime.SPRUCE_THEMES_STATE} in {s3.location()} isn't valid JSON ({e}). Fix or move it first.", 3)
+    except s3.ERRORS as e:
+        ui.fail(f"Couldn't publish to {s3.location()}: {e}", 1)
+
+
+def themes_palettes(args):
+    """Write the palette overview image and open it in the default viewer."""
+    from .custom_themes import palette_sheet
+    try:
+        path = palette_sheet.write_sheet(os.path.join(store.cache_dir(), "themes", "palettes.png"))
+    except OSError as e:
+        ui.fail(f"Couldn't write the palette overview: {e}", 1)
+    print(path)
+    if not webbrowser.open(pathlib.Path(path).as_uri()):
+        ui.fail("Couldn't open a viewer: open the file above yourself", 1)
+    return 0
+
+
 def themes_pick(args):
     from . import spruce_themes
     usersettings.ensure_bucket()
@@ -1253,7 +1336,7 @@ def second_words():
     words["games"] = sorted(set(words.get("games", [])) | {"list", "add", "remove", "full", "sets", "export", "import"})
     words["sets"] = ["edit"]
     words["collections"] = ["edit"]
-    words["themes"] = ["update", "pick"]
+    words["themes"] = ["update", "pick", "build", "publish", "palettes"]
     words["download"] = ["pico8"]
     words["cards"] = ["edit", "list", "new", "set", "rename", "convert", "clean", "delete", "copy", "export", "import"]
     words["saves"] = ["stash", "apply", "manage"]
@@ -1363,6 +1446,14 @@ def build_parser():
     themes = sub.add_parser("themes", add_help=False, allow_abbrev=False)
     tsub = themes.add_subparsers(dest="action", required=True)
     p = tsub.add_parser("update", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=themes_update)
+    for action, fn in (("build", themes_build), ("publish", themes_publish)):
+        p = tsub.add_parser(action, allow_abbrev=False); common(p, card=False); p.add_argument("names", nargs="*")
+        group = p.add_mutually_exclusive_group()
+        group.add_argument("--palette", action="append", metavar="NAME"); group.add_argument("--all-palettes", action="store_true")
+        if action == "build":
+            p.add_argument("--out", metavar="DIR")
+        p.set_defaults(fn=fn)
+    p = tsub.add_parser("palettes", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=themes_palettes)
     p = tsub.add_parser("pick", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=themes_pick)
 
     download = sub.add_parser("download", add_help=False, allow_abbrev=False)

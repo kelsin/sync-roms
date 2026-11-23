@@ -15,6 +15,7 @@ THEMES_PREFIX = "os/onion/Themes/"  # Onion themes in storage, copied to the car
 ESDE_THEMES_PREFIX = "os/esde/themes/"  # ES-DE theme archives in storage (Art Book Next for the Surprise collection)
 SPRUCE_THEMES_PREFIX = "os/spruceos/themes/"  # PyUI themes for spruce cards, one unpacked folder each
 SPRUCE_THEMES_STATE = "os/spruceos/themes.json"  # {release asset: {updated_at, size, folder}}: the themes sync-roms put there
+CUSTOM_THEMES_STATE = "os/spruceos/custom-themes.json"  # {folder: {files: {path: [sha256, size]}}}: the custom themes sync-roms published
 APKS_PREFIX = "os/android/APKs/"  # Android APKs and the Obtainium app list in storage, copied to the card's APKs/
 PICO8_PREFIX = "os/pico8/"  # the official PICO-8 zips in storage; the newest goes where each frontend installs it from
 ONION_PREFIX = "os/onion/"  # the Surprise app zips for Onion cards in storage; the newest is installed under App/Surprise/
