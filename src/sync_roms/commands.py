@@ -1198,6 +1198,20 @@ def themes_update(args):
     return max(themeart.update_storage(args.dry_run), spruce_themes.update_storage(args.dry_run))
 
 
+def themes_pick(args):
+    from . import spruce_themes
+    usersettings.ensure_bucket()
+    ui.require_terminal("pick themes", "a terminal")
+    chosen = spruce_themes.pick("🎨 Spruce themes synced by default", spruce_themes.default_list())
+    if chosen is None:
+        return 0
+    settings = usersettings.load_settings()
+    settings["spruce_themes"] = sorted(chosen, key=lambda n: (n.lower(), n))
+    usersettings.save_settings(settings)
+    print(f"✅ {len(chosen)} Spruce theme(s) on by default")
+    return 0
+
+
 def download_pico8(args):
     from . import bbs
     return bbs.download_pico8(args)
@@ -1233,7 +1247,7 @@ def second_words():
     words["games"] = sorted(set(words.get("games", [])) | {"list", "add", "remove", "full", "sets", "export", "import"})
     words["sets"] = ["edit"]
     words["collections"] = ["edit"]
-    words["themes"] = ["update"]
+    words["themes"] = ["update", "pick"]
     words["download"] = ["pico8"]
     words["cards"] = ["edit", "list", "new", "set", "rename", "convert", "clean", "delete", "copy", "export", "import"]
     words["saves"] = ["stash", "apply"]
@@ -1343,6 +1357,7 @@ def build_parser():
     themes = sub.add_parser("themes", add_help=False, allow_abbrev=False)
     tsub = themes.add_subparsers(dest="action", required=True)
     p = tsub.add_parser("update", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=themes_update)
+    p = tsub.add_parser("pick", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=themes_pick)
 
     download = sub.add_parser("download", add_help=False, allow_abbrev=False)
     dsub = download.add_subparsers(dest="action", required=True)

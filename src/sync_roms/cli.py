@@ -125,6 +125,8 @@ TOPICS = {
   art; a card's copy is replaced when storage has a newer commit. Does nothing when storage already has the latest.
   It also refreshes the PyUI themes for spruce in os/spruceos/themes/ (the spruceUI/PyUI-Themes release, unpacked with
   7z; folders you add there yourself are left alone).
+
+  sync-roms themes pick                       choose the PyUI themes every spruce card gets by default (saved as spruce_themes)
 """,
     "download": """
   sync-roms download pico8 [--count N] [--dry-run] [--yes]   add the BBS Featured carts to storage's pico8/

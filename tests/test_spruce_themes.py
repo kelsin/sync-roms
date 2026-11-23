@@ -8,7 +8,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import helpers  # noqa: E402,F401
-from sync_roms import external, inventory, runtime, spruce_themes, ui  # noqa: E402
+from sync_roms import commands, external, inventory, picker, runtime, spruce_themes, ui, usersettings  # noqa: E402
 
 PREFIX = runtime.SPRUCE_THEMES_PREFIX
 NAME = "2CleanMini_by_Sheezie.7z"
@@ -157,3 +157,70 @@ class Themes(helpers.StorageDir):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class Pick(Themes):
+    def themes(self, *names):
+        for n in names:
+            self.put(f"{PREFIX}{n}/config.json")
+        self.put(f"{PREFIX}x/readme.txt")
+
+    def pick_args(self, result):
+        calls = []
+
+        def fake(title, labels, **kw):
+            calls.append((labels, kw))
+            return result
+        self.enterContext(mock.patch.object(picker, "filter_list", fake))
+        self.enterContext(mock.patch.object(ui, "has_terminal", return_value=True))
+        self.enterContext(mock.patch.object(usersettings, "ensure_bucket"))
+        with contextlib.redirect_stdout(io.StringIO()):
+            commands.themes_pick(None)
+        return calls
+
+    def test_available_lists_theme_folders(self):
+        self.themes("B", "a")
+        self.assertEqual(spruce_themes.available(), ["a", "B"])
+
+    def test_themes_pick_saves_sorted_list(self):
+        self.themes("a", "B", "c")
+        self.pick_args([True, False, True])
+        self.assertEqual(usersettings.load_settings()["spruce_themes"], ["a", "c"])
+
+    def test_themes_pick_esc_saves_nothing(self):
+        self.themes("a")
+        self.pick_args(None)
+        self.assertNotIn("spruce_themes", usersettings.load_settings())
+
+    def test_pick_keeps_missing_names(self):
+        self.themes("a")
+        seen = []
+        with mock.patch.object(picker, "filter_list", lambda t, labels, **kw: seen.append((labels, kw)) or [False, True]):
+            self.assertEqual(spruce_themes.pick("t", ["gone"]), ["gone"])
+        self.assertEqual(seen[0][0][1], "gone")
+        self.assertEqual(seen[0][1]["initial"], [False, True])
+
+    def test_pick_one(self):
+        self.themes("a", "b")
+        with mock.patch.object(picker, "filter_list", return_value=2) as f:
+            self.assertEqual(spruce_themes.pick_one("t", "a"), "b")
+        self.assertEqual(f.call_args.kwargs["cursor"], 1)
+        with mock.patch.object(picker, "filter_list", return_value=0):
+            self.assertIsNone(spruce_themes.pick_one("t", "a"))
+        with mock.patch.object(picker, "filter_list", return_value=None):
+            self.assertIs(spruce_themes.pick_one("t", None), False)
+
+    def test_default_list(self):
+        self.assertEqual(spruce_themes.default_list(), [])
+        usersettings.save_settings({"spruce_themes": ["a"]})
+        self.assertEqual(spruce_themes.default_list(), ["a"])
+
+    def test_preview_none_without_png(self):
+        self.themes("a")
+        self.assertIsNone(spruce_themes.preview("a"))
+
+    def test_preview_downloads_png(self):
+        self.put(f"{PREFIX}a/preview.png", b"png")
+        path = spruce_themes.preview("a")
+        with open(path, "rb") as f:
+            self.assertEqual(f.read(), b"png")

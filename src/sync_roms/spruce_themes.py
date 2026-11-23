@@ -6,7 +6,7 @@ import shutil
 import subprocess
 import tempfile
 
-from . import external, github, inventory, runtime, s3, ui
+from . import external, github, inventory, picker, previews, runtime, s3, ui, usersettings
 
 REPO = "spruceUI/PyUI-Themes"
 TAG = "1"
@@ -143,3 +143,55 @@ def _refresh(asset, state, prefix, listing):
              or (old and old["folder"] != folder and k.startswith(f"{prefix}{old['folder']}/"))]
     s3.delete_keys(stale)
     return {"updated_at": asset["updated_at"], "size": asset["size"], "folder": folder}
+
+
+def available():
+    """The theme folder names in storage (those holding a config.json), sorted ignoring case."""
+    prefix = runtime.SPRUCE_THEMES_PREFIX
+    names = {k[len(prefix):].split("/")[0] for k in inventory.files(prefix, sizes=False) if k.endswith("/config.json")
+             and k.count("/", len(prefix)) == 1}
+    return sorted(names, key=lambda n: (n.lower(), n))
+
+
+def preview(name):
+    """Local path of the theme's preview.png (downloaded once), or None when storage has none."""
+    key = f"{runtime.SPRUCE_THEMES_PREFIX}{name}/preview.png"
+    try:
+        if key not in inventory.files(f"{runtime.SPRUCE_THEMES_PREFIX}{name}/", sizes=False):
+            return None
+        return previews._download(key)
+    except (OSError, *s3.ERRORS):
+        return None
+
+
+def default_list():
+    """The themes every spruce card gets, from settings."""
+    names = usersettings.load_settings().get("spruce_themes")
+    return [n for n in names if isinstance(n, str)] if isinstance(names, list) else []
+
+
+def pick(title, chosen, locked=None):
+    """Multi pick of themes: the ones in storage, then chosen names storage lacks (dim). The locked theme is always on.
+    Returns the names on, or None on Esc."""
+    names = available()
+    missing = [n for n in chosen if n not in names]
+    rows = names + missing
+    on = [n in chosen or n == locked for n in rows]
+    extras = [[("", "dim")] for _ in names] + [[("not in storage", "dim")] for _ in missing]
+    states = picker.filter_list(title, rows, multi=True, initial=on, extras=extras,
+                                locked=[n == locked for n in rows], locked_note="this card's current theme",
+                                preview=lambda i: preview(rows[i]) if i < len(names) else None)
+    if states is None:
+        return None
+    return [n for n, s in zip(rows, states) if s]
+
+
+def pick_one(title, current):
+    """Pick one theme (or none). Returns the name, None for no theme, False on Esc."""
+    names = available()
+    labels = ["None (no current theme)"] + names
+    i = picker.filter_list(title, labels, cursor=names.index(current) + 1 if current in names else 0,
+                           preview=lambda i: preview(names[i - 1]) if i > 0 else None)
+    if i is None:
+        return False
+    return names[i - 1] if i else None
