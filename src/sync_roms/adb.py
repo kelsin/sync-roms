@@ -63,6 +63,11 @@ def is_dir(serial, path):
     return shell(serial, "sh", "-c", 'test -d "$1" && echo y || echo n', "_", path).strip() == "y"
 
 
+def is_file(serial, path):
+    """Whether the device has the file; a failed adb raises AdbError rather than reading as missing."""
+    return shell(serial, "sh", "-c", 'test -f "$1" && echo y || echo n', "_", path).strip() == "y"
+
+
 def mdns_services():
     """(name, kind, "host:port") of the services adb discovered."""
     out = []

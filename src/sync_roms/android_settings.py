@@ -1,8 +1,12 @@
 """The retroarch.cfg and ES-DE gamelist edits `config apply` makes on an Android device, as text in, text out (no adb)."""
+import os
+import posixpath
 import re
+import shutil
+import tempfile
 from xml.sax.saxutils import escape, unescape
 
-from . import android, applied, spruce_syncthing, store, usersettings
+from . import adb, android, applied, spruce_syncthing, store, ui, usersettings
 
 CFG = "retroarch.cfg"
 SECRETS = ("cheevos_password", "webdav_password", "cheevos_token")
@@ -89,3 +93,103 @@ def esde_wanted(folders):
         if folder in have:
             result.append((folder, data["esde_labels"][core]))
     return result
+
+
+ESDE_PACKAGE = "org.es_de.frontend"
+
+
+def _read(path):
+    with open(path, encoding="utf-8", newline="") as f:
+        return f.read()
+
+
+def _write(path, text):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8", newline="") as f:
+        f.write(text)
+
+
+def _push(serial, local, remote, failed):
+    try:
+        adb.push(serial, local, remote)
+    except adb.AdbError as e:
+        failed.append(remote)
+        ui.warn(f"Couldn't write {remote}: {e}")
+
+
+def _retroarch_part(serial, pkg, tmp):
+    """(entries, cfg text, remote path) for retroarch.cfg; ([], None, path) with a warning when it can't be read."""
+    remote = f"/storage/emulated/0/Android/data/{pkg}/files/{CFG}"
+    if not adb.is_file(serial, remote):
+        ui.warn(f"Can't read RetroArch's settings at {remote}: skipping them")
+        return [], None, remote
+    local = os.path.join(tmp, CFG)
+    adb.pull(serial, remote, local)
+    text = _read(local)
+    return cfg_entries(text, cfg_wanted()), text, remote
+
+
+def _esde_part(serial, volume, roms_dir, systems, tmp):
+    """([Entry], {folder: (gamelist text or None, label)}) for the wanted ES-DE folders the device has."""
+    folders = {s["folders"]["esde"] for s in systems if s.get("folders", {}).get("esde")}
+    entries, texts = [], {}
+    for folder, label in esde_wanted(folders):
+        if not adb.is_dir(serial, f"/storage/{volume}/{roms_dir}/{folder}"):
+            continue
+        remote = f"/storage/{volume}/ES-DE/gamelists/{folder}/gamelist.xml"
+        text = None
+        if adb.is_file(serial, remote):
+            local = os.path.join(tmp, "gamelists", folder, "gamelist.xml")
+            os.makedirs(os.path.dirname(local), exist_ok=True)
+            adb.pull(serial, remote, local)
+            text = _read(local)
+        entries.append(gamelist_entry(folder, text, label))
+        texts[folder] = (text, label)
+    return entries, texts
+
+
+def _write_retroarch(serial, pkg, entries, text, remote, tmp, failed):
+    android.wait_closed(serial, pkg)
+    local = os.path.join(tmp, "new-" + CFG)
+    _write(local, cfg_apply(text, entries))
+    _push(serial, local, remote, failed)
+
+
+def _write_esde(serial, volume, entries, texts, tmp, failed):
+    if not ui.confirm("ES-DE must restart to see the new emulators. Close it now?", default=True):
+        print(ui.dim("↩️  Left ES-DE's gamelists as they are"))
+        return
+    adb.shell(serial, "am", "force-stop", ESDE_PACKAGE)
+    for entry in entries:
+        if not applied.changed(entry):
+            continue
+        folder = entry.where.split("/")[2]
+        text, label = texts[folder]
+        local = os.path.join(tmp, "new-gamelists", folder, "gamelist.xml")
+        _write(local, gamelist_apply(text, label))
+        remote = f"/storage/{volume}/ES-DE/gamelists/{folder}/gamelist.xml"
+        adb.shell(serial, "mkdir", "-p", posixpath.dirname(remote))
+        _push(serial, local, remote, failed)
+    adb.shell(serial, "am", "start", "-a", "android.intent.action.MAIN", "-c", "android.intent.category.HOME")
+
+
+def apply(target, layout, systems, dry_run):
+    """Set the wanted RetroArch and ES-DE settings on the device; 0, or 1 when a write failed. adb errors propagate."""
+    serial = target.serial
+    pkg = android.retroarch_package(serial)
+    tmp = tempfile.mkdtemp(prefix="sync-roms-apply-")
+    failed = []
+    try:
+        ra_entries, cfg_text, cfg_remote = _retroarch_part(serial, pkg, tmp)
+        esde_entries, texts = _esde_part(serial, target.volume, layout["roms_dir"], systems, tmp)
+        applied.show(ra_entries + esde_entries, dry_run)
+        if dry_run:
+            return 0
+        if any(applied.changed(e) for e in ra_entries):
+            _write_retroarch(serial, pkg, ra_entries, cfg_text, cfg_remote, tmp, failed)
+        if any(applied.changed(e) for e in esde_entries):
+            _write_esde(serial, target.volume, esde_entries, texts, tmp, failed)
+        # Task 4: the APK step goes here
+        return 1 if failed else 0
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)

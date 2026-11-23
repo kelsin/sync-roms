@@ -1,7 +1,12 @@
+import contextlib
+import io
+import os
+import tempfile
 import unittest
+from unittest import mock
 
 import helpers
-from sync_roms import android, android_settings, applied, usersettings
+from sync_roms import adb, android, android_settings, applied, ui, usersettings
 
 E = applied.Entry
 
@@ -117,3 +122,107 @@ class EsdeWanted(helpers.DataDir):
     def test_off_without_syncthing(self):
         usersettings.save_settings({"spruce_syncthing": False})
         self.assertEqual(android_settings.esde_wanted(["nes"]), [])
+
+
+OLD_CFG = 'cloud_sync_enable = "true"\nsavefile_directory = "x"\n'
+RIGHT_CFG = "".join(f'{k} = "{v}"\n' for k, v in android_settings.CLOUD_SYNC.items())
+ESDE_SYSTEMS = [{"bucket": "nes", "folders": {"esde": "nes"}}]
+TARGET = android.Target("S", "Pixel", "6AF3-53E9", "card")
+LAYOUT = {"roms_dir": "ROMs"}
+
+
+class Apply(helpers.DataDir):
+    """android_settings.apply with adb mocked: a fake device of files by path."""
+
+    def setUp(self):
+        super().setUp()
+        quiet = contextlib.ExitStack()
+        quiet.enter_context(contextlib.redirect_stdout(io.StringIO()))
+        quiet.enter_context(contextlib.redirect_stderr(io.StringIO()))
+        self.addCleanup(quiet.close)
+        usersettings.save_settings({"spruce_syncthing": False})
+        self.calls = []
+        self.files = {}
+        self.dirs = {"/storage/6AF3-53E9/ROMs/nes"}
+        self.tmps = []
+        self.pull_error = None
+        self.push_error = None
+        self.confirm = True
+        pkg = "/storage/emulated/0/Android/data/com.retroarch/files/retroarch.cfg"
+        self.cfg_path = pkg
+        for name, fn in (("retroarch_package", lambda s: "com.retroarch"), ("wait_closed", self.wait_closed)):
+            self.enterContext(mock.patch.object(android, name, fn))
+        self.enterContext(mock.patch.object(adb, "is_file", lambda s, p: p in self.files))
+        self.enterContext(mock.patch.object(adb, "is_dir", lambda s, p: p in self.dirs))
+        self.enterContext(mock.patch.object(adb, "pull", self.pull))
+        self.enterContext(mock.patch.object(adb, "push", self.push))
+        self.enterContext(mock.patch.object(adb, "shell", lambda s, *w, check=True: self.calls.append(("shell",) + w) or ""))
+        self.enterContext(mock.patch.object(ui, "confirm", lambda q, default=True: self.confirm))
+        real = tempfile.mkdtemp
+        self.enterContext(mock.patch.object(tempfile, "mkdtemp", lambda **k: self.tmps.append(real(**k)) or self.tmps[-1]))
+
+    def wait_closed(self, serial, pkg):
+        self.calls.append(("wait_closed",))
+
+    def pull(self, serial, remote, local):
+        if self.pull_error:
+            raise self.pull_error
+        with open(local, "w") as f:
+            f.write(self.files[remote])
+
+    def push(self, serial, local, remote):
+        if self.push_error:
+            raise self.push_error
+        self.calls.append(("push", remote))
+        with open(local) as f:
+            self.files[remote] = f.read()
+
+    def names(self):
+        return [c[0] if c[0] != "shell" else c[2] for c in self.calls]
+
+    def run_apply(self, dry_run=False):
+        return android_settings.apply(TARGET, LAYOUT, ESDE_SYSTEMS, dry_run)
+
+    def test_apply_dry_run_writes_nothing(self):
+        self.files[self.cfg_path] = OLD_CFG
+        self.assertEqual(self.run_apply(dry_run=True), 0)
+        self.assertEqual(self.calls, [])
+
+    def test_apply_pushes_only_changed_cfg(self):
+        self.files[self.cfg_path] = RIGHT_CFG
+        self.assertEqual(self.run_apply(), 0)
+        self.assertEqual(self.calls, [])
+        self.files[self.cfg_path] = OLD_CFG
+        self.assertEqual(self.run_apply(), 0)
+        self.assertEqual(self.names(), ["wait_closed", "push"])
+        self.assertIn('cloud_sync_enable = "false"', self.files[self.cfg_path])
+
+    def test_apply_restarts_esde_after_writing_gamelists(self):
+        usersettings.save_settings({"spruce_syncthing": True})
+        self.files[self.cfg_path] = "".join(f'{k} = "{v}"\n' for k, v in android_settings.cfg_wanted().items())
+        self.run_apply()
+        gamelist = "/storage/6AF3-53E9/ES-DE/gamelists/nes/gamelist.xml"
+        names = self.names()
+        self.assertEqual([n for n in names if n in ("force-stop", "push", "start")], ["force-stop", "push", "start"])
+        self.assertIn("FCEUmm", self.files[gamelist])
+
+    def test_apply_declined_esde_skips_gamelists(self):
+        usersettings.save_settings({"spruce_syncthing": True})
+        self.files[self.cfg_path] = "".join(f'{k} = "{v}"\n' for k, v in android_settings.cfg_wanted().items())
+        self.confirm = False
+        self.assertEqual(self.run_apply(), 0)
+        self.assertNotIn("force-stop", self.names())
+        self.assertNotIn("push", self.names())
+
+    def test_apply_lost_device_removes_temp(self):
+        self.files[self.cfg_path] = OLD_CFG
+        self.pull_error = adb.AdbError("device offline")
+        with self.assertRaises(adb.AdbError):
+            self.run_apply()
+        self.assertTrue(self.tmps)
+        self.assertFalse(any(os.path.exists(t) for t in self.tmps))
+
+    def test_apply_failed_push_returns_one(self):
+        self.files[self.cfg_path] = OLD_CFG
+        self.push_error = adb.AdbError("denied")
+        self.assertEqual(self.run_apply(), 1)
