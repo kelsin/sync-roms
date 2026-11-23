@@ -459,7 +459,7 @@ def help_text(topic=None):
 
 {ui.bold('EXAMPLES')}
   sync-roms /Volumes/SD                          sync the card
-  sync-roms sync /Volumes/SD --device anbernic-rg35xx-sp --layout knulli --yes --dry-run
+  sync-roms sync /Volumes/SD --device anbernic-rg-35xxsp --layout knulli --yes --dry-run
   sync-roms games add gba 'Metroid*' --card SD   add games to a card
   sync-roms upload ~/roms/gba                    upload ROMs to storage
 

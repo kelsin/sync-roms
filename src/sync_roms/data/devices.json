@@ -109,7 +109,7 @@
     "rocknix_image": "RK3576"
   },
   {
-    "id": "anbernic-rg28xx",
+    "id": "anbernic-rg-28xx",
     "name": "Anbernic RG28XX",
     "soc": "Allwinner H700",
     "screen": "4:3",
@@ -125,7 +125,7 @@
     "network": false
   },
   {
-    "id": "anbernic-rg34xx",
+    "id": "anbernic-rg-34xx",
     "name": "Anbernic RG34XX",
     "soc": "Allwinner H700",
     "screen": "3:2",
@@ -140,7 +140,7 @@
     "rocknix_image": "H700"
   },
   {
-    "id": "anbernic-rg34xx-sp",
+    "id": "anbernic-rg-34xxsp",
     "name": "Anbernic RG34XX SP",
     "soc": "Allwinner H700",
     "screen": "3:2",
@@ -155,7 +155,7 @@
     "rocknix_image": "H700"
   },
   {
-    "id": "anbernic-rg353ps",
+    "id": "anbernic-rg-353ps",
     "name": "Anbernic RG353PS",
     "soc": "Rockchip RK3566",
     "screen": "4:3",
@@ -167,7 +167,7 @@
     "rocknix_image": "RK3566-Generic"
   },
   {
-    "id": "anbernic-rg353vs",
+    "id": "anbernic-rg-353vs",
     "name": "Anbernic RG353VS",
     "soc": "Rockchip RK3566",
     "screen": "4:3",
@@ -179,7 +179,7 @@
     "rocknix_image": "RK3566-Generic"
   },
   {
-    "id": "anbernic-rg35xx-2024",
+    "id": "anbernic-rg-35xx-2024",
     "name": "Anbernic RG35XX 2024",
     "soc": "Allwinner H700",
     "screen": "4:3",
@@ -195,7 +195,7 @@
     "network": false
   },
   {
-    "id": "anbernic-rg35xxh",
+    "id": "anbernic-rg-35xxh",
     "name": "Anbernic RG35XX H",
     "soc": "Allwinner H700",
     "screen": "4:3",
@@ -210,7 +210,7 @@
     "rocknix_image": "H700"
   },
   {
-    "id": "anbernic-rg35xx-plus",
+    "id": "anbernic-rg-35xx-plus",
     "name": "Anbernic RG35XX Plus",
     "soc": "Allwinner H700",
     "screen": "4:3",
@@ -225,7 +225,7 @@
     "rocknix_image": "H700"
   },
   {
-    "id": "anbernic-rg35xx-pro",
+    "id": "anbernic-rg-35xx-pro",
     "name": "Anbernic RG35XX Pro",
     "soc": "Allwinner H700",
     "screen": "4:3",
@@ -240,7 +240,7 @@
     "rocknix_image": "H700"
   },
   {
-    "id": "anbernic-rg35xx-sp",
+    "id": "anbernic-rg-35xxsp",
     "name": "Anbernic RG35XX SP",
     "soc": "Allwinner H700",
     "screen": "4:3",
@@ -255,7 +255,7 @@
     "rocknix_image": "H700"
   },
   {
-    "id": "anbernic-rg405m",
+    "id": "anbernic-rg-405m",
     "name": "Anbernic RG405M",
     "soc": "UNISOC T618",
     "screen": "4:3",
@@ -265,7 +265,7 @@
     ]
   },
   {
-    "id": "anbernic-rg405v",
+    "id": "anbernic-rg-405v",
     "name": "Anbernic RG405V",
     "soc": "UNISOC T618",
     "screen": "4:3",
@@ -275,7 +275,7 @@
     ]
   },
   {
-    "id": "anbernic-rg406h",
+    "id": "anbernic-rg-406h",
     "name": "Anbernic RG406H",
     "soc": "UNISOC Tiger T820",
     "screen": "4:3",
@@ -285,7 +285,7 @@
     ]
   },
   {
-    "id": "anbernic-rg406v",
+    "id": "anbernic-rg-406v",
     "name": "Anbernic RG406V",
     "soc": "UNISOC Tiger T820",
     "screen": "4:3",
@@ -295,7 +295,7 @@
     ]
   },
   {
-    "id": "anbernic-rg40xxh",
+    "id": "anbernic-rg-40xxh",
     "name": "Anbernic RG40XX H",
     "soc": "Allwinner H700",
     "screen": "4:3",
@@ -310,7 +310,7 @@
     "rocknix_image": "H700"
   },
   {
-    "id": "anbernic-rg40xxv",
+    "id": "anbernic-rg-40xxv",
     "name": "Anbernic RG40XX V",
     "soc": "Allwinner H700",
     "screen": "4:3",
@@ -325,7 +325,7 @@
     "rocknix_image": "H700"
   },
   {
-    "id": "anbernic-rg476h",
+    "id": "anbernic-rg-476h",
     "name": "Anbernic RG476H",
     "soc": "UNISOC Tiger T820",
     "screen": "4:3",
@@ -335,7 +335,7 @@
     ]
   },
   {
-    "id": "anbernic-rg477m",
+    "id": "anbernic-rg-477m",
     "name": "Anbernic RG477M",
     "soc": "MediaTek Dimensity 8300",
     "screen": "4:3",
@@ -345,7 +345,7 @@
     ]
   },
   {
-    "id": "anbernic-rg477v",
+    "id": "anbernic-rg-477v",
     "name": "Anbernic RG477V",
     "soc": "MediaTek Dimensity 8300",
     "screen": "4:3",
@@ -355,7 +355,7 @@
     ]
   },
   {
-    "id": "anbernic-rg503",
+    "id": "anbernic-rg-503",
     "name": "Anbernic RG503",
     "soc": "Rockchip RK3566",
     "screen": "16:9",
@@ -367,7 +367,7 @@
     "rocknix_image": "RK3566-Generic"
   },
   {
-    "id": "anbernic-rg505",
+    "id": "anbernic-rg-505",
     "name": "Anbernic RG505",
     "soc": "UNISOC T618",
     "screen": "16:9",
@@ -377,7 +377,7 @@
     ]
   },
   {
-    "id": "anbernic-rg556",
+    "id": "anbernic-rg-556",
     "name": "Anbernic RG556",
     "soc": "UNISOC Tiger T820",
     "screen": "16:9",
@@ -387,7 +387,7 @@
     ]
   },
   {
-    "id": "anbernic-rg557",
+    "id": "anbernic-rg-557",
     "name": "Anbernic RG557",
     "soc": "MediaTek Dimensity 8300",
     "screen": "16:9",
@@ -397,7 +397,7 @@
     ]
   },
   {
-    "id": "anbernic-rg55g1",
+    "id": "anbernic-rg-55g1",
     "name": "Anbernic RG55G1",
     "soc": "Snapdragon G1 Gen 2",
     "gpu": "adreno-a12",
@@ -423,6 +423,16 @@
     "rocknix_image": "SM8650"
   },
   {
+    "id": "ayaneo-konkr-pocket-block",
+    "name": "AYANEO KONKR Pocket Block",
+    "soc": "MediaTek Helio G85",
+    "screen": "4:3",
+    "resolution": "960x720",
+    "firmwares": [
+      "esde"
+    ]
+  },
+  {
     "id": "ayaneo-pocket-ace",
     "name": "AYANEO Pocket ACE",
     "soc": "Snapdragon G3x Gen 2",
@@ -436,7 +446,7 @@
     "rocknix_image": "SM8550"
   },
   {
-    "id": "ayaneo-pocket-advance",
+    "id": "ayaneo-konkr-pocket-advance",
     "name": "AYANEO KONKR Pocket Advance",
     "soc": "MediaTek Helio G90T",
     "screen": "3:2",

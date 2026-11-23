@@ -26,7 +26,7 @@ GPU_DEVICES = {
     ],
     "adreno-g3-gen-3": ["ayaneo-konkr-pocket-fit", "ayaneo-pocket-s2", "ayaneo-pocket-s2-pro"],
     "adreno-830": ["ayn-odin-3"],
-    "adreno-a12": ["anbernic-rg55g1", "retroid-pocket-classic"],
+    "adreno-a12": ["anbernic-rg-55g1", "retroid-pocket-classic"],
     "adreno-a22": ["retroid-pocket-g2"],
 }
 
