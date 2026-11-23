@@ -123,6 +123,7 @@ Old personal sets in `sets/` are left on disk and never read; a sync reads an ol
 | `spruce_theme` | card editor's S menu | `spruce` cards: the card's current PyUI theme (folder name), synced when storage has it and set as the selected theme. |
 | `spruce_themes_installed` | sync | `spruce` cards: sorted theme folders sync installed in `Themes/` (only those the card didn't have before); only these are removed when no longer synced. |
 | `spruce_emu` | sync | `{ROM folder: [file names]}`: the BIOS zips sync added to that folder's `Emu/<folder>/config.json` `ignoreList` on a `spruce` card; only these are removed when the file stops being synced. |
+| `android_volume` | `saves stash`/`apply` | The SD card's Android volume id (`/storage/<id>`). |
 | `muos_storage` | by hand | `sd1` (default) or `sd2`: the mount (`/mnt/mmc` or `/mnt/sdcard`) written into a `muos` card's collection entries. |
 
 ### Sets and collections
@@ -177,6 +178,7 @@ Rules for sets:
 - `spruce_themes.py` syncs PyUI themes onto `spruce` cards. `themes update` keeps every PyUI-Themes release theme unpacked in `os/spruceos/themes/<folder>/` (state in `os/spruceos/themes.json`); `themes pick` sets the default list (`spruce_themes`). Sync copies the default list plus the card's `spruce_theme` into `Themes/` file by file (`config*.json` by content, so theme settings reset to storage's; files a spruce fix wrote aren't copied back). With a terminal and without `--yes`, the download question is asked even when nothing else is to download, and takes `t`: pick the themes for this sync only (never saved). After the answer it removes themes it installed (`spruce_themes_installed`) and no longer syncs, unless `--no-delete`, the device's selected theme or `spruce_theme`, then sets `"theme"` in every `Saves/*-system.json` (never created; malformed ones skipped). Themes it didn't install are never removed. Limit: a spruce card with no systems to sync returns before the question and gets no themes. The local mirror keeps the default list's and the cards' current themes; after `t`, themes are read from storage itself.
 - `spruce_os.py` copies the newest `os/spruceos/spruceV<version>.7z` unextracted to the root of `spruce` cards, for Apps → EZ Updater on the device, after the card's other writes and only when the card has room for it with 64 MiB to spare. Only the previously staged file is removed (kept with `--no-delete`). OTA deltas (`spruceOTA-*`) and installers are ignored. The local mirror keeps the newest 7z too.
 - `saves stash` and `apply` use Pickles' `MUOS/pickles/sram|state` on muOS (`muos_saves.py`), copied as they are; a Pickles stash applies only to muOS cards.
+- `saves stash` and `apply` reach Android cards over adb through `android.py`, staging a temp copy (pushing back only what apply wrote).
 
 ### Theme art data
 
