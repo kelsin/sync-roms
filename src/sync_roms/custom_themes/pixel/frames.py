@@ -63,10 +63,11 @@ def footprint(img):
 
 
 class Canvas:
-    """A grid of square cells laid over the footprint `box` of an image of `size`; leftover pixels split evenly."""
+    """A grid of square cells laid over the footprint `box` of an image of `size`; leftover pixels split evenly. With a
+    `background`, the whole footprint (leftover pixels included) is painted that color under the cells."""
 
-    def __init__(self, size, cell, box):
-        self.size, self.cell = size, cell
+    def __init__(self, size, cell, box, background=None):
+        self.size, self.cell, self.box, self.background = size, cell, tuple(box), background
         x0, y0, x1, y1 = box
         self.cols, self.rows = (x1 - x0) // cell, (y1 - y0) // cell
         self.ox = x0 + (x1 - x0 - self.cols * cell) // 2
@@ -125,6 +126,8 @@ class Canvas:
 
     def image(self):
         img = Image.new("RGBA", self.size, (0, 0, 0, 0))
+        if self.background is not None:
+            img.paste(tuple(self.background) + (255,), self.box)
         c = self.cell
         for (x, y), rgb in sorted(self.cells.items()):
             left, top = self.ox + x * c, self.oy + y * c
@@ -137,13 +140,14 @@ class FrameSpec:
     draw: object  # draw(canvas, shades)
     symmetric: bool = False
     flush: tuple = field(default=())
+    background: tuple = None  # painted over the whole footprint first (full-screen backgrounds stay opaque)
 
 
 FRAMES = {}  # "skin/<file>.png": FrameSpec, drawn in every skin*/ folder that has the file
 
 
-def register(name, draw, symmetric=False, flush=()):
-    FRAMES[name] = FrameSpec(draw, symmetric, tuple(flush))
+def register(name, draw, symmetric=False, flush=(), background=None):
+    FRAMES[name] = FrameSpec(draw, symmetric, tuple(flush), background)
 
 
 def apply(theme_dir, palette):
@@ -162,7 +166,7 @@ def apply(theme_dir, palette):
                 size, box = im.size, footprint(im.convert("RGBA"))
             if box is None:  # nothing shows in the base: keep it that way
                 continue
-            canvas = Canvas(size, cell_for(size, _base_size(theme_dir, file)), box)
+            canvas = Canvas(size, cell_for(size, _base_size(theme_dir, file)), box, spec.background)
             spec.draw(canvas, colors)
             canvas.image().save(path)
             written.append(f"{folder}/{file}")
@@ -177,4 +181,4 @@ def _base_size(theme_dir, file):
         return im.size
 
 
-from . import frames_select  # noqa: E402,F401  (registers its frames; it imports this module back)
+from . import frames_panels, frames_select  # noqa: E402,F401  (register their frames; they import this module back)

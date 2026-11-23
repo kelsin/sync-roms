@@ -25,12 +25,44 @@ BASE = {
     "grid-game-selected.png": ((140, 140), None),
     "bg-game-item-f.png": ((154, 170), (6, 0, 144, 153)),
     "bg-grid-s.png": ((156, 176), (7, 3, 150, 166)),
+    # bars, screens, panels, loading and dividers (the real base has some fully transparent: opaque here to draw them)
+    "bg-title.png": ((640, 60), None),
+    "tips-bar-bg.png": ((640, 60), None),
+    "navbg.png": ((640, 60), None),
+    "statbg.png": ((640, 62), None),
+    "bg-gamelist.png": ((640, 360), None),
+    "menu-5line-bg.png": ((640, 480), None),
+    "menu-6line-bg.png": ((640, 480), None),
+    "app_loading_bg.png": ((640, 480), None),
+    "bg-pop-menu-4.png": ((320, 250), (0, 0, 320, 240)),
+    "menu-sub-bg.png": ((320, 300), None),
+    "loading-bg.png": ((508, 68), None),
+    "loading-progress-left.png": ((4, 50), None),
+    "loading-progress-mid.png": ((4, 50), None),
+    "loading-progress-right.png": ((4, 50), None),
+    "preview-bg.png": ((254, 360), None),
+    "preview-nameFrame.png": ((174, 70), None),
+    "thumb-default.png": ((250, 360), None),
+    "div-line-v-02.png": ((4, 420), None),
 }
+PANELS = {"bg-title", "tips-bar-bg", "navbg", "statbg", "bg-gamelist", "menu-5line-bg", "menu-6line-bg", "app_loading_bg",
+          "bg-pop-menu-4", "menu-sub-bg", "loading-bg", "loading-progress-left", "loading-progress-mid",
+          "loading-progress-right", "preview-bg", "preview-nameFrame", "thumb-default", "div-line-v-02"}
+FULL_SCREEN = ("bg-title", "tips-bar-bg", "navbg", "statbg", "bg-gamelist", "menu-5line-bg", "menu-6line-bg",
+               "app_loading_bg")
+PROGRESS = ("loading-progress-left", "loading-progress-mid", "loading-progress-right")
 # copies drawn natively at their own size
 COPIES = {
-    "skin_1280x720": {"bg-list-l.png": ((1280, 135), None), "bg-game-item-f.png": ((231, 255), (9, 0, 216, 230))},
+    "skin_1280x720": {"bg-list-l.png": ((1280, 135), None), "bg-game-item-f.png": ((231, 255), (9, 0, 216, 230)),
+                      "bg-title.png": ((1280, 90), None), "app_loading_bg.png": ((960, 720), None),
+                      "bg-pop-menu-4.png": ((480, 375), (0, 0, 480, 360)), "loading-progress-left.png": ((6, 75), None),
+                      "loading-progress-mid.png": ((6, 75), None), "loading-progress-right.png": ((6, 75), None)},
     "skin_720x480": {"bg-list-l.png": ((720, 90), None), "list-item-select-bg-short.png": ((320, 60), None)},
-    "skin_640_480": {"menu-sub-title-bg.png": ((320, 36), None)},
+    "skin_640_480": {"menu-sub-title-bg.png": ((320, 36), None), "menu-5line-bg.png": ((640, 480), None)},
+    # odd leftovers: 752x70 and 746x559 at cell 5, 373x349 and 201x81 at cell 5
+    "skin_752x560": {"bg-title.png": ((752, 70), None), "app_loading_bg.png": ((746, 559), None),
+                     "menu-sub-bg.png": ((373, 349), None), "preview-nameFrame.png": ((201, 81), None),
+                     "thumb-default.png": ((291, 419), None)},
 }
 
 
@@ -175,6 +207,8 @@ class Frames(unittest.TestCase):
         # regular steps: every pixel is its cell's color, nothing outside the grid
         cells = grid(img, canvas)
         expect = Image.new("RGBA", img.size, (0, 0, 0, 0))
+        if spec.background is not None:
+            expect.paste(tuple(spec.background) + (255,), box)
         for (cx, cy), rgba in cells.items():
             x, y = canvas.ox + cx * cell, canvas.oy + cy * cell
             expect.paste(rgba, (x, y, x + cell, y + cell))
@@ -218,6 +252,75 @@ class Frames(unittest.TestCase):
                 second = load(os.path.join(arcade, rel))
                 self.assertEqual(img.getchannel("A"), second.getchannel("A"))
                 self.assertNotEqual(img.convert("RGB"), second.convert("RGB"))
+
+    def test_registry_has_all_panel_files(self):
+        names = {key.split("/", 1)[1][:-len(".png")] for key in frames.FRAMES}
+        self.assertLessEqual(PANELS, names)
+        self.assertNotIn("missing_image", names)
+        for name in FULL_SCREEN:
+            self.assertEqual(frames.FRAMES[f"skin/{name}.png"].background, (0, 0, 0), name)
+
+    def test_progress_pieces_tile(self):
+        theme, _ = self.build(GRUVBOX)
+        for folder, cell in (("skin", 2), ("skin_1280x720", 3)):
+            with self.subTest(folder):
+                left, mid, right = (load(os.path.join(theme, folder, f"{n}.png")) for n in PROGRESS)
+                pieces = [left, mid, mid, mid, right]
+                strip = Image.new("RGBA", (sum(p.width for p in pieces), left.height), (0, 0, 0, 0))
+                x = 0
+                for p in pieces:
+                    self.assertEqual((p.size, p.width), (left.size, 2 * cell))
+                    strip.paste(p, (x, 0))
+                    x += p.width
+                px = strip.load()
+                n, rows = strip.width // cell, strip.height // cell
+                self.assertEqual(rows * cell, strip.height)
+                cols = [tuple(px[c * cell, r * cell] for r in range(rows)) for c in range(n)]
+                # no gap anywhere between the end caps' rows: every pixel inside is opaque
+                for y in range(cell, strip.height - cell):
+                    for x in range(strip.width):
+                        self.assertEqual(px[x, y][3], 255, (x, y))
+                # the outline rows run unbroken across every join, end cap to end cap
+                for r in (0, rows - 1):
+                    self.assertEqual({cols[c][r] for c in range(1, n - 1)}, {cols[1][r]})
+                    self.assertEqual(cols[0][r][3], 0)  # the caps' stepped corners
+                    self.assertEqual(cols[n - 1][r][3], 0)
+                # the segments alternate evenly across the left and mid joins up to the leading edge
+                for c in range(1, n - 3):
+                    self.assertNotEqual(cols[c], cols[c + 1], c)
+                    if c + 2 <= n - 3:
+                        self.assertEqual(cols[c], cols[c + 2], c)
+                # every piece is whole cells: each pixel is its cell's color
+                for y in range(strip.height):
+                    for x in range(strip.width):
+                        self.assertEqual(px[x, y], px[x - x % cell, y - y % cell], (x, y))
+
+    def test_full_screen_backgrounds_stay_opaque_black_inside(self):
+        theme, written = self.build(GRUVBOX)
+        files = [rel for rel in written if rel.split("/", 1)[1][:-len(".png")] in FULL_SCREEN]
+        self.assertGreaterEqual(len(files), len(FULL_SCREEN) + 4)
+        for rel in files:
+            with self.subTest(rel):
+                img = load(os.path.join(theme, rel))
+                spec = frames.FRAMES["skin/" + rel.split("/", 1)[1]]
+                base_size = BASE[rel.split("/", 1)[1]][0]
+                canvas = frames.Canvas(img.size, frames.cell_for(img.size, base_size), (0, 0) + img.size)
+                logo = rel.endswith("bg-title.png")
+                colored = 0
+                px = img.load()
+                for y in range(img.height):
+                    for x in range(img.width):
+                        rgba = px[x, y]
+                        self.assertEqual(rgba[3], 255, (x, y))
+                        cx, cy = (x - canvas.ox) // canvas.cell, (y - canvas.oy) // canvas.cell
+                        on_grid = 0 <= cx < canvas.cols and 0 <= cy < canvas.rows
+                        edge = on_grid and min(cx, canvas.cols - 1 - cx, cy, canvas.rows - 1 - cy) < 2
+                        slot = logo and on_grid and cx < canvas.rows  # bg-title's logo, at the left
+                        if not (edge or slot):
+                            self.assertEqual(rgba, (0, 0, 0, 255), (x, y))
+                        colored += rgba != (0, 0, 0, 255)
+                self.assertGreater(colored, 0)
+                self.assertEqual(spec.flush, ("left", "right", "top", "bottom"))
 
     def test_non_uniform_copy_uses_min_ratio_cell(self):
         theme, _ = self.build(GRUVBOX)
