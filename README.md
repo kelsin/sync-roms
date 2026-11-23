@@ -178,7 +178,7 @@ Every mode is a command (plain `sync-roms [CARD]` syncs a card):
 | `flash` | [write a Knulli, BaseOS, muOS, ROCKNIX or OakMoss image](#flashing-an-sd-card-flash) from storage's `os/` to an SD card, macOS only | |
 | `umount` | pick an SD card, remove macOS's junk from it as a sync does (`.metadata_never_index`, `.fseventsd`, `._` files) and unmount it, macOS only | |
 | `cards list\|new\|set\|rename\|convert\|clean\|delete\|copy\|export\|import` | [manage cards](#cards-cards) | |
-| `saves stash\|apply [CARD]`, `saves manage` | [copy RetroArch saves and states](#moving-saves-between-cards-saves) off a card, or stashed ones onto a card; inspect, label, move, prune and delete stashes | |
+| `saves stash\|apply [CARD]`, `saves manage` | [copy RetroArch saves and states](#moving-saves-between-cards-saves) off a card, or stashed ones onto a card (Android: over adb); inspect, label, move, prune and delete stashes | |
 | `devices [ID]` | list the supported devices with their chip and the number of systems each one gets, or one device's layouts, note and systems | `--devices` |
 | `layouts [ID]` | list the layouts, or one layout's folders and the devices that run it | |
 | `upload [DIR]` | [upload ROMs](#uploading-roms-upload) to storage | `--upload` |
@@ -233,7 +233,7 @@ For one command:
 | `--translated` | `scrape match` | The ROM is a fan translation |
 | `--set-credentials` | `scrape` | Ask for your ScreenScraper username and password and save them in `settings.json` |
 | `--full` | `cache update` | List every folder and stat every file of a storage folder |
-| `--retroarch DIR` | `saves stash`, `saves apply` | Read or write RetroArch's saves and states in `DIR` instead of the card's RetroArch folder |
+| `--retroarch DIR` | `saves stash`, `saves apply` | Read or write RetroArch's saves and states in `DIR` instead of a mounted card's RetroArch folder |
 | `--count N` | `download pico8` | Stop after N carts to add or upgrade |
 | `--bucket-keys` | `check` | Also verify with the read-only profile that every game key in your cards and sets exists in storage |
 | `-e`, `--edit`, `--upload [DIR]`, `-c`, `--clean-scrapes`, `--m3u [DIR]`, `--cd [DIR]`, `--chd [DIR]`, `--install-tools`, `--mirror [DIR]`, `--use-mirror DIR`, `--clear-mirror`, `--diff [DIR]`, `--devices`, `--scrape`, `--scrape-match SYSTEM ROM GAME`, `--scrape-review [SYSTEM]`, `--scrape-missing [SYSTEM]`, `--scrape-art [SYSTEM]` | (old flags) | Use the command beside each in the Commands table (`--chd` is the older name of `--cd`) |
@@ -457,7 +457,7 @@ sync-roms saves stash /Volumes/SHARE     # copy saves and states off the card
 sync-roms saves apply /Volumes/RGSP      # copy stashed ones onto another card
 ```
 
-Both take the folder (default: the current directory) of a card with a layout (`sync-roms cards set NAME --layout NAME`) and need a terminal. `--dry-run` prints what would be copied.
+Both take the folder (default: the current directory) of a card with a layout (`sync-roms cards set NAME --layout NAME`) and need a terminal. `--dry-run` prints what would be copied. An Android card (an `esde` card whose device isn't `windows-pc`) stays in its device, so they reach it over wireless adb instead: pass the card's name (`sync-roms saves stash POCKETNOVA`), or no card from a folder that isn't one to pick the device. Another layout's card name fails: pass its mounted folder.
 
 `stash` lists the card's games that have RetroArch saves (`.srm`, and Gambatte's `.rtc` clock files) or states (`.state`, `.stateN`, `.state.auto`, with their `.png` thumbnails), none picked, then the picked games' files, all picked, and copies those to `saves/<system>/<game>/<YYYYMMDD-HHMMSS>-<card>/` in the data folder with a `stash.json` saying what they are and where they came from. A run only adds stashes, never replaces one. On layouts sorted by core (and EmuDeck's flat folders) a save whose game's ROM isn't on the card (or is in several systems' folders) is skipped and counted; on Knulli and ROCKNIX the folder gives the system (on ROCKNIX saves with no ROM beside them are skipped too).
 
@@ -475,7 +475,7 @@ Both take the folder (default: the current directory) of a card with a layout (`
 | `emudeck` | `Emulation/saves/retroarch` | `saves` | `states` |
 
 - **NextUI**: `apply` renames a save to MinUI's `Game.gba.sav` (taken from the card's ROM; PlayStation saves and saves with no ROM there keep their name) and `stash` turns it back into `.srm`. States are copied as they are, so NextUI's own state names aren't converted, and a stash holding a state with no core is skipped.
-- **Android**: RetroArch keeps its saves in internal storage (`/storage/emulated/0/RetroArch/`), not on the SD card: point its save folders at the card's `RetroArch/saves` and `RetroArch/states` (every sync creates them on `esde` cards), or copy that folder off the device and pass it with `--retroarch DIR`.
+- **Android**: needs `adb` (`brew install android-platform-tools`). "📱 Which device?" lists the devices adb sees (the wireless ones it finds on the network are connected first) with the card in each; its last row, "➕ Set up a new device", shows how to turn on Wireless debugging and pairs the device with its pairing code. The card's SD card volume is remembered in `cards.json` (`android_volume`), so the card is found in any device; a new one asks which card it is. RetroArch's save and state folders (and whether they're sorted by core) are read from its `retroarch.cfg`; saves or states in the content folder or sorted by content directory aren't supported and fail saying which setting to turn off. RetroArch must be closed on the device: it asks you to save in-game and close it, then checks again. The saves are copied to a temp folder, `apply` writes there and then pushes only the files it wrote (a file that fails is listed and the run exits 1), and the temp folder is removed at the end; `--dry-run` never writes to the device. `--retroarch` only applies to a mounted card.
 - **EmuDeck**: its folders are symlinks that only resolve on the Deck; elsewhere pass the real folder with `--retroarch`.
 - **muOS**: cards use Pickles' saves and states, copied as they are, not converted from RetroArch's. A stash made on a muOS card applies only to muOS cards, and `--retroarch` is ignored there.
 - **ROCKNIX**: only RetroArch's files are covered. Saves of standalone emulators (PSP, PS1 memory cards, N64 and the like) are not stashed or applied.

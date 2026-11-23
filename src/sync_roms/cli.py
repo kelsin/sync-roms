@@ -26,7 +26,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "flash": ("", "write a Knulli, BaseOS, muOS, ROCKNIX or OakMoss image from storage's os/ to an SD card"),
     "umount": ("", "clean the macOS junk off an SD card and unmount it"),
     "cards": ("[edit|list|new|set|rename|convert|clean|delete|copy|export|import]", "list and manage the cards you've synced"),
-    "saves": ("stash|apply [CARD] [--retroarch DIR], manage", "copy RetroArch saves and states off a card, or onto one, or tidy the stashes"),
+    "saves": ("stash|apply [CARD] [--retroarch DIR], manage", "copy RetroArch saves and states off a card, or onto one (Android: over adb), or tidy the stashes"),
     "devices": ("[ID]", "list the supported devices, or one device's systems"),
     "layouts": ("[ID]", "list the firmware card layouts, or one layout's folders and devices"),
     "upload": ("[DIR]", "upload ROMs to the storage folder of a system you pick"),
@@ -195,6 +195,12 @@ TOPICS = {
   sync-roms saves manage [--dry-run] [--yes]                    inspect, label, move, prune and delete stashes
 
   CARD is the card's folder (default: the current directory); it needs a layout (`sync-roms cards set NAME --layout`).
+  An Android card (esde, not windows-pc) is reached over wireless adb instead: CARD is its name, or with no CARD (and
+  the current folder isn't a card) a device is picked from those adb sees, the last row walking through pairing a new
+  one (Wireless debugging). It needs adb (brew install android-platform-tools). The card's SD card is remembered
+  (android_volume) so it's found in any device. RetroArch must be closed on the device (it asks you to, then checks
+  again); its save and state folders are read from its retroarch.cfg. apply copies onto a temp copy, then pushes the
+  files it wrote; --dry-run never writes to the device. A name of another layout's card fails: pass its mounted folder.
   stash lists the card's games that have RetroArch saves (.srm and .rtc) or states (.state, .stateN, .state.auto and their
   .png), then their files, and copies them to ~/.sync-roms/saves/<system>/<game>/<time>-<card>/ (with stash.json).
   On layouts sorted by core and flat folders a save whose game isn't on the card is skipped; on Knulli and ROCKNIX the folder
@@ -219,8 +225,8 @@ TOPICS = {
   emudeck   Emulation/saves/retroarch    saves            states
   nextui    (card root)                  Saves/<TAG>      .userdata/shared/<TAG>-<core>   (MinUI .sav naming)
 
-  --retroarch DIR   read or write that folder instead of the card's RetroArch folder: a copy of Android's internal
-                    /storage/emulated/0/RetroArch for ES-DE, or the real folder EmuDeck's symlinks point to.
+  --retroarch DIR   read or write that folder instead of a mounted card's RetroArch folder (not over adb): the real
+                    folder EmuDeck's symlinks point to, or a copy of an Android device's RetroArch folder.
   nextui: apply renames saves to MinUI's Game.gba.sav (from the card's ROM; PlayStation and saves with no ROM there keep
   their name), stash turns .sav back into .srm. States are stashed and applied as they are, so NextUI's own state
   names aren't converted.

@@ -1,5 +1,5 @@
-"""RetroArch saves and states on a card (muOS: Pickles ones, through muos_saves): reading them, stashing them in the
-data folder, copying them back (`saves stash` and `saves apply`)."""
+"""RetroArch saves and states on a card (muOS: Pickles ones, through muos_saves; an Android card over adb, through
+android): reading them, stashing them in the data folder, copying them back (`saves stash` and `saves apply`)."""
 import datetime
 import filecmp
 import json
@@ -7,7 +7,7 @@ import os
 import re
 import shutil
 
-from . import muos_saves, picker, store, ui
+from . import adb, android, muos_saves, picker, store, ui
 
 STATE = re.compile(r"^(?P<stem>.+)\.state(\d+|\.auto)?$")
 STASH_KEYS = ("system", "game", "card", "layout", "core", "stashed", "files")
@@ -347,21 +347,53 @@ def card_setup(args):
     if name not in cards:
         ui.fail(f"No card named {name!r}. Set it up with `sync-roms cards new {name} --device ID|full --layout NAME`", 2)
     catalog = store.load_catalog()
-    setup = picker.saved_setup(cards[name], catalog["devices"], catalog["layouts"], name)
-    if not setup:
-        ui.fail(f"{name!r} has no usable layout. Set it with `sync-roms cards set {name} --layout NAME`", 2)
+    setup = _saved_setup(cards, name, catalog)
     if not os.path.isdir(base):
         ui.fail(f"No folder {base}", 2)
     return base, name, setup, catalog
 
 
+def _saved_setup(cards, name, catalog):
+    setup = picker.saved_setup(cards[name], catalog["devices"], catalog["layouts"], name)
+    if not setup:
+        ui.fail(f"{name!r} has no usable layout. Set it with `sync-roms cards set {name} --layout NAME`", 2)
+    return setup
+
+
 def _card(args, what):
-    """(base, card name, layout name, layout, device or None for Full, catalog) of the command's card; exits 2 when
-    it isn't a set-up card, or without a terminal."""
-    base, name, (device, layout_name), catalog = card_setup(args)
+    """(base, card name, layout name, layout, device or None for Full, catalog, android.Session or None) of the
+    command's card: a folder (args.card, else the current folder named after a card), else an Android card over adb
+    (args.card naming it, else the device picked), staged in the session's base. Exits 2 when it isn't a set-up card,
+    or without a terminal; 1 when the device's connection is lost."""
+    cards = store.load_cards()
+    if args.card and (os.path.isdir(args.card) or args.card not in cards) or \
+            not args.card and os.path.basename(os.getcwd()) in cards:
+        base, name, (device, layout_name), catalog = card_setup(args)
+        if not ui.has_terminal():
+            ui.fail(f"`saves {what}` needs a terminal to pick from", 2)
+        return base, name, layout_name, catalog["layouts"][layout_name], device, catalog, None
+    if args.card and not android.is_android(cards[args.card]):
+        ui.fail(f"{args.card!r} isn't an Android card: pass its mounted folder", 2)
+    if args.retroarch:
+        ui.fail("--retroarch only applies to a mounted card", 2)
+    catalog = store.load_catalog()
+    if args.card:
+        _saved_setup(cards, args.card, catalog)
     if not ui.has_terminal():
         ui.fail(f"`saves {what}` needs a terminal to pick from", 2)
-    return base, name, layout_name, catalog["layouts"][layout_name], device, catalog
+    if not args.card:
+        adb.require(mounted=True)
+    try:
+        target = android.resolve(args.card, cards, catalog["layouts"]["esde"]["roms_dir"])
+    except adb.AdbError as e:
+        ui.fail(f"Lost the connection to the device: {e}", 1)
+    device, layout_name = _saved_setup(cards, target.card, catalog)
+    try:
+        session = android.open_session(target, catalog["layouts"][layout_name], layout_name, catalog["systems"])
+    except adb.AdbError as e:
+        ui.fail(f"Lost the connection to {target.model or target.serial}: {e}", 1)
+    args.retroarch = session.retroarch_dir
+    return session.base, target.card, layout_name, session.layout, device, catalog, session
 
 
 def _plural(n, word):
@@ -413,7 +445,15 @@ def pick_stash(games, names):
 def stash_command(args):
     """`saves stash [CARD]`: copy picked RetroArch (muOS: Pickles) saves and states off the card into the stash
     folder."""
-    base, card, layout_name, layout, _, catalog = _card(args, "stash")
+    base, card, layout_name, layout, _, catalog, session = _card(args, "stash")
+    try:
+        return _stash(args, base, card, layout_name, layout, catalog)
+    finally:
+        if session:
+            session.close()
+
+
+def _stash(args, base, card, layout_name, layout, catalog):
     systems = catalog["systems"]
     pickles = "pickles" in layout
     if pickles:
@@ -507,8 +547,17 @@ def _ask_core(base, layout, system, retroarch_dir):
 
 def apply_command(args):
     """`saves apply [CARD]`: copy picked stashes into the card's RetroArch folders for its layout (muOS: Pickles
-    folders, at the paths they were stashed from)."""
-    base, card, layout_name, layout, device, catalog = _card(args, "apply")
+    folders, at the paths they were stashed from; an Android card: then pushed to the device)."""
+    base, card, layout_name, layout, device, catalog, session = _card(args, "apply")
+    try:
+        return _apply(args, base, card, layout_name, layout, device, catalog, session)
+    finally:
+        if session:
+            session.close()
+
+
+def _apply(args, base, card, layout_name, layout, device, catalog, session):
+    shown = session.remote if session else (lambda path: path)  # a path as the user knows it
     pickles = "pickles" in layout  # Pickles and RetroArch states differ: a stash only goes back to its own kind
     if pickles and args.retroarch:
         ui.warn("--retroarch is ignored on muOS cards")
@@ -567,22 +616,29 @@ def apply_command(args):
     if differs and not args.dry_run:
         print(ui.yellow(f"⚠️  {len(differs)} file(s) on {card} differ from the stash:"))
         for dst in differs:
-            print(ui.dim(f"  {dst}"))
+            print(ui.dim(f"  {shown(dst)}"))
         overwrite = ui.confirm("Overwrite them?", default=False)
-    copied, games, state_cores = 0, 0, set()
+    copied, games, state_cores, written = 0, 0, set(), []
     for stash, steps in plan:
         todo = [(f, src, dst) for f, (src, dst, state) in zip(stash["files"], steps)
                 if state == "new" or state == "differs" and overwrite]
         for f, src, dst in todo:
             if args.dry_run:
-                print(ui.dim(f"  {src} → {dst}"))
+                print(ui.dim(f"  {src} → {shown(dst)}"))
                 continue
             os.makedirs(os.path.dirname(dst), exist_ok=True)
             shutil.copy2(src, dst)
+            written.append(dst)
         copied += len(todo)
         games += bool(todo)
         if any(f["kind"] == "state" for f, _, _ in todo):
             state_cores.add(stash["core"])
+    failed = []
+    if session and written:
+        android.wait_closed(session.target.serial, session.pkg)  # RetroArch may have been reopened during the pickers
+        failed = session.push(written)
+    for path, error in failed:
+        ui.warn(f"Couldn't copy {path} to the device: {error}")
     done = f"{copied} file(s) of {games} game(s) to {card}"
     if args.dry_run:
         print(ui.yellow(f"🧪 Would apply {done}" + (f" ({len(differs)} overwriting a different file, asked first)"
@@ -594,4 +650,6 @@ def apply_command(args):
     if differs and not overwrite:
         print(ui.dim(f"  {len(differs)} different file(s) kept"))
     _states_note(state_cores)
+    if failed:
+        ui.fail(f"{len(failed)} file(s) not copied to {card}", 1)
     return 0

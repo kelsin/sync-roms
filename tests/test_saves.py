@@ -1,3 +1,4 @@
+import contextlib
 import json
 import os
 import sys
@@ -10,7 +11,7 @@ sys.path.insert(0, os.path.join(ROOT, "src"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 import helpers  # noqa: E402
-from sync_roms import commands, picker, saves, store, ui  # noqa: E402
+from sync_roms import adb, android, commands, picker, saves, store, ui  # noqa: E402
 
 LAYOUTS = store.repo_json("layouts")
 SYSTEMS = [{"bucket": "gba", "folders": {"onion": "GBA", "knulli": "gba", "esde": "gba", "allium": "GBA",
@@ -1027,6 +1028,161 @@ class ApplyCommandTest(CommandTest):
         self.assertEqual(code, 0, err)
         self.assertIn("Skipped", err + out)
         self.assertFalse(os.path.exists(os.path.join(base, "Saves")))
+
+
+class AndroidCommandTest(CommandTest):
+    """`saves` on an Android card over adb, with android.resolve and android.open_session faked."""
+    REMOTE = "/storage/emulated/0/RetroArch/saves/Gambatte/Game.srm"
+
+    def setUp(self):
+        super().setUp()
+        self.enterContext(contextlib.chdir(self.enterContext(tempfile.TemporaryDirectory())))
+        self.card("POCKETNOVA", "esde")
+        self.base = os.path.join(self.cards_dir.name, "session")
+        helpers.touch(os.path.join(self.base, "ROMs/gba/Game.zip"), "")
+        target = android.Target("SER", "Pocket", "1234-ABCD", "POCKETNOVA")
+        folders = android.Folders("/storage/emulated/0/RetroArch/saves", "/storage/emulated/0/RetroArch/states",
+                                  True, True)
+        self.session = android.Session(target, "com.retroarch", folders, self.base, LAYOUTS["esde"])
+        self.order = []
+        self.session.push = mock.Mock(side_effect=lambda paths: self.order.append("push") or [])
+        self.session.close = mock.Mock()
+        self.wait = self.enterContext(mock.patch.object(android, "wait_closed",
+                                                        side_effect=lambda s, p: self.order.append("wait")))
+        self.enterContext(mock.patch.object(adb.shutil, "which", return_value="/usr/bin/adb"))  # CI has no adb
+        self.resolve = self.enterContext(mock.patch.object(android, "resolve", return_value=target))
+        self.real_open = android.open_session
+        self.open = self.enterContext(mock.patch.object(android, "open_session", return_value=self.session))
+
+    def test_name_of_android_card_uses_adb(self):
+        helpers.touch(os.path.join(self.base, "RetroArch/saves/mGBA/Game.srm"), "s")
+        self.lists([True], [True])
+        code, out, err = self.run_cmd("saves", "stash", "POCKETNOVA")
+        self.assertEqual(code, 0, err)
+        self.resolve.assert_called_once_with("POCKETNOVA", mock.ANY, "ROMs")
+        [stash] = saves.load_stashes()
+        self.assertEqual((stash["card"], stash["core"]), ("POCKETNOVA", "mGBA"))
+        self.session.close.assert_called_once()
+
+    def test_name_of_other_card_fails(self):
+        self.card("KN", "knulli")
+        code, _, err = self.run_cmd("saves", "stash", "KN")
+        self.assertEqual(code, 2)
+        self.assertIn("'KN' isn't an Android card: pass its mounted folder", err)
+        self.resolve.assert_not_called()
+
+    def test_cwd_card_keeps_path_mode(self):
+        base = self.card("PHONE", "esde")
+        with contextlib.chdir(base):
+            code, out, err = self.run_cmd("saves", "stash")
+        self.assertEqual(code, 0, err)
+        self.assertIn("No RetroArch saves or states on PHONE", out)
+        self.resolve.assert_not_called()
+
+    def test_no_arg_other_cwd_uses_adb(self):
+        code, out, err = self.run_cmd("saves", "stash")
+        self.assertEqual(code, 0, err)
+        self.assertIsNone(self.resolve.call_args.args[0])
+        self.assertIn("No RetroArch saves or states on POCKETNOVA", out)
+
+    def test_retroarch_flag_with_adb_fails(self):
+        code, _, err = self.run_cmd("saves", "stash", "POCKETNOVA", "--retroarch", "/x")
+        self.assertEqual(code, 2)
+        self.assertIn("--retroarch only applies to a mounted card", err)
+        self.resolve.assert_not_called()
+
+    def test_needs_terminal_before_adb(self):
+        with mock.patch.object(ui, "has_terminal", lambda: False):
+            code, _, err = self.run_cmd("saves", "stash", "POCKETNOVA")
+        self.assertEqual(code, 2)
+        self.resolve.assert_not_called()
+
+    def test_lost_connection_exits_1(self):
+        self.open.side_effect = adb.AdbError("device offline")
+        code, _, err = self.run_cmd("saves", "stash", "POCKETNOVA")
+        self.assertEqual(code, 1)
+        self.assertIn("Lost the connection to Pocket: device offline", err)
+        self.resolve.side_effect = adb.AdbError("closed")
+        code, _, err = self.run_cmd("saves", "stash", "POCKETNOVA")
+        self.assertEqual(code, 1)
+        self.assertIn("Lost the connection to the device: closed", err)
+
+    def test_no_card_without_adb_says_how_to_use_mounted(self):
+        with mock.patch.object(adb.shutil, "which", return_value=None):
+            code, _, err = self.run_cmd("saves", "stash")
+        self.assertEqual(code, 2)
+        self.assertIn("adb isn't installed (brew install android-platform-tools); for a mounted card, pass its "
+                      "folder or run from it", err)
+        self.resolve.assert_not_called()
+
+    def test_device_drop_at_saves_check_exits_1_without_push(self):
+        self.gambatte_stash()
+        self.open.side_effect = self.real_open
+        with mock.patch.object(android, "retroarch_package", return_value="com.retroarch"), \
+                mock.patch.object(android, "read_folders", return_value=self.session.folders), \
+                mock.patch.object(adb, "is_dir", side_effect=lambda s, p: (_ for _ in ()).throw(
+                    adb.AdbError("device offline")) if p == self.session.folders.saves else False), \
+                mock.patch.object(adb, "pull") as pull, mock.patch.object(adb, "push") as push:
+            code, _, err = self.run_cmd("saves", "apply", "POCKETNOVA")
+        self.assertEqual(code, 1)
+        self.assertIn("Lost the connection to Pocket: device offline", err)
+        pull.assert_not_called()
+        push.assert_not_called()
+
+    def gambatte_stash(self):
+        self.stash(core="Gambatte", card="OTHER", layout="esde", files={"Game.srm": "save"})
+
+    def test_apply_pushes_written_files(self):
+        self.gambatte_stash()
+        self.lists([True])
+        code, out, err = self.run_cmd("saves", "apply", "POCKETNOVA")
+        self.assertEqual(code, 0, err)
+        dst = os.path.join(self.base, "RetroArch/saves/Gambatte/Game.srm")
+        self.assertEqual(self.read_file(dst), "save")
+        self.session.push.assert_called_once_with([dst])
+        self.assertEqual(self.order, ["wait", "push"])
+        self.wait.assert_called_once_with("SER", "com.retroarch")
+        self.assertIn("Applied 1 file(s) of 1 game(s) to POCKETNOVA", out)
+        self.session.close.assert_called_once()
+
+    def test_apply_differs_shows_device_paths(self):
+        self.gambatte_stash()
+        helpers.touch(os.path.join(self.base, "RetroArch/saves/Gambatte/Game.srm"), "old")
+        self.lists([True])
+        with mock.patch.object(ui, "confirm", return_value=False):
+            code, out, err = self.run_cmd("saves", "apply", "POCKETNOVA")
+        self.assertEqual(code, 0, err)
+        self.assertIn(self.REMOTE, out)
+        self.assertNotIn(self.base, out)
+        self.session.push.assert_not_called()
+        self.wait.assert_not_called()
+
+    def test_apply_dry_run_never_pushes(self):
+        self.gambatte_stash()
+        self.lists([True])
+        code, out, err = self.run_cmd("saves", "apply", "POCKETNOVA", "--dry-run")
+        self.assertEqual(code, 0, err)
+        self.assertIn(f"→ {self.REMOTE}", out)
+        self.session.push.assert_not_called()
+        self.wait.assert_not_called()
+
+    def test_apply_push_failure_exits_1(self):
+        self.gambatte_stash()
+        self.session.push.side_effect = None
+        self.session.push.return_value = [(self.REMOTE, "no space left")]
+        self.lists([True])
+        code, out, err = self.run_cmd("saves", "apply", "POCKETNOVA")
+        self.assertEqual(code, 1)
+        self.assertIn(f"Couldn't copy {self.REMOTE} to the device: no space left", err)
+        self.assertIn("1 file(s) not copied to POCKETNOVA", err)
+        self.session.close.assert_called_once()
+
+    def test_session_closed_on_error(self):
+        self.gambatte_stash()
+        with mock.patch.object(saves, "pick_apply", side_effect=KeyboardInterrupt):
+            with self.assertRaises(KeyboardInterrupt):
+                self.run_cmd("saves", "apply", "POCKETNOVA")
+        self.session.close.assert_called_once()
 
 
 class SavesCliTest(unittest.TestCase):
