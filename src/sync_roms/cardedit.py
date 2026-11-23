@@ -7,6 +7,7 @@ import threading
 from . import budget, cardpicks, collections as colls, edit, inventory, listedit, metafilter, picker, previews, s3, scrape_plan, spruce_themes, store, surprise, themeart, ui, usersettings
 
 FULL_KEY = "f"
+OFF_KEY = "x"
 SET_KEY = "s"
 CLEAR_KEY = "c"
 CLEAR_ALL_KEY = "D"
@@ -18,7 +19,7 @@ META_KEY = "m"
 VARIANT_KEY = "v"
 SERIES_KEY = "r"
 ALL_KEY = "a"
-LIST_HINT = "Enter · a all · f full · s set · l collections · S settings · D clear"
+LIST_HINT = "Enter · a all · f full · x off · s set · l colls · S settings · D clear"
 GAMES_HINT = "Space toggle · Enter done · s set · m meta · p past · v variant"
 META_HINT = "Enter list its values · Esc back"
 VALUES_HINT = "Enter narrow to it · Esc back · / filter"
@@ -26,6 +27,7 @@ SETS_HINT = "Enter show its games · Space/Tab toggle its games here · / filter
 SET_GAMES_HINT = "Space toggle · Enter done · w note · v variant · r series"
 ALL_GAMES_HINT = "Space toggle · Enter done · w note · v variant · s set · c clear"
 LIST_KEYS = [("Enter", "the system's games"), ("f", "full system: every file in its folder (again to undo)"),
+             ("x", "turn the system off on this card: nothing of it syncs, its picks stay (again to turn it back on)"),
              ("a", "every game across this card's systems"),
              ("s", "a set's games across this card's systems"), ("l", "collections on this card"),
              ("S", "settings menu: Surprise, theme, collections and RAOfflineProxy on or off, and the systems Surprise may use"),
@@ -92,6 +94,7 @@ def system_labels(card, systems, recommended, usages, full_sizes):
     budget.full_usage}, a missing one not worked out yet; an empty folder shows none). A full system shows its files
     and full size instead of its picks, then 🗂️. The first column starts with the state: 🟢 full system, 🟡 some games picked, ⚪ none."""
     games = card.get("games") or {}
+    off = store.systems_off(card)
     labels, extras = [], []
     for s in systems:
         rec = s["bucket"] in recommended
@@ -100,7 +103,11 @@ def system_labels(card, systems, recommended, usages, full_sizes):
         unknown = f is None or f.partial
         row = [("  ⚪", "dim"), ("", "dim"), ("", "dim")]
         entry = games.get(s["bucket"])
-        if isinstance(entry, dict) and entry.get("full_system"):
+        if s["bucket"] in off:
+            row[0] = ("  🚫 off", "red")
+            if unknown or f.count:
+                row[2] = (f"  🗂️  {SIZING if unknown else size_text(f.bytes)} full", "dim")
+        elif isinstance(entry, dict) and entry.get("full_system"):
             files = SIZING if unknown else f.count
             row = [(f"  🟢 {files} file" + ("" if files == 1 else "s"), "green"),
                    (f"  {SIZING if unknown else size_text(f.bytes)}", "dim"), ("  🗂️  full system", "cyan")]
@@ -249,6 +256,19 @@ def toggle_full(name, bucket):
     store.update_card(name, games=store.sorted_list(games))
 
 
+def toggle_off(name, bucket):
+    """Turn a system off on a card, or back on, and save it. The card's picks stay."""
+    cards = store.load_cards()
+    entry = dict(store.saved_card(name, cards))
+    off = store.systems_off(entry) ^ {bucket}
+    if off:
+        entry["systems_off"] = sorted(off)
+    else:
+        entry.pop("systems_off", None)
+    cards[name] = entry
+    store.write_cards(cards)
+
+
 @picker.one_app
 def edit_card(name, setup=None, to_fetch=None, card_match=None):
     """The card's system list. setup: (device or None for Full, layout) to edit with instead of the saved one.
@@ -297,10 +317,10 @@ def edit_card(name, setup=None, to_fetch=None, card_match=None):
                 extras[:] = system_labels(card_entry(name, setup), systems, recommended, usages, full.sizes)[1]
 
         def on_hotkey(key, idx):
-            """f switches full system in place, so the screen isn't torn down and redrawn."""
-            if key != FULL_KEY or idx is None:
+            """f and x switch full system and off in place, so the screen isn't torn down and redrawn."""
+            if key not in (FULL_KEY, OFF_KEY) or idx is None:
                 return False
-            toggle_full(name, systems[idx]["bucket"])
+            (toggle_full if key == FULL_KEY else toggle_off)(name, systems[idx]["bucket"])
             usages[systems[idx]["bucket"]] = budget.system_usage(card_entry(name, setup), systems[idx])
             extras[:] = work_out()[1]
             return True
@@ -308,7 +328,7 @@ def edit_card(name, setup=None, to_fetch=None, card_match=None):
         on = surprise.enabled(store.load_cards().get(name))
         i = picker.filter_list(f"💳 {name} — its systems (⭐ for the device) · 🎁 Surprise {'on' if on else 'off'}",
                                labels, extras=extras, cursor=pos,
-                               hotkeys=(FULL_KEY, ALL_KEY, SET_KEY, COLLECTIONS_KEY, SETTINGS_KEY, CLEAR_ALL_KEY,
+                               hotkeys=(FULL_KEY, OFF_KEY, ALL_KEY, SET_KEY, COLLECTIONS_KEY, SETTINGS_KEY, CLEAR_ALL_KEY,
                                         *((KEEP_KEY,) if card_match else ())),
                                hint=LIST_HINT + (KEEP_HINT if card_match else ""),
                                key_help=LIST_KEYS + (KEEP_KEYS if card_match else []),
@@ -318,7 +338,7 @@ def edit_card(name, setup=None, to_fetch=None, card_match=None):
         if i is None:
             return
         if isinstance(i, tuple):
-            key, pos = i  # never f: on_hotkey takes it
+            key, pos = i  # never f or x: on_hotkey takes them
             if key == ALL_KEY:
                 edit_all(name, setup, systems, to_fetch, usages)
                 changed = ALL
@@ -845,12 +865,13 @@ def edit_system(name, system, setup, to_fetch=None, card_usages=None):
     start = sp.states(picks.cover())
 
     place = {}  # picker.carry_place's: the last pass's row, filter text, view and scroll
+    off_note = " · 🚫 off on this card" if bucket in store.systems_off(store.saved_card(name, cards)) else ""
     try:
         while True:
             kept = {r[1] for r in sp.rows if filters.keep(r[1])}
             shown = [r for r in sp.rows if r[1] in kept and sp.playlist_of.get(r[1]) not in kept]  # a shown playlist hides its discs
             result = _games_pass(
-                f"✏️  {system['name']} on {name} — ✅ synced, ⬜ not, 📦 from a set", shown, picks, {bucket: sp}, {},
+                f"✏️  {system['name']} on {name} — ✅ synced, ⬜ not, 📦 from a set{off_note}", shown, picks, {bucket: sp}, {},
                 start, work, capacity, to_fetch, place, hint=GAMES_HINT, hotkeys=(*GameFilters.KEYS, VARIANT_KEY),
                 key_help=GAMES_KEYS, filters=filters.describe())
             if not isinstance(result, tuple):
