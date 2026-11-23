@@ -270,11 +270,20 @@ class Apply(helpers.DataDir):
         self.assertIn(("shell", "pm", "install", CARD_APK), self.calls)
         self.assertEqual([c for c in self.calls if c[0] in ("download", "install")], [])
 
-    def test_apply_bucket_downloads_once_and_removes_copy(self):
-        self.apk_setup()
+    def test_apply_bucket_downloads_once_and_removes_each_copy_when_done(self):
+        self.apk_setup(name="a.apk", package="com.a", installed=65)  # up to date
+        self.apk_setup(name="b.apk", package="com.b", installed=70)  # newer installed
+        self.apk_setup(name="c.apk", package="com.c")  # to install
+        self.apk_setup(name="d.apk", package="com.d")  # to install
+        held = []
+        real = self.download
+
+        def watching(job):
+            real(job)
+            held.append((job[1].rsplit("/", 1)[1], sorted(os.listdir(os.path.dirname(job[1])))))
+        self.enterContext(mock.patch.object(s3, "download", watching))
         self.assertEqual(self.run_apply(), 0)
-        self.assertEqual([c for c in self.calls if c[0] == "download"], [("download", APKS + "app.apk")])
-        self.assertFalse(os.path.exists(os.path.join(self.tmps[0], "apks", "app.apk")))
+        self.assertEqual(held, [("a.apk", ["a.apk"]), ("b.apk", ["b.apk"]), ("c.apk", ["c.apk"]), ("d.apk", ["d.apk"])])
 
     def test_apply_folder_storage_reads_and_installs_in_place(self):
         self.apk_setup()

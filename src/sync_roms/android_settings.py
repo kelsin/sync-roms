@@ -251,7 +251,7 @@ def _forget(tmp, name):
 
 
 def apk_entries(serial, volume, card_name, listing, tmp):
-    """Generator of (file name, key, size, state, package, new version, old version, card path, local copy)] for each APK in the
+    """Generator of (file name, key, size, state, package, new version, old version, card path, local copy) for each APK in the
     listing {key: size}. state: install, upgrade, current, newer, or the skip reason in parentheses; unreadable ones are
     warned about and left out. A downloaded copy stays in tmp until the caller is done with the entry (_forget)."""
     if not any(not k.endswith("/") and k.lower().endswith(".apk") for k in listing):
@@ -315,6 +315,7 @@ def _install_apks(serial, entries, tmp, failed):
     for entry in entries:
         name, _, _, state, pkg, new, old, _, _ = entry
         if state not in ("install", "upgrade"):
+            _forget(tmp, name)
             continue
         print(f"📦 Installing {name}" if state == "install" else f"⬆️ Upgrading {name} ({old} → {new})")
         error = _install(serial, entry, tmp)
