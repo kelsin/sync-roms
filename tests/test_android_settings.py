@@ -226,3 +226,40 @@ class Apply(helpers.DataDir):
         self.files[self.cfg_path] = OLD_CFG
         self.push_error = adb.AdbError("denied")
         self.assertEqual(self.run_apply(), 1)
+
+    def test_apply_rereads_cfg_after_retroarch_closes(self):
+        self.files[self.cfg_path] = OLD_CFG
+        saved = 'cloud_sync_enable = "true"\nsavefile_directory = "x"\nnew_key = "kept"\n'
+
+        def closed(serial, pkg):
+            self.calls.append(("wait_closed",))
+            self.files[self.cfg_path] = saved
+        with mock.patch.object(android, "wait_closed", closed):
+            self.assertEqual(self.run_apply(), 0)
+        pushed = self.files[self.cfg_path]
+        self.assertIn('new_key = "kept"', pushed)
+        self.assertIn('cloud_sync_enable = "false"', pushed)
+
+    def test_apply_skips_push_when_close_fixed_cfg(self):
+        self.files[self.cfg_path] = OLD_CFG
+
+        def closed(serial, pkg):
+            self.files[self.cfg_path] = RIGHT_CFG
+        with mock.patch.object(android, "wait_closed", closed):
+            self.assertEqual(self.run_apply(), 0)
+        self.assertEqual(self.calls, [])
+
+    def test_apply_missing_cfg_warns_and_skips_retroarch(self):
+        with mock.patch.object(ui, "warn") as warn:
+            self.assertEqual(self.run_apply(), 0)
+        self.assertEqual(self.calls, [])
+        self.assertIn("retroarch.cfg", warn.call_args[0][0])
+
+    def test_apply_creates_missing_gamelist(self):
+        usersettings.save_settings({"spruce_syncthing": True})
+        self.files[self.cfg_path] = "".join(f'{k} = "{v}"\n' for k, v in android_settings.cfg_wanted().items())
+        self.run_apply()
+        gamelist = "/storage/6AF3-53E9/ES-DE/gamelists/nes/gamelist.xml"
+        self.assertIn(("shell", "mkdir", "-p", "/storage/6AF3-53E9/ES-DE/gamelists/nes"), self.calls)
+        self.assertLess(self.calls.index(("shell", "mkdir", "-p", "/storage/6AF3-53E9/ES-DE/gamelists/nes")),
+                        self.calls.index(("push", gamelist)))
