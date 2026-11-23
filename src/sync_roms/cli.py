@@ -21,7 +21,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "games": ("edit|list|add|remove|full|sets|export|import", "edit a card's games, interactively or from scripts"),
     "sets": ("edit", "edit the game sets in storage by hand and save the changes there"),
     "collections": ("edit", "edit your collections of favourite games (saved in ~/.sync-roms/collections/)"),
-    "themes": ("update|pick|build|publish", "copy the latest Art Book Next for ES-DE and the PyUI themes for spruce from GitHub into storage; build and publish custom spruce themes"),
+    "themes": ("update|pick|build|publish|palettes", "copy the latest Art Book Next for ES-DE and the PyUI themes for spruce from GitHub into storage; build and publish custom spruce themes"),
     "download": ("pico8", "add the PICO-8 BBS Featured carts storage doesn't have, and newer revisions of those it has"),
     "flash": ("", "write a Knulli, BaseOS, muOS, ROCKNIX or OakMoss image from storage's os/ to an SD card"),
     "umount": ("", "clean the macOS junk off an SD card and unmount it"),
@@ -136,6 +136,11 @@ TOPICS = {
   theme is named "<style> - <palette>", e.g. "Pixel Consoles - Gruvbox", and goes into the cache's themes/build/
   folder, or into DIR/<theme> with --out (replaced); the folders are printed. The base theme is read from
   os/spruceos/themes/SPRUCE/ in storage, so run `sync-roms themes update` first. Nothing is written to storage.
+
+  sync-roms themes palettes                   write the overview image of all the palettes and open it
+
+  Draws one small list screen per palette, numbered, from the palette data, into the cache's themes/palettes.png
+  (the path is printed) and opens it in the default viewer.
 
   sync-roms themes publish [STYLE...] (--palette NAME... | --all-palettes) [--dry-run] [--yes]   put them in storage
 

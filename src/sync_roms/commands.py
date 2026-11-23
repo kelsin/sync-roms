@@ -1255,6 +1255,16 @@ def themes_publish(args):
         ui.fail(f"Couldn't publish to {s3.location()}: {e}", 1)
 
 
+def themes_palettes(args):
+    """Write the palette overview image and open it in the default viewer."""
+    from .custom_themes import palette_sheet
+    path = palette_sheet.write_sheet(os.path.join(store.cache_dir(), "themes", "palettes.png"))
+    print(path)
+    if not webbrowser.open(pathlib.Path(path).as_uri()):
+        ui.fail("Couldn't open a viewer: open the file above yourself", 1)
+    return 0
+
+
 def themes_pick(args):
     from . import spruce_themes
     usersettings.ensure_bucket()
@@ -1309,7 +1319,7 @@ def second_words():
     words["games"] = sorted(set(words.get("games", [])) | {"list", "add", "remove", "full", "sets", "export", "import"})
     words["sets"] = ["edit"]
     words["collections"] = ["edit"]
-    words["themes"] = ["update", "pick", "build", "publish"]
+    words["themes"] = ["update", "pick", "build", "publish", "palettes"]
     words["download"] = ["pico8"]
     words["cards"] = ["edit", "list", "new", "set", "rename", "convert", "clean", "delete", "copy", "export", "import"]
     words["saves"] = ["stash", "apply", "manage"]
@@ -1425,6 +1435,7 @@ def build_parser():
         if action == "build":
             p.add_argument("--out", metavar="DIR")
         p.set_defaults(fn=fn)
+    p = tsub.add_parser("palettes", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=themes_palettes)
     p = tsub.add_parser("pick", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=themes_pick)
 
     download = sub.add_parser("download", add_help=False, allow_abbrev=False)

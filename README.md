@@ -175,6 +175,7 @@ Every mode is a command (plain `sync-roms [CARD]` syncs a card):
 | `themes update` | put the latest Art Book Next for ES-DE (for collections' [theme art](#theme-art)) and every [PyUI theme](#spruce) (needs `7z`) in storage | |
 | `themes build [STYLE...] --palette NAME\|--all-palettes [--out DIR]` | build the custom spruce theme styles (Pixel Consoles, Pixel Controllers) in each chosen palette from the SPRUCE base theme in storage into the cache, or into `DIR` with `--out`; writes nothing to storage | |
 | `themes publish [STYLE...] --palette NAME\|--all-palettes` | build the custom spruce themes in each chosen palette and make their `os/spruceos/themes/<theme>/` folders in storage match: upload what changed and delete what the build no longer makes, after one question (`--yes` answers it, `--dry-run` only shows the plan) | |
+| `themes palettes` | write the overview image of all 28 palettes (a numbered mock list screen for each) and open it | |
 | `themes pick` | choose the PyUI themes every spruce card gets by default (`spruce_themes` setting) | |
 | `download pico8` | add the [PICO-8 BBS Featured carts](#pico-8-carts-from-the-bbs-download-pico8) storage doesn't have, and newer revisions of those it has | |
 | `flash` | [write a Knulli, BaseOS, muOS, ROCKNIX or OakMoss image](#flashing-an-sd-card-flash) from storage's `os/` to an SD card, macOS only | |

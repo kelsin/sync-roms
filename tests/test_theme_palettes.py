@@ -272,5 +272,55 @@ class Names(unittest.TestCase):
         self.assertTrue(all(re.fullmatch(r"Pixel (Consoles|Controllers) - .+", n) for n in names))
 
 
+def hexrgb(h):
+    return tuple(int(h[i:i + 2], 16) for i in (1, 3, 5))
+
+
+class PaletteSheet(helpers.StorageDir):
+    def test_render_panel_size_and_colors(self):
+        from sync_roms.custom_themes import palette_sheet
+        p = palettes.get("Gruvbox")
+        img = palette_sheet.render_panel(p)
+        self.assertEqual(img.size, (300, 215))
+        self.assertEqual(img.mode, "RGB")
+        self.assertEqual(img.getpixel((2, 56 + 30 + 2)), hexrgb(p.bar))
+        self.assertEqual(img.getpixel((297, 56 + 30 + 2)), hexrgb(p.bar))
+        row = [img.getpixel((8 + 46 * i + 20, 196 + 6)) for i in range(6)]
+        self.assertEqual(row, [hexrgb(c) for c in (p.text, p.list, p.selected, p.accent, p.dim, p.bar)])
+
+    def test_render_sheet_size(self):
+        from sync_roms.custom_themes import palette_sheet
+        img = palette_sheet.render_sheet(palettes.PALETTES.values())
+        self.assertEqual(len(palettes.PALETTES), 28)
+        self.assertEqual(img.size, (5 * 300 + 6 * 8, 6 * 215 + 7 * 8))
+        self.assertEqual(img.getpixel((0, 0)), (28, 28, 28))
+
+    def test_write_sheet_creates_png(self):
+        from sync_roms.custom_themes import palette_sheet
+        path = os.path.join(self.tmp.name, "a", "b", "palettes.png")
+        self.assertEqual(palette_sheet.write_sheet(path), path)
+        with Image.open(path) as img:
+            self.assertEqual(img.format, "PNG")
+
+    def test_font_path_falls_back(self):
+        from sync_roms.custom_themes import palette_sheet
+        self.assertIsNone(palette_sheet.font_path())
+
+    def test_palettes_command_opens_viewer(self):
+        from sync_roms.custom_themes import palette_sheet
+        path = os.path.join(self.data, "cache", "themes", "palettes.png")
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out), mock.patch("webbrowser.open", return_value=True) as opened:
+            self.assertEqual(commands.run(["themes", "palettes"]), 0)
+        self.assertIn(path, out.getvalue())
+        self.assertTrue(os.path.isfile(path))
+        opened.assert_called_once()
+        with self.assertRaises(SystemExit) as raised, mock.patch("sys.stderr") as err, \
+                contextlib.redirect_stdout(io.StringIO()), mock.patch("webbrowser.open", return_value=False):
+            commands.run(["themes", "palettes"])
+        self.assertEqual(raised.exception.code, 1)
+        self.assertIn("open the file above yourself", "".join(c.args[0] for c in err.write.call_args_list))
+
+
 if __name__ == "__main__":
     unittest.main()
