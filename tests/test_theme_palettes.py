@@ -85,9 +85,9 @@ class Palettes(unittest.TestCase):
         self.assertEqual(custom_themes.theme_name("Pixel Consoles", "Gruvbox"), "Pixel Consoles - Gruvbox")
 
     def test_styles(self):
-        self.assertEqual(custom_themes.styles(), ["Pixel Consoles", "Pixel Controllers"])
+        self.assertEqual(custom_themes.styles(), ["Pixel Consoles", "Pixel Controllers", "ToTK - James"])
         for style, module in custom_themes.STYLES.items():
-            self.assertEqual((module.STYLE, module.BASE), (style, "SPRUCE"))
+            self.assertEqual((module.STYLE, module.BASE), (style, "ToTK" if style == "ToTK - James" else "SPRUCE"))
 
 
 class Recolor(unittest.TestCase):
@@ -213,11 +213,12 @@ class Command(helpers.StorageDir):
         self.enterContext(mock.patch.object(usersettings, "apply_settings"))
         self.enterContext(contextlib.redirect_stdout(io.StringIO()))
         make_base(os.path.join(self.root, "os", "spruceos", "themes", "SPRUCE"))
+        make_base(os.path.join(self.root, "os", "spruceos", "themes", "ToTK"))
         self.out = os.path.join(self.tmp.name, "out")
 
     def test_duplicate_palette_flags_collapse(self):
         self.assertEqual(commands.run(["themes", "build", "--palette", "Arcade", "--palette", "Arcade", "--out", self.out]), 0)
-        self.assertEqual(sorted(os.listdir(self.out)), ["Pixel Consoles - Arcade", "Pixel Controllers - Arcade"])
+        self.assertEqual(sorted(os.listdir(self.out)), ["Pixel Consoles - Arcade", "Pixel Controllers - Arcade", "ToTK - James"])
 
     def test_palette_order_kept(self):
         with mock.patch.object(custom_themes, "build", return_value={}) as build:
@@ -286,6 +287,7 @@ class Publish(helpers.StorageDir):
         self.enterContext(contextlib.redirect_stdout(io.StringIO()))
         self.enterContext(mock.patch.object(ui, "ASSUME_YES", True))
         make_base(os.path.join(self.root, "os", "spruceos", "themes", "SPRUCE"))
+        make_base(os.path.join(self.root, "os", "spruceos", "themes", "ToTK"))
 
     def test_publish_two_palettes(self):
         mint = self.put(T + "Pixel Consoles - Mint/config.json", b"mint")
@@ -331,7 +333,7 @@ class Publish(helpers.StorageDir):
         with contextlib.redirect_stdout(out):
             custom_themes.publish(None, chosen, dry_run=True)
         lines = out.getvalue().splitlines()
-        names = [custom_themes.theme_name(s, p.name) for s in custom_themes.styles() for p in chosen]
+        names = [custom_themes.theme_name(s, p.name) for s in custom_themes.styles()[:2] for p in chosen]
         self.assertGreater(len(names), custom_themes.COMPACT_OVER)
         themed = [line for line in lines if line.startswith("🎨 Pixel ")]
         self.assertEqual(sorted(line.split(":")[0][2:] for line in themed), sorted(names))
@@ -346,7 +348,7 @@ class Publish(helpers.StorageDir):
 
 class Names(unittest.TestCase):
     def test_theme_names_never_collide_with_old_folders(self):
-        names = {custom_themes.theme_name(s, p) for s in custom_themes.styles() for p in palettes.names()}
+        names = {custom_themes.theme_name(s, p) for s in custom_themes.styles()[:2] for p in palettes.names()}
         self.assertEqual(len(names), 56)
         self.assertFalse(names & set(custom_themes.styles()))
         self.assertTrue(all(re.fullmatch(r"Pixel (Consoles|Controllers) - .+", n) for n in names))

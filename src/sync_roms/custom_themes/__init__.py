@@ -1,13 +1,13 @@
 """Custom spruceOS themes sync-roms builds from a base theme. STYLES maps each style's name to its module; a built
-theme is one style in one palette (palettes.py), named `<style> - <palette>`."""
+theme is one style in one palette (palettes.py), named `<style> - <palette>`; a style with PALETTES = False is built once, as `<style>`."""
 import os
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 
 from .. import downloads, inventory, runtime, s3, store
-from . import manifest, pixel_consoles, pixel_controllers
+from . import manifest, pixel_consoles, pixel_controllers, totk_james
 
-STYLES = {module.STYLE: module for module in (pixel_consoles, pixel_controllers)}
+STYLES = {module.STYLE: module for module in (pixel_consoles, pixel_controllers, totk_james)}
 
 
 def styles():
@@ -61,16 +61,22 @@ def _prune(folder, keep):
             os.rmdir(dirpath)
 
 
+def needs_palettes(styles):
+    """Whether any of the named styles (all when None) is built in palettes."""
+    chosen = list(STYLES) if styles is None else styles
+    return any(getattr(STYLES[s], "PALETTES", True) for s in chosen if s in STYLES)
+
+
 def build(styles, palettes, out=None):
     """Build each named style (all when None) in each palette into out, or the cache's build folder; returns
-    {theme name: built folder}. Raises KeyError for an unknown style, ValueError for no palettes and BaseMissing when a
+    {theme name: built folder}. Raises KeyError for an unknown style, ValueError for no palettes (when a style needs them) and BaseMissing when a
     base theme isn't in storage."""
-    if not palettes:
-        raise ValueError("no palettes to build")
     chosen = sorted(STYLES, key=str.lower) if styles is None else list(styles)
     for style in chosen:
         if style not in STYLES:
             raise KeyError(style)
+    if not palettes and needs_palettes(chosen):
+        raise ValueError("no palettes to build")
     out = out or os.path.join(store.cache_dir(), "themes", "build")
     bases = {}
     built = {}
@@ -78,6 +84,9 @@ def build(styles, palettes, out=None):
         module = STYLES[style]
         if module.BASE not in bases:
             bases[module.BASE] = fetch_base(module.BASE)
+        if not getattr(module, "PALETTES", True):
+            built[module.STYLE] = module.build(bases[module.BASE], out)
+            continue
         for palette in palettes:
             built[theme_name(style, palette.name)] = module.build(bases[module.BASE], out, palette)
     return built
