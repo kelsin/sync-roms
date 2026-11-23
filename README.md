@@ -383,7 +383,7 @@ Besides ROMs, BIOS and scraped data, a sync writes the card's [collections](#col
 | `rocknix` | staged on the card, installed from Ports | theme customizations | collection | `pico8_64`, `pico8_dyn`, `pico8.dat` in `roms/pico-8/` | `roms/ports/RAOfflineProxy Install.sh` | RetroArch | none |
 | `muos` | `MUOS/info/collection/<Name>/` | in the catalogue | collection | `pico8_64`, `pico8.dat` in `MUOS/bios/pico8/` | `MUOS/application/RAOfflineProxy/` | Pickles | none |
 | `nextui` | `Collections/<Name>.txt`, one `/Roms/<system folder>/<path on card>` line per game | none | collection | none: carts are plain ROMs | none | RetroArch, MinUI save names | none |
-| `spruce` | `Collections/collections.json` | `Collections/Imgs/<Name>.png` | collection | `pico8_dyn`, `pico8_64`, `pico8.dat` in `BIOS/` | none | RetroArch | spruceOS update file |
+| `spruce` | `Collections/collections.json` | `Collections/Imgs/<Name>.png`, also in `Imgs_med/` and `Imgs_small/` | collection | `pico8_dyn`, `pico8_64`, `pico8.dat` in `BIOS/` | none | RetroArch | spruceOS update file |
 | `onion` | none | none | Surprise app | `pico8_dyn`, `pico8.dat` in `RApp/PICO-8/bin/` | `App/RAOfflineProxy/` | RetroArch | themes |
 | `allium` | none | none | off by default | `pico8_dyn`, `pico8.dat` in `Apps/pico.pak/bin/` | `Apps/RAOfflineProxy.pak/` | RetroArch | none |
 
