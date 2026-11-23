@@ -735,8 +735,8 @@ def _variant_mark(picks, key, on_card=None):
 
 
 def _locked_note(sp, key):
-    """Why a collection or surprise game row can't be switched off ("" for any other row)."""
-    return f"From {sp.locked_from[key]}; take it off the card to remove this game" if key in sp.locked_from else ""
+    """Why a surprise game row can't be switched off ("" for any other row)."""
+    return f"From {sp.locked_from[key]}; take it off the card to remove this game" if key in sp.surprise else ""
 
 
 def _toggle_variant(picks, key, title):
@@ -811,7 +811,7 @@ def _games_pass(title, shown, picks, sps, files_of, start, work, capacity, to_fe
             session=session, note_text=lambda i: edit.note_text(sp_of[i].games, keys[i]),
             on_note=lambda i, text: edit.save_note(sp_of[i].games, keys[i], text),
             **previews.game_pane(keys), links=links,
-            locked=[sp is None or k in sp.locked_from for k, sp in zip(keys, sp_of)],
+            locked=[sp is None or k in sp.surprise for k, sp in zip(keys, sp_of)],
             locked_note=[edit.FULL_SYSTEM_NOTE if sp is None else _locked_note(sp, k) for k, sp in zip(keys, sp_of)],
             **list_kw)
     except KeyboardInterrupt:  # Ctrl-C: keep the toggles

@@ -101,6 +101,46 @@ class Picks(Flow):
         self.assertFalse(p.save())
         self.assertEqual(store.card_games("c"), {})
 
+    def test_off_on_a_collection_game_excludes_it(self):
+        self.favs()
+        self.card(collections=["favs"])
+        p = self.picks()
+        self.switch(p, "gba/Ruby.zip", False)
+        self.assertTrue(p.save())
+        self.assertEqual(store.card_excluded("c"), {"gba": ["gba/Ruby.zip"]})
+        self.assertEqual(store.card_games("c"), {})
+
+    def test_on_again_removes_the_exclusion_and_adds_no_pick(self):
+        self.favs()
+        self.card(collections=["favs"], excluded={"gba": ["gba/Ruby.zip"]})
+        p = self.picks()
+        self.assertFalse(p.system(GBA).states(p.cover())["gba/Ruby.zip"])
+        self.switch(p, "gba/Ruby.zip", True)
+        self.assertTrue(p.save())
+        self.assertEqual(store.card_excluded("c"), {})
+        self.assertEqual(store.card_games("c"), {})
+
+    def test_keep_switches_an_excluded_collection_game_back_on(self):
+        self.favs()
+        self.card(collections=["favs"], excluded={"gba": ["gba/Ruby.zip"]})
+        sp, n = self.keep(self.picks(), "gba/Ruby.zip")
+        self.assertEqual(n, 1)
+        self.assertEqual((sp.games, sp.excluded), ([], set()))
+
+    def test_on_card_of_an_excluded_collection_game_on_a_system_not_shown_is_false(self):
+        self.favs()
+        self.card(collections=["favs"], excluded={"gb": ["gb/Red.gb"]})
+        self.assertFalse(self.picks().on_card("gb/Red.gb"))
+
+    def test_surprise_rows_stay_on_and_untouched_by_apply(self):
+        self.card(surprises=[{"system": "gba", "bucket": "gba/Zelda.zip", "title": "Zelda"}])
+        p = self.picks()
+        sp = p.system(GBA)
+        self.assertEqual(sp.surprise, {"gba/Zelda.zip"})
+        self.switch(p, "gba/Zelda.zip", False)
+        self.assertEqual((sp.games, sp.excluded), ([], set()))
+        self.assertTrue(sp.states(p.cover())["gba/Zelda.zip"])
+
     def test_a_surprise_game_on_a_system_not_shown_is_on_the_card(self):
         self.card(surprises=[{"title": "Red", "system": "gb", "bucket": "gb/Red.gb"}])
         p = self.picks()

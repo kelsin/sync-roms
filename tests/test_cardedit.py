@@ -451,15 +451,25 @@ class Flow(DataDir):
         self.assertEqual(len(calls), 2)  # the system list twice, no collection list
         self.assertIn("sync-roms collections edit", note.call_args[0][0])
 
-    def test_collection_games_are_on_locked_and_marked_even_when_excluded(self):
+    def test_collection_games_are_on_unlocked_and_marked(self):
+        self.favs()
+        self.card(collections=["favs"])
+        _, calls = self.run_system(toggle())
+        _, labels, kw = calls[0]
+        i = labels.index("Ruby.zip")
+        self.assertTrue(kw["initial"][i])
+        self.assertFalse(kw["locked"][i])
+        self.assertEqual(kw["locked_note"][i], "")
+        self.assertIn(("  💖 Favs", "cyan"), kw["extras"][i])
+
+    def test_an_excluded_collection_game_shows_off(self):
         self.favs()
         self.card(collections=["favs"], excluded={"gba": ["gba/Ruby.zip"]})
         changed, calls = self.run_system(toggle())
         _, labels, kw = calls[0]
         i = labels.index("Ruby.zip")
-        self.assertTrue(kw["initial"][i])
-        self.assertEqual([n for n, on in enumerate(kw["locked"]) if on], [i])
-        self.assertEqual(kw["locked_note"][i], "From 💖 Favs; take it off the card to remove this game")
+        self.assertFalse(kw["initial"][i])
+        self.assertFalse(kw["locked"][i])
         self.assertIn(("  💖 Favs", "cyan"), kw["extras"][i])
         self.assertFalse(changed)
 
