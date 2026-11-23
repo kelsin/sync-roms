@@ -44,11 +44,18 @@ MISSING = object()
 
 def allowed():
     """{section: [keys]} that spruce_settings may hold (data/spruce-settings.json)."""
-    return store.repo_json("spruce-settings")["sections"]
+    from . import spruce_syncthing
+    sections = store.repo_json("spruce-settings")["sections"]
+    if not spruce_syncthing.enabled():
+        return sections
+    forced = spruce_syncthing.forced_keys()
+    return {section: [k for k in keys if (section, k) not in forced] for section, keys in sections.items()}
 
 
 def wanted_settings():
-    """[(section, key, value)] of the allowlisted spruce_settings entries; others, and a malformed value, are warned about once."""
+    """[(section, key, value)] of the allowlisted spruce_settings entries; others, and a malformed value, are warned about once.
+    While Syncthing is on, the keys it forces are dropped without a warning."""
+    from . import spruce_syncthing
     saved = usersettings.load_settings().get("spruce_settings")
     if saved is None:
         return []
@@ -56,9 +63,12 @@ def wanted_settings():
         ui.warn("spruce_settings in settings.json must be {section: {key: value}}; ignored")
         return []
     allow = allowed()
+    forced = spruce_syncthing.forced_keys() if spruce_syncthing.enabled() else set()
     result, unknown = [], []
     for section, keys in saved.items():
         for key, value in keys.items():
+            if (section, key) in forced:
+                continue
             if key in allow.get(section, ()):
                 result.append((section, key, value))
             else:
@@ -74,9 +84,11 @@ def install(card, layout_name, base, dry_run):
     The failure count (always 0: a file that can't be used is warned about and skipped)."""
     if layout_name != "spruce":
         return 0
+    from . import spruce_syncthing
     values = wanted()
     extra = wanted_settings()
-    if not values and not extra:
+    forced = spruce_syncthing.forced_settings(card)
+    if not values and not extra and not forced:
         return 0
     path = os.path.join(base, FILE)
     shown = FILE.replace(os.sep, "/")
@@ -109,6 +121,13 @@ def install(card, layout_name, base, dry_run):
         if isinstance(entry, dict) and entry.get("selected") != value:
             entry["selected"] = value
             lines.append(f"   {section} / {key} = {value}")
+    for section, key, value in forced:
+        entry = (options.get(section) or {}).get(key) if isinstance(options.get(section), dict) else None
+        if not isinstance(entry, dict):
+            ui.warn(f"{shown} has no {section} / {key}; update spruceOS for Syncthing saves to work")
+        elif entry.get("selected") != value:
+            entry["selected"] = value
+            lines.append(f"   {section} / {key} = {value} (Syncthing)")
     if json.loads(old) == data:
         return 0
     new = json.dumps(data, indent=_indent(old), ensure_ascii=False) + ("\n" if old.endswith("\n") else "")
