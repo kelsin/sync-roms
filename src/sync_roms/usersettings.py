@@ -44,7 +44,7 @@ def settings_problem():
 
 
 def load_settings():
-    """Saved global settings: {"bucket": S3 bucket name, "root": folder used instead of a bucket, "endpoint": custom S3 endpoint URL, "profile"/"write_profile": aws profiles, "mirror": folder of the local mirror, "surprise_ttl_days": days before a surprise may repeat (default 183), "surprise_excluded_systems": system ids Surprise never picks from, "screenscraper_user"/"screenscraper_password": ScreenScraper login (never shown by config show), "spruce_ra_mode"/"spruce_ra_username"/"spruce_ra_password"/"spruce_ra_api_key"/"spruce_ra_offline_proxy"/"spruce_ra_proxy_stats": RetroAchievements settings written to spruce cards, "spruce_settings": {section: {key: value}} of other spruceOS preferences, from `config import`}.
+    """Saved global settings: {"bucket": S3 bucket name, "root": folder used instead of a bucket, "endpoint": custom S3 endpoint URL, "profile"/"write_profile": aws profiles, "mirror": folder of the local mirror, "surprise_ttl_days": days before a surprise may repeat (default 183), "surprise_excluded_systems": system ids Surprise never picks from, "screenscraper_user"/"screenscraper_password": ScreenScraper login (never shown by config show), "spruce_ra_mode"/"spruce_ra_username"/"spruce_ra_password"/"spruce_ra_api_key"/"spruce_ra_offline_proxy"/"spruce_ra_proxy_stats": RetroAchievements settings written to spruce cards, "spruce_settings": {section: {key: value}} of other spruceOS preferences, from `config import`, "wifi_networks": [{"ssid", "psk"?}] WiFi networks written to spruce cards' wpa_supplicant.conf}.
     {} when the file is missing; stops (exit 3) when it is there but unreadable, so it is never overwritten."""
     settings, problem = _read()
     if problem:

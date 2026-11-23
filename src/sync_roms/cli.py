@@ -10,7 +10,7 @@ from concurrent.futures import ThreadPoolExecutor
 from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError
 
 from . import __version__, budget, cardedit, cardfs, clean, commands, downloads, drivers, edit, external, frontend, inventory, m3u, mirroring, picker, runtime, s3, scrape_plan, store
-from . import muos_collections, nextui_folders, onion_surprise, pico8, raofflineproxy, rocknix_collections, saves, spruce_collections, spruce_bootlogo, spruce_emu, spruce_os, spruce_fixes, spruce_settings, surprise, themeart, ui, usersettings, vita
+from . import muos_collections, nextui_folders, onion_surprise, pico8, raofflineproxy, rocknix_collections, saves, spruce_collections, spruce_bootlogo, spruce_emu, spruce_os, spruce_fixes, spruce_settings, spruce_wifi, surprise, themeart, ui, usersettings, vita
 from . import collections as colls
 
 
@@ -1136,11 +1136,12 @@ def sync_card(args):
                 + raofflineproxy.install(card, layout_name, base, dry_run))
 
     def stage_spruce(dry_run):
-        """Stage boot logos, the newest spruceOS and the saved settings on a spruce card. The failure count."""
+        """Stage boot logos, the newest spruceOS, the saved settings and WiFi networks on a spruce card. The failure count."""
         wrote = []
         failed = spruce_bootlogo.install(card, layout_name, device, base, dry_run, wrote, keep=args.no_delete)
         failed += spruce_os.install(card, layout_name, base, dry_run, wrote, keep=args.no_delete)
         failed += spruce_settings.install(card, layout_name, base, dry_run)
+        failed += spruce_wifi.install(card, layout_name, base, dry_run)
         if clean_card and wrote:
             clean._clean_root = base
         return failed
