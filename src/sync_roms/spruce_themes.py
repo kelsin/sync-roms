@@ -47,7 +47,8 @@ def _unpack(archive, out):
 
 def _read_state():
     try:
-        return json.loads(s3.get_text(runtime.SPRUCE_THEMES_STATE))
+        state = json.loads(s3.get_text(runtime.SPRUCE_THEMES_STATE))
+        return {k: v for k, v in state.items() if isinstance(v, dict) and isinstance(v.get("folder"), str)}
     except s3.ERRORS as e:
         if s3.missing(e):
             return {}
@@ -90,16 +91,18 @@ def update_storage(dry_run=False):
     if todo and not external.find_tool("7z"):
         ui.warn("7z isn't installed, so the PyUI themes can't be unpacked; run `sync-roms tools install`")
         return 1
-    failed = 0
+    failed = done = 0
     try:
         listing = inventory.files(prefix, sizes=False)
         for name in gone:
-            s3.delete_keys([k for k in listing if k.startswith(f"{prefix}{state[name]['folder']}/")])
+            doomed = [k for k in listing if k.startswith(f"{prefix}{state[name]['folder']}/")]
+            s3.delete_keys(doomed)
+            listing = {k: v for k, v in listing.items() if k not in set(doomed)}
             del state[name]
         for a in todo:
             try:
-                state_entry = _refresh(a, state.get(a["name"]), prefix, listing)
-            except (OSError, http.client.HTTPException, subprocess.CalledProcessError, *s3.ERRORS) as e:
+                state_entry = _refresh(a, state, prefix, listing)
+            except (OSError, http.client.HTTPException, subprocess.CalledProcessError, ValueError, *s3.ERRORS) as e:
                 ui.warn(f"{a['name']}: {e}")
                 failed = 1
                 continue
@@ -108,22 +111,29 @@ def update_storage(dry_run=False):
                 failed = 1
             else:
                 state[a["name"]] = state_entry
+                done += 1
         s3.put_text(runtime.SPRUCE_THEMES_STATE, json.dumps(state, indent=2, sort_keys=True) + "\n")
     except s3.ERRORS as e:
         ui.warn(f"Couldn't update the PyUI themes in {s3.location()}: {e}")
         return 1
-    print(ui.green(f"✅ PyUI themes in {s3.location()}: {len(todo)} added or updated, {len(gone)} removed"))
+    print(ui.green(f"✅ PyUI themes in {s3.location()}: {done} added or updated, {len(gone)} removed"))
     return failed
 
 
-def _refresh(asset, old, prefix, listing):
-    """Download, unpack and upload one asset, replacing its folder. Returns its themes.json entry, or None."""
+def _refresh(asset, state, prefix, listing):
+    """Download, unpack and upload one asset, replacing its folder. Returns its themes.json entry, or None when the
+    archive isn't one theme folder. Raises ValueError when the folder is one sync-roms doesn't own for this asset."""
+    old = state.get(asset["name"])
     with tempfile.TemporaryDirectory() as tmp:
         archive, out = os.path.join(tmp, "theme.7z"), os.path.join(tmp, "out")
         _download(asset["browser_download_url"], archive)
         folder = _unpack(archive, out)
         if folder is None:
             return None
+        mine = bool(old) and old["folder"] == folder
+        if not mine and (any(v["folder"] == folder for v in state.values())
+                         or any(k.startswith(f"{prefix}{folder}/") for k in listing)):
+            raise ValueError(f"storage already has a folder {folder!r} that isn't this theme's; left alone")
         files = _files(os.path.join(out, *MEMBER_ROOT, folder))
         keep = {f"{prefix}{folder}/{rel}" for rel in files}
         for rel, path in files.items():

@@ -93,6 +93,34 @@ class Themes(helpers.StorageDir):
         self.run_update([asset()])
         self.assertTrue(self.exists(f"{PREFIX}Mine/config.json"))
 
+    def test_release_folder_matching_custom_folder_skipped(self):
+        self.put(f"{PREFIX}{FOLDER}/mine.png")
+        self.archives[NAME] = (FOLDER, {"config.json": b"{}"})
+        self.assertEqual(self.run_update([asset()]), 1)
+        self.assertTrue(self.exists(f"{PREFIX}{FOLDER}/mine.png"))
+        self.assertFalse(self.exists(f"{PREFIX}{FOLDER}/config.json"))
+        self.assertFalse(self.exists(runtime.SPRUCE_THEMES_STATE) and self.state())
+        self.assertIn(FOLDER, self.warned[0])
+
+    def test_folder_recorded_for_another_asset_skipped(self):
+        self.put(runtime.SPRUCE_THEMES_STATE, json.dumps({"Other.7z": {"updated_at": "x", "size": 1, "folder": FOLDER}}).encode())
+        self.archives[NAME] = (FOLDER, {"config.json": b"{}"})
+        self.assertEqual(self.run_update([asset(), asset("Other.7z", "x", 1)]), 1)
+        self.assertFalse(self.exists(f"{PREFIX}{FOLDER}/config.json"))
+
+    def test_folder_renamed_inside_updated_asset(self):
+        self.put(runtime.SPRUCE_THEMES_STATE, json.dumps({NAME: {"updated_at": "old", "size": 10, "folder": "Old Name"}}).encode())
+        self.put(f"{PREFIX}Old Name/config.json")
+        self.archives[NAME] = (FOLDER, {"config.json": b"{}"})
+        self.assertEqual(self.run_update([asset()]), 0)
+        self.assertFalse(self.exists(f"{PREFIX}Old Name/config.json"))
+        self.assertTrue(self.exists(f"{PREFIX}{FOLDER}/config.json"))
+        self.assertEqual(self.state()[NAME]["folder"], FOLDER)
+
+    def test_malformed_state_entry_is_ignored(self):
+        self.put(runtime.SPRUCE_THEMES_STATE, json.dumps({"Bad.7z": {"size": 1}}).encode())
+        self.assertEqual(self.run_update([]), 0)
+
     def test_bad_member_paths_skipped(self):
         self.archives["Bad.7z"] = (None, {"a": b"a"})
         self.archives[NAME] = (FOLDER, {"config.json": b"{}"})
