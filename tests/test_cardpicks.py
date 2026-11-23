@@ -141,6 +141,25 @@ class Picks(Flow):
         self.assertEqual((sp.games, sp.excluded), ([], set()))
         self.assertTrue(sp.states(p.cover())["gba/Zelda.zip"])
 
+    def test_a_surprise_that_is_also_an_excluded_collection_game_stays_on(self):
+        self.favs()
+        self.card(collections=["favs"], excluded={"gba": ["gba/Ruby.zip"]},
+                  surprises=[{"system": "gba", "bucket": "gba/Ruby.zip", "title": "Ruby"}])
+        p = self.picks()
+        sp = p.system(GBA)
+        self.assertIn("gba/Ruby.zip", sp.surprise)
+        self.assertNotIn("gba/Ruby.zip", sp.collected)
+        self.assertTrue(sp.states(p.cover())["gba/Ruby.zip"])
+        self.switch(p, "gba/Ruby.zip", False)
+        self.assertEqual((sp.games, sp.excluded), ([], {"gba/Ruby.zip"}))
+        self.assertTrue(sp.states(p.cover())["gba/Ruby.zip"])
+
+    def test_on_card_of_a_surprise_that_is_also_an_excluded_collection_game_is_true(self):
+        self.favs()
+        self.card(collections=["favs"], excluded={"gb": ["gb/Red.gb"]},
+                  surprises=[{"system": "gb", "bucket": "gb/Red.gb", "title": "Red"}])
+        self.assertTrue(self.picks().on_card("gb/Red.gb"))
+
     def test_a_surprise_game_on_a_system_not_shown_is_on_the_card(self):
         self.card(surprises=[{"title": "Red", "system": "gb", "bucket": "gb/Red.gb"}])
         p = self.picks()

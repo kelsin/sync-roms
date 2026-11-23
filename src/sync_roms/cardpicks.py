@@ -1,17 +1,18 @@
 """A card's picks as the card editor edits them: the card loaded once, each system's games listed from storage when
 first shown, and every edit saved to cards.json together."""
-from . import collections as colls, edit, listedit, m3u, names, store, surprise, vita
+from . import collections as colls, edit, listedit, m3u, names, store, vita
 
 
 class SystemPicks:
     """One system's games on a card as edited so far: every file of its storage folder (in_storage) as rows, the
     card's direct picks (games) and exclusions, and the games its collections and surprises bring (locked_from, by
-    label): surprises stay on (surprise), collection games are on unless excluded (collected)."""
+    label): the card's current surprises stay on (surprise), the other collection games are on unless excluded
+    (collected)."""
 
-    def __init__(self, system, in_storage, games, excluded, locked_from):
+    def __init__(self, system, in_storage, games, excluded, locked_from, surprise):
         self.system, self.bucket, self.in_storage = system, system["bucket"], in_storage
         self.games, self.excluded, self.locked_from = games, excluded, locked_from
-        self.surprise = {k for k, label in locked_from.items() if label == surprise.LABEL}
+        self.surprise = set(surprise)
         self.collected = set(locked_from) - self.surprise
         self.rows = edit.system_rows({**system, "games": games}, in_storage)
         self.titles = {k: title for _, k, title, _ in self.rows}
@@ -83,6 +84,8 @@ class CardPicks:
         self.system_names = {x["bucket"]: x["name"] for x in store.repo_json("systems")}
         locked = store.card_locked_games(self._entry(), {c["id"]: c for c in colls.load_collections()})
         self.locked_from = {b: {g["bucket"]: g["from"] for g in games} for b, games in locked.items()}
+        # the current surprises' keys by system, whatever label locked_from gave them (a collection's comes first)
+        self.surprises = {b: {g["bucket"] for g in games} for b, games in store.card_locked_games(self._entry(), {}).items()}
         self._systems = {}  # {system bucket: SystemPicks}
         self._picks = {}  # {system bucket: [games]}: direct picks on a system not shown, once a variant changes them
         self._excluded = {}  # {system bucket: {keys}}: exclusions on a system not shown, as edited
@@ -101,7 +104,8 @@ class CardPicks:
             excluded = self.excluded_of(bucket)
             self._picks.pop(bucket)
             self._excluded.pop(bucket)
-            self._systems[bucket] = SystemPicks(system, in_storage, games, excluded, self.locked_from.get(bucket, {}))
+            self._systems[bucket] = SystemPicks(system, in_storage, games, excluded, self.locked_from.get(bucket, {}),
+                                                self.surprises.get(bucket, ()))
         return self._systems[bucket]
 
     def cover(self):
@@ -133,11 +137,10 @@ class CardPicks:
         bucket = key.partition("/")[0]
         if bucket in self._systems:
             return self._systems[bucket].states(self.cover()).get(key, False)
-        locked = self.locked_from.get(bucket, {})
-        if locked.get(key) == surprise.LABEL:
+        if key in self.surprises.get(bucket, ()):
             return True
         return self.full(bucket) or ((any(g.get("bucket") == key for g in self.picks_of(bucket)) or key in self.cover()
-                                      or key in locked) and key not in self.excluded_of(bucket))
+                                      or key in self.locked_from.get(bucket, {})) and key not in self.excluded_of(bucket))
 
     def toggle_variant(self, variant):
         """Add or remove a variant (and its files) as a direct pick; one the card syncs whole or through a set or

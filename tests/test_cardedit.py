@@ -473,6 +473,18 @@ class Flow(DataDir):
         self.assertIn(("  💖 Favs", "cyan"), kw["extras"][i])
         self.assertFalse(changed)
 
+    def test_a_surprise_that_is_also_an_excluded_collection_game_is_on_locked_and_marked_surprise(self):
+        self.favs()
+        self.card(collections=["favs"], excluded={"gba": ["gba/Ruby.zip"]},
+                  surprises=[{"system": "gba", "bucket": "gba/Ruby.zip", "title": "Ruby"}])
+        _, calls = self.run_system(toggle())
+        _, labels, kw = calls[0]
+        i = labels.index("Ruby.zip")
+        self.assertTrue(kw["initial"][i])
+        self.assertTrue(kw["locked"][i])
+        self.assertEqual(kw["locked_note"][i], "From 🎁 Surprise; take it off the card to remove this game")
+        self.assertIn(("  🎁 Surprise", "cyan"), kw["extras"][i])
+
     def test_collection_games_count_in_the_game_view_and_system_list(self):
         self.favs()
         self.card(size="1 GB", collections=["favs"])

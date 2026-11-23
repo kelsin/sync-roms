@@ -718,7 +718,7 @@ def _row_extras(sp, work, key, notes, state):
     if key in notes:  # the note ends in the set's emoji and name (edit.cover_notes)
         out[1] = (f"  {notes[key].split(': ', 1)[-1]}", "cyan" if state else "dim")
     if key in sp.locked_from:
-        out[2] = (f"  {sp.locked_from[key]}", "cyan")
+        out[2] = (f"  {surprise.LABEL if key in sp.surprise else sp.locked_from[key]}", "cyan")
     if key in costs:
         out[3] = (f"  {size_text(costs[key])}", "dim")
     elif key in sp.in_storage:
@@ -736,7 +736,7 @@ def _variant_mark(picks, key, on_card=None):
 
 def _locked_note(sp, key):
     """Why a surprise game row can't be switched off ("" for any other row)."""
-    return f"From {sp.locked_from[key]}; take it off the card to remove this game" if key in sp.surprise else ""
+    return f"From {surprise.LABEL}; take it off the card to remove this game" if key in sp.surprise else ""
 
 
 def _toggle_variant(picks, key, title):
