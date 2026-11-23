@@ -1018,12 +1018,13 @@ class ApplyCommandTest(CommandTest):
 
 class SavesCliTest(unittest.TestCase):
     def test_completion_and_words(self):
-        self.assertEqual(commands.second_words()["saves"], ["stash", "apply"])
+        self.assertEqual(commands.second_words()["saves"], ["stash", "apply", "manage"])
         self.assertIn("saves", helpers.script_for("bash"))
         self.assertIn("--retroarch", commands.all_flags())
         from sync_roms import cli
         self.assertIn("saves", cli.SUBCOMMANDS)
         self.assertIn("sync-roms saves stash", cli.TOPICS["saves"])
+        self.assertIn("sync-roms saves manage", cli.TOPICS["saves"])
         self.assertIn("saves", commands.COMMANDS)
 
 

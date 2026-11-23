@@ -26,7 +26,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "flash": ("", "write a Knulli, BaseOS, muOS, ROCKNIX or OakMoss image from storage's os/ to an SD card"),
     "umount": ("", "clean the macOS junk off an SD card and unmount it"),
     "cards": ("[edit|list|new|set|rename|convert|clean|delete|copy|export|import]", "list and manage the cards you've synced"),
-    "saves": ("stash|apply [CARD] [--retroarch DIR]", "copy RetroArch saves and states off a card, or onto one"),
+    "saves": ("stash|apply|manage [CARD] [--retroarch DIR]", "copy RetroArch saves and states off a card, or onto one, or tidy the stashes"),
     "devices": ("[ID]", "list the supported devices, or one device's systems"),
     "layouts": ("[ID]", "list the firmware card layouts, or one layout's folders and devices"),
     "upload": ("[DIR]", "upload ROMs to the storage folder of a system you pick"),
@@ -192,6 +192,7 @@ TOPICS = {
     "saves": """
   sync-roms saves stash [CARD] [--retroarch DIR] [--dry-run]    copy picked saves and states off the card
   sync-roms saves apply [CARD] [--retroarch DIR] [--dry-run]    copy picked stashed ones onto the card
+  sync-roms saves manage [--dry-run] [--yes]                    inspect, label, move, prune and delete stashes
 
   CARD is the card's folder (default: the current directory); it needs a layout (`sync-roms cards set NAME --layout`).
   stash lists the card's games that have RetroArch saves (.srm and .rtc) or states (.state, .stateN, .state.auto and their
@@ -202,6 +203,10 @@ TOPICS = {
   apply lists the stashes of systems the card syncs (one per game) and copies them into the card's RetroArch folders.
   A different file already there is only overwritten after you confirm (default no); identical ones are skipped.
   A stash without a core going to a layout sorted by core asks which core folder to use (skipped with --yes).
+  manage lists every stash (unreadable ones too, which can only be inspected and deleted). Space picks; m and d act on
+  the picked stashes, else the highlighted one. Enter lists a stash's files, w labels it, m moves it to another system
+  (its game never changes), p picks all but the newest N of each game, d deletes after you confirm (default no; it
+  can't be undone; --yes skips the question). --dry-run changes nothing and says what it would do.
 
   Layout    RetroArch folder             saves            states
   esde      RetroArch                    saves/<core>     states/<core>

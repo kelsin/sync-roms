@@ -1,9 +1,10 @@
 """Operations behind `sync-roms saves manage`: list, label, move, prune and delete stashes."""
+import datetime
 import json
 import os
 import shutil
 
-from . import muos_saves, saves, store, ui
+from . import muos_saves, picker, saves, store, ui
 
 
 def _real(path):
@@ -177,3 +178,162 @@ def prune_picks(rows, keep):
         for i in idx[keep:]:
             picks[i] = True
     return picks
+
+
+KEY_HELP = [("Space/Tab", "pick the stash"), ("Enter", "list the stash's files"), ("w", "label the stash"),
+            ("m", "move the picked stashes (or this one) to another system"),
+            ("p", "pick all but the newest N stashes of each game"),
+            ("d", "delete the picked stashes (or this one)"), ("Esc", "done")]
+
+
+def _note(text):
+    if not picker.queue_note(text):
+        ui.warn(text)
+
+
+def _label(row):
+    if row["unreadable"]:
+        return row["rel_dir"]
+    rel = muos_saves.stash_rel(row)
+    return row["game"] + (f" · {rel}" if rel else "")
+
+
+def _extras(row, names):
+    if row["unreadable"]:
+        return [("", "dim"), ("", ""), ("", "dim"), ("", ""), (ui.human_size(row["size"]), ""), ("", "cyan"),
+                ("unreadable", "red"), ("", "dim")]
+    return [(names.get(row["system"], row["system"]), "dim"), (f"from {row['card']}", ""),
+            (row["stashed"][:16].replace("T", " "), "dim"), (saves._counts([f["kind"] for f in row["files"]]), ""),
+            (ui.human_size(row["size"]), ""), (row["core"] or "", "cyan"),
+            (f"{len(row['missing'])} missing" if row["missing"] else "", "red"), (row.get("note", ""), "dim")]
+
+
+def _file_rows(row):
+    """(label, kind, path, mark) of each file of a stash: those stash.json lists, then the folder's others."""
+    if row["unreadable"]:
+        return [(n, (saves.classify(n) or (None, ""))[1], os.path.join(row["dir"], n), "") for n in row["files"]]
+    out = [(saves._rel_prefix(f) + f["name"], f["kind"], os.path.join(row["dir"], f["name"]),
+            "missing" if f["name"] in row["missing"] else "") for f in row["files"]]
+    return out + [(n, "", os.path.join(row["dir"], n), "extra") for n in row["extra"]]
+
+
+def _show_files(row):
+    files = _file_rows(row)
+    extras = []
+    for _, kind, path, mark in files:
+        try:
+            st = os.stat(path)
+            size, when = ui.human_size(st.st_size), datetime.datetime.fromtimestamp(st.st_mtime).strftime("%Y-%m-%d %H:%M")
+        except OSError:
+            size = when = ""
+        extras.append([(kind, "dim"), (size, ""), (when, "dim"), (mark, "red" if mark == "missing" else "dim")])
+    title = row["rel_dir"] if row["unreadable"] else row["game"]
+    picker.filter_list(f"💾 {title} files", [f[0] for f in files], extras=extras, hint="Esc back")
+
+
+def _describe(row, names):
+    if row["unreadable"]:
+        return f"{row['rel_dir']} (unreadable)"
+    parts = [row["game"], names.get(row["system"], row["system"]), row["stashed"][:16].replace("T", " ")]
+    return " · ".join(parts + ([row["note"]] if row.get("note") else []))
+
+
+@picker.one_app
+def _manage(rows, systems, dry_run):
+    """The stash list until Esc; (deleted, moved, labelled) counts."""
+    names = {s["bucket"]: s.get("name", s["bucket"]) for s in systems}
+    session = {"sel": [False] * len(rows)}
+    deleted, moved, labelled = 0, 0, set()
+
+    def on_note(i, text):
+        row = rows[i]
+        if row["unreadable"]:
+            return "This stash can't be read, so it can't be labelled"
+        try:
+            set_label(row, text, dry_run=dry_run)
+        except (OSError, ValueError) as e:
+            return f"Couldn't label {row['game']}: {e}"
+        labelled.add(id(row))
+        what = f"labelled {text.strip()!r}" if text.strip() else "label removed"
+        return f"{'Would be ' if dry_run else ''}{what}: {row['game']}"
+
+    while rows:
+        state = picker.filter_list(
+            "🗂️ Stashed saves", [_label(r) for r in rows], multi=True, initial=[False] * len(rows), esc_asks=False,
+            extras=[_extras(r, names) for r in rows], session=session, hotkeys=("enter", "m", "p", "d"),
+            on_note=on_note, note_text=lambda i: rows[i].get("note", ""),
+            hint="? help · Space toggle · Enter files · w label · m move · p prune · d delete · Esc done",
+            key_help=KEY_HELP)
+        if not isinstance(state, tuple):
+            break
+        key, i = state
+        targets = [r for r, on in zip(rows, session["sel"]) if on] or ([rows[i]] if i is not None else [])
+        if key == "enter" and i is not None:
+            _show_files(rows[i])
+        elif key == "m" and targets:
+            current = next((n for n, s in enumerate(systems) if s["bucket"] == targets[0].get("system")), 0)
+            pick = picker.filter_list("📦 Move to which system?", [s.get("name", s["bucket"]) for s in systems],
+                                      cursor=current, hint="Enter move · Esc cancel")
+            if pick is None:
+                continue
+            for r in targets:
+                try:
+                    old, new = r["dir"], move(r, systems[pick], systems, dry_run=dry_run)
+                except ValueError as e:
+                    _note(f"{_label(r)}: {e}")
+                    continue
+                except OSError as e:
+                    ui.warn(f"Couldn't move {r['dir']}: {e}")
+                    continue
+                if new:
+                    moved += 1
+                    if dry_run:
+                        print(ui.dim(f"  {old} → {new}"))
+        elif key == "p":
+            answer = ui.ask("✂️  Keep how many per game? [1] ").strip() or "1"
+            if not answer.isdigit() or int(answer) < 1:
+                _note(f"Keep how many: {answer!r} isn't a positive whole number")
+                continue
+            session["sel"] = prune_picks(rows, int(answer))
+            _note(f"Picked {sum(session['sel'])} stash(es) to delete: press d")
+        elif key == "d" and targets:
+            print(ui.yellow(f"🗑️  {len(targets)} stash(es) to delete:"))
+            for r in targets:
+                print(ui.dim(f"  {_describe(r, names)}"))
+            if not ui.ASSUME_YES and not ui.confirm(f"Delete {len(targets)} stash(es)? This can't be undone.",
+                                                    default=False):
+                continue
+            try:
+                delete(targets, dry_run=dry_run)
+            except ValueError as e:
+                ui.warn(str(e))
+                continue
+            gone = {id(r) for r in targets if dry_run or not os.path.exists(r["dir"])}
+            if dry_run:
+                for r in targets:
+                    print(ui.dim(f"  would delete {r['dir']}"))
+            deleted += len(gone)
+            kept = [n for n, r in enumerate(rows) if id(r) not in gone]
+            if session.get("row") is not None:
+                session["row"] = min(sum(1 for n in kept if n < session["row"]), max(len(kept) - 1, 0))
+            session["sel"] = [session["sel"][n] and id(rows[n]) not in gone for n in kept]
+            rows[:] = [rows[n] for n in kept]
+    return deleted, moved, len(labelled)
+
+
+def manage_command(args):
+    """`saves manage`: list every stash to inspect, label, move to another system, prune and delete."""
+    if not ui.has_terminal():
+        ui.fail("`saves manage` needs a terminal to pick from", 2)
+    rows = list_rows()
+    if not rows:
+        print(ui.yellow(f"↩️  No stashed saves in {saves.stash_root()}"))
+        return 0
+    deleted, moved, labelled = _manage(rows, store.load_catalog()["systems"], args.dry_run)
+    if not (deleted or moved or labelled):
+        print(ui.yellow("↩️  Nothing changed"))
+    elif args.dry_run:
+        print(ui.yellow(f"🧪 Would delete {deleted} stash(es), move {moved}, label {labelled}"))
+    else:
+        print(ui.green(f"🗑️  Deleted {deleted} stash(es), moved {moved}, labelled {labelled}"))
+    return 0

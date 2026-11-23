@@ -178,7 +178,7 @@ Every mode is a command (plain `sync-roms [CARD]` syncs a card):
 | `flash` | [write a Knulli, BaseOS, muOS, ROCKNIX or OakMoss image](#flashing-an-sd-card-flash) from storage's `os/` to an SD card, macOS only | |
 | `umount` | pick an SD card, remove macOS's junk from it as a sync does (`.metadata_never_index`, `.fseventsd`, `._` files) and unmount it, macOS only | |
 | `cards list\|new\|set\|rename\|convert\|clean\|delete\|copy\|export\|import` | [manage cards](#cards-cards) | |
-| `saves stash\|apply [CARD]` | [copy RetroArch saves and states](#moving-saves-between-cards-saves) off a card, or stashed ones onto a card | |
+| `saves stash\|apply [CARD]`, `saves manage` | [copy RetroArch saves and states](#moving-saves-between-cards-saves) off a card, or stashed ones onto a card; inspect, label, move, prune and delete stashes | |
 | `devices [ID]` | list the supported devices with their chip and the number of systems each one gets, or one device's layouts, note and systems | `--devices` |
 | `layouts [ID]` | list the layouts, or one layout's folders and the devices that run it | |
 | `upload [DIR]` | [upload ROMs](#uploading-roms-upload) to storage | `--upload` |
@@ -481,6 +481,8 @@ Both take the folder (default: the current directory) of a card with a layout (`
 - **ROCKNIX**: only RetroArch's files are covered. Saves of standalone emulators (PSP, PS1 memory cards, N64 and the like) are not stashed or applied.
 
 States only load in the core they were made with (`gpSP` states don't load in `mGBA`); `.srm` saves (and `.rtc`) usually work in any core of the system.
+
+`sync-roms saves manage` lists every stash in the data folder (game, system, card, date, files, size, core, missing files and label; a stash whose `stash.json` can't be read is listed by its folder and can only be inspected and deleted) and needs a terminal. `Space` picks stashes; `m` and `d` act on the picked ones, or on the highlighted one when none are picked. `Enter` lists a stash's files (marking missing ones and files `stash.json` doesn't list), `w` labels it (an empty label removes it), `m` moves it to another system (the game never changes; a muOS stash goes only to a system with a muOS folder), `p` asks how many to keep per game (default 1) and picks the older rest, and `d` deletes the picked stashes after listing them and asking (default no). A delete can't be undone; `--yes` skips the question. `--dry-run` changes nothing and prints what each action would do.
 
 ## Uploading ROMs (`upload`)
 

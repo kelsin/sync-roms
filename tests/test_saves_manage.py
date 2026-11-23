@@ -14,7 +14,7 @@ sys.path.insert(0, os.path.join(ROOT, "src"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 import helpers  # noqa: E402
-from sync_roms import saves, saves_manage  # noqa: E402
+from sync_roms import picker, saves, saves_manage, store, ui  # noqa: E402
 
 GB = {"bucket": "gb", "folders": {"muos": "GB"}}
 NOMUOS = {"bucket": "gb", "folders": {"onion": "GB"}}
@@ -205,6 +205,141 @@ class OpsTest(helpers.DataDir):
         self.assertTrue(saves_manage.inside(os.path.join(saves.stash_root(), "gba")))
         self.assertFalse(saves_manage.inside(saves.stash_root()))
         self.assertFalse(saves_manage.inside(self.src))
+
+
+class SessionFree:
+    """picker.one_app runs its function in place (no Textual app) while has_terminal is true."""
+    def run(self, fn, args, kwargs):
+        return fn(*args, **kwargs)
+
+
+SYSTEMS = [{"name": "Game Boy", "bucket": "gb", "folders": {"muos": "GB"}},
+           {"name": "Game Boy Advance", "bucket": "gba", "folders": {"muos": "GBA"}}]
+
+
+class ManageCommandTest(helpers.Cmd):
+    def setUp(self):
+        super().setUp()
+        self.src = self.enterContext(tempfile.TemporaryDirectory())
+        catalog = {"layouts": {}, "systems": SYSTEMS, "devices": []}
+        for p in (mock.patch.object(store, "load_catalog", lambda: catalog),
+                  mock.patch.object(ui, "has_terminal", lambda: True),
+                  mock.patch.object(picker, "_Session", SessionFree)):
+            self.enterContext(p)
+        self.calls = []
+
+    def lists(self, *answers):
+        """picker.filter_list answers in turn: a value, or a callable(labels) giving one; calls are kept."""
+        it = iter(answers)
+
+        def fake(title, labels, multi=False, **kw):
+            self.calls.append((title, list(labels), kw))
+            a = next(it)
+            return a(labels) if callable(a) else a
+        self.enterContext(mock.patch.object(picker, "filter_list", fake))
+
+    def stash(self, game="Game", system="gba", day=1):
+        entries = []
+        for name, data in {f"{game}.srm": "save", f"{game}.state.auto": "st"}.items():
+            p = os.path.join(self.src, system, game, name)
+            helpers.touch(p, data)
+            entries.append({"path": p, "name": name, "kind": saves.classify(name)[1]})
+        return saves.write_stash("X", "onion", system, game, "gpSP", entries,
+                                 now=datetime.datetime(2026, 1, day, 0, 0, 0))
+
+    def test_no_stashes_says_so(self):
+        code, out, err = self.run_cmd("saves", "manage")
+        self.assertEqual(code, 0, err)
+        self.assertIn("No stashed saves", out)
+
+    def test_delete_highlighted_after_confirm(self):
+        d = self.stash()
+        self.lists(("d", 0), None)
+        with mock.patch.object(ui, "confirm", lambda *a, **k: True):
+            code, out, err = self.run_cmd("saves", "manage")
+        self.assertEqual(code, 0, err)
+        self.assertFalse(os.path.exists(d))
+        self.assertIn("Deleted 1 stash(es)", out)
+
+    def test_delete_declined_keeps_it(self):
+        d = self.stash()
+        self.lists(("d", 0), None)
+        with mock.patch.object(ui, "confirm", lambda *a, **k: False):
+            code, out, err = self.run_cmd("saves", "manage")
+        self.assertEqual(code, 0, err)
+        self.assertTrue(os.path.isdir(d))
+        self.assertIn("Nothing changed", out)
+
+    def test_yes_skips_the_question(self):
+        d = self.stash()
+        self.lists(("d", 0), None)
+        with mock.patch.object(ui, "confirm", side_effect=AssertionError("asked")):
+            code, out, err = self.run_cmd("saves", "manage", "--yes")
+        self.assertEqual(code, 0, err)
+        self.assertFalse(os.path.exists(d))
+
+    def test_dry_run_deletes_nothing(self):
+        d = self.stash()
+        self.lists(("d", 0), None)
+        with mock.patch.object(ui, "confirm", lambda *a, **k: True):
+            code, out, err = self.run_cmd("saves", "manage", "--dry-run")
+        self.assertEqual(code, 0, err)
+        self.assertTrue(os.path.isfile(os.path.join(d, "Game.srm")))
+        self.assertIn("Would delete 1", out)
+
+    def test_move_to_another_system(self):
+        d = self.stash()
+        self.lists(("m", 0), 0, None)
+        code, out, err = self.run_cmd("saves", "manage")
+        self.assertEqual(code, 0, err)
+        self.assertEqual(self.calls[1][1], ["Game Boy", "Game Boy Advance"])
+        self.assertEqual(self.calls[1][2]["cursor"], 1)
+        self.assertTrue(os.path.isfile(os.path.join(saves.stash_root(), "gb", "Game", os.path.basename(d), "Game.srm")))
+        self.assertFalse(os.path.exists(d))
+        self.assertIn("moved 1", out)
+
+    def test_label_writes_the_note(self):
+        d = self.stash()
+
+        def label(labels):
+            kw = self.calls[-1][2]
+            self.assertEqual(kw["note_text"](0), "")
+            self.assertIn("boss", kw["on_note"](0, "boss"))
+            return None
+        self.lists(label)
+        code, out, err = self.run_cmd("saves", "manage")
+        self.assertEqual(code, 0, err)
+        with open(os.path.join(d, "stash.json")) as f:
+            self.assertEqual(json.load(f)["note"], "boss")
+        self.assertIn("labelled 1", out)
+
+    def test_prune_then_delete(self):
+        old, mid, new = self.stash(day=1), self.stash(day=2), self.stash(day=3)
+
+        def picks(labels):
+            self.assertEqual(self.calls[-1][2]["session"]["sel"], [False, True, True])
+            return ("d", 0)
+        self.lists(("p", 0), picks, None)
+        with mock.patch.object(ui, "ask", lambda *a: "1"), mock.patch.object(ui, "confirm", lambda *a, **k: True):
+            code, out, err = self.run_cmd("saves", "manage")
+        self.assertEqual(code, 0, err)
+        self.assertEqual([os.path.exists(d) for d in (old, mid, new)], [False, False, True])
+        self.assertIn("Deleted 2 stash(es)", out)
+
+    def test_enter_lists_files(self):
+        self.stash()
+        self.lists(("enter", 0), None, None)
+        code, out, err = self.run_cmd("saves", "manage")
+        self.assertEqual(code, 0, err)
+        self.assertEqual(self.calls[1][1], ["Game.srm", "Game.state.auto"])
+        self.assertIn("Nothing changed", out)
+
+    def test_needs_a_terminal(self):
+        self.stash()
+        with mock.patch.object(ui, "has_terminal", lambda: False):
+            code, _, err = self.run_cmd("saves", "manage")
+        self.assertEqual(code, 2)
+        self.assertIn("`saves manage` needs a terminal", err)
 
 
 if __name__ == "__main__":

@@ -1227,6 +1227,11 @@ def saves_apply(args):
     return saves.apply_command(args)
 
 
+def saves_manage(args):
+    from . import saves_manage
+    return saves_manage.manage_command(args)
+
+
 def umount_cmd(args):
     from . import umount
     return umount.run(args)
@@ -1250,7 +1255,7 @@ def second_words():
     words["themes"] = ["update", "pick"]
     words["download"] = ["pico8"]
     words["cards"] = ["edit", "list", "new", "set", "rename", "convert", "clean", "delete", "copy", "export", "import"]
-    words["saves"] = ["stash", "apply"]
+    words["saves"] = ["stash", "apply", "manage"]
     words["config"] = ["show", "path", "set", "unset", "import"]
     words["cache"] = ["update"]
     words["completion"] = ["bash", "zsh", "fish"]
@@ -1387,6 +1392,7 @@ def build_parser():
     for name, fn in (("stash", saves_stash), ("apply", saves_apply)):
         p = svsub.add_parser(name, allow_abbrev=False); common(p, card=False); p.add_argument("card", nargs="?")
         p.add_argument("--retroarch", metavar="DIR"); p.set_defaults(fn=fn)
+    p = svsub.add_parser("manage", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=saves_manage)
 
     p = sub.add_parser("layouts", allow_abbrev=False); common(p, card=False); p.add_argument("layout_id", nargs="?"); p.add_argument("--json", action="store_true"); p.set_defaults(fn=layouts_cmd)
     p = sub.add_parser("config", allow_abbrev=False); common(p, card=False); p.add_argument("action", choices=["show", "path", "set", "unset", "import"], nargs="?", default="show")
