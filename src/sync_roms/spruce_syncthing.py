@@ -4,7 +4,7 @@ import json
 import os
 import re
 
-from . import cardfs, spruce_emu, store, ui, usersettings
+from . import applied, cardfs, spruce_emu, store, ui, usersettings
 
 NO_WIFI_SKIPS = ("Network Settings", "enableSyncthing")
 
@@ -32,9 +32,9 @@ def forced_settings(card):
             for key, value in keys.items() if not (no_wifi and (section, key) == NO_WIFI_SKIPS)]
 
 
-def core_writes(base):
-    """(writes [(path, text)], lines, warnings): each Emu/<FOLDER>/config.json that exists, with the Syncthing core selected in every Emulator* entry that offers it."""
-    writes, lines, warnings, seen = [], [], [], set()
+def _cores(base, warnings):
+    """Yield (folder, core, path, old text, config) for each Emu/<FOLDER>/config.json that exists and can be read."""
+    seen = set()
     systems = {s["bucket"]: s for s in store.repo_json("systems")}
     for system, core in data()["cores"].items():
         folder = systems.get(system, {}).get("folders", {}).get("spruce")
@@ -52,17 +52,34 @@ def core_writes(base):
         except (OSError, ValueError):
             warnings.append(f"Emu/{folder}/config.json can't be read; its core left as it is")
             continue
-        options = config.get("menuOptions")
+        yield folder, core, path, old, config
+
+
+def _offering(config, core):
+    """[entry dict] of the config's Emulator* entries that offer the core."""
+    options = config.get("menuOptions")
+    return [entry for key, entry in (options.items() if isinstance(options, dict) else [])
+            if key.startswith("Emulator") and isinstance(entry, dict) and isinstance(entry.get("options"), list)
+            and core in entry["options"]]
+
+
+def core_writes(base):
+    """(writes [(path, text)], lines, warnings): each Emu/<FOLDER>/config.json that exists, with the Syncthing core selected in every Emulator* entry that offers it."""
+    writes, lines, warnings = [], [], []
+    for folder, core, path, old, config in _cores(base, warnings):
         changed = False
-        for key, entry in (options.items() if isinstance(options, dict) else []):
-            if (key.startswith("Emulator") and isinstance(entry, dict) and isinstance(entry.get("options"), list)
-                    and core in entry["options"] and entry.get("selected") != core):
+        for entry in _offering(config, core):
+            if entry.get("selected") != core:
                 entry["selected"] = core
                 changed = True
         if changed:
             writes.append((path, spruce_emu._dump(config, old)))
             lines.append(f"   Emu/{folder}: {core}")
     return writes, lines, warnings
+
+
+def _pattern(key):
+    return re.compile(rf"^[ \t]*{re.escape(key)}[ \t]*=.*?(?=\r?$)", re.M)
 
 
 def retroarch_writes(base):
@@ -81,7 +98,7 @@ def retroarch_writes(base):
         new = old
         for key, value in data()["retroarch"].items():
             line = f'{key} = "{value}"'
-            pattern = re.compile(rf"^[ \t]*{re.escape(key)}[ \t]*=.*?(?=\r?$)", re.M)
+            pattern = _pattern(key)
             if pattern.search(new):
                 updated = pattern.sub(lambda m: m.group(0) if m.group(0) == line or _same(m.group(0), value) else line, new)
             else:
@@ -97,6 +114,28 @@ def retroarch_writes(base):
 def _same(line, value):
     """True when a cfg line already holds value (quoted or not)."""
     return line.split("=", 1)[1].strip().strip('"') == value
+
+
+def entries(card, base):
+    """[Entry] for every Syncthing core and RetroArch save setting, changed or not; [] when Syncthing is off."""
+    if not enabled():
+        return []
+    result = []
+    for folder, core, _, _, config in _cores(base, []):
+        offering = _offering(config, core)
+        if offering:
+            old = next((e.get("selected") for e in offering if e.get("selected") != core), core)
+            result.append(applied.Entry(f"Emu/{folder}/config.json", "core", old, core, False))
+    for path in sorted(glob.glob(os.path.join(glob.escape(base), "Saves", "ra-configs", "retroarch-*.cfg"))):
+        try:
+            text = cardfs.read(path).decode("utf-8")
+        except (OSError, ValueError):
+            continue
+        for key, value in data()["retroarch"].items():
+            found = _pattern(key).search(text)
+            old = found.group(0).split("=", 1)[1].strip().strip('"') if found else None
+            result.append(applied.Entry(f"Saves/ra-configs/{os.path.basename(path)}", key, old, value, False))
+    return result
 
 
 def run(card, layout_name, base, dry_run):

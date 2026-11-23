@@ -2,7 +2,7 @@
 (shared by every spruceOS device using the card) in spruceOS's own format, keeping networks added on the device."""
 import os
 
-from . import cardfs, ui, usersettings
+from . import applied, cardfs, ui, usersettings
 
 FILE = os.path.join("Saves", "spruce", "wpa_supplicant.conf")
 HEADER = "ctrl_interface=/var/run/wpa_supplicant\nupdate_config=1\n\n"
@@ -80,6 +80,18 @@ def merge(text, ssid, psk):
         text += "\n"
     text += "\nnetwork={\n" + "".join(f"    {line}\n" for line in body(ssid, psk)) + "}\n"
     return text, "update" if mine else "add"
+
+
+def entries(base):
+    """[Entry] per saved network: the old value is "present" when the card has the network with the same password,
+    "different" when it has it with another, None when it's missing. The password is never in an entry."""
+    path = os.path.join(base, FILE)
+    text = cardfs.text(path) if os.path.isfile(path) else ""
+    if broken(text):
+        text = ""
+    shown = FILE.replace(os.sep, "/")
+    states = {None: "present", "update": "different", "add": None}
+    return [applied.Entry(shown, f"network {ssid}", states[merge(text, ssid, psk)[1]], "present", False) for ssid, psk in wanted()]
 
 
 def install(card, layout_name, base, dry_run):

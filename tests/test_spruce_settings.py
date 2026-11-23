@@ -136,6 +136,41 @@ RICH = {"menuOptions": {
     "RetroAchievements Settings": {"username": {"selected": "me"}, "password": {"selected": "pw9"}}}}
 
 
+class Entries(InstallBase):
+    def entries(self, **settings):
+        if not self.syncthing:
+            settings.setdefault("spruce_syncthing", False)
+        usersettings.save_settings(settings)
+        with contextlib.redirect_stderr(io.StringIO()):
+            return spruce_settings.entries("c", self.card)
+
+    def test_entries_lists_unchanged_too(self):
+        self.put_config({"menuOptions": {"RetroAchievements Settings": {"modeToggle": {"selected": "Casual"}}}})
+        found = {e.key: e for e in self.entries(spruce_ra_mode="Casual", spruce_ra_username="me")}
+        self.assertEqual(found["RetroAchievements Settings / modeToggle"].old, "Casual")
+        self.assertEqual(found["RetroAchievements Settings / modeToggle"].new, "Casual")
+        self.assertIsNone(found["RetroAchievements Settings / username"].old)
+        self.assertEqual(found["RetroAchievements Settings / username"].new, "me")
+        self.assertEqual({e.where for e in found.values()}, {"Saves/spruce/spruce-config.json"})
+
+    def test_entries_hides_password(self):
+        self.put_config(BASE)
+        found = {e.key: e for e in self.entries(spruce_ra_password="pw1", spruce_ra_api_key="k", spruce_ra_username="me")}
+        self.assertTrue(found["RetroAchievements Settings / password"].secret)
+        self.assertTrue(found["RetroAchievements Settings / webApiKey"].secret)
+        self.assertFalse(found["RetroAchievements Settings / username"].secret)
+
+    def test_entries_empty_when_the_file_is_missing_or_unreadable(self):
+        self.assertEqual(self.entries(spruce_ra_mode="Casual"), [])
+        self.put_config(None, raw="not json")
+        self.assertEqual(self.entries(spruce_ra_mode="Casual"), [])
+
+    def test_entries_leaves_out_settings_the_file_lacks(self):
+        self.put_config({"menuOptions": {"Emulator Settings": {"raAutoSave": {"selected": "True"}}}})
+        keys = [e.key for e in self.entries(spruce_settings={"Emulator Settings": {"raAutoSave": "False"}})]
+        self.assertEqual(keys, ["Emulator Settings / raAutoSave"])
+
+
 class SharedSettings(Install):
     def shared(self, data):
         usersettings.save_settings({"spruce_settings": data})

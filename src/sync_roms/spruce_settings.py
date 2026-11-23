@@ -3,7 +3,7 @@ import json
 import os
 import re
 
-from . import cardfs, store, ui, usersettings
+from . import applied, cardfs, store, ui, usersettings
 
 FILE = os.path.join("Saves", "spruce", "spruce-config.json")
 BLOCK = "RetroAchievements Settings"
@@ -75,6 +75,61 @@ def wanted_settings():
                 unknown.append(f"{section} / {key}")
     if unknown:
         ui.warn(f"spruce_settings in settings.json has settings that aren't shared, ignored: {', '.join(unknown)}")
+    return result
+
+
+def _options(base, shown):
+    """The file's menuOptions dict (text, data), or None with a warning when it's missing or can't be read."""
+    path = os.path.join(base, FILE)
+    if not os.path.isfile(path):
+        ui.warn(f"{shown} is missing; spruce settings skipped (start the card in the device once first)")
+        return None
+    old = cardfs.text(path)
+    try:
+        data = json.loads(old)
+    except ValueError:
+        data = None
+    options = data.get("menuOptions") if isinstance(data, dict) else None
+    if not isinstance(options, dict):
+        ui.warn(f"{shown} can't be read as Spruce settings; spruce settings skipped")
+        return None
+    return old, data
+
+
+def _selected(options, section, key):
+    """The entry dict of section / key, or None."""
+    found = options.get(section)
+    entry = found.get(key) if isinstance(found, dict) else None
+    return entry if isinstance(entry, dict) else None
+
+
+def entries(card, base):
+    """[Entry] for every saved spruce setting that applies to the card's spruce-config.json, changed or not; [] when it can't be used."""
+    from . import spruce_syncthing
+    values = wanted()
+    extra = wanted_settings()
+    forced = spruce_syncthing.forced_settings(card)
+    if not values and not extra and not forced:
+        return []
+    shown = FILE.replace(os.sep, "/")
+    found = _options(base, shown)
+    if not found:
+        return []
+    options = found[1]["menuOptions"]
+    result = []
+    for key, value in values.items():
+        entry = _selected(options, BLOCK, key)
+        result.append(applied.Entry(shown, f"{BLOCK} / {key}", entry.get("selected") if entry else None, value, key in HIDDEN))
+    for section, key, value in extra:
+        entry = _selected(options, section, key)
+        if entry:
+            result.append(applied.Entry(shown, f"{section} / {key}", entry.get("selected"), value, False))
+    for section, key, value in forced:
+        entry = _selected(options, section, key)
+        if entry:
+            result.append(applied.Entry(shown, f"{section} / {key} (Syncthing)", entry.get("selected"), value, False))
+        else:
+            ui.warn(f"{shown} has no {section} / {key}; update spruceOS for Syncthing saves to work")
     return result
 
 
