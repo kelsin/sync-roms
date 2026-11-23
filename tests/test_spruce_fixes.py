@@ -186,9 +186,9 @@ class RunTests(Base):
     def test_absent_line(self):
         count, out = self.run_fixes()
         self.assertEqual(count, 0)
-        self.assertIn("Spruce theme fixes", out)
+        self.assertIn("Spruce fixes", out)
         for fix in spruce_fixes.FIXES:
-            self.assertIn("the theme isn't on the card", self.line(out, fix))
+            self.assertIn(getattr(fix, "MISSING", "the theme isn't on the card"), self.line(out, fix))
 
     def test_other_layouts_print_nothing(self):
         self.put("ART_BOOK_NEXT/icons/overlay/fc.png", NES)
