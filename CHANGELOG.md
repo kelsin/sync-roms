@@ -1,5 +1,14 @@
 # Changelog
 
+## [3.28.0](https://github.com/kelsin/sync-roms/compare/v3.27.0...v3.28.0) (2026-11-23)
+
+
+### :video_game: Features
+
+* **themes:** add the totk - james theme ([#543](https://github.com/kelsin/sync-roms/issues/543)) ([803a02f](https://github.com/kelsin/sync-roms/commit/803a02f99999acfc0d2c24fa79f548fa3bb0f523))
+* **themes:** preview pixel themes as their main screen in the palette ([#542](https://github.com/kelsin/sync-roms/issues/542)) ([4477ac9](https://github.com/kelsin/sync-roms/commit/4477ac9c37bf8a30479d9c178a6193ee9dcc3b13))
+* **themes:** use the fusion pixel font in the pixel themes ([#540](https://github.com/kelsin/sync-roms/issues/540)) ([dad208e](https://github.com/kelsin/sync-roms/commit/dad208ee04274d14393654744dc1fd76d5a422f1))
+
 ## [3.27.0](https://github.com/kelsin/sync-roms/compare/v3.26.1...v3.27.0) (2026-11-23)
 
 
