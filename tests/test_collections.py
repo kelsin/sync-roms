@@ -6,6 +6,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
+import helpers  # noqa: E402
 from helpers import DataDir  # noqa: E402
 from sync_roms import collections, commands, store, ui  # noqa: E402
 
@@ -165,12 +166,60 @@ class Selection(DataDir):
         self.assertEqual(store.card_locked_games({"collections": ["favs"]}, by_id)["gba"][0]["from"], "🎁 Favs")
         self.assertEqual(store.card_locked_games({}, self.by_id()), {})
 
-    def test_load_manifest_adds_them_after_picks_and_excluded_never_drops_them(self):
-        self.write_json("cards.json", {"c": {"device": "full", "layout": "esde", "collections": ["favs"],
-                                             "games": {"gba": [{"bucket": "gba/A.zip"}, {"bucket": "gba/Ruby.zip"}]},
+    def gba(self, name="c"):
+        return next(s for s in store.load_manifest([name])["systems"] if s["bucket"] == "gba")
+
+    def test_load_manifest_drops_excluded_collection_games(self):
+        self.write_json("cards.json", {"c": {"device": "full", "layout": "esde", "collections": ["favs", "more"],
+                                             "games": {"gba": [{"bucket": "gba/A.zip"}]},
                                              "excluded": {"gba": ["gba/Ruby.zip"]}}})
-        gba = next(s for s in store.load_manifest(["c"])["systems"] if s["bucket"] == "gba")
-        self.assertEqual([g["bucket"] for g in gba["games"]], ["gba/A.zip", "gba/Ruby.zip"])
+        self.assertEqual([g["bucket"] for g in self.gba()["games"]], ["gba/A.zip", "gba/Zelda.zip"])
+
+    def test_a_key_from_a_set_and_a_collection_excluded_is_gone(self):
+        helpers.storage_sets(self, {"s": {"name": "S", "games": [{"title": "Ruby", "system": "gba", "bucket": "gba/Ruby.zip"}]}})
+        self.write_json("cards.json", {"c": {"device": "full", "layout": "esde", "collections": ["favs"],
+                                             "games": {"sets": ["s"]}, "excluded": {"gba": ["gba/Ruby.zip"]}}})
+        self.assertEqual(self.gba()["games"], [])
+
+    def test_load_manifest_keeps_excluded_surprises(self):
+        self.write_json("cards.json", {"c": {"device": "full", "layout": "esde", "surprise": True,
+                                             "surprises": [{"system": "gba", "bucket": "gba/Surp.zip", "title": "Surp"}],
+                                             "excluded": {"gba": ["gba/Surp.zip"]}}})
+        self.assertEqual([g["bucket"] for g in self.gba()["games"]], ["gba/Surp.zip"])
+
+    def test_excluded_collection_game_on_a_full_system_still_full(self):
+        self.write_json("cards.json", {"c": {"device": "full", "layout": "esde", "collections": ["favs"],
+                                             "games": {"gba": {"full_system": True}},
+                                             "excluded": {"gba": ["gba/Ruby.zip"]}}})
+        self.assertTrue(self.gba()["full_system"])
+
+    def test_systems_off_blank_the_system_and_keep_the_card(self):
+        helpers.storage_sets(self, {"s": {"name": "S", "games": [{"title": "B", "system": "gba", "bucket": "gba/B.zip"},
+                                                                 {"title": "N", "system": "nes", "bucket": "nes/N.zip"}]}})
+        card = {"device": "full", "layout": "esde", "collections": ["favs"], "excluded": {"gba": ["gba/X.zip"]},
+                "games": {"gba": [{"bucket": "gba/A.zip"}], "sets": ["s"]}, "systems_off": ["gba"]}
+        self.write_json("cards.json", {"c": card})
+        manifest = store.load_manifest(["c"])
+        gba = next(s for s in manifest["systems"] if s["bucket"] == "gba")
+        self.assertEqual(gba["games"], [])
+        self.assertFalse(gba["full_system"])
+        nes = next(s for s in manifest["systems"] if s["bucket"] == "nes")
+        self.assertEqual([g["bucket"] for g in nes["games"]], ["nes/N.zip"])
+        self.assertEqual(store.saved_card("c"), card)
+        self.write_json("cards.json", {"c": {**card, "games": {"gba": {"full_system": True}}}})
+        gba = self.gba()
+        self.assertEqual(gba["games"], [])
+        self.assertFalse(gba["full_system"])
+
+    def test_systems_off_ignores_bad_ids(self):
+        self.write_json("cards.json", {"c": {"device": "full", "layout": "esde", "games": {"gba": [{"bucket": "gba/A.zip"}]},
+                                             "systems_off": ["gba", 3, "nope"]}})
+        self.assertEqual(store.systems_off(store.saved_card("c")), {"gba", "nope"})
+        self.assertEqual(self.gba()["games"], [])
+
+    def test_systems_off_of_non_lists(self):
+        self.assertEqual(store.systems_off({"systems_off": "gba"}), set())
+        self.assertEqual(store.systems_off(None), set())
 
     def test_every_cards_collections_are_in_the_mirror_list(self):
         self.write_json("cards.json", {"a": {"collections": ["favs"]}, "b": {"collections": ["more"]}})
