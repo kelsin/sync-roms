@@ -1,4 +1,4 @@
-"""Scriptable subcommands: games, sets, collections, themes, download, flash, cards, saves, layouts, cache, config,
+"""Scriptable subcommands: games, sets, collections, themes, download, flash, umount, cards, saves, layouts, cache, config,
 doctor, guide, check and completion; plus helpers the sync flow uses."""
 import argparse
 import datetime
@@ -14,7 +14,7 @@ from . import budget, cardedit, cardshare, collectionedit, external, inventory, 
 
 
 UNKNOWN_SHOWN = 8  # device ids named in an "unknown device" error
-COMMANDS = {"games", "sets", "collections", "themes", "download", "flash", "cards", "saves", "layouts", "cache", "config", "doctor", "guide", "check", "completion"}
+COMMANDS = {"games", "sets", "collections", "themes", "download", "flash", "umount", "cards", "saves", "layouts", "cache", "config", "doctor", "guide", "check", "completion"}
 
 
 class Parser(argparse.ArgumentParser):
@@ -1213,6 +1213,11 @@ def saves_apply(args):
     return saves.apply_command(args)
 
 
+def umount_cmd(args):
+    from . import umount
+    return umount.run(args)
+
+
 def flash_cmd(args):
     from . import flash
     return flash.run(args)
@@ -1345,6 +1350,7 @@ def build_parser():
     p.add_argument("--count", type=_positive_int, metavar="N"); p.set_defaults(fn=download_pico8)
 
     p = sub.add_parser("flash", add_help=False, allow_abbrev=False); common(p, card=False); p.set_defaults(fn=flash_cmd)
+    p = sub.add_parser("umount", add_help=False, allow_abbrev=False); common(p, card=False); p.set_defaults(fn=umount_cmd)
 
     cards = sub.add_parser("cards", add_help=False, allow_abbrev=False)
     csub = cards.add_subparsers(dest="action", required=True)

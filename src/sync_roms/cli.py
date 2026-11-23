@@ -23,6 +23,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "themes": ("update", "copy the latest Art Book Next for ES-DE from GitHub into storage"),
     "download": ("pico8", "add the PICO-8 BBS Featured carts storage doesn't have, and newer revisions of those it has"),
     "flash": ("", "write a Knulli, BaseOS, muOS, ROCKNIX or OakMoss image from storage's os/ to an SD card"),
+    "umount": ("", "clean the macOS junk off an SD card and unmount it"),
     "cards": ("[edit|list|new|set|rename|convert|clean|delete|copy|export|import]", "list and manage the cards you've synced"),
     "saves": ("stash|apply [CARD] [--retroarch DIR]", "copy RetroArch saves and states off a card, or onto one"),
     "devices": ("[ID]", "list the supported devices, or one device's systems"),
@@ -148,6 +149,14 @@ TOPICS = {
   checked first); right before writing, the card must still be the same disk (id, size and name). Then `sudo dd`
   writes it, decompressed (gz, xz or zip) on the fly, with 4 MiB blocks (sudo may ask for your password before downloading and
   writing). Last, the temp folder is removed and the card is ejected; after a failure it is unmounted instead, so you can retry.
+""",
+    "umount": """
+  sync-roms umount [--dry-run]                clean the macOS junk off an SD card and unmount it (macOS only)
+
+  Lists the mounted external SD cards (disk id, size, name and volume names; never the disk holding storage), then
+  runs the end-of-sync tidy on each volume of the one you pick: .metadata_never_index, .fseventsd/no_log and the
+  ._ files macOS leaves, plus the sudo mdutil offer when Spotlight is on. Ctrl-C skips the rest of that volume's tidy.
+  Last, `diskutil unmountDisk` unmounts the card.
 """,
     "edit": """
   sync-roms edit                              main menu: Cards, Sets (saved to storage), Collections, Device systems; same as `games edit`
