@@ -71,6 +71,16 @@ class Flash(unittest.TestCase):
         self.assertEqual(got, [flash.Disk("disk4", 1, "SD Card Reader", ("KNULLI", "SHARE")),
                                flash.Disk("disk6", 1, "SD Card Reader", ("Backup",))])
 
+    def test_parse_disks_reads_mount_points(self):
+        listing = {"WholeDisks": ["disk4", "disk6"], "AllDisksAndPartitions": [
+            {"DeviceIdentifier": "disk4", "Partitions": [{"VolumeName": "KNULLI", "MountPoint": "/Volumes/KNULLI"}, {},
+                                                         {"VolumeName": "SHARE", "MountPoint": "/Volumes/SHARE"}]},
+            {"DeviceIdentifier": "disk6", "Partitions": [
+                {"APFSVolumes": [{"VolumeName": "Backup", "MountPoint": "/Volumes/Backup"}]}]}]}
+        got = flash.parse_disks(listing, lambda d: {"Size": 1, "MediaName": "SD Card Reader"}, set())
+        self.assertEqual(got, [flash.Disk("disk4", 1, "SD Card Reader", ("KNULLI", "SHARE"), ("/Volumes/KNULLI", "/Volumes/SHARE")),
+                               flash.Disk("disk6", 1, "SD Card Reader", ("Backup",), ("/Volumes/Backup",))])
+
     def test_parse_disks_empty(self):
         self.assertEqual(flash.parse_disks({}, lambda d: {}, set()), [])
 

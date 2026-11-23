@@ -114,22 +114,22 @@ def sort_images(keys, device_id, rocknix_image=None):
     return sorted(pairs, key=lambda p: (not p[1], _newest(p[0]), p[0]))
 
 
-Disk = collections.namedtuple("Disk", "id size name volumes", defaults=((),))
+Disk = collections.namedtuple("Disk", "id size name volumes mounts", defaults=((), ()))
 
 
 def _volumes(listing):
-    """{whole disk id: its volume names} from a `diskutil list -plist` listing (partitions and APFS volumes)."""
+    """{whole disk id: (volume names, mount points)} from a `diskutil list -plist` listing (partitions and APFS volumes)."""
     found = {}
     for entry in listing.get("AllDisksAndPartitions", []):
-        names = [v.get("VolumeName") for part in [entry, *entry.get("Partitions", [])]
-                 for v in [part, *part.get("APFSVolumes", [])]]
-        found[entry.get("DeviceIdentifier")] = tuple(n for n in names if n)
+        vols = [v for part in [entry, *entry.get("Partitions", [])] for v in [part, *part.get("APFSVolumes", [])]]
+        found[entry.get("DeviceIdentifier")] = (tuple(n for n in (v.get("VolumeName") for v in vols) if n),
+                                                tuple(m for m in (v.get("MountPoint") for v in vols) if m))
     return found
 
 
 def parse_disks(listing, info, exclude):
     """The whole disks of a `diskutil list -plist` listing, minus exclude, with size and name read through info(id) and
-    volume names from the listing."""
+    volume names and mount points from the listing."""
     volumes = _volumes(listing)
     disks = []
     for disk in listing.get("WholeDisks", []):
@@ -137,7 +137,7 @@ def parse_disks(listing, info, exclude):
             continue
         i = info(disk)
         disks.append(Disk(disk, i.get("TotalSize", i.get("Size")), i.get("MediaName") or i.get("IORegistryEntryName") or "",
-                          volumes.get(disk, ())))
+                          *volumes.get(disk, ((), ()))))
     return disks
 
 

@@ -154,17 +154,21 @@ def card_disk(path):
 
 
 def eject():
-    """Unmount every volume on the card's disk with diskutil unmountDisk (macOS only), so it can be pulled right away."""
+    """Unmount every volume on the card's disk with diskutil unmountDisk (macOS only), so it can be pulled right away.
+
+    True when it unmounted or had nothing to do, False when diskutil failed."""
     if not _eject_root or sys.platform != "darwin" or not shutil.which("diskutil"):
-        return
+        return True
     disk = card_disk(_eject_root)
     if not disk:  # a folder on this Mac's own disk or a share: nothing to pull out
-        return
+        return True
     os.chdir("/")  # sync-roms's own working directory on the card would keep it busy
     print(ui.bold(f"\n⏏️  Unmounting {disk}..."))
     r = subprocess.run(["diskutil", "unmountDisk", disk], capture_output=True, text=True)
     if r.returncode == 0:
         print(ui.green("  ✅ Safe to remove the card"))
+        return True
     else:
         ui.failure(ui.red(f"  ❌ {(r.stderr or r.stdout).strip()}"))
         ui.failure(ui.dim(f"     A shell or app with the card open keeps it busy: close it, then run diskutil unmountDisk {disk}"))
+    return False
