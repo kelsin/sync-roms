@@ -432,6 +432,7 @@ BIOS files sit flat in `roms/bios`. RetroArch saves sit beside the ROMs: a sync 
 - **Collections and Surprise**: the one `Collections/collections.json` holds every collection; collections made on the device are kept as they are.
 - **Art**: a sync also removes the picture of a collection it wrote that has no art any more, even with `"theme": false`.
 - **spruceOS**: the newest `spruceV<version>.7z` from storage's `os/spruceos/` is copied to the card root, unextracted, for Apps → EZ Updater on the device: once per file, after the card's other writes, and only when the card has room for it with 64 MiB to spare. The one staged before is removed (kept with `--no-delete`).
+- **Fixes**: a "Spruce fixes" block patches known spruceOS bugs on the card until upstream releases the fix. Until [spruceOS#2070](https://github.com/spruceUI/spruceOS/pull/2070) ships, that includes PyUI's Settings → Game Select Settings → **Reopen last collection** (on by default; off, Collections opens on the list with the last collection highlighted). The five PyUI files get small insertions, and their CRLF line ends are kept. This happens only when the card's PyUI matches a known version (4.6.0 or the current `Development` code); otherwise the card is left as it is, with a warning. `--dry-run` shows what it would change.
 
 ### Onion and Allium
 

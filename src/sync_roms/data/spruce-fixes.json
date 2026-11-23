@@ -6,5 +6,9 @@
   "fds": {
     "title": "Famicom Disk System logo",
     "upstream": "https://github.com/spruceUI/PyUI-Themes/pull/16"
+  },
+  "reopen_collection": {
+    "title": "Reopen last collection setting",
+    "upstream": "https://github.com/spruceUI/spruceOS/pull/2070"
   }
 }
