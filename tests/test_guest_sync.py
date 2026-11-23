@@ -192,6 +192,13 @@ class GuestSyncTest(DataDir):
         self.sync()
         self.assertEqual(self.job_keys(), [])
 
+    def test_a_seeded_rom_storage_lost_since_is_reported_missing(self):
+        self.save(guest=True)
+        self.card_file("ROMs/gba/Game.zip")
+        self.sync(patches=((cli.store, {"list_system": lambda s: {}}),))
+        self.assertIn("gba/Game.zip", self.out.getvalue() + self.err.getvalue())
+        self.assertNotIn("gba/Game.zip", self.job_keys())
+
     def test_guest_sync_adds_a_new_pick(self):
         self.save(guest=True)
 

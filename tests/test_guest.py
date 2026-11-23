@@ -101,6 +101,14 @@ class GuestTest(RealDataDirGuard):
         helpers.touch(path, "<gameList><game><path>./A.zip</path></game></gameList>")
         self.assertEqual(guest.new_gamelist_entries({path: {"A.zip": {}}}), {})
 
+    def test_new_gamelist_entries_drops_a_gamelist_that_does_not_parse(self):
+        for text in ("<gameList><game><path>./A.zip</path>", "<gameList><game><path>./A.zip</game></gameList>"):
+            path = os.path.join(self.dest, "gamelist.xml")
+            helpers.touch(path, text)
+            with mock.patch.object(guest.ui, "warn") as warn:
+                self.assertEqual(guest.new_gamelist_entries({path: {"B.zip": {"name": "B"}}}), {}, text)
+            self.assertIn(path, warn.call_args.args[0])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1303,7 +1303,7 @@ def sync_card(args):
         if disc_keys:  # discs a past sync left loose go where they belong rather than being downloaded again
             moved.update(downloads.hide_discs(dest, disc_dir, disc_keys, args.dry_run))
         for key in wanted:
-            if key in seed.get(s["bucket"], {}):  # guest: where the card has it, as the card spells it
+            if key in have and key in seed.get(s["bucket"], {}):  # guest: where the card has it, as the card spells it
                 rom_jobs.append((key, seed[s["bucket"]][key], have[key]))
             elif key in have:
                 downloads.add_job(rom_jobs, key, dest, downloads.rom_rel(key, disc_dir, disc_keys, folders_of(s)), have[key])

@@ -3,7 +3,7 @@ import os
 import re
 import xml.etree.ElementTree as ET
 
-from . import cardfs, downloads, m3u, store
+from . import cardfs, downloads, m3u, store, ui
 
 
 def is_guest(entry):
@@ -72,15 +72,21 @@ def new_files(jobs):
 
 
 def new_gamelist_entries(gamelists):
-    """{gamelist path: {rom rel: tags}} without the ROMs the file already lists."""
+    """{gamelist path: {rom rel: tags}} without the ROMs the file already lists. A file that is there but doesn't
+    parse is left out, with a warning: writing it would replace the friend's whole list."""
     out = {}
     for path, entries in gamelists.items():
         listed = set()
         if os.path.exists(path):
-            with open(path, encoding="utf-8") as f:
-                m = re.search(r"<gameList\b.*</gameList>", f.read(), re.S)
-            if m:
+            try:
+                with open(path, encoding="utf-8") as f:
+                    m = re.search(r"<gameList\b.*</gameList>", f.read(), re.S)
+                if not m:
+                    raise ValueError("no <gameList>")
                 listed = {(g.findtext("path") or "").strip() for g in ET.fromstring(m.group(0)).findall("game")}
+            except (ET.ParseError, OSError, UnicodeDecodeError, ValueError) as e:
+                ui.warn(f"{path} doesn't parse ({e}): left as it is")
+                continue
         fresh = {rom: tags for rom, tags in entries.items() if "./" + rom not in listed}
         if fresh:
             out[path] = fresh
