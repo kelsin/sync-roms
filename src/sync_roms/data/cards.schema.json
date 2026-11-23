@@ -53,6 +53,7 @@
         "additionalProperties": {"type": "array", "items": {"type": "string"}}
       },
       "android_volume": {"type": "string", "description": "The SD card's Android volume id (/storage/<id>), remembered by saves stash/apply"},
+      "guest": {"type": "boolean", "const": true, "description": "true on a guest card (a friend's card): sync only copies ROMs, BIOS and scrapes; hidden from cards list without --all"},
       "surprise": {"type": "boolean", "description": "false turns Surprise off (absent: on)"},
       "surprises": {
         "type": "array",

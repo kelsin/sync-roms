@@ -660,6 +660,36 @@ class CardSizeTest(Cmd):
         self.assertEqual((row["theme"], row["collections"], row["raofflineproxy"]), (False, False, False))
         self.assertTrue(self.run_cmd("cards", "list")[1].rstrip().endswith("🎁"))
 
+    def make_guest_pair(self):
+        self.run_cmd("cards", "new", "Mine", "--device", "full", "--layout", "esde")
+        self.run_cmd("cards", "new", "Friend", "--device", "full", "--layout", "esde")
+        cards = store.load_cards()
+        cards["Friend"]["guest"] = True
+        store.write_cards(cards)
+
+    def test_cards_list_hides_guest_cards(self):
+        self.make_guest_pair()
+        text = self.run_cmd("cards", "list")[1]
+        self.assertIn("Mine", text)
+        self.assertNotIn("Friend", text)
+        self.assertIn("1 guest card hidden", text)
+        self.assertIn("--all", text)
+
+    def test_cards_list_all_shows_guest_cards_marked(self):
+        self.make_guest_pair()
+        text = self.run_cmd("cards", "list", "--all")[1]
+        self.assertIn("Mine", text)
+        friend = [l for l in text.splitlines() if "Friend" in l]
+        self.assertEqual(len(friend), 1)
+        self.assertIn("👤", friend[0])
+        self.assertNotIn("hidden", text)
+
+    def test_cards_list_json_has_guest_field(self):
+        self.make_guest_pair()
+        rows = {r["name"]: r["guest"] for r in json.loads(self.run_cmd("cards", "list", "--all", "--json")[1])}
+        self.assertEqual(rows, {"Mine": False, "Friend": True})
+        self.assertEqual([r["name"] for r in json.loads(self.run_cmd("cards", "list", "--json")[1])], ["Mine"])
+
     def test_bad_size_exits_2(self):
         self.assertEqual(self.run_cmd("cards", "new", "SD", "--device", "full", "--layout", "esde", "--size", "big")[0], 2)
 

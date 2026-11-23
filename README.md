@@ -137,7 +137,7 @@ Exit codes: `0` done (or nothing to do, or you declined), `1` some files failed,
 
 `--dry-run` shows the same free space as a sync (counting the ROMs it would delete as freed) and says when the downloads would not fit. `sync --dry-run --json` prints `{downloads, delete, kept, theme_remove, rename, missing, stale_media, totals, free_space}`: `downloads` lists every file with its `kind` (scraped media as `scrape`, counted in `totals`), `kept` is what `--no-delete` keeps, `theme_remove` the PyUI theme folders a `spruce` card would lose, `rename` holds `{from, to}` pairs, `missing` has `roms` and `bios`, and `free_space` is in bytes.
 
-The other `--json` documents: `devices` is a list of `{id, name, soc, systems, firmwares}` (`systems` a count), or one device's entry with its `systems` and `system_names`; `layouts` is the `layouts.json` entries plus `id` and `devices`; `games list` is `{full_systems, sets, games}`, each game `{system, bucket, title}`; `cards list` is a list of `{name, device, layout, size, used, sized, full_systems, games, extras, surprise, theme, collections, raofflineproxy}`; `diff` is `{system, only_local, only_bucket}`, the last two lists of `{path, size}`.
+The other `--json` documents: `devices` is a list of `{id, name, soc, systems, firmwares}` (`systems` a count), or one device's entry with its `systems` and `system_names`; `layouts` is the `layouts.json` entries plus `id` and `devices`; `games list` is `{full_systems, sets, games}`, each game `{system, bucket, title}`; `cards list` is a list of `{name, device, layout, size, used, sized, full_systems, games, extras, guest, surprise, theme, collections, raofflineproxy}`; `diff` is `{system, only_local, only_bucket}`, the last two lists of `{path, size}`.
 
 ### List keys
 
@@ -230,7 +230,7 @@ For one command:
 | `--system ID` | `diff`, `scrape`, `scrape missing`, `scrape art` | `diff`: the system to compare with, instead of the picker. `scrape`, `scrape missing`, `scrape art`: only that storage folder (the same as `scrape SYSTEM`) |
 | `--for onion\|spruce\|both` | `scrape art` | Which art to make (default both) |
 | `--workers N` | `scrape art` | How many sources to download at once (default: your CPU count); conversion always uses one process per core |
-| `--all` | `scrape`, `scrape missing` | Every ROM in storage, not only the games your cards reference |
+| `--all` | `scrape`, `scrape missing`, `cards list` | Every ROM in storage, not only the games your cards reference; with `cards list`, guest cards too |
 | `--retry` | `scrape` | Also try the ROMs ScreenScraper didn't know before (ROMs whose lookup failed are always tried again; non-games never are) and, with `--fill-media`, the ROMs missing only media it didn't offer |
 | `--fill-media` | `scrape` | Also scrape ROMs that have metadata but lack some media type in storage; their metadata is kept. Media types ScreenScraper didn't offer for a ROM are remembered, and a ROM missing only those isn't asked for again until `--retry` |
 | `--skip-media TYPES` | `scrape`, `scrape match` | Comma-separated media folders not to download (e.g. `manuals,fanart`) |
@@ -270,7 +270,7 @@ An optional `device-systems.json` there adjusts the systems a device can play: `
 
 A card is a folder name (the card root's name) with a remembered device, layout and games.
 
-- `cards list` (or just `cards`) shows the space each card's picks take (ROMs, scrapes and BIOS) against its size, how many full systems and games it syncs, and which of Surprise (🎁), theme art (🎨), collections (💖) and RAOfflineProxy (🏆) are on.
+- `cards list` (or just `cards`) shows the space each card's picks take (ROMs, scrapes and BIOS) against its size, how many full systems and games it syncs, and which of Surprise (🎁), theme art (🎨), collections (💖) and RAOfflineProxy (🏆) are on. Guest cards (a friend's card, marked 👤) are hidden unless you pass `--all`.
 - `cards new NAME --device ID|full --layout NAME [--size SIZE]` creates a card; `cards set NAME` changes one's device, layout or size.
 - `cards rename OLD NEW` and `cards delete NAME` rename and delete one.
 - `cards convert [CARD] --layout NAME` moves the mounted card's ROMs, BIOS and RetroArch saves and states to another layout's folders and saves the layout (the device stays). `--dry-run` previews, `--yes` skips the question. Files already at a destination are left; the rest is for a sync to fill in. A convert to or from `muos` leaves saves and states where they are and lists them, since muOS uses Pickles' own, not RetroArch's. The old layout's scraped media (gamelists and media folders) is deleted from the old ROM folders; the new layout's own is installed by the next sync.

@@ -76,7 +76,7 @@ class Schemas(unittest.TestCase):
         self.assertIn("sets", games["properties"])
         card = cards["additionalProperties"]["properties"]
         for key in ("device", "layout", "systems", "games", "collections", "frontend_collections",
-                    "surprise", "surprises"):
+                    "surprise", "surprises", "guest"):
             self.assertIn(key, card)
         self.assertEqual(card["systems"]["items"]["type"], "string")
         self.assertEqual(self.load("collections.schema.json")["required"], ["name", "games"])
