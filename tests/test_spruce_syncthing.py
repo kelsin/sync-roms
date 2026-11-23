@@ -124,6 +124,15 @@ class Card(helpers.CardDir):
         self.assertTrue(text.endswith('\r\n'))
         self.assertNotIn("\n", text.replace("\r\n", ""))
 
+    def test_unreadable_cfg_warns(self):
+        path = self.cp("Saves", "ra-configs", "retroarch-A.cfg")
+        os.makedirs(os.path.dirname(path))
+        with open(path, "wb") as f:
+            f.write(b"\xff\xfe = bad")
+        self.assertIn("Saves/ra-configs/retroarch-A.cfg can't be read; its save settings left as they are", self.run_sync())
+        with open(path, "rb") as f:
+            self.assertEqual(f.read(), b"\xff\xfe = bad")
+
     def test_no_cfg_warns(self):
         self.assertIn("Saves/ra-configs has no retroarch-*.cfg yet", self.run_sync())
 

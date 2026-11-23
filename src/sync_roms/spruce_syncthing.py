@@ -70,11 +70,12 @@ def retroarch_writes(base):
     paths = sorted(glob.glob(os.path.join(glob.escape(base), "Saves", "ra-configs", "retroarch-*.cfg")))
     if not paths:
         return [], [], ["Saves/ra-configs has no retroarch-*.cfg yet; launch a game once on the device, then sync again for RetroArch's save settings"]
-    writes, lines = [], []
+    writes, lines, warnings = [], [], []
     for path in paths:
         try:
             old = cardfs.read(path).decode("utf-8")  # raw: cardfs.text would turn CRLF into LF
         except (OSError, ValueError):
+            warnings.append(f"Saves/ra-configs/{os.path.basename(path)} can't be read; its save settings left as they are")
             continue
         eol = "\r\n" if "\r\n" in old else "\n"
         new = old
@@ -90,7 +91,7 @@ def retroarch_writes(base):
                 lines.append(f"   {os.path.basename(path)}: {key} = {value}")
         if new != old:
             writes.append((path, new))
-    return writes, lines, []
+    return writes, lines, warnings
 
 
 def _same(line, value):
