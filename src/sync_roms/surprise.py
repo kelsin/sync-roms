@@ -261,9 +261,9 @@ def _current(entry, chosen_systems):
 def run_surprise(card_name, setup, chosen_systems, interactive, dry_run, to_fetch=None, card_match=None):
     """The sync step that comes first: ask which of a card's surprises to replace (all of them when not interactive),
     keep the others and save them (the empty slots are filled later, by fill_surprises, after the card editor), then
-    open the card editor when interactive (with Surprise off too). Systems in excluded_systems(), the card's own list or its systems_off are left out, and
-    their current surprises dropped. A dry run changes nothing. Returns the surprises kept (on a dry run, the saved
-    ones). to_fetch, card_match: passed to the card editor."""
+    open the card editor when interactive (with Surprise off too). Systems in excluded_systems(), the card's own
+    list or its systems_off are left out, and their current surprises dropped. A dry run changes nothing. Returns
+    the surprises kept (on a dry run, the saved ones). to_fetch, card_match: passed to the card editor."""
     cards = store.load_cards()
     entry = store.saved_card(card_name, cards)
     if not enabled(entry):
