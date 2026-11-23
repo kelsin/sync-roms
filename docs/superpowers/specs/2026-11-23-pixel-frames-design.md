@@ -61,3 +61,11 @@ The exact art of each frame within the style and margin rules, the kit's functio
 - **Palette fields and shades.** `Palette` fields are `name, text, list, selected, accent, dim, bar` (`palettes.py`). The derived shades (`hi`, `sh`, `mid`, `dark`) and `ink` live in `pixel/frames.py` as `shades(palette)`; `dark` fills panels, pure black is only for full-screen backgrounds.
 - **Symmetry and flush.** Each registry entry declares `symmetric: bool` and `flush: tuple` of sides (`"left"`, `"right"`, `"top"`, `"bottom"`) where the artwork touches the footprint edge. The symmetry test compares the cell-grid artwork (exact mirror in cells); the leftover-pixel rule (extra pixel to the right/bottom when odd) may offset the artwork by at most 1 px, which the test tolerates.
 - **Animation frames.** The builder inspects the base `app_loading_01..05` and `charging-01..05` and redraws the glyph inside each frame's own footprint (the same footprint rule), keeping the frame count and positions.
+
+## Accepted exceptions (decided during the build)
+
+- `context-menu/select/start` (66 px) and `bg-btn-02-f/n` use the small-file cell rule (`small=True`) instead of the width formula, so their letters fit and the wide keys match the narrow ones.
+- `nav-file-f/n` is not mirror-symmetric (the folder tab sits at the left; its body mirrors exactly).
+- `btn-shift` draws a solid arrow only, without the base glyph's own outline box (only 4 rows are free inside it); it stays inside the base footprint and is centered with equal margins; the key tile behind it draws the key.
+- Files fully transparent in the real base (`navbg`, `statbg`, `preview-bg`, `thumb-default`, `div-line-v-02`, `bg-grid-s`, `num-bg`) are left transparent: an empty footprint has nothing to draw.
+- PyUI does not load `loading-bg`, `loading-progress-*`, `progress-dot`, `app_loading_*`, `charging-0*`, `nav-*`, the keyboard `btn-*` glyphs or `navbg`/`statbg`/`preview-bg`/`thumb-default` (older spruce UIs do); they are still redrawn.
