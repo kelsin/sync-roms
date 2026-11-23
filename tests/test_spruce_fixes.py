@@ -209,5 +209,13 @@ class RunTests(Base):
         self.assertEqual(self.get("ART_BOOK_NEXT/icons/overlay/fds.png"), NES)
 
 
+
+class ContractTests(unittest.TestCase):
+    def test_every_fix_has_keeps(self):
+        for fix in spruce_fixes.FIXES:
+            self.assertTrue(callable(getattr(fix, "keeps", None)), fix.ID)
+        self.assertFalse(spruce_fixes.keeps(os.path.join("App", "PyUI", "main-ui", "main.py")))
+
+
 if __name__ == "__main__":
     unittest.main()
