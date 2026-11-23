@@ -1,5 +1,22 @@
 # Changelog
 
+## [3.26.0](https://github.com/kelsin/sync-roms/compare/v3.25.0...v3.26.0) (2026-11-23)
+
+
+### :video_game: Features
+
+* **config:** add config apply for spruce cards and android devices ([#533](https://github.com/kelsin/sync-roms/issues/533)) ([e73654d](https://github.com/kelsin/sync-roms/commit/e73654d0c3d9ff1b5b19ae6e6e7c64cb57d98aef))
+* **mount:** mount an unmounted SD card again without pulling it out ([#528](https://github.com/kelsin/sync-roms/issues/528)) ([5c2971a](https://github.com/kelsin/sync-roms/commit/5c2971aea7f063d93becc3101c22d4a2a5200069))
+* **sync:** add guest cards for syncing friends' cards ([#534](https://github.com/kelsin/sync-roms/issues/534)) ([f025d33](https://github.com/kelsin/sync-roms/commit/f025d33c951e1b784b527dd926a2aa4bb0347fc7))
+* **themes:** default the publish upload prompt to yes ([#527](https://github.com/kelsin/sync-roms/issues/527)) ([8d0e02c](https://github.com/kelsin/sync-roms/commit/8d0e02cf7d09a8ec4d2350b34fa26579d27c0f03))
+* **themes:** draw missing app icons and show collections by default ([#530](https://github.com/kelsin/sync-roms/issues/530)) ([4231419](https://github.com/kelsin/sync-roms/commit/42314191a785b982dbb725e24b2803e824dac25a))
+
+
+### :bug: Bug Fixes
+
+* **spruce:** highlight the last collection instead of the reopen setting ([#532](https://github.com/kelsin/sync-roms/issues/532)) ([885fac4](https://github.com/kelsin/sync-roms/commit/885fac45d07123509ec443f4849a9e41553e2ce8))
+* **themes:** frame the pixel list highlight bar with a light rim ([#531](https://github.com/kelsin/sync-roms/issues/531)) ([4b68602](https://github.com/kelsin/sync-roms/commit/4b68602df1e85a98f7e8fe826c2ade96dc219ce2))
+
 ## [3.25.0](https://github.com/kelsin/sync-roms/compare/v3.24.0...v3.25.0) (2026-11-23)
 
 
