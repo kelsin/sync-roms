@@ -1,4 +1,4 @@
-"""The palette overview image: one small mock of a PyUI list screen per palette, drawn from the palette data."""
+"""The palette overview image: one small pixel-theme main screen per palette, drawn from the palette data."""
 import contextlib
 import os
 import tempfile
@@ -7,7 +7,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 from .. import store
 
-PANEL = (300, 215)
+PANEL = (320, 240)
 GAP = 8
 BACKGROUND = (28, 28, 28)
 CAPTION = (136, 136, 136)
@@ -28,32 +28,14 @@ def _font(path, size):
     return ImageFont.load_default(size)
 
 
-def _rgb(color):
-    return tuple(int(color[i:i + 2], 16) for i in (1, 3, 5))
-
-
 def render_panel(palette, font_path=None, caption=None):
-    img = Image.new("RGB", PANEL, (0, 0, 0))
+    from .pixel import preview
+    img = preview.preview_image("CONSOLES", palette, font_path)
+    img = img.resize(PANEL, Image.NEAREST)
     d = ImageDraw.Draw(img)
-    f15, f18 = _font(font_path, 15), _font(font_path, 18)
-    text, listc, selected, accent, dim, bar = (_rgb(c) for c in (
-        palette.text, palette.list, palette.selected, palette.accent, palette.dim, palette.bar))
-    d.text((8, 4), caption or palette.name, font=f15, fill=CAPTION)
-    d.text((8, 24), "Games", font=f18, fill=text)
-    d.text((PANEL[0] - 8, 24), "12", font=f18, fill=accent, anchor="ra")
-    width = d.textlength("12", font=f18)
-    d.text((PANEL[0] - 8 - width, 24), "3/", font=f18, fill=text, anchor="ra")
-    for i, name in enumerate(("Super Metroid", "Chrono Trigger", "F-Zero")):
-        y = 56 + 30 * i
-        if i == 1:
-            d.rectangle((0, y, PANEL[0] - 1, y + 27), fill=bar)
-        d.text((12, y + 4), name, font=f18, fill=selected if i == 1 else listc)
-    for x, label, color in ((12, "GB", text), (70, "SNES", accent), (140, "N64", dim)):
-        d.text((x, 150), label, font=f18, fill=color)
-    d.text((12, 172), "A  Open   B  Back", font=f15, fill=text)
-    for i, color in enumerate((text, listc, selected, accent, dim, bar)):
-        x = 8 + 46 * i
-        d.rectangle((x, 196, x + 39, 207), fill=color)
+    font, text = _font(font_path, 15), caption or palette.name
+    d.rectangle((0, 0, 8 + d.textlength(text, font=font), 24), fill=(0, 0, 0))
+    d.text((6, 4), text, font=font, fill=CAPTION)
     return img
 
 
