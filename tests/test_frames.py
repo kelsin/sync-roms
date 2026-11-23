@@ -1,0 +1,293 @@
+import os
+import sys
+import tempfile
+import unittest
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import helpers  # noqa: E402,F401  (imports isolate first)
+from PIL import Image  # noqa: E402
+from test_custom_themes import make_base as make_theme_base  # noqa: E402
+
+from sync_roms.custom_themes import palettes  # noqa: E402
+from sync_roms.custom_themes.pixel import build as pixel_build  # noqa: E402
+from sync_roms.custom_themes.pixel import frames  # noqa: E402
+
+GRUVBOX = palettes.get("Gruvbox")
+ARCADE = palettes.get("Arcade")
+
+# file: (size, opaque box or None for a fully opaque image), in the base theme's plain skin/ (640x480)
+BASE = {
+    "bg-list-l.png": ((640, 90), None),
+    "bg-list-s.png": ((640, 60), None),
+    "bg-list-s2.png": ((320, 60), None),
+    "list-item-select-bg-short.png": ((320, 60), None),
+    "menu-sub-title-bg.png": ((320, 36), None),
+    "grid-game-selected.png": ((140, 140), None),
+    "bg-game-item-f.png": ((154, 170), (6, 0, 144, 153)),
+    "bg-grid-s.png": ((156, 176), (7, 3, 150, 166)),
+}
+# copies drawn natively at their own size
+COPIES = {
+    "skin_1280x720": {"bg-list-l.png": ((1280, 135), None), "bg-game-item-f.png": ((231, 255), (9, 0, 216, 230))},
+    "skin_720x480": {"bg-list-l.png": ((720, 90), None), "list-item-select-bg-short.png": ((320, 60), None)},
+    "skin_640_480": {"menu-sub-title-bg.png": ((320, 36), None)},
+}
+
+
+def synthetic(path, size, box):
+    """A base-like PNG: the bar gray over `box` (the whole image when None), soft alpha-100 pixels around it."""
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    img = Image.new("RGBA", size, (0, 0, 0, 0))
+    x0, y0, x1, y1 = box or (0, 0) + size
+    img.paste((80, 73, 69, 255), (x0, y0, x1, y1))
+    if box:
+        for x in range(x0, x1):
+            if y1 < size[1]:
+                img.putpixel((x, y1), (80, 73, 69, 100))
+    img.save(path)
+
+
+def make_base(path, files=None, copies=None):
+    for name, (size, box) in (BASE if files is None else files).items():
+        synthetic(os.path.join(path, "skin", name), size, box)
+    for folder, entries in (COPIES if copies is None else copies).items():
+        for name, (size, box) in entries.items():
+            synthetic(os.path.join(path, folder, name), size, box)
+
+
+def load(path):
+    with Image.open(path) as im:
+        return im.convert("RGBA")
+
+
+def grid(img, canvas):
+    """The cell grid of a drawn frame: {(cx, cy): RGBA} sampled at each cell's top-left pixel."""
+    px = img.load()
+    return {(cx, cy): px[canvas.ox + cx * canvas.cell, canvas.oy + cy * canvas.cell]
+            for cy in range(canvas.rows) for cx in range(canvas.cols)}
+
+
+class Kit(unittest.TestCase):
+    def test_shades(self):
+        s = frames.shades(GRUVBOX)
+        bar = (80, 73, 69)
+        self.assertEqual(s.bar, bar)
+        self.assertEqual(s.hi, tuple(round(v + (255 - v) * .35) for v in bar))
+        self.assertEqual(s.sh, tuple(round(v * .6) for v in bar))
+        self.assertEqual(s.mid, tuple(round(v * .55) for v in bar))
+        self.assertEqual(s.dark, tuple(round(v * .3) for v in bar))
+        self.assertLess(sum(s.dark), sum(s.sh))
+        self.assertEqual(s.ink, (27, 21, 48))
+        self.assertEqual(s.accent, (0xD6, 0x5D, 0x0E))
+        self.assertEqual((s.text, s.list, s.selected, s.dim),
+                         ((0xEB, 0xDB, 0xB2), (0xFB, 0xF1, 0xC7), (0xFB, 0xF1, 0xC7), (0x7C, 0x6F, 0x64)))
+
+    def test_cell_for(self):
+        self.assertEqual(frames.cell_for((640, 90), (640, 90)), 4)
+        self.assertEqual(frames.cell_for((1280, 135), (640, 90)), 6)
+        self.assertEqual(frames.cell_for((720, 90), (640, 90)), 4)
+        self.assertEqual(frames.cell_for((1280, 720), (640, 480)), 6)
+        self.assertEqual(frames.cell_for((100, 20), None), 4)
+        self.assertEqual(frames.cell_for((40, 20), None), 2)
+        # small files (under 64 px wide in the base)
+        self.assertEqual(frames.cell_for((50, 50), (50, 50)), 2)
+        self.assertEqual(frames.cell_for((100, 100), (50, 50)), 4)
+        self.assertEqual(frames.cell_for((30, 30), (50, 50)), 1)
+        self.assertEqual(frames.cell_for((10, 10), (100, 100)), 2)
+
+    def test_footprint(self):
+        self.assertEqual(frames.footprint(Image.new("RGBA", (30, 20), (1, 2, 3, 255))), (0, 0, 30, 20))
+        img = Image.new("RGBA", (30, 20), (0, 0, 0, 0))
+        img.paste((1, 2, 3, 255), (4, 2, 26, 15))
+        img.paste((1, 2, 3, 100), (0, 0, 30, 1))  # a soft edge, ignored
+        self.assertEqual(frames.footprint(img), (4, 2, 26, 15))
+        self.assertEqual(frames.footprint(Image.new("RGB", (5, 6))), (0, 0, 5, 6))
+        self.assertIsNone(frames.footprint(Image.new("RGBA", (5, 6), (0, 0, 0, 0))))
+
+    def test_canvas_leftover_split(self):
+        c = frames.Canvas((700, 100), 4, (20, 10, 670, 90))  # 650 x 80
+        self.assertEqual((c.cols, c.rows), (162, 20))
+        self.assertEqual(c.ox, 20 + (650 - 648) // 2)
+        self.assertEqual(c.oy, 10)
+        c = frames.Canvas((700, 100), 4, (0, 0, 651, 83))  # odd leftovers: extra pixel right/bottom
+        self.assertEqual((c.cols, c.rows, c.ox, c.oy), (162, 20, 1, 1))
+        c.rect(0, 0, c.cols, c.rows, (9, 9, 9))
+        self.assertEqual(c.image().getchannel("A").getbbox(), (1, 1, 649, 81))
+        self.assertEqual(c.image().size, (700, 100))
+
+    def test_rect_and_px_clip(self):
+        c = frames.Canvas((16, 16), 4, (0, 0, 16, 16))
+        c.rect(-2, -2, 10, 3, (1, 1, 1))
+        c.px(9, 9, (1, 1, 1))
+        self.assertEqual(c.image().getchannel("A").getbbox(), (0, 0, 16, 4))
+
+    def test_panel_symmetric_corners(self):
+        c = frames.Canvas((120, 80), 4, (0, 0, 120, 80))
+        s = frames.shades(GRUVBOX)
+        c.panel(1, 1, 28, 18, s.bar, s.hi, s.sh, s.ink, cut=3)
+        alpha = c.image().getchannel("A")
+        self.assertEqual(alpha.getbbox(), (4, 4, 116, 76))
+        self.assertEqual(alpha, alpha.transpose(Image.Transpose.FLIP_LEFT_RIGHT))
+        self.assertEqual(alpha, alpha.transpose(Image.Transpose.FLIP_TOP_BOTTOM))
+        px = c.image().load()
+        self.assertEqual(px[4, 40][:3], s.ink)  # outline at the left edge
+        self.assertEqual(px[4, 4][3], 0)  # corner cut
+        self.assertEqual(px[16, 4][:3], s.ink)  # top edge starts after the 3-cell cut
+        self.assertEqual(px[16, 8][:3], s.hi)
+        self.assertEqual(px[16, 68][:3], s.sh)
+        self.assertEqual(px[60, 40][:3], s.bar)
+        self.assertEqual(px[12, 12][:3], s.bar)  # the bevel stays on the straight rows: no stray cell in the corner
+        self.assertEqual(px[12, 64][:3], s.bar)
+        # stepped 1:1: the outline's first cell on each row of the corner moves one cell per row
+        firsts = [min(x for x in range(120) if px[x, y][3]) for y in (4, 8, 12, 16)]
+        self.assertEqual(firsts, [16, 12, 8, 4])
+
+    def test_dots_and_mirror(self):
+        c = frames.Canvas((40, 8), 4, (0, 0, 40, 8))
+        c.hline_dots(0, 0, 10, (5, 5, 5))
+        c.vline_dots(0, 0, 2, (6, 6, 6), on=1, off=1)
+        row = [c.image().load()[x * 4, 0][3] > 0 for x in range(10)]
+        self.assertEqual(row, [True, True, False, True, True, False, True, True, False, True])
+        self.assertEqual(c.image().load()[0, 4][3], 0)
+        m = frames.Canvas((40, 4), 4, (0, 0, 40, 4))
+        m.px(1, 0, (7, 7, 7))
+        m.mirror()
+        self.assertEqual(m.image().load()[8 * 4, 0][:3], (7, 7, 7))
+
+
+class Frames(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+
+    def build(self, palette, name="theme"):
+        theme = os.path.join(self.tmp.name, name)
+        make_base(theme)
+        return theme, frames.apply(theme, palette)
+
+    def check_margins(self, img, box, cell, spec):
+        canvas = frames.Canvas(img.size, cell, box)
+        alpha = img.getchannel("A")
+        bbox = alpha.getbbox()
+        self.assertIsNotNone(bbox)
+        x0, y0, x1, y1 = box
+        self.assertTrue(x0 <= bbox[0] and y0 <= bbox[1] and bbox[2] <= x1 and bbox[3] <= y1, (bbox, box))
+        # regular steps: every pixel is its cell's color, nothing outside the grid
+        cells = grid(img, canvas)
+        expect = Image.new("RGBA", img.size, (0, 0, 0, 0))
+        for (cx, cy), rgba in cells.items():
+            x, y = canvas.ox + cx * cell, canvas.oy + cy * cell
+            expect.paste(rgba, (x, y, x + cell, y + cell))
+        self.assertEqual(list(img.get_flattened_data()), list(expect.get_flattened_data()))
+        # insets in cells: flush sides reach the grid edge, opposite non-flush insets are equal
+        on = [(cx, cy) for (cx, cy), rgba in cells.items() if rgba[3]]
+        inset = {"left": min(x for x, _ in on), "right": canvas.cols - 1 - max(x for x, _ in on),
+                 "top": min(y for _, y in on), "bottom": canvas.rows - 1 - max(y for _, y in on)}
+        for side in spec.flush:
+            self.assertEqual(inset[side], 0, side)
+        for a, b in (("left", "right"), ("top", "bottom")):
+            if a not in spec.flush and b not in spec.flush:
+                self.assertEqual(inset[a], inset[b], (a, b, inset))
+        # leftover pixels split evenly: at most one more on the right/bottom
+        for lead, total, n in ((canvas.ox - x0, x1 - x0, canvas.cols), (canvas.oy - y0, y1 - y0, canvas.rows)):
+            trail = total - n * cell - lead
+            self.assertIn(trail - lead, (0, 1))
+        if spec.symmetric:
+            for (cx, cy), rgba in cells.items():
+                self.assertEqual(rgba, cells[(canvas.cols - 1 - cx, cy)], (cx, cy))
+
+    def test_every_registered_frame(self):
+        names = {key.split("/", 1)[1] for key in frames.FRAMES}
+        self.assertEqual(names, set(BASE))
+        theme, written = self.build(GRUVBOX, "a")
+        other, _ = self.build(GRUVBOX, "b")
+        arcade, _ = self.build(ARCADE, "c")
+        expected = {f"skin/{n}" for n in BASE} | {f"{folder}/{n}" for folder, entries in COPIES.items() for n in entries}
+        self.assertEqual(sorted(written), sorted(expected))
+        sizes = dict({f"skin/{n}": v for n, v in BASE.items()},
+                     **{f"{folder}/{n}": v for folder, entries in COPIES.items() for n, v in entries.items()})
+        for rel in sorted(written):
+            with self.subTest(rel):
+                spec = frames.FRAMES["skin/" + rel.split("/", 1)[1]]
+                (size, box), base_size = sizes[rel], BASE[rel.split("/", 1)[1]][0]
+                img = load(os.path.join(theme, rel))
+                self.assertEqual(img.size, size)
+                self.check_margins(img, box or (0, 0) + size, frames.cell_for(size, base_size), spec)
+                with open(os.path.join(theme, rel), "rb") as f, open(os.path.join(other, rel), "rb") as g:
+                    self.assertEqual(f.read(), g.read())
+                second = load(os.path.join(arcade, rel))
+                self.assertEqual(img.getchannel("A"), second.getchannel("A"))
+                self.assertNotEqual(img.convert("RGB"), second.convert("RGB"))
+
+    def test_non_uniform_copy_uses_min_ratio_cell(self):
+        theme, _ = self.build(GRUVBOX)
+        img = load(os.path.join(theme, "skin_1280x720", "bg-list-l.png"))
+        canvas = frames.Canvas((1280, 135), 6, (0, 0, 1280, 135))
+        self.assertEqual((canvas.cols, canvas.rows, canvas.ox, canvas.oy), (213, 22, 1, 1))
+        alpha = img.getchannel("A")
+        # the bar's first opaque row is one cell (6 px) below the grid top
+        self.assertEqual(alpha.getbbox()[1], 1 + 6)
+        self.assertEqual(alpha.getbbox()[3], 135 - 2 - 6)
+
+    def test_apply_skips_missing_files_and_other_folders(self):
+        theme = os.path.join(self.tmp.name, "theme")
+        make_base(theme, {"bg-list-s.png": ((640, 60), None)}, {})
+        synthetic(os.path.join(theme, "icons", "bg-list-l.png"), (640, 90), None)
+        synthetic(os.path.join(theme, "skin_720x480", "bg-grid-s.png"), (156, 176), (2, 2, 150, 170))  # not in skin/
+        Image.new("RGBA", (640, 480), (0, 0, 0, 255)).save(os.path.join(theme, "skin", "background.png"))
+        with open(os.path.join(theme, "icons", "bg-list-l.png"), "rb") as f:
+            icon = f.read()
+        written = frames.apply(theme, GRUVBOX)
+        self.assertEqual(sorted(written), ["skin/bg-list-s.png", "skin_720x480/bg-grid-s.png"])
+        with open(os.path.join(theme, "icons", "bg-list-l.png"), "rb") as f:
+            self.assertEqual(f.read(), icon)
+        self.assertEqual(set(load(os.path.join(theme, "skin", "background.png")).get_flattened_data()), {(0, 0, 0, 255)})
+        self.assertFalse(os.path.exists(os.path.join(theme, "skin", "bg-list-l.png")))
+
+    def test_fully_transparent_base_stays_transparent(self):
+        theme = os.path.join(self.tmp.name, "theme")
+        os.makedirs(os.path.join(theme, "skin"))
+        path = os.path.join(theme, "skin", "bg-grid-s.png")
+        Image.new("RGBA", (156, 176), (0, 0, 0, 0)).save(path)
+        with open(path, "rb") as f:
+            before = f.read()
+        self.assertEqual(frames.apply(theme, GRUVBOX), [])
+        with open(path, "rb") as f:
+            self.assertEqual(f.read(), before)
+
+    def test_build_theme_draws_frames_natively(self):
+        base = os.path.join(self.tmp.name, "base")
+        make_theme_base(base)
+        make_base(base)
+        dest = pixel_build.build_theme(base, os.path.join(self.tmp.name, "out"), "T", "CONSOLES", GRUVBOX)
+        img = load(os.path.join(dest, "skin_720x480", "bg-list-l.png"))
+        self.assertEqual(img.size, (720, 90))
+        canvas = frames.Canvas((720, 90), 4, (0, 0, 720, 90))
+        cells = grid(img, canvas)
+        self.check_margins(img, (0, 0, 720, 90), 4, frames.FRAMES["skin/bg-list-l.png"])
+        # drawn on its own 180-cell grid, not the 640 bar stretched: the outline row's corner cut is whole cells
+        row = [cx for cx in range(canvas.cols) if cells[(cx, 1)][3]]
+        self.assertEqual((row[0], row[-1]), (2, canvas.cols - 3))
+        self.assertEqual(img.load()[7, 5][3], 0)
+        self.assertEqual(img.load()[8, 5][:3], frames.shades(GRUVBOX).ink)
+        self.assertEqual(load(os.path.join(dest, "skin", "bg-list-l.png")).size, (640, 90))
+
+    def test_resize_variants_leaves_native_files(self):
+        theme = os.path.join(self.tmp.name, "theme")
+        make_base(theme, {"bg-list-l.png": ((640, 90), None)}, {"skin_720x480": {"bg-list-l.png": ((720, 90), None)}})
+        Image.new("RGBA", (720, 60), (40, 40, 40, 255)).save(os.path.join(theme, "skin_720x480", "bg-title.png"))
+        before = {}
+        for file in ("bg-list-l.png", "bg-title.png"):
+            with open(os.path.join(theme, "skin_720x480", file), "rb") as f:
+                before[file] = f.read()
+        native = {"skin_720x480/bg-list-l.png", "skin_720x480/bg-title.png"}
+        pixel_build.resize_variants(theme, {"skin/bg-list-l.png"}, native)
+        for file, data in before.items():
+            with open(os.path.join(theme, "skin_720x480", file), "rb") as f:
+                self.assertEqual(f.read(), data, file)
+        pixel_build.resize_variants(theme, {"skin/bg-list-l.png"})
+        self.assertEqual(load(os.path.join(theme, "skin_720x480", "bg-title.png")).getpixel((0, 0)), (0, 0, 0, 255))
+
+
+if __name__ == "__main__":
+    unittest.main()

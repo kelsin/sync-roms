@@ -63,8 +63,8 @@ def palette_base(path):
         json.dump(full_config(), f)
     with open(os.path.join(path, "config_720x480.json"), "w") as f:
         json.dump(full_config(), f)
-    bar_png(os.path.join(path, "skin", "bg-list-l.png"))
-    bar_png(os.path.join(path, "skin_720x480", "bg-list-l.png"))
+    bar_png(os.path.join(path, "skin", "div-line-h.png"))  # a frame file not redrawn: only recolored
+    bar_png(os.path.join(path, "skin_720x480", "div-line-h.png"))
 
 
 class Palettes(unittest.TestCase):
@@ -160,7 +160,7 @@ class Build(helpers.StorageDir):
             with open(os.path.join(folder, "icons", "sel", "gba.png"), "rb") as f:
                 icons.append(f.read())
             bar = rgb(palettes.get(name.split(" - ")[1]).bar)
-            self.assertEqual(pixels(os.path.join(folder, "skin_720x480", "bg-list-l.png"))[5, 2], bar + (255,))
+            self.assertEqual(pixels(os.path.join(folder, "skin_720x480", "div-line-h.png"))[5, 2], bar + (255,))
         self.assertNotEqual(configs[0], configs[1])
         self.assertEqual(icons[0], icons[1])
 

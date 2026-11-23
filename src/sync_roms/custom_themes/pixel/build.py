@@ -7,7 +7,8 @@ import shutil
 
 from PIL import Image
 
-from . import app_icons, arcade, extras, handhelds, menu, nintendo_sega, others, recolor, ui_settings, ui_status, variants
+from . import (app_icons, arcade, extras, frames, handhelds, menu, nintendo_sega, others, recolor, ui_settings, ui_status,
+               variants)
 from .sprite import place, render
 
 BATCHES = (handhelds, nintendo_sega, others, arcade, extras)
@@ -54,9 +55,10 @@ def blacken_all(path):
     Image.new("RGBA", size, BLACK).save(path)
 
 
-def resize_variants(dest, drawn):
+def resize_variants(dest, drawn, native=()):
     """The theme ships pre-scaled copies for other screens (icons_<W>x<H>/, skin_<W>x<H>/) that PyUI never remakes:
-    redo the files this script drew at each copy's own size, and black the backgrounds there too."""
+    redo the files this script drew at each copy's own size, and black the backgrounds there too. Files in `native`
+    (paths relative to dest, drawn at each copy's own size already) are left alone."""
     for folder in sorted(os.listdir(dest)):
         base, _, size = folder.partition("_")
         if base not in ("icons", "skin") or not size or folder == "skin_640_480":
@@ -67,6 +69,8 @@ def resize_variants(dest, drawn):
                 rel = posixpath.normpath(posixpath.join(base, rel_dir.replace(os.sep, "/"), file))  # drawn's keys use /
                 src = os.path.join(dest, *rel.split("/"))
                 target = os.path.join(dirpath, file)
+                if posixpath.normpath(posixpath.join(folder, rel_dir.replace(os.sep, "/"), file)) in native:
+                    continue
                 if file in BLACKED.get("skin", []) and base == "skin":
                     blacken(target)
                 elif file == "background.png" and base == "skin":
@@ -139,7 +143,8 @@ def build_theme(base_dir, out_dir, name, kind, palette):
             scale = max(1, min(4, size[0] // (sprite.w + 2), size[1] // (sprite.h + 2)))
             place(render(sprite, scale, "sel"), size, (size[0] / 2, size[1] / 2)).save(target)
             drawn.add(rel)
-    resize_variants(dest, drawn)
+    native = set(frames.apply(dest, palette))  # last among the skin steps, after the recolor and blacken
+    resize_variants(dest, drawn, native)
     preview(dest, spec)
     with open(os.path.join(dest, "CREDITS.txt"), "a") as f:
         f.write(f"\n{name}: the SPRUCE theme with a black background and pixel-art icons drawn for sync-roms.\n")
