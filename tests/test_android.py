@@ -2,6 +2,7 @@ import contextlib
 import io
 import os
 import sys
+import tempfile
 import unittest
 from unittest import mock
 
@@ -9,7 +10,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "src"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from sync_roms import adb, android  # noqa: E402
+from sync_roms import adb, android, store  # noqa: E402
 
 NOVA_CFG = '''savefile_directory = "/storage/emulated/0/RetroArch/saves"
 savefiles_in_content_dir = "false"
@@ -99,12 +100,134 @@ class AndroidTest(unittest.TestCase):
             android.wait_closed("S", "com.retroarch")
         self.assertEqual(running.call_count, 2)
 
+    def test_reconnect_connects_unconnected(self):
+        devs = [adb.Device("adb-X._adb-tls-connect._tcp", "device", "")]
+        services = [("adb-X", "_adb-tls-connect._tcp", "1.1.1.1:1"), ("adb-Y", "_adb-tls-connect._tcp", "2.2.2.2:2"),
+                    ("adb-Z", "_adb-tls-pairing._tcp", "3.3.3.3:3")]
+        with mock.patch.object(adb, "devices", return_value=devs), \
+                mock.patch.object(adb, "mdns_services", return_value=services), \
+                mock.patch.object(adb, "connect") as connect:
+            android.reconnect()
+        connect.assert_called_once_with("2.2.2.2:2")
+
     def test_wait_closed_declined_stops(self):
         with mock.patch.object(android, "running", return_value=True), \
                 mock.patch.object(android.ui, "confirm", return_value=False):
             with self.assertRaises(SystemExit) as ctx:
                 android.wait_closed("S", "com.retroarch")
         self.assertEqual(ctx.exception.code, 0)
+
+
+NOVA = adb.Device("S1", "device", "Retroid Pocket Nova")
+VOL = "6AF3-53E9"
+
+
+class ResolveTest(unittest.TestCase):
+    def setUp(self):
+        quiet = contextlib.ExitStack()
+        quiet.enter_context(contextlib.redirect_stdout(io.StringIO()))
+        quiet.enter_context(contextlib.redirect_stderr(io.StringIO()))
+        self.addCleanup(quiet.close)
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        patch = mock.patch.object(store, "data_dir", lambda: tmp.name)
+        patch.start()
+        self.addCleanup(patch.stop)
+        self.cards = {}
+        self.devs = [NOVA]
+        self.vols = {"S1": [VOL]}
+        self.picks = []
+        self.shown = []
+
+        def filter_list(title, labels, **kw):
+            self.shown.append(list(labels))
+            return self.picks.pop(0)
+        for target, kw in ((adb, {"require": None, "devices": lambda: self.devs, "mdns_services": []}),
+                           (android, {"reconnect": None, "card_volumes": lambda s, r: self.vols.get(s, [])}),
+                           (android.picker, {"filter_list": filter_list})):
+            for name, value in kw.items():
+                p = mock.patch.object(target, name, side_effect=value) if callable(value) else \
+                    mock.patch.object(target, name, return_value=value)
+                p.start()
+                self.addCleanup(p.stop)
+
+    def save(self, cards):
+        self.cards = cards
+        store.write_cards(cards)
+
+    def card(self, **kw):
+        return {"layout": "esde", "device": "retroid-pocket-nova", **kw}
+
+    def test_named_card_finds_its_device(self):
+        self.save({"POCKETNOVA": self.card(android_volume=VOL)})
+        got = android.resolve("POCKETNOVA", self.cards)
+        self.assertEqual(got, android.Target("S1", "Retroid Pocket Nova", VOL, "POCKETNOVA"))
+        self.assertEqual(self.shown, [])
+
+    def test_new_volume_asks_and_remembers(self):
+        self.save({"POCKETNOVA": self.card(), "LINUX": {"layout": "knulli", "device": "x"}})
+        self.picks = [0, 0]
+        got = android.resolve(None, self.cards)
+        self.assertEqual(got.card, "POCKETNOVA")
+        self.assertIn("new card", self.shown[0][0])
+        self.assertEqual(self.shown[1], ["POCKETNOVA"])
+        self.assertEqual(store.load_cards()["POCKETNOVA"]["android_volume"], VOL)
+        self.assertEqual(self.cards["POCKETNOVA"]["android_volume"], VOL)
+
+    def test_volume_moves_from_a_card_no_longer_android(self):
+        self.save({"OLD": self.card(android_volume=VOL, layout="knulli"), "NEW": self.card()})
+        self.picks = [0]
+        got = android.resolve("NEW", self.cards)
+        self.assertEqual(got.card, "NEW")
+        saved = store.load_cards()
+        self.assertEqual(saved["NEW"]["android_volume"], VOL)
+        self.assertNotIn("android_volume", saved["OLD"])
+
+    def test_named_card_wrong_device_fails(self):
+        self.save({"POCKETNOVA": self.card(), "OTHER": self.card(android_volume=VOL)})
+        self.picks = [0]
+        with self.assertRaises(SystemExit) as ctx:
+            android.resolve("POCKETNOVA", self.cards)
+        self.assertEqual(ctx.exception.code, 2)
+
+    def test_unauthorized_not_listed(self):
+        self.devs = [NOVA, adb.Device("S2", "unauthorized", "")]
+        self.save({"POCKETNOVA": self.card(android_volume=VOL)})
+        self.picks = [None]
+        with self.assertRaises(SystemExit) as ctx:
+            android.resolve(None, self.cards)
+        self.assertEqual(ctx.exception.code, 0)
+        self.assertEqual(len(self.shown[0]), 2)
+        self.assertIn("POCKETNOVA", self.shown[0][0])
+
+    def test_setup_row_runs_setup(self):
+        self.save({"POCKETNOVA": self.card()})
+        self.picks = [1, 0, 0]
+        with mock.patch.object(android, "setup_device") as setup:
+            android.resolve(None, self.cards)
+        setup.assert_called_once_with()
+        self.assertEqual(len(self.shown), 3)
+
+    def test_no_roms_volume_fails(self):
+        self.vols = {}
+        self.picks = [0]
+        with self.assertRaises(SystemExit) as ctx:
+            android.resolve(None, self.cards)
+        self.assertEqual(ctx.exception.code, 2)
+
+
+class SetupTest(unittest.TestCase):
+    def test_setup_device_pairs(self):
+        pairing = [("adb-Y", "_adb-tls-pairing._tcp", "1.2.3.4:4000")]
+        with contextlib.redirect_stdout(io.StringIO()), mock.patch.object(android.time, "sleep"), \
+                mock.patch.object(adb, "mdns_services", return_value=pairing), \
+                mock.patch.object(android.ui, "ask", return_value="123456"), \
+                mock.patch.object(adb, "pair") as pair, \
+                mock.patch.object(adb, "devices", return_value=[NOVA]), \
+                mock.patch.object(android, "reconnect") as reconnect:
+            android.setup_device()
+        pair.assert_called_once_with("1.2.3.4:4000", "123456")
+        reconnect.assert_called_once_with()
 
 
 if __name__ == "__main__":

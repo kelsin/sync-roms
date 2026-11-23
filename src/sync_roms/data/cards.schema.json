@@ -47,6 +47,7 @@
         "type": "object",
         "additionalProperties": {"type": "array", "items": {"type": "string"}}
       },
+      "android_volume": {"type": "string", "description": "The SD card's Android volume id (/storage/<id>), remembered by saves stash/apply"},
       "surprise": {"type": "boolean", "description": "false turns Surprise off (absent: on)"},
       "surprises": {
         "type": "array",
