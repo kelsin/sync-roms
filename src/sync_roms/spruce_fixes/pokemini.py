@@ -25,3 +25,7 @@ def plan(base):
             elif cardfs.exists(source):
                 writes.append((target, cardfs.read(source)))
     return writes, "the theme already has poke.png" if has_poke else "the theme has no pokemini.png to copy"
+
+
+def keeps(path):
+    return False

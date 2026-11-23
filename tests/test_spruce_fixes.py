@@ -94,6 +94,17 @@ class FdsTests(Base):
     def read(self, theme, name="fds.png"):
         return self.get(f"{theme}/icons/overlay/{name}")
 
+    def test_fds_keeps_only_fixed_file(self):
+        fixed = self.put("ART_BOOK_NEXT/icons/overlay/fds.png", self.image)
+        other = self.put("ART_BOOK_NEXT/icons/overlay/fc.png", self.image)
+        buggy = self.put("ART_BOOK_NOIR/icons/overlay/fds.png", NES)
+        outside = self.put("OTHER/icons/overlay/fds.png", self.image)
+        self.assertTrue(fds.keeps(fixed))
+        self.assertTrue(spruce_fixes.keeps(fixed))
+        for path in (other, buggy, outside, os.path.join(self.base, "Themes", "ART_BOOK_NEXT", "icons", "overlay", "none.png")):
+            self.assertFalse(fds.keeps(path))
+            self.assertFalse(spruce_fixes.keeps(path))
+
     def test_buggy_card_is_fixed(self):
         for theme in fds.THEMES:
             self.put_pair(theme, NES, NES)

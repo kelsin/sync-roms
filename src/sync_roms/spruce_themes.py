@@ -1,4 +1,5 @@
 """PyUI themes for spruce cards: the .7z assets of spruceUI/PyUI-Themes' release, kept unpacked in storage."""
+import glob
 import http.client
 import json
 import os
@@ -6,7 +7,7 @@ import shutil
 import subprocess
 import tempfile
 
-from . import external, github, inventory, picker, previews, runtime, s3, ui, usersettings
+from . import cardfs, downloads, external, github, inventory, picker, previews, runtime, s3, spruce_fixes, spruce_settings, store, ui, usersettings
 
 REPO = "spruceUI/PyUI-Themes"
 TAG = "1"
@@ -193,3 +194,131 @@ def pick_one(title, current):
     if i is None:
         return False
     return names[i - 1] if i else None
+
+
+def wanted(card, names):
+    """names plus the card's current theme, limited to the themes in storage. Prints a dim note for each one storage
+    lacks, and a warning when that is the current theme."""
+    current = store.saved_card(card).get("spruce_theme")
+    have = available()
+    result = []
+    for n in [*names, *([current] if isinstance(current, str) and current else [])]:
+        if n in have:
+            if n not in result:
+                result.append(n)
+        elif n == current:
+            ui.warn(f"The current theme {n} isn't in storage; run sync-roms themes update")
+        else:
+            print(ui.dim(f"   ⏭️  Spruce theme {n} isn't in storage; skipped"))
+    return result
+
+
+def plan(card, base, names, keep):
+    """What a card's themes need: jobs ([(key, path, size)] for every file of each wanted theme), remove (installed
+    folders to delete) and installed (the card's new spruce_themes_installed). Only folders sync put on the card are
+    removed, and never one that is wanted, the card's current theme, or in use by a device (Saves/*-system.json)."""
+    saved = store.saved_card(card)
+    previous = [n for n in saved.get("spruce_themes_installed") or [] if isinstance(n, str)]
+    current = saved.get("spruce_theme")
+    have = available()
+    use = wanted(card, names)
+    prefix = runtime.SPRUCE_THEMES_PREFIX
+    jobs = []
+    for name in use:
+        folder = os.path.join(base, "Themes", name)
+        for key, size in sorted(inventory.files(f"{prefix}{name}/").items()):
+            downloads.add_job(jobs, key, folder, key[len(prefix) + len(name) + 1:], size)
+    installed = previous + [n for n in use if n not in previous and not os.path.isdir(os.path.join(base, "Themes", n))]
+    remove = []
+    if not keep and have:
+        busy = selected(base)
+        remove = [n for n in previous if n not in use and n not in busy and n != current]
+    return {"jobs": jobs, "remove": remove, "installed": [n for n in installed if n not in remove]}
+
+
+def todo(jobs):
+    """The jobs whose card file is out of date. A file a spruce fix already made right is left alone; a config*.json
+    is compared by content, since a changed setting can keep the same size."""
+    result = []
+    for key, path, size in jobs:
+        if spruce_fixes.keeps(path):
+            continue
+        if os.path.basename(path).lower().startswith("config") and path.lower().endswith(".json"):
+            try:
+                if cardfs.read(path) == s3.get_text(key).encode("utf-8"):
+                    continue
+            except (OSError, *s3.ERRORS):
+                pass
+            result.append((key, path, size))
+        elif not downloads.is_current(path, size):
+            result.append((key, path, size))
+    return result
+
+
+def remove(base, names, dry_run):
+    """Delete the card's Themes/<name>/ folders. Returns the number that failed."""
+    failed = 0
+    for name in names:
+        path = os.path.join(base, "Themes", name)
+        if dry_run:
+            print(ui.dim(f"🧪 Dry run: would remove the Spruce theme {name}"))
+            continue
+        try:
+            shutil.rmtree(path)
+            print(f"🗑️  Removed the Spruce theme {name}")
+        except FileNotFoundError:
+            pass
+        except OSError as e:
+            ui.warn(f"Couldn't remove the Spruce theme {name}: {e}")
+            failed += 1
+    return failed
+
+
+def _system_files(base):
+    return sorted(glob.glob(os.path.join(glob.escape(base), "Saves", "*-system.json")))
+
+
+def selected(base):
+    """The themes the card's devices have selected: the "theme" of each Saves/*-system.json that parses."""
+    names = set()
+    for path in _system_files(base):
+        try:
+            theme = json.loads(cardfs.text(path)).get("theme")
+        except (OSError, ValueError, AttributeError):
+            continue
+        if isinstance(theme, str) and theme:
+            names.add(theme)
+    return names
+
+
+def select(card, base, dry_run):
+    """Set "theme" to the card's spruce_theme in every Saves/*-system.json, keeping the rest of each file. Returns the
+    failure count (always 0: a file that can't be used is warned about and skipped)."""
+    name = store.saved_card(card).get("spruce_theme")
+    if not isinstance(name, str) or not name:
+        return 0
+    files = _system_files(base)
+    if not files:
+        ui.warn("Saves/*-system.json is missing; the Spruce theme isn't selected (start the card in the device once first)")
+        return 0
+    changed = 0
+    for path in files:
+        old = cardfs.text(path)
+        try:
+            data = json.loads(old)
+        except ValueError:
+            data = None
+        if not isinstance(data, dict):
+            ui.warn(f"{os.path.relpath(path, base)} can't be read as Spruce settings; theme not selected there")
+            continue
+        if data.get("theme") == name:
+            continue
+        data["theme"] = name
+        if not dry_run:
+            cardfs.write_text(path, json.dumps(data, indent=spruce_settings._indent(old), ensure_ascii=False)
+                              + ("\n" if old.endswith("\n") else ""))
+        changed += 1
+    if changed:
+        print(ui.dim(f"🧪 Dry run: would select the Spruce theme {name} ({changed} file(s))") if dry_run
+              else f"🎨 Spruce theme → {name} ({changed} file(s))")
+    return 0

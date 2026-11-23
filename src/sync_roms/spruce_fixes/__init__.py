@@ -20,6 +20,11 @@ class Mismatch(str):
     """A skip reason that is a warning: the card isn't as the fix expects, so nothing was written."""
 
 
+def keeps(path):
+    """Whether the card file at path is one a fix already made right, so a theme copy must not overwrite it."""
+    return any(fix.keeps(path) for fix in FIXES)
+
+
 def run(layout_name, base, dry_run):
     """Print one line per fix and write what each plans (nothing with dry_run). Returns the number of files written,
     or, with dry_run, that would be."""
