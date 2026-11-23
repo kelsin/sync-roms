@@ -16,6 +16,11 @@ NAME = "2CleanMini_by_Sheezie.7z"
 FOLDER = "2CleanMini by Sheezie"
 
 
+def read(path):
+    with open(path, "rb") as f:
+        return f.read()
+
+
 def asset(name=NAME, updated="2026-01-01T00:00:00Z", size=10):
     return {"name": name, "size": size, "updated_at": updated, "browser_download_url": f"https://example.invalid/{name}"}
 
@@ -286,6 +291,32 @@ class Pick(helpers.StorageDir):
         path = spruce_themes.preview("a")
         with open(path, "rb") as f:
             self.assertEqual(f.read(), b"png")
+
+    def test_preview_follows_a_republished_png(self):
+        self.put(f"{PREFIX}a/preview.png", b"old")
+        spruce_themes.preview("a")
+        self.put(f"{PREFIX}a/preview.png", b"new")
+        self.assertEqual(read(spruce_themes.preview("a")), b"new")
+
+    def test_preview_from_a_bucket_is_cached_by_etag(self):
+        key = f"{PREFIX}a/preview.png"
+        bodies = {"e1": b"old", "e2": b"new"}
+        etag = ["e1"]
+
+        def download(job):
+            os.makedirs(os.path.dirname(job[1]), exist_ok=True)
+            with open(job[1], "wb") as f:
+                f.write(bodies[etag[0]])
+        with mock.patch.object(runtime, "ROOT", None), mock.patch.object(runtime, "BUCKET", "b"), \
+                mock.patch.object(inventory, "known", lambda k: (3, f'"{etag[0]}"') if k == key else None), \
+                mock.patch.object(s3, "download", side_effect=download) as fetch:
+            self.assertEqual(read(spruce_themes.preview("a")), b"old")
+            self.assertEqual(read(spruce_themes.preview("a")), b"old")
+            self.assertEqual(fetch.call_count, 1)
+            etag[0] = "e2"
+            path = spruce_themes.preview("a")
+            self.assertEqual(read(path), b"new")
+            self.assertEqual(os.listdir(os.path.dirname(path)), [os.path.basename(path)])
 
 
 

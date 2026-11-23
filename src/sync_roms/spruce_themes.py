@@ -211,10 +211,27 @@ def available():
 
 
 def preview(name):
-    """Local path of the theme's preview.png (downloaded once), or None when storage has none."""
+    """Local path of the theme's preview.png, or None when storage has none: a storage folder's own file, else a
+    download kept in the cache under its ETag, so a republished preview (themes publish) is downloaded again."""
+    from . import mirroring  # imported here: mirroring imports this module
     key = f"{runtime.SPRUCE_THEMES_PREFIX}{name}/preview.png"
     try:
-        return previews._download(key)
+        if runtime.ROOT:
+            path = s3.safe_join(runtime.ROOT, key)
+            return path if os.path.isfile(path) else None
+        known = inventory.known(key)
+        etag = known[1] if known else inventory.tag(key)
+        if not etag:
+            return None
+        folder = os.path.join(store.cache_dir(), "previews", *os.path.dirname(key).split("/"))
+        path = os.path.join(folder, f"preview.{etag.strip(chr(34))}.png")
+        if not os.path.exists(path):
+            with mirroring.storage_reads():
+                s3.download((key, path, None))
+            for old in os.listdir(folder):  # older versions, and the untagged copy earlier releases kept
+                if old != os.path.basename(path) and old.startswith("preview.") and old.endswith(".png"):
+                    os.remove(os.path.join(folder, old))
+        return path
     except (OSError, *s3.ERRORS):
         return None
 
