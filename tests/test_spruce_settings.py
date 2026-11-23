@@ -13,7 +13,9 @@ from sync_roms import commands, spruce_settings, store, usersettings  # noqa: E4
 BASE = {"menuOptions": {"Other": {"x": {"selected": "1"}}}, "theme": "dark"}
 
 
-class Install(helpers.CardDir):
+class InstallBase(helpers.CardDir):
+    syncthing = False  # the forced Syncthing settings are tested in Forced
+
     def setUp(self):
         super().setUp()
         self.path = self.cp("Saves", "spruce", "spruce-config.json")
@@ -28,6 +30,8 @@ class Install(helpers.CardDir):
             return json.load(f)
 
     def run_install(self, layout="spruce", dry_run=False, **settings):
+        if not self.syncthing:
+            settings.setdefault("spruce_syncthing", False)
         usersettings.save_settings(settings)
         out, self.err = io.StringIO(), io.StringIO()
         with contextlib.redirect_stdout(out), contextlib.redirect_stderr(self.err):
@@ -37,6 +41,8 @@ class Install(helpers.CardDir):
     def block(self):
         return self.config()["menuOptions"]["RetroAchievements Settings"]
 
+
+class Install(InstallBase):
     def test_sets_keys_and_keeps_the_rest(self):
         self.put_config(BASE)
         out = self.run_install(spruce_ra_mode="Hardcore", spruce_ra_username="me", spruce_ra_password="pw1",
@@ -195,9 +201,66 @@ class SharedSettings(Install):
         self.assertEqual(self.config(), RICH)
 
 
+FORCED = {"menuOptions": {
+    "Emulator Settings": {"raAutoSave": {"selected": "Custom"}, "raAutoLoad": {"selected": "Custom"},
+                          "keepSavesBetweenCores": {"selected": "Prompt"}},
+    "Network Settings": {"enableSyncthing": {"selected": "False"}}}}
+
+
+class Forced(InstallBase):
+    syncthing = True
+
+    def setUp(self):
+        super().setUp()
+        store.write_cards({"c": {"device": "anbernic-rg-sp", "layout": "spruce"}})
+        self.put_config(FORCED)
+
+    def selected(self, section, key):
+        return self.config()["menuOptions"][section][key]["selected"]
+
+    def values(self):
+        return [self.selected("Emulator Settings", k) for k in ("raAutoSave", "raAutoLoad", "keepSavesBetweenCores")] + [
+            self.selected("Network Settings", "enableSyncthing")]
+
+    def test_forced_settings_applied_by_default(self):
+        out = self.run_install()
+        self.assertEqual(self.values(), ["True", "True", "Always", "True"])
+        self.assertIn("   Emulator Settings / raAutoSave = True (Syncthing)", out)
+        self.assertIn("   Network Settings / enableSyncthing = True (Syncthing)", out)
+
+    def test_forced_beat_saved_values_silently(self):
+        self.run_install(spruce_settings={"Emulator Settings": {"raAutoLoad": "False"}})
+        self.assertEqual(self.selected("Emulator Settings", "raAutoLoad"), "True")
+        self.assertNotIn("aren't shared", self.err.getvalue())
+
+    def test_no_wifi_device_keeps_syncthing_off(self):
+        store.write_cards({"c": {"device": "miyoo-mini", "layout": "spruce"}})
+        self.run_install()
+        self.assertEqual(self.values(), ["True", "True", "Always", "False"])
+
+    def test_off_uses_saved_values(self):
+        out = self.run_install(spruce_syncthing=False, spruce_settings={"Emulator Settings": {"raAutoLoad": "False"}})
+        self.assertEqual(self.values(), ["Custom", "False", "Prompt", "False"])
+        self.assertNotIn("Syncthing", out)
+
+    def test_missing_forced_key_warns(self):
+        self.put_config({"menuOptions": {"Emulator Settings": {"raAutoSave": {"selected": "Custom"}}}})
+        self.run_install()
+        self.assertIn("spruce-config.json has no Emulator Settings / raAutoLoad; update spruceOS for Syncthing saves to work",
+                      self.err.getvalue())
+        self.assertEqual(self.selected("Emulator Settings", "raAutoSave"), "True")
+
+    def test_allowlist_drops_forced_keys_only_while_on(self):
+        keys = {k for ks in spruce_settings.allowed().values() for k in ks}
+        self.assertFalse(keys & {"raAutoSave", "raAutoLoad", "keepSavesBetweenCores", "enableSyncthing"})
+        usersettings.save_settings({"spruce_syncthing": False})
+        self.assertIn("raAutoSave", spruce_settings.allowed()["Emulator Settings"])
+
+
 class Import(helpers.Cmd):
     def setUp(self):
         super().setUp()
+        usersettings.save_settings({"spruce_syncthing": False})
         self.card = os.path.join(self.tmp.name, "RGSP")
         store.write_cards({"RGSP": {"device": "full", "layout": "spruce"}})
         path = os.path.join(self.card, "Saves", "spruce", "spruce-config.json")
@@ -248,7 +311,7 @@ class Import(helpers.Cmd):
                                         "Emulator Settings": {"raAutoSave": "Custom"}})
 
     def test_lists_identical_and_different(self):
-        usersettings.save_settings({"mirror": "/m", "spruce_settings": {
+        usersettings.save_settings({"mirror": "/m", "spruce_syncthing": False, "spruce_settings": {
             "Button Settings": {"menuButton": "L3"}, "Emulator Settings": {"raAutoSave": "Old"}}})
         code, out, _ = self.imp(["y"])
         self.assertIn("Identical (1)", out)
@@ -259,7 +322,7 @@ class Import(helpers.Cmd):
         self.assertEqual(saved["spruce_settings"], self.ALL)
 
     def test_nothing_different_does_not_prompt(self):
-        usersettings.save_settings({"spruce_settings": self.ALL})
+        usersettings.save_settings({"spruce_syncthing": False, "spruce_settings": self.ALL})
         code, out, _ = self.imp([])  # any input() call would raise StopIteration
         self.assertEqual(code, 0)
         self.assertIn("nothing to import", out)
@@ -311,6 +374,13 @@ class Import(helpers.Cmd):
         os.makedirs(os.path.join(self.tmp.name, "RGSP2"))
         store.write_cards({"RGSP2": {"device": "full", "layout": "spruce"}})
         self.assertEqual(self.run_cmd("config", "import", os.path.join(self.tmp.name, "RGSP2"))[0], 2)
+
+    def test_import_skips_forced_keys_while_on(self):
+        usersettings.save_settings({})
+        code, out, _ = self.imp(["y"])
+        self.assertEqual(code, 0)
+        self.assertNotIn("raAutoSave", out)
+        self.assertEqual(self.saved(), {"Button Settings": {"menuButton": "L3"}, "Emulator Settings": {"perfectOverlays": "False"}})
 
     def test_spruce_spruce_import_is_gone(self):
         self.assertEqual(self.run_cmd("config", "spruce-import", self.card)[0], 2)

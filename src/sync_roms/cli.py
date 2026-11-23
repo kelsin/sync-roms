@@ -10,7 +10,7 @@ from concurrent.futures import ThreadPoolExecutor
 from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError
 
 from . import __version__, budget, cardedit, cardfs, clean, commands, downloads, drivers, edit, external, frontend, inventory, m3u, mirroring, picker, runtime, s3, scrape_plan, store
-from . import muos_collections, nextui_folders, onion_surprise, pico8, raofflineproxy, rocknix_collections, saves, spruce_collections, spruce_bootlogo, spruce_emu, spruce_os, spruce_fixes, spruce_settings, spruce_wifi, surprise, themeart, ui, usersettings, vita
+from . import muos_collections, nextui_folders, onion_surprise, pico8, raofflineproxy, rocknix_collections, saves, spruce_collections, spruce_bootlogo, spruce_emu, spruce_os, spruce_fixes, spruce_settings, spruce_syncthing, spruce_wifi, surprise, themeart, ui, usersettings, vita
 from . import collections as colls
 
 
@@ -329,7 +329,7 @@ TOPICS = {
   sync-roms config import [CARD]        save a card's own settings (spruceOS preferences) in settings.json
 
   NAME is bucket, root, endpoint, profile, write_profile, mirror, screenscraper_user or screenscraper_password (text),
-  eject or storage_cache_declined (true or false), surprise_ttl_days (a positive number of days) or
+  eject, storage_cache_declined or spruce_syncthing (true or false), surprise_ttl_days (a positive number of days) or
   surprise_excluded_systems (comma-separated system ids, e.g. gba,snes). root and mirror must be absolute
   paths (~ is expanded). The password is saved but never printed;
   `scrape --set-credentials` asks for it without echoing it.
@@ -1142,6 +1142,7 @@ def sync_card(args):
         failed += spruce_os.install(card, layout_name, base, dry_run, wrote, keep=args.no_delete)
         failed += spruce_settings.install(card, layout_name, base, dry_run)
         failed += spruce_wifi.install(card, layout_name, base, dry_run)
+        failed += spruce_syncthing.run(card, layout_name, base, dry_run)
         if clean_card and wrote:
             clean._clean_root = base
         return failed

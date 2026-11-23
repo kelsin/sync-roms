@@ -675,7 +675,7 @@ CONFIG_KINDS = {"bucket": str, "root": str, "endpoint": str, "profile": str, "wr
                 "eject": bool, "storage_cache_declined": bool, "surprise_ttl_days": int, "surprise_excluded_systems": list,
                 "screenscraper_user": str, "screenscraper_password": str, "spruce_ra_mode": str, "spruce_ra_username": str,
                 "spruce_ra_password": str, "spruce_ra_api_key": str, "spruce_ra_offline_proxy": bool,
-                "spruce_ra_proxy_stats": bool}  # the settings `config set` and `config unset` take
+                "spruce_ra_proxy_stats": bool, "spruce_syncthing": bool}  # the settings `config set` and `config unset` take
 HIDDEN = {"screenscraper_password", "spruce_ra_password", "spruce_ra_api_key"}  # set, never printed
 
 
