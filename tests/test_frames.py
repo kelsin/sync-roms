@@ -44,7 +44,51 @@ BASE = {
     "preview-nameFrame.png": ((174, 70), None),
     "thumb-default.png": ((250, 360), None),
     "div-line-v-02.png": ((4, 420), None),
+    # keys, counters, glyphs, hints, spinner and charging (glyph footprints as in the real base: soft edges trimmed)
+    "bg-btn-01-f.png": ((50, 50), None),
+    "bg-btn-01-n.png": ((50, 50), None),
+    "bg-btn-02-f.png": ((111, 50), None),
+    "bg-btn-02-n.png": ((111, 50), None),
+    "bg-btn-nor.png": ((48, 48), None),
+    "bg-btn-sel.png": ((50, 50), None),
+    "bg-btn-shift-active.png": ((48, 48), None),
+    "value-frame-f.png": ((61, 24), None),
+    "value-frame-n.png": ((61, 24), None),
+    "num-bg.png": ((44, 24), None),
+    "btn-delete.png": ((30, 30), (1, 5, 29, 25)),
+    "btn-empty.png": ((30, 30), (1, 3, 29, 28)),
+    "btn-shift.png": ((30, 30), (2, 7, 28, 23)),
+    "btn-space.png": ((30, 30), (4, 4, 26, 26)),
+    "nav-favorite-f.png": ((40, 40), (2, 3, 38, 37)),
+    "nav-favorite-n.png": ((40, 40), (2, 3, 38, 37)),
+    "nav-file-f.png": ((40, 40), (3, 5, 37, 33)),
+    "nav-file-n.png": ((40, 40), (3, 5, 37, 33)),
+    "progress-dot.png": ((12, 12), (1, 1, 11, 11)),
+    "context-a.png": ((26, 26), None),
+    "context-b.png": ((26, 26), None),
+    "context-x.png": ((26, 26), None),
+    "context-y.png": ((26, 26), None),
+    "context-menu.png": ((66, 26), None),
+    "context-select.png": ((66, 26), None),
+    "context-start.png": ((66, 26), None),
 }
+for _i in range(1, 6):
+    BASE[f"app_loading_0{_i}.png"] = ((100, 480), (27, 198, 75, 282))
+    BASE[f"charging-0{_i}.png"] = ((100, 480), (27, 198, 75, 282))
+KEYS = {"bg-btn-01-f", "bg-btn-01-n", "bg-btn-02-f", "bg-btn-02-n", "bg-btn-nor", "bg-btn-sel", "bg-btn-shift-active",
+        "value-frame-f", "value-frame-n", "num-bg", "btn-delete", "btn-empty", "btn-shift", "btn-space",
+        "nav-favorite-f", "nav-favorite-n", "nav-file-f", "nav-file-n", "progress-dot", "context-a", "context-b",
+        "context-x", "context-y", "context-menu", "context-select", "context-start"} | {
+    f"{kind}{i}" for kind in ("app_loading_0", "charging-0") for i in range(1, 6)}
+# the spec's file list (2026-11-23-pixel-frames-design.md, "The files"), and the ones it keeps as they are
+SPEC_FILES = {
+    "bg-list-l", "bg-list-s", "bg-list-s2", "list-item-select-bg-short", "menu-sub-title-bg", "grid-game-selected",
+    "bg-game-item-f", "bg-game-item-n", "bg-grid-s", "bg-title", "tips-bar-bg", "navbg", "statbg", "bg-gamelist",
+    "menu-5line-bg", "menu-6line-bg", "app_loading_bg", "bg-pop-menu-4", "menu-sub-bg", "loading-bg",
+    "loading-progress-left", "loading-progress-mid", "loading-progress-right", "preview-bg", "preview-nameFrame",
+    "thumb-default", "missing_image", "div-line-v-02", "div-line-h", "div-line-v-01", "background"} | KEYS
+NOT_DRAWN = {"bg-game-item-n", "div-line-h", "div-line-v-01", "missing_image", "background"}
+PAIRS = ("bg-btn-01", "bg-btn-02", "value-frame", "nav-favorite", "nav-file")
 PANELS = {"bg-title", "tips-bar-bg", "navbg", "statbg", "bg-gamelist", "menu-5line-bg", "menu-6line-bg", "app_loading_bg",
           "bg-pop-menu-4", "menu-sub-bg", "loading-bg", "loading-progress-left", "loading-progress-mid",
           "loading-progress-right", "preview-bg", "preview-nameFrame", "thumb-default", "div-line-v-02"}
@@ -63,6 +107,18 @@ COPIES = {
     "skin_752x560": {"bg-title.png": ((752, 70), None), "app_loading_bg.png": ((746, 559), None),
                      "menu-sub-bg.png": ((373, 349), None), "preview-nameFrame.png": ((201, 81), None),
                      "thumb-default.png": ((291, 419), None)},
+    # even grids at cell 2 (a 14-cell button, 36x14 pills) and cell 3 copies
+    "skin_720x540": {"context-a.png": ((29, 29), None), "context-start.png": ((73, 29), None),
+                     "context-select.png": ((73, 29), None), "context-menu.png": ((73, 29), None),
+                     "btn-delete.png": ((33, 33), (1, 5, 32, 28)), "btn-empty.png": ((33, 33), (1, 3, 32, 30)),
+                     "btn-shift.png": ((33, 33), (2, 8, 31, 25)), "btn-space.png": ((33, 33), (4, 4, 29, 29)),
+                     "nav-favorite-f.png": ((45, 45), (2, 3, 43, 42)), "nav-file-n.png": ((45, 45), (4, 6, 41, 37)),
+                     "progress-dot.png": ((13, 13), (1, 1, 12, 12)), "bg-btn-02-f.png": ((123, 55), None),
+                     "app_loading_03.png": ((112, 540), (30, 223, 84, 317))},
+    "skin_1024x768": {"context-b.png": ((41, 41), None), "context-menu.png": ((104, 41), None),
+                      "btn-empty.png": ((48, 48), (2, 4, 46, 44)), "nav-file-f.png": ((64, 64), (5, 8, 59, 53)),
+                      "nav-favorite-n.png": ((64, 64), (3, 4, 61, 60)), "bg-btn-01-f.png": ((80, 80), None),
+                      "value-frame-n.png": ((96, 38), None), "charging-02.png": ((160, 768), (43, 317, 120, 451))},
 }
 
 
@@ -115,6 +171,10 @@ class Kit(unittest.TestCase):
                          ((0xEB, 0xDB, 0xB2), (0xFB, 0xF1, 0xC7), (0xFB, 0xF1, 0xC7), (0x7C, 0x6F, 0x64)))
 
     def test_cell_for(self):
+        self.assertEqual(frames.cell_for((66, 26), (66, 26), small=True), 2)  # a wide glyph drawn as a small file
+        self.assertEqual(frames.cell_for((104, 41), (66, 26), small=True), 3)
+        self.assertEqual(frames.cell_for((66, 26), (66, 26)), 4)
+        self.assertEqual(frames.cell_for((100, 20), None, small=True), 2)
         self.assertEqual(frames.cell_for((640, 90), (640, 90)), 4)
         self.assertEqual(frames.cell_for((1280, 135), (640, 90)), 6)
         self.assertEqual(frames.cell_for((720, 90), (640, 90)), 4)
@@ -247,12 +307,95 @@ class Frames(unittest.TestCase):
                 (size, box), base_size = sizes[rel], BASE[rel.split("/", 1)[1]][0]
                 img = load(os.path.join(theme, rel))
                 self.assertEqual(img.size, size)
-                self.check_margins(img, box or (0, 0) + size, frames.cell_for(size, base_size), spec)
+                self.check_margins(img, box or (0, 0) + size, frames.cell_for(size, base_size, spec.small), spec)
                 with open(os.path.join(theme, rel), "rb") as f, open(os.path.join(other, rel), "rb") as g:
                     self.assertEqual(f.read(), g.read())
                 second = load(os.path.join(arcade, rel))
                 self.assertEqual(img.getchannel("A"), second.getchannel("A"))
                 self.assertNotEqual(img.convert("RGB"), second.convert("RGB"))
+
+    def test_registry_has_all_key_files(self):
+        names = {key.split("/", 1)[1][:-len(".png")] for key in frames.FRAMES}
+        self.assertLessEqual(KEYS, names)
+        for name in KEYS:
+            self.assertIsNone(frames.FRAMES[f"skin/{name}.png"].background, name)  # glyphs keep a transparent surround
+
+    def test_registry_covers_the_spec(self):
+        names = {key.split("/", 1)[1][:-len(".png")] for key in frames.FRAMES}
+        self.assertEqual(names, SPEC_FILES - NOT_DRAWN)
+
+    def test_selected_and_unselected_share_geometry(self):
+        theme, written = self.build(GRUVBOX)
+        folders = sorted({rel.split("/", 1)[0] for rel in written})
+        checked = 0
+        for folder in folders:
+            for pair in PAIRS:
+                f, n = (os.path.join(theme, folder, f"{pair}-{state}.png") for state in "fn")
+                if not (os.path.exists(f) and os.path.exists(n)):
+                    continue
+                with self.subTest(folder=folder, pair=pair):
+                    img_f, img_n = load(f), load(n)
+                    self.assertEqual(img_f.getchannel("A"), img_n.getchannel("A"))
+                    self.assertNotEqual(img_f.convert("RGB"), img_n.convert("RGB"))
+                    checked += 1
+        self.assertGreaterEqual(checked, len(PAIRS))
+
+    def test_hint_letters_centered(self):
+        """The letter or word of a button hint is centered in its button: equal ink margins left/right and top/bottom,
+        on odd (13-cell) and even (14-cell) grids alike."""
+        theme, written = self.build(GRUVBOX)
+        ink = frames.shades(GRUVBOX).ink
+        hints = [rel for rel in written if rel.split("/", 1)[1].startswith("context-")]
+        self.assertGreaterEqual(len(hints), 7 + 5)
+        for rel in hints:
+            with self.subTest(rel):
+                img = load(os.path.join(theme, rel))
+                name = rel.split("/", 1)[1]
+                canvas = frames.Canvas(img.size, frames.cell_for(img.size, BASE[name][0], small=True), (0, 0) + img.size)
+                cells = grid(img, canvas)
+                # the letters: ink cells inside the button (not its outline ring)
+                body = {xy for xy, rgba in cells.items() if rgba[3] and rgba[:3] != ink}
+                letters = [(x, y) for (x, y), rgba in cells.items() if rgba[:3] == ink and
+                           all((x + dx, y + dy) in body or cells.get((x + dx, y + dy), (0,) * 4)[:3] == ink
+                               for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)))]
+                self.assertTrue(letters)
+                left, right = min(x for x, _ in letters), max(x for x, _ in letters)
+                top, bottom = min(y for _, y in letters), max(y for _, y in letters)
+                self.assertEqual(left, canvas.cols - 1 - right)
+                self.assertEqual(top, canvas.rows - 1 - bottom)
+
+    def test_animation_frames_keep_positions(self):
+        theme, written = self.build(GRUVBOX)
+        s = frames.shades(GRUVBOX)
+        for kind in ("app_loading_0", "charging-0"):
+            for folder in sorted({rel.split("/", 1)[0] for rel in written}):
+                paths = [os.path.join(theme, folder, f"{kind}{i}.png") for i in range(1, 6)]
+                if not all(os.path.exists(p) for p in paths):
+                    continue
+                with self.subTest(kind=kind, folder=folder):
+                    imgs = [load(p) for p in paths]
+                    masks = [img.getchannel("A") for img in imgs]
+                    for mask in masks[1:]:
+                        self.assertEqual(mask, masks[0])  # the same glyph in every frame: only its colors change
+                    lit = [sum(px[:3] == s.accent and px[3] > 0 for px in img.get_flattened_data()) for img in imgs]
+                    self.assertEqual(lit[0], 0)
+                    self.assertEqual(lit, sorted(set(lit)))  # each frame lights more than the one before
+                    self.assertEqual(lit[-1], sum(1 for v in masks[0].get_flattened_data() if v))
+
+    def test_animation_frames_share_a_grid_inside_each_footprint(self):
+        """A frame whose footprint is a pixel taller (a soft pixel over the threshold) still draws on the frames'
+        common grid, so nothing jumps between frames, and each frame stays inside its own footprint."""
+        theme = os.path.join(self.tmp.name, "theme")
+        boxes = {i: (27, 198, 75, 282) for i in range(1, 6)}
+        boxes[5] = (27, 197, 75, 282)
+        make_base(theme, {f"charging-0{i}.png": ((100, 480), box) for i, box in boxes.items()}, {})
+        frames.apply(theme, GRUVBOX)
+        imgs = {i: load(os.path.join(theme, "skin", f"charging-0{i}.png")) for i in boxes}
+        for i, img in imgs.items():
+            bbox = img.getchannel("A").getbbox()
+            x0, y0, x1, y1 = boxes[i]
+            self.assertTrue(x0 <= bbox[0] and y0 <= bbox[1] and bbox[2] <= x1 and bbox[3] <= y1, (i, bbox))
+            self.assertEqual(img.getchannel("A"), imgs[1].getchannel("A"), i)
 
     def test_registry_has_all_panel_files(self):
         names = {key.split("/", 1)[1][:-len(".png")] for key in frames.FRAMES}

@@ -214,9 +214,7 @@ def face(letter):
     return draw
 
 
-for letter in "ABXY":
-    add(f"context-{letter.lower()}", face(letter))
-for letter in "XY":
+for letter in "XY":  # context-a/b/x/y and the context pills are frames (frames_keys.py), drawn at each size
     add(f"icon-{letter.lower()}", face(letter))
 
 
@@ -233,9 +231,6 @@ add("icon-L2", pill("L2", 11))
 add("icon-R2", pill("R2", 11))
 add("icon-OK", pill("OK", 11, body="green", ink="white"))
 add("icon-START", pill("START", 21))
-add("context-start", pill("START", 29))
-add("context-select", pill("SELECT", 29))
-add("context-menu", pill("MENU", 29))
 
 
 # ---- keyboard keys and arrows ----

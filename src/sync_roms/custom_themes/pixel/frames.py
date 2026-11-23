@@ -44,12 +44,14 @@ def shades(palette):
 SMALL = 64  # base files narrower than this use the small-file cell rule
 
 
-def cell_for(size, base_size):
-    """Cell size in pixels for a file of `size`, from the same file's size in the base skin/ (None: not there)."""
+def cell_for(size, base_size, small=False):
+    """Cell size in pixels for a file of `size`, from the same file's size in the base skin/ (None: not there). With
+    `small`, a file at least SMALL wide still takes the small-file rule (a wide glyph, like a hint pill whose word
+    needs its cells)."""
     if base_size is None:
-        return 4 if size[0] >= SMALL else 2
+        return 4 if size[0] >= SMALL and not small else 2
     ratio = min(size[0] / base_size[0], size[1] / base_size[1])
-    if base_size[0] >= SMALL:
+    if base_size[0] >= SMALL and not small:
         return max(2, round(4 * ratio))
     return max(1, round(2 * ratio))
 
@@ -141,13 +143,15 @@ class FrameSpec:
     symmetric: bool = False
     flush: tuple = field(default=())
     background: tuple = None  # painted over the whole footprint first (full-screen backgrounds stay opaque)
+    group: tuple = field(default=())  # files (in the same folder) whose footprints are intersected: one shared grid
+    small: bool = False  # the small-file cell rule whatever the width (see cell_for)
 
 
 FRAMES = {}  # "skin/<file>.png": FrameSpec, drawn in every skin*/ folder that has the file
 
 
-def register(name, draw, symmetric=False, flush=(), background=None):
-    FRAMES[name] = FrameSpec(draw, symmetric, tuple(flush), background)
+def register(name, draw, symmetric=False, flush=(), background=None, group=(), small=False):
+    FRAMES[name] = FrameSpec(draw, symmetric, tuple(flush), background, tuple(group), small)
 
 
 def apply(theme_dir, palette):
@@ -157,18 +161,28 @@ def apply(theme_dir, palette):
     for folder in sorted(os.listdir(theme_dir)):
         if not folder.startswith("skin") or not os.path.isdir(os.path.join(theme_dir, folder)):
             continue
-        for name, spec in sorted(FRAMES.items()):
+        found = {}  # every frame's size and footprint, read before any is drawn over (a group reads the others')
+        for name in sorted(FRAMES):
             file = name.split("/", 1)[1]
             path = os.path.join(theme_dir, folder, file)
-            if not os.path.exists(path):
+            if os.path.exists(path):
+                with Image.open(path) as im:
+                    found[file] = (im.size, footprint(im.convert("RGBA")))
+        for name, spec in sorted(FRAMES.items()):
+            file = name.split("/", 1)[1]
+            if file not in found:
                 continue
-            with Image.open(path) as im:
-                size, box = im.size, footprint(im.convert("RGBA"))
+            size, box = found[file]
             if box is None:  # nothing shows in the base: keep it that way
                 continue
-            canvas = Canvas(size, cell_for(size, _base_size(theme_dir, file)), box, spec.background)
+            for other in spec.group:  # animation frames: draw on the grid of the box every frame covers
+                other_box = found.get(other, (None, None))[1]
+                if other_box is not None:
+                    box = (max(box[0], other_box[0]), max(box[1], other_box[1]), min(box[2], other_box[2]),
+                           min(box[3], other_box[3]))
+            canvas = Canvas(size, cell_for(size, _base_size(theme_dir, file), spec.small), box, spec.background)
             spec.draw(canvas, colors)
-            canvas.image().save(path)
+            canvas.image().save(os.path.join(theme_dir, folder, file))
             written.append(f"{folder}/{file}")
     return written
 
@@ -181,4 +195,4 @@ def _base_size(theme_dir, file):
         return im.size
 
 
-from . import frames_panels, frames_select  # noqa: E402,F401  (register their frames; they import this module back)
+from . import frames_keys, frames_panels, frames_select  # noqa: E402,F401  (register their frames; they import this module back)
