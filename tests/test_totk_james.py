@@ -76,6 +76,22 @@ class Build(unittest.TestCase):
         with open(os.path.join(dest, "config.json"), encoding="utf-8") as f:
             self.assertEqual(json.load(f)["mainMenuTitle"], "")
 
+    def test_preview_gets_the_title(self):
+        self.config("{}")
+        Image.new("RGB", (640, 480), (9, 80, 7)).save(os.path.join(self.base, "preview.png"))
+        dest = totk_james.build(self.base, self.out)
+        with Image.open(os.path.join(dest, "preview.png")) as preview, \
+                Image.open(os.path.join(DATA, "bg-title.png")) as title:
+            self.assertEqual(preview.size, (640, 480))
+            self.assertEqual(preview.convert("RGB").crop((0, 0, 196, 51)).tobytes(), title.convert("RGB").tobytes())
+            self.assertEqual(preview.convert("RGB").getpixel((196, 0)), (9, 80, 7))
+            self.assertEqual(preview.convert("RGB").getpixel((0, 51)), (9, 80, 7))
+
+    def test_no_preview_in_base(self):
+        self.config("{}")
+        dest = totk_james.build(self.base, self.out)
+        self.assertFalse(os.path.exists(os.path.join(dest, "preview.png")))
+
 
 if __name__ == "__main__":
     unittest.main()
