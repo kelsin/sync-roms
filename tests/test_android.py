@@ -243,3 +243,140 @@ class SetupTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class FakeDevice:
+    """A fake adb over a temp folder standing for the device's storage."""
+    def __init__(self, test):
+        tmp = tempfile.TemporaryDirectory()
+        test.addCleanup(tmp.cleanup)
+        self.root = tmp.name
+        self.calls = []
+        self.fail_push = set()
+
+    def real(self, remote):
+        return self.root + remote
+
+    def put(self, remote, data=b""):
+        os.makedirs(os.path.dirname(self.real(remote)), exist_ok=True)
+        with open(self.real(remote), "wb") as f:
+            f.write(data)
+
+    def run(self, *args, serial=None, check=True, timeout=60):
+        import shlex
+        import shutil
+        self.calls.append(args)
+        if args[0] == "pull":
+            remote, local = self.real(args[2]), args[3]
+            if os.path.isdir(local):
+                local = os.path.join(local, os.path.basename(remote))
+            shutil.copytree(remote, local)
+            return ""
+        if args[0] == "push":
+            if args[2] in self.fail_push:
+                raise adb.AdbError("push failed")
+            os.makedirs(os.path.dirname(self.real(args[2])), exist_ok=True)
+            shutil.copyfile(args[1], self.real(args[2]))
+            return ""
+        words = shlex.split(args[1])
+        if words[0] == "test":
+            if not os.path.isdir(self.real(words[2])):
+                raise adb.AdbError("no")
+            return ""
+        if words[0] == "find":
+            return "".join(os.path.join(d, f)[len(self.root):] + "\n"
+                           for d, _, fs in os.walk(self.real(words[1])) for f in fs)
+        if words[0] == "pidof":
+            raise adb.AdbError("not running")
+        return ""
+
+
+class SessionTest(unittest.TestCase):
+    def setUp(self):
+        quiet = contextlib.ExitStack()
+        quiet.enter_context(contextlib.redirect_stdout(io.StringIO()))
+        quiet.enter_context(contextlib.redirect_stderr(io.StringIO()))
+        self.addCleanup(quiet.close)
+        self.dev = FakeDevice(self)
+        self.folders = android.Folders("/storage/emulated/0/RetroArch/saves", "/storage/emulated/0/RetroArch/states",
+                                       True, True)
+        self.order = []
+        for target, name, value in ((adb, "run", self.dev.run), (android, "retroarch_package", lambda s: "com.ra"),
+                                    (android, "read_folders", lambda s, p: self.folders),
+                                    (android, "wait_closed", lambda s, p: self.order.append("wait"))):
+            p = mock.patch.object(target, name, side_effect=value)
+            p.start()
+            self.addCleanup(p.stop)
+        self.catalog = store.load_catalog()
+        self.layout = self.catalog["layouts"]["esde"]
+        self.systems = [s for s in self.catalog["systems"] if s["folders"].get("esde") in ("gb", "gba")]
+        self.target = android.Target("S1", "Nova", VOL, "NOVA")
+
+    def open(self):
+        s = android.open_session(self.target, self.layout, "esde", self.systems)
+        self.addCleanup(s.close)
+        return s
+
+    def test_stage_pulls_saves_and_states(self):
+        name = "Tetris Plus (USA, Europe) (SGB Enhanced).srm"
+        self.dev.put(f"/storage/emulated/0/RetroArch/saves/Gambatte/{name}", b"data")
+        self.dev.put("/storage/emulated/0/RetroArch/states/Gambatte/X.state1", b"st")
+        s = self.open()
+        with open(os.path.join(s.base, "RetroArch", "saves", "Gambatte", name), "rb") as f:
+            self.assertEqual(f.read(), b"data")
+        self.assertTrue(os.path.exists(os.path.join(s.retroarch_dir, "states", "Gambatte", "X.state1")))
+
+    def test_stage_rom_placeholders(self):
+        self.dev.put(f"/storage/{VOL}/ROMs/gb/Tom & Jerry (USA).zip", b"big")
+        self.dev.put(f"/storage/{VOL}/ROMs/other/Skip.zip")
+        s = self.open()
+        path = os.path.join(s.base, "ROMs", "gb", "Tom & Jerry (USA).zip")
+        self.assertEqual(os.path.getsize(path), 0)
+        self.assertFalse(os.path.exists(os.path.join(s.base, "ROMs", "other")))
+
+    def test_stage_missing_remote_dirs(self):
+        s = self.open()
+        self.assertEqual(os.listdir(os.path.join(s.retroarch_dir, "states")), [])
+        self.assertEqual(os.listdir(os.path.join(s.retroarch_dir, "saves")), [])
+
+    def test_sort_off_flat_layout(self):
+        self.folders = android.Folders(*self.folders[:2], False, True)
+        before = self.catalog["layouts"]["esde"]["retroarch"]["saves"]
+        s = self.open()
+        self.assertEqual(s.layout["retroarch"]["saves"], "saves")
+        self.assertEqual(s.layout["retroarch"]["states"], "states/{core}")
+        self.assertEqual(s.layout["retroarch"]["dir"], "RetroArch")
+        self.assertEqual(self.layout["retroarch"]["saves"], before)
+
+    def test_remote_mapping(self):
+        s = self.open()
+        got = s.remote(os.path.join(s.base, "RetroArch", "states", "Gambatte", "X.state1"))
+        self.assertEqual(got, "/storage/emulated/0/RetroArch/states/Gambatte/X.state1")
+        with self.assertRaises(ValueError):
+            s.remote(os.path.join(s.base, "ROMs", "gb", "X.zip"))
+
+    def test_push_mkdir_and_failures(self):
+        s = self.open()
+        a = os.path.join(s.retroarch_dir, "saves", "Gambatte", "A B.srm")
+        b = os.path.join(s.retroarch_dir, "saves", "Gambatte", "C.srm")
+        os.makedirs(os.path.dirname(a))
+        for p in (a, b):
+            open(p, "w").close()
+        bad = "/storage/emulated/0/RetroArch/saves/Gambatte/A B.srm"
+        self.dev.fail_push.add(bad)
+        self.assertEqual(s.push([a, b]), [bad])
+        self.assertTrue(os.path.exists(self.dev.real("/storage/emulated/0/RetroArch/saves/Gambatte/C.srm")))
+        self.assertIn(("shell", "mkdir -p /storage/emulated/0/RetroArch/saves/Gambatte"), self.dev.calls)
+
+    def test_waits_for_retroarch(self):
+        self.dev.put("/storage/emulated/0/RetroArch/saves/Gambatte/A.srm")
+        real = self.dev.run
+        with mock.patch.object(adb, "run", side_effect=lambda *a, **k: (self.order.append(a[0]), real(*a, **k))[1]):
+            self.open()
+        self.assertEqual(self.order[0], "wait")
+        self.assertIn("pull", self.order)
+
+    def test_close_removes_temp(self):
+        s = android.open_session(self.target, self.layout, "esde", self.systems)
+        s.close()
+        self.assertFalse(os.path.exists(s.base))

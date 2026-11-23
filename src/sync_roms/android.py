@@ -1,4 +1,9 @@
 """An Android device over adb: its SD card, RetroArch and RetroArch's save folders."""
+import copy
+import os
+import posixpath
+import shutil
+import tempfile
 import time
 from collections import namedtuple
 
@@ -203,3 +208,70 @@ def resolve(card, cards, roms_dir="ROMs"):
     if name in cards:
         cards[name]["android_volume"] = vol
     return Target(dev.serial, model, vol, name)
+
+
+class Session:
+    """A temp folder shaped like an esde card, holding the device's saves and states, so the saves code runs on it."""
+    def __init__(self, target, pkg, folders, base, layout):
+        self.target, self.pkg, self.folders, self.base, self.layout = target, pkg, folders, base, layout
+        self.retroarch_dir = os.path.join(base, "RetroArch")
+
+    def remote(self, local):
+        for kind in ("saves", "states"):
+            root = os.path.join(self.retroarch_dir, kind)
+            if local == root or local.startswith(root + os.sep):
+                return getattr(self.folders, kind) + local[len(root):].replace(os.sep, "/")
+        raise ValueError(f"{local} isn't a saves or states path")
+
+    def push(self, paths):
+        """Copy the files to the device; the remote paths that failed."""
+        failed = []
+        for path in paths:
+            remote = self.remote(path)
+            try:
+                adb.shell(self.target.serial, "mkdir", "-p", posixpath.dirname(remote))
+                adb.push(self.target.serial, path, remote)
+            except adb.AdbError:
+                failed.append(remote)
+        return failed
+
+    def close(self):
+        shutil.rmtree(self.base, ignore_errors=True)
+
+
+def open_session(target, layout, layout_name, systems):
+    serial = target.serial
+    pkg = retroarch_package(serial)
+    folders = read_folders(serial, pkg)
+    wait_closed(serial, pkg)
+    base = tempfile.mkdtemp(prefix="sync-roms-android-")
+    try:
+        layout = copy.deepcopy(layout)
+        ra = layout["retroarch"]
+        ra["dir"] = "RetroArch"
+        ra["saves"] = "saves/{core}" if folders.sort_saves else "saves"
+        ra["states"] = "states/{core}" if folders.sort_states else "states"
+        roms = f"/storage/{target.volume}/{layout['roms_dir']}"
+        for folder in sorted({s["folders"].get(layout_name) for s in systems} - {None}):
+            if not adb.shell_ok(serial, "test", "-d", f"{roms}/{folder}"):
+                continue
+            for line in adb.shell(serial, "find", f"{roms}/{folder}", "-type", "f").splitlines():
+                if line.startswith(roms + "/"):
+                    path = os.path.join(base, layout["roms_dir"], *line[len(roms) + 1:].split("/"))
+                    os.makedirs(os.path.dirname(path), exist_ok=True)
+                    open(path, "w").close()
+        for kind in ("saves", "states"):
+            dest = os.path.join(base, "RetroArch", kind)
+            remote = getattr(folders, kind)
+            if adb.shell_ok(serial, "test", "-d", remote):
+                os.makedirs(os.path.dirname(dest), exist_ok=True)
+                tmp = dest + ".pull"
+                adb.pull(serial, remote, tmp)
+                os.rename(tmp, dest)
+            else:
+                os.makedirs(dest)
+    except BaseException:
+        shutil.rmtree(base, ignore_errors=True)
+        raise
+    print(f"📱 {target.card} on {target.model} (RetroArch {pkg})")
+    return Session(target, pkg, folders, base, layout)
