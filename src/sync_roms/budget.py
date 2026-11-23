@@ -76,12 +76,14 @@ def _system_keys(card, system, games, collections_by_id):
         return sorted(k for k in sizes if not k.endswith("/"))  # sync installs every file: exclusions don't apply
     skip = (card.get("excluded") or {}).get(bucket, ())
     keys = [g["bucket"] for g in games["games"] if g.get("bucket") and g["bucket"] not in skip]
-    keys += [g["bucket"] for g in store.card_locked_games(card, collections_by_id).get(bucket, ())
-             if g["bucket"] not in keys]  # collection games ignore exclusions
+    keys += [g["bucket"] for g in store.card_locked_games(card, collections_by_id, card.get("excluded") or {}).get(bucket, ())
+             if g["bucket"] not in keys]
     return keys
 
 
 def _system_usage(card, system, games, collections_by_id):
+    if system["bucket"] in store.systems_off(card):
+        return Usage(0, 0, False)
     keys = _system_keys(card, system, games, collections_by_id)
     if keys is None:
         return Usage(0, 0, True)
