@@ -455,34 +455,54 @@ class Frames(unittest.TestCase):
                 self.assertGreaterEqual(max(xs) - min(xs) + 1, canvas.rows - 3)
                 self.assertGreaterEqual(len(arrow), 10)
 
-    def test_star_legs_are_solid(self):
-        """The star's legs are as wide as its waist half, from a notch only the peak's width at the top."""
+    def test_star_is_a_classic_star(self):
+        """The star: a narrow peak, arms tapering to 1-cell points, legs tapering to 1-cell feet straight under the
+        waist round a V notch whose top is the peak's width and whose depth is about a third of the star's height;
+        exactly mirrored, centered with equal margins."""
         for cols, rows in ((18, 17), (19, 18), (20, 19), (21, 20)):
             cells, width, height = frames_keys.star_mask(cols, rows)
             with self.subTest(grid=(cols, rows)):
                 peak = 2 - cols % 2
-                axis = range((width - peak) // 2, (width + peak) // 2)
-                notch = min(y for y in range(height) if all((x, y) not in cells for x in axis))
-                legs = []
-                for y in range(notch, height):
-                    runs, x = [], 0
+                self.assertEqual((cols - width) % 2, 0)
+                self.assertEqual((rows - height) % 2, 0)
+                self.assertLessEqual((width, height), (cols, rows))
+                for (x, y) in cells:
+                    self.assertIn((width - 1 - x, y), cells)
+
+                def runs(y):
+                    out, x = [], 0
                     while x < width:
                         if (x, y) in cells:
                             start = x
                             while (x, y) in cells:
                                 x += 1
-                            runs.append(x - start)
+                            out.append((start, x - start))
                         x += 1
-                    self.assertEqual(len(runs), 2, y)
-                    legs.append(runs[0])
-                self.assertEqual(set(legs), {legs[0]})  # solid legs of one width all the way down
-                self.assertGreaterEqual(legs[0], width // 4)
-                gap = [x for x in range(width) if (x, notch) not in cells and
-                       any((xx, notch) in cells for xx in range(x)) and
-                       any((xx, notch) in cells for xx in range(x + 1, width))]
-                self.assertEqual(len(gap), peak)
-                for (x, y) in cells:
-                    self.assertIn((width - 1 - x, y), cells)
+                    return out
+
+                self.assertEqual(runs(0), [((width - peak) // 2, peak)])
+                arm = max(range(height), key=lambda y: sum(n for _, n in runs(y)))
+                self.assertEqual(runs(arm), [(0, width)])
+                self.assertEqual(runs(arm + 1), [(1, width - 2)])  # the arm tips are single-cell points
+                notch = [y for y in range(height) if len(runs(y)) == 2]
+                self.assertEqual(notch, list(range(notch[0], height)))
+                self.assertEqual(runs(notch[0])[1][0] - sum(runs(notch[0])[0]), peak)
+                self.assertTrue(.25 <= len(notch) / height <= .4, (len(notch), height))
+                legs = [runs(y)[0] for y in notch]
+                self.assertEqual({start for start, _ in legs}, {legs[0][0]})  # a straight outer edge
+                self.assertEqual([n for _, n in legs], list(range(legs[0][1], 0, -1)))  # 1:1 to a pointed foot
+
+    def test_shift_arrow_is_solid(self):
+        """The shift arrow is a solid head (a filled 1:1 triangle of three rows) over a stem as wide as its tip."""
+        s = frames.shades(GRUVBOX)
+        for size, cell in (((26, 16), 2), ((29, 17), 2), ((39, 25), 3)):
+            canvas = frames.Canvas(size, cell, (0, 0) + size)
+            with self.subTest(grid=(canvas.cols, canvas.rows)):
+                frames_keys.shift(canvas, s)
+                widths = [sum(1 for x in range(2, canvas.cols - 2) if (x, y) in canvas.cells)
+                          for y in range(2, canvas.rows - 2)]
+                tip = 2 - canvas.cols % 2
+                self.assertEqual(widths, [tip, tip + 2, tip + 4] + [tip] * (len(widths) - 3))
 
     def test_registry_has_all_panel_files(self):
         names = {key.split("/", 1)[1][:-len(".png")] for key in frames.FRAMES}

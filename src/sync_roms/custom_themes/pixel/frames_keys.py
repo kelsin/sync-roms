@@ -64,18 +64,17 @@ def delete(canvas, s):
 
 
 def shift(canvas, s):
-    """Shift: a key outline with an up arrow centered in it, drawn like the backspace arrow (shaft and 1:1 head
-    strokes), its head as wide as the arrow's height allows and one cell of padding above and below it."""
+    """Shift: a key outline with a solid up arrow centered in it, one cell of padding above and below: a filled 1:1
+    head of three rows (fewer in a very short key) over a solid stem as wide as its tip."""
     ring(canvas, s.text)
     w, h = canvas.cols - 2, canvas.rows - 2
-    t = 2 - w % 2  # the shaft: the arrow's width has the inner width's parity, so it centers exactly
+    t = 2 - w % 2  # the tip and the stem: the arrow's width has the inner width's parity, so it centers exactly
     tall = max(2, h - 2)
-    k = max(1, min(tall - 1, (w - 2 - t) // 2))
-    x0, y0 = 1 + (w - t) // 2, 1 + (h - tall) // 2
-    canvas.rect(x0, y0, t, tall, s.text)
-    for i in range(1, k + 1):
-        canvas.px(x0 - i, y0 + i, s.text)
-        canvas.px(x0 + t - 1 + i, y0 + i, s.text)
+    head = min(3, tall - 1, (w - 2 - t) // 2 + 1)
+    y0 = 1 + (h - tall) // 2
+    for i in range(head):
+        canvas.rect(1 + (w - t - 2 * i) // 2, y0 + i, t + 2 * i, 1, s.text)
+    canvas.rect(1 + (w - t) // 2, y0 + head, t, tall - head, s.text)
 
 
 def space(canvas, s):
@@ -131,24 +130,24 @@ def trash(canvas, s):
 # favorite and file glyphs
 
 def star_mask(cols, rows):
-    """A five-pointed star of 1:1 edges as wide as the grid allows with even side margins: a spike, two arms, the
-    underside stepping in to the waist, then two solid legs stepping out from a narrow notch to feet under the arm
-    tips. Returns (cells, width, height)."""
+    """A classic five-pointed star, as wide as the grid allows with even side margins: a narrow peak widening 1:1 to
+    the arm row, arms tapering 1:1 to a point at each end, the waist under them, and two legs that taper to pointed
+    feet straight below the waist (a vertical outer edge, as steep as a star's legs are) round a 1:1 V notch about a
+    third of the star's height deep. Returns (cells, width, height)."""
     peak = 2 - cols % 2
     arm = (cols - peak) // 2
-    while arm >= 2:
-        spike, waist = max(1, arm // 2), max(1, arm // 2)
-        legs = arm - waist
-        height = spike + 1 + (arm - waist) + legs
+    while True:
+        waist = max(1, arm // 2)
+        spike = max(1, round(arm * .6))
+        height = spike + 1 + arm  # the spike, the arm row, the underside (arm - waist) and the legs (waist)
         if (rows - height) % 2:
-            spike += 1 if height + 1 <= rows else -1
-            height += 1 if spike > max(1, arm // 2) else -1
-        if height <= rows and spike >= 1:
+            spike, height = spike - 1, height - 1  # equal margins above and below
+        if (height <= rows and spike >= 1) or arm <= 2:
             break
         arm -= 1
     rows_ = [[(-r, r)] for r in range(spike)] + [[(-arm, arm)]]
     rows_ += [[(-(arm - i), arm - i)] for i in range(1, arm - waist + 1)]
-    rows_ += [[(-(waist + j), -j), (j, waist + j)] for j in range(1, legs + 1)]
+    rows_ += [[(-waist, -j), (j, waist)] for j in range(1, waist + 1)]
     cells = set()
     for y, segments in enumerate(rows_):
         for a, b in segments:
