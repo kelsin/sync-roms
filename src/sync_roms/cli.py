@@ -21,7 +21,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "games": ("edit|list|add|remove|full|sets|export|import", "edit a card's games, interactively or from scripts"),
     "sets": ("edit", "edit the game sets in storage by hand and save the changes there"),
     "collections": ("edit", "edit your collections of favourite games (saved in ~/.sync-roms/collections/)"),
-    "themes": ("update", "copy the latest Art Book Next for ES-DE and the PyUI themes for spruce from GitHub into storage"),
+    "themes": ("update|pick|build", "copy the latest Art Book Next for ES-DE and the PyUI themes for spruce from GitHub into storage; build custom spruce themes"),
     "download": ("pico8", "add the PICO-8 BBS Featured carts storage doesn't have, and newer revisions of those it has"),
     "flash": ("", "write a Knulli, BaseOS, muOS, ROCKNIX or OakMoss image from storage's os/ to an SD card"),
     "umount": ("", "clean the macOS junk off an SD card and unmount it"),
@@ -128,6 +128,12 @@ TOPICS = {
   7z; folders you add there yourself are left alone).
 
   sync-roms themes pick                       choose the PyUI themes every spruce card gets by default (saved as spruce_themes)
+
+  sync-roms themes build [THEME...] [--out DIR]   build custom spruce themes from the SPRUCE base theme in storage
+
+  Builds each named custom theme (all of them without names) into the cache's themes/build/ folder, or into DIR/<theme>
+  with --out, and prints the folders. The base theme is read from os/spruceos/themes/SPRUCE/ in storage, so run
+  `sync-roms themes update` first. Nothing is written to storage.
 """,
     "download": """
   sync-roms download pico8 [--count N] [--dry-run] [--yes]   add the BBS Featured carts to storage's pico8/

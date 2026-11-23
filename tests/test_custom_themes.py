@@ -1,15 +1,18 @@
+import contextlib
 import hashlib
+import io
 import json
 import os
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import helpers  # noqa: E402,F401  (imports isolate first)
 from PIL import Image  # noqa: E402
 
-from sync_roms import custom_themes  # noqa: E402
+from sync_roms import commands, custom_themes, downloads, runtime, usersettings  # noqa: E402
 
 CONFIG = {"name": "SPRUCE", "author": "spruce", "description": "x", "screensaver": {"bgColor": "#282828"}, "extra": 1}
 
@@ -100,6 +103,58 @@ class Build(unittest.TestCase):
         make_base(self.base, ssh=False)
         dest = custom_themes.THEMES["Pixel Consoles"].build(self.base, os.path.join(self.tmp.name, "out"))
         self.assertFalse(os.path.exists(os.path.join(dest, "icons", "app", "SSH.png")))
+
+
+class Fetch(helpers.StorageDir):
+    def setUp(self):
+        super().setUp()
+        self.enterContext(mock.patch.object(usersettings, "apply_settings"))
+        self.enterContext(contextlib.redirect_stdout(io.StringIO()))
+
+    def test_fetch_base_copies_files(self):
+        self.put("os/spruceos/themes/SPRUCE/config.json", b'{"a": 1}')
+        self.put("os/spruceos/themes/SPRUCE/skin/background.png", b"png-bytes")
+        folder = custom_themes.fetch_base("SPRUCE")
+        with open(os.path.join(folder, "config.json"), "rb") as f:
+            self.assertEqual(f.read(), b'{"a": 1}')
+        with open(os.path.join(folder, "skin", "background.png"), "rb") as f:
+            self.assertEqual(f.read(), b"png-bytes")
+
+    def test_fetch_base_reuses_same_size(self):
+        self.put("os/spruceos/themes/SPRUCE/config.json", b"{}")
+        custom_themes.fetch_base("SPRUCE")
+        with mock.patch.object(downloads, "run_downloads", wraps=downloads.run_downloads) as run:
+            custom_themes.fetch_base("SPRUCE")
+        self.assertEqual(run.call_args.args[0], [])
+
+    def test_fetch_base_missing(self):
+        self.put("os/spruceos/themes/Other/config.json", b"{}")
+        with self.assertRaises(custom_themes.BaseMissing):
+            custom_themes.fetch_base("SPRUCE")
+
+    def test_fetch_base_unmounted(self):
+        with mock.patch.object(runtime, "ROOT", os.path.join(self.tmp.name, "gone")):
+            with self.assertRaises(FileNotFoundError):
+                custom_themes.fetch_base("SPRUCE")
+
+    def test_build_command_writes_to_out(self):
+        make_base(os.path.join(self.root, "os", "spruceos", "themes", "SPRUCE"))
+        out = os.path.join(self.tmp.name, "out")
+        self.assertEqual(commands.run(["themes", "build", "Pixel Consoles", "--out", out]), 0)
+        self.assertTrue(os.path.exists(os.path.join(out, "Pixel Consoles", "config.json")))
+        self.assertFalse(os.path.exists(os.path.join(out, "Pixel Controllers")))
+
+    def test_build_command_unknown_name(self):
+        with self.assertRaises(SystemExit) as raised, mock.patch("sys.stderr") as err:
+            commands.run(["themes", "build", "Nope"])
+        self.assertEqual(raised.exception.code, 2)
+        self.assertIn("Pixel Consoles", "".join(c.args[0] for c in err.write.call_args_list))
+
+    def test_build_command_base_missing(self):
+        with self.assertRaises(SystemExit) as raised, mock.patch("sys.stderr") as err:
+            commands.run(["themes", "build", "--out", os.path.join(self.tmp.name, "out")])
+        self.assertEqual(raised.exception.code, 1)
+        self.assertIn("themes update", "".join(c.args[0] for c in err.write.call_args_list))
 
 
 if __name__ == "__main__":

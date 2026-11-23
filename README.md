@@ -173,6 +173,7 @@ Every mode is a command (plain `sync-roms [CARD]` syncs a card):
 | `sets edit` | edit the [game sets](#sets-sets-edit) in storage by hand and save them there | |
 | `collections edit` | edit your [collections](#collections-collections-edit) of favourite games | |
 | `themes update` | put the latest Art Book Next for ES-DE (for collections' [theme art](#theme-art)) and every [PyUI theme](#spruce) (needs `7z`) in storage | |
+| `themes build [THEME...] [--out DIR]` | build the custom spruce themes (Pixel Consoles, Pixel Controllers) from the SPRUCE base theme in storage into the cache, or into `DIR` with `--out`; writes nothing to storage | |
 | `themes pick` | choose the PyUI themes every spruce card gets by default (`spruce_themes` setting) | |
 | `download pico8` | add the [PICO-8 BBS Featured carts](#pico-8-carts-from-the-bbs-download-pico8) storage doesn't have, and newer revisions of those it has | |
 | `flash` | [write a Knulli, BaseOS, muOS, ROCKNIX or OakMoss image](#flashing-an-sd-card-flash) from storage's `os/` to an SD card, macOS only | |
@@ -234,6 +235,7 @@ For one command:
 | `--set-credentials` | `scrape` | Ask for your ScreenScraper username and password and save them in `settings.json` |
 | `--full` | `cache update` | List every folder and stat every file of a storage folder |
 | `--retroarch DIR` | `saves stash`, `saves apply` | Read or write RetroArch's saves and states in `DIR` instead of a mounted card's RetroArch folder |
+| `--out DIR` | `themes build` | Build into `DIR/<theme name>` instead of the cache |
 | `--count N` | `download pico8` | Stop after N carts to add or upgrade |
 | `--bucket-keys` | `check` | Also verify with the read-only profile that every game key in your cards and sets exists in storage |
 | `-e`, `--edit`, `--upload [DIR]`, `-c`, `--clean-scrapes`, `--m3u [DIR]`, `--cd [DIR]`, `--chd [DIR]`, `--install-tools`, `--mirror [DIR]`, `--use-mirror DIR`, `--clear-mirror`, `--diff [DIR]`, `--devices`, `--scrape`, `--scrape-match SYSTEM ROM GAME`, `--scrape-review [SYSTEM]`, `--scrape-missing [SYSTEM]`, `--scrape-art [SYSTEM]` | (old flags) | Use the command beside each in the Commands table (`--chd` is the older name of `--cd`) |

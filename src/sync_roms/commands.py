@@ -1199,6 +1199,23 @@ def themes_update(args):
     return max(themeart.update_storage(args.dry_run), spruce_themes.update_storage(args.dry_run))
 
 
+def themes_build(args):
+    from . import custom_themes
+    usersettings.ensure_bucket()
+    unknown = [n for n in args.names if n not in custom_themes.THEMES]
+    if unknown:
+        ui.fail(f"Unknown theme {', '.join(unknown)}; the custom themes are: {', '.join(custom_themes.names())}", 2)
+    try:
+        built = custom_themes.build(args.names or None, args.out)
+    except custom_themes.BaseMissing as e:
+        ui.fail(f"{e}: run `sync-roms themes update` first", 1)
+    except s3.ERRORS as e:
+        ui.fail(f"Couldn't read the base theme from {s3.location()}: {e}", 1)
+    for name, folder in built.items():
+        print(f"🎨 {name}: {folder}")
+    return 0
+
+
 def themes_pick(args):
     from . import spruce_themes
     usersettings.ensure_bucket()
@@ -1253,7 +1270,7 @@ def second_words():
     words["games"] = sorted(set(words.get("games", [])) | {"list", "add", "remove", "full", "sets", "export", "import"})
     words["sets"] = ["edit"]
     words["collections"] = ["edit"]
-    words["themes"] = ["update", "pick"]
+    words["themes"] = ["update", "pick", "build"]
     words["download"] = ["pico8"]
     words["cards"] = ["edit", "list", "new", "set", "rename", "convert", "clean", "delete", "copy", "export", "import"]
     words["saves"] = ["stash", "apply", "manage"]
@@ -1363,6 +1380,7 @@ def build_parser():
     themes = sub.add_parser("themes", add_help=False, allow_abbrev=False)
     tsub = themes.add_subparsers(dest="action", required=True)
     p = tsub.add_parser("update", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=themes_update)
+    p = tsub.add_parser("build", allow_abbrev=False); common(p, card=False); p.add_argument("names", nargs="*"); p.add_argument("--out", metavar="DIR"); p.set_defaults(fn=themes_build)
     p = tsub.add_parser("pick", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=themes_pick)
 
     download = sub.add_parser("download", add_help=False, allow_abbrev=False)
