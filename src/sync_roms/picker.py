@@ -210,6 +210,7 @@ def move_key(k, cur, last, view):
 
 POLL_MS = 200  # how often filter_list calls its poll while it waits for a key
 PREVIEW_IDLE_MS = 150  # how long the highlighted row stays put before its picture loads (holding a key loads none)
+PREVIEW_SHARE = 34  # percent of the width a picture's pane may take (one with no preview_width)
 PREVIEW_PX = (800, 800)  # a loaded picture is cut down to this (more than the pane shows) so drawing it is cheap
 PREFETCH_ROWS = 3  # a fixed-width picture's list then loads this many rows' pictures each way into their cache
 MIN_LIST_WIDTH = 40  # a fixed-width picture (preview_width) is left out when it would leave the list fewer cells
@@ -955,12 +956,21 @@ def _app_class():
         def fit_preview(self):
             """A fixed-width picture (preview_width) gets a column of its own at the top right, as many cells wide as it
             needs. Without room for it (the list would get fewer than MIN_LIST_WIDTH cells, or the picture is taller than
-            the rows above the status line) there is no column and the list takes the whole width."""
-            if not self.model.preview_width:
-                return
+            the rows above the status line) there is no column and the list takes the whole width. Any other picture is
+            fit, keeping its shape, in PREVIEW_SHARE of the width and the whole height."""
             from textual_image._terminal import get_cell_size  # cached: textual-image measured it on import
             cell = get_cell_size()
             pane = self.list_screen.query_one("#preview")
+            if not self.model.preview_width:
+                if pane.image is None:
+                    pane.styles.width = pane.styles.height = None  # back to the CSS
+                    return
+                width, height = pane.image.size
+                scale = min(self.size.width * PREVIEW_SHARE // 100 * cell.width / width,
+                            self.size.height * cell.height / height)
+                pane.styles.width = max(1, round(width * scale / cell.width))
+                pane.styles.height = max(1, round(height * scale / cell.height))
+                return
             columns = math.ceil(self.model.preview_width / cell.width)
             rows = math.ceil(pane.image.height / cell.height) if pane.image is not None else 0
             pane.styles.width = columns

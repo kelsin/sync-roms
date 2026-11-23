@@ -509,6 +509,11 @@ class TextualList(unittest.TestCase):
         pane_css = picker._app_class().CSS
         self.assertIn("_ListScreen #preview { width: auto; max-width: 34%; height: 100%; }", pane_css)
 
+    def test_a_wide_preview_keeps_its_shape_when_the_pane_is_width_capped(self):
+        [(shown, region, _, pixels, list_width)] = self.preview_layout((640, 480))
+        # 34% of 80 is 27 cells (270 px); 270 x 202 px is 10 rows of 20 px, not the whole height
+        self.assertEqual((shown, region, list_width), (True, (53, 0, 27, 10), 53))
+
     def test_block_fallbacks_dont_count_as_drawing_images(self):
         from sync_roms import picker
         with mock.patch.object(sys, "__stdout__", io.StringIO()), \
