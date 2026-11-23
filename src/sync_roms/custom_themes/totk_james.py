@@ -1,5 +1,5 @@
 """The "ToTK - James" spruceOS theme: the ToTK theme with the Triforce and "James" as its title picture (in its preview
-too), a Collections card for the main menu and no main menu title. It has no palette, so it is built once."""
+too), a Collections card for the main menu, collections shown and no main menu title. It has no palette, so it is built once."""
 import json
 import os
 import shutil
@@ -42,6 +42,7 @@ def build(base_dir, out_dir, palette=None):
                 config = json.load(f)
             config["name"] = STYLE
             config["mainMenuTitle"] = ""
+            config["collectionsEnabled"] = True  # PyUI's Show Collections, off when the theme doesn't set it
             with open(path, "w", encoding="utf-8") as f:
                 json.dump(config, f, indent=4, ensure_ascii=False)
     return dest
