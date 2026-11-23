@@ -13,7 +13,8 @@ MIRROR_PRUNE_ASK = 25  # delete more unreferenced mirror files than this (or ove
 def mirror_wanted(manifest):
     """{bucket key: size} of everything the game lists and BIOS requirements reference that is in storage: the ROMs a sync
     installs, every system's BIOS files, the scraped data of those ROMs, storage's Onion themes, its ES-DE theme archives,
-    its GPU driver zips, its PICO-8 zips, its Android APKs folder, the newest Surprise app zip, the newest RAOfflineProxy file of each layout and the newest spruceOS 7z and the PyUI themes of the default list and the cards' current themes."""
+    its GPU driver zips, its PICO-8 zips, its Android APKs folder, the newest Surprise app zip, the newest RAOfflineProxy
+    file of each layout, the newest spruceOS 7z, and the PyUI themes of the default list and the cards' current themes."""
     systems = manifest["systems"]
     todo = [s for s in systems if s.get("full_system") or store.listed(s)]
     with ThreadPoolExecutor(runtime.WORKERS) as ex:

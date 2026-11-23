@@ -148,6 +148,41 @@ class Themes(helpers.StorageDir):
         self.assertIn("sync-roms tools install", self.warned[0])
         self.assertFalse(self.exists(runtime.SPRUCE_THEMES_STATE))
 
+    def test_failed_upload_of_new_asset_completes_next_run(self):
+        self.archives[NAME] = (FOLDER, {"a.png": b"a", "config.json": b"{}"})
+        real, calls = spruce_themes.s3.put_file, []
+
+        def flaky(key, path):
+            calls.append(key)
+            if len(calls) == 2:
+                raise OSError("share went away")
+            return real(key, path)
+        with mock.patch.object(spruce_themes.s3, "put_file", flaky):
+            self.assertEqual(self.run_update([asset()]), 1)
+        self.assertEqual(self.state()[NAME]["folder"], FOLDER)
+        inventory.reset()
+        self.warned.clear()
+        self.assertEqual(self.run_update([asset()]), 0, self.warned)
+        self.assertTrue(self.exists(f"{PREFIX}{FOLDER}/a.png"))
+        self.assertTrue(self.exists(f"{PREFIX}{FOLDER}/config.json"))
+        self.assertEqual(self.state(), {NAME: {"updated_at": "2026-01-01T00:00:00Z", "size": 10, "folder": FOLDER}})
+
+    def test_state_written_after_each_theme(self):
+        class Abort(BaseException):
+            pass
+        self.archives[NAME] = (FOLDER, {"config.json": b"{}"})
+        self.archives["Other.7z"] = ("Other", {"config.json": b"{}"})
+        real = spruce_themes.s3.put_file
+
+        def put_file(key, path):
+            if "/Other/" in key:
+                raise Abort()
+            return real(key, path)
+        with mock.patch.object(spruce_themes.s3, "put_file", put_file), self.assertRaises(Abort):
+            self.run_update([asset(), asset("Other.7z")])
+        self.assertEqual(self.state()[NAME], {"updated_at": "2026-01-01T00:00:00Z", "size": 10, "folder": FOLDER})
+        self.assertEqual(self.state()["Other.7z"]["folder"], "Other")
+
     def test_unmounted_root_changes_nothing(self):
         gone = os.path.join(self.root, "gone")
         with mock.patch.object(runtime, "ROOT", gone):
@@ -201,6 +236,15 @@ class Pick(helpers.StorageDir):
             self.assertEqual(spruce_themes.pick("t", ["gone"]), ["gone"])
         self.assertEqual(seen[0][0][1], "gone")
         self.assertEqual(seen[0][1]["initial"], [False, True])
+
+    def test_pick_storage_error_is_esc(self):
+        warned = []
+        with mock.patch.object(inventory, "files", side_effect=OSError("share gone")), \
+                mock.patch.object(ui, "warn", warned.append), \
+                mock.patch.object(picker, "filter_list") as f:
+            self.assertIsNone(spruce_themes.pick("t", ["a"]))
+        f.assert_not_called()
+        self.assertTrue(warned)
 
     def test_pick_one(self):
         self.themes("a", "b")
@@ -308,6 +352,12 @@ class Card(helpers.StorageDir):
         plan = self.plan(["A"])
         self.assertEqual((plan["remove"], plan["installed"]), ([], ["A", "C"]))
 
+    def test_requested_theme_missing_from_storage_kept(self):
+        self.themes(B=None)
+        self.saved(spruce_themes_installed=["A", "C"], spruce_theme="C")
+        plan = self.plan(["A"])
+        self.assertEqual((plan["remove"], plan["installed"]), ([], ["A", "C"]))
+
     def test_no_storage_themes_removes_nothing(self):
         self.saved(spruce_themes_installed=["C"])
         plan = self.plan([])
@@ -325,6 +375,18 @@ class Card(helpers.StorageDir):
         self.assertEqual(spruce_themes.todo([job]), [job])
         self.card_file("Themes/A/config.json", b"abc")
         self.assertEqual(spruce_themes.todo([job]), [])
+
+    def test_crlf_config_identical_not_recopied(self):
+        self.put(f"{PREFIX}A/config.json", b'{\r\n"a": 1\r\n}\r\n')
+        job = (f"{PREFIX}A/config.json", self.card_file("Themes/A/config.json", b'{\r\n"a": 1\r\n}\r\n'), 13)
+        self.assertEqual(spruce_themes.todo([job]), [])
+
+    def test_non_utf8_config_compared(self):
+        self.put(f"{PREFIX}A/config.json", b"\xff\xfe")
+        job = (f"{PREFIX}A/config.json", self.card_file("Themes/A/config.json", b"\xff\xfe"), 2)
+        self.assertEqual(spruce_themes.todo([job]), [])
+        self.card_file("Themes/A/config.json", b"\xff\xfd")
+        self.assertEqual(spruce_themes.todo([job]), [job])
 
     def test_other_files_compared_by_size(self):
         same = ("k1", self.card_file("Themes/A/a.png", b"abc"), 3)
@@ -355,8 +417,9 @@ class Card(helpers.StorageDir):
 
     def test_select_sets_theme_keeps_keys(self):
         path = self.system()
+        self.card_file("Themes/B/config.json")
         self.saved(spruce_theme="B")
-        self.assertEqual(spruce_themes.select("c", self.base, False), 0)
+        self.assertEqual(spruce_themes.select("c", self.base, False), 1)
         self.assertEqual(self.read(path), '{\n  "theme": "B",\n  "vol": 5\n}\n')
 
     def test_select_missing_file_warns(self):
@@ -366,10 +429,38 @@ class Card(helpers.StorageDir):
 
     def test_select_malformed_skipped(self):
         path = self.system(data="nope")
+        self.card_file("Themes/B/config.json")
         self.saved(spruce_theme="B")
         self.assertEqual(spruce_themes.select("c", self.base, False), 0)
         self.assertEqual(self.read(path), "nope")
         self.assertTrue(self.warned)
+
+    def test_select_theme_not_on_card_sets_nothing(self):
+        path = self.system()
+        before = self.read(path)
+        self.saved(spruce_theme="B")
+        self.assertEqual(spruce_themes.select("c", self.base, False), 0)
+        self.assertEqual(self.read(path), before)
+        self.assertTrue(any("B" in w for w in self.warned))
+
+    def test_select_dry_run_counts_theme_storage_has(self):
+        self.system()
+        self.themes(B=None)
+        self.saved(spruce_theme="B")
+        self.assertEqual(spruce_themes.select("c", self.base, True), 1)
+        self.assertEqual(self.warned, [])
+
+    def test_select_unreadable_file_skipped(self):
+        self.card_file("Themes/B/config.json")
+        bad = self.card_file("Saves/a-system.json", b"\xff")
+        os.makedirs(os.path.join(self.base, "Saves", "b-system.json"))
+        good = self.system()
+        self.saved(spruce_theme="B")
+        self.assertEqual(spruce_themes.select("c", self.base, False), 1)
+        self.assertIn('"theme": "B"', self.read(good))
+        with open(bad, "rb") as f:
+            self.assertEqual(f.read(), b"\xff")
+        self.assertEqual(len(self.warned), 2)
 
     def test_select_dry_run_writes_nothing(self):
         path, before = self.system(), None

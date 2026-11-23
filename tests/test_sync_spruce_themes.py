@@ -55,8 +55,8 @@ class SyncThemes(helpers.StorageDir):
     def saved(self):
         return store.load_cards().get("card") or {}
 
-    def sync(self, yes=True, dry_run=False, terminal=True, layout="spruce", free=10**9):
-        argv = ["sync-roms", self.card] + (["--yes"] if yes else []) + (["--dry-run"] if dry_run else [])
+    def sync(self, yes=True, dry_run=False, terminal=True, layout="spruce", free=10**9, extra=()):
+        argv = ["sync-roms", self.card] + (["--yes"] if yes else []) + (["--dry-run"] if dry_run else []) + list(extra)
         manifest = {**MANIFEST, "layouts": LAYOUTS, "systems": [{**SYSTEM, "folders": {"spruce": "GBA", "onion": "GBA"}}]}
         with contextlib.ExitStack() as st:
             for target, kw in (
@@ -80,6 +80,7 @@ class SyncThemes(helpers.StorageDir):
                 code = e.code
             finally:
                 ui.ASSUME_YES = False
+                self.clean_root = cli.clean._clean_root
         return code
 
     def test_spruce_sync_copies_default_and_current(self):
@@ -172,6 +173,40 @@ class SyncThemes(helpers.StorageDir):
         self.assertIn("would select the Spruce theme B", out)
         with open(system) as f:
             self.assertEqual(json.load(f)["theme"], "X")
+
+    def test_t_themes_read_from_storage_past_the_mirror(self):
+        mirror = os.path.join(self.tmp.name, "mirror")
+        for key in ("gba/Game.zip", f"{PREFIX}A/config.json", f"{PREFIX}A/icons/a.png"):
+            os.makedirs(os.path.dirname(os.path.join(mirror, key)), exist_ok=True)
+            with open(os.path.join(self.root, key), "rb") as src, open(os.path.join(mirror, key), "wb") as dst:
+                dst.write(src.read())
+        self.choose.side_effect = ["t", "y"]
+        self.pick.return_value = ["A", "C"]
+        with mock.patch.object(runtime, "_mirror_root", mirror):
+            self.assertEqual(self.sync(yes=False), 0, self.err.getvalue())
+        self.assertTrue(os.path.isfile(os.path.join(self.card, "Themes", "C", "icons", "a.png")), self.out.getvalue() + self.err.getvalue())
+
+    def test_dry_run_json_lists_theme_removals(self):
+        store.update_card("card", spruce_themes_installed=["C"])
+        self.card_theme("C")
+        with mock.patch.object(ui, "emit_json") as emit:
+            self.assertEqual(self.sync(dry_run=True, extra=["--json"]), 0, self.err.getvalue())
+        self.assertEqual(emit.call_args.args[0]["theme_remove"], ["C"])
+
+    def test_removal_alone_finalizes_card(self):
+        self.assertEqual(self.sync(), 0, self.err.getvalue())
+        store.update_card("card", spruce_themes_installed=["A", "C"])
+        self.card_theme("C")
+        self.assertEqual(self.sync(), 0, self.err.getvalue())
+        self.assertEqual(self.on_card(), ["A"])
+        self.assertEqual(self.clean_root, self.card)
+
+    def test_selection_alone_finalizes_card(self):
+        store.update_card("card", spruce_theme="A")
+        self.assertEqual(self.sync(), 0, self.err.getvalue())
+        self.system_file()
+        self.assertEqual(self.sync(), 0, self.err.getvalue())
+        self.assertEqual(self.clean_root, self.card)
 
     def test_onion_themes_unchanged(self):
         self.put(f"{runtime.THEMES_PREFIX}X/config.json", b"{}")

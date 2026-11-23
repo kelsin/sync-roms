@@ -1,5 +1,6 @@
 """Download ROMs and BIOS files from your ROM storage."""
 import argparse
+import contextlib
 import os
 import re
 import sys
@@ -1479,7 +1480,7 @@ def sync_card(args):
                           for kind, todo in (("rom", rom_todo), ("bios", bios_todo), ("android", apk_todo), ("driver", driver_todo),
                                           ("theme", theme_todo), ("scrape", scrape_todo))
                           for key, path, size in todo],
-            "delete": list(extras), "kept": kept_extras, "rename": [{"from": a, "to": b} for a, b in renames + [(p, j[1]) for p, j in card_moves]],
+            "delete": list(extras), "kept": kept_extras, "theme_remove": theme_plan["remove"] if theme_plan else [], "rename": [{"from": a, "to": b} for a, b in renames + [(p, j[1]) for p, j in card_moves]],
             "missing": {"roms": missing, "bios": [k for k in bios_keys if k not in bios_have]},
             "free_space": free}
         for key, path, _ in todo_all:
@@ -1544,6 +1545,7 @@ def sync_card(args):
 
     # on spruce cards t picks this sync's themes; the removals wait for the answer, so a kept theme isn't copied again
     pick_themes = theme_plan is not None and not ui.ASSUME_YES and ui.has_terminal()
+    themes_picked = False  # a list picked with t: the mirror keeps only the default list's themes, so storage is read
     while todo_all or pick_themes:
         if todo_all:
             short = space(free_space(base) + (spruce_themes.freed(base, theme_plan["remove"]) if theme_plan else 0))
@@ -1562,17 +1564,21 @@ def sync_card(args):
             return 0
         if answer == "y":
             break
-        picked = spruce_themes.pick("🎨 Themes for this sync only", theme_names, locked=store.saved_card(card).get("spruce_theme"))
+        with mirroring.storage_reads():
+            picked = spruce_themes.pick("🎨 Themes for this sync only", theme_names, locked=store.saved_card(card).get("spruce_theme"))
+            if picked is not None:
+                theme_names, themes_picked = picked, True
+                theme_plan = spruce_themes.plan(card, base, theme_names, args.no_delete)
+                theme_jobs = downloads.with_sizes(theme_plan["jobs"])
+                theme_todo = spruce_themes.todo(theme_jobs)
         if picked is not None:
-            theme_names = picked
-            theme_plan = spruce_themes.plan(card, base, theme_names, args.no_delete)
-            theme_jobs = downloads.with_sizes(theme_plan["jobs"])
-            theme_todo = spruce_themes.todo(theme_jobs)
             todo_all = rom_todo + bios_todo + apk_todo + driver_todo + theme_todo + scrape_todo
             print(f"🎨 Themes: {ui.bold(str(len(theme_todo)))} to download ({ui.human_size(total_bytes(theme_todo))}), "
                   f"{len(theme_jobs) - len(theme_todo)} already present"
                   + (f"; {len(theme_plan['remove'])} to remove" if theme_plan["remove"] else ""))
+    present = [n for n in theme_plan["remove"] if os.path.isdir(os.path.join(base, "Themes", n))] if theme_plan else []
     removal_failed = spruce_themes.remove(base, theme_plan["remove"], False) if theme_plan else 0
+    themes_removed = any(not os.path.isdir(os.path.join(base, "Themes", n)) for n in present)
     if removal_failed:  # a folder that couldn't be removed stays recorded, so the next sync tries again
         theme_plan["installed"] = spruce_themes.sorted_names(
             [*theme_plan["installed"], *(n for n in theme_plan["remove"] if os.path.isdir(os.path.join(base, "Themes", n)))])
@@ -1593,11 +1599,13 @@ def sync_card(args):
     pico8_wrote = []
     failed += install_apps(False, pico8_wrote)
     if theme_todo:
-        failed += downloads.run_downloads(theme_todo, "Themes", "🎨", base if theme_plan else os.path.join(base, themes_dir), failures)
+        with mirroring.storage_reads() if themes_picked else contextlib.nullcontext():
+            failed += downloads.run_downloads(theme_todo, "Themes", "🎨", base if theme_plan else os.path.join(base, themes_dir), failures)
     if theme_plan:
         if theme_plan["installed"] != (store.saved_card(card).get("spruce_themes_installed") or []):
             store.update_card(card, spruce_themes_installed=theme_plan["installed"])
-        spruce_themes.select(card, base, False)
+        if (spruce_themes.select(card, base, False) or themes_removed) and clean_card:
+            clean._clean_root = base
     prefixed = 0
     for s in chosen:
         if disc_dir and available(s):

@@ -56,6 +56,10 @@ def _read_state():
         raise
 
 
+def _write_state(state):
+    s3.put_text(runtime.SPRUCE_THEMES_STATE, json.dumps(state, indent=2, sort_keys=True) + "\n")
+
+
 def _files(folder):
     """The files of an unpacked theme folder: {storage-relative path: local path}."""
     return {os.path.relpath(os.path.join(dp, n), folder).replace(os.sep, "/"): os.path.join(dp, n)
@@ -112,8 +116,9 @@ def update_storage(dry_run=False):
                 failed = 1
             else:
                 state[a["name"]] = state_entry
+                _write_state(state)
                 done += 1
-        s3.put_text(runtime.SPRUCE_THEMES_STATE, json.dumps(state, indent=2, sort_keys=True) + "\n")
+        _write_state(state)
     except s3.ERRORS as e:
         ui.warn(f"Couldn't update the PyUI themes in {s3.location()}: {e}")
         return 1
@@ -135,6 +140,9 @@ def _refresh(asset, state, prefix, listing):
         if not mine and (any(v["folder"] == folder for v in state.values())
                          or any(k.startswith(f"{prefix}{folder}/") for k in listing)):
             raise ValueError(f"storage already has a folder {folder!r} that isn't this theme's; left alone")
+        if not mine:  # claimed first, so a run that stops partway leaves a folder the next run knows as this theme's
+            state[asset["name"]] = {"folder": folder, "updated_at": None, "size": None}
+            _write_state(state)
         files = _files(os.path.join(out, *MEMBER_ROOT, folder))
         keep = {f"{prefix}{folder}/{rel}" for rel in files}
         for rel, path in files.items():
@@ -171,8 +179,12 @@ def default_list():
 
 def pick(title, chosen, locked=None):
     """Multi pick of themes: the ones in storage, then chosen names storage lacks (dim). The locked theme is always on.
-    Returns the names on, or None on Esc."""
-    names = available()
+    Returns the names on, or None on Esc (and when storage can't be listed)."""
+    try:
+        names = available()
+    except s3.ERRORS as e:
+        ui.warn(f"Couldn't list the PyUI themes in {s3.location()}: {e}")
+        return None
     missing = [n for n in chosen if n not in names]
     rows = names + missing
     on = [n in chosen or n == locked for n in rows]
@@ -222,7 +234,8 @@ def _plain(name):
 def plan(card, base, names, keep):
     """What a card's themes need: jobs ([(key, path, size)] for every file of each wanted theme), remove (installed
     folders to delete) and installed (the card's new spruce_themes_installed, sorted). Only folders sync put on the card are
-    removed, and never one that is wanted, the card's current theme, or in use by a device (Saves/*-system.json)."""
+    removed, and never one that is asked for (in names or the card's current theme, even when storage lacks it) or in use
+    by a device (Saves/*-system.json)."""
     saved = store.saved_card(card)
     previous = [n for n in saved.get("spruce_themes_installed") or [] if _plain(n)]
     current = saved.get("spruce_theme")
@@ -238,7 +251,7 @@ def plan(card, base, names, keep):
     remove = []
     if not keep and have:
         busy = selected(base)
-        remove = [n for n in previous if n not in use and n not in busy and n != current]
+        remove = [n for n in previous if n not in names and n not in busy and n != current]
     return {"jobs": jobs, "remove": remove, "installed": sorted_names(n for n in installed if n not in remove)}
 
 
@@ -256,9 +269,9 @@ def todo(jobs):
             continue
         if os.path.basename(path).lower().startswith("config") and path.lower().endswith(".json"):
             try:
-                if cardfs.read(path) == s3.get_text(key).encode("utf-8"):
+                if cardfs.read(path) == s3.get_bytes(key):
                     continue
-            except (OSError, *s3.ERRORS):
+            except (OSError, ValueError, *s3.ERRORS):
                 pass
             result.append((key, path, size))
         elif not downloads.is_current(path, size):
@@ -310,10 +323,14 @@ def selected(base):
 
 
 def select(card, base, dry_run):
-    """Set "theme" to the card's spruce_theme in every Saves/*-system.json, keeping the rest of each file. Returns the
-    failure count (always 0: a file that can't be used is warned about and skipped)."""
+    """Set "theme" to the card's spruce_theme in every Saves/*-system.json, keeping the rest of each file, when
+    Themes/<name>/ is on the card (in a dry run, when storage has it: the real run copies it). Returns the number of files changed (a file that
+    can't be used is warned about and skipped)."""
     name = store.saved_card(card).get("spruce_theme")
     if not isinstance(name, str) or not name:
+        return 0
+    if not (_plain(name) and os.path.isdir(os.path.join(base, "Themes", name))) and not (dry_run and name in available()):
+        ui.warn(f"The Spruce theme {name} isn't on the card; it isn't selected")
         return 0
     files = _system_files(base)
     if not files:
@@ -321,10 +338,10 @@ def select(card, base, dry_run):
         return 0
     changed = 0
     for path in files:
-        old = cardfs.text(path)
         try:
+            old = cardfs.text(path)
             data = json.loads(old)
-        except ValueError:
+        except (OSError, ValueError):
             data = None
         if not isinstance(data, dict):
             ui.warn(f"{os.path.relpath(path, base)} can't be read as Spruce settings; theme not selected there")
@@ -339,4 +356,4 @@ def select(card, base, dry_run):
     if changed:
         print(ui.dim(f"🧪 Dry run: would select the Spruce theme {name} ({changed} file(s))") if dry_run
               else f"🎨 Spruce theme → {name} ({changed} file(s))")
-    return 0
+    return changed
