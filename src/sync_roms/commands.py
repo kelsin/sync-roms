@@ -10,7 +10,7 @@ import sys
 import webbrowser
 
 from . import collections as colls
-from . import budget, cardedit, cardshare, collectionedit, external, inventory, m3u, names, picker, runtime, s3, setedit, spruce_settings, store, surprise, themeart, ui, usersettings
+from . import budget, cardedit, cardshare, collectionedit, external, guest, inventory, m3u, names, picker, runtime, s3, setedit, spruce_settings, store, surprise, themeart, ui, usersettings
 
 
 UNKNOWN_SHOWN = 8  # device ids named in an "unknown device" error
@@ -444,7 +444,11 @@ def cards_list(args):
     cards = store.load_cards()
     manifest = store.load_catalog()
     rows = []
+    hidden = 0
     for name in sorted(cards):
+        if guest.is_guest(cards[name]) and not args.all:
+            hidden += 1
+            continue
         setup = picker.saved_setup(cards[name], manifest["devices"], manifest["layouts"])
         games = store.card_games(name, cards)
         extras = sum(len(v) if isinstance(v, list) else 1 for v in games.values())
@@ -461,6 +465,7 @@ def cards_list(args):
                      "layout": setup[1] if setup else None, "size": cards[name].get("size") if isinstance(cards[name], dict) else None,
                      "used": usage.bytes if usage else None, "sized": not usage.partial if usage else None,
                      "full_systems": len(full) if setup else None, "games": picked, "extras": extras,
+                     "guest": guest.is_guest(cards[name]),
                      "surprise": surprise.enabled(cards[name]), "theme": store.card_flag(cards[name], "theme"),
                      "collections": store.card_flag(cards[name], "custom_collections"),
                      "raofflineproxy": store.card_flag(cards[name], "raofflineproxy")})
@@ -494,8 +499,10 @@ def cards_list(args):
     # one fixed two-column slot per status emoji (blank when it doesn't apply), so several line up; add new ones here
     badges = lambda r: "".join(emoji if on else "  " for emoji, on in [("🎁", r["surprise"]), ("🎨", r["theme"]),
                                                                          ("💖", r["collections"]), ("🏆", r["raofflineproxy"])])
-    ui.table([(r["name"], r["device"] or "(no device set)", r["layout"] or "", used(r), *picks(r), badges(r))
+    ui.table([(("👤 " if r["guest"] else "") + r["name"], r["device"] or "(no device set)", r["layout"] or "", used(r), *picks(r), badges(r))
               for r in rows])
+    if hidden:
+        print(ui.dim(f"{hidden} guest card{'' if hidden == 1 else 's'} hidden (--all shows them)"))
     if unsized:
         print()
         print(ui.dim("* Not sized: there is no storage cache yet, so full-system folders can't be counted.\n"
@@ -1477,7 +1484,7 @@ def build_parser():
 
     cards = sub.add_parser("cards", add_help=False, allow_abbrev=False)
     csub = cards.add_subparsers(dest="action", required=True)
-    p = csub.add_parser("list", allow_abbrev=False); p.add_argument("--json", action="store_true"); p.set_defaults(fn=cards_list)
+    p = csub.add_parser("list", allow_abbrev=False); p.add_argument("--json", action="store_true"); p.add_argument("--all", action="store_true"); p.set_defaults(fn=cards_list)
     for name, create in (("new", True), ("set", False)):
         p = csub.add_parser(name, allow_abbrev=False); common(p, card=False); p.add_argument("name")
         p.add_argument("--device"); p.add_argument("--layout"); p.add_argument("--size", help="the card's size, e.g. 256, 512GB, 1TB"); p.set_defaults(fn=lambda a, c=create: cards_save_setup(a, c))

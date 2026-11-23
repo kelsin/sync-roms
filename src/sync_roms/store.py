@@ -279,7 +279,8 @@ def card_locked_games(entry, collections_by_id, excluded=None):
             parsed = _game_keys(game)
             skip = (excluded or {}).get(parsed[0]) if parsed else None
             add(game, f"{themeart.collection_emoji(coll)} {coll['name']}", skip if isinstance(skip, list) else ())
-    if isinstance(entry, dict) and surprise.enabled(entry):
+    from . import guest  # here: guest imports store
+    if isinstance(entry, dict) and surprise.enabled(entry) and not guest.is_guest(entry):
         picks = entry.get("surprises")
         for game in picks if isinstance(picks, list) else ():
             add(game, surprise.LABEL)

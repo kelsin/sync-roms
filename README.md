@@ -137,7 +137,7 @@ Exit codes: `0` done (or nothing to do, or you declined), `1` some files failed,
 
 `--dry-run` shows the same free space as a sync (counting the ROMs it would delete as freed) and says when the downloads would not fit. `sync --dry-run --json` prints `{downloads, delete, kept, theme_remove, rename, missing, stale_media, totals, free_space}`: `downloads` lists every file with its `kind` (scraped media as `scrape`, counted in `totals`), `kept` is what `--no-delete` keeps, `theme_remove` the PyUI theme folders a `spruce` card would lose, `rename` holds `{from, to}` pairs, `missing` has `roms` and `bios`, and `free_space` is in bytes.
 
-The other `--json` documents: `devices` is a list of `{id, name, soc, systems, firmwares}` (`systems` a count), or one device's entry with its `systems` and `system_names`; `layouts` is the `layouts.json` entries plus `id` and `devices`; `games list` is `{full_systems, sets, games}`, each game `{system, bucket, title}`; `cards list` is a list of `{name, device, layout, size, used, sized, full_systems, games, extras, surprise, theme, collections, raofflineproxy}`; `diff` is `{system, only_local, only_bucket}`, the last two lists of `{path, size}`.
+The other `--json` documents: `devices` is a list of `{id, name, soc, systems, firmwares}` (`systems` a count), or one device's entry with its `systems` and `system_names`; `layouts` is the `layouts.json` entries plus `id` and `devices`; `games list` is `{full_systems, sets, games}`, each game `{system, bucket, title}`; `cards list` is a list of `{name, device, layout, size, used, sized, full_systems, games, extras, guest, surprise, theme, collections, raofflineproxy}`; `diff` is `{system, only_local, only_bucket}`, the last two lists of `{path, size}`.
 
 ### List keys
 
@@ -223,6 +223,7 @@ For one command:
 | --- | --- | --- |
 | `-a`, `--ask` | `sync` | Confirm the saved device and layout instead of using them silently |
 | `--device ID\|full`, `--layout NAME` | `sync`, `cards new`, `cards set` | Choose the setup without the picker (it is saved for the card). `cards convert` takes `--layout` too |
+| `--guest` | `sync` | Make the card a guest card (saved): each sync seeds its picks from the storage ROMs on it (name and size), copies only ROMs, BIOS and scrapes, never overwrites a file and deletes only the seeded ROMs you deselect, with their media |
 | `--no-delete`, `--no-clean`, `--no-eject` | `sync` | Never delete from the card (what would have been deleted is listed instead); skip the end-of-run card tidy; leave the card mounted |
 | `--size SIZE` | `cards new`, `cards set` | The card's size as people read it (`256`, `512GB`, `1TB`), shown by `cards list` and on sync |
 | `--card NAME` | `games` | The card whose games to change (required) |
@@ -230,7 +231,7 @@ For one command:
 | `--system ID` | `diff`, `scrape`, `scrape missing`, `scrape art` | `diff`: the system to compare with, instead of the picker. `scrape`, `scrape missing`, `scrape art`: only that storage folder (the same as `scrape SYSTEM`) |
 | `--for onion\|spruce\|both` | `scrape art` | Which art to make (default both) |
 | `--workers N` | `scrape art` | How many sources to download at once (default: your CPU count); conversion always uses one process per core |
-| `--all` | `scrape`, `scrape missing` | Every ROM in storage, not only the games your cards reference |
+| `--all` | `scrape`, `scrape missing`, `cards list` | Every ROM in storage, not only the games your cards reference; with `cards list`, guest cards too |
 | `--retry` | `scrape` | Also try the ROMs ScreenScraper didn't know before (ROMs whose lookup failed are always tried again; non-games never are) and, with `--fill-media`, the ROMs missing only media it didn't offer |
 | `--fill-media` | `scrape` | Also scrape ROMs that have metadata but lack some media type in storage; their metadata is kept. Media types ScreenScraper didn't offer for a ROM are remembered, and a ROM missing only those isn't asked for again until `--retry` |
 | `--skip-media TYPES` | `scrape`, `scrape match` | Comma-separated media folders not to download (e.g. `manuals,fanart`) |
@@ -270,7 +271,7 @@ An optional `device-systems.json` there adjusts the systems a device can play: `
 
 A card is a folder name (the card root's name) with a remembered device, layout and games.
 
-- `cards list` (or just `cards`) shows the space each card's picks take (ROMs, scrapes and BIOS) against its size, how many full systems and games it syncs, and which of Surprise (🎁), theme art (🎨), collections (💖) and RAOfflineProxy (🏆) are on.
+- `cards list` (or just `cards`) shows the space each card's picks take (ROMs, scrapes and BIOS) against its size, how many full systems and games it syncs, and which of Surprise (🎁), theme art (🎨), collections (💖) and RAOfflineProxy (🏆) are on. Guest cards (a friend's card, marked 👤) are hidden unless you pass `--all`.
 - `cards new NAME --device ID|full --layout NAME [--size SIZE]` creates a card; `cards set NAME` changes one's device, layout or size.
 - `cards rename OLD NEW` and `cards delete NAME` rename and delete one.
 - `cards convert [CARD] --layout NAME` moves the mounted card's ROMs, BIOS and RetroArch saves and states to another layout's folders and saves the layout (the device stays). `--dry-run` previews, `--yes` skips the question. Files already at a destination are left; the rest is for a sync to fill in. A convert to or from `muos` leaves saves and states where they are and lists them, since muOS uses Pickles' own, not RetroArch's. The old layout's scraped media (gamelists and media folders) is deleted from the old ROM folders; the new layout's own is installed by the next sync.
@@ -378,6 +379,16 @@ Every card gets up to 10 surprises on top of the games you picked: random full E
 - **History** is kept in `surprises.json` in the data folder (system, bucket, title, card, ISO date) and pruned past `surprise_ttl_days` in `settings.json` (default 183) whenever it is written.
 - **On the device** the surprises show as a collection named `Surprise` (that name is reserved, so a collection of yours can't be called Surprise), with a gift-box artwork and logo like any collection with [theme art](#theme-art); Onion cards get the Surprise app instead (see [What each layout gets](#what-each-layout-gets)).
 - **Mirror**: picks are made from storage itself, not the mirror, so they can be games the mirror doesn't have yet.
+
+## Guest cards (`--guest`)
+
+For a card that isn't yours (a friend's), run `sync-roms sync CARD --guest` once: the card is remembered as a guest card, and `F` in the [card editor](#editing-a-cards-games-edit-games) turns that off. A guest sync only adds ROMs, their BIOS and their [scraped data](#scraped-data-on-the-card), and leaves the rest of the card alone (no other ROMs or media are deleted or overwritten): no Surprise, apps, themes, collections, drivers, settings or fixes.
+
+- Each sync starts from what the card already holds: every ROM in storage whose file is on the card (same name, ignoring case and Unicode form, and same size) becomes a pick. The editor opens on those picks; add games to copy them.
+- A file already on the card is never overwritten, and a gamelist only gains entries for ROMs it doesn't list (one that can't be read is left as it is, with a warning).
+- Only the ROMs found on the card at the start that you deselect in the editor are deleted (after you confirm, unless `--no-delete`), with their scraped media. A system turned off with `x` is skipped entirely. Your friend's other files are never deleted or overwritten. The exceptions: on Spruce cards, BIOS zips sync puts in a ROM folder are added to that system's `Emu/<folder>/config.json` ignore list, and the usual end-of-run tidy runs. Loose discs are left where they are.
+- Without the editor (`--yes`, `--json`, no terminal) the picks are what the card holds and nothing is deleted.
+- Turning guest off in the editor during a sync takes effect on the next sync.
 
 ## What each layout gets
 

@@ -65,7 +65,7 @@ class SyncSmokeTest(DataDir):
             with open(os.path.join(card, "ROMs", "gba", "Game.zip"), "wb") as f:
                 f.write(b"x" * 5)
 
-        def run_surprise(card, setup, chosen, interactive, dry_run, to_fetch=None, card_match=None):
+        def run_surprise(card, setup, chosen, interactive, dry_run, to_fetch=None, card_match=None, on_guest=None):
             calls.append(([s["bucket"] for s in chosen], to_fetch(SYSTEM, ["gba/Game.zip", "gba/New.zip"])))
             return []
         patches = ((store, {"load_manifest": lambda names=(): manifest}),
@@ -83,7 +83,7 @@ class SyncSmokeTest(DataDir):
                 with open(os.path.join(card, "ROMs", "gba", name), "wb") as f:
                     f.write(b"x")
 
-        def run_surprise(card, setup, chosen, interactive, dry_run, to_fetch=None, card_match=None):
+        def run_surprise(card, setup, chosen, interactive, dry_run, to_fetch=None, card_match=None, on_guest=None):
             calls.append(card_match(SYSTEM, ["gba/Kept.gba", "gba/Other.gba"]))
             calls.append(card_match({**SYSTEM, "bucket": "nes", "folders": {}}, ["nes/A.nes"]))
             return []
@@ -103,7 +103,7 @@ class SyncSmokeTest(DataDir):
                 with open(path, "wb") as fh:
                     fh.write(b"x")
 
-        def run_surprise(card, setup, chosen, interactive, dry_run, to_fetch=None, card_match=None):
+        def run_surprise(card, setup, chosen, interactive, dry_run, to_fetch=None, card_match=None, on_guest=None):
             got.append(card_match(system, keys))
             return []
         layouts = {layout: {"label": layout, "roms_dir": "Roms" if layout == "onion" else "ROMs", "bios_dir": "BIOS",
