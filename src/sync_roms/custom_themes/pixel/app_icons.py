@@ -392,11 +392,11 @@ def sftpgo():
 
 def syncthing():
     s = Sprite(20, 20)
-    for k in (0, 1):
-        s.line(9 + k, 5, 4 + k, 15, "blue")
-    s.rect(5, 15, 10, 2, "blue")
+    for y in range(5, 15):
+        s.rect(8 - (y - 4) // 2, y, 2, 1, "blue")
+    s.rect(3, 14, 14, 2, "blue")
     s.ellipse(9.5, 3.5, 3.4, 3.4, "cyan")
-    s.ellipse(3.5, 16.5, 3.4, 3.4, "cyan")
+    s.ellipse(3.5, 15.5, 3.4, 3.4, "cyan")
     s.mirror()
     return s
 

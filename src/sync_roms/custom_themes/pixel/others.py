@@ -46,16 +46,19 @@ def pcecd_console():
 
 
 def sgfx_console():
-    """SuperGrafx: wide dark-gray body with ribbed side wings, a raised middle and a black card slot."""
+    """SuperGrafx (Wikimedia, "SuperGrafx-Console-Set"): wide gray body, three raised rear blocks (green switch on
+    the left, card slot in the middle), a raised centre plate and a column of round bumps on each side wing."""
     s = Sprite(26, 16)
     s.rrect(0, 3, 26, 13, "dgray", 2)
-    s.rrect(6, 0, 14, 8, "dgray", 2)
-    s.rect(9, 2, 8, 2, "black")
-    s.rect(1, 4, 3, 2, "green")
+    s.rrect(0, 1, 6, 5, "dgray", 1)
+    s.rrect(20, 1, 6, 5, "dgray", 1)
+    s.rrect(8, 0, 10, 6, "dgray", 1)
+    s.rect(2, 2, 3, 2, "green")
+    s.rect(10, 1, 6, 1, "black")
+    s.rect(9, 7, 8, 8, "dark")
     for y in (7, 10, 13):
-        s.rect(2, y, 5, 1, "dark")
-        s.rect(19, y, 5, 1, "dark")
-    s.rect(9, 8, 8, 6, "dark")
+        s.rrect(1, y, 6, 2, "dark", 1)
+        s.rrect(19, y, 6, 2, "dark", 1)
     return s
 
 
@@ -109,17 +112,17 @@ def neocd_console():
 
 
 def neogeo_stick():
-    """AES arcade stick: black box, red ball top on a gray gate, select and start, four coloured buttons."""
+    """AES arcade stick (Wikimedia, "Neo-Geo-AES-Console-Set"): all-black slab, a black ball on a round dish at the left,
+    small select and start above, four black buttons in a rising arc (A lowest, D highest)."""
     s = Sprite(26, 23)
-    s.rrect(0, 10, 26, 13, "dark", 3)
-    s.rect(6, 8, 2, 4, "dgray")
-    s.ellipse(6.5, 4.5, 4, 4, "red")
-    s.rrect(2, 10, 10, 2, "dgray", 1)
-    s.rect(3, 15, 3, 1, "gray")
-    s.rect(3, 17, 3, 1, "gray")
-    for i, c in enumerate(("red", "yellow", "green", "blue")):
-        s.rect(9 + i * 4, 15, 3, 3, c)
-    s.rect(2, 20, 22, 1, "dgray")
+    s.rrect(0, 4, 26, 19, "dark", 3)
+    s.ellipse(6, 15, 4.5, 4.5, "black")
+    s.rect(5, 8, 2, 6, "black")
+    s.ellipse(5.5, 6.5, 3, 3, "dgray")
+    s.rect(14, 7, 3, 1, "gray")
+    s.rect(19, 7, 3, 1, "gray")
+    for x, y in ((11, 15), (15, 12), (19, 10), (23, 9)):
+        s.rect(x, y, 3, 3, "dgray")
     return s
 
 
@@ -226,13 +229,28 @@ def joystick(base, stick, ball, buttons):
 
 
 def cx40():
-    """CX40: black stick and base with the red fire button on the base."""
-    return joystick("dark", "dgray", "black", [(3, "red")])
+    """CX40 (Wikimedia, "Atari-2600-Joystick"): square black base, a tall tapering stick in a rubber boot, the red fire
+    button at the back left corner."""
+    s = Sprite(26, 23)
+    s.rect(11, 0, 4, 9, "black")
+    s.rrect(10, 8, 6, 4, "black", 1)
+    s.rrect(0, 11, 26, 12, "dark", 3)
+    s.ellipse(12.5, 12.5, 5.5, 2.5, "dgray")
+    s.rrect(2, 14, 6, 4, "red", 1)
+    return s
 
 
 def prolin_stick():
-    """7800 ProLine stick: silver base, black stick, an orange fire button on each side."""
-    return joystick("gray", "dark", "black", [(2, "orange"), (20, "orange")])
+    """7800 ProLine stick (Wikimedia, "Atari-7800-Console-Set"): black base with a silver plate, a black stick with a
+    broad round cap, an orange fire button at each end."""
+    s = Sprite(26, 23)
+    s.rect(12, 8, 2, 6, "dgray")
+    s.rrect(8, 1, 10, 8, "black", 2)
+    s.rrect(0, 13, 26, 10, "dark", 3)
+    s.rect(9, 17, 8, 4, "gray")
+    s.rect(1, 15, 3, 5, "orange")
+    s.rect(22, 15, 3, 5, "orange")
+    return s
 
 
 def atari5200_pad():
@@ -291,15 +309,17 @@ def atarist_mouse():
 
 
 def jaguar_console():
-    """Jaguar: black body with a raised angular middle, a cartridge slot, side ribs and a red power button."""
+    """Jaguar (Wikimedia, "Atari-Jaguar-Console-Set"): black body, a round dish under a cartridge slot, ribs at both
+    sides and the red button on the front strip."""
     s = Sprite(26, 15)
-    s.rrect(0, 3, 26, 12, "dark", 2)
-    s.rrect(6, 0, 14, 7, "dark", 2)
-    s.rect(9, 2, 8, 2, "black")
-    for x in (21, 23):
-        s.rect(x, 5, 1, 6, "dgray")
-    s.rect(7, 9, 2, 2, "red")
-    s.rect(4, 12, 18, 1, "dgray")
+    s.rrect(0, 0, 26, 15, "dark", 3)
+    s.rect(9, 1, 8, 2, "black")
+    s.ellipse(12.5, 7, 7.5, 3.5, "black")
+    for y in (3, 5, 7, 9):
+        s.rect(1, y, 3, 1, "dgray")
+        s.rect(22, y, 3, 1, "dgray")
+    s.rect(5, 11, 16, 3, "dgray")
+    s.rect(11, 11, 4, 2, "red")
     return s
 
 
@@ -380,35 +400,39 @@ def itv_pad():
 
 
 def ody_console():
-    """Odyssey 2: silver-gray slab, dark cartridge panel on top and the flat membrane keyboard."""
+    """Odyssey 2 (Wikimedia, "Magnavox-Odyssey2-Console-BR"): silver top with the black cartridge bay and its red tab,
+    a flat black keyboard panel with its rows of keys, a black lower body."""
     s = Sprite(26, 17)
-    s.rrect(0, 0, 26, 17, "gray", 3)
-    s.rect(3, 2, 20, 3, "black")
-    s.rect(18, 3, 3, 1, "red")
-    keys(s, 3, 7, 7, 3, "dark", 2, 1, 1, 1)
-    s.rect(7, 13, 12, 1, "dark")
+    s.rrect(0, 0, 26, 6, "gray", 3)
+    s.rect(0, 3, 26, 10, "gray")
+    s.rrect(0, 11, 26, 6, "dark", 3)
+    s.rect(0, 11, 26, 2, "dark")
+    s.rect(3, 1, 20, 3, "black")
+    s.rect(18, 2, 3, 1, "red")
+    s.rect(2, 5, 22, 7, "black")
+    keys(s, 3, 6, 7, 3, "dgray", 2, 1, 1, 1)
     return s
 
 
 def ody_stick():
-    """Odyssey 2 stick: black base and stick with a red fire cap on top."""
+    """Odyssey 2 stick (Wikimedia, "Magnavox-Odyssey2-Console-BR"): a black box with a short black stick in a round
+    collar and a red tab at the back corner."""
     s = Sprite(26, 23)
-    s.rect(12, 8, 2, 7, "dgray")
-    s.rrect(8, 1, 10, 7, "red", 2)
-    s.rrect(0, 13, 26, 10, "dark", 3)
+    s.rect(12, 1, 2, 10, "black")
+    s.rect(11, 0, 4, 2, "black")
+    s.rrect(0, 9, 26, 14, "dark", 3)
+    s.ellipse(12.5, 13, 5.5, 3, "dgray")
+    s.rect(2, 11, 5, 3, "red")
     return s
 
 
 def vectrex_console():
-    """Vectrex: tall black cabinet, a hood over the monitor with white vector art and the control deck."""
+    """Vectrex (Wikimedia, "Vectrex-Console-Set"): tall black cabinet, a hood over the pale gray screen glass and
+    the recessed control deck with its vents."""
     s = Sprite(20, 23)
     s.rrect(0, 0, 20, 5, "dark", 1)
     s.rrect(1, 4, 18, 19, "dark", 3)
-    s.rrect(3, 5, 14, 11, "black", 2)
-    s.line(9, 8, 5, 12, "white")
-    s.line(10, 8, 14, 12, "white")
-    s.rect(9, 8, 2, 1, "white")
-    s.rect(5, 12, 10, 1, "white")
+    s.rrect(3, 5, 14, 11, "gray", 3)
     s.rect(3, 18, 14, 1, "dgray")
     s.rect(4, 20, 4, 2, "dgray")
     s.rect(10, 20, 6, 2, "dgray")
@@ -416,36 +440,41 @@ def vectrex_console():
 
 
 def vectrex_pad():
-    """Vectrex pad: black slab, analog stick on the left and four buttons in a row."""
-    s = Sprite(26, 17)
-    s.rrect(0, 0, 26, 17, "dark", 4)
-    s.ellipse(7.5, 8.5, 5, 5, "dgray")
-    s.ellipse(7.5, 8.5, 3, 3, "black")
-    s.rect(6, 6, 2, 1, "dgray")
-    for i in range(4):
-        s.rect(14 + i * 3, 7, 2, 3, "gray")
+    """Vectrex controller (Wikimedia, "Vectrex-Console-Set"): black slab, a small stick with a cream tip on a round
+    collar at the left, a pale stripe and four round buttons in a row."""
+    s = Sprite(26, 16)
+    s.rrect(0, 0, 26, 16, "dark", 3)
+    s.ellipse(5.5, 7.5, 3.5, 3.5, "black")
+    s.rect(5, 7, 2, 2, "cream")
+    s.rect(1, 12, 24, 1, "dgray")
+    for x in (10, 14, 18, 22):
+        s.rect(x, 4, 3, 3, "dgray")
     return s
 
 
 def fairchild_console():
-    """Channel F: black top with a row of buttons and a big cartridge bay, thick woodgrain front."""
+    """Channel F (Wikimedia, "Fairchild-Channel-F"): a dark sloping top over a front strip with the yellow reset and four
+    cream buttons at the left and the cartridge slot at the right, woodgrain base."""
     s = Sprite(26, 15)
     s.rrect(0, 0, 26, 15, "dark", 2)
-    s.rrect(0, 9, 26, 6, "brown", 2)
-    s.rect(14, 2, 10, 5, "black")
-    s.rect(15, 4, 8, 1, "dgray")
+    s.rrect(0, 11, 26, 4, "brown", 2)
+    s.rect(2, 8, 2, 2, "yellow")
     for i in range(4):
-        s.rect(2 + i * 3, 3, 2, 3, "gray")
-    s.rect(3, 11, 20, 1, "tan")
+        s.rect(5 + i * 3, 8, 2, 2, "cream")
+    s.rect(15, 6, 9, 4, "black")
+    s.rect(16, 7, 7, 1, "dgray")
+    s.rect(2, 2, 22, 1, "dgray")
     return s
 
 
 def fairchild_stick():
-    """Channel F controller: a thick grip with a big domed knob on a flat base."""
-    s = Sprite(22, 23)
-    s.rect(9, 10, 4, 6, "gray")
-    s.rrect(2, 1, 18, 11, "dgray", 4)
-    s.rrect(0, 14, 22, 9, "dark", 3)
+    """Channel F controller (Wikimedia, "Fairchild-Channel-F"): a ridged black barrel with a disc-shaped knob on its end."""
+    s = Sprite(26, 16)
+    s.rrect(0, 3, 21, 10, "dark", 2)
+    for x in range(3, 18, 2):
+        s.rect(x, 5, 1, 6, "dgray")
+    s.rect(21, 7, 2, 2, "dgray")
+    s.rrect(22, 1, 4, 14, "black", 1)
     return s
 
 
@@ -453,12 +482,12 @@ def fairchild_stick():
 # --- Computers ---------------------------------------------------------------
 
 def msx_console():
-    """MSX: dark-gray keyboard computer, a cartridge slot on top, light keys and the cursor keys."""
+    """MSX (Wikimedia, Sony HB-10P): black keyboard computer, a cartridge slot on top, light keys, red STOP key and the cursor keys."""
     s = Sprite(26, 16)
-    s.rrect(0, 0, 26, 16, "dgray", 3)
+    s.rrect(0, 0, 26, 16, "dark", 3)
     s.rect(3, 2, 20, 2, "black")
     keys(s, 3, 6, 5, 2, "gray", 2, 1, 1, 1)
-    s.rect(19, 6, 2, 1, "gray")
+    s.rect(19, 6, 2, 1, "red")
     s.rect(21, 8, 2, 1, "gray")
     s.rect(19, 8, 2, 1, "gray")
     s.rect(6, 11, 12, 2, "gray")
@@ -484,32 +513,42 @@ def c64_console():
 
 
 def competition_pro():
-    """Competition Pro: black base, red ball top and a red fire button on each side."""
-    return joystick("dark", "dgray", "red", [(2, "red"), (20, "red")])
+    """Competition Pro (icomp.de photo "Compproretro420"): black base, red stick with a red ball, a big round red fire
+    button at the left and two small red buttons at the right."""
+    s = Sprite(26, 23)
+    s.rect(12, 8, 2, 6, "red")
+    s.ellipse(12.5, 5.5, 4.5, 4.5, "red")
+    s.rrect(0, 13, 26, 10, "dark", 3)
+    s.rrect(2, 15, 6, 6, "red", 2)
+    s.rect(21, 15, 3, 3, "red")
+    s.rect(21, 19, 3, 3, "red")
+    return s
 
 
 def pc98_console():
-    """PC-98: off-white CRT monitor on the main unit with two floppy slots."""
+    """PC-9801 (Wikimedia, "PC-9801 computer set" and "NEC PC-9801VM Front"): a beige CRT on the wide main unit, a vent
+    grille at the left and two floppy slots stacked at the right."""
     s = Sprite(26, 22)
-    s.rrect(2, 0, 22, 12, "white", 2)
-    s.rrect(4, 2, 18, 8, "black", 1)
-    s.rrect(0, 13, 26, 9, "white", 2)
-    s.rect(3, 16, 8, 1, "black")
-    s.rect(15, 16, 8, 1, "black")
-    s.rect(3, 19, 3, 1, "green")
-    s.rect(20, 19, 3, 1, "red")
+    s.rrect(3, 0, 20, 11, "cream", 2)
+    s.rrect(5, 2, 16, 7, "black", 1)
+    s.rrect(0, 12, 26, 10, "cream", 2)
+    for y in (14, 16, 18, 20):
+        s.rect(2, y, 10, 1, "tan")
+    s.rect(15, 14, 9, 1, "black")
+    s.rect(15, 18, 9, 1, "black")
     return s
 
 
 def pc98_keyboard():
-    """PC-98 keyboard: off-white slab, a function row, a key block, a number block and a space bar."""
-    s = Sprite(26, 16)
-    s.rrect(0, 0, 26, 16, "white", 2)
-    for k in range(7):
-        s.rect(3 + k * 3, 2, 2, 1, "dgray")
-    keys(s, 2, 5, 5, 3, "dgray", 2, 1, 1, 1)
-    keys(s, 19, 5, 2, 3, "dgray", 2, 1, 1, 1)
-    s.rect(6, 12, 10, 2, "dgray")
+    """PC-9800 keyboard (Wikimedia, "NEC PC-9800 series keyboard"): a long pale slab, a row of function keys, the main
+    block, a darker cursor and number block and a space bar."""
+    s = Sprite(26, 12)
+    s.rrect(0, 0, 26, 12, "white", 2)
+    keys(s, 2, 2, 8, 1, "gray", 2, 1, 1, 1)
+    keys(s, 2, 4, 5, 3, "gray", 2, 1, 1, 1)
+    keys(s, 17, 4, 2, 3, "dgray", 2, 1, 1, 1)
+    keys(s, 21, 4, 1, 3, "dgray", 2, 1, 1, 1)
+    s.rect(5, 10, 10, 1, "gray")
     return s
 
 

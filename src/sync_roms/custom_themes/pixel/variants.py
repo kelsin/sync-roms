@@ -249,10 +249,15 @@ def genesis6_pad():
 
 
 def mark3_pad():
-    """Japanese Master System pad: white slab with a dark d-pad and two dark buttons (shape from the
-    console's white styling; no photo of this pad was found)."""
-    from .nintendo_sega import _sms_pad
-    return _sms_pad("white", "dark", "red")
+    """Japanese Master System / Mark III joypad SJ-152 (Wikimedia, "Sega Mark III", the "JOYPAD" next to the console):
+    a short cream slab, a black square d-pad at the left, a gray panel with two round black buttons."""
+    s = Sprite(26, 11)
+    s.rrect(0, 0, 26, 11, "cream", 2)
+    s.rrect(2, 2, 7, 7, "black", 1)
+    s.rect(10, 1, 15, 9, "gray")
+    for x in (12, 19):
+        s.rrect(x, 3, 4, 4, "black", 1)
+    return s
 
 
 def saturn_us_pad():

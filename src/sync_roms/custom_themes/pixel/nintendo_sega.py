@@ -66,16 +66,21 @@ def sfc_console():
 
 
 def sufami_console():
-    """Sufami Turbo adapter: a gray SNES-style cartridge with two mini cartridges plugged into its top."""
-    s = Sprite(26, 20)
-    s.rrect(3, 0, 8, 11, "orange", 1)
-    s.rect(4, 2, 6, 4, "white")
-    s.rrect(15, 0, 8, 11, "teal", 1)
-    s.rect(16, 2, 6, 4, "white")
-    s.rrect(0, 9, 26, 11, "gray", 2)
-    s.rect(3, 10, 8, 1, "black")           # slots
-    s.rect(15, 10, 8, 1, "black")
-    s.rect(7, 14, 12, 3, "white")          # label
+    """Sufami Turbo (Bandai promotional art, "sufami_system" at pixelnostalgia.github.io): the gray two-bay adapter,
+    darker than the Super Famicom it plugs into, with an empty bay and a mini cartridge in the other."""
+    s = Sprite(26, 22)
+    s.rrect(2, 3, 22, 10, "dgray", 1)
+    s.rect(4, 4, 8, 4, "dark")             # empty bay
+    s.rrect(14, 0, 8, 8, "gray", 1)        # mini cartridge
+    s.rect(15, 2, 6, 3, "white")           # its label
+    s.rect(17, 3, 2, 1, "red")
+    s.rect(8, 10, 10, 2, "gray")           # name plate
+    s.rrect(0, 12, 26, 10, "gray", 2)      # Super Famicom
+    s.rect(4, 15, 4, 2, "dark")            # power
+    s.rect(10, 15, 6, 2, "dgray")          # eject
+    s.rect(18, 15, 4, 2, "dark")           # reset
+    s.rect(4, 19, 5, 2, "black")           # pad ports
+    s.rect(17, 19, 5, 2, "black")
     return s
 
 
@@ -87,8 +92,8 @@ def satella_console():
     s.rect(3, 7, 20, 2, "dgray")
     s.rect(4, 11, 5, 2, "black")            # its pad ports
     s.rect(17, 11, 5, 2, "black")
-    s.rrect(7, 0, 12, 9, "dgray", 1)        # BS-X memory pack
-    s.rect(9, 2, 8, 4, "yellow")            # its label
+    s.rrect(6, 0, 14, 9, "dgray", 1)        # BS-X memory pack
+    s.rect(8, 2, 10, 4, "yellow")           # its label
     s.rrect(1, 15, 24, 8, "gray", 2)        # Satellaview box
     s.rect(2, 15, 22, 1, "dgray")           # seam
     s.rect(15, 18, 2, 2, "dark")            # access
@@ -405,15 +410,16 @@ def dc_pad():
 
 
 def sg1000_pad():
-    """SG-1000 joystick: gray case seen from the front, black stick with a ball, two red buttons."""
+    """SG-1000 joystick SJ-200 (Wikimedia, "Sega-SG-1000-Console-Set"): a long gray slab, a black stick with a rounded
+    top on a round collar, an orange fire button at each end."""
     s = Sprite(26, 17)
-    s.rrect(0, 7, 26, 10, "gray", 2)
-    s.rect(11, 3, 3, 6, "black")           # stick
-    s.ellipse(12.5, 3.5, 3, 3, "red")
-    s.rect(1, 9, 8, 1, "dgray")
-    s.rect(1, 12, 8, 1, "dgray")
-    btn(s, 16, 10, "red")               # buttons
-    btn(s, 21, 10, "red")
+    s.rrect(0, 4, 26, 13, "gray", 2)
+    s.rect(4, 6, 10, 2, "black")           # label strip
+    s.rect(1, 6, 2, 9, "orange")           # fire buttons
+    s.rect(23, 6, 2, 9, "orange")
+    s.ellipse(16, 11, 4.5, 4, "dgray")
+    s.rect(15, 3, 3, 9, "black")
+    s.rrect(14, 0, 5, 4, "black", 1)
     return s
 
 

@@ -60,30 +60,38 @@ def n3ds():
 
 
 def gamate():
-    """Bit Corp Gamate: gray portrait handheld, wide screen, d-pad and two buttons below, speaker grille."""
-    s = Sprite(18, 23)
-    s.rrect(0, 0, 18, 23, "gray", 3)
-    s.rrect(1, 1, 16, 12, "dgray", 2)
-    s.rect(3, 3, 12, 8, "screen")
-    face(s, 9, 4, 3)
-    plus(s, 2, 15, 6, 2, "dark")
-    s.rrect(13, 16, 3, 3, "dark", 1)         # A
-    s.rrect(9, 18, 3, 3, "dark", 1)          # B
-    s.rect(2, 21, 3, 1, "dgray")             # start / select
+    """Bit Corp Gamate: a landscape dark gray handheld, speaker grille top left, wide screen, d-pad left, two round
+    buttons at the right (the real unit's start / select are two small keys above them)."""
+    s = Sprite(26, 14)
+    s.rrect(0, 0, 26, 14, "dgray", 3)
+    s.rect(8, 1, 10, 9, "black")
+    s.rect(9, 2, 8, 7, "screen")
+    face(s, 13, 3, 3)
+    keys(s, 2, 2, 2, 3, "dark", 1, 1, 1, 1)      # speaker grille
+    plus(s, 1, 7, 6, 2, "dark")                  # d-pad
+    s.rect(20, 2, 2, 1, "orange")                # select / start
+    s.rect(23, 2, 2, 1, "orange")
+    s.rrect(21, 5, 4, 4, "dark", 1)              # A
+    s.rrect(19, 9, 4, 4, "dark", 1)              # B
     return s
 
 
 def gw():
-    """Game & Watch: wide silver case, LCD in a black frame, d-pad on the left, a button on the right, small keys below."""
+    """Game & Watch Ball: silver face with a red rim, the LCD in the middle, a round red LEFT / RIGHT button on each
+    side of it and the three small game A / game B / time keys below."""
     s = Sprite(26, 16)
-    s.rrect(0, 0, 26, 16, "gray", 2)
-    s.rect(6, 2, 14, 9, "black")
+    s.rrect(0, 0, 26, 16, "red", 2)
+    s.rrect(1, 1, 24, 14, "gray", 1)
+    s.rect(6, 2, 14, 9, "red")                   # LCD frame
     s.rect(7, 3, 12, 7, "screen")
-    face(s, 13, 4, 3)
-    plus(s, 1, 5, 3, 1, "dark")
-    s.rrect(22, 5, 3, 3, "red", 1)           # jump
-    s.rect(8, 13, 3, 1, "dgray")             # game A / game B / time
-    s.rect(15, 13, 3, 1, "dgray")
+    s.rect(12, 4, 2, 2, "dark")                  # juggler: head, body and arms
+    s.rect(12, 6, 2, 3, "dark")
+    s.line(9, 4, 11, 6, "dark")
+    s.line(16, 6, 14, 4, "dark")
+    s.rrect(2, 5, 4, 4, "red", 1)                # left
+    s.rrect(20, 5, 4, 4, "red", 1)               # right
+    for x in (9, 12, 15):                        # game A / game B / time
+        s.rect(x, 12, 2, 2, "red")
     return s
 
 
@@ -102,49 +110,81 @@ def j2me():
 
 
 def loopy():
-    """Casio Loopy: a white rounded console with its pad built in, a pink cartridge in the top slot, two pink buttons."""
+    """Casio Loopy: the lavender-gray console, cartridge slot along the back, round eject button and a yellow reset
+    at the left, the round-windowed seal lid at the right and the black seal-out opening at the front."""
     s = Sprite(26, 16)
-    s.rrect(0, 0, 26, 16, "white", 4)
-    s.rect(5, 2, 16, 4, "pink")              # cartridge in the slot
-    s.rect(7, 3, 12, 1, "white")             # label
-    plus(s, 3, 8, 6, 2, "gray")              # d-pad
-    s.rrect(14, 9, 3, 3, "pink", 1)
-    s.rrect(19, 9, 3, 3, "pink", 1)
+    s.rrect(0, 0, 26, 16, "gray", 4)
+    s.rect(4, 2, 14, 1, "dgray")             # cartridge slot
+    s.ellipse(6.5, 7.5, 3, 3, "indigo")      # eject
+    s.rect(12, 8, 2, 2, "yellow")            # reset
+    s.rrect(16, 4, 8, 7, "periwinkle", 1)    # seal lid
+    s.ellipse(19.5, 6.5, 2, 1.5, "dgray")    # its window
+    s.rrect(13, 12, 11, 3, "black", 1)       # seal out
+    return s
+
+
+def loopy_pad():
+    """Casio Loopy pad: lavender-gray, a round d-pad on the left, a yellow start and four indigo buttons in an arc."""
+    s = Sprite(26, 15)
+    s.rrect(0, 0, 26, 15, "gray", 4)
+    plus(s, 2, 4, 7, 3, "indigo")
+    s.rect(11, 4, 2, 1, "yellow")            # start
+    s.rect(21, 2, 3, 3, "indigo")         # D
+    s.rect(17, 6, 3, 3, "indigo")         # C
+    s.rect(13, 9, 3, 3, "indigo")         # B
+    s.rect(9, 11, 3, 3, "indigo")         # A
     return s
 
 
 def mkxp():
-    """mkxp-z runs RPG Maker (RGSS, built on Ruby): a faceted ruby."""
-    s = Sprite(24, 17)
-    for y in range(5):                             # crown, widening 1:1
-        s.rect(4 - y, y, 16 + 2 * y, 1, "red")
-    s.rect(0, 5, 24, 1, "maroon")                  # girdle
-    for y in range(6, 17):                         # pavilion, narrowing 1:1
-        s.rect(y - 5, y, 24 - 2 * (y - 5), 1, "red")
-    s.rect(7, 1, 10, 2, "pink")                    # table highlight
+    """mkxp-z plays RPG Maker XP / VX / VX Ace games: the engine's classic front-facing hero, auburn hair, blue
+    tunic, brown belt and boots."""
+    s = Sprite(18, 21)
+    s.art(0, 0, [
+        "..OOOOOOO",
+        ".OOOOOOOO",
+        "OOOOOOOOO",
+        "OOOOOOOOO",
+        "OOsssssss",
+        "OOsssssss",
+        "OOsssssss",
+        "..sssssss",
+        "...ssssss",
+        "......sss",
+        ".IIBBBBBB",
+        "IIIBBBBBB",
+        "IIIBBBBBB",
+        "IIIBBBBBB",
+        "sssbbbbbb",
+        "...BBBBBB",
+        "...nnnnn.",
+        "...nnnnn.",
+        "...nnnnn.",
+        "..bbbbbb.",
+        "..bbbbbb.",
+    ], {"O": "orange", "s": "tan", "I": "indigo", "B": "blue", "b": "brown", "n": "navy"})
+    s.rect(4, 5, 1, 2, "dark")                     # eye
+    s.rect(8, 8, 1, 1, "red")                      # mouth
+    s.mirror()
     return s
 
 
 def wolf():
-    """Wolfenstein 3D: B.J. Blazkowicz's face from the status bar, brown hair, blue eyes, in a green tunic."""
+    """Wolfenstein 3D: B.J. Blazkowicz's face as the status bar shows it, auburn swept-back hair, blue eyes and a strong
+    jaw on the bar's blue panel."""
     s = Sprite(18, 22)
-    s.rrect(0, 0, 18, 18, "tan", 3)
-    for y in range(7):
-        for x in range(18):
-            if s.g[y][x]:
-                s.g[y][x] = "brown"
-    for y in range(7, 10):                         # sideburns
-        for x in (0, 1, 16, 17):
-            if s.g[y][x]:
-                s.g[y][x] = "brown"
-    s.rect(4, 10, 2, 2, "blue")
-    s.rect(12, 10, 2, 2, "blue")
-    s.rect(3, 9, 4, 1, "brown")                    # brows
-    s.rect(11, 9, 4, 1, "brown")
-    s.rect(8, 12, 2, 2, "orange")                  # nose
-    s.rect(6, 15, 6, 1, "dark")
-    s.rect(6, 18, 6, 1, "tan")                     # neck
-    s.rrect(1, 19, 16, 3, "forest", 1)
+    s.rrect(0, 0, 18, 22, "blue", 2)
+    s.rect(2, 2, 7, 4, "orange")                   # hair
+    s.rect(2, 6, 1, 4, "orange")                   # sideburn
+    s.rect(3, 6, 6, 9, "tan")                      # face
+    s.rect(4, 15, 5, 1, "tan")                     # jaw
+    s.rect(5, 16, 4, 1, "tan")
+    s.rect(6, 17, 3, 4, "tan")                     # neck
+    s.rect(3, 7, 4, 1, "brown")                    # brow
+    s.rect(4, 8, 2, 1, "sky")                      # eye
+    s.rect(8, 10, 1, 3, "orange")                  # nose
+    s.rect(6, 14, 3, 1, "maroon")                  # mouth
+    s.mirror()
     return s
 
 
@@ -210,50 +250,61 @@ def amiga_console():
     return s
 
 
-def amiga_stick():
-    """Amiga joystick: the one-button digital stick of the era, a gray base with the red fire button."""
-    return joystick("gray", "dark", "black", [(3, "red")])
+def amiga_mouse():
+    """Amiga mouse: the beige two-button mouse that shipped with the machine, its cord at the top."""
+    s = Sprite(14, 21)
+    s.rect(6, 0, 2, 3, "gray")
+    s.rrect(0, 2, 14, 19, "cream", 3)
+    s.rect(2, 4, 4, 6, "gray")
+    s.rect(8, 4, 4, 6, "gray")
+    return s
 
 
 def coco_console():
-    """TRS-80 Color Computer: a gray case with ribbed top vents and a black keyboard of light keys."""
-    s = Sprite(26, 16)
-    s.rrect(0, 0, 26, 16, "gray", 3)
+    """TRS-80 Color Computer 2: a light gray wedge case with ribbed vents across the top and a black keyboard panel of
+    white keys with the red BREAK key at the top right."""
+    s = Sprite(26, 17)
+    s.rrect(0, 0, 26, 17, "cream", 3)
     for y in (2, 4):
-        s.rect(4, y, 18, 1, "dgray")
-    s.rect(2, 7, 22, 7, "black")
+        s.rect(4, y, 18, 1, "gray")
+    s.rect(2, 7, 22, 9, "black")
     keys(s, 4, 8, 6, 3, "white", 2, 1, 1, 1)
+    s.rect(8, 14, 10, 1, "white")            # space bar
+    s.rect(22, 8, 2, 1, "red")               # BREAK
     return s
 
 
 def coco_stick():
-    """Color Computer joystick: black base, black ball, one gray fire button."""
-    return joystick("dark", "dgray", "black", [(3, "gray")])
+    """Color Computer joystick ("Black Beauty"): black base and ball, the one red fire button on the front."""
+    return joystick("dark", "dgray", "black", [(3, "red")])
 
 
 def cpc_console():
-    """Amstrad CPC 464: dark keyboard with the cassette deck at the top right and four colored keys."""
-    s = Sprite(26, 16)
-    s.rrect(0, 0, 26, 16, "dgray", 3)
-    s.rect(14, 2, 9, 5, "black")             # cassette deck
-    s.rect(15, 3, 7, 3, "gray")
-    s.rect(16, 4, 1, 1, "dark")
-    s.rect(20, 4, 1, 1, "dark")
-    keys(s, 3, 9, 6, 2, "gray", 2, 1, 1, 1)
-    s.rect(19, 9, 2, 1, "red")               # color keys
-    s.rect(22, 9, 1, 1, "green")
-    s.rect(19, 11, 2, 1, "blue")
-    s.rect(22, 11, 1, 1, "yellow")
+    """Amstrad CPC 464: a long black keyboard with the green and blue colored keys, a numeric block and the built-in
+    cassette deck at the right with its red REC key."""
+    s = Sprite(26, 12)
+    s.rrect(0, 0, 26, 12, "dark", 2)
+    keys(s, 2, 2, 4, 3, "dgray", 2, 1, 1, 1)
+    s.rect(2, 2, 2, 1, "green")              # colored keys
+    s.rect(2, 4, 2, 1, "green")
+    s.rect(6, 8, 6, 1, "dgray")              # space bar
+    keys(s, 14, 2, 2, 3, "dgray", 2, 1, 1, 1)
+    s.rect(14, 6, 2, 2, "blue")              # ENTER
+    s.rect(20, 2, 5, 4, "black")             # cassette deck
+    s.rect(21, 3, 3, 2, "gray")
+    s.rect(20, 8, 2, 1, "red")               # REC
+    s.rect(23, 8, 2, 1, "dgray")
     return s
 
 
 def cpc_stick():
-    """Amstrad joystick: dark base, blue ball and a red fire button."""
-    return joystick("dark", "dgray", "blue", [(19, "red")])
+    """Amstrad joystick: red case, black stick with its fire button on top and a black fire button on the base."""
+    return joystick("red", "black", "black", [(3, "dark")])
 
 
 def dos_console():
-    """DOS PC: a cream CRT with a prompt on the desktop case, a big and a small floppy drive."""
+    """IBM PC 5150: a beige monochrome monitor over the desktop case, vent slits on the left and the two 5.25" floppy
+    drives on the right."""
     s = Sprite(26, 22)
     s.rrect(3, 0, 20, 13, "cream", 2)
     s.rect(5, 2, 16, 8, "black")
@@ -261,9 +312,11 @@ def dos_console():
     s.rect(6, 5, 1, 1, "screen")
     s.rect(7, 5, 2, 1, "dgray")
     s.rrect(0, 14, 26, 8, "cream", 2)
-    s.rect(3, 17, 9, 1, "dark")              # 5.25" drive
-    s.rect(15, 17, 5, 1, "dark")             # 3.5" drive
-    s.rect(22, 17, 1, 1, "green")
+    for x in (3, 5, 7):                      # vents
+        s.rect(x, 16, 1, 4, "gray")
+    for x in (11, 19):                       # drives
+        s.rect(x, 16, 6, 4, "dark")
+        s.rect(x + 1, 17, 4, 1, "black")
     return s
 
 
@@ -278,96 +331,105 @@ def dos_keyboard():
 
 
 def gametank_console():
-    """GameTank: a black box with a cartridge on top (white label), vent slots and two pad ports."""
-    s = Sprite(26, 17)
-    s.rrect(0, 0, 26, 17, "dark", 3)
-    s.rect(5, 2, 16, 6, "dgray")             # cartridge
-    s.rect(7, 3, 6, 3, "white")
-    for x in (15, 17, 19):
-        s.rect(x, 3, 1, 4, "dark")
-    s.rect(4, 11, 6, 2, "black")             # pad ports
-    s.rect(16, 11, 6, 2, "black")
-    s.rect(12, 14, 2, 1, "red")              # power light
+    """GameTank: a blue box with ribbed vents down both sides, a cartridge standing in the top slot and a red and an
+    orange button on the front."""
+    s = Sprite(26, 18)
+    s.rect(0, 4, 26, 14, "blue")
+    for y in range(5, 17, 2):                # ribbed side vents
+        s.rect(1, y, 3, 1, "indigo")
+        s.rect(22, y, 3, 1, "indigo")
+    s.rect(8, 4, 10, 2, "dark")              # slot
+    s.rect(9, 0, 8, 5, "gray")               # cartridge
+    s.rect(10, 1, 6, 2, "red")               # label
+    s.rect(8, 12, 4, 3, "red")
+    s.rect(14, 12, 4, 3, "orange")
     return s
 
 
 def gametank_pad():
-    """GameTank controller: a black pad with a d-pad on the left and a row of red buttons."""
+    """GameTank controller: a small blue oblong pad with a d-pad on the left, a small start and the A, B and C buttons
+    at the right."""
     s = Sprite(26, 12)
-    s.rrect(0, 0, 26, 12, "dark", 4)
-    plus(s, 3, 3, 6, 2, "gray")
-    s.rrect(13, 4, 3, 3, "red", 1)
-    s.rrect(17, 4, 3, 3, "red", 1)
-    s.rrect(21, 4, 3, 3, "red", 1)
+    s.rrect(0, 0, 26, 12, "blue", 4)
+    plus(s, 3, 3, 6, 2, "dark")
+    s.rect(12, 3, 2, 1, "dark")              # start
+    s.rect(17, 3, 3, 3, "dark")             # C
+    s.rect(21, 5, 3, 3, "dark")             # B
+    s.rect(17, 7, 3, 3, "dark")             # A
     return s
 
 
 def vdp_console():
-    """Sega SC-3000: a white keyboard computer with the cartridge slot on top and black keys."""
+    """Sega SC-3000: a black keyboard computer with gray keys, the orange RESET key at the right end and the cartridge
+    slot beside it."""
     s = Sprite(26, 16)
-    s.rrect(0, 0, 26, 16, "white", 3)
-    s.rect(3, 2, 20, 2, "dark")              # cartridge slot
-    s.rect(11, 2, 4, 1, "red")
-    keys(s, 3, 6, 6, 3, "dgray", 2, 1, 1, 1)
-    keys(s, 21, 6, 1, 3, "dgray", 2, 1, 1, 1)
-    s.rect(7, 13, 10, 1, "dgray")
+    s.rrect(0, 0, 26, 16, "dark", 3)
+    s.rect(4, 2, 14, 1, "dgray")             # vents
+    keys(s, 3, 5, 6, 4, "dgray", 2, 1, 1, 1)
+    s.rect(7, 13, 9, 1, "dgray")             # space bar
+    s.rect(21, 3, 3, 1, "orange")            # RESET
+    s.rect(21, 7, 3, 6, "black")             # cartridge slot
     return s
 
 
 def vdp_stick():
-    """SC-3000 joystick: white base, red ball, two red fire buttons."""
-    return joystick("white", "dgray", "red", [(2, "red"), (20, "red")])
+    """SG-1000 / SC-3000 joystick: a gray slab, a black stick near the left and a red fire button at each end."""
+    s = Sprite(26, 12)
+    s.rrect(0, 0, 26, 12, "gray", 3)
+    for y in range(12):
+        for x in (0, 1, 2, 23, 24, 25):
+            if s.g[y][x]:
+                s.g[y][x] = "red"
+    s.ellipse(8.5, 5.5, 4, 4, "dgray")
+    s.ellipse(8.5, 5.5, 2.5, 2.5, "black")
+    return s
 
 
 def vic20_console():
-    """Commodore VIC-20: a cream case, brown keys, the function key column and a space bar."""
+    """Commodore VIC-20: a cream case with brown keys and the column of four tan function keys at the right."""
     s = Sprite(26, 16)
     s.rrect(0, 0, 26, 16, "cream", 3)
-    s.rect(3, 2, 20, 2, "brown")             # stripe
-    keys(s, 3, 6, 6, 3, "brown", 2, 1, 1, 1)
-    for i in range(3):
-        s.rect(21, 6 + i * 2, 2, 1, "brown")
-    s.rect(6, 12, 12, 1, "brown")
+    keys(s, 3, 3, 6, 4, "brown", 2, 1, 1, 1)
+    for i in range(4):
+        s.rect(21, 3 + i * 2, 2, 1, "tan")
+    s.rect(6, 12, 10, 1, "brown")
     return s
 
 
 def x68000_console():
-    """Sharp X68000: the dark twin towers around a CRT, floppy drives under it."""
+    """Sharp X68000: the two black towers side by side: the narrow drive tower with two floppy slots and their
+    beige eject tabs, the wide computer tower with its activity lamps, on a dark base."""
     s = Sprite(26, 23)
-    s.rrect(0, 0, 7, 23, "dgray", 2)         # left tower
-    for y in (3, 5, 7):
-        s.rect(2, y, 3, 1, "dark")
-    s.rect(2, 19, 3, 1, "red")
-    s.rect(7, 2, 12, 12, "dark")             # CRT
-    s.rect(9, 4, 8, 8, "black")
-    s.rect(7, 14, 12, 8, "dgray")
-    s.rect(9, 16, 4, 1, "black")
-    s.rect(14, 16, 4, 1, "black")
-    s.rect(9, 19, 8, 1, "black")
-    for y in range(23):
-        for x in range(7):
-            if s.g[y][x]:
-                s.g[y][25 - x] = s.g[y][x]
+    s.rect(0, 21, 26, 2, "dark")
+    s.rrect(0, 0, 10, 21, "dgray", 2)
+    s.rect(3, 3, 1, 11, "black")
+    s.rect(6, 3, 1, 11, "black")
+    s.rect(2, 14, 3, 2, "tan")
+    s.rect(5, 14, 3, 2, "tan")
+    s.rrect(10, 0, 16, 21, "dark", 2)
+    for y in (3, 6, 9, 12):
+        s.rect(12, y, 3, 1, "gray")
     return s
 
 
 def x68000_pad():
-    """X68000 pad: a black pad with a d-pad, start / select pills and two round buttons."""
-    s = Sprite(26, 12)
-    s.rrect(0, 0, 26, 12, "dark", 3)
-    plus(s, 3, 3, 6, 2, "gray")
-    s.rect(11, 8, 2, 1, "gray")
-    s.rect(14, 8, 2, 1, "gray")
-    s.rrect(17, 4, 3, 3, "gray", 1)
-    s.rrect(21, 4, 3, 3, "gray", 1)
+    """X68000 Cyber Stick: a wide black slab with a stick at each end, red tips, and the three round A, B and C
+    buttons between them."""
+    s = Sprite(26, 14)
+    s.rrect(0, 0, 26, 14, "dark", 3)
+    for cx in (4.5, 20.5):
+        s.ellipse(cx, 7.5, 3, 3, "dgray")
+        s.ellipse(cx, 7.5, 1.5, 1.5, "red")
+    for x in (8, 12, 16):
+        s.rect(x, 5, 2, 2, "gray")
     return s
 
 
 def zxs_console():
-    """ZX Spectrum: a black case of rubber keys with the rainbow stripes across the bottom right."""
+    """ZX Spectrum: a black case of gray rubber keys with the rainbow stripes across the bottom right."""
     s = Sprite(26, 14)
     s.rrect(0, 0, 26, 14, "dark", 2)
-    keys(s, 3, 2, 7, 4, "gray", 2, 1, 1, 1)
+    keys(s, 3, 2, 7, 4, "dgray", 2, 1, 1, 1)
     for i, c in enumerate(("red", "yellow", "green", "cyan")):
         for k in range(5):
             x, y = 17 + i + k, 13 - k
@@ -377,21 +439,27 @@ def zxs_console():
 
 
 def zxs_stick():
-    """Spectrum joystick (Quickshot style): dark base, red ball, a yellow fire button."""
-    return joystick("dark", "gray", "red", [(3, "yellow"), (19, "yellow")])
+    """Spectrum joystick (Quickshot II): a black pistol grip with the red trigger on top and a red fire button on the
+    base."""
+    s = Sprite(26, 23)
+    s.rrect(0, 13, 26, 10, "dark", 3)
+    s.rect(11, 3, 4, 11, "black")
+    s.rect(10, 0, 6, 4, "red")
+    s.rrect(3, 16, 4, 4, "red", 1)
+    return s
 
 
 SHARED = {
     "3ds": n3ds, "dsi": dsi, "fake08": pico, "ffplay": ffplay, "gamate": gamate, "gw": gw, "j2me": j2me,
-    "loopy": loopy, "mkxp-z": mkxp, "wolf": wolf,
+    "mkxp-z": mkxp, "wolf": wolf,
 }
 CONSOLES = {
     "amiga": amiga_console, "coco": coco_console, "cpc": cpc_console, "dos": dos_console, "fbneo": arcade_cab,
-    "gametank": gametank_console, "msu1": msu1_console, "msumd": msumd_console, "vdp": vdp_console,
+    "gametank": gametank_console, "loopy": loopy, "msu1": msu1_console, "msumd": msumd_console, "vdp": vdp_console,
     "vic20": vic20_console, "x68000": x68000_console, "zxs": zxs_console,
 }
 CONTROLLERS = {
-    "amiga": amiga_stick, "coco": coco_stick, "cpc": cpc_stick, "dos": dos_keyboard, "fbneo": arcade_stick,
-    "gametank": gametank_pad, "msu1": msu1_pad, "msumd": msumd_pad, "vdp": vdp_stick, "vic20": cx40,
+    "amiga": amiga_mouse, "coco": coco_stick, "cpc": cpc_stick, "dos": dos_keyboard, "fbneo": arcade_stick,
+    "gametank": gametank_pad, "loopy": loopy_pad, "msu1": msu1_pad, "msumd": msumd_pad, "vdp": vdp_stick, "vic20": cx40,
     "x68000": x68000_pad, "zxs": zxs_stick,
 }

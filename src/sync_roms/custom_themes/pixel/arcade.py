@@ -54,8 +54,17 @@ def mame_cab():
 
 
 def cps1_cab():
-    """Street Fighter II style: black cabinet, red marquee, six buttons in two rows."""
-    return _cab("dark", "red", "dgray", VERSUS, rows=2)
+    """Street Fighter II upright: black cabinet, purple marquee, two red-ball sticks with six buttons each (blue side, red side)."""
+    s = _cab("dark", "purple", "dgray", VERSUS, rows=0)
+    s.rect(2, 2, 16, 1, "orange")                # marquee art band
+    s.rect(0, 13, 10, 3, "periwinkle")           # player 1 panel
+    s.rect(10, 13, 10, 3, "maroon")              # player 2 panel
+    for x0, c in ((0, "blue"), (10, "red")):
+        s.rect(x0 + 1, 13, 2, 2, "red")          # stick
+        for x in (x0 + 4, x0 + 6, x0 + 8):       # six buttons: two rows of three
+            s.rect(x, 13, 1, 1, c)
+            s.rect(x, 15, 1, 1, c)
+    return s
 
 
 def cps2_board():
@@ -143,14 +152,13 @@ BASE = [                                         # a clean 9x9 round stick base
 BALL = [".XXX.", "XXXXX", "XXXXX", "XXXXX", ".XXX."]
 
 
-def _panel(rows, stick="red", body="dark"):
+def _panel(rows, stick="red", body="dark", colors=("red", "yellow", "green", "white", "orange", "pink")):
     """Control panel, 26x17: a ball-top stick and 3x3 buttons, `rows` being the count in each row."""
     s = Sprite(26, 17)
     s.rrect(0, 0, 26, 17, body, 2)
     s.art(2, 4, BASE, {"X": "black"})
     s.art(4, 6, BALL, {"X": stick})
     s.px(5, 7, "white")
-    colors = ["red", "yellow", "green", "white", "orange", "pink"]
     n = 0
     for r, count in enumerate(rows):
         y = 3 + r * 6 if len(rows) == 2 else 7
@@ -181,7 +189,7 @@ def cps3_stick():
 
 
 def atomiswave_stick():
-    return _panel([2, 2], "blue", "red")
+    return _panel([2, 2], "blue", "red", ("yellow", "white", "green", "orange"))
 
 
 def naomi_stick():
@@ -293,20 +301,31 @@ def openbor():
     return s
 
 
+HEART = [
+    "..XXXX..XXXX..",
+    ".XXXXXXXXXXXX.",
+    "XXXXXXXXXXXXXX",
+    "XXXXXXXXXXXXXX",
+    "XXXXXXXXXXXXXX",
+    ".XXXXXXXXXXXX.",
+    "..XXXXXXXXXX..",
+    "...XXXXXXXX...",
+    "....XXXXXX....",
+    ".....XXXX.....",
+    "......XX......",
+]
+
+
 def chai():
-    """A cup of chai with a heart."""
-    s = Sprite(26, 22)
-    s.rect(6, 0, 1, 3, "white")                  # steam
-    s.rect(10, 1, 1, 3, "white")
-    s.rect(14, 0, 1, 3, "white")
-    s.rrect(2, 5, 16, 12, "cream", 3)
-    s.rect(2, 5, 16, 2, "tan")
-    s.rect(3, 7, 14, 1, "brown")
-    s.ellipse(20.5, 10.5, 4.6, 3.6, "cream")     # handle
-    s.ellipse(20.5, 10.5, 2.4, 1.6, None)
-    s.rect(0, 18, 22, 4, "teal")                 # saucer
-    s.rect(2, 21, 18, 1, "teal")
-    s.art(6, 9, ["XX.XX", "XXXXX", ".XXX.", "..X.."], {"X": "red"})
+    """ChaiLove's emblem: a blue swirl disc, dark on its right rim, round a white heart (LOVE's heart)."""
+    s = Sprite(22, 22)
+    s.ellipse(10.5, 10.5, 10.5, 10.5, "navy")
+    for y in range(22):                          # the disc minus a shifted copy leaves the dark rim on the right
+        for x in range(22):
+            if ((x - 9) / 10.5) ** 2 + ((y - 10.5) / 10.5) ** 2 <= 1.0 and s.g[y][x]:
+                s.px(x, y, "blue")
+    s.ellipse(10.5, 10.5, 8.5, 8.5, "sky")
+    s.art(4, 5, HEART, {"X": "white"})
     return s
 
 

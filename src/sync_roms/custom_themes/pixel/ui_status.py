@@ -152,29 +152,25 @@ add("headphone-icon", headphone)
 
 
 # ---- wifi: dot and arcs around the bottom middle, cut to a 45 degree wedge ----
-def wifi(count, w=18, h=16, r0=5.2, color="yellow", slash=False):
+def wifi(count, color, w=18, h=16, r0=5.2, arcs=3):
+    """Dot plus the first `count` of `arcs` arcs."""
     def draw():
         s = Sprite(w, h)
         cx, cy = w / 2 - 0.5, h - 1.5
         s.rect(w // 2 - 1, h - 2, 2, 2, color)
-        for k in range(count):
+        for k in range(min(count, arcs)):
             r = r0 + 4 * k
             for y in range(h):
                 for x in range(w):
                     dx, dy = x - cx, y - cy
                     if r - 2.2 < (dx * dx + dy * dy) ** 0.5 <= r and -dy >= abs(dx):
                         s.px(x, y, color)
-        if slash:
-            for i in range(h):
-                s.rect(i - 1, i, 4, 1, None)
-            for i in range(h):
-                s.rect(i, i, 2, 1, "red")
         return s
     return draw
 
 
-for n in range(1, 5):
-    add(f"icon-wifi-signal-0{n}", wifi(n - 1))
+for n, (arcs, color) in enumerate(((1, "orange"), (2, "yellow"), (3, "lime"), (3, "green"))):
+    add(f"icon-wifi-signal-0{n + 1}", wifi(arcs, color))
 
 
 def wifi_connected():
@@ -190,7 +186,18 @@ def wifi_connected():
 
 
 add("icon-wifi-connected", wifi_connected)
-add("icon-wifi-locked", wifi(2, 12, 12, 4.2, "yellow", True))
+def wifi_locked():
+    """Padlock: gray shackle, yellow body with a keyhole."""
+    s = Sprite(12, 12)
+    s.rect(3, 0, 3, 1, "gray")
+    s.rect(2, 1, 2, 5, "gray")
+    s.rrect(0, 5, 12, 7, "yellow", 1)
+    s.rect(5, 7, 2, 3, "dark")
+    s.mirror()
+    return s
+
+
+add("icon-wifi-locked", wifi_locked)
 
 
 # ---- face buttons and text pills ----
