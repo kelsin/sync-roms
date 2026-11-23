@@ -627,7 +627,6 @@ const retroarchBinds = h => [
   ["Settings > Input > Hotkeys > Fast-Forward (Hold)", "R1", "Leave Fast-Forward (Toggle) unbound so fast-forward only runs while held."],
   ["Settings > Input > Hotkeys > Show FPS (Toggle)", "Y"],
   ["Settings > Input > Hotkeys > Quit RetroArch", "Start", "Closes RetroArch and returns to the frontend."],
-  ["Main Menu > Configuration File > Save Current Configuration", "run once after binding", "Hotkeys live in the global retroarch.cfg."],
 ];
 // What each layout's own hotkey layer does by default and what to change to reach HOTKEY_SCHEME.
 // `src` marks what could not be confirmed on the vendor's docs, to check on the device.
@@ -819,6 +818,10 @@ const SECTIONS = [
     when: { platform: ["android"] },
     items: [
       {
+        title: "Over Wireless debugging",
+        body: `<p><code>sync-roms config apply</code> installs the card's APKs over Wireless debugging (all but those that don't fit the device); the steps below are the way by hand.</p>`,
+      },
+      {
         title: "Install ES-DE, Obtainium and MiXplorer",
         body: `
           <ol>
@@ -958,40 +961,6 @@ const SECTIONS = [
     ],
   },
   {
-    id: "cloudsync",
-    title: "Cloud saves (RetroArch Cloud Sync)",
-    lede: "RetroArch's built-in Cloud Sync keeps saves and states in step across devices through my WebDAV server.",
-    when: { layout: ["esde", "knulli", "emudeck"] },
-    items: [
-      {
-        title: "Set it up in RetroArch",
-        body: `
-          <p class="path">${path("RetroArch menu > Settings > Saving > Cloud Sync")}</p>
-          <p>Set up the device with the most progress first, restart RetroArch, and let the first sync finish (status line at the bottom left) before setting up the others. Every device needs identical settings; the four <b>Sort Saves/Save States into Folders by…</b> options must match across devices.</p>`,
-        settings: [
-          ["Cloud Sync > Enable Cloud Sync", "on"],
-          ["Cloud Sync > Cloud Sync Backend", "webdav"],
-          ["Cloud Sync > Cloud Storage URL", "https://cloud-saves.valefor.com/dav/", "Keep the trailing slash."],
-          ["Cloud Sync > Username", "my cloud-saves username"],
-          ["Cloud Sync > Password", "my cloud-saves password"],
-          ["Cloud Sync > Sync: Saves/States", "on", "Save files and save states."],
-          ["Cloud Sync > Sync: Configuration Files", "off", "Core options and shader presets differ per device."],
-          ["Cloud Sync > Sync: Thumbnail Images", "off"],
-          ["Cloud Sync > Sync: System Files", "off", "BIOS comes from the card."],
-          ["Cloud Sync > Destructive Cloud Sync", "off", "Replaced files are kept in cloud_backups/."],
-          ["Cloud Sync > Sync Mode", "automatic", "Syncs at start and when a core unloads."],
-        ],
-      },
-      {
-        title: "Notes",
-        body: `<ul>
-          <li><code>retroarch.cfg</code> and playlists are never synced.</li>
-          <li>The status can say <i>finished with failures</i> even though the files arrived; check RetroArch's log for the failing transfer.</li>
-        </ul>`,
-      },
-    ],
-  },
-  {
     id: "syncthing",
     title: "Syncthing",
     lede: "Syncs saves between the device and my Syncthing server at <code>http://192.168.68.98:8384/</code>, only on the home network. Each device runs its own Syncthing and pairs with the server; the server's web UI is the one place to approve devices and folders.",
@@ -1070,11 +1039,8 @@ const SECTIONS = [
           <p class="note">On a Steam Deck, Flatpak emulators keep saves under <code>~/.var</code>; Syncthing may need access granted to those folders. EmuDeck also has its own cloud save feature.</p>
           <p><b>Android, RetroArch:</b></p>
           <ol>
-            <li><span class="path">${path("Settings > Directory")}</span>: Save Files <code>/storage/emulated/0/RetroArch/saves</code>, Save States <code>/storage/emulated/0/RetroArch/states</code> (not under <code>Android/data</code>, which Syncthing-Fork can't read on Android 11+).</li>
-            <li><span class="path">${path("Settings > Saving")}</span>: Sort Saves / Save States into Folders by Core Name on, by Content Directory off, Write Saves / Save States to Content Directory off, SaveRAM Autosave Interval 10 seconds, Auto Save State on, Auto Load State on.</li>
-            <li><span class="path">${path("Main Menu > Configuration File > Save Current Configuration")}</span>.</li>
+            <li>Run <code>sync-roms config apply</code> with the device on Wireless debugging: it sets RetroArch's save and state folders and save settings, turns Cloud Sync off, and sets each system's ES-DE emulator to its core in "RetroArch cores" (RetroArch closed; ES-DE restarts).</li>
             <li>In Syncthing-Fork share <code>ra-saves</code> (<code>jkx7j-mnlfo</code>) and <code>ra-states</code> (<code>w5nqg-xmpq6</code>) to those two folders, and set its run conditions so it runs when switching devices.</li>
-            <li>ES-DE: set each system's alternative emulator to its core in "RetroArch cores".</li>
           </ol>`,
       },
       {
@@ -1094,7 +1060,6 @@ const SECTIONS = [
           <li>Saves and states both sync now, since the cores match. A state from another core version can fail to load; the in-game save still applies.</li>
           <li>RetroAchievements Hardcore turns auto load off.</li>
           <li>Make an in-game save before switching devices.</li>
-          <li>Syncthing and RetroArch Cloud Sync both touch saves; use one per device, not both.</li>
         </ul>`,
       },
     ],
@@ -1102,7 +1067,7 @@ const SECTIONS = [
   {
     id: "retroarch-cores",
     title: "RetroArch cores",
-    lede: "One libretro core per system on every device, so RetroArch's core-named save and state folders match and Syncthing can share them. Spruce cards get these from sync; on Android set each system's alternative emulator in ES-DE to it.",
+    lede: "One libretro core per system on every device, so RetroArch's core-named save and state folders match and Syncthing can share them. Spruce cards get these from sync; Android gets them from <code>sync-roms config apply</code>.",
     when: { layout: ["esde", "emudeck", "spruce"] },
     items: [
       {
