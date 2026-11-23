@@ -1253,7 +1253,8 @@ def palette_args(args):
 def themes_build(args):
     from . import custom_themes
     usersettings.ensure_bucket()
-    styles, chosen = style_args(args), palette_args(args)
+    styles = style_args(args)
+    chosen = palette_args(args) if custom_themes.needs_palettes(styles) else []
     try:
         built = custom_themes.build(styles, chosen, args.out)
     except custom_themes.BaseMissing as e:
@@ -1268,7 +1269,8 @@ def themes_build(args):
 def themes_publish(args):
     from . import custom_themes
     usersettings.ensure_bucket()
-    styles, chosen = style_args(args), palette_args(args)
+    styles = style_args(args)
+    chosen = palette_args(args) if custom_themes.needs_palettes(styles) else []
     try:
         return custom_themes.publish(styles, chosen, args.dry_run)
     except custom_themes.BaseMissing as e:

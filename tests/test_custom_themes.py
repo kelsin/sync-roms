@@ -3,6 +3,7 @@ import hashlib
 import io
 import json
 import os
+import shutil
 import sys
 import tempfile
 import unittest
@@ -64,9 +65,9 @@ class Build(unittest.TestCase):
         self.base = os.path.join(self.tmp.name, "base")
 
     def test_registry_styles(self):
-        self.assertEqual(custom_themes.styles(), ["Pixel Consoles", "Pixel Controllers"])
-        for module in custom_themes.STYLES.values():
-            self.assertEqual(module.BASE, "SPRUCE")
+        self.assertEqual(custom_themes.styles(), ["Pixel Consoles", "Pixel Controllers", "ToTK - James"])
+        for style, module in custom_themes.STYLES.items():
+            self.assertEqual(module.BASE, "ToTK" if style == "ToTK - James" else "SPRUCE")
 
     def test_build_overlays_base(self):
         make_base(self.base)
@@ -308,6 +309,7 @@ class Publish(helpers.StorageDir):
         self.out = self.enterContext(contextlib.redirect_stdout(io.StringIO()))
         self.enterContext(mock.patch.object(ui, "ASSUME_YES", True))
         make_base(os.path.join(self.root, "os", "spruceos", "themes", "SPRUCE"))
+        make_base(os.path.join(self.root, "os", "spruceos", "themes", "ToTK"))
 
     def manifest(self):
         return self.read_json(runtime.CUSTOM_THEMES_STATE)
@@ -418,6 +420,7 @@ class Publish(helpers.StorageDir):
 
     def test_base_missing_changes_nothing(self):
         os.rename(os.path.join(self.root, "os", "spruceos", "themes", "SPRUCE"), os.path.join(self.tmp.name, "moved"))
+        shutil.rmtree(os.path.join(self.root, "os", "spruceos", "themes", "ToTK"))
         with self.assertRaises(SystemExit) as raised, mock.patch("sys.stderr") as err:
             commands.run(["themes", "publish", "--palette", "Gruvbox", "--yes"])
         self.assertEqual(raised.exception.code, 1)
@@ -487,6 +490,52 @@ class Publish(helpers.StorageDir):
         ask.assert_called_once()
         self.assertIs(ask.call_args.kwargs["default"], True)  # Enter uploads
         self.assertEqual(self.stored(P), set())
+
+
+class PaletteFree(helpers.StorageDir):
+    def setUp(self):
+        super().setUp()
+        self.enterContext(mock.patch.object(usersettings, "apply_settings"))
+        self.enterContext(contextlib.redirect_stdout(io.StringIO()))
+        for base in ("SPRUCE", "ToTK"):
+            make_base(os.path.join(self.root, "os", "spruceos", "themes", base))
+        self.out = os.path.join(self.tmp.name, "out")
+
+    def test_needs_palettes(self):
+        self.assertFalse(custom_themes.needs_palettes(["ToTK - James"]))
+        self.assertTrue(custom_themes.needs_palettes(None))
+        self.assertTrue(custom_themes.needs_palettes(["Pixel Consoles"]))
+
+    def test_build_without_palettes(self):
+        built = custom_themes.build(["ToTK - James"], [], self.out)
+        self.assertEqual(built, {"ToTK - James": os.path.join(self.out, "ToTK - James")})
+        with self.assertRaises(ValueError):
+            custom_themes.build(["Pixel Consoles"], [], self.out)
+
+    def test_all_styles_build_totk_once(self):
+        from sync_roms.custom_themes import totk_james
+        with mock.patch.object(totk_james, "build", wraps=totk_james.build) as build:
+            built = custom_themes.build(None, [GRUVBOX, palettes.get("Candy")], self.out)
+        self.assertEqual(sorted(built), [
+            "Pixel Consoles - Candy", "Pixel Consoles - Gruvbox",
+            "Pixel Controllers - Candy", "Pixel Controllers - Gruvbox", "ToTK - James"])
+        build.assert_called_once()
+
+    def test_palette_flag_ignored_for_totk(self):
+        self.assertEqual(commands.run(["themes", "build", "--palette", "Gruvbox", "ToTK - James", "--out", self.out]), 0)
+        self.assertEqual(os.listdir(self.out), ["ToTK - James"])
+
+    def test_command_without_saved_palettes_builds(self):
+        with mock.patch.object(ui, "ASSUME_YES", True), mock.patch.object(ui, "has_terminal", return_value=False):
+            self.assertEqual(commands.run(["themes", "build", "ToTK - James", "--out", self.out]), 0)
+        self.assertEqual(os.listdir(self.out), ["ToTK - James"])
+
+    def test_command_with_terminal_skips_picker(self):
+        from sync_roms.custom_themes import palette_picker
+        with mock.patch.object(ui, "ASSUME_YES", False), mock.patch.object(ui, "has_terminal", return_value=True), \
+                mock.patch.object(palette_picker, "pick") as pick:
+            self.assertEqual(commands.run(["themes", "build", "ToTK - James", "--out", self.out]), 0)
+        pick.assert_not_called()
 
 
 if __name__ == "__main__":
