@@ -1573,6 +1573,9 @@ def sync_card(args):
                   f"{len(theme_jobs) - len(theme_todo)} already present"
                   + (f"; {len(theme_plan['remove'])} to remove" if theme_plan["remove"] else ""))
     removal_failed = spruce_themes.remove(base, theme_plan["remove"], False) if theme_plan else 0
+    if removal_failed:  # a folder that couldn't be removed stays recorded, so the next sync tries again
+        theme_plan["installed"] = spruce_themes.sorted_names(
+            [*theme_plan["installed"], *(n for n in theme_plan["remove"] if os.path.isdir(os.path.join(base, "Themes", n)))])
     cardfs.clear()
 
     if clean_card and todo_all:  # nothing downloaded means nothing to finalize

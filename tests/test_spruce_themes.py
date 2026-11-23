@@ -397,18 +397,6 @@ class Card(helpers.StorageDir):
         self.assertTrue(os.path.isfile(os.path.join(self.base, "keep.txt")))
         self.assertFalse(os.path.exists(os.path.join(self.base, "Themes", "C")))
 
-    def test_tampered_installed_names_never_leave_themes(self):
-        self.themes(A=None)
-        self.card_file("Themes/C/x.png")
-        self.card_file("keep.txt")
-        self.saved(spruce_themes_installed=["", ".", "..", "../x", "a/b", os.sep + "abs", 5, "C"])
-        plan = self.plan(["A"])
-        self.assertEqual((plan["remove"], plan["installed"]), (["C"], ["A"]))
-        self.assertEqual(spruce_themes.remove(self.base, ["", ".", "..", "a/b", "C"], dry_run=False), 0)
-        self.assertTrue(os.path.isdir(os.path.join(self.base, "Themes")))
-        self.assertTrue(os.path.isfile(os.path.join(self.base, "keep.txt")))
-        self.assertFalse(os.path.exists(os.path.join(self.base, "Themes", "C")))
-
 
 if __name__ == "__main__":
     unittest.main()

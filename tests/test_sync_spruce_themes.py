@@ -142,7 +142,15 @@ class SyncThemes(helpers.StorageDir):
         self.pick.return_value = ["A", "C"]
         self.assertEqual(self.sync(yes=False), 0, self.err.getvalue())
         self.assertEqual(self.on_card(), ["A", "C"])
-        self.assertEqual(self.saved().get("spruce_themes_installed"), ["C", "A"])
+        self.assertEqual(self.saved().get("spruce_themes_installed"), ["A", "C"])
+
+    def test_failed_removal_stays_recorded(self):
+        store.update_card("card", spruce_themes_installed=["C"])
+        self.card_theme("C")
+        with mock.patch.object(spruce_themes.shutil, "rmtree", side_effect=OSError("busy")):
+            self.assertEqual(self.sync(), 1)
+        self.assertEqual(self.on_card(), ["A", "C"])
+        self.assertEqual(self.saved().get("spruce_themes_installed"), ["A", "C"])
 
     def test_free_space_counts_removed_themes(self):
         store.update_card("card", spruce_themes_installed=["C"])

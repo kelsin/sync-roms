@@ -221,7 +221,7 @@ def _plain(name):
 
 def plan(card, base, names, keep):
     """What a card's themes need: jobs ([(key, path, size)] for every file of each wanted theme), remove (installed
-    folders to delete) and installed (the card's new spruce_themes_installed). Only folders sync put on the card are
+    folders to delete) and installed (the card's new spruce_themes_installed, sorted). Only folders sync put on the card are
     removed, and never one that is wanted, the card's current theme, or in use by a device (Saves/*-system.json)."""
     saved = store.saved_card(card)
     previous = [n for n in saved.get("spruce_themes_installed") or [] if _plain(n)]
@@ -239,7 +239,12 @@ def plan(card, base, names, keep):
     if not keep and have:
         busy = selected(base)
         remove = [n for n in previous if n not in use and n not in busy and n != current]
-    return {"jobs": jobs, "remove": remove, "installed": [n for n in installed if n not in remove]}
+    return {"jobs": jobs, "remove": remove, "installed": sorted_names(n for n in installed if n not in remove)}
+
+
+def sorted_names(names):
+    """names without repeats, sorted ignoring case."""
+    return sorted(set(names), key=lambda n: (n.lower(), n))
 
 
 def todo(jobs):
