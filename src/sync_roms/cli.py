@@ -151,11 +151,11 @@ TOPICS = {
   writing). Last, the temp folder is removed and the card is ejected; after a failure it is unmounted instead, so you can retry.
 """,
     "umount": """
-  sync-roms umount                            clean the macOS junk off an SD card and unmount it (macOS only)
+  sync-roms umount [--dry-run]                clean the macOS junk off an SD card and unmount it (macOS only)
 
   Lists the mounted external SD cards (disk id, size, name and volume names; never the disk holding storage), then
   runs the end-of-sync tidy on each volume of the one you pick: .metadata_never_index, .fseventsd/no_log and the
-  ._ files macOS leaves, plus the sudo mdutil offer when Spotlight is on. Ctrl-C skips the tidy, the offer included.
+  ._ files macOS leaves, plus the sudo mdutil offer when Spotlight is on. Ctrl-C skips the rest of that volume's tidy.
   Last, `diskutil unmountDisk` unmounts the card.
 """,
     "edit": """

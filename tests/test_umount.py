@@ -3,12 +3,13 @@ import io
 import os
 import subprocess
 import sys
+import types
 import unittest
 from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from sync_roms import clean, flash, picker, runtime, umount  # noqa: E402
+from sync_roms import cli, clean, flash, picker, runtime, umount, usersettings  # noqa: E402
 
 DISK4 = flash.Disk("disk4", 1, "SD", ("A",), ("/Volumes/A",))
 DISK5 = flash.Disk("disk5", 1, "SD", ("B",), ())
@@ -24,6 +25,7 @@ class Run(unittest.TestCase):
         runtime.ROOT = None
         self.disks = [DISK4, DISK5]
         self.pick = 0
+        self.dry_run = False
         self.cleaned = []
         self.eject_result = True
         self.eject_roots = []
@@ -41,7 +43,7 @@ class Run(unittest.TestCase):
     def run_umount(self):
         out = io.StringIO()
         with contextlib.redirect_stdout(out):
-            code = umount.run(None)
+            code = umount.run(types.SimpleNamespace(dry_run=self.dry_run))
         return code, out.getvalue()
 
     def test_run_lists_only_mounted(self):
@@ -80,6 +82,19 @@ class Run(unittest.TestCase):
         self.run_umount()
         self.external.assert_called_with(set())
 
+    def test_run_resets_roots_on_both_paths(self):
+        for result in (True, False):
+            self.eject_result = result
+            self.run_umount()
+            self.assertEqual((clean._clean_root, clean._eject_root), (None, None))
+
+    def test_run_dry_run_does_nothing(self):
+        self.dry_run = True
+        code, out = self.run_umount()
+        self.assertEqual(code, 0)
+        self.assertIn("Would tidy /Volumes/A and unmount disk4", out)
+        self.assertEqual((self.cleaned, self.eject_roots), ([], []))
+
     def test_run_needs_macos(self):
         with mock.patch.object(sys, "platform", "linux"):
             self.assertEqual(self.run_umount()[0], 1)
@@ -108,3 +123,24 @@ class Eject(unittest.TestCase):
     def test_true_when_nothing_to_do(self):
         clean._eject_root = None
         self.assertIs(self.eject(1), True)
+
+
+class Main(unittest.TestCase):
+    def test_main_unmounts_exactly_once(self):
+        self.addCleanup(setattr, clean, "_clean_root", clean._clean_root)
+        self.addCleanup(setattr, clean, "_eject_root", clean._eject_root)
+        self.addCleanup(setattr, runtime, "ROOT", runtime.ROOT)
+        runtime.ROOT = None
+        disk = flash.Disk("disk4", 1, "SD", ("A",), ("/Volumes/A",))
+        r = subprocess.CompletedProcess([], 0, "", "")
+        with mock.patch.object(sys, "platform", "darwin"), mock.patch.object(sys, "argv", ["sync-roms", "umount"]), \
+                mock.patch.object(usersettings, "load_settings", lambda: {}), \
+                mock.patch.object(flash, "external_disks", return_value=[disk]), \
+                mock.patch.object(picker, "filter_list", return_value=0), \
+                mock.patch.object(clean, "_clean_card"), mock.patch.object(clean, "card_disk", return_value="disk4"), \
+                mock.patch.object(clean.shutil, "which", return_value="/usr/sbin/diskutil"), \
+                mock.patch.object(clean.os, "chdir"), \
+                mock.patch.object(clean.subprocess, "run", return_value=r) as run, \
+                contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(cli.main(), 0)
+        self.assertEqual(run.call_args_list, [mock.call(["diskutil", "unmountDisk", "disk4"], capture_output=True, text=True)])

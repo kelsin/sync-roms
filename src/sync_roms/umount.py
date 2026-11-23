@@ -17,8 +17,15 @@ def run(args):
     if i is None:
         return 0
     disk = cards[i]
-    for mount in disk.mounts:
-        clean._clean_root = mount
-        clean.clean_dirs()
-    clean._eject_root = disk.mounts[0]
-    return 0 if clean.eject() else 1
+    if args.dry_run:
+        print(f"Would tidy {', '.join(disk.mounts)} and unmount {disk.id}")
+        return 0
+    try:
+        for mount in disk.mounts:
+            clean._clean_root = mount
+            clean.clean_dirs()
+        clean._clean_root = None
+        clean._eject_root = disk.mounts[0]
+        return 0 if clean.eject() else 1
+    finally:  # cli.main's own end-of-run tidy and eject must find nothing left to do
+        clean._clean_root = clean._eject_root = None
