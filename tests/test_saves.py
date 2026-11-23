@@ -1049,6 +1049,7 @@ class AndroidCommandTest(CommandTest):
         self.session.close = mock.Mock()
         self.wait = self.enterContext(mock.patch.object(android, "wait_closed",
                                                         side_effect=lambda s, p: self.order.append("wait")))
+        self.enterContext(mock.patch.object(adb.shutil, "which", return_value="/usr/bin/adb"))  # CI has no adb
         self.resolve = self.enterContext(mock.patch.object(android, "resolve", return_value=target))
         self.real_open = android.open_session
         self.open = self.enterContext(mock.patch.object(android, "open_session", return_value=self.session))
