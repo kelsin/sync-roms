@@ -1,5 +1,18 @@
 # Changelog
 
+## [3.29.0](https://github.com/kelsin/sync-roms/compare/v3.28.0...v3.29.0) (2026-11-23)
+
+
+### :video_game: Features
+
+* **themes:** show collections by default in the totk - james theme ([#545](https://github.com/kelsin/sync-roms/issues/545)) ([b92dfb7](https://github.com/kelsin/sync-roms/commit/b92dfb75dcc26561f502582447699d9aa1b683d0))
+
+
+### :bug: Bug Fixes
+
+* **themes:** draw the pixel list highlight bars one row tall ([#547](https://github.com/kelsin/sync-roms/issues/547)) ([cd161a8](https://github.com/kelsin/sync-roms/commit/cd161a81c271f21839472d39b918d5a21b597b15))
+* **themes:** show republished theme previews in themes pick ([#544](https://github.com/kelsin/sync-roms/issues/544)) ([919bec4](https://github.com/kelsin/sync-roms/commit/919bec4e4c82ef30b554b8fa657ca8e0baa6135f))
+
 ## [3.28.0](https://github.com/kelsin/sync-roms/compare/v3.27.0...v3.28.0) (2026-11-23)
 
 
