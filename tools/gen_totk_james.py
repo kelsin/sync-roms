@@ -158,7 +158,9 @@ def make_title(base):
     font, mask, box = chosen
     # glyph box top-left lands at x 35, y 27 (bottom at 50)
     glyphs = mask.crop(box)
-    title.paste(Image.new("RGBA", glyphs.size, TEXT_COLOR + (255,)), (35, 27), glyphs)
+    x = 35 + round(font.getlength(" "))
+    assert x + glyphs.width <= title.width, "the text does not fit"
+    title.paste(Image.new("RGBA", glyphs.size, TEXT_COLOR + (255,)), (x, 27), glyphs)
     return title
 
 
