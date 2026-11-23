@@ -132,7 +132,7 @@ TOPICS = {
   sync-roms themes build [THEME...] [--out DIR]   build custom spruce themes from the SPRUCE base theme in storage
 
   Builds each named custom theme (all of them without names) into the cache's themes/build/ folder, or into DIR/<theme>
-  with --out, and prints the folders. The base theme is read from os/spruceos/themes/SPRUCE/ in storage, so run
+  with --out (replaced), and prints the folders. The base theme is read from os/spruceos/themes/SPRUCE/ in storage, so run
   `sync-roms themes update` first. Nothing is written to storage.
 
   sync-roms themes publish [THEME...] [--dry-run] [--yes]   build custom spruce themes and put them in storage
@@ -142,8 +142,8 @@ TOPICS = {
   hash is kept in os/spruceos/custom-themes.json, so an unchanged rebuild uploads nothing and a failed upload is retried
   next time. A custom theme's name is reserved: an existing folder of that name is adopted (every file uploaded, the
   others deleted), except a theme `themes update` downloaded, which is left alone (exit code 1). `themes pick` and
-  sync then treat it like any other theme. After adding or removing themes in storage, run `sync-roms cache update`:
-  storage listings come from the cache.
+  sync then treat it like any other theme. Other machines see custom themes a publish added or removed after
+  `sync-roms cache update`.
 """,
     "download": """
   sync-roms download pico8 [--count N] [--dry-run] [--yes]   add the BBS Featured carts to storage's pico8/

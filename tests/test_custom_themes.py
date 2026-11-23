@@ -12,8 +12,9 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import helpers  # noqa: E402,F401  (imports isolate first)
 from PIL import Image  # noqa: E402
 
-from sync_roms import commands, custom_themes, downloads, runtime, s3, ui, upload, usersettings  # noqa: E402
+from sync_roms import commands, custom_themes, downloads, inventory, runtime, s3, ui, upload, usersettings  # noqa: E402
 from sync_roms.custom_themes.pixel import build as pixel_build  # noqa: E402
+from sync_roms.custom_themes.pixel import ids as pixel_ids  # noqa: E402
 
 CONFIG = {"name": "SPRUCE", "author": "spruce", "description": "x", "screensaver": {"bgColor": "#282828"}, "extra": 1}
 
@@ -70,7 +71,7 @@ class Build(unittest.TestCase):
         dest = module.build(self.base, os.path.join(self.tmp.name, "out"))
         self.assertEqual(dest, os.path.join(self.tmp.name, "out", module.NAME))
         with Image.open(os.path.join(dest, "skin", "background.png")) as im:
-            self.assertEqual(set(im.convert("RGBA").getdata()), {(0, 0, 0, 255)})
+            self.assertEqual(set(im.convert("RGBA").get_flattened_data()), {(0, 0, 0, 255)})
         with Image.open(os.path.join(dest, "icons", "sel", "gba.png")) as im:
             self.assertIsNotNone(im.convert("RGBA").getbbox())
         with open(os.path.join(dest, "config.json")) as f:
@@ -80,6 +81,10 @@ class Build(unittest.TestCase):
         self.assertEqual(config["extra"], 1)
         with Image.open(os.path.join(dest, "icons_720x540", "gba.png")) as im:
             self.assertEqual(im.size, (134, 146))
+
+    def test_every_spruce_icon_id_is_drawn(self):
+        for kind in ("CONSOLES", "CONTROLLERS"):
+            self.assertLessEqual(set(pixel_ids.IDS), set(pixel_build.systems(kind)), kind)
 
     def test_build_is_deterministic(self):
         make_base(self.base)
@@ -423,6 +428,41 @@ class Publish(helpers.StorageDir):
             with self.assertRaises(KeyboardInterrupt):
                 custom_themes.publish(["Pixel Consoles"])
         self.assertEqual(self.manifest().get("Pixel Consoles", {}).get("files", {}), {})
+
+    def test_stale_file_gone_behind_the_cache_is_not_deleted(self):
+        inventory.update()
+        custom_themes.publish(["Pixel Consoles"])
+        old = self.put(P + "old.png")
+        inventory.update()
+        os.remove(old)
+        self.out.seek(0)
+        self.out.truncate()
+        self.assertEqual(custom_themes.publish(["Pixel Consoles"]), 0)
+        out = self.out.getvalue()
+        self.assertNotIn("couldn't delete", out)
+        self.assertNotIn(P + "old.png", out)
+        self.assertIn("Nothing to upload", out)
+
+    def test_malformed_manifest_entries_are_ignored(self):
+        spruce = os.path.join(self.root, "os", "spruceos", "themes", "SPRUCE", "config.json")
+        with open(spruce, "rb") as f:
+            before = f.read()
+        self.put(runtime.CUSTOM_THEMES_STATE, json.dumps({
+            "Pixel Consoles": {"files": {"../SPRUCE/config.json": ["0" * 64, 1], "a//b.png": ["0" * 64, 1], "x.png": "bad"}},
+            "Pixel Controllers": {"files": []}, "Other": "nope"}).encode())
+        inventory.update()
+        self.assertEqual(custom_themes.publish(None), 0)
+        with open(spruce, "rb") as f:
+            self.assertEqual(f.read(), before)
+        files = self.manifest()["Pixel Consoles"]["files"]
+        self.assertFalse(any(".." in rel or "//" in rel for rel in files))
+        self.assertNotIn("x.png", files)
+
+    def test_cancelled_with_skipped_theme_exits_1(self):
+        self.put(runtime.SPRUCE_THEMES_STATE, json.dumps({"x.7z": {"folder": "Pixel Consoles"}}).encode())
+        with mock.patch.object(ui, "ASSUME_YES", False), mock.patch.object(ui, "confirm", return_value=False):
+            self.assertEqual(custom_themes.publish(None), 1)
+        self.assertEqual(self.stored(C), set())
 
     def test_command_cancelled_without_yes(self):
         with mock.patch.object(ui, "ASSUME_YES", False), mock.patch.object(ui, "confirm", return_value=False) as ask:

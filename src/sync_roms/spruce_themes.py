@@ -43,7 +43,8 @@ def _unpack(archive, out):
     return folders.pop() if len(folders) == 1 else None
 
 
-def _read_state():
+def read_state():
+    """themes.json: {release asset: {..., "folder"}} for the theme folders `themes update` made ({} when storage has none)."""
     try:
         state = json.loads(s3.get_text(runtime.SPRUCE_THEMES_STATE))
         return {k: v for k, v in state.items() if isinstance(v, dict) and isinstance(v.get("folder"), str)}
@@ -107,7 +108,7 @@ def update_storage(dry_run=False):
     prefix = runtime.SPRUCE_THEMES_PREFIX
     try:
         s3.check_root()
-        state = _read_state()
+        state = read_state()
         assets = _release()
     except FileNotFoundError as e:
         ui.warn(f"The storage folder isn't there (is it mounted?): {e}")

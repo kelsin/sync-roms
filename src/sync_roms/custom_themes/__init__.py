@@ -119,7 +119,7 @@ def publish(selected, dry_run=False):
     s3.check_root()  # an unmounted share must never read as empty theme folders
     built = build(selected)
     state = manifest.read()
-    downloaded = {v["folder"] for v in spruce_themes._read_state().values()}
+    downloaded = {v["folder"] for v in spruce_themes.read_state().values()}
     plans, trees, jobs, stale, sizes = [], {}, [], [], {}
     for name, folder in built.items():
         prefix = f"{runtime.SPRUCE_THEMES_PREFIX}{name}/"
@@ -132,7 +132,8 @@ def publish(selected, dry_run=False):
         trees[name] = manifest.hash_tree(folder)
         recorded = (state.get(name) or {}).get("files", {})
         gone = [prefix + rel for rel in recorded if rel not in trees[name] and prefix + rel not in listing]
-        plan.stale = sorted(set(plan.stale) | inventory.uncached(gone))  # published by another machine since the cache
+        candidates = set(plan.stale) | inventory.uncached(gone)  # published by another machine since the cache
+        plan.stale = sorted(k for k, t in _tags(sorted(candidates)).items() if t is not None)  # not gone behind the cache
         for rel in plan.new + plan.changed:
             sizes[prefix + rel] = trees[name][rel][1]
             jobs.append((prefix + rel, os.path.join(folder, *rel.split("/")), trees[name][rel][1]))
@@ -161,7 +162,7 @@ def publish(selected, dry_run=False):
         print(f"{question} (--yes)")
     elif not ui.confirm(question, default=False):
         print(ui.yellow("👋 Cancelled."))
-        return 0
+        return 1 if skipped else 0
     active = [p for p in plans if not p.skipped]
 
     def claim(data):  # before the first upload: an interrupted run leaves folders the next one knows as its own

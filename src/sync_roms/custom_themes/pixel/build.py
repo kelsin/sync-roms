@@ -2,6 +2,7 @@
 system icons (icons/<id>.png and icons/sel/<id>.png), app and UI icons, and the pre-scaled copies."""
 import json
 import os
+import posixpath
 import shutil
 
 from PIL import Image
@@ -40,7 +41,7 @@ def blacken(path):
         return
     with Image.open(path) as im:
         img = im.convert("RGBA")
-    img.putdata([BLACK if px[:3] == (40, 40, 40) and px[3] else px for px in img.getdata()])
+    img.putdata([BLACK if px[:3] == (40, 40, 40) and px[3] else px for px in img.get_flattened_data()])
     img.save(path)
 
 
@@ -63,8 +64,8 @@ def resize_variants(dest, drawn):
         for dirpath, _, files in os.walk(os.path.join(dest, folder)):
             rel_dir = os.path.relpath(dirpath, os.path.join(dest, folder))
             for file in files:
-                rel = os.path.normpath(os.path.join(base, rel_dir, file))
-                src = os.path.join(dest, rel)
+                rel = posixpath.normpath(posixpath.join(base, rel_dir.replace(os.sep, "/"), file))  # drawn's keys use /
+                src = os.path.join(dest, *rel.split("/"))
                 target = os.path.join(dirpath, file)
                 if file in BLACKED.get("skin", []) and base == "skin":
                     blacken(target)
@@ -121,8 +122,8 @@ def build_theme(base_dir, out_dir, name, kind):
         drawn.update({f"skin/ic-{key}-n.png", f"skin/ic-{key}-f.png"})
     for icon, draw in spec["systems"].items():
         sprite = draw()
-        for state, folder in (("n", "icons"), ("sel", os.path.join("icons", "sel"))):
-            place(render(sprite, 4, state), ICON_SIZE, ICON_CENTER).save(os.path.join(dest, folder, f"{icon}.png"))
+        for state, folder in (("n", "icons"), ("sel", "icons/sel")):
+            place(render(sprite, 4, state), ICON_SIZE, ICON_CENTER).save(os.path.join(dest, *folder.split("/"), f"{icon}.png"))
             drawn.add(f"{folder}/{icon}.png")
     for module in ICON_MODULES:
         for rel, draw in module.ICONS.items():

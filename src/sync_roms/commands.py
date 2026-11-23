@@ -1208,7 +1208,7 @@ def themes_build(args):
     try:
         built = custom_themes.build(args.names or None, args.out)
     except custom_themes.BaseMissing as e:
-        ui.fail(f"{e}: run `sync-roms themes update` first", 1)
+        ui.fail(f"{e}: run `sync-roms themes update` first (or `sync-roms cache update` if another machine put it there)", 1)
     except s3.ERRORS as e:
         ui.fail(f"Couldn't read the base theme from {s3.location()}: {e}", 1)
     for name, folder in built.items():
@@ -1225,7 +1225,7 @@ def themes_publish(args):
     try:
         return custom_themes.publish(args.names or None, args.dry_run)
     except custom_themes.BaseMissing as e:
-        ui.fail(f"{e}: run `sync-roms themes update` first", 1)
+        ui.fail(f"{e}: run `sync-roms themes update` first (or `sync-roms cache update` if another machine put it there)", 1)
     except custom_themes.DownloadFailed as e:
         ui.fail(f"{e}", 1)
     except json.JSONDecodeError as e:

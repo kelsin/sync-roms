@@ -54,7 +54,7 @@ Only one storage layout is supported; don't add support for others. Repo data an
 | `sets/<id>.json` | Game sets (the id is the file name) | `sets edit`, the `update-variants` skill |
 | `variants-checked.json` | The ROMs the `update-variants` skill already judged | the `update-variants` skill |
 | `ignored.json` | `{system folder: [ROM paths]}`: ROMs sync-roms never shows, syncs, uploads or scrapes | `scrape review` (`scrape match --translated` takes ROMs off) |
-| `os/` | Firmware images, apps, themes, drivers, PICO-8 zips | by hand; `os/drivers/` by sync only, `os/esde/themes/` by `themes update`; `os/spruceos/themes/<folder>/` (every PyUI-Themes release theme, unpacked) and `os/spruceos/themes.json` (the folders `themes update` made, never touching others) by `themes update` |
+| `os/` | Firmware images, apps, themes, drivers, PICO-8 zips | by hand; `os/drivers/` by sync only, `os/esde/themes/` by `themes update`; `os/spruceos/themes/<folder>/` (every PyUI-Themes release theme, unpacked) and `os/spruceos/themes.json` (the folders `themes update` made, never touching others) by `themes update`, and the custom theme folders `os/spruceos/themes/<NAME>/` by `themes publish` |
 | `os/spruceos/custom-themes.json` | `{theme folder: {"files": {path in the folder: [sha256, size]}}}`: the custom themes sync-roms published and each file's content, so an unchanged rebuild uploads nothing | `themes publish` |
 
 ### Reading and writing storage
@@ -98,7 +98,7 @@ The data folder is `store.data_dir()`: `$XDG_DATA_HOME/sync-roms`, `%APPDATA%\sy
 - `collections/<id>.json`: one per collection (`collections.py`); never in the repo or storage.
 - `saves/`: RetroArch saves and states, `<system>/<stem>/<stamp>-<card>/` with `stash.json`, written by `saves stash`, read by `saves apply`; `saves manage` labels, moves and deletes stashes, and `stash.json` may hold an optional `note`.
 - `bootlogos/<W>x<H>/`: your own boot logos (`.png`, `.bmp`), one folder per device `resolution`; never in the repo or storage.
-- `cache/`: what can be rebuilt: `storage-cache.json`, `preview-cache/` (the editors' 300 px WebP game pictures, `<image key without extension>.<ETag or s<size>>.webp`), `previews/`, `theme-art/`, `names.json`.
+- `cache/`: what can be rebuilt: `storage-cache.json`, `preview-cache/` (the editors' 300 px WebP game pictures, `<image key without extension>.<ETag or s<size>>.webp`), `previews/`, `theme-art/`, `themes/` (`base/<BASE>/`, a custom theme's base theme from storage; `build/<NAME>/`, built custom themes), `names.json`.
 
 Old personal sets in `sets/` are left on disk and never read; a sync reads an old `games.json` only to warn that it is no longer used.
 
