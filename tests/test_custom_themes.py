@@ -108,10 +108,24 @@ class Build(unittest.TestCase):
         dest = custom_themes.STYLES["Pixel Controllers"].build(self.base, os.path.join(self.tmp.name, "out"), GRUVBOX)
         self.assertTrue(os.path.exists(os.path.join(dest, "icons", "sel", "gba.png")))
 
-    def test_icons_missing_in_base_are_skipped(self):
+    def test_app_icons_missing_in_base_are_drawn(self):
         make_base(self.base, ssh=False)
         dest = custom_themes.STYLES["Pixel Consoles"].build(self.base, os.path.join(self.tmp.name, "out"), GRUVBOX)
-        self.assertFalse(os.path.exists(os.path.join(dest, "icons", "app", "SSH.png")))
+        for name in ("SSH", "cheevos", "moonlight", "songo"):
+            with Image.open(os.path.join(dest, "icons", "app", f"{name}.png")) as im:
+                self.assertEqual(im.size, (70, 70), name)
+                self.assertIsNotNone(im.convert("RGBA").getbbox(), name)
+
+    def test_other_icons_missing_in_base_are_skipped(self):
+        make_base(self.base)
+        dest = custom_themes.STYLES["Pixel Consoles"].build(self.base, os.path.join(self.tmp.name, "out"), GRUVBOX)
+        self.assertFalse(os.path.exists(os.path.join(dest, "skin", "ic-cheevos-mark.png")))
+
+    def test_collections_shown_by_default(self):
+        make_base(self.base)
+        dest = custom_themes.STYLES["Pixel Controllers"].build(self.base, os.path.join(self.tmp.name, "out"), GRUVBOX)
+        with open(os.path.join(dest, "config.json")) as f:
+            self.assertIs(json.load(f)["collectionsEnabled"], True)
 
 
 class Fetch(helpers.StorageDir):

@@ -1,7 +1,10 @@
 """Pixel replacements for base-theme icons: ICONS = {path inside the theme: draw fn returning a Sprite}.
 
-The Apps menu icons (`icons/app/<name>.png`, 70x70 in the base theme): sprites of at most 20x20 cells."""
+The Apps menu icons (`icons/app/<name>.png`, 70x70 in the base theme): sprites of at most 20x20 cells. An app's icon
+is the `icon` in its spruceOS `App/<app>/config.json`; one the base theme lacks is drawn at APP_SIZE."""
 from .sprite import Sprite
+
+APP_SIZE = (70, 70)
 
 
 def _rot180(s):
@@ -380,6 +383,17 @@ def scraper():
     return s
 
 
+def songo():
+    """Songo#5, the music player: two beamed eighth notes."""
+    s = Sprite(20, 20)
+    s.rect(6, 1, 13, 3, "pink")
+    s.rect(6, 1, 2, 15, "pink")
+    s.rect(17, 1, 2, 13, "pink")
+    s.ellipse(4.5, 16.5, 3.5, 2.6, "pink")
+    s.ellipse(15.5, 14.5, 3.5, 2.6, "pink")
+    return s
+
+
 def sftpgo():
     s = Sprite(20, 20)
     for y, c in ((0, "periwinkle"), (7, "periwinkle"), (14, "periwinkle")):
@@ -445,4 +459,4 @@ def zitch():
 ICONS = {f"icons/app/{fn.__name__.upper() if fn is ssh else fn.__name__}.png": fn for fn in (
     ssh, backup, bootlogo, cheevos, emufresh, ereader, expertappswitch, file, firmwareupdate, fnkey, gallery,
     gamelist, iconfresh, led, menuswitch, moonlight, pico8, portmaster, ppsspp, random, recents, restore,
-    retroarch, retroexpert, rtc, scraper, sftpgo, syncthing, themegallery, updater, usb, zitch)}
+    retroarch, retroexpert, rtc, scraper, songo, sftpgo, syncthing, themegallery, updater, usb, zitch)}
