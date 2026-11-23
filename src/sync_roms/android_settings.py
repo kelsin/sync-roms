@@ -27,6 +27,8 @@ def cfg_wanted():
         wanted.update(spruce_syncthing.data()["retroarch"])
         wanted["savefile_directory"] = android.DEFAULT_SAVES
         wanted["savestate_directory"] = android.DEFAULT_STATES
+        wanted["savestate_auto_save"] = "true"  # spruce's raAutoSave and raAutoLoad
+        wanted["savestate_auto_load"] = "true"
     settings = usersettings.load_settings()
     wanted.update(RA_MODES.get(settings.get("spruce_ra_mode"), {}))
     for setting, key in (("spruce_ra_username", "cheevos_username"), ("spruce_ra_password", "cheevos_password")):
@@ -37,10 +39,14 @@ def cfg_wanted():
 
 
 def cfg_entries(text, wanted):
-    """[Entry] for each wanted key; a changed username also clears a stored cheevos_token."""
+    """[Entry] for each wanted key; a changed username also clears a stored cheevos_token. RetroArch clears the password once
+    a token is stored, so cheevos_password is left out while there is a token and the username stays."""
     current = android.parse_config(text)
     result = [applied.Entry(CFG, key, current.get(key), value, key in SECRETS) for key, value in wanted.items()]
-    if current.get("cheevos_token") and any(e.key == "cheevos_username" and applied.changed(e) for e in result):
+    renamed = any(e.key == "cheevos_username" and applied.changed(e) for e in result)
+    if current.get("cheevos_token") and not renamed:
+        result = [e for e in result if e.key != "cheevos_password"]
+    if current.get("cheevos_token") and renamed:
         result.append(applied.Entry(CFG, "cheevos_token", current["cheevos_token"], "", True))
     return result
 
@@ -111,11 +117,14 @@ def _write(path, text):
 
 
 def _push(serial, local, remote, failed):
+    """True when the file was written."""
     try:
         adb.push(serial, local, remote)
     except adb.AdbError as e:
         failed.append(remote)
         ui.warn(f"Couldn't write {remote}: {e}")
+        return False
+    return True
 
 
 def _pull_cfg(serial, remote, tmp):
@@ -147,6 +156,9 @@ def _esde_part(serial, volume, roms_dir, systems, tmp):
             os.makedirs(os.path.dirname(local), exist_ok=True)
             adb.pull(serial, remote, local)
             text = _read(local)
+        if text and text.strip() and "<gameList" not in text:
+            ui.warn(f"Can't read {remote} as a gamelist: skipping it")
+            continue
         result.append((gamelist_entry(folder, text, label), folder, text, label))
     return result
 
@@ -160,7 +172,8 @@ def _write_retroarch(serial, pkg, remote, tmp, failed):
         return
     local = os.path.join(tmp, "new-" + CFG)
     _write(local, cfg_apply(text, entries))
-    _push(serial, local, remote, failed)
+    if _push(serial, local, remote, failed):
+        applied.show(entries, False)
 
 
 def _write_esde(serial, volume, gamelists, tmp, failed):
@@ -168,15 +181,18 @@ def _write_esde(serial, volume, gamelists, tmp, failed):
         print(ui.dim("↩️  Left ES-DE's gamelists as they are"))
         return
     adb.shell(serial, "am", "force-stop", ESDE_PACKAGE)
-    for entry, folder, text, label in gamelists:
-        if not applied.changed(entry):
-            continue
-        local = os.path.join(tmp, "new-gamelists", folder, "gamelist.xml")
-        _write(local, gamelist_apply(text, label))
-        remote = f"/storage/{volume}/ES-DE/gamelists/{folder}/gamelist.xml"
-        adb.shell(serial, "mkdir", "-p", posixpath.dirname(remote))
-        _push(serial, local, remote, failed)
-    adb.shell(serial, "am", "start", "-a", "android.intent.action.MAIN", "-c", "android.intent.category.HOME")
+    try:
+        for entry, folder, text, label in gamelists:
+            if not applied.changed(entry):
+                continue
+            local = os.path.join(tmp, "new-gamelists", folder, "gamelist.xml")
+            _write(local, gamelist_apply(text, label))
+            remote = f"/storage/{volume}/ES-DE/gamelists/{folder}/gamelist.xml"
+            adb.shell(serial, "mkdir", "-p", posixpath.dirname(remote))
+            if _push(serial, local, remote, failed):
+                applied.show([entry], False)
+    finally:
+        adb.shell(serial, "am", "start", "-a", "android.intent.action.MAIN", "-c", "android.intent.category.HOME")
 
 
 def apk_rules(card_name):
@@ -332,8 +348,13 @@ def _install_apks(serial, entries, tmp, failed):
 def _apk_part(serial, target, tmp, dry_run, failed):
     """List (dry run) or install the APKs; a storage error warns and counts as a failure, an adb one propagates."""
     try:
-        entries = apk_entries(serial, target.volume, target.card, inventory.files(runtime.APKS_PREFIX, sizes=True), tmp)
+        listing = inventory.files(runtime.APKS_PREFIX, sizes=True)
+        entries = apk_entries(serial, target.volume, target.card, listing, tmp)
         if dry_run:
+            tree = inventory.current()
+            if tree and tree.updated:
+                print(ui.dim(f"📇 APK list from the storage cache, updated {inventory._ago(max(0, inventory._clock() - tree.updated))}"
+                             f"; refresh it with: {inventory.UPDATE_HINT}"))
             shown = []
             for entry in entries:
                 shown.append(entry)
@@ -357,8 +378,8 @@ def apply(target, layout, systems, dry_run):
         ra_entries, cfg_remote = _retroarch_part(serial, pkg, tmp)
         gamelists = _esde_part(serial, target.volume, layout["roms_dir"], systems, tmp)
         esde_entries = [g[0] for g in gamelists]
-        applied.show(ra_entries + esde_entries, dry_run)
         if dry_run:
+            applied.show(ra_entries + esde_entries, True)
             _apk_part(serial, target, tmp, True, failed)
             return 1 if failed else 0
         if any(applied.changed(e) for e in ra_entries):

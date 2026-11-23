@@ -36,6 +36,12 @@ class Show(unittest.TestCase):
         self.assertIn("   would set   gone = 1 (was missing)", out)
         self.assertNotIn("secret", out)
 
+    def test_secret_that_was_empty_says_so(self):
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            applied.show([applied.Entry("a", "pw", "", "x", True)], True)
+        self.assertIn("pw = (hidden) (was empty)", out.getvalue())
+
     def test_show_real_run_lists_only_changed(self):
         out = shown(False)
         self.assertIn("   mode = Hardcore", out)

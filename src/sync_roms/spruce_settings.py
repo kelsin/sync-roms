@@ -81,7 +81,6 @@ def wanted_settings():
 def _options(base, shown):
     """(file text, parsed data, its menuOptions dict) of the card's spruce-config.json, or None with a warning when it's missing or can't be read."""
     path = os.path.join(base, FILE)
-    path = os.path.join(base, FILE)
     if not os.path.isfile(path):
         ui.warn(f"{shown} is missing; spruce settings skipped (start the card in the device once first)")
         return None

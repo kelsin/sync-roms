@@ -30,7 +30,7 @@ def show(entries, dry_run):
             if not dry_run:
                 print(f"   {e.key} = {new}")
             elif changed(e):
-                was = "missing" if e.old is None else _shown(e, e.old)
+                was = "missing" if e.old is None else "empty" if e.old == "" else _shown(e, e.old)
                 print(f"   would set   {e.key} = {new} (was {was})")
             else:
                 print(f"   already set {e.key} = {new}")

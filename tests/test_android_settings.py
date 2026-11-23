@@ -44,6 +44,11 @@ class CfgWanted(helpers.DataDir):
         self.assertEqual(w["savestate_directory"], android.DEFAULT_STATES)
         self.assertEqual(w["sort_savefiles_enable"], "true")
 
+    def test_syncthing_turns_on_savestate_auto_save_and_load(self):
+        w = self.wanted(spruce_syncthing=True)
+        self.assertEqual((w["savestate_auto_save"], w["savestate_auto_load"]), ("true", "true"))
+        self.assertNotIn("savestate_auto_save", self.wanted(spruce_syncthing=False))
+
     def test_without_syncthing(self):
         w = self.wanted(spruce_syncthing=False)
         self.assertNotIn("savefile_directory", w)
@@ -83,6 +88,14 @@ class CfgEntries(unittest.TestCase):
     def test_apply_appends_missing_key(self):
         entries = android_settings.cfg_entries('a = "1"', {"webdav_url": ""})
         self.assertEqual(android_settings.cfg_apply('a = "1"', entries), 'a = "1"\nwebdav_url = ""\n')
+
+    def test_password_skipped_while_a_token_is_stored(self):
+        wanted = {"cheevos_username": "u", "cheevos_password": "pw"}
+        found = by_key(android_settings.cfg_entries('cheevos_username = "u"\ncheevos_token = "abc"\ncheevos_password = ""\n', wanted))
+        self.assertNotIn("cheevos_password", found)
+        self.assertFalse(any(applied.changed(e) for e in found.values()))
+        found = by_key(android_settings.cfg_entries('cheevos_username = "u"\ncheevos_password = ""\n', wanted))
+        self.assertEqual(found["cheevos_password"], E("retroarch.cfg", "cheevos_password", "", "pw", True))
 
 
 BLOCK = "<alternativeEmulator>\n\t<label>FCEUmm</label>\n</alternativeEmulator>\n"
@@ -370,6 +383,55 @@ class Apply(helpers.DataDir):
         self.assertEqual(self.run_apply(), 0)
         self.assertNotIn("force-stop", self.names())
         self.assertNotIn("push", self.names())
+
+    def synced_cfg(self):
+        return "".join(f'{k} = "{v}"\n' for k, v in android_settings.cfg_wanted().items())
+
+    def test_apply_prints_a_group_only_after_its_write(self):
+        self.files[self.cfg_path] = OLD_CFG
+        self.run_apply()
+        self.assertIn("cloud_sync_enable = false", self.out.getvalue())
+        self.out.truncate(0), self.out.seek(0)
+        self.files[self.cfg_path] = OLD_CFG
+        self.push_error = adb.AdbError("denied")
+        self.run_apply()
+        self.assertNotIn("cloud_sync_enable", self.out.getvalue())
+        self.out.truncate(0), self.out.seek(0)
+        usersettings.save_settings({"spruce_syncthing": True})
+        self.push_error = None
+        self.files[self.cfg_path] = self.synced_cfg()
+        self.confirm = False
+        self.run_apply()
+        self.assertEqual(self.out.getvalue().count("alternativeEmulator"), 0)
+        self.confirm = True
+        self.run_apply()
+        self.assertIn("alternativeEmulator = FCEUmm", self.out.getvalue())
+
+    def test_apply_relaunches_home_when_a_write_raises(self):
+        usersettings.save_settings({"spruce_syncthing": True})
+        self.files[self.cfg_path] = self.synced_cfg()
+        self.push_error = RuntimeError("boom")
+        with self.assertRaises(RuntimeError):
+            self.run_apply()
+        self.assertEqual([n for n in self.names() if n in ("force-stop", "start")], ["force-stop", "start"])
+
+    def test_apply_skips_gamelist_that_is_not_a_gamelist(self):
+        usersettings.save_settings({"spruce_syncthing": True})
+        gamelist = "/storage/6AF3-53E9/ES-DE/gamelists/nes/gamelist.xml"
+        self.files[self.cfg_path] = self.synced_cfg()
+        self.files[gamelist] = "<html>oops</html>"
+        self.assertEqual(self.run_apply(), 0)
+        self.assertEqual(self.files[gamelist], "<html>oops</html>")
+        self.assertNotIn("force-stop", self.names())
+        self.assertIn("Can't read", self.err.getvalue())
+
+    def test_apply_dry_run_names_the_cache_age(self):
+        self.apk_setup()
+        tree = inventory.Tree("src", 1000.0, {}, {})
+        with mock.patch.object(inventory, "current", lambda: tree), mock.patch.object(inventory, "_clock", lambda: 1000.0 + 7200):
+            self.run_apply(dry_run=True)
+        self.assertIn("2 hours ago", self.out.getvalue())
+        self.assertIn(inventory.UPDATE_HINT, self.out.getvalue())
 
     def test_apply_lost_device_removes_temp(self):
         self.files[self.cfg_path] = OLD_CFG
