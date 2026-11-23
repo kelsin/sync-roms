@@ -1008,6 +1008,65 @@
     ]
   },
   {
+    "id": "trimui-brick",
+    "name": "TrimUI Brick",
+    "soc": "Allwinner A133P",
+    "screen": "4:3",
+    "resolution": "1024x768",
+    "firmwares": [
+      "nextui",
+      "spruce",
+      "knulli"
+    ]
+  },
+  {
+    "id": "trimui-brick-hammer",
+    "name": "TrimUI Brick Hammer",
+    "soc": "Allwinner A133P",
+    "screen": "4:3",
+    "resolution": "1024x768",
+    "firmwares": [
+      "nextui",
+      "spruce",
+      "knulli"
+    ]
+  },
+  {
+    "id": "trimui-brick-pro",
+    "name": "TrimUI Brick Pro",
+    "soc": "Allwinner A133P",
+    "screen": "4:3",
+    "resolution": "1024x768",
+    "firmwares": [
+      "nextui",
+      "spruce"
+    ]
+  },
+  {
+    "id": "trimui-smart-pro",
+    "name": "TrimUI Smart Pro",
+    "soc": "Allwinner A133P",
+    "screen": "16:9",
+    "resolution": "1280x720",
+    "firmwares": [
+      "nextui",
+      "spruce",
+      "knulli"
+    ]
+  },
+  {
+    "id": "trimui-smart-pro-s",
+    "name": "TrimUI Smart Pro S",
+    "soc": "Allwinner A523",
+    "screen": "16:9",
+    "resolution": "1280x720",
+    "firmwares": [
+      "nextui",
+      "spruce",
+      "knulli"
+    ]
+  },
+  {
     "id": "windows-pc",
     "name": "Windows PC (RetroBat)",
     "soc": "x86-64",

@@ -438,6 +438,25 @@
       "tier": "steam-deck",
       "note": "Faster than the Steam Deck, so the same list with more headroom for Switch, Wii U and PS3. Xbox 360 is still game-dependent."
     },
+    "trimui-brick": {
+      "tier": "nds",
+      "note": "Quad Cortex-A53 like the H700: stable through PS1 and NDS. N64, Dreamcast, Saturn and PSP are inconsistent, so left off."
+    },
+    "trimui-brick-hammer": {
+      "tier": "nds",
+      "note": "Quad Cortex-A53 like the H700: stable through PS1 and NDS. N64, Dreamcast, Saturn and PSP are inconsistent, so left off."
+    },
+    "trimui-brick-pro": {
+      "tier": "nds",
+      "note": "Quad Cortex-A53 like the H700: stable through PS1 and NDS. N64, Dreamcast, Saturn and PSP are inconsistent, so left off."
+    },
+    "trimui-smart-pro": {
+      "tier": "nds",
+      "note": "Quad Cortex-A53 like the H700: stable through PS1 and NDS. N64, Dreamcast, Saturn and PSP are inconsistent, so left off."
+    },
+    "trimui-smart-pro-s": {
+      "tier": "psp-n64-dc"
+    },
     "windows-pc": {
       "tier": "windows"
     }
