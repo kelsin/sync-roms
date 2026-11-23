@@ -94,7 +94,7 @@ def collection_emoji(collection):
 
 
 def art_png(art_id, folder="art"):
-    """The artwork file for art_id (in art/, or art-spruce/ for Spruce's square pictures), or None when there is
+    """The artwork file for art_id (in art/, or art-box/<size> for Spruce's box pictures), or None when there is
     none."""
     if art_id != SURPRISE_ART and art_id not in art_choices():
         return None
@@ -139,7 +139,7 @@ def usable(layout_name, arts):
     """The {collection name: art png} of arts ({name: art id}) that can be installed, warning about the rest."""
     out, taken = {}, set()
     for name, art_id in sorted(arts.items()):
-        png = art_png(art_id, "art-spruce" if layout_name == "spruce" else "art")
+        png = art_png(art_id, "art-box/Imgs" if layout_name == "spruce" else "art")
         if not png:
             ui.warn(f"{name}: there is no theme art called {art_id!r}; skipped")
         elif layout_name != "spruce" and (name.lower() in _reserved(layout_name) or name.lower().startswith("auto-")):
@@ -501,22 +501,26 @@ def install_muos(base, arts):
 
 # --- Spruce --------------------------------------------------------------------------------------------------------
 
-SPRUCE_DIR = os.path.join("Collections", "Imgs")  # PyUI shows Imgs/<collection name>.png
+SPRUCE_SIZES = ("Imgs", "Imgs_med", "Imgs_small")  # PyUI shows <size>/<collection name>.png, PNG only
+SPRUCE_DIR = os.path.join("Collections", SPRUCE_SIZES[0])
 
 
 def _spruce_stale(base, arts, owned):
-    """The Imgs files of the collections sync-roms owns (owned) that have no art in arts any more."""
-    paths = (os.path.join(base, SPRUCE_DIR, f"{name}.png") for name in dict.fromkeys(owned) if name not in arts)
+    """The pictures, in every size, of the collections sync-roms owns (owned) that have no art in arts any more."""
+    paths = (os.path.join(base, "Collections", size, f"{name}.png")
+             for name in dict.fromkeys(owned) if name not in arts for size in SPRUCE_SIZES)
     return [p for p in paths if os.path.exists(p)]
 
 
 def install_spruce(base, arts, owned):
-    """Put the collections' art ({name: art png}) in Collections/Imgs/ and remove the picture of each collection in owned
-    that has none now. Other files there are left alone. Returns whether files changed."""
+    """Put the collections' art ({name: art png of the Imgs size}) in Collections/Imgs/, Imgs_med/ and Imgs_small/
+    and remove the pictures of each collection in owned that has none now. Other files there are left alone.
+    Returns whether files changed."""
     changed = False
     for name, png in arts.items():
-        with open(png, "rb") as f:
-            changed |= cardfs.write_bytes(os.path.join(base, SPRUCE_DIR, f"{name}.png"), f.read())
+        for size in SPRUCE_SIZES:
+            with open(os.path.join(os.path.dirname(os.path.dirname(png)), size, os.path.basename(png)), "rb") as f:
+                changed |= cardfs.write_bytes(os.path.join(base, "Collections", size, f"{name}.png"), f.read())
     for path in _spruce_stale(base, arts, owned):
         os.remove(path)
         changed = True
@@ -525,7 +529,7 @@ def install_spruce(base, arts, owned):
 
 def describe_spruce(base, arts, owned):
     if arts:
-        print(ui.dim(f"🎨 would add art for {', '.join(arts)} to {SPRUCE_DIR.replace(os.sep, '/')}/"))
+        print(ui.dim(f"🎨 would add art for {', '.join(arts)} to {SPRUCE_DIR.replace(os.sep, '/')}/ (and its _med, _small)"))
     for path in _spruce_stale(base, arts, owned):
         print(ui.dim(f"🎨 would remove {os.path.relpath(path, base).replace(os.sep, '/')}"))
 
