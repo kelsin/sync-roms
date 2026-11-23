@@ -107,7 +107,8 @@ def build_theme(base_dir, out_dir, name, kind, palette):
         config_path = os.path.join(dest, file)
         with open(config_path) as f:
             config = json.load(f)
-        config.update({"name": name, "author": "sync-roms", "description": spec["description"]})
+        # collectionsEnabled: PyUI's Show Collections, off when the theme doesn't set it
+        config.update({"name": name, "author": "sync-roms", "description": spec["description"], "collectionsEnabled": True})
         if "screensaver" in config:
             config["screensaver"]["bgColor"] = "#000000"
         recolor.recolor_config(config, palette)
@@ -135,10 +136,14 @@ def build_theme(base_dir, out_dir, name, kind, palette):
     for module in ICON_MODULES:
         for rel, draw in module.ICONS.items():
             target = os.path.join(dest, rel)
-            if not os.path.exists(target):
+            if os.path.exists(target):
+                with Image.open(target) as im:
+                    size = im.size
+            elif rel.startswith("icons/app/"):  # an app the base theme has no icon for
+                os.makedirs(os.path.dirname(target), exist_ok=True)
+                size = app_icons.APP_SIZE
+            else:
                 continue
-            with Image.open(target) as im:
-                size = im.size
             sprite = draw()
             scale = max(1, min(4, size[0] // (sprite.w + 2), size[1] // (sprite.h + 2)))
             place(render(sprite, scale, "sel"), size, (size[0] / 2, size[1] / 2)).save(target)
