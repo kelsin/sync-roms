@@ -9,6 +9,7 @@ from PIL import Image
 
 from . import (app_icons, arcade, extras, frames, handhelds, menu, nintendo_sega, others, recolor, ui_settings, ui_status,
                variants)
+from .preview import preview_image
 from .sprite import place, render
 
 BATCHES = (handhelds, nintendo_sega, others, arcade, extras)
@@ -150,22 +151,13 @@ def build_theme(base_dir, out_dir, name, kind, palette):
             drawn.add(rel)
     native = set(frames.apply(dest, palette))  # last among the skin steps, after the recolor and blacken
     resize_variants(dest, drawn, native)
-    preview(dest, spec)
+    preview(dest, kind, palette)
     with open(os.path.join(dest, "CREDITS.txt"), "a") as f:
         f.write(f"\n{name}: the SPRUCE theme with a black background and pixel-art icons drawn for sync-roms.\n")
     return dest
 
 
-def preview(dest, spec):
-    """preview.png (640x480): the main menu row over a grid of system icons, on black."""
-    img = Image.new("RGBA", (640, 480), BLACK)
-    for n, key in enumerate(list(menu.SPRITES) + ["game"]):
-        with Image.open(os.path.join(dest, "skin", f"ic-{key}-{'f' if n == 0 else 'n'}.png")) as im:
-            tile = im.convert("RGBA").resize((70, 98), Image.NEAREST)
-        img.paste(tile, (20 + n * 86, 20), tile)
-    ids = list(spec["systems"])[:18]
-    for n, icon in enumerate(ids):
-        with Image.open(os.path.join(dest, "icons", "sel" if n == 0 else "", f"{icon}.png")) as im:
-            tile = im.convert("RGBA").resize((100, 108), Image.NEAREST)
-        img.paste(tile, (20 + (n % 6) * 104, 140 + (n // 6) * 110), tile)
-    img.save(os.path.join(dest, "preview.png"))
+def preview(dest, kind, palette):
+    """preview.png (640x480): the main screen drawn in the palette (preview.py)."""
+    font = os.path.join(dest, "nunwen.ttf")
+    preview_image(kind, palette, font if os.path.exists(font) else None).save(os.path.join(dest, "preview.png"))
