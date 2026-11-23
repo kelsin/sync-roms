@@ -475,6 +475,20 @@ class Update(Esde):
         with open(os.path.join(self.storage, themeart.ESDE_ARCHIVE), "rb") as f:
             self.assertEqual(f.read(), tarball)
 
+    def test_a_download_with_a_length_gets_a_bar_and_uploads(self):
+        tarball = archive({"top/theme.xml": b"<theme/>"}).getvalue()
+
+        class Response(io.BytesIO):
+            headers = {"Content-Length": str(len(tarball))}
+
+        def fake(url, accept=None):
+            return Response(b"abc" if "api.github.com" in url else tarball)
+        with mock.patch.object(github, "get", fake), contextlib.redirect_stdout(io.StringIO()) as out:
+            self.assertEqual(themeart.update_storage(), 0)
+        self.assertIn("Downloading Art Book Next", out.getvalue())
+        with open(os.path.join(self.storage, themeart.ESDE_ARCHIVE), "rb") as f:
+            self.assertEqual(f.read(), tarball)
+
     def test_the_latest_already_in_storage_is_left_alone(self):
         self.store("abc", {"theme.xml": b"<theme/>"})
         self.assertEqual(self.run_update("abc", b"not used"), 0)
@@ -482,9 +496,10 @@ class Update(Esde):
     def test_a_missing_storage_folder_or_failed_upload_fails(self):
         with mock.patch.object(runtime, "ROOT", os.path.join(self.storage, "gone")):
             self.assertEqual(self.run_update("abc"), 1)
-        with mock.patch.object(themeart.s3, "put_file", mock.Mock(side_effect=PermissionError("denied"))):
+        with mock.patch.object(themeart.s3, "copy_file", mock.Mock(side_effect=PermissionError("denied"))):
             self.assertEqual(self.run_update("abc", archive({"top/a": b"a"}).getvalue()), 1)
-        self.assertIn("denied", self.warned[-1])
+        self.assertIn("Couldn't upload Art Book Next", self.warned[-1])
+        self.assertFalse(os.path.exists(os.path.join(self.storage, themeart.ESDE_COMMIT)))
 
     def test_a_dry_run_or_a_bad_download_changes_nothing(self):
         self.store("abc", {"theme.xml": b"<theme/>"})

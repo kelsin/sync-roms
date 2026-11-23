@@ -11,6 +11,7 @@ import tarfile
 import tempfile
 from xml.sax import saxutils
 import zlib
+from concurrent.futures import ThreadPoolExecutor
 
 from . import cardfs, downloads, frontend, github, rocknix_collections, runtime, s3, store, ui
 
@@ -363,20 +364,33 @@ def update_storage(dry_run=False):
     if dry_run:
         print(ui.dim(f"🧪 Dry run: would upload {ESDE_ARCHIVE} and {ESDE_COMMIT}"))
         return 0
+    from . import upload  # upload imports mirroring, which imports this module
+    url = f"https://codeload.github.com/{ESDE_REPO}/tar.gz/{latest}"
     with tempfile.TemporaryDirectory() as tmp:
         path = os.path.join(tmp, "theme.tar.gz")
         try:
-            with github.get(f"https://codeload.github.com/{ESDE_REPO}/tar.gz/{latest}") as r, open(path, "wb") as f:
-                shutil.copyfileobj(r, f)
+            with github.get(url) as r:
+                size = github.length(r)
+                if size:
+                    moved = ui.ByteProgress([size])
+                    bar = ui.ProgressBar(1, moved.fraction, moved.total, active=lambda: moved.active(["Art Book Next"]))
+                    print(ui.bold("⬇️  Downloading Art Book Next") + ui.dim(f"  {ui.human_size(size)}"))
+                    with ThreadPoolExecutor(1) as ex:
+                        ui.wait_drawing(bar, 0, ex.submit(github.save, r, path, lambda n: moved.add(0, n)).result)
+                    bar.clear()
+                else:
+                    print("⬇️  Downloading Art Book Next…")
+                    github.save(r, path)
             with tarfile.open(path, mode="r:gz") as archive:  # a whole, readable archive before it replaces the old one
                 count = sum(1 for m in archive if m.isfile())
         except (OSError, http.client.HTTPException, *ARCHIVE_ERRORS) as e:
             ui.warn(f"Couldn't download Art Book Next: {e}")
             return 1
         try:
-            s3.put_file(ESDE_ARCHIVE, path)
+            if upload.run_uploads([(ESDE_ARCHIVE, path, os.path.getsize(path))], quiet=True):
+                raise OSError("the upload failed")
             s3.put_text(ESDE_COMMIT, latest + "\n")
-        except s3.ERRORS as e:
+        except (OSError, *s3.ERRORS) as e:
             ui.warn(f"Couldn't upload Art Book Next to {s3.location()}: {e}")
             return 1
     print(ui.green(f"✅ Uploaded Art Book Next {latest[:7]} ({count} files) to {s3.location()}"))

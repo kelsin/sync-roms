@@ -4,8 +4,10 @@ import http.client
 import json
 import os
 import shutil
+import queue
 import subprocess
 import tempfile
+from concurrent.futures import ThreadPoolExecutor
 
 from . import cardfs, downloads, external, github, inventory, picker, previews, runtime, s3, spruce_fixes, spruce_settings, store, ui, usersettings
 
@@ -22,11 +24,6 @@ def _release():
     """The release's .7z assets: name, size, updated_at and browser_download_url."""
     data = github.json(f"https://api.github.com/repos/{REPO}/releases/tags/{TAG}")
     return [a for a in data["assets"] if a["name"].lower().endswith(".7z")]
-
-
-def _download(url, path):
-    with github.get(url) as r, open(path, "wb") as f:
-        shutil.copyfileobj(r, f)
 
 
 def _unpack(archive, out):
@@ -64,6 +61,49 @@ def _files(folder):
     """The files of an unpacked theme folder: {storage-relative path: local path}."""
     return {os.path.relpath(os.path.join(dp, n), folder).replace(os.sep, "/"): os.path.join(dp, n)
             for dp, _, names in os.walk(folder) for n in names if not _junk(n) and not os.path.islink(os.path.join(dp, n))}
+
+
+def _download_all(todo, tmp):
+    """Download the assets into tmp, in a small pool under one progress bar. Returns {asset name: path} of those that
+    arrived; a failed one is warned about and left out."""
+    print(ui.bold(f"\n⬇️  Downloading {len(todo)} PyUI theme(s)") + ui.dim(f"  {ui.human_size(sum(a['size'] for a in todo))}"))
+    moved = ui.ByteProgress([a["size"] for a in todo])
+    names = [a["name"] for a in todo]
+    bar = ui.ProgressBar(len(todo), moved.fraction, moved.total, active=lambda: moved.active(names))
+    paths = {}
+
+    def fetch(i):
+        moved.start(i)
+        path = os.path.join(tmp, f"{i}.7z")
+        github.download(todo[i]["browser_download_url"], path, lambda n: moved.add(i, n))
+        return path
+
+    ex = ThreadPoolExecutor(runtime.WORKERS)
+    try:
+        finishing = queue.Queue()
+        futs = [ex.submit(fetch, i) for i in range(len(todo))]
+        index = {f: i for i, f in enumerate(futs)}
+        for f in futs:
+            f.add_done_callback(finishing.put)
+        for finished in range(1, len(todo) + 1):
+            f = ui.wait_drawing(bar, finished - 1, finishing.get)
+            i = index[f]
+            moved.finish(i)
+            prog = ui.dim(f"[{finished}/{len(todo)}]")
+            try:
+                paths[todo[i]["name"]] = f.result()
+                bar.say(f"  {prog} ✅ {names[i]}")
+            except (OSError, http.client.HTTPException) as e:
+                bar.say(f"  {prog} ❌ {ui.red(names[i])}: {e}")
+            bar.draw(finished)
+    except KeyboardInterrupt:
+        ex.shutdown(wait=False, cancel_futures=True)
+        bar.clear()
+        raise
+    finally:
+        ex.shutdown(wait=False, cancel_futures=True)
+        bar.clear()
+    return paths
 
 
 def update_storage(dry_run=False):
@@ -104,20 +144,26 @@ def update_storage(dry_run=False):
             s3.delete_keys(doomed)
             listing = {k: v for k, v in listing.items() if k not in set(doomed)}
             del state[name]
-        for a in todo:
-            try:
-                state_entry = _refresh(a, state, prefix, listing)
-            except (OSError, http.client.HTTPException, subprocess.CalledProcessError, ValueError, *s3.ERRORS) as e:
-                ui.warn(f"{a['name']}: {e}")
-                failed = 1
-                continue
-            if state_entry is None:
-                ui.warn(f"{a['name']}: not a single theme folder under mnt/SDCARD/Themes/; skipped")
-                failed = 1
-            else:
-                state[a["name"]] = state_entry
-                _write_state(state)
-                done += 1
+        with tempfile.TemporaryDirectory() as tmp:
+            archives = _download_all(todo, tmp) if todo else {}
+            for i, a in enumerate(todo, 1):
+                if a["name"] not in archives:
+                    ui.warn(f"{a['name']}: not downloaded; skipped")
+                    failed = 1
+                    continue
+                try:
+                    state_entry = _refresh(a, archives[a["name"]], f"[{i}/{len(todo)}]", state, prefix, listing)
+                except (OSError, http.client.HTTPException, subprocess.CalledProcessError, ValueError, *s3.ERRORS) as e:
+                    ui.warn(f"{a['name']}: {e}")
+                    failed = 1
+                    continue
+                if state_entry is None:
+                    ui.warn(f"{a['name']}: not a single theme folder under mnt/SDCARD/Themes/; skipped")
+                    failed = 1
+                else:
+                    state[a["name"]] = state_entry
+                    _write_state(state)
+                    done += 1
         _write_state(state)
     except s3.ERRORS as e:
         ui.warn(f"Couldn't update the PyUI themes in {s3.location()}: {e}")
@@ -126,16 +172,21 @@ def update_storage(dry_run=False):
     return failed
 
 
-def _refresh(asset, state, prefix, listing):
-    """Download, unpack and upload one asset, replacing its folder. Returns its themes.json entry, or None when the
-    archive isn't one theme folder. Raises ValueError when the folder is one sync-roms doesn't own for this asset."""
+def _refresh(asset, archive, prog, state, prefix, listing):
+    """Unpack the downloaded archive and upload it, replacing the asset's folder. Returns its themes.json entry, or None
+    when the archive isn't one theme folder. Raises ValueError when the folder is one sync-roms doesn't own for this
+    asset, OSError when a file didn't upload."""
+    from . import upload  # upload imports mirroring, which imports this module
     old = state.get(asset["name"])
     with tempfile.TemporaryDirectory() as tmp:
-        archive, out = os.path.join(tmp, "theme.7z"), os.path.join(tmp, "out")
-        _download(asset["browser_download_url"], archive)
+        out = os.path.join(tmp, "out")
         folder = _unpack(archive, out)
+        os.remove(archive)
         if folder is None:
             return None
+        files = _files(os.path.join(out, *MEMBER_ROOT, folder))
+        jobs = [(f"{prefix}{folder}/{rel}", path, os.path.getsize(path)) for rel, path in files.items()]
+        print(f"🎨 {prog} {asset['name']} → {folder} ({len(jobs)} files, {ui.human_size(sum(j[2] for j in jobs))})")
         mine = bool(old) and old["folder"] == folder
         if not mine and (any(v["folder"] == folder for v in state.values())
                          or any(k.startswith(f"{prefix}{folder}/") for k in listing)):
@@ -143,10 +194,10 @@ def _refresh(asset, state, prefix, listing):
         if not mine:  # claimed first, so a run that stops partway leaves a folder the next run knows as this theme's
             state[asset["name"]] = {"folder": folder, "updated_at": None, "size": None}
             _write_state(state)
-        files = _files(os.path.join(out, *MEMBER_ROOT, folder))
-        keep = {f"{prefix}{folder}/{rel}" for rel in files}
-        for rel, path in files.items():
-            s3.put_file(f"{prefix}{folder}/{rel}", path)
+        keep = {j[0] for j in jobs}
+        failures = upload.run_uploads(jobs, quiet=True)
+        if failures:
+            raise OSError(f"{failures} file(s) didn't upload; the next run retries")
     stale = [k for k in listing
              if (k.startswith(f"{prefix}{folder}/") and k not in keep)
              or (old and old["folder"] != folder and k.startswith(f"{prefix}{old['folder']}/"))]
