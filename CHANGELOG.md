@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.26.1](https://github.com/kelsin/sync-roms/compare/v3.26.0...v3.26.1) (2026-11-23)
+
+
+### :bug: Bug Fixes
+
+* **scrape:** hint at scrape art only for ROMs it can make spruce art for ([#537](https://github.com/kelsin/sync-roms/issues/537)) ([f4d27bd](https://github.com/kelsin/sync-roms/commit/f4d27bda58e451dbeb4e7a9827545361d8b45bf6))
+* **spruce:** take out the draft reopen setting patch before highlighting the last collection ([#535](https://github.com/kelsin/sync-roms/issues/535)) ([0c46e7f](https://github.com/kelsin/sync-roms/commit/0c46e7f4f5f3e5028eac597d189ea7ed654f0f2f))
+
 ## [3.26.0](https://github.com/kelsin/sync-roms/compare/v3.25.0...v3.26.0) (2026-11-23)
 
 
