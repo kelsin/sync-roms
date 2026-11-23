@@ -1,0 +1,135 @@
+"""PyUI themes for spruce cards: the .7z assets of spruceUI/PyUI-Themes' release, kept unpacked in storage."""
+import http.client
+import json
+import os
+import shutil
+import subprocess
+import tempfile
+
+from . import external, github, inventory, runtime, s3, ui
+
+REPO = "spruceUI/PyUI-Themes"
+TAG = "1"
+MEMBER_ROOT = ("mnt", "SDCARD", "Themes")  # where each archive keeps its one theme folder
+
+
+def _junk(name):
+    return name == ".DS_Store" or name.startswith("._")
+
+
+def _release():
+    """The release's .7z assets: name, size, updated_at and browser_download_url."""
+    data = github.json(f"https://api.github.com/repos/{REPO}/releases/tags/{TAG}")
+    return [a for a in data["assets"] if a["name"].lower().endswith(".7z")]
+
+
+def _download(url, path):
+    with github.get(url) as r, open(path, "wb") as f:
+        shutil.copyfileobj(r, f)
+
+
+def _unpack(archive, out):
+    """Extract archive into out. Returns the one theme folder name when every extracted file is under
+    mnt/SDCARD/Themes/<folder>/, else None."""
+    tool = external.find_tool("7z")
+    subprocess.run([tool, "x", "-y", "-bso0", "-bsp0", f"-o{out}", "--", archive], check=True)
+    folders = set()
+    for dirpath, _, names in os.walk(out):
+        for name in names:
+            if _junk(name):
+                continue
+            parts = os.path.relpath(os.path.join(dirpath, name), out).split(os.sep)
+            if len(parts) < len(MEMBER_ROOT) + 2 or tuple(parts[:len(MEMBER_ROOT)]) != MEMBER_ROOT:
+                return None
+            folders.add(parts[len(MEMBER_ROOT)])
+    return folders.pop() if len(folders) == 1 else None
+
+
+def _read_state():
+    try:
+        return json.loads(s3.get_text(runtime.SPRUCE_THEMES_STATE))
+    except s3.ERRORS as e:
+        if s3.missing(e):
+            return {}
+        raise
+
+
+def _files(folder):
+    """The files of an unpacked theme folder: {storage-relative path: local path}."""
+    return {os.path.relpath(os.path.join(dp, n), folder).replace(os.sep, "/"): os.path.join(dp, n)
+            for dp, _, names in os.walk(folder) for n in names if not _junk(n) and not os.path.islink(os.path.join(dp, n))}
+
+
+def update_storage(dry_run=False):
+    """Make storage's PyUI themes match the latest release. Returns an exit code."""
+    prefix = runtime.SPRUCE_THEMES_PREFIX
+    try:
+        s3.check_root()
+        state = _read_state()
+        assets = _release()
+    except FileNotFoundError as e:
+        ui.warn(f"The storage folder isn't there (is it mounted?): {e}")
+        return 1
+    except (OSError, http.client.HTTPException, KeyError, ValueError, *s3.ERRORS) as e:
+        ui.warn(f"Couldn't read the PyUI themes release from GitHub or storage: {e}")
+        return 1
+    released = {a["name"]: a for a in assets}
+    todo = [a for a in assets if (state.get(a["name"], {}).get("updated_at"), state.get(a["name"], {}).get("size"))
+            != (a["updated_at"], a["size"])]
+    gone = [n for n in state if n not in released]
+    if not todo and not gone:
+        print(ui.green(f"✅ The PyUI themes in storage are already the latest ({len(state)})"))
+        return 0
+    for a in todo:
+        print(f"🎨 PyUI theme {a['name']}: {'update' if a['name'] in state else 'add'}")
+    for n in gone:
+        print(f"🎨 PyUI theme {n}: remove")
+    if dry_run:
+        print(ui.dim(f"🧪 Dry run: would change {len(todo) + len(gone)} theme(s) in {prefix}"))
+        return 0
+    if todo and not external.find_tool("7z"):
+        ui.warn("7z isn't installed, so the PyUI themes can't be unpacked; run `sync-roms tools install`")
+        return 1
+    failed = 0
+    try:
+        listing = inventory.files(prefix, sizes=False)
+        for name in gone:
+            s3.delete_keys([k for k in listing if k.startswith(f"{prefix}{state[name]['folder']}/")])
+            del state[name]
+        for a in todo:
+            try:
+                state_entry = _refresh(a, state.get(a["name"]), prefix, listing)
+            except (OSError, http.client.HTTPException, subprocess.CalledProcessError, *s3.ERRORS) as e:
+                ui.warn(f"{a['name']}: {e}")
+                failed = 1
+                continue
+            if state_entry is None:
+                ui.warn(f"{a['name']}: not a single theme folder under mnt/SDCARD/Themes/; skipped")
+                failed = 1
+            else:
+                state[a["name"]] = state_entry
+        s3.put_text(runtime.SPRUCE_THEMES_STATE, json.dumps(state, indent=2, sort_keys=True) + "\n")
+    except s3.ERRORS as e:
+        ui.warn(f"Couldn't update the PyUI themes in {s3.location()}: {e}")
+        return 1
+    print(ui.green(f"✅ PyUI themes in {s3.location()}: {len(todo)} added or updated, {len(gone)} removed"))
+    return failed
+
+
+def _refresh(asset, old, prefix, listing):
+    """Download, unpack and upload one asset, replacing its folder. Returns its themes.json entry, or None."""
+    with tempfile.TemporaryDirectory() as tmp:
+        archive, out = os.path.join(tmp, "theme.7z"), os.path.join(tmp, "out")
+        _download(asset["browser_download_url"], archive)
+        folder = _unpack(archive, out)
+        if folder is None:
+            return None
+        files = _files(os.path.join(out, *MEMBER_ROOT, folder))
+        keep = {f"{prefix}{folder}/{rel}" for rel in files}
+        for rel, path in files.items():
+            s3.put_file(f"{prefix}{folder}/{rel}", path)
+    stale = [k for k in listing
+             if (k.startswith(f"{prefix}{folder}/") and k not in keep)
+             or (old and old["folder"] != folder and k.startswith(f"{prefix}{old['folder']}/"))]
+    s3.delete_keys(stale)
+    return {"updated_at": asset["updated_at"], "size": asset["size"], "folder": folder}

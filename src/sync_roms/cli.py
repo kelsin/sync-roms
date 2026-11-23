@@ -20,7 +20,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "games": ("edit|list|add|remove|full|sets|export|import", "edit a card's games, interactively or from scripts"),
     "sets": ("edit", "edit the game sets in storage by hand and save the changes there"),
     "collections": ("edit", "edit your collections of favourite games (saved in ~/.sync-roms/collections/)"),
-    "themes": ("update", "copy the latest Art Book Next for ES-DE from GitHub into storage"),
+    "themes": ("update", "copy the latest Art Book Next for ES-DE and the PyUI themes for spruce from GitHub into storage"),
     "download": ("pico8", "add the PICO-8 BBS Featured carts storage doesn't have, and newer revisions of those it has"),
     "flash": ("", "write a Knulli, BaseOS, muOS, ROCKNIX or OakMoss image from storage's os/ to an SD card"),
     "umount": ("", "clean the macOS junk off an SD card and unmount it"),
@@ -118,11 +118,13 @@ TOPICS = {
   that use Art Book Next.
 """,
     "themes": """
-  sync-roms themes update [--dry-run]         put the latest Art Book Next for ES-DE in storage
+  sync-roms themes update [--dry-run]         put the latest Art Book Next for ES-DE and the PyUI themes in storage
 
   Downloads the GitHub archive of the theme's latest commit (about 200 MB) and replaces os/esde/themes/ in storage
   (write profile). Syncs copy it from there onto ES-DE cards that use Art Book Next, so the Surprise collection has its
   art; a card's copy is replaced when storage has a newer commit. Does nothing when storage already has the latest.
+  It also refreshes the PyUI themes for spruce in os/spruceos/themes/ (the spruceUI/PyUI-Themes release, unpacked with
+  7z; folders you add there yourself are left alone).
 """,
     "download": """
   sync-roms download pico8 [--count N] [--dry-run] [--yes]   add the BBS Featured carts to storage's pico8/

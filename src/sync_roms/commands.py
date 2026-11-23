@@ -1193,9 +1193,9 @@ def collections_edit(args):
 
 
 def themes_update(args):
-    from . import themeart
+    from . import spruce_themes, themeart
     usersettings.ensure_bucket()
-    return themeart.update_storage(args.dry_run)
+    return max(themeart.update_storage(args.dry_run), spruce_themes.update_storage(args.dry_run))
 
 
 def download_pico8(args):
