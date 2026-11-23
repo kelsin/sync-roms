@@ -95,7 +95,7 @@ The data folder is `store.data_dir()`: `$XDG_DATA_HOME/sync-roms`, `%APPDATA%\sy
 - `surprises.json`: history of Surprise picks: system, bucket, title, card, ISO date. Pruned past `surprise_ttl_days` (default 183) on write.
 - `device-systems.json`: optional overlay, `{device id: {"add": [...], "remove": [...]}}` of system ids, applied to the repo defaults. Notes always come from the defaults.
 - `collections/<id>.json`: one per collection (`collections.py`); never in the repo or storage.
-- `saves/`: RetroArch saves and states, `<system>/<stem>/<stamp>-<card>/` with `stash.json`, written by `saves stash`, read by `saves apply`.
+- `saves/`: RetroArch saves and states, `<system>/<stem>/<stamp>-<card>/` with `stash.json`, written by `saves stash`, read by `saves apply`; `saves manage` labels, moves and deletes stashes, and `stash.json` may hold an optional `note`.
 - `bootlogos/<W>x<H>/`: your own boot logos (`.png`, `.bmp`), one folder per device `resolution`; never in the repo or storage.
 - `cache/`: what can be rebuilt: `storage-cache.json`, `preview-cache/` (the editors' 300 px WebP game pictures, `<image key without extension>.<ETag or s<size>>.webp`), `previews/`, `theme-art/`, `names.json`.
 

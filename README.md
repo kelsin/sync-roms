@@ -178,7 +178,7 @@ Every mode is a command (plain `sync-roms [CARD]` syncs a card):
 | `flash` | [write a Knulli, BaseOS, muOS, ROCKNIX or OakMoss image](#flashing-an-sd-card-flash) from storage's `os/` to an SD card, macOS only | |
 | `umount` | pick an SD card, remove macOS's junk from it as a sync does (`.metadata_never_index`, `.fseventsd`, `._` files) and unmount it, macOS only | |
 | `cards list\|new\|set\|rename\|convert\|clean\|delete\|copy\|export\|import` | [manage cards](#cards-cards) | |
-| `saves stash\|apply [CARD]` | [copy RetroArch saves and states](#moving-saves-between-cards-saves) off a card, or stashed ones onto a card | |
+| `saves stash\|apply [CARD]`, `saves manage` | [copy RetroArch saves and states](#moving-saves-between-cards-saves) off a card, or stashed ones onto a card; inspect, label, move, prune and delete stashes | |
 | `devices [ID]` | list the supported devices with their chip and the number of systems each one gets, or one device's layouts, note and systems | `--devices` |
 | `layouts [ID]` | list the layouts, or one layout's folders and the devices that run it | |
 | `upload [DIR]` | [upload ROMs](#uploading-roms-upload) to storage | `--upload` |
@@ -461,7 +461,7 @@ Both take the folder (default: the current directory) of a card with a layout (`
 
 `stash` lists the card's games that have RetroArch saves (`.srm`, and Gambatte's `.rtc` clock files) or states (`.state`, `.stateN`, `.state.auto`, with their `.png` thumbnails), none picked, then the picked games' files, all picked, and copies those to `saves/<system>/<game>/<YYYYMMDD-HHMMSS>-<card>/` in the data folder with a `stash.json` saying what they are and where they came from. A run only adds stashes, never replaces one. On layouts sorted by core (and EmuDeck's flat folders) a save whose game's ROM isn't on the card (or is in several systems' folders) is skipped and counted; on Knulli and ROCKNIX the folder gives the system (on ROCKNIX saves with no ROM beside them are skipped too).
 
-`apply` lists the stashes of the systems the card syncs (newest first; one per game can be picked), marking games whose ROM isn't on the card, and copies them into the folders the card's layout reads. Identical files are skipped; a different file already there is listed and only overwritten after you confirm (default no). A stash with no core (from Knulli or EmuDeck) going to a layout sorted by core asks which core folder to use, once per system: one already on the card, a typed name, or none (RetroArch with sort by core off); with `--yes` it is skipped.
+`apply` lists the stashes of the systems the card syncs (newest first; one per game can be picked), marking games whose ROM isn't on the card and showing each stash's label (set in `saves manage`), and copies them into the folders the card's layout reads. Identical files are skipped; a different file already there is listed and only overwritten after you confirm (default no). A stash with no core (from Knulli or EmuDeck) going to a layout sorted by core asks which core folder to use, once per system: one already on the card, a typed name, or none (RetroArch with sort by core off); with `--yes` it is skipped.
 
 | Layout | RetroArch folder | Saves | States |
 | --- | --- | --- | --- |
@@ -481,6 +481,8 @@ Both take the folder (default: the current directory) of a card with a layout (`
 - **ROCKNIX**: only RetroArch's files are covered. Saves of standalone emulators (PSP, PS1 memory cards, N64 and the like) are not stashed or applied.
 
 States only load in the core they were made with (`gpSP` states don't load in `mGBA`); `.srm` saves (and `.rtc`) usually work in any core of the system.
+
+`sync-roms saves manage` lists every stash in the data folder (game, system, card, date, files, size, core, missing files and label; a stash whose `stash.json` can't be read is listed by its folder and can only be inspected and deleted) and needs a terminal. `Space` picks stashes; `m` and `d` act on the picked ones, or on the highlighted one when none are picked. `Enter` lists a stash's files (marking missing ones and files `stash.json` doesn't list), `w` labels it (an empty label removes it), `m` moves it to another system (the game never changes; a muOS stash goes only to a system with a muOS folder), `p` asks how many to keep per game (default 1) and picks the older rest, and `d` deletes the picked stashes after listing them and asking (default no). A delete can't be undone; `--yes` skips the question. `--dry-run` changes nothing and prints what each action would do.
 
 ## Uploading ROMs (`upload`)
 
