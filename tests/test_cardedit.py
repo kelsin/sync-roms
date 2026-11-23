@@ -352,6 +352,34 @@ class Flow(DataDir):
         every.assert_called_once()
         one.assert_called_once()
 
+    def test_settings_menu_spruce_theme_entry_only_on_spruce(self):
+        seen = []
+        for layout, shown in (("esde", False), ("spruce", True)):
+            self.card(layout=layout)
+            with mock.patch.object(picker, "filter_list", lambda t, labels, **kw: seen.append(labels) or None):
+                cardedit.settings_menu("c", CATALOG["systems"], [])
+            self.assertEqual(any("Spruce theme" in l for l in seen[-1]), shown)
+        self.assertEqual(seen[-1][-1], "🎨 Spruce theme: none")
+
+    def test_settings_menu_sets_and_clears_spruce_theme(self):
+        self.card(layout="spruce")
+        with mock.patch.object(picker, "filter_list", return_value=6), \
+                mock.patch.object(cardedit.spruce_themes, "pick_one", return_value="Mono") as pick:
+            cardedit.settings_menu("c", CATALOG["systems"], [])
+        self.assertEqual(self.read("cards.json")["c"]["spruce_theme"], "Mono")
+        self.assertEqual(pick.call_args.args[1], None)
+        seen = []
+        with mock.patch.object(picker, "filter_list", lambda t, labels, **kw: seen.append(labels) or 6), \
+                mock.patch.object(cardedit.spruce_themes, "pick_one", return_value=False):
+            cardedit.settings_menu("c", CATALOG["systems"], [])
+        self.assertEqual(seen[0][-1], "🎨 Spruce theme: Mono")
+        self.assertEqual(self.read("cards.json")["c"]["spruce_theme"], "Mono")
+        with mock.patch.object(picker, "filter_list", return_value=6), \
+                mock.patch.object(cardedit.spruce_themes, "pick_one", return_value=None) as pick:
+            cardedit.settings_menu("c", CATALOG["systems"], [])
+        self.assertEqual(pick.call_args.args[1], "Mono")
+        self.assertNotIn("spruce_theme", self.read("cards.json")["c"])
+
     def test_surprise_rows_are_locked_in_the_game_list(self):
         self.card(surprises=[{"system": "gba", "bucket": "gba/Zelda.zip", "title": "Zelda"}])
         _, calls = self.run_system(lambda labels, kw: list(kw["initial"]))
