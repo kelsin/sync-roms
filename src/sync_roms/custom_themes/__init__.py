@@ -1,8 +1,9 @@
 """Custom spruceOS themes sync-roms builds from a base theme. THEMES maps each theme's name to its module."""
 import os
+from dataclasses import dataclass, field
 
 from .. import downloads, inventory, runtime, s3, store
-from . import pixel_consoles, pixel_controllers
+from . import manifest, pixel_consoles, pixel_controllers
 
 THEMES = {module.NAME: module for module in (pixel_consoles, pixel_controllers)}
 
@@ -69,3 +70,36 @@ def build(selected, out=None):
             bases[module.BASE] = fetch_base(module.BASE)
         built[name] = module.build(bases[module.BASE], out)
     return built
+
+
+@dataclass
+class Plan:
+    name: str
+    adopt: bool = False
+    new: list = field(default_factory=list)
+    changed: list = field(default_factory=list)
+    same: list = field(default_factory=list)
+    stale: list = field(default_factory=list)  # storage keys
+    skipped: str | None = None
+
+
+def plan_publish(name, built, listing, state, downloaded):
+    """What publishing the built folder does to storage: listing is {key: size} under the theme's folder, state the
+    manifest, downloaded the folders `themes update` made (never touched)."""
+    if name in downloaded:
+        return Plan(name, skipped=f"{name} is a downloaded theme")
+    prefix = f"{runtime.SPRUCE_THEMES_PREFIX}{name}/"
+    listing = {k: v for k, v in listing.items() if k.startswith(prefix)}
+    recorded = (state.get(name) or {}).get("files", {})
+    plan = Plan(name, adopt=bool(listing) and name not in state)
+    tree = manifest.hash_tree(built)
+    for rel, (digest, size) in sorted(tree.items()):
+        key = prefix + rel
+        if key not in listing:
+            plan.new.append(rel)
+        elif list(recorded.get(rel) or ()) != [digest, size] or listing[key] != size:
+            plan.changed.append(rel)
+        else:
+            plan.same.append(rel)
+    plan.stale = sorted(k for k in listing if k[len(prefix):] not in tree)
+    return plan

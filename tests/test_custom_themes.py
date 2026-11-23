@@ -188,5 +188,81 @@ class Fetch(helpers.StorageDir):
         self.assertIn("themes update", "".join(c.args[0] for c in err.write.call_args_list))
 
 
+P = "os/spruceos/themes/Pixel Consoles/"
+
+
+def tree(root, files):
+    for rel, data in files.items():
+        path = os.path.join(root, rel)
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "wb") as f:
+            f.write(data)
+
+
+class PlanPublish(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        tree(self.tmp.name, {"a.png": b"aaa", "d/b.png": b"bbb", "c.png": b"ccc"})
+        self.h = custom_themes.manifest.hash_tree(self.tmp.name)
+
+    def state(self, **over):
+        files = {rel: list(v) for rel, v in self.h.items()}
+        files.update(over)
+        return {"Pixel Consoles": {"files": files}}
+
+    def plan(self, listing, state, downloaded=()):
+        return custom_themes.plan_publish("Pixel Consoles", self.tmp.name, listing, state, set(downloaded))
+
+    def test_classifies(self):
+        listing = {P + "a.png": 3, P + "d/b.png": 3, P + "old.png": 9}
+        state = self.state(**{"a.png": ["0" * 64, 3]})  # same size, different hash
+        plan = self.plan(listing, state)
+        self.assertEqual((plan.new, plan.changed, plan.same, plan.stale, plan.adopt, plan.skipped),
+                         (["c.png"], ["a.png"], ["d/b.png"], [P + "old.png"], False, None))
+
+    def test_listed_size_differs(self):
+        plan = self.plan({P + "a.png": 4, P + "d/b.png": 3, P + "c.png": 3}, self.state())
+        self.assertEqual((plan.changed, plan.same), (["a.png"], ["c.png", "d/b.png"]))
+
+    def test_adopts_existing_folder(self):
+        plan = self.plan({P + "a.png": 3, P + "x.png": 1}, {})
+        self.assertTrue(plan.adopt)
+        self.assertEqual((plan.changed, plan.new, plan.same, plan.stale), (["a.png"], ["c.png", "d/b.png"], [], [P + "x.png"]))
+
+    def test_new_folder_is_not_adopted(self):
+        plan = self.plan({}, {})
+        self.assertFalse(plan.adopt)
+        self.assertEqual(plan.new, ["a.png", "c.png", "d/b.png"])
+
+    def test_sibling_prefix_never_stale(self):
+        plan = self.plan({P + "a.png": 3, "os/spruceos/themes/Pixel Consoles 2/x.png": 1}, self.state())
+        self.assertEqual(plan.stale, [])
+
+    def test_downloaded_is_skipped(self):
+        plan = self.plan({P + "a.png": 3}, {}, downloaded={"Pixel Consoles"})
+        self.assertTrue(plan.skipped)
+        self.assertEqual((plan.new, plan.changed, plan.same, plan.stale), ([], [], [], []))
+
+
+class Manifest(helpers.StorageDir):
+    def test_read_missing(self):
+        self.assertEqual(custom_themes.manifest.read(), {})
+
+    def test_update_keeps_other_keys(self):
+        m = custom_themes.manifest
+        m.update(lambda d: d.update({"A": {"files": {"x": ["h", 1]}}, "B": {"files": {}}}))
+        self.assertEqual(m.read()["A"]["files"], {"x": ["h", 1]})
+        m.update(lambda d: d.__delitem__("A"))
+        self.assertEqual(m.read(), {"B": {"files": {}}})
+        with open(os.path.join(self.root, runtime.CUSTOM_THEMES_STATE)) as f:
+            self.assertTrue(f.read().endswith("}\n"))
+
+    def test_hash_tree_skips_junk(self):
+        tmp = os.path.join(self.tmp.name, "t")
+        tree(tmp, {"a.png": b"a", ".DS_Store": b"x", "d/._b": b"x", "d/b.png": b"b"})
+        self.assertEqual(sorted(custom_themes.manifest.hash_tree(tmp)), ["a.png", "d/b.png"])
+
+
 if __name__ == "__main__":
     unittest.main()
