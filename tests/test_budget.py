@@ -39,12 +39,22 @@ class Budget(DataDir):
     def test_layout_without_scrapes(self):
         self.assertEqual(self.usage({"games": {"gba": [g("gba/A.zip")]}}, "other").bytes, 100)
 
-    def test_collection_games_count_like_picks_and_ignore_exclusions(self):
+    def test_collection_games_honour_exclusions(self):
         fav = {"id": "fav", "name": "Fav", "games": [{"system": "gba", "bucket": "gba/C.zip"}, {"system": "gba", "bucket": "gba/A.zip"}]}
         with mock.patch("sync_roms.collections.load_collections", lambda: [fav]):
             u = self.usage({"games": {"gba": [g("gba/A.zip")]}, "collections": ["fav"],
                             "excluded": {"gba": ["gba/C.zip"]}}, "other")
-        self.assertEqual((u.bytes, u.count), (500, 2))
+        self.assertEqual((u.bytes, u.count), (100, 1))  # gba/C.zip is excluded
+
+    def test_an_off_system_is_empty(self):
+        for games in ([g("gba/A.zip")], {"full_system": True}):
+            self.assertEqual(tuple(self.usage({"games": {"gba": games}, "systems_off": ["gba"]}, "onion")), (0, 0, False))
+
+    def test_card_usage_has_no_bios_for_an_off_system(self):
+        self.cache["BIOS/"] = {"BIOS/gba_bios.bin": 16}
+        gba = {**GBA, "bios": {"files": ["gba_bios.bin"]}}
+        off = {"layout": "other", "games": {"gba": [g("gba/A.zip")]}, "systems_off": ["gba"]}
+        self.assertEqual(budget.card_usage(off, [gba]).bytes, budget.card_usage({"layout": "other"}, [gba]).bytes)
 
     def test_direct_and_set_count_once(self):
         u = self.usage({"games": {"gba": [g("gba/A.zip")], "sets": ["s"]}}, "other")

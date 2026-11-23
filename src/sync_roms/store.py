@@ -239,6 +239,12 @@ def card_excluded(card, cards=None):
     return excluded if isinstance(excluded, dict) else {}
 
 
+def systems_off(entry):
+    """The set of system ids nothing syncs for on a card, from its cards.json entry's `systems_off`."""
+    ids = entry.get("systems_off") if isinstance(entry, dict) else None
+    return {i for i in ids if isinstance(i, str)} if isinstance(ids, list) else set()
+
+
 def _game_keys(game):
     """A locked game's (system, [bucket key, then its files]), or None when it isn't a usable game entry."""
     if not isinstance(game, dict):
@@ -249,27 +255,30 @@ def _game_keys(game):
     return system, [bucket] + [k for k in (files if isinstance(files, list) else ()) if isinstance(k, str) and k]
 
 
-def card_locked_games(entry, collections_by_id):
+def card_locked_games(entry, collections_by_id, excluded=None):
     """The games a card's collections add, then its current surprises (when Surprise is on),
     {system bucket: [{"title", "bucket", "from"}]}: one entry per key of a game (its bucket key, then its files),
-    the first occurrence winning within a system. Ids that don't load and malformed games are skipped."""
+    the first occurrence winning within a system. Ids that don't load and malformed games are skipped.
+    excluded: {system bucket: [keys]} whose keys a collection's games leave out (surprises are never left out)."""
     from . import surprise  # surprise imports store
     ids = entry.get("collections") if isinstance(entry, dict) else None
     locked = {}
 
-    def add(game, label):
+    def add(game, label, skip=()):
         parsed = _game_keys(game)
         if parsed:
             seen = locked.setdefault(parsed[0], [])
             for key in parsed[1]:
-                if all(g["bucket"] != key for g in seen):
+                if key not in skip and all(g["bucket"] != key for g in seen):
                     seen.append({"title": game.get("title"), "bucket": key, "from": label})
 
     from . import themeart  # here: themeart imports store
     for cid in ids if isinstance(ids, list) else ():
         coll = collections_by_id.get(cid)
         for game in (coll or {}).get("games", []):
-            add(game, f"{themeart.collection_emoji(coll)} {coll['name']}")
+            parsed = _game_keys(game)
+            skip = (excluded or {}).get(parsed[0]) if parsed else None
+            add(game, f"{themeart.collection_emoji(coll)} {coll['name']}", skip if isinstance(skip, list) else ())
     if isinstance(entry, dict) and surprise.enabled(entry):
         picks = entry.get("surprises")
         for game in picks if isinstance(picks, list) else ():
@@ -408,10 +417,11 @@ def load_catalog():
     return catalog
 
 
-def load_manifest(card_names=()):
+def load_manifest(card_names=(), keep_off=False):
     """Systems, devices and layouts from the repo, joined with the games of the named cards (their picks, set
     references and full systems, plus the games of their collections and, with Surprise on, their current
-    surprises) and the device-system overlay. No cards means no games."""
+    surprises) and the device-system overlay. No cards means no games. A one-card manifest empties the card's
+    systems_off, unless keep_off."""
     sets = load_sets()
     cards = load_cards()
     warn_unknown_sets(sets, cards)
@@ -425,8 +435,15 @@ def load_manifest(card_names=()):
             s["games"] = [g for g in s["games"] if g.get("bucket") not in skip]
     from . import collections
     by_id = {c["id"]: c for c in collections.load_collections()}
+    one = card_names[0] if len(card_names) == 1 else None
     for n in card_names:
-        merge_locked(manifest["systems"], card_locked_games(cards.get(n) or {}, by_id))
+        merge_locked(manifest["systems"], card_locked_games(cards.get(n) or {}, by_id,
+                                                            card_excluded(n, cards) if n == one else None))
+    if one and not keep_off:
+        off = systems_off(cards.get(one))
+        for s in manifest["systems"]:
+            if s["bucket"] in off:
+                s["games"], s["full_system"] = [], False
     apply_device_overlay(manifest["devices"], manifest["systems"], load_overlay())
     return manifest
 

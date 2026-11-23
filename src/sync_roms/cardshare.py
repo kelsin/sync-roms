@@ -24,21 +24,24 @@ def _plain(game):
 
 def export_entry(entry, collections_by_id):
     """A card as shared: its KEPT fields, with its collections' games and every surprise (on or off) flattened into
-    `games` under their system, skipping buckets already listed there, and taken out of `excluded` (which never
-    applied to them). A full system gets none; unknown ids and malformed games are skipped. The input is not changed."""
+    `games` under their system, skipping buckets already listed there. A collection game the card unticked
+    (in `excluded`) isn't flattened and stays excluded; a surprise is always flattened and leaves `excluded`. A full system gets none; unknown ids and malformed games are skipped. The input is not changed."""
     out = {k: copy.deepcopy(entry[k]) for k in KEPT if k in entry}
     games = out.setdefault("games", {})
     if not isinstance(games, dict):
         return out
+    unticked = entry.get("excluded") if isinstance(entry.get("excluded"), dict) else {}
     picks = []
     for cid in entry.get("collections") or ():
-        picks += (collections_by_id.get(cid) or {}).get("games", [])
-    picks += entry.get("surprises") or []
-    for game in picks:
+        picks += [(g, True) for g in (collections_by_id.get(cid) or {}).get("games", [])]
+    picks += [(g, False) for g in entry.get("surprises") or []]
+    for game, from_collection in picks:
         parsed = _plain(game)
         if not parsed:
             continue
         system, plain = parsed
+        if from_collection and isinstance(unticked.get(system), list) and plain["bucket"] in unticked[system]:
+            continue
         have = games.setdefault(system, [])
         if isinstance(have, list) and all(g.get("bucket") != plain["bucket"] for g in have if isinstance(g, dict)):
             have.append(plain)

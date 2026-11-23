@@ -13,6 +13,11 @@
         "type": "array",
         "items": {"type": "string"}
       },
+      "systems_off": {
+        "description": "System ids turned off on this card: nothing syncs for them, the picks stay saved",
+        "type": "array",
+        "items": {"type": "string"}
+      },
       "collections": {
         "description": "Ids of the user's collections synced whole to this card",
         "type": "array",

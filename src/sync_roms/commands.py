@@ -454,7 +454,8 @@ def cards_list(args):
             entry, systems = cardedit.card_entry(name, setup, cards), cardedit.can_play(manifest["systems"], setup)
             usages = budget.system_usages(entry, systems)
             usage = budget.card_usage(entry, systems, usages)
-            full = {b for b in usages if isinstance(games.get(b), dict) and games[b].get("full_system")}
+            off = store.systems_off(entry)
+            full = {b for b in usages if isinstance(games.get(b), dict) and games[b].get("full_system") and b not in off}
             picked = sum(u.count for b, u in usages.items() if b not in full)  # direct, set and collection games
         rows.append({"name": name, "device": (setup[0]["id"] if setup[0] else "full") if setup else None,
                      "layout": setup[1] if setup else None, "size": cards[name].get("size") if isinstance(cards[name], dict) else None,
@@ -588,7 +589,7 @@ def cards_copy(args):
     if setup is None:
         ui.fail(f"Card {args.dst!r} has no usable device and layout", 2)
     playable = {s["bucket"] for s in catalog["systems"] if store.system_applies(s, *setup)}
-    dst_synced = {s["bucket"]: set(store.listed(s)) for s in store.load_manifest([args.dst])["systems"]}
+    dst_synced = {s["bucket"]: set(store.listed(s)) for s in store.load_manifest([args.dst], keep_off=True)["systems"]}
     cards = store.load_cards()
     entry, counts, skipped = cardshare.copy_selections(cards[args.src], cards[args.dst], playable, dst_synced)
     shown = f"{counts['games']} games, {counts['full']} full systems, {counts['sets']} sets, {counts['collections']} collections, {counts['excluded']} exclusions"

@@ -88,6 +88,14 @@ class Pure(unittest.TestCase):
         self.assertEqual(extras[1], [("  ⚪", "dim"), ("", "dim"), ("  🗂️  45 GB full", "dim")])  # nothing picked
         self.assertEqual(extras[2], [("  🟢 1 file", "green"), ("  7 GB", "dim"), ("  🗂️  full system", "cyan")])
 
+    def test_system_labels_mark_an_off_system(self):
+        card = {"games": {"gba": [g("gba/Ruby.zip")]}, "systems_off": ["gba"]}
+        usages = {"gba": U(0, 0, False), "gb": U(0, 0, False)}
+        full = {"gba": U(9 * 10 ** 9, 30, False), "gb": U(45 * 10 ** 9, 1234, False)}
+        extras = cardedit.system_labels(card, [GBA, GB], set(), usages, full)[1]
+        self.assertEqual(extras[0], [("  🚫 off", "red"), ("", "dim"), ("  🗂️  9 GB full", "dim")])
+        self.assertEqual(extras[1][0], ("  ⚪", "dim"))
+
     def test_system_labels_while_full_sizes_are_unknown(self):
         card = {"games": {"psx": {"full_system": True}}}
         usages = {"gba": U(2 * 10 ** 9, 4, False), "gb": U(0, 0, False), "psx": U(0, 0, True)}
@@ -451,17 +459,39 @@ class Flow(DataDir):
         self.assertEqual(len(calls), 2)  # the system list twice, no collection list
         self.assertIn("sync-roms collections edit", note.call_args[0][0])
 
-    def test_collection_games_are_on_locked_and_marked_even_when_excluded(self):
+    def test_collection_games_are_on_unlocked_and_marked(self):
+        self.favs()
+        self.card(collections=["favs"])
+        _, calls = self.run_system(toggle())
+        _, labels, kw = calls[0]
+        i = labels.index("Ruby.zip")
+        self.assertTrue(kw["initial"][i])
+        self.assertFalse(kw["locked"][i])
+        self.assertEqual(kw["locked_note"][i], "")
+        self.assertIn(("  💖 Favs", "cyan"), kw["extras"][i])
+
+    def test_an_excluded_collection_game_shows_off(self):
         self.favs()
         self.card(collections=["favs"], excluded={"gba": ["gba/Ruby.zip"]})
         changed, calls = self.run_system(toggle())
         _, labels, kw = calls[0]
         i = labels.index("Ruby.zip")
-        self.assertTrue(kw["initial"][i])
-        self.assertEqual([n for n, on in enumerate(kw["locked"]) if on], [i])
-        self.assertEqual(kw["locked_note"][i], "From 💖 Favs; take it off the card to remove this game")
+        self.assertFalse(kw["initial"][i])
+        self.assertFalse(kw["locked"][i])
         self.assertIn(("  💖 Favs", "cyan"), kw["extras"][i])
         self.assertFalse(changed)
+
+    def test_a_surprise_that_is_also_an_excluded_collection_game_is_on_locked_and_marked_surprise(self):
+        self.favs()
+        self.card(collections=["favs"], excluded={"gba": ["gba/Ruby.zip"]},
+                  surprises=[{"system": "gba", "bucket": "gba/Ruby.zip", "title": "Ruby"}])
+        _, calls = self.run_system(toggle())
+        _, labels, kw = calls[0]
+        i = labels.index("Ruby.zip")
+        self.assertTrue(kw["initial"][i])
+        self.assertTrue(kw["locked"][i])
+        self.assertEqual(kw["locked_note"][i], "From 🎁 Surprise; take it off the card to remove this game")
+        self.assertIn(("  🎁 Surprise", "cyan"), kw["extras"][i])
 
     def test_collection_games_count_in_the_game_view_and_system_list(self):
         self.favs()
@@ -670,6 +700,31 @@ class Flow(DataDir):
         self.run_card(returns((cardedit.FULL_KEY, 1)), look, returns(None))
         self.assertEqual(seen[0], {"gba": {"full_system": True, "games": [g("gba/Ruby.zip")]}})
         self.assertEqual(store.card_games("c"), {"gba": [g("gba/Ruby.zip")]})
+
+    def test_x_turns_a_system_off_and_on_in_place(self):
+        self.card(games={"gba": [g("gba/Ruby.zip")]})
+        seen = []
+
+        def look_off(labels, kw):
+            seen.append(kw["extras"][1][0])
+            self.assertEqual(store.saved_card("c")["systems_off"], ["gba"])
+            return (cardedit.OFF_KEY, 1)
+        self.run_card(returns((cardedit.OFF_KEY, 1)), look_off, returns(None))
+        self.assertEqual(seen, [("  🚫 off", "red")])
+        self.assertNotIn("systems_off", store.saved_card("c"))
+        self.assertEqual(store.card_games("c"), {"gba": [g("gba/Ruby.zip")]})
+
+    def test_an_off_system_still_opens_with_a_notice(self):
+        self.card(games={"gba": [g("gba/Ruby.zip")]}, systems_off=["gba"])
+        calls = self.run_card(returns(1), lambda labels, kw: kw["initial"], returns(None))
+        self.assertTrue(calls[1][0].endswith(" · 🚫 off on this card"), calls[1][0])
+
+    def test_clear_all_leaves_systems_off_alone(self):
+        self.card(games={"gba": [g("gba/Ruby.zip")]}, systems_off=["gba"])
+        with mock.patch.object(ui, "confirm", return_value=True):
+            self.run_card(returns((cardedit.CLEAR_ALL_KEY, 0)), returns(None))
+        self.assertEqual(store.card_games("c"), {})
+        self.assertEqual(store.saved_card("c")["systems_off"], ["gba"])
 
     def test_clear_all_hotkey_empties_the_card_after_confirming(self):
         entry = {"games": {"gba": [g("gba/Ruby.zip")], "gb": {"full_system": True}, "sets": ["pk"]},
