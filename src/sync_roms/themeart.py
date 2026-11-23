@@ -9,9 +9,9 @@ import os
 import shutil
 import tarfile
 import tempfile
+import time
 from xml.sax import saxutils
 import zlib
-from concurrent.futures import ThreadPoolExecutor
 
 from . import cardfs, downloads, frontend, github, rocknix_collections, runtime, s3, store, ui
 
@@ -375,11 +375,17 @@ def update_storage(dry_run=False):
                     moved = ui.ByteProgress([size])
                     bar = ui.ProgressBar(1, moved.fraction, moved.total, active=lambda: moved.active(["Art Book Next"]))
                     print(ui.bold("⬇️  Downloading Art Book Next") + ui.dim(f"  {ui.human_size(size)}"))
-                    ex = ThreadPoolExecutor(1)
+                    last = 0.0
+
+                    def progress(n):  # in this thread, so ^C interrupts the read itself
+                        nonlocal last
+                        moved.add(0, n)
+                        if time.monotonic() - last >= ui.POLL:
+                            last = time.monotonic()
+                            bar.draw(0)
                     try:
-                        ui.wait_drawing(bar, 0, ex.submit(github.save, r, path, lambda n: moved.add(0, n)).result)
-                    finally:  # no wait: ^C must not sit out the rest of the download
-                        ex.shutdown(wait=False, cancel_futures=True)
+                        github.save(r, path, progress)
+                    finally:
                         bar.clear()
                 else:
                     print("⬇️  Downloading Art Book Next…")
