@@ -13,6 +13,7 @@ from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError
 from . import __version__, budget, cardedit, cardfs, clean, commands, downloads, drivers, edit, external, frontend, inventory, m3u, mirroring, picker, runtime, s3, scrape_plan, store
 from . import muos_collections, nextui_folders, onion_surprise, pico8, raofflineproxy, rocknix_collections, saves, spruce_collections, spruce_bootlogo, spruce_emu, spruce_os, spruce_fixes, spruce_settings, spruce_syncthing, spruce_themes, spruce_wifi, surprise, themeart, ui, usersettings, vita
 from . import collections as colls
+from . import guest as guests
 
 
 SUBCOMMANDS = {  # name -> (usage, one-line summary)
@@ -80,6 +81,9 @@ TOPICS = {
   --no-delete never delete anything from the card: ROMs no longer in the lists, their media, old drivers and empty
               system folders are listed as kept and the delete prompt is skipped (for adding games to a card
               someone set up by hand)
+  --guest     make CARD a guest card (saved; F in the card editor turns it off): its picks are seeded from the storage
+              ROMs on it, only ROMs, BIOS and scrapes are copied, no file on it is overwritten, and only the seeded ROMs
+              you deselect are deleted, with their media
   --no-clean  skip the end-of-run card tidy (.metadata_never_index, .fseventsd, ._ files)
   --no-eject  leave the card mounted (by default a Mac unmounts all of its volumes after a run with no failures;
               "eject": false in settings.json turns that off for every run)
@@ -631,7 +635,7 @@ LEGACY = {
 WORDS = {flags[0]: " ".join(words) for words, flags in LEGACY.items() if flags}  # mode flag -> its command, for messages
 TYPED = None  # (command words, mode flag) of the command translate() last rewrote, for Parser.error
 BOOL_FLAGS = {"-n", "--dry-run", "-y", "--yes", "-a", "--ask"}
-PLAIN_FLAGS = BOOL_FLAGS | {"--replace", "--json", "--no-clean", "--no-delete", "--no-eject", "--retry", "--all", "--fill-media", "--set-credentials",
+PLAIN_FLAGS = BOOL_FLAGS | {"--replace", "--json", "--guest", "--no-clean", "--no-delete", "--no-eject", "--retry", "--all", "--fill-media", "--set-credentials",
                             "--translated"}
 VALUE_FLAGS = {"--system", "--device", "--layout", "--device-id", "--skip-media", "--for", "--workers"}
 
@@ -708,6 +712,7 @@ def build_parser():
     ap.add_argument("--system")
     ap.add_argument("--device")
     ap.add_argument("--layout")
+    ap.add_argument("--guest", action="store_true")
     ap.add_argument("--no-clean", action="store_true")
     ap.add_argument("--no-delete", action="store_true")
     ap.add_argument("--no-eject", action="store_true")
@@ -737,8 +742,8 @@ def check_modes(args):
         ui.fail(f"--dry-run has no effect on `{name}`", 2)
     if args.ask and mode:
         ui.fail(f"--ask only applies to syncing a card, not `{name}`", 2)
-    if (args.device or args.layout or args.no_clean or args.no_delete or args.no_eject) and mode:
-        ui.fail(f"--device, --layout, --no-clean, --no-delete and --no-eject only apply to syncing a card, not `{name}`", 2)
+    if (args.device or args.layout or args.guest or args.no_clean or args.no_delete or args.no_eject) and mode:
+        ui.fail(f"--device, --layout, --guest, --no-clean, --no-delete and --no-eject only apply to syncing a card, not `{name}`", 2)
     if args.base_dir and mode == "--clean-scrapes":
         ui.fail(f"`clean scrapes` doesn't take a folder ({args.base_dir!r})", 2)
     if mode == "--scrape" and args.base_dir:  # `scrape gba`, like `scrape missing gba`
@@ -1061,12 +1066,17 @@ def sync_card(args):
     if chosen_setup is None:
         return 0
     device, layout_name, dirs = chosen_setup
+    if args.guest and not args.dry_run:
+        store.update_card(card, guest=True)
+    # a friend's card: only ROMs, BIOS and scrapes are copied, and only the ROMs deselected this session are deleted.
+    # Stays a guest sync for this run even when the card editor turns the flag off
+    guest = args.guest or guests.is_guest(store.saved_card(card))
     layout = layouts[layout_name]
     disc_dir = layout.get("disc_dir")  # multi-disc games' discs go in this hidden folder, their playlist beside it (Onion)
     disc_folders = layout.get("disc_folders")  # each disc game goes in a folder of its own (NextUI)
     onion = layout_name in scrape_plan.ONION_LAYOUTS
     roms_dir, bios_dir = dirs
-    if layout_name == "nextui":  # folders an earlier sync named differently from NextUI move rather than download again
+    if layout_name == "nextui" and not guest:  # folders an earlier sync named differently from NextUI move rather than download again
         for old, new in nextui_folders.migrate(roms_dir, args.dry_run):
             print(ui.dim(f"  📦 {'would rename' if args.dry_run else 'Renamed'} {old} → {new}"))
         cardfs.clear()
@@ -1084,8 +1094,10 @@ def sync_card(args):
     unsupported = len(systems) - len(dropped) - len(synced(systems))  # of the systems the device runs
     if unsupported:
         print(ui.dim(f"  {unsupported} system(s) have no {layout['label']} folder and are skipped"))
+    if guest:  # nothing on a friend's card is unwanted for being in a system the device doesn't list
+        dropped = []
     systems = synced(systems)
-    if layout_name == "spruce":  # the folders an earlier sync used for a system that now uses another: all of it is unwanted
+    if layout_name == "spruce" and not guest:  # the folders an earlier sync used for a system that now uses another: all of it is unwanted
         legacy = spruce_emu.legacy_systems(systems)
         dropped += legacy
         manifest["systems"] = [*manifest["systems"], *legacy]
@@ -1190,15 +1202,52 @@ def sync_card(args):
         relist()
         saved = store.saved_card(card)
 
-    # surprises come in two steps: which ones to replace first (then the card editor, which shows the ones kept), and
-    # the empty slots last, right before the sync, from every system the card's device supports, games picked or not
-    surprise.run_surprise(card, (device, layout_name), systems, interactive, args.dry_run, to_fetch=to_fetch,
-                       card_match=card_match)
-    if not args.dry_run:  # the step (and the card editor it opens) may have changed the card's games
-        reload_changes()
-    surprise.fill_surprises(card, (device, layout_name), systems, args.dry_run)
-    if not args.dry_run:
-        reload_changes()
+    seed = {}  # guest syncs: {system id: {storage key: card path}}, the storage ROMs on the card when seeded
+
+    def reseed():
+        """Make the storage ROMs on the card (a matching name and storage's size) the card's picks, replacing the ones
+        saved before: in cards.json, or in memory on a dry run."""
+        seed.clear()
+        for s in systems:
+            dest = os.path.join(roms_dir, s["folders"][layout_name])
+            found = {}
+            if cardfs.is_dir(dest):
+                keys = sorted(k for k in inventory.files(s["bucket"] + "/", sizes=False) if not k.endswith("/"))
+                folders = m3u.game_folders(keys) if disc_folders else None
+                named = guests.named(dest, keys, disc_dir, folders)  # sizes only for these: a share is slow to stat
+                if named:
+                    found = guests.recognized(dest, keys, inventory.stat(sorted(named)), disc_dir, folders)
+            seed[s["bucket"]] = found
+        if args.dry_run:
+            guests.apply_seed(systems, seed)
+            listings.clear()
+            relist()
+        else:
+            guests.save_seed(card, seed)
+            reload_changes()
+
+    if guest:  # no Surprise: the card editor opens on the picks seeded from the card
+        reseed()
+        if interactive and not args.dry_run:
+            cardedit.edit_card(card, (device, layout_name), to_fetch, card_match)
+            reload_changes()
+    else:
+        def on_guest():
+            """F in the card editor turned the card into a guest card: this sync is a guest sync from here."""
+            nonlocal guest
+            guest = True
+            reseed()
+
+        # surprises come in two steps: which ones to replace first (then the card editor, which shows the ones kept), and
+        # the empty slots last, right before the sync, from every system the card's device supports, games picked or not
+        surprise.run_surprise(card, (device, layout_name), systems, interactive, args.dry_run, to_fetch=to_fetch,
+                              card_match=card_match, on_guest=on_guest)
+        if not args.dry_run:  # the step (and the card editor it opens) may have changed the card's games
+            reload_changes()
+        if not guest:
+            surprise.fill_surprises(card, (device, layout_name), systems, args.dry_run)
+        if not args.dry_run:
+            reload_changes()
 
     def install_apps(dry_run, wrote=None):
         """Put PICO-8 (wrote, a list, gets what it put), the Surprise app and RAOfflineProxy on the card. The failure count."""
@@ -1218,11 +1267,18 @@ def sync_card(args):
         return failed
 
     chosen = [s for s in systems if available(s)]
-    if not chosen:
-        failed = install_apps(args.dry_run)
-        if onion_surprise.write_list(card, layout_name, base, roms_dir, systems, args.dry_run) and clean_card:
-            clean._clean_root = base
-        failed += stage_spruce(args.dry_run)
+    deselected = []  # guest syncs: the seeded ROMs the card editor deselected, the only ROMs a guest sync deletes
+    if guest:
+        picked = {s["bucket"]: set(available(s)) for s in systems}
+        # x (systems_off) skips a system this sync, and a system no longer synced is never touched
+        deselected = guests.deletions(seed, picked, store.systems_off(store.saved_card(card)) | (set(seed) - set(picked)))
+    if not chosen and not deselected:
+        failed = 0
+        if not guest:
+            failed = install_apps(args.dry_run)
+            if onion_surprise.write_list(card, layout_name, base, roms_dir, systems, args.dry_run) and clean_card:
+                clean._clean_root = base
+            failed += stage_spruce(args.dry_run)
         print(ui.yellow(f"👋 {card} has nothing to sync."))
         return 1 if failed else 0
     print(ui.bold(f"\n🔎 Checking {len(chosen)} system(s) against storage..."))
@@ -1247,7 +1303,9 @@ def sync_card(args):
         if disc_keys:  # discs a past sync left loose go where they belong rather than being downloaded again
             moved.update(downloads.hide_discs(dest, disc_dir, disc_keys, args.dry_run))
         for key in wanted:
-            if key in have:
+            if key in seed.get(s["bucket"], {}):  # guest: where the card has it, as the card spells it
+                rom_jobs.append((key, seed[s["bucket"]][key], have[key]))
+            elif key in have:
                 downloads.add_job(rom_jobs, key, dest, downloads.rom_rel(key, disc_dir, disc_keys, folders_of(s)), have[key])
             else:
                 missing.append(key)
@@ -1271,7 +1329,9 @@ def sync_card(args):
         if t["folders"].get(layout_name):
             own_files[os.path.join(roms_dir, t["folders"][layout_name])].update(downloads.layout_files(layout_name, t))
     cardfs.clear()  # the discs moved above, and the card editor's previews listed the card a while ago
-    for dest in sorted({dest_of(s) for s in systems if s["bucket"] in chosen_ids or not available(s)} | dropped_dests):
+    if guest:  # no sweep of a friend's card: only what the card editor deselected
+        extras = list(deselected)
+    for dest in [] if guest else sorted({dest_of(s) for s in systems if s["bucket"] in chosen_ids or not available(s)} | dropped_dests):
         extras += downloads.find_extras(dest, dest_keys[dest], onion, disc_dir, dest_discs[dest], dest_bios[dest] | own_files[dest] | (pico8.keep_in(dest, card, layout_name) if dest in pico8_dests else set()), renames=renames, folders=dest_folders[dest], skip_saves=saves.beside_roms(layout))
 
     # BIOS for every system with ROMs already on the card too, even when this sync doesn't touch that system
@@ -1293,10 +1353,10 @@ def sync_card(args):
     apk_dir = os.path.join(base, "APKs")
     apk_jobs = ([(k, os.path.join(apk_dir, k[len(runtime.APKS_PREFIX):]), size) for k, size in sorted(inventory.files(runtime.APKS_PREFIX, sizes=False).items())
                  if not k.endswith("/") and (store.card_flag(store.saved_card(card), "raofflineproxy")
-                                             or not raofflineproxy.APK_NAME.fullmatch(os.path.basename(k)))] if layout_name == "esde" else [])
+                                             or not raofflineproxy.APK_NAME.fullmatch(os.path.basename(k)))] if layout_name == "esde" and not guest else [])
     apk_jobs = downloads.with_sizes(apk_jobs)
     # and the suggested GPU drivers for the device's Adreno GPU, kept up to date in storage first, in a Drivers/ folder
-    driver_entries = drivers.for_device(device, layout_name)
+    driver_entries = [] if guest else drivers.for_device(device, layout_name)
     drivers_dir = os.path.join(base, "Drivers")
     if driver_entries:
         if drivers.can_write():
@@ -1308,7 +1368,7 @@ def sync_card(args):
     # Onion cards also get storage's os/onion/Themes/ folders in the card's Themes/
     themes_dir = layout.get("themes_dir")
     theme_jobs = []
-    if themes_dir:
+    if themes_dir and not guest:
         for k, size in sorted(inventory.files(runtime.THEMES_PREFIX, sizes=False).items()):
             rel = k[len(runtime.THEMES_PREFIX):]
             if k.endswith("/") or os.path.basename(rel) == ".DS_Store":
@@ -1318,7 +1378,7 @@ def sync_card(args):
     theme_jobs = downloads.with_sizes(theme_jobs)
     # spruce cards get the PyUI themes of the default list and the card's current theme in Themes/
     theme_plan = None
-    if layout_name == "spruce":
+    if layout_name == "spruce" and not guest:
         theme_names = spruce_themes.default_list()
         theme_plan = spruce_themes.plan(card, base, theme_names, args.no_delete)
         theme_jobs = downloads.with_sizes(theme_plan["jobs"])
@@ -1327,6 +1387,8 @@ def sync_card(args):
     apk_todo = downloads.plan_downloads(apk_jobs)
     driver_todo = downloads.plan_downloads(driver_jobs)
     theme_todo = spruce_themes.todo(theme_jobs) if theme_plan else downloads.plan_downloads(theme_jobs)
+    if guest:  # never overwrite a file on a friend's card
+        rom_todo, bios_todo = guests.new_files(rom_todo), guests.new_files(bios_todo)
     if args.dry_run:  # the real run moves these first, so they are already there and not extras
         rom_todo = [j for j in rom_todo if j[1] not in moved]
         extras = [p for p in extras if not moved or os.path.join(os.path.dirname(p), disc_dir, os.path.basename(p)) not in moved]
@@ -1335,7 +1397,7 @@ def sync_card(args):
     # card files spelled differently from storage are renamed, and unwanted ones that match a missing file are moved
     # there, before the downloads: neither is downloaded or deleted
     rom_todo, bios_todo = downloads.after_renames(rom_todo, renames, disc_dir), downloads.after_renames(bios_todo, renames)
-    card_moves = downloads.plan_moves(rom_todo + bios_todo, {p: cardfs.size(p) for p in extras})
+    card_moves = [] if guest else downloads.plan_moves(rom_todo + bios_todo, {p: cardfs.size(p) for p in extras})
     moved_jobs, moved_from = {j for _, j in card_moves}, {p for p, _ in card_moves}
     bios_moves = moved_jobs.intersection(bios_todo)
     extras = [p for p in extras if p not in moved_from]
@@ -1376,7 +1438,26 @@ def sync_card(args):
         if esde_problem and plan["gamelists"]:
             skipped()
             plan["gamelists"] = {}
+        if guest:  # never overwrite a file on a friend's card, nor a gamelist entry
+            plan["jobs"] = guests.new_files(plan["jobs"])
+            plan["writes"] = [w for w in plan["writes"] if cardfs.size(w[0]) is None]
+            plan["gamelists"] = guests.new_gamelist_entries(plan["gamelists"])
         return plan
+
+    def deleted_media(paths):
+        """Guest syncs: the media on the card of the seeded ROMs at paths, where this layout names them."""
+        gone = defaultdict(list)
+        for bucket, found in seed.items():
+            gone[bucket] += [k.split("/", 1)[1] for k, path in found.items() if path in paths]
+        those = [s for s in systems if gone.get(s["bucket"])]
+        if not (scrapes and those):
+            return []
+        plan = scrape_plan.build_scrape_plan(layout_name, those, scrape_plan.load_scrape_data(those), gone, dest_of, es_dir,
+                                             lambda path: True, base, all_media=True)
+        return sorted({p for p in [j[1] for j in plan["jobs"]] + [w[0] for w in plan["writes"]] if cardfs.size(p) is not None})
+
+    # computed before the ROMs go; removed after, only those no ROM left on the card still names
+    media_gone = deleted_media(set(extras) | set(kept_extras)) if guest else []
 
     # the media of every ROM that will be on the card, so the totals and the space check count it
     planned = build_plan(lambda path: True) if scrapes else None
@@ -1519,7 +1600,7 @@ def sync_card(args):
             for name in old:
                 print(f"  {ui.red('would delete')} {os.path.join(drivers_dir, name)}" if dry_run else ui.green(f"🧹 Removed old driver {name}"))
 
-    capacity = budget.card_capacity(saved) if surprise.enabled(saved) else None
+    capacity = budget.card_capacity(saved) if surprise.enabled(saved) and not guest else None
     if capacity:
         used = budget.card_usage(cardedit.card_entry(card, (device, layout_name)), systems).bytes
         if used > capacity:
@@ -1553,21 +1634,24 @@ def sync_card(args):
         if theme_plan:
             spruce_themes.remove(base, theme_plan["remove"], True)
             spruce_themes.select(card, base, True)
-        prune_drivers(True)
-        install_apps(True)
-        stage_spruce(True)
+        if not guest:
+            prune_drivers(True)
+            install_apps(True)
+            stage_spruce(True)
         stale_count = 0
         if scrapes:
-            stale_files = scrape_plan.stale_media(layout_name, manifest['systems'], roms_dir, stale_es_dir, base)
+            stale_files = media_gone if guest else scrape_plan.stale_media(layout_name, manifest['systems'], roms_dir, stale_es_dir, base)
             if args.no_delete:
                 list_kept(stale_files, "media file(s) for ROMs that aren't on this card")
             else:
                 stale_count = len(stale_files)
                 print(f"🧹 Media on the card for ROMs it doesn't have: {stale_count} file(s) to remove")
-        frontend_step(True)
+        if not guest:
+            frontend_step(True)
         spruce_emu_step(True)
-        spruce_fixes.run(layout_name, base, True)
-        onion_surprise.write_list(card, layout_name, base, roms_dir, systems, True)
+        if not guest:
+            spruce_fixes.run(layout_name, base, True)
+            onion_surprise.write_list(card, layout_name, base, roms_dir, systems, True)
         plan_json["stale_media"] = stale_count
         plan_json["totals"] = {"files": len(todo_all), "bytes": total_bytes(todo_all), "delete": len(extras),
                                "stale_media": stale_count, "missing": len(missing)}
@@ -1651,9 +1735,11 @@ def sync_card(args):
     if driver_entries:
         failed += downloads.run_downloads(driver_todo, "Drivers", "🎮", drivers_dir, failures)
     # also when the card gets no drivers now (another device or layout): the ones sync copied before go
-    prune_drivers(False)
+    if not guest:
+        prune_drivers(False)
     pico8_wrote = []
-    failed += install_apps(False, pico8_wrote)
+    if not guest:
+        failed += install_apps(False, pico8_wrote)
     if theme_todo:
         with mirroring.storage_reads() if themes_picked else contextlib.nullcontext():
             failed += downloads.run_downloads(theme_todo, "Themes", "🎨", base if theme_plan else os.path.join(base, themes_dir), failures)
@@ -1669,7 +1755,7 @@ def sync_card(args):
     cardfs.clear()
 
     psvita_wrote = []
-    if layout_name in frontend.ESDE_LAYOUTS:  # ES-DE launches an installed Vita game through its .psvita file
+    if layout_name in frontend.ESDE_LAYOUTS and not guest:  # ES-DE launches an installed Vita game through its .psvita file
         for path, error in vita.add_psvita_files({dest_of(s) for s in chosen if s["bucket"] == "psvita"}, psvita_wrote):
             failed += 1
             failures.append((os.path.relpath(path, roms_dir), error))
@@ -1687,27 +1773,35 @@ def sync_card(args):
         if clean_card and wrote:
             clean._clean_root = base
         cardfs.clear()
-        stale = scrape_plan.stale_media(layout_name, manifest["systems"], roms_dir, stale_es_dir, base)
+        if not guest:
+            stale = scrape_plan.stale_media(layout_name, manifest["systems"], roms_dir, stale_es_dir, base)
+        elif media_gone and not args.no_delete:  # a picture another ROM on the card still names stays (a ROM kept at the prompt too)
+            swept = set(scrape_plan.stale_media(layout_name, systems, roms_dir, stale_es_dir, base))
+            stale = [p for p in media_gone if p in swept]
+        else:
+            stale = media_gone
     if args.no_delete:
         list_kept(stale, "media file(s) for ROMs that aren't on this card")
     else:
         remove_stale_media(stale)
     cardfs.clear()
-    for folder in [] if args.no_delete else scrape_plan.prune_empty_systems(layout_name, manifest["systems"], roms_dir):
+    for folder in [] if args.no_delete or guest else scrape_plan.prune_empty_systems(layout_name, manifest["systems"], roms_dir):
         print(ui.green(f"🧹 Removed empty system folder {os.path.relpath(folder, base)}"))
     cardfs.clear()
-    frontend_step(False)
+    if not guest:
+        frontend_step(False)
     spruce_emu_step(False)
-    if spruce_fixes.run(layout_name, base, False) and clean_card:
+    if not guest and spruce_fixes.run(layout_name, base, False) and clean_card:
         clean._clean_root = base
-    if onion_surprise.write_list(card, layout_name, base, roms_dir, systems, False) and clean_card:
+    if not guest and onion_surprise.write_list(card, layout_name, base, roms_dir, systems, False) and clean_card:
         clean._clean_root = base
     try:
         cardfs.flush()  # the frontend settings, before the card is reported done
     except OSError as e:
         failed += 1
         failures.append(("frontend settings", str(e)))
-    failed += stage_spruce(False)  # last: the 7z is large, and the card's other writes come first
+    if not guest:
+        failed += stage_spruce(False)  # last: the 7z is large, and the card's other writes come first
     if failures:
         report_failures(failures)
     if not failed and not args.no_eject and usersettings.load_settings().get("eject", True) is not False:

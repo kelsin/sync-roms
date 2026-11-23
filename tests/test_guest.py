@@ -33,6 +33,12 @@ class GuestTest(RealDataDirGuard):
         got = guest.recognized(self.dest, ["gba/Game.zip", "gba/Other.zip"], {"gba/Game.zip": 5, "gba/Other.zip": 3})
         self.assertEqual(got, {"gba/Game.zip": os.path.join(self.dest, "Game.zip")})
 
+    def test_named_matches_names_at_any_size(self):
+        self.card("GAME.zip", b"x" * 4)
+        self.card("Mine.zip")
+        got = guest.named(self.dest, ["gba/Game.zip", "gba/Other.zip"])
+        self.assertEqual(got, {"gba/Game.zip": os.path.join(self.dest, "GAME.zip")})
+
     def test_recognized_skips_a_different_size(self):
         self.card("Game.zip", b"x" * 4)
         self.assertEqual(guest.recognized(self.dest, ["gba/Game.zip"], {"gba/Game.zip": 5}), {})
@@ -75,6 +81,10 @@ class GuestTest(RealDataDirGuard):
     def test_deletions_are_seed_minus_picks_without_skipped(self):
         seed = {"gba": {"gba/A.zip": "/a", "gba/B.zip": "/b"}, "nes": {"nes/C.zip": "/c"}}
         self.assertEqual(guest.deletions(seed, {"gba": {"gba/A.zip"}}, {"nes"}), ["/b"])
+
+    def test_deletions_keep_a_file_another_kept_key_was_found_at(self):
+        seed = {"ws": {"ws/G.ws": "/g"}, "wsc": {"wsc/G.ws": "/g", "wsc/H.ws": "/h"}, "off": {"off/G.ws": "/h"}}
+        self.assertEqual(guest.deletions(seed, {"ws": {"ws/G.ws"}, "wsc": set()}, {"off"}), [])
 
     def test_new_files_drops_existing_paths(self):
         have = self.card("A.zip")

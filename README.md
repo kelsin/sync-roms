@@ -223,6 +223,7 @@ For one command:
 | --- | --- | --- |
 | `-a`, `--ask` | `sync` | Confirm the saved device and layout instead of using them silently |
 | `--device ID\|full`, `--layout NAME` | `sync`, `cards new`, `cards set` | Choose the setup without the picker (it is saved for the card). `cards convert` takes `--layout` too |
+| `--guest` | `sync` | Make the card a guest card (saved): each sync seeds its picks from the storage ROMs on it (name and size), copies only ROMs, BIOS and scrapes, never overwrites a file and deletes only the seeded ROMs you deselect, with their media |
 | `--no-delete`, `--no-clean`, `--no-eject` | `sync` | Never delete from the card (what would have been deleted is listed instead); skip the end-of-run card tidy; leave the card mounted |
 | `--size SIZE` | `cards new`, `cards set` | The card's size as people read it (`256`, `512GB`, `1TB`), shown by `cards list` and on sync |
 | `--card NAME` | `games` | The card whose games to change (required) |

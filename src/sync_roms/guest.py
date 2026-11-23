@@ -10,8 +10,9 @@ def is_guest(entry):
     return isinstance(entry, dict) and entry.get("guest") is True
 
 
-def recognized(dest, keys, sizes, disc_dir=None, folders=None):
-    """{storage key: card path as spelled on the card} for keys whose current file is on the card under a matching name."""
+def named(dest, keys, disc_dir=None, folders=None):
+    """{storage key: card path as spelled on the card} for keys with a file on the card under a matching name (case and
+    Unicode form left out), whatever its size."""
     walks = list(downloads.walk_roms(dest, rename_temps=True))
     if disc_dir:
         walks += downloads.walk_roms(os.path.join(dest, disc_dir), rename_temps=True)
@@ -24,9 +25,15 @@ def recognized(dest, keys, sizes, disc_dir=None, folders=None):
     out = {}
     for k in keys:
         path = on_card.get(downloads.name_key(downloads.rom_rel(k, disc_dir, discs, folders)))
-        if path and downloads.is_current(path, sizes.get(k), disc_dir):
+        if path:
             out[k] = path
     return out
+
+
+def recognized(dest, keys, sizes, disc_dir=None, folders=None):
+    """{storage key: card path as spelled on the card} for keys whose current file is on the card under a matching name."""
+    return {k: path for k, path in named(dest, keys, disc_dir, folders).items()
+            if downloads.is_current(path, sizes.get(k), disc_dir)}
 
 
 def seed_games(seed):
@@ -52,9 +59,11 @@ def apply_seed(systems, seed):
 
 
 def deletions(seed, picked, skipped):
-    """Card paths of seeded ROMs no longer picked, leaving out the skipped buckets."""
+    """Card paths of seeded ROMs no longer picked, leaving out the skipped buckets and any path a kept key was found at
+    (systems that share a folder)."""
+    kept = {path for b, keys in seed.items() for k, path in keys.items() if b in skipped or k in picked.get(b, set())}
     return sorted({path for b, keys in seed.items() if b not in skipped
-                   for k, path in keys.items() if k not in picked.get(b, set())})
+                   for k, path in keys.items() if k not in picked.get(b, set())} - kept)
 
 
 def new_files(jobs):
