@@ -811,8 +811,10 @@ class Spruce(Card):
         out = io.StringIO()
         with contextlib.redirect_stdout(out):
             themeart.describe("spruce", self.base, SURPRISE, {"Favs"})
-        self.assertIn("Surprise", out.getvalue())
-        self.assertIn("Favs.png", out.getvalue())
+        text = out.getvalue()
+        self.assertEqual(text.count("would remove"), 1)
+        self.assertIn("would remove the art for Favs from Collections/Imgs/ (and Imgs_med/, Imgs_small/)", text)
+        self.assertIn("would add the art for Surprise", text)
         for size in themeart.SPRUCE_SIZES:
             self.assertFalse(os.path.exists(self.path("Surprise", size)))
             self.assertTrue(os.path.exists(self.path("Favs", size)))

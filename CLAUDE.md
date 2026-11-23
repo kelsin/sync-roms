@@ -214,11 +214,17 @@ Subject:
 - A series may get its character when asked. Get the proportions of the right form: Pikachu has long slim ears with a short tip band, a head smaller than its chubby body, small solid eyes and a large stepped tail; wide triangular ears on a big head is Pichu.
 - When asked to redo a picture without a subject, say which subject was chosen. When two concepts are equally plausible, show both and let the user pick.
 
+Sprites (`sprites/<id>.txt`, the box art's picture, rendered by `tools/gen_box_art.py`):
+
+- 32x32 with a clear border, `K` for the outline, lit from the top left, 2 to 3 tones per colour, and standing out against the id's box colour.
+- Clean lines: symmetric shapes exactly mirrored, straight and diagonal edges in regular 1:1, 2:1 or 1:2 pixel steps, curves stepping evenly, one-pixel outlines with no jogs or stray pixels. Crooked sprites are rejected.
+- Before finishing, enlarge a contact sheet (`gen_box_art.py --sheet`) and look at it.
+
 Checking:
 
 - Never finish without looking at the result. Read the generated PNG (the drawing is in y 600..1050), and also crop that part and enlarge it 2x to check every join, line end and overlap.
 - Compare with the pictures next to it in a contact sheet of all of `art/`, and show the user that sheet or the changed pictures. Keep review images out of the commit.
-- The tests check that every `art.json` id has a PNG in `art/`, a sprite, the three `art-box/` sizes and its own emoji; `sync-roms check` notes sets in storage that have no art or share one.
+- The tests check that every `art.json` id has a PNG in `art/`, a sprite (and no sprite lacks an id), the three `art-box/` sizes (equal to what the sprite renders to) and its own emoji; `sync-roms check` notes sets in storage that have no art or share one.
 
 ## Devices
 

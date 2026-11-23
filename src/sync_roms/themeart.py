@@ -528,10 +528,12 @@ def install_spruce(base, arts, owned):
 
 
 def describe_spruce(base, arts, owned):
+    where = SPRUCE_DIR.replace(os.sep, "/")
     if arts:
-        print(ui.dim(f"🎨 would add art for {', '.join(arts)} to {SPRUCE_DIR.replace(os.sep, '/')}/ (and its _med, _small)"))
-    for path in _spruce_stale(base, arts, owned):
-        print(ui.dim(f"🎨 would remove {os.path.relpath(path, base).replace(os.sep, '/')}"))
+        print(ui.dim(f"🎨 would add the art for {', '.join(arts)} to {where}/ (and Imgs_med/, Imgs_small/)"))
+    stale = list(dict.fromkeys(os.path.basename(p)[:-4] for p in _spruce_stale(base, arts, owned)))
+    if stale:
+        print(ui.dim(f"🎨 would remove the art for {', '.join(stale)} from {where}/ (and Imgs_med/, Imgs_small/)"))
 
 
 def install(layout_name, base, arts, owned=()):

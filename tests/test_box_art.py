@@ -3,6 +3,8 @@ import os
 import sys
 import unittest
 
+from PIL import Image
+
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tools"))
@@ -59,6 +61,17 @@ class BoxArtTest(unittest.TestCase):
             self.assertEqual([len(r) for r in rows], [32] * 32, f)
             self.assertTrue(set("".join(rows)) <= set(PALETTE) | {"."}, f)
             self.assertEqual(set(rows[0] + rows[-1] + "".join(r[0] + r[-1] for r in rows)), {"."}, f)
+
+    def test_sprite_files_are_exactly_the_ids(self):
+        self.assertEqual(sorted(f[:-4] for f in os.listdir(SPRITES)), gen_box_art.ids())
+
+    def test_committed_pngs_match_the_generator(self):
+        for art_id in gen_box_art.ids():
+            for name, im in gen_box_art.sizes(art_id).items():
+                path = os.path.join(DATA, "art-box", name, f"{art_id}.png")
+                with Image.open(path) as png:
+                    self.assertEqual(png.convert("RGB").tobytes(), im.tobytes(),
+                                     f"{path} is out of date: run tools/gen_box_art.py")
 
 
 if __name__ == "__main__":
