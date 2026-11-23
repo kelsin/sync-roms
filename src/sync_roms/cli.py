@@ -39,7 +39,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "tools": ("install", "brew install the 7z, unar and chdman that `convert` needs"),
     "mirror": ("[DIR] | use DIR | clear", "make or refresh a local copy of everything your lists reference"),
     "cache": ("[update [--full]]", "show the storage cache every command reads file lists and sizes from, or update it"),
-    "config": ("show|path|set NAME VALUE|unset NAME|import [CARD]", "show the effective settings and where each comes from, or change one"),
+    "config": ("show|path|set NAME VALUE|unset NAME|import [CARD]|apply [CARD]", "show the effective settings and where each comes from, or change one"),
     "guide": ("", "open the device setup guide (steps to finish a device by hand) in a browser"),
     "doctor": ("", "check the AWS profile, storage access, tools and your data files"),
     "check": ("", "validate cards.json, surprises.json, the device overlay, the sets and your collections"),
@@ -391,6 +391,7 @@ TOPICS = {
   sync-roms config set NAME VALUE       save one setting in settings.json
   sync-roms config unset NAME           remove it (back to its default)
   sync-roms config import [CARD]        save a card's own settings (spruceOS preferences) in settings.json
+  sync-roms config apply [CARD] [--dry-run] [--yes]   apply the saved settings to a spruce card or an Android device
 
   NAME is bucket, root, endpoint, profile, write_profile, mirror, screenscraper_user or screenscraper_password (text),
   eject, storage_cache_declined or spruce_syncthing (true or false), surprise_ttl_days (a positive number of days) or
@@ -410,6 +411,11 @@ TOPICS = {
   those that differ or are new, then asks Yes (all of them), No or Pick (one by one); no answer is assumed, and with no
   terminal input nothing is saved. Every sync of a spruce card then sets those that the card's file already has. spruce_settings isn't a `config set` name: import it, or edit settings.json by hand
   ({"section": {"key": value}}, values as the card holds them).
+
+  config apply sets the saved settings without a sync. A mounted spruce card (CARD as for import) gets the spruceOS settings, WiFi networks and
+  Syncthing settings a sync writes. An Android device over adb (CARD naming an Android card, or none to pick the device) gets RetroArch's
+  and ES-DE's settings (RetroArch Cloud Sync turned off) and its APKs installed or upgraded, except those that don't fit the device.
+  --dry-run lists every setting, changed or not; --yes skips the questions.
 """,
     "cache": """
   sync-roms cache [update [--full]]
