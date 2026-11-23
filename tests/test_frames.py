@@ -10,7 +10,7 @@ from test_custom_themes import make_base as make_theme_base  # noqa: E402
 
 from sync_roms.custom_themes import palettes  # noqa: E402
 from sync_roms.custom_themes.pixel import build as pixel_build  # noqa: E402
-from sync_roms.custom_themes.pixel import frames  # noqa: E402
+from sync_roms.custom_themes.pixel import frames, frames_panels  # noqa: E402
 
 GRUVBOX = palettes.get("Gruvbox")
 ARCADE = palettes.get("Arcade")
@@ -214,7 +214,8 @@ class Frames(unittest.TestCase):
             expect.paste(rgba, (x, y, x + cell, y + cell))
         self.assertEqual(list(img.get_flattened_data()), list(expect.get_flattened_data()))
         # insets in cells: flush sides reach the grid edge, opposite non-flush insets are equal
-        on = [(cx, cy) for (cx, cy), rgba in cells.items() if rgba[3]]
+        blank = (0, 0, 0, 0) if spec.background is None else tuple(spec.background) + (255,)
+        on = [(cx, cy) for (cx, cy), rgba in cells.items() if rgba != blank]  # the artwork, not the background
         inset = {"left": min(x for x, _ in on), "right": canvas.cols - 1 - max(x for x, _ in on),
                  "top": min(y for _, y in on), "bottom": canvas.rows - 1 - max(y for _, y in on)}
         for side in spec.flush:
@@ -320,7 +321,57 @@ class Frames(unittest.TestCase):
                             self.assertEqual(rgba, (0, 0, 0, 255), (x, y))
                         colored += rgba != (0, 0, 0, 255)
                 self.assertGreater(colored, 0)
-                self.assertEqual(spec.flush, ("left", "right", "top", "bottom"))
+                self.assertEqual(spec.background, (0, 0, 0))
+
+    def test_border_brackets_have_equal_arms(self):
+        s = frames.shades(GRUVBOX)
+        accent = s.accent
+        # every full-screen size of the real base's skin folders (and odd grids), at its own cell
+        sizes = [(640, 480), (720, 480), (720, 540), (720, 720), (746, 559), (960, 720), (1024, 768), (1280, 720),
+                 (852, 640), (644, 484), (650, 490)]
+        for size in sizes:
+            canvas = frames.Canvas(size, frames.cell_for(size, (640, 480)), (0, 0) + size)
+            with self.subTest(size=size, grid=(canvas.cols, canvas.rows)):
+                frames_panels.border(canvas, s)
+                cells = canvas.cells
+                x0, y0, x1, y1 = 1, 1, canvas.cols - 2, canvas.rows - 2
+                arms = set()
+                for x, dx in ((x0, 1), (x1, -1)):
+                    for y, dy in ((y0, 1), (y1, -1)):
+                        across = next(i for i in range(canvas.cols) if cells.get((x + dx * i, y)) != accent)
+                        down = next(i for i in range(canvas.rows) if cells.get((x, y + dy * i)) != accent)
+                        self.assertEqual(across, down, (x, y))
+                        arms.add(across)
+                        # a 1-2 cell gap, then a whole dash
+                        gap_x = next(i for i in range(across, canvas.cols) if (x + dx * i, y) in cells) - across
+                        gap_y = next(i for i in range(down, canvas.rows) if (x, y + dy * i) in cells) - down
+                        self.assertIn(gap_x, (1, 2))
+                        self.assertIn(gap_y, (1, 2))
+                        self.assertIn((x + dx * (across + gap_x + 1), y), cells)
+                        self.assertIn((x, y + dy * (down + gap_y + 1)), cells)
+                self.assertEqual(len(arms), 1)
+                self.assertIn(arms.pop(), (3, 4, 5))
+
+    def test_title_tree_is_centered_in_its_slot(self):
+        theme, written = self.build(GRUVBOX)
+        accent, trunk = frames.shades(GRUVBOX).accent, frames.shades(GRUVBOX).hi
+        for rel in sorted(r for r in written if r.endswith("bg-title.png")):
+            with self.subTest(rel):
+                img = load(os.path.join(theme, rel))
+                canvas = frames.Canvas(img.size, frames.cell_for(img.size, BASE["bg-title.png"][0]), (0, 0) + img.size)
+                cells = grid(img, canvas)
+                tree = [(cx, cy) for (cx, cy), rgba in cells.items()
+                        if cy < canvas.rows - 1 and rgba[:3] in (accent, trunk)]
+                slot = (img.height - canvas.ox) // canvas.cell  # the title text starts at the bar's height
+                left, right = min(x for x, _ in tree), max(x for x, _ in tree)
+                top, bottom = min(y for _, y in tree), max(y for _, y in tree)
+                self.assertEqual(left, slot - 1 - right)
+                self.assertEqual(top, canvas.rows - 2 - bottom)
+                self.assertGreaterEqual(top, 1)
+                # three tiers of three rows each, every row centered on the tree's axis
+                for y in range(top, bottom + 1):
+                    xs = [x for x, yy in tree if yy == y]
+                    self.assertEqual(min(xs) - left, right - max(xs), y)
 
     def test_non_uniform_copy_uses_min_ratio_cell(self):
         theme, _ = self.build(GRUVBOX)

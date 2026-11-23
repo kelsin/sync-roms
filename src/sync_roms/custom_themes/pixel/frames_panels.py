@@ -62,16 +62,22 @@ def bottom_rule(canvas, s):
 
 
 def title(canvas, s):
-    """The title bar: a dotted bottom rule and a small spruce tree centered in a square slot at the left (the slot is
-    the bar's height above the rule: the tree's left, top and bottom margins are equal)."""
+    """The title bar: a dotted bottom rule and a small spruce tree in the logo slot at the left. The slot runs from the
+    footprint's left edge to where the title text starts (PyUI's topBarInitialXOffset, the bar's height in every
+    config), in whole cells; the tree is centered in it (equal left and right margins) and between the bar's top and
+    the rule (equal top and bottom margins), its width and trunk length matched to the slot's parity so both are
+    exact."""
     bottom_rule(canvas, s)
+    slot = (canvas.size[1] - canvas.ox) // canvas.cell
     content = canvas.rows - 1
-    tall = content % 2  # an odd slot gets a one-row-longer trunk, so the top and bottom margins stay equal
-    widths = [2, 4, 6, 4, 6, 8, 6, 8] + [2] * (2 + tall)  # three tiers with 1:1 sides, then the trunk
-    margin = (content - len(widths)) // 2
-    for row, width in enumerate(widths):
-        color = s.hi if row >= 8 else s.accent
-        canvas.rect(margin + (8 - width) // 2, margin + row, width, 1, color)
+    odd = slot % 2  # an odd slot gets an odd-width tree (one-cell peak), so it centers exactly
+    tiers = [w - odd for w in (2, 4, 6, 4, 6, 8, 6, 8, 10)]  # three tiers of three rows, 1:1 sides
+    trunk = 3 if (content - len(tiers)) % 2 else 2
+    widths = tiers + [2 + odd] * trunk
+    width = tiers[-1]
+    left, top = (slot - width) // 2, (content - len(widths)) // 2
+    for row, w in enumerate(widths):
+        canvas.rect(left + (width - w) // 2, top + row, w, 1, s.hi if row >= len(tiers) else s.accent)
 
 
 def rails(canvas, s):
@@ -80,26 +86,36 @@ def rails(canvas, s):
     vrule(canvas, canvas.cols - 1, rule(s))
 
 
-def _arm(length):
-    """The bracket arm (3 to 5 cells) that lets the dots between a side's two brackets, a cell's gap from each, start
-    and end with a whole dash: the dash rhythm then runs unbroken from corner to corner."""
-    return next(arm for arm in (3, 4, 5) if dotted(length - 2 * (arm + 1))[:2] == [True, True])
+def _gap(length, arm):
+    """The gap (1 to 3 cells) between a side's brackets and its dots that lets the dots start and end with a whole
+    dash, so the dash rhythm runs unbroken from bracket to bracket."""
+    return next(g for g in (1, 2, 3) if dotted(length - 2 * (arm + g))[:2] == [True, True])
+
+
+def _arm(across, down):
+    """One bracket arm (3 to 5 cells) for both axes, so every bracket's arms are equal: the one with the smallest gaps
+    (never 3: each axis rules out a single arm length mod 3), then the shortest."""
+    def cost(arm):
+        gaps = (_gap(across, arm), _gap(down, arm))
+        return max(gaps), sum(gaps), arm
+    return min((3, 4, 5), key=cost)
 
 
 def border(canvas, s):
-    """A dotted border one cell in from every edge, with solid L brackets at the four (identical) corners."""
+    """A dotted border one cell in from every edge, with solid L brackets of equal arms at the four (identical)
+    corners."""
     x0, y0, x1, y1 = 1, 1, canvas.cols - 2, canvas.rows - 2
     across, down = x1 - x0 + 1, y1 - y0 + 1
-    arm_x, arm_y = _arm(across), _arm(down)
-    hdots(canvas, x0 + arm_x + 1, y0, across - 2 * (arm_x + 1), rule(s))
-    hdots(canvas, x0 + arm_x + 1, y1, across - 2 * (arm_x + 1), rule(s))
-    vdots(canvas, x0, y0 + arm_y + 1, down - 2 * (arm_y + 1), rule(s))
-    vdots(canvas, x1, y0 + arm_y + 1, down - 2 * (arm_y + 1), rule(s))
+    arm = _arm(across, down)
+    gx, gy = _gap(across, arm), _gap(down, arm)
+    hdots(canvas, x0 + arm + gx, y0, across - 2 * (arm + gx), rule(s))
+    hdots(canvas, x0 + arm + gx, y1, across - 2 * (arm + gx), rule(s))
+    vdots(canvas, x0, y0 + arm + gy, down - 2 * (arm + gy), rule(s))
+    vdots(canvas, x1, y0 + arm + gy, down - 2 * (arm + gy), rule(s))
     for x, dx in ((x0, 1), (x1, -1)):
         for y, dy in ((y0, 1), (y1, -1)):
-            for i in range(arm_x):
+            for i in range(arm):
                 canvas.px(x + dx * i, y, s.accent)
-            for i in range(arm_y):
                 canvas.px(x, y + dy * i, s.accent)
 
 
@@ -129,8 +145,8 @@ def name_frame(canvas, s):
 
 
 def thumb(canvas, s):
-    """A placeholder picture: the dark panel with a mountain peak centered in it (1:1 sides, a light snow cap, its peak one cell wide on
-    an odd grid and two on an even one, so it centers exactly)."""
+    """A placeholder picture: the dark panel with a mountain peak centered in it (1:1 sides, a light snow cap, its peak
+    one cell wide on an odd grid and two on an even one, so it centers exactly)."""
     dark_panel(canvas, s)
     peak = 2 - canvas.cols % 2
     height = max(2, min(canvas.cols, canvas.rows) // 6)
@@ -176,11 +192,13 @@ def progress(kinds):
     return draw
 
 
-for _name, _draw in (("tips-bar-bg", top_rule), ("navbg", top_rule), ("statbg", bottom_rule),
-                     ("bg-gamelist", rails), ("menu-5line-bg", border), ("menu-6line-bg", border),
-                     ("app_loading_bg", border)):
-    register(f"skin/{_name}.png", _draw, symmetric=True, flush=ALL, background=BLACK)
-register("skin/bg-title.png", title, flush=ALL, background=BLACK)
+# flush: the sides the colored artwork touches (the black background always fills the footprint)
+for _name, _draw, _flush in (("tips-bar-bg", top_rule, ("top",)), ("navbg", top_rule, ("top",)),
+                             ("statbg", bottom_rule, ("bottom",)), ("bg-gamelist", rails, ("left", "right")),
+                             ("menu-5line-bg", border, ()), ("menu-6line-bg", border, ()),
+                             ("app_loading_bg", border, ())):
+    register(f"skin/{_name}.png", _draw, symmetric=True, flush=_flush, background=BLACK)
+register("skin/bg-title.png", title, flush=("bottom",), background=BLACK)
 for _name in ("bg-pop-menu-4", "menu-sub-bg", "preview-bg"):
     register(f"skin/{_name}.png", dark_panel, symmetric=True, flush=ALL)
 register("skin/loading-bg.png", loading_frame, symmetric=True, flush=ALL)
