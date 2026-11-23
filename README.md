@@ -180,6 +180,7 @@ Every mode is a command (plain `sync-roms [CARD]` syncs a card):
 | `download pico8` | add the [PICO-8 BBS Featured carts](#pico-8-carts-from-the-bbs-download-pico8) storage doesn't have, and newer revisions of those it has | |
 | `flash` | [write a Knulli, BaseOS, muOS, ROCKNIX or OakMoss image](#flashing-an-sd-card-flash) from storage's `os/` to an SD card, macOS only | |
 | `umount` | pick an SD card, remove macOS's junk from it as a sync does (`.metadata_never_index`, `.fseventsd`, `._` files) and unmount it, macOS only | |
+| `mount` | pick an SD card that was unmounted (by `umount` or a sync) but not pulled out and mount it again with `diskutil mountDisk`, macOS only | |
 | `cards list\|new\|set\|rename\|convert\|clean\|delete\|copy\|export\|import` | [manage cards](#cards-cards) | |
 | `saves stash\|apply [CARD]`, `saves manage` | [copy RetroArch saves and states](#moving-saves-between-cards-saves) off a card, or stashed ones onto a card (Android: over adb); inspect, label, move, prune and delete stashes | |
 | `devices [ID]` | list the supported devices with their chip and the number of systems each one gets, or one device's layouts, note and systems | `--devices` |

@@ -25,6 +25,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "download": ("pico8", "add the PICO-8 BBS Featured carts storage doesn't have, and newer revisions of those it has"),
     "flash": ("", "write a Knulli, BaseOS, muOS, ROCKNIX or OakMoss image from storage's os/ to an SD card"),
     "umount": ("", "clean the macOS junk off an SD card and unmount it"),
+    "mount": ("", "mount again an SD card that was unmounted but not pulled out"),
     "cards": ("[edit|list|new|set|rename|convert|clean|delete|copy|export|import]", "list and manage the cards you've synced"),
     "saves": ("stash|apply [CARD] [--retroarch DIR], manage", "copy RetroArch saves and states off a card, or onto one (Android: over adb), or tidy the stashes"),
     "devices": ("[ID]", "list the supported devices, or one device's systems"),
@@ -193,6 +194,13 @@ TOPICS = {
   runs the end-of-sync tidy on each volume of the one you pick: .metadata_never_index, .fseventsd/no_log and the
   ._ files macOS leaves, plus the sudo mdutil offer when Spotlight is on. Ctrl-C skips the rest of that volume's tidy.
   Last, `diskutil unmountDisk` unmounts the card.
+""",
+    "mount": """
+  sync-roms mount [--dry-run]                 mount again an SD card that was unmounted but not pulled out (macOS only)
+
+  Lists the external SD cards with no volume mounted (never the disk holding storage), then runs
+  `diskutil mountDisk` on the one you pick, so you don't have to pull it out and put it back after umount or a sync.
+  An ejected card (as flash leaves it) is gone from the list: that one has to be put back in.
 """,
     "edit": """
   sync-roms edit                              main menu: Cards, Sets (saved to storage), Collections, Device systems; same as `games edit`
