@@ -591,11 +591,31 @@ class Flow(DataDir):
         self.assertEqual(calls[2][1], ["Ruby.sav", "Ruby.zip"])  # the set's games here, not Emerald or Zelda
         self.assertEqual(store.card_games("c"), {"gba": [g("gba/Ruby.sav"), g("gba/Ruby.zip")]})
 
-    def run_card(self, *steps):
+    def run_card(self, *steps, **kw):
         script = Script(*steps)
         with mock.patch.object(picker, "filter_list", script), contextlib.redirect_stdout(io.StringIO()):
-            cardedit.edit_card("c")
+            cardedit.edit_card("c", **kw)
         return script.calls
+
+    def test_g_toggles_guest(self):
+        self.card()
+        self.run_card(returns((cardedit.GUEST_KEY, 0)), returns(None))
+        self.assertIs(self.read("cards.json")["c"]["guest"], True)
+        self.run_card(returns((cardedit.GUEST_KEY, 0)), returns(None))
+        self.assertNotIn("guest", self.read("cards.json")["c"])
+
+    def test_g_on_calls_on_guest_once(self):
+        self.card()
+        on_guest = mock.Mock()
+        self.run_card(returns((cardedit.GUEST_KEY, 0)), returns((cardedit.GUEST_KEY, 0)), returns(None),
+                      on_guest=on_guest)
+        on_guest.assert_called_once_with()
+
+    def test_title_shows_guest(self):
+        self.card(guest=True)
+        calls = self.run_card(returns(None))
+        self.assertIn("👤 guest", calls[0][0])
+        self.assertIn(cardedit.GUEST_KEY, calls[0][2]["hotkeys"])
 
     def test_s_opens_a_set_then_its_games(self):
         self.card()

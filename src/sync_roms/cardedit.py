@@ -4,7 +4,7 @@ import json
 import queue
 import threading
 
-from . import budget, cardpicks, collections as colls, edit, inventory, listedit, metafilter, picker, previews, s3, scrape_plan, spruce_themes, store, surprise, themeart, ui, usersettings
+from . import budget, cardpicks, collections as colls, edit, guest, inventory, listedit, metafilter, picker, previews, s3, scrape_plan, spruce_themes, store, surprise, themeart, ui, usersettings
 
 FULL_KEY = "f"
 OFF_KEY = "x"
@@ -14,12 +14,13 @@ CLEAR_ALL_KEY = "D"
 COLLECTIONS_KEY = "l"
 SETTINGS_KEY = "S"
 KEEP_KEY = "K"
+GUEST_KEY = "G"
 PAST_SURPRISE_KEY = "p"
 META_KEY = "m"
 VARIANT_KEY = "v"
 SERIES_KEY = "r"
 ALL_KEY = "a"
-LIST_HINT = "Enter · a all · f full · x off · s set · l colls · S settings · D clear"
+LIST_HINT = "Enter · a all · f full · x off · s set · l colls · S settings · G guest"
 GAMES_HINT = "Space toggle · Enter done · s set · m meta · p past · v variant"
 META_HINT = "Enter list its values · Esc back"
 VALUES_HINT = "Enter narrow to it · Esc back · / filter"
@@ -31,6 +32,7 @@ LIST_KEYS = [("Enter", "the system's games"), ("f", "full system: every file in 
              ("a", "every game across this card's systems"),
              ("s", "a set's games across this card's systems"), ("l", "collections on this card"),
              ("S", "settings menu: Surprise, theme, collections and RAOfflineProxy on or off, and the systems Surprise may use"),
+             ("G", "guest card: a friend's card; syncs only copy ROMs, BIOS and scrapes (again to undo)"),
              ("D", "clear every pick, full system and set from the card")]
 KEEP_HINT = " · K keep card files"
 KEEP_KEYS = [("K", "pick every card file that matches a storage game")]
@@ -269,12 +271,27 @@ def toggle_off(name, bucket):
     store.write_cards(cards)
 
 
+def toggle_guest(name):
+    """Make a card a guest card, or an ordinary one again, and save it. Returns the new state."""
+    cards = store.load_cards()
+    entry = dict(store.saved_card(name, cards))
+    on = not guest.is_guest(entry)
+    if on:
+        entry["guest"] = True
+    else:
+        entry.pop("guest", None)
+    cards[name] = entry
+    store.write_cards(cards)
+    return on
+
+
 @picker.one_app
-def edit_card(name, setup=None, to_fetch=None, card_match=None):
+def edit_card(name, setup=None, to_fetch=None, card_match=None, on_guest=None):
     """The card's system list. setup: (device or None for Full, layout) to edit with instead of the saved one.
     to_fetch(system, keys): the keys not on the card yet, when editing from a sync; the status then shows how much
     a sync would download. card_match(system, keys): the keys of the system's storage files that are on the card, when
-    editing from a sync; it enables K."""
+    editing from a sync; it enables K. on_guest(): called when G turns the guest flag on, when editing from a sync
+    (it reseeds the card's picks)."""
     catalog = store.load_catalog()
     cards = store.load_cards()
     setup = setup or picker.saved_setup(cards.get(name), catalog["devices"], catalog["layouts"], name)
@@ -326,10 +343,11 @@ def edit_card(name, setup=None, to_fetch=None, card_match=None):
             return True
 
         on = surprise.enabled(store.load_cards().get(name))
-        i = picker.filter_list(f"💳 {name} — its systems (⭐ for the device) · 🎁 Surprise {'on' if on else 'off'}",
+        i = picker.filter_list(f"💳 {name} — its systems (⭐ for the device) · 🎁 Surprise {'on' if on else 'off'}"
+                               + (" · 👤 guest" if guest.is_guest(store.load_cards().get(name)) else ""),
                                labels, extras=extras, cursor=pos,
-                               hotkeys=(FULL_KEY, OFF_KEY, ALL_KEY, SET_KEY, COLLECTIONS_KEY, SETTINGS_KEY, CLEAR_ALL_KEY,
-                                        *((KEEP_KEY,) if card_match else ())),
+                               hotkeys=(FULL_KEY, OFF_KEY, ALL_KEY, SET_KEY, COLLECTIONS_KEY, SETTINGS_KEY, GUEST_KEY,
+                                        CLEAR_ALL_KEY, *((KEEP_KEY,) if card_match else ())),
                                hint=LIST_HINT + (KEEP_HINT if card_match else ""),
                                key_help=LIST_KEYS + (KEEP_KEYS if card_match else []),
                                status=lambda _state: status_of(view["total"], capacity, view["fetch"]),
@@ -357,6 +375,10 @@ def edit_card(name, setup=None, to_fetch=None, card_match=None):
                 changed = ALL
             elif key == KEEP_KEY:
                 keep_card_files(name, setup, systems, card_match)
+                changed = ALL
+            elif key == GUEST_KEY:
+                if toggle_guest(name) and on_guest:
+                    on_guest()
                 changed = ALL
             elif key == CLEAR_ALL_KEY:
                 if ui.confirm(f"🧹 Clear every pick, full system and set from {name}?", default=False):
