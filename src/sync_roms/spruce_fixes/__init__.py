@@ -10,11 +10,11 @@ to remove one, delete its module, its list entry, its json entry, its test and i
 copies of a theme (`icons_<W>x<H>/`, `bg_<W>x<H>/`), which the fixes patch too."""
 import os
 
-from . import fds, pokemini, pyui, reopen_collection
+from . import fds, highlight_last_collection, pokemini, pyui
 from .. import cardfs, store, ui
 
 ABSENT = None
-FIXES = (pokemini, fds, reopen_collection)
+FIXES = (pokemini, fds, highlight_last_collection)
 
 
 class Mismatch(str):
