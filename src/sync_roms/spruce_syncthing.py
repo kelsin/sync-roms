@@ -42,14 +42,14 @@ def core_writes(base):
             continue
         seen.add(folder)
         path = os.path.join(base, "Emu", folder, "config.json")
-        old = cardfs.text(path)
-        if not old:
-            continue
         try:
+            old = cardfs.text(path)
+            if not old:
+                continue
             config = json.loads(old)
             if not isinstance(config, dict):
                 raise ValueError
-        except ValueError:
+        except (OSError, ValueError):
             warnings.append(f"Emu/{folder}/config.json can't be read; its core left as it is")
             continue
         options = config.get("menuOptions")
@@ -119,7 +119,7 @@ def run(card, layout_name, base, dry_run):
         return 0
     for path, text in writes:
         cardfs.write_text(path, text)
-    print(ui.green(f"🔄 Syncthing: set {len(writes)} setting(s) so saves and states sync"))
+    print(ui.green(f"🔄 Syncthing: set {len(lines)} setting(s) so saves and states sync"))
     for line in lines:
         print(line)
     return 0

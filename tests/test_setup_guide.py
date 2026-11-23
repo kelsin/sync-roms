@@ -54,8 +54,9 @@ class SetupGuideTest(unittest.TestCase):
             html = f.read()
         with open(os.path.join(os.path.dirname(update_setup_guide.GUIDE), "syncthing.json")) as f:
             cores = json.load(f)["cores"]
+        section = html.split('id: "retroarch-cores",', 1)[1].split('\n  {\n    id: "', 1)[0]
         for core in set(cores.values()):
-            self.assertIn(f"<code>{core}</code>", html)
+            self.assertIn(f"<code>{core}</code>", section)
         self.assertIn("jkx7j-mnlfo", html)
         self.assertIn("w5nqg-xmpq6", html)
 

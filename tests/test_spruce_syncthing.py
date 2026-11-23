@@ -106,6 +106,14 @@ class Card(helpers.CardDir):
         self.assertIn("Emu/SFC/config.json can't be read; its core left as it is", self.run_sync())
         self.assertEqual(self.read("Emu/SFC/config.json"), "{nope")
 
+    def test_non_utf8_emu_config_warns(self):
+        self.put("Saves/ra-configs/retroarch-A.cfg", self.CFG)
+        path = self.cp("Emu", "SFC", "config.json")
+        os.makedirs(os.path.dirname(path))
+        with open(path, "wb") as f:
+            f.write(b"\xff\xfe{}")
+        self.assertIn("Emu/SFC/config.json can't be read; its core left as it is", self.run_sync())
+
     def test_retroarch_cfg_keys_replaced_and_appended(self):
         self.put("Saves/ra-configs/retroarch-Anbernic.cfg", self.CFG)
         self.run_sync()
