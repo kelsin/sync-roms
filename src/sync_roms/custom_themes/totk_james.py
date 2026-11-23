@@ -4,8 +4,6 @@ import json
 import os
 import shutil
 
-from .. import runtime  # noqa: F401  (keeps the package import order of the other styles)
-
 STYLE = "ToTK - James"
 BASE = "ToTK"
 PALETTES = False

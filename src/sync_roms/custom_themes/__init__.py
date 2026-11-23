@@ -1,5 +1,6 @@
 """Custom spruceOS themes sync-roms builds from a base theme. STYLES maps each style's name to its module; a built
-theme is one style in one palette (palettes.py), named `<style> - <palette>`; a style with PALETTES = False is built once, as `<style>`."""
+theme is one style in one palette (palettes.py), named `<style> - <palette>`;
+a style with PALETTES = False is built once, as `<style>`."""
 import os
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
@@ -69,8 +70,8 @@ def needs_palettes(styles):
 
 def build(styles, palettes, out=None):
     """Build each named style (all when None) in each palette into out, or the cache's build folder; returns
-    {theme name: built folder}. Raises KeyError for an unknown style, ValueError for no palettes (when a style needs them) and BaseMissing when a
-    base theme isn't in storage."""
+    {theme name: built folder}. Raises KeyError for an unknown style, ValueError for no palettes (when a style needs them) and
+    BaseMissing when a base theme isn't in storage."""
     chosen = sorted(STYLES, key=str.lower) if styles is None else list(styles)
     for style in chosen:
         if style not in STYLES:
@@ -134,8 +135,8 @@ COMPACT_OVER = 4  # more themes than this in one publish: one line each
 
 
 def publish(styles, palettes, dry_run=False):
-    """Build the named styles (all when None) in each palette and make their storage folders match: upload new and changed files,
-    delete the files a build no longer makes, and record each file's hash in the manifest. Returns the exit code.
+    """Build the named styles (all when None) in each palette and make their storage folders match: upload new and changed
+    files, delete the files a build no longer makes, and record each file's hash in the manifest. Returns the exit code.
     Raises BaseMissing, DownloadFailed, a storage error, or ValueError for a malformed manifest or themes.json."""
     from .. import spruce_themes, ui, upload
     s3.check_root()  # an unmounted share must never read as empty theme folders

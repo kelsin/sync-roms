@@ -513,8 +513,13 @@ class PaletteFree(helpers.StorageDir):
             custom_themes.build(["Pixel Consoles"], [], self.out)
 
     def test_all_styles_build_totk_once(self):
-        built = custom_themes.build(None, PAL, self.out)
-        self.assertEqual(sorted(built), ["Pixel Consoles - Gruvbox", "Pixel Controllers - Gruvbox", "ToTK - James"])
+        from sync_roms.custom_themes import totk_james
+        with mock.patch.object(totk_james, "build", wraps=totk_james.build) as build:
+            built = custom_themes.build(None, [GRUVBOX, palettes.get("Candy")], self.out)
+        self.assertEqual(sorted(built), [
+            "Pixel Consoles - Candy", "Pixel Consoles - Gruvbox",
+            "Pixel Controllers - Candy", "Pixel Controllers - Gruvbox", "ToTK - James"])
+        build.assert_called_once()
 
     def test_palette_flag_ignored_for_totk(self):
         self.assertEqual(commands.run(["themes", "build", "--palette", "Gruvbox", "ToTK - James", "--out", self.out]), 0)

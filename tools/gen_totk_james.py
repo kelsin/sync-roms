@@ -156,7 +156,7 @@ def make_title(base):
             chosen = (font, mask, box)
             break
     font, mask, box = chosen
-    # glyph box top-left lands at x 35, y 27 (bottom at 50)
+    # glyph box top-left lands one space past x 35, at y 27 (bottom at 50)
     glyphs = mask.crop(box)
     x = 35 + round(font.getlength(" "))
     assert x + glyphs.width <= title.width, "the text does not fit"
