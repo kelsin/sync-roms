@@ -46,10 +46,15 @@ class AndroidTest(unittest.TestCase):
         self.assertFalse(android.is_android({"layout": "knulli", "device": "retroid-pocket-nova"}))
 
     def test_card_volumes_keeps_those_with_roms(self):
-        answers = {"ls /storage": "6AF3-53E9\nemulated\nself\nAAAA-BBBB\n",
-                   "test -d /storage/6AF3-53E9/ROMs": "", "test -d /storage/AAAA-BBBB/ROMs": adb.AdbError("x")}
-        with mock.patch.object(adb, "run", side_effect=fake_run(answers)):
+        with mock.patch.object(adb, "run", side_effect=fake_run({"ls /storage": "6AF3-53E9\nemulated\nself\nAAAA-BBBB\n"})), \
+                mock.patch.object(adb, "is_dir", side_effect=lambda s, p: p == "/storage/6AF3-53E9/ROMs"):
             self.assertEqual(android.card_volumes("S", "ROMs"), ["6AF3-53E9"])
+
+    def test_card_volumes_lost_connection_raises(self):
+        with mock.patch.object(adb, "run", side_effect=fake_run({"ls /storage": "6AF3-53E9\n"})), \
+                mock.patch.object(adb, "is_dir", side_effect=adb.AdbError("device offline")):
+            with self.assertRaises(adb.AdbError):
+                android.card_volumes("S", "ROMs")
 
     def test_parse_config(self):
         text = 'savefile_directory = "/storage/emulated/0/RetroArch/saves"\nsort_savefiles_enable = "true"\n'
@@ -96,6 +101,7 @@ class AndroidTest(unittest.TestCase):
 
     def test_wait_closed_rechecks(self):
         with mock.patch.object(android, "running", side_effect=[True, False]) as running, \
+                mock.patch.object(android.ui, "has_terminal", return_value=True), \
                 mock.patch.object(android.ui, "confirm", return_value=True):
             android.wait_closed("S", "com.retroarch")
         self.assertEqual(running.call_count, 2)
@@ -112,10 +118,25 @@ class AndroidTest(unittest.TestCase):
 
     def test_wait_closed_declined_stops(self):
         with mock.patch.object(android, "running", return_value=True), \
+                mock.patch.object(android.ui, "has_terminal", return_value=True), \
                 mock.patch.object(android.ui, "confirm", return_value=False):
             with self.assertRaises(SystemExit) as ctx:
                 android.wait_closed("S", "com.retroarch")
         self.assertEqual(ctx.exception.code, 0)
+
+    def test_wait_closed_yes_fails_after_one_check(self):
+        err = io.StringIO()
+        with mock.patch.object(android, "running", return_value=True) as running, \
+                mock.patch.object(android.ui, "has_terminal", return_value=True), \
+                mock.patch.object(android.ui, "ASSUME_YES", True), \
+                mock.patch.object(adb, "devices", return_value=[adb.Device("S", "device", "Retroid Pocket Nova")]), \
+                contextlib.redirect_stderr(err), contextlib.redirect_stdout(err):
+            with self.assertRaises(SystemExit) as ctx:
+                android.wait_closed("S", "com.retroarch")
+        self.assertEqual(ctx.exception.code, 1)
+        self.assertEqual(running.call_count, 1)
+        self.assertIn("RetroArch is open on Retroid Pocket Nova: save in-game, close it, then run again",
+                      err.getvalue())
 
 
 NOVA = adb.Device("S1", "device", "Retroid Pocket Nova")
@@ -221,9 +242,9 @@ class SetupTest(unittest.TestCase):
         pairing = [("adb-Y", "_adb-tls-pairing._tcp", "1.2.3.4:4000")]
         with contextlib.redirect_stdout(io.StringIO()), mock.patch.object(android.time, "sleep"), \
                 mock.patch.object(adb, "mdns_services", return_value=pairing), \
-                mock.patch.object(android.ui, "ask", return_value="123456"), \
+                mock.patch.object(android.ui, "ask", side_effect=["", "123456"]), \
                 mock.patch.object(adb, "pair") as pair, \
-                mock.patch.object(adb, "devices", return_value=[NOVA]), \
+                mock.patch.object(adb, "devices", side_effect=[[], [NOVA]]), \
                 mock.patch.object(android, "reconnect") as reconnect:
             android.setup_device()
         pair.assert_called_once_with("1.2.3.4:4000", "123456")
@@ -233,16 +254,42 @@ class SetupTest(unittest.TestCase):
         pairing = [("adb-Y", "_adb-tls-pairing._tcp", "1.2.3.4:4000")]
         with contextlib.redirect_stdout(io.StringIO()), mock.patch.object(android.time, "sleep"), \
                 mock.patch.object(adb, "mdns_services", return_value=pairing), \
-                mock.patch.object(android.ui, "ask", side_effect=["123456", "1.2.3.4:5555"]), \
-                mock.patch.object(adb, "pair"), mock.patch.object(adb, "connect") as connect, \
+                mock.patch.object(android.ui, "ask", side_effect=["", "123456", "1.2.3.4:5555"]), \
+                mock.patch.object(adb, "pair"), mock.patch.object(adb, "connect", return_value=True) as connect, \
                 mock.patch.object(adb, "devices", return_value=[NOVA]), \
                 mock.patch.object(android, "reconnect"):
             android.setup_device()
         connect.assert_called_once_with("1.2.3.4:5555")
 
+    def test_setup_device_warns_when_connect_fails(self):
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(out), \
+                mock.patch.object(android.time, "sleep"), \
+                mock.patch.object(adb, "mdns_services", return_value=[("adb-Y", "_adb-tls-pairing._tcp", "1.2.3.4:4000")]), \
+                mock.patch.object(android.ui, "ask", side_effect=["", "123456", "1.2.3.4:5555"]), \
+                mock.patch.object(adb, "pair"), mock.patch.object(adb, "connect", return_value=False), \
+                mock.patch.object(adb, "devices", return_value=[NOVA]), mock.patch.object(android, "reconnect"):
+            android.setup_device()
+        self.assertIn("Couldn't connect to 1.2.3.4:5555", out.getvalue())
 
-if __name__ == "__main__":
-    unittest.main()
+    def test_setup_device_mdns_failure_asks_address(self):
+        with contextlib.redirect_stdout(io.StringIO()), mock.patch.object(android.time, "sleep"), \
+                mock.patch.object(adb, "mdns_services", side_effect=adb.AdbError("mdns off")), \
+                mock.patch.object(android.ui, "ask", side_effect=["", "1.2.3.4:4000", "123456"]), \
+                mock.patch.object(adb, "pair") as pair, \
+                mock.patch.object(adb, "devices", side_effect=[[], [NOVA]]), \
+                mock.patch.object(android, "reconnect"):
+            android.setup_device()
+        pair.assert_called_once_with("1.2.3.4:4000", "123456")
+
+    def test_setup_device_waits_for_enter_before_polling(self):
+        order = []
+        with contextlib.redirect_stdout(io.StringIO()), mock.patch.object(android.time, "sleep"), \
+                mock.patch.object(adb, "mdns_services", side_effect=lambda: order.append("poll") or []), \
+                mock.patch.object(android.ui, "ask", side_effect=lambda q: order.append(q) or ""):
+            android.setup_device()
+        self.assertEqual(order[0], "Press Enter once the pairing code is on screen: ")
+        self.assertEqual(order[1], "poll")
 
 
 class FakeDevice:
@@ -253,6 +300,7 @@ class FakeDevice:
         self.root = tmp.name
         self.calls = []
         self.fail_push = set()
+        self.drop = set()
 
     def real(self, remote):
         return self.root + remote
@@ -279,10 +327,10 @@ class FakeDevice:
             shutil.copyfile(args[1], self.real(args[2]))
             return ""
         words = shlex.split(args[1])
-        if words[0] == "test":
-            if not os.path.isdir(self.real(words[2])):
-                raise adb.AdbError("no")
-            return ""
+        if words[0] == "sh":
+            if words[4] in self.drop:
+                raise adb.AdbError("device offline")
+            return "y\n" if os.path.isdir(self.real(words[4])) else "n\n"
         if words[0] == "find":
             return "".join(os.path.join(d, f)[len(self.root):] + "\n"
                            for d, _, fs in os.walk(self.real(words[1])) for f in fs)
@@ -364,7 +412,7 @@ class SessionTest(unittest.TestCase):
             open(p, "w").close()
         bad = "/storage/emulated/0/RetroArch/saves/Gambatte/A B.srm"
         self.dev.fail_push.add(bad)
-        self.assertEqual(s.push([a, b]), [bad])
+        self.assertEqual(s.push([a, b]), [(bad, "push failed")])
         self.assertTrue(os.path.exists(self.dev.real("/storage/emulated/0/RetroArch/saves/Gambatte/C.srm")))
         self.assertIn(("shell", "mkdir -p /storage/emulated/0/RetroArch/saves/Gambatte"), self.dev.calls)
 
@@ -376,7 +424,17 @@ class SessionTest(unittest.TestCase):
         self.assertEqual(self.order[0], "wait")
         self.assertIn("pull", self.order)
 
+    def test_lost_connection_at_saves_check_raises(self):
+        self.dev.drop.add(self.folders.saves)
+        with self.assertRaises(adb.AdbError):
+            self.open()
+        self.assertFalse(any(c[0] == "pull" for c in self.dev.calls))
+
     def test_close_removes_temp(self):
         s = android.open_session(self.target, self.layout, "esde", self.systems)
         s.close()
         self.assertFalse(os.path.exists(s.base))
+
+
+if __name__ == "__main__":
+    unittest.main()

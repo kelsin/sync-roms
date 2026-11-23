@@ -381,6 +381,8 @@ def _card(args, what):
         _saved_setup(cards, args.card, catalog)
     if not ui.has_terminal():
         ui.fail(f"`saves {what}` needs a terminal to pick from", 2)
+    if not args.card:
+        adb.require(mounted=True)
     try:
         target = android.resolve(args.card, cards, catalog["layouts"]["esde"]["roms_dir"])
     except adb.AdbError as e:
@@ -630,9 +632,12 @@ def _apply(args, base, card, layout_name, layout, device, catalog, session):
         games += bool(todo)
         if any(f["kind"] == "state" for f, _, _ in todo):
             state_cores.add(stash["core"])
-    failed = session.push(written) if session and not args.dry_run else []
-    for path in failed:
-        ui.warn(f"Couldn't copy {path} to the device")
+    failed = []
+    if session and written:
+        android.wait_closed(session.target.serial, session.pkg)  # RetroArch may have been reopened during the pickers
+        failed = session.push(written)
+    for path, error in failed:
+        ui.warn(f"Couldn't copy {path} to the device: {error}")
     done = f"{copied} file(s) of {games} game(s) to {card}"
     if args.dry_run:
         print(ui.yellow(f"🧪 Would apply {done}" + (f" ({len(differs)} overwriting a different file, asked first)"

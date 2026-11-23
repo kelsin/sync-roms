@@ -1,3 +1,5 @@
+import contextlib
+import io
 import os
 import subprocess
 import sys
@@ -61,17 +63,45 @@ class AdbTest(unittest.TestCase):
         with mock.patch.object(adb, "run", return_value="failed to connect to 1.2.3.4:5"):
             self.assertFalse(adb.connect("1.2.3.4:5"))
 
-    def test_shell_ok_and_prop(self):
+    def test_shell_ok(self):
         with mock.patch.object(adb, "run", side_effect=adb.AdbError("x")):
-            self.assertFalse(adb.shell_ok("S", "test", "-d", "/x"))
-        with mock.patch.object(adb, "run", return_value="14\n"):
-            self.assertEqual(adb.prop("S", "ro.build.version.release"), "14")
+            self.assertFalse(adb.shell_ok("S", "pidof", "x"))
+        with mock.patch.object(adb, "run", return_value="123\n"):
+            self.assertTrue(adb.shell_ok("S", "pidof", "x"))
+
+    def test_is_dir(self):
+        with mock.patch.object(adb, "run", return_value="y\n") as run:
+            self.assertTrue(adb.is_dir("S", "/x/A B"))
+        run.assert_called_once_with("shell", "sh -c 'test -d \"$1\" && echo y || echo n' _ '/x/A B'",
+                                    serial="S", check=True)
+        with mock.patch.object(adb, "run", return_value="n\n"):
+            self.assertFalse(adb.is_dir("S", "/x"))
+        with mock.patch.object(adb, "run", side_effect=adb.AdbError("device offline")):
+            with self.assertRaises(adb.AdbError):
+                adb.is_dir("S", "/x")
+
+    def test_pull_and_push_never_time_out(self):
+        done = subprocess.CompletedProcess([], 0, stdout="", stderr="")
+        with mock.patch.object(adb, "require", return_value="adb"), \
+                mock.patch.object(adb.subprocess, "run", return_value=done) as sub:
+            adb.pull("S", "/r", "/l")
+            adb.push("S", "/l", "/r")
+        self.assertEqual([c.kwargs["timeout"] for c in sub.call_args_list], [None, None])
 
     def test_require_missing(self):
         with mock.patch.object(adb.shutil, "which", return_value=None):
             with self.assertRaises(SystemExit) as ctx:
                 adb.require()
         self.assertEqual(ctx.exception.code, 2)
+
+    def test_require_missing_mounted_hint(self):
+        err = io.StringIO()
+        with mock.patch.object(adb.shutil, "which", return_value=None), contextlib.redirect_stderr(err), \
+                contextlib.redirect_stdout(err):
+            with self.assertRaises(SystemExit):
+                adb.require(mounted=True)
+        self.assertIn("adb isn't installed (brew install android-platform-tools); for a mounted card, pass its "
+                      "folder or run from it", err.getvalue())
 
 
 if __name__ == "__main__":

@@ -29,15 +29,18 @@ def is_android(entry):
 def card_volumes(serial, roms_dir):
     """The ids of the SD cards and USB drives that hold the ROM folder."""
     ids = [i for i in adb.shell(serial, "ls", "/storage").split() if i not in ("emulated", "self")]
-    return [i for i in ids if adb.shell_ok(serial, "test", "-d", f"/storage/{i}/{roms_dir}")]
+    return [i for i in ids if adb.is_dir(serial, f"/storage/{i}/{roms_dir}")]
+
+
+def model(serial):
+    return next((d.model for d in adb.devices() if d.serial == serial and d.model), serial)
 
 
 def retroarch_package(serial):
     out = adb.shell(serial, "pm", "list", "packages")
     pkgs = [line[8:].strip() for line in out.splitlines() if line.startswith("package:com.retroarch")]
     if not pkgs:
-        model = next((d.model for d in adb.devices() if d.serial == serial and d.model), serial)
-        ui.fail(f"No RetroArch installed on {model}", 2)
+        ui.fail(f"No RetroArch installed on {model(serial)}", 2)
     if len(pkgs) == 1:
         return pkgs[0]
     pick = picker.filter_list("🕹️  Which RetroArch?", pkgs)
@@ -82,6 +85,8 @@ def running(serial, pkg):
 
 def wait_closed(serial, pkg):
     while running(serial, pkg):
+        if ui.ASSUME_YES or not ui.has_terminal():
+            ui.fail(f"RetroArch is open on {model(serial)}: save in-game, close it, then run again", 1)
         print("RetroArch is open on the device: save in-game, then close RetroArch on the device.")
         if not ui.confirm("Closed it? (Enter checks again)", default=True):
             print(ui.yellow("↩️  Stopped: RetroArch is still open"))
@@ -104,13 +109,17 @@ def setup_device():
     print("  1. Settings → About → tap Build number 7 times")
     print("  2. Developer options → turn Wireless debugging on (same Wi-Fi as this computer)")
     print("  3. Wireless debugging → Pair device with pairing code")
+    ui.ask("Press Enter once the pairing code is on screen: ")
+    addr = ""
     try:
-        addr = ""
         for _ in range(30):
             addr = next((a for _, kind, a in adb.mdns_services() if kind == "_adb-tls-pairing._tcp"), "")
             if addr:
                 break
             time.sleep(1)
+    except adb.AdbError:
+        pass
+    try:
         addr = addr or ui.ask("Pairing IP:port shown on the device: ").strip()
         code = ui.ask("6-digit pairing code: ").strip() if addr else ""
         if not code:
@@ -123,8 +132,8 @@ def setup_device():
                 return
             time.sleep(1)
         addr = ui.ask("IP:port under Wireless debugging (not the pairing one): ").strip()
-        if addr:
-            adb.connect(addr)
+        if addr and not adb.connect(addr):
+            ui.warn(f"Couldn't connect to {addr}")
     except adb.AdbError as e:
         print(ui.yellow(f"⚠️  {e}"))
 
@@ -224,15 +233,15 @@ class Session:
         raise ValueError(f"{local} isn't a saves or states path")
 
     def push(self, paths):
-        """Copy the files to the device; the remote paths that failed."""
+        """Copy the files to the device; (remote path, error) of those that failed."""
         failed = []
         for path in paths:
             remote = self.remote(path)
             try:
                 adb.shell(self.target.serial, "mkdir", "-p", posixpath.dirname(remote))
                 adb.push(self.target.serial, path, remote)
-            except adb.AdbError:
-                failed.append(remote)
+            except adb.AdbError as e:
+                failed.append((remote, str(e)))
         return failed
 
     def close(self):
@@ -253,7 +262,7 @@ def open_session(target, layout, layout_name, systems):
         ra["states"] = "states/{core}" if folders.sort_states else "states"
         roms = f"/storage/{target.volume}/{layout['roms_dir']}"
         for folder in sorted({s["folders"].get(layout_name) for s in systems} - {None}):
-            if not adb.shell_ok(serial, "test", "-d", f"{roms}/{folder}"):
+            if not adb.is_dir(serial, f"{roms}/{folder}"):
                 continue
             for line in adb.shell(serial, "find", f"{roms}/{folder}", "-type", "f").splitlines():
                 if line.startswith(roms + "/"):
@@ -263,7 +272,7 @@ def open_session(target, layout, layout_name, systems):
         for kind in ("saves", "states"):
             dest = os.path.join(base, "RetroArch", kind)
             remote = getattr(folders, kind)
-            if adb.shell_ok(serial, "test", "-d", remote):
+            if adb.is_dir(serial, remote):
                 os.makedirs(os.path.dirname(dest), exist_ok=True)
                 tmp = dest + ".pull"
                 adb.pull(serial, remote, tmp)

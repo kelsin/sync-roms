@@ -13,11 +13,13 @@ class AdbError(Exception):
     pass
 
 
-def require():
-    """The adb path, or exit with how to install it."""
+def require(mounted=False):
+    """The adb path, or exit with how to install it (and, when mounted, how to use a mounted card instead)."""
     path = shutil.which("adb")
     if not path:
-        ui.fail("adb isn't installed: brew install android-platform-tools (or install Android platform-tools)", 2)
+        ui.fail("adb isn't installed (brew install android-platform-tools); for a mounted card, pass its folder or "
+                "run from it" if mounted else
+                "adb isn't installed: brew install android-platform-tools (or install Android platform-tools)", 2)
     return path
 
 
@@ -56,8 +58,9 @@ def shell_ok(serial, *words):
     return True
 
 
-def prop(serial, name):
-    return shell(serial, "getprop", name).strip()
+def is_dir(serial, path):
+    """Whether the device has the folder; a failed adb raises AdbError rather than reading as missing."""
+    return shell(serial, "sh", "-c", 'test -d "$1" && echo y || echo n', "_", path).strip() == "y"
 
 
 def mdns_services():
@@ -79,8 +82,8 @@ def connect(addr):
 
 
 def pull(serial, remote, local):
-    run("pull", "-a", remote, local, serial=serial)
+    run("pull", "-a", remote, local, serial=serial, timeout=None)
 
 
 def push(serial, local, remote):
-    run("push", local, remote, serial=serial)
+    run("push", local, remote, serial=serial, timeout=None)
