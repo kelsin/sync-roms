@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.27.0](https://github.com/kelsin/sync-roms/compare/v3.26.1...v3.27.0) (2026-11-23)
+
+
+### :video_game: Features
+
+* **devices:** add trimui brick, brick hammer, brick pro, smart pro and smart pro s ([#538](https://github.com/kelsin/sync-roms/issues/538)) ([96ea418](https://github.com/kelsin/sync-roms/commit/96ea418b87eba918b4a284576260a3a23fc429b5))
+
 ## [3.26.1](https://github.com/kelsin/sync-roms/compare/v3.26.0...v3.26.1) (2026-11-23)
 
 
