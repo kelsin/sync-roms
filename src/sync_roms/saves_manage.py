@@ -17,6 +17,12 @@ def inside(path):
     return p != root and p.startswith(root + os.sep)
 
 
+def at_stash_depth(path):
+    """Whether path is exactly <system>/<game>/<stash> below the stash folder."""
+    rel = os.path.relpath(_real(path), _real(saves.stash_root()))
+    return len(rel.split(os.sep)) == 3 and not rel.startswith(os.pardir)
+
+
 def _files(folder):
     try:
         names = os.listdir(folder)
@@ -39,6 +45,8 @@ def list_rows():
     """Every readable stash with what is missing or extra in its folder, then each unreadable stash folder."""
     rows = []
     for s in saves.load_stashes():
+        if not at_stash_depth(s["dir"]):
+            continue
         listed = [f["name"] for f in s["files"]]
         present = _files(s["dir"])
         rows.append({**s, "missing": [n for n in listed if n not in present],
@@ -75,8 +83,10 @@ def _read(row):
 
 
 def set_label(row, text, dry_run=False):
-    """Store text as the stash's note; empty removes it."""
+    """Store text as the stash's note; empty removes it. Whether it changed anything."""
     text = text.strip()
+    if text == row.get("note", ""):
+        return False
     if not dry_run:
         data = _read(row)
         if text:
@@ -88,6 +98,7 @@ def set_label(row, text, dry_run=False):
         row["note"] = text
     else:
         row.pop("note", None)
+    return True
 
 
 def _prune_empty(folder):
@@ -107,6 +118,8 @@ def move(row, system, catalog_systems, dry_run=False):
     """Move a stash to another system; the new folder, None when it is already there. ValueError when refused."""
     if row.get("unreadable"):
         raise ValueError("this stash can't be read, so it can't be moved")
+    if not at_stash_depth(row["dir"]):
+        raise ValueError("the stash isn't in a <system>/<game>/<stash> folder")
     bucket = system["bucket"]
     if row["system"] == bucket:
         return None
@@ -153,6 +166,8 @@ def delete(rows, dry_run=False):
     for r in rows:
         if not inside(r["dir"]):
             raise ValueError(f"{r['dir']} is outside the stash folder")
+        if not at_stash_depth(r["dir"]):
+            raise ValueError(f"{r['dir']} isn't in a <system>/<game>/<stash> folder")
     done = 0
     for r in rows:
         if not dry_run:
@@ -243,16 +258,18 @@ def _manage(rows, systems, dry_run):
     """The stash list until Esc; (deleted, moved, labelled) counts."""
     names = {s["bucket"]: s.get("name", s["bucket"]) for s in systems}
     session = {"sel": [False] * len(rows)}
-    deleted, moved, labelled = 0, 0, set()
+    deleted, moved, labelled = 0, set(), set()
 
     def on_note(i, text):
         row = rows[i]
         if row["unreadable"]:
             return "This stash can't be read, so it can't be labelled"
         try:
-            set_label(row, text, dry_run=dry_run)
+            changed = set_label(row, text, dry_run=dry_run)
         except (OSError, ValueError) as e:
             return f"Couldn't label {row['game']}: {e}"
+        if not changed:
+            return f"Label unchanged: {row['game']}"
         labelled.add(id(row))
         what = f"labelled {text.strip()!r}" if text.strip() else "label removed"
         return f"{'Would be ' if dry_run else ''}{what}: {row['game']}"
@@ -286,12 +303,14 @@ def _manage(rows, systems, dry_run):
                     ui.warn(f"Couldn't move {r['dir']}: {e}")
                     continue
                 if new:
-                    moved += 1
+                    moved.add(old)
                     if dry_run:
                         print(ui.dim(f"  {old} → {new}"))
+            if not dry_run:
+                session["sel"][:] = [False] * len(rows)
         elif key == "p":
             answer = ui.ask("✂️  Keep how many per game? [1] ").strip() or "1"
-            if not answer.isdigit() or int(answer) < 1:
+            if not answer.isdecimal() or int(answer) < 1:
                 _note(f"Keep how many: {answer!r} isn't a positive whole number")
                 continue
             session["sel"] = prune_picks(rows, int(answer))
@@ -318,7 +337,7 @@ def _manage(rows, systems, dry_run):
                 session["row"] = min(sum(1 for n in kept if n < session["row"]), max(len(kept) - 1, 0))
             session["sel"] = [session["sel"][n] and id(rows[n]) not in gone for n in kept]
             rows[:] = [rows[n] for n in kept]
-    return deleted, moved, len(labelled)
+    return deleted, len(moved), len(labelled)
 
 
 def manage_command(args):

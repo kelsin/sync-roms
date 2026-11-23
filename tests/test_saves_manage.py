@@ -70,6 +70,7 @@ class OpsTest(helpers.DataDir):
         row = self.row_for(d)
         saves_manage.set_label(row, " boss ", dry_run=True)
         self.assertNotIn("note", self.meta(d))
+        row = self.row_for(d)
         saves_manage.set_label(row, " boss ")
         self.assertEqual(self.meta(d)["note"], "boss")
         self.assertEqual(row["note"], "boss")
@@ -154,6 +155,27 @@ class OpsTest(helpers.DataDir):
         with self.assertRaises(ValueError):
             saves_manage.move(row, GB, [GB])
         self.assertTrue(os.path.isdir(bad))
+
+    def stray(self):
+        """A valid stash.json directly in a system folder, beside real stashes."""
+        real = self.stash()
+        sysdir = os.path.join(saves.stash_root(), "gba")
+        shutil.copy(os.path.join(real, "stash.json"), os.path.join(sysdir, "stash.json"))
+        return real, sysdir
+
+    def test_list_rows_ignores_a_stash_json_at_the_wrong_depth(self):
+        real, sysdir = self.stray()
+        self.assertEqual([r["dir"] for r in saves_manage.list_rows()], [real])
+
+    def test_delete_and_move_refuse_a_row_at_the_wrong_depth(self):
+        real, sysdir = self.stray()
+        row = {**self.row_for(real), "dir": sysdir}
+        with self.assertRaises(ValueError):
+            saves_manage.delete([row])
+        with self.assertRaises(ValueError):
+            saves_manage.move(row, GB, [GB])
+        self.assertTrue(os.path.isdir(real))
+        self.assertTrue(os.path.isfile(os.path.join(sysdir, "stash.json")))
 
     def test_delete_removes_folder_and_empty_parents(self):
         a, b = self.stash(day=1), self.stash(day=2)
@@ -297,6 +319,51 @@ class ManageCommandTest(helpers.Cmd):
         self.assertTrue(os.path.isfile(os.path.join(saves.stash_root(), "gb", "Game", os.path.basename(d), "Game.srm")))
         self.assertFalse(os.path.exists(d))
         self.assertIn("moved 1", out)
+
+    def test_move_clears_the_picks(self):
+        self.stash(game="A"), self.stash(game="B")
+
+        def pick_both(labels):
+            self.calls[-1][2]["session"]["sel"][:] = [True, True]
+            return ("m", 0)
+
+        def after_move(labels):
+            self.assertEqual(self.calls[-1][2]["session"]["sel"], [False, False])
+            return None
+        self.lists(pick_both, 0, after_move)
+        code, out, err = self.run_cmd("saves", "manage")
+        self.assertEqual(code, 0, err)
+        self.assertIn("moved 2", out)
+
+    def test_unchanged_label_is_not_written(self):
+        d = self.stash()
+        with open(os.path.join(d, "stash.json")) as f:
+            data = json.load(f)
+        data["note"] = "boss"
+        helpers.touch(os.path.join(d, "stash.json"), json.dumps(data))
+
+        def label(labels):
+            self.calls[-1][2]["on_note"](0, " boss ")
+            return None
+        self.lists(label)
+        with mock.patch.object(saves_manage, "_write", side_effect=AssertionError("written")):
+            code, out, err = self.run_cmd("saves", "manage")
+        self.assertEqual(code, 0, err)
+        self.assertIn("Nothing changed", out)
+
+    def test_prune_rejects_a_superscript_digit(self):
+        self.stash()
+        self.lists(("p", 0), None)
+        with mock.patch.object(ui, "ask", lambda *a: "\u00b2"):
+            code, out, err = self.run_cmd("saves", "manage")
+        self.assertEqual(code, 0, err)
+
+    def test_dry_run_move_counts_a_stash_once(self):
+        self.stash()
+        self.lists(("m", 0), 0, ("m", 0), 0, None)
+        code, out, err = self.run_cmd("saves", "manage", "--dry-run")
+        self.assertEqual(code, 0, err)
+        self.assertIn("move 1,", out)
 
     def test_label_writes_the_note(self):
         d = self.stash()

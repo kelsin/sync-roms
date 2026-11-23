@@ -26,7 +26,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "flash": ("", "write a Knulli, BaseOS, muOS, ROCKNIX or OakMoss image from storage's os/ to an SD card"),
     "umount": ("", "clean the macOS junk off an SD card and unmount it"),
     "cards": ("[edit|list|new|set|rename|convert|clean|delete|copy|export|import]", "list and manage the cards you've synced"),
-    "saves": ("stash|apply|manage [CARD] [--retroarch DIR]", "copy RetroArch saves and states off a card, or onto one, or tidy the stashes"),
+    "saves": ("stash|apply [CARD] [--retroarch DIR], manage", "copy RetroArch saves and states off a card, or onto one, or tidy the stashes"),
     "devices": ("[ID]", "list the supported devices, or one device's systems"),
     "layouts": ("[ID]", "list the firmware card layouts, or one layout's folders and devices"),
     "upload": ("[DIR]", "upload ROMs to the storage folder of a system you pick"),
