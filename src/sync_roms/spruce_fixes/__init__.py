@@ -4,7 +4,8 @@ applied to `spruce` cards on every sync.
 A fix is a module here with `ID` (a key of data/spruce-fixes.json, which holds its `title` and `upstream` PR URL) and `plan(base)`, which returns
 `(writes, skip)`: `writes` is `[(path, bytes)]` to write on the card; with none, `skip` says why: `ABSENT` (what it
 fixes isn't on the card: the theme, or the module's `MISSING`), a `Mismatch` (the card isn't as expected, so it is left
-alone: a warning) or a short reason the card is already right. To add a fix, write its module and list it in FIXES and add it to spruce-fixes.json;
+alone: a warning) or a short reason the card is already right, and `keeps(path)`, whether a card file is one the fix
+already made right (so a theme copy doesn't overwrite it). To add a fix, write its module and list it in FIXES and add it to spruce-fixes.json;
 to remove one, delete its module, its list entry, its json entry, its test and its data. `pyui` finds PyUI's resized
 copies of a theme (`icons_<W>x<H>/`, `bg_<W>x<H>/`), which the fixes patch too."""
 import os
@@ -18,6 +19,11 @@ FIXES = (pokemini, fds, reopen_collection)
 
 class Mismatch(str):
     """A skip reason that is a warning: the card isn't as the fix expects, so nothing was written."""
+
+
+def keeps(path):
+    """Whether the card file at path is one a fix already made right, so a theme copy must not overwrite it."""
+    return any(fix.keeps(path) for fix in FIXES)
 
 
 def run(layout_name, base, dry_run):

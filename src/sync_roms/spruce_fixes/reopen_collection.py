@@ -129,3 +129,8 @@ def _decode(data):
 def _mismatch(reason):
     from . import Mismatch
     return Mismatch(f"the card's PyUI isn't a version it knows ({reason}); the card is left as it is")
+
+
+def keeps(path):
+    """Never: this fix patches PyUI's own files, which no theme copy writes."""
+    return False

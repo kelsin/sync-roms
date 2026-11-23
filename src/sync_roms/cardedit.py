@@ -4,7 +4,7 @@ import json
 import queue
 import threading
 
-from . import budget, cardpicks, collections as colls, edit, inventory, listedit, metafilter, picker, previews, s3, scrape_plan, store, surprise, themeart, ui, usersettings
+from . import budget, cardpicks, collections as colls, edit, inventory, listedit, metafilter, picker, previews, s3, scrape_plan, spruce_themes, store, surprise, themeart, ui, usersettings
 
 FULL_KEY = "f"
 SET_KEY = "s"
@@ -376,17 +376,21 @@ def card_status(name, setup, systems, to_fetch=None):
 
 
 def settings_menu(name, systems, playable):
-    """S in the system list: turn the card's Surprise, theme, custom collections or RAOfflineProxy on or off, or pick the systems
-    Surprise may use on every card or on this card (playable: the systems the card can play)."""
+    """S in the system list: turn the card's Surprise, theme, custom collections or RAOfflineProxy on or off, pick the systems
+    Surprise may use on every card or on this card (playable: the systems the card can play) and, on a spruce card, its current theme."""
     entry = store.load_cards().get(name)
     state = lambda on: "on" if on else "off"
+    spruce = isinstance(entry, dict) and entry.get("layout") == "spruce"
+    current = entry.get("spruce_theme") if spruce else None
+    current = current if isinstance(current, str) and current else None
     i = picker.filter_list("⚙️  Settings", [
         f"🎁 Surprise: {state(surprise.enabled(entry))}",
         f"🎨 Theme (Art Book Next, ES-DE theme, collection art): {state(store.card_flag(entry, 'theme'))}",
         f"💖 Collections (written to the frontend, Surprise's too): {state(store.card_flag(entry, 'custom_collections'))}",
         f"🏆 RAOfflineProxy (RetroAchievements offline proxy app): {state(store.card_flag(entry, 'raofflineproxy'))}",
         "Systems Surprise may use (every card)",
-        "Systems Surprise may use (this card)"])
+        "Systems Surprise may use (this card)",
+        *([f"🎨 Spruce theme: {current or 'none'}"] if spruce else [])])
     if i == 0:
         toggle_surprise(name)
     elif i in (1, 2, 3):
@@ -395,6 +399,21 @@ def settings_menu(name, systems, playable):
         pick_surprise_systems(systems)
     elif i == 5:
         pick_card_surprise_systems(name, playable)
+    elif i == 6 and spruce:
+        pick_spruce_theme(name, current)
+
+
+def pick_spruce_theme(name, current):
+    """Pick the card's current spruce theme, saved as spruce_theme (removed for none, kept on Esc)."""
+    theme = spruce_themes.pick_one(f"🎨 Spruce theme ({name})", current)
+    if theme is False:
+        return
+    if theme:
+        store.update_card(name, spruce_theme=theme)
+        return
+    cards = store.load_cards()
+    if isinstance(cards.get(name), dict) and cards[name].pop("spruce_theme", None) is not None:
+        store.write_cards(cards)
 
 
 def toggle_flag(name, field):

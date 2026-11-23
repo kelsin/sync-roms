@@ -484,6 +484,17 @@ class EsdeExtrasSyncTest(unittest.TestCase):
             wanted = mirroring.mirror_wanted({"systems": []})
         self.assertEqual(wanted, {"os/spruceos/spruceV4.6.0.7z": 2})
 
+    def test_mirror_wants_listed_and_current_themes(self):
+        pre = "os/spruceos/themes/"
+        listing = {pre + "A/config.json": 1, pre + "A/x.png": 2, pre + "B/config.json": 3, pre + "C/config.json": 4,
+                   pre + "D/config.json": 5, pre + "A/": 0}
+        with mock.patch.object(mirroring.s3, "read_root", return_value=None), \
+                mock.patch.object(mirroring.s3, "list_sizes", side_effect=lambda p, sizes=True: listing if p == pre else {}), \
+                mock.patch.object(mirroring.spruce_themes, "default_list", return_value=["A"]), \
+                mock.patch.object(mirroring.store, "load_cards", return_value={"c": {"spruce_theme": "C"}, "d": "x"}):
+            wanted = mirroring.mirror_wanted({"systems": []})
+        self.assertEqual(wanted, {pre + "A/config.json": 1, pre + "A/x.png": 2, pre + "C/config.json": 4})
+
     def test_mirror_wanted_includes_the_android_apks(self):
         listings = {"os/android/APKs/": {"os/android/APKs/": 0, "os/android/APKs/obtainium.json": 1, "os/android/APKs/ES-DE.apk": 2,
                                          "os/android/APKs/RAOfflineProxy-v3.1.0.apk": 3}}

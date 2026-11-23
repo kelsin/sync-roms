@@ -1,5 +1,6 @@
 """Download ROMs and BIOS files from your ROM storage."""
 import argparse
+import contextlib
 import os
 import re
 import sys
@@ -10,7 +11,7 @@ from concurrent.futures import ThreadPoolExecutor
 from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError
 
 from . import __version__, budget, cardedit, cardfs, clean, commands, downloads, drivers, edit, external, frontend, inventory, m3u, mirroring, picker, runtime, s3, scrape_plan, store
-from . import muos_collections, nextui_folders, onion_surprise, pico8, raofflineproxy, rocknix_collections, saves, spruce_collections, spruce_bootlogo, spruce_emu, spruce_os, spruce_fixes, spruce_settings, spruce_syncthing, spruce_wifi, surprise, themeart, ui, usersettings, vita
+from . import muos_collections, nextui_folders, onion_surprise, pico8, raofflineproxy, rocknix_collections, saves, spruce_collections, spruce_bootlogo, spruce_emu, spruce_os, spruce_fixes, spruce_settings, spruce_syncthing, spruce_themes, spruce_wifi, surprise, themeart, ui, usersettings, vita
 from . import collections as colls
 
 
@@ -20,7 +21,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "games": ("edit|list|add|remove|full|sets|export|import", "edit a card's games, interactively or from scripts"),
     "sets": ("edit", "edit the game sets in storage by hand and save the changes there"),
     "collections": ("edit", "edit your collections of favourite games (saved in ~/.sync-roms/collections/)"),
-    "themes": ("update", "copy the latest Art Book Next for ES-DE from GitHub into storage"),
+    "themes": ("update", "copy the latest Art Book Next for ES-DE and the PyUI themes for spruce from GitHub into storage"),
     "download": ("pico8", "add the PICO-8 BBS Featured carts storage doesn't have, and newer revisions of those it has"),
     "flash": ("", "write a Knulli, BaseOS, muOS, ROCKNIX or OakMoss image from storage's os/ to an SD card"),
     "umount": ("", "clean the macOS junk off an SD card and unmount it"),
@@ -118,11 +119,15 @@ TOPICS = {
   that use Art Book Next.
 """,
     "themes": """
-  sync-roms themes update [--dry-run]         put the latest Art Book Next for ES-DE in storage
+  sync-roms themes update [--dry-run]         put the latest Art Book Next for ES-DE and the PyUI themes in storage
 
   Downloads the GitHub archive of the theme's latest commit (about 200 MB) and replaces os/esde/themes/ in storage
   (write profile). Syncs copy it from there onto ES-DE cards that use Art Book Next, so the Surprise collection has its
   art; a card's copy is replaced when storage has a newer commit. Does nothing when storage already has the latest.
+  It also refreshes the PyUI themes for spruce in os/spruceos/themes/ (the spruceUI/PyUI-Themes release, unpacked with
+  7z; folders you add there yourself are left alone).
+
+  sync-roms themes pick                       choose the PyUI themes every spruce card gets by default (saved as spruce_themes)
 """,
     "download": """
   sync-roms download pico8 [--count N] [--dry-run] [--yes]   add the BBS Featured carts to storage's pico8/
@@ -1255,11 +1260,17 @@ def sync_card(args):
             downloads.add_job(theme_jobs, k, os.path.join(base, themes_dir), rel, size)
 
     theme_jobs = downloads.with_sizes(theme_jobs)
+    # spruce cards get the PyUI themes of the default list and the card's current theme in Themes/
+    theme_plan = None
+    if layout_name == "spruce":
+        theme_names = spruce_themes.default_list()
+        theme_plan = spruce_themes.plan(card, base, theme_names, args.no_delete)
+        theme_jobs = downloads.with_sizes(theme_plan["jobs"])
 
     rom_todo, bios_todo = downloads.plan_downloads(rom_jobs, disc_dir), downloads.plan_downloads(bios_jobs)
     apk_todo = downloads.plan_downloads(apk_jobs)
     driver_todo = downloads.plan_downloads(driver_jobs)
-    theme_todo = downloads.plan_downloads(theme_jobs)
+    theme_todo = spruce_themes.todo(theme_jobs) if theme_plan else downloads.plan_downloads(theme_jobs)
     if args.dry_run:  # the real run moves these first, so they are already there and not extras
         rom_todo = [j for j in rom_todo if j[1] not in moved]
         extras = [p for p in extras if not moved or os.path.join(os.path.dirname(p), disc_dir, os.path.basename(p)) not in moved]
@@ -1325,6 +1336,8 @@ def sync_card(args):
         scrape_plan.describe_scrape_plan(planned)
     if extras:
         print(f"🗑️  Local ROMs no longer in the selection: {ui.bold(str(len(extras)))}")
+    if theme_plan and theme_plan["remove"]:
+        print(f"🗑️  Themes to remove: {ui.bold(str(len(theme_plan['remove'])))}")
     list_kept(kept_extras, "local ROM(s) no longer in the selection")
     if renames or card_moves:
         print(f"📦 Card files to rename or move instead of downloading: {ui.bold(str(len(renames) + len(card_moves)))}")
@@ -1460,12 +1473,14 @@ def sync_card(args):
     if args.dry_run:
         print(ui.yellow("\n🧪 Dry run — nothing downloaded or deleted"))
         free = free_space(base) + sum(cardfs.size(p) or 0 for p in extras)  # the real run deletes these first
+        if theme_plan:
+            free += spruce_themes.freed(base, theme_plan["remove"])
         plan_json = {
             "downloads": [{"kind": kind, "key": key, "path": path, "size": size or 0}
                           for kind, todo in (("rom", rom_todo), ("bios", bios_todo), ("android", apk_todo), ("driver", driver_todo),
                                           ("theme", theme_todo), ("scrape", scrape_todo))
                           for key, path, size in todo],
-            "delete": list(extras), "kept": kept_extras, "rename": [{"from": a, "to": b} for a, b in renames + [(p, j[1]) for p, j in card_moves]],
+            "delete": list(extras), "kept": kept_extras, "theme_remove": theme_plan["remove"] if theme_plan else [], "rename": [{"from": a, "to": b} for a, b in renames + [(p, j[1]) for p, j in card_moves]],
             "missing": {"roms": missing, "bios": [k for k in bios_keys if k not in bios_have]},
             "free_space": free}
         for key, path, _ in todo_all:
@@ -1479,6 +1494,9 @@ def sync_card(args):
             print(f"  {ui.yellow('would move')} {path} {ui.dim('→')} {job[1]}")
         for path in extras:
             print(f"  {ui.red('would delete')} {path}")
+        if theme_plan:
+            spruce_themes.remove(base, theme_plan["remove"], True)
+            spruce_themes.select(card, base, True)
         prune_drivers(True)
         install_apps(True)
         stage_spruce(True)
@@ -1525,25 +1543,53 @@ def sync_card(args):
         delete_extras(extras)
     cardfs.clear()
 
-    if todo_all:
-        short = space(free_space(base))
-        if short:
-            if ui.ASSUME_YES or not ui.has_terminal():  # nobody to answer "Try anyway?"
-                ui.fail(short, 1)
-            ui.failure(ui.red(f"❌ {short}"))
-            if not ui.confirm("Try anyway?", default=False):
-                print(ui.yellow("👋 Cancelled."))
-                return 0
-        if not ui.confirm(f"⬇️  Download {len(todo_all)} file(s) ({ui.human_size(total_bytes(todo_all))})?"):
+    # on spruce cards t picks this sync's themes; the removals wait for the answer, so a kept theme isn't copied again
+    pick_themes = theme_plan is not None and not ui.ASSUME_YES and ui.has_terminal()
+    themes_picked = False  # a list picked with t: the mirror keeps only the default list's themes, so storage is read
+    while todo_all or pick_themes:
+        if todo_all:
+            short = space(free_space(base) + (spruce_themes.freed(base, theme_plan["remove"]) if theme_plan else 0))
+            if short:
+                if ui.ASSUME_YES or not ui.has_terminal():  # nobody to answer "Try anyway?"
+                    ui.fail(short, 1)
+                ui.failure(ui.red(f"❌ {short}"))
+                if not ui.confirm("Try anyway?", default=False):
+                    print(ui.yellow("👋 Cancelled."))
+                    return 0
+        question = (f"⬇️  Download {len(todo_all)} file(s) ({ui.human_size(total_bytes(todo_all))})?" if todo_all
+                    else "Nothing to download. Continue?")
+        answer = ui.choose(question, "ynt", "y", "t: themes for this sync") if pick_themes else "y" if ui.confirm(question) else "n"
+        if answer == "n":
             print(ui.yellow("👋 Cancelled."))
             return 0
+        if answer == "y":
+            break
+        with mirroring.storage_reads():
+            picked = spruce_themes.pick("🎨 Themes for this sync only", theme_names, locked=store.saved_card(card).get("spruce_theme"))
+            if picked is not None:
+                theme_names, themes_picked = picked, True
+                theme_plan = spruce_themes.plan(card, base, theme_names, args.no_delete)
+                theme_jobs = downloads.with_sizes(theme_plan["jobs"])
+                theme_todo = spruce_themes.todo(theme_jobs)
+        if picked is not None:
+            todo_all = rom_todo + bios_todo + apk_todo + driver_todo + theme_todo + scrape_todo
+            print(f"🎨 Themes: {ui.bold(str(len(theme_todo)))} to download ({ui.human_size(total_bytes(theme_todo))}), "
+                  f"{len(theme_jobs) - len(theme_todo)} already present"
+                  + (f"; {len(theme_plan['remove'])} to remove" if theme_plan["remove"] else ""))
+    present = [n for n in theme_plan["remove"] if os.path.isdir(os.path.join(base, "Themes", n))] if theme_plan else []
+    removal_failed = spruce_themes.remove(base, theme_plan["remove"], False) if theme_plan else 0
+    themes_removed = any(not os.path.isdir(os.path.join(base, "Themes", n)) for n in present)
+    if removal_failed:  # a folder that couldn't be removed stays recorded, so the next sync tries again
+        theme_plan["installed"] = spruce_themes.sorted_names(
+            [*theme_plan["installed"], *(n for n in theme_plan["remove"] if os.path.isdir(os.path.join(base, "Themes", n)))])
+    cardfs.clear()
 
     if clean_card and todo_all:  # nothing downloaded means nothing to finalize
         clean._clean_root = base
     started = time.monotonic()
     failures = []
     disc_dirs = {os.path.normpath(dest_of(s)): disc_dir for s in chosen if available(s)} if disc_dir else None
-    failed = move_failed + downloads.run_downloads(rom_todo, "ROMs", "💿", roms_dir, failures, disc_dirs) + downloads.run_downloads(bios_todo, "BIOS", "🧠", bios_dir, failures)
+    failed = move_failed + removal_failed + downloads.run_downloads(rom_todo, "ROMs", "💿", roms_dir, failures, disc_dirs) + downloads.run_downloads(bios_todo, "BIOS", "🧠", bios_dir, failures)
     if apk_jobs:
         failed += downloads.run_downloads(apk_todo, "Android", "🤖", apk_dir, failures)
     if driver_entries:
@@ -1553,7 +1599,13 @@ def sync_card(args):
     pico8_wrote = []
     failed += install_apps(False, pico8_wrote)
     if theme_todo:
-        failed += downloads.run_downloads(theme_todo, "Themes", "🎨", os.path.join(base, themes_dir), failures)
+        with mirroring.storage_reads() if themes_picked else contextlib.nullcontext():
+            failed += downloads.run_downloads(theme_todo, "Themes", "🎨", base if theme_plan else os.path.join(base, themes_dir), failures)
+    if theme_plan:
+        if theme_plan["installed"] != (store.saved_card(card).get("spruce_themes_installed") or []):
+            store.update_card(card, spruce_themes_installed=theme_plan["installed"])
+        if (spruce_themes.select(card, base, False) or themes_removed) and clean_card:
+            clean._clean_root = base
     prefixed = 0
     for s in chosen:
         if disc_dir and available(s):

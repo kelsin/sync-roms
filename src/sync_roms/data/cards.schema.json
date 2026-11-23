@@ -33,6 +33,15 @@
         "type": "array",
         "items": {"type": "string"}
       },
+      "spruce_theme": {
+        "description": "The PyUI theme folder sync-roms copies to a spruce card and selects in its Saves/*-system.json",
+        "type": "string"
+      },
+      "spruce_themes_installed": {
+        "description": "PyUI theme folder names sync-roms installed in a spruce card's Themes",
+        "type": "array",
+        "items": {"type": "string"}
+      },
       "spruce_emu": {
         "description": "Per ROM folder, the BIOS zip names sync-roms added to the ignoreList of the folder's Spruce Emu config",
         "type": "object",

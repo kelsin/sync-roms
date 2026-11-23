@@ -331,6 +331,14 @@ def get_text(key):
     return s3_client().get_object(Bucket=runtime.BUCKET, Key=key)["Body"].read().decode("utf-8")
 
 
+def get_bytes(key):
+    """A storage file's bytes, through the local mirror when a sync has one."""
+    if read_root():
+        with open(safe_join(read_root(), key), "rb") as f:
+            return f.read()
+    return s3_client().get_object(Bucket=runtime.BUCKET, Key=key)["Body"].read()
+
+
 def fetch_texts(keys):
     keys = sorted(keys)
     with ThreadPoolExecutor(runtime.WORKERS) as ex:

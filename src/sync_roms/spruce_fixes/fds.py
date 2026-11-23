@@ -37,6 +37,18 @@ def plan(base):
     return writes, reason
 
 
+def keeps(path):
+    """Whether path is a theme's top-level icons/overlay/fds.png already holding the fix's image."""
+    parts = os.path.normpath(path).split(os.sep)
+    if len(parts) < 5 or parts[-5] != "Themes" or parts[-4] not in THEMES or parts[-3:] != ["icons", "overlay", "fds.png"]:
+        return False
+    try:
+        with open(IMAGE, "rb") as f:
+            return cardfs.read(path) == f.read()
+    except OSError:
+        return False
+
+
 def _resized(image, scale):
     """image as PyUI resizes an icon by scale (the same bytes at 1.0)."""
     if scale == 1.0:
