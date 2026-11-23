@@ -5,7 +5,7 @@ import tempfile
 
 from PIL import Image, ImageDraw, ImageFont
 
-from .. import store
+from .pixel import build
 
 PANEL = (300, 215)
 GAP = 8
@@ -14,9 +14,8 @@ CAPTION = (136, 136, 136)
 
 
 def font_path():
-    """The base theme's font when it is in the cache, else None (Pillow's default font)."""
-    path = os.path.join(store.cache_dir(), "themes", "base", "SPRUCE", "nunwen.ttf")
-    return path if os.path.isfile(path) else None
+    """The Pixel themes' font (Fusion Pixel 12px, in the repo data)."""
+    return os.path.join(build.FONT_DIR, build.FONT)
 
 
 def _font(path, size):

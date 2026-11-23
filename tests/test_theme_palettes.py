@@ -30,7 +30,7 @@ def full_config():
         "name": "Spruce", "author": "tenlevels", "description": "x", "unrelated": {"color": "#123456"},
         "batteryPercentage": dict(text), "title": dict(text), "hint": dict(text, contextbuttons=True),
         "currentpage": dict(text), "total": dict(text, color="#D65D0E"),
-        "grid": {"font": "nunwen.ttf", "grid1x4": 25, "color": "#7C6F64", "selectedcolor": "#FBF1C7"},
+        "grid": {"font": "nunwen.ttf", "grid1x4": 25, "grid3x4": 18, "color": "#7C6F64", "selectedcolor": "#FBF1C7"},
         "list": {"font": "nunwen.ttf", "size": 24, "color": "#FBF1C7", "selectedcolor": "#FBF1C7"},
         "screensaver": {"bgColor": "#282828", "widgets": [
             {"type": "clock", "fontSize": 82, "color": "#FFFFFF", "font": "nunwen.ttf"},
@@ -163,6 +163,40 @@ class Build(helpers.StorageDir):
             self.assertEqual(pixels(os.path.join(folder, "skin_720x480", "div-line-h.png"))[5, 2], bar + (255,))
         self.assertNotEqual(configs[0], configs[1])
         self.assertEqual(icons[0], icons[1])
+
+    def test_build_uses_the_pixel_font(self):
+        base = os.path.join(self.root, "os", "spruceos", "themes", "SPRUCE")
+        with open(os.path.join(base, "nunwen.ttf"), "wb") as f:
+            f.write(b"font")
+        folder = custom_themes.build(["Pixel Consoles"], [palettes.get("Gruvbox")], os.path.join(self.tmp.name, "out"))[
+            "Pixel Consoles - Gruvbox"]
+        font = "fusion-pixel-12px-proportional-ja.ttf"
+        self.assertTrue(os.path.isfile(os.path.join(folder, font)))
+        self.assertTrue(os.path.isfile(os.path.join(folder, "FONT-LICENSE.txt")))
+        self.assertFalse(os.path.exists(os.path.join(folder, "nunwen.ttf")))
+        with open(os.path.join(folder, "CREDITS.txt")) as f:
+            self.assertIn("Fusion Pixel", f.read())
+
+        def fonts(node):
+            if isinstance(node, dict):
+                yield from ([node] if "font" in node else [])
+                for child in node.values():
+                    yield from fonts(child)
+            elif isinstance(node, list):
+                for child in node:
+                    yield from fonts(child)
+
+        for file in ("config.json", "config_720x480.json"):
+            with open(os.path.join(folder, file)) as f:
+                config = json.load(f)
+            found = list(fonts(config))
+            self.assertEqual(len(found), 8, file)
+            self.assertEqual({entry["font"] for entry in found}, {font}, file)
+            sizes = [v for entry in found for k, v in entry.items() if k in ("size", "grid1x4", "grid3x4")]
+            self.assertEqual(len(sizes), 8, file)
+            self.assertLessEqual(set(sizes), {12, 24}, file)
+            self.assertEqual((config["batteryPercentage"]["size"], config["title"]["size"], config["grid"]["grid1x4"],
+                              config["grid"]["grid3x4"]), (12, 24, 24, 12), file)
 
     def test_unknown_style_raises_keyerror(self):
         with self.assertRaises(KeyError):
@@ -348,9 +382,10 @@ class PaletteSheet(helpers.StorageDir):
         with Image.open(path) as img:
             self.assertEqual(img.format, "PNG")
 
-    def test_font_path_falls_back(self):
+    def test_font_path_is_the_bundled_font(self):
         from sync_roms.custom_themes import palette_sheet
-        self.assertIsNone(palette_sheet.font_path())
+        self.assertTrue(os.path.isfile(palette_sheet.font_path()))
+        self.assertEqual(os.path.basename(palette_sheet.font_path()), "fusion-pixel-12px-proportional-ja.ttf")
 
     def test_palettes_command_opens_viewer(self):
         from sync_roms.custom_themes import palette_sheet

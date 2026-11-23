@@ -7,6 +7,7 @@ import shutil
 
 from PIL import Image
 
+from ... import store
 from . import (app_icons, arcade, extras, frames, handhelds, menu, nintendo_sega, others, recolor, ui_settings, ui_status,
                variants)
 from .sprite import place, render
@@ -35,6 +36,36 @@ BLACKED = {
     "skin": ["app_loading_bg.png", "bg-gamelist.png", "bg-title.png", "tips-bar-bg.png", "menu-5line-bg.png", "menu-6line-bg.png"],
     "skin_640_480": ["menu-5line-bg.png", "menu-6line-bg.png"],
 }
+
+
+FONT_DIR = os.path.join(store.REPO_DATA, "themes", "fusion-pixel")
+FONT, FONT_LICENSE = "fusion-pixel-12px-proportional-ja.ttf", "FONT-LICENSE.txt"
+# {config section: {size key: size}}: the pixel font is only crisp at multiples of 12
+FONT_SIZES = {"batteryPercentage": {"size": 12}, "title": {"size": 24}, "hint": {"size": 24}, "currentpage": {"size": 24},
+              "total": {"size": 24}, "list": {"size": 24}, "grid": {"grid1x4": 24, "grid3x4": 12}}
+
+
+def set_font(config):
+    """Point every "font" in config at FONT and set the FONT_SIZES the config has; returns the fonts it replaced."""
+    replaced = set()
+
+    def walk(node):
+        if isinstance(node, dict):
+            if "font" in node:
+                replaced.add(node["font"])
+                node["font"] = FONT
+            nodes = node.values()
+        else:
+            nodes = node if isinstance(node, list) else ()
+        for child in nodes:
+            walk(child)
+
+    walk(config)
+    for section, sizes in FONT_SIZES.items():
+        for key, size in sizes.items():
+            if key in config.get(section, {}):
+                config[section][key] = size
+    return replaced - {FONT}
 
 
 def blacken(path):
@@ -101,6 +132,9 @@ def build_theme(base_dir, out_dir, name, kind, palette):
         shutil.rmtree(dest)
     shutil.copytree(base_dir, dest)
     recolor.recolor_bar(dest, palette)  # the base's own skins and pre-scaled copies, before anything is drawn
+    shutil.copyfile(os.path.join(FONT_DIR, FONT), os.path.join(dest, FONT))
+    shutil.copyfile(os.path.join(FONT_DIR, "OFL.txt"), os.path.join(dest, FONT_LICENSE))
+    old_fonts = set()
     for file in sorted(os.listdir(dest)):
         if not (file.startswith("config") and file.endswith(".json")):
             continue
@@ -112,9 +146,13 @@ def build_theme(base_dir, out_dir, name, kind, palette):
         if "screensaver" in config:
             config["screensaver"]["bgColor"] = "#000000"
         recolor.recolor_config(config, palette)
+        old_fonts |= set_font(config)
         with open(config_path, "w") as f:
             json.dump(config, f, indent=4)
             f.write("\n")
+    for font in old_fonts:  # no config uses the base's font anymore
+        if os.path.isfile(os.path.join(dest, font)):
+            os.remove(os.path.join(dest, font))
     blacken_all(os.path.join(dest, "skin", "background.png"))
     for folder, files in BLACKED.items():
         for file in files:
@@ -152,7 +190,9 @@ def build_theme(base_dir, out_dir, name, kind, palette):
     resize_variants(dest, drawn, native)
     preview(dest, spec)
     with open(os.path.join(dest, "CREDITS.txt"), "a") as f:
-        f.write(f"\n{name}: the SPRUCE theme with a black background and pixel-art icons drawn for sync-roms.\n")
+        f.write(f"\n{name}: the SPRUCE theme with a black background and pixel-art icons drawn for sync-roms.\n"
+                f"Font: Fusion Pixel 12px by TakWolf (https://github.com/TakWolf/fusion-pixel-font), {FONT}, under the SIL "
+                f"Open Font License 1.1 ({FONT_LICENSE}).\n")
     return dest
 
 
