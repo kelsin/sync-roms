@@ -4,7 +4,7 @@
 
 **Goal:** A card marked `guest` gets a sync that only copies ROMs, BIOS and scrapes, deletes only the recognized ROMs deselected this session (and their media), never overwrites a card file, and is hidden from `cards list` without `--all`.
 
-**Architecture:** A new `guest.py` holds the pure guest logic (recognize card files, seed picks, work out deletions, filter jobs so nothing is overwritten, find a deleted ROM's media). `cli.sync_card` calls it behind a `guest` boolean and gates every non-copy step with `if not guest`. The card editor gets a `G` key; `cards list` gets `--all`.
+**Architecture:** A new `guest.py` holds the pure guest logic (recognize card files, seed picks, work out deletions, filter jobs so nothing is overwritten, find a deleted ROM's media). `cli.sync_card` calls it behind a `guest` boolean and gates every non-copy step with `if not guest`. The card editor gets a `F` key; `cards list` gets `--all`.
 
 **Tech Stack:** Python 3.12+ stdlib, `unittest`, `uv run`.
 
@@ -26,11 +26,11 @@
 
 1. A card on a case-sensitive filesystem with `Game.ZIP` where storage has `Game.zip`: recognized, not downloaded again, deleted at its own path when deselected. (Task 1 test `test_recognized_keeps_the_card_spelling`, Task 4 test `test_guest_sync_does_not_redownload_a_differently_spelled_rom`.)
 2. A same-named friend file of a different size: never seeded, never deleted, never overwritten. (Task 1 `test_recognized_skips_a_different_size`, Task 4 `test_guest_sync_leaves_a_same_named_file_of_another_size`.)
-3. `G` turned **off** during a guest sync must not turn that run into a normal sync (a normal sync sweeps every unpicked file, the friend's included). Plan call: turning guest off takes effect on the next sync; the running sync stays guest. (Task 3 test `test_turning_guest_off_mid_sync_keeps_this_run_guest`.)
+3. `F` turned **off** during a guest sync must not turn that run into a normal sync (a normal sync sweeps every unpicked file, the friend's included). Plan call: turning guest off takes effect on the next sync; the running sync stays guest. (Task 3 test `test_turning_guest_off_mid_sync_keeps_this_run_guest`.)
 4. A guest card with old `surprises` saved: none are synced. (Task 2 `test_guest_card_surprises_are_not_in_the_manifest`.)
 5. `--yes`/no terminal on a guest card: no editor, nothing deleted, BIOS and scrapes filled in. (Task 4 `test_guest_sync_with_yes_deletes_nothing`.)
 
-Note for the user: item 3 is a plan-level change to the spec, which said turning `G` off mid-sync makes it a normal sync. It's safer this way.
+Note for the user: item 3 is a plan-level change to the spec, which said turning `F` off mid-sync makes it a normal sync. It's safer this way.
 
 ---
 
@@ -102,7 +102,7 @@ Note for the user: item 3 is a plan-level change to the spec, which said turning
   - `cards_list`: skip guest entries unless `args.all`; with `--all` add `👤 ` before a guest row's name; after the table (text output only) print `ui.dim(f"{n} guest card(s) hidden (--all shows them)")` when any were hidden, with the singular `1 guest card hidden`. Add `"guest": guest.is_guest(cards[name])` to each row.
   - Parser: `p.add_argument("--all", action="store_true")` on `cards list`; add `--all` to completion if `commands.second_words`/completion lists per-command flags (check `tests/test_completion.py`).
   - Schema: `"guest": {"type": "boolean", "const": true}` (or the schema's style for flags).
-  - CLAUDE.md Card fields table, new row: `` `guest` | `--guest`, card editor's `G` | `true` on a guest card (a friend's card): its sync only copies ROMs, BIOS and scrapes, deletes only the recognized ROMs deselected that session, never overwrites a card file; hidden from `cards list` without `--all`. Absent otherwise. ``
+  - CLAUDE.md Card fields table, new row: `` `guest` | `--guest`, card editor's `F` | `true` on a guest card (a friend's card): its sync only copies ROMs, BIOS and scrapes, deletes only the recognized ROMs deselected that session, never overwrites a card file; hidden from `cards list` without `--all`. Absent otherwise. ``
   - README: document `cards list --all`.
 
 - [ ] **Step 4: Run** `uv run python -m unittest tests.test_guest tests.test_commands tests.test_readme tests.test_completion -v` → PASS.
@@ -111,7 +111,7 @@ Note for the user: item 3 is a plan-level change to the spec, which said turning
 
 ---
 
-### Task 3: `G` in the card editor and the editor hook
+### Task 3: `F` in the card editor and the editor hook
 
 **Files:**
 - Modify: `src/sync_roms/cardedit.py` (keys at top, `edit_card` at 273)
@@ -121,19 +121,19 @@ Note for the user: item 3 is a plan-level change to the spec, which said turning
 **Interfaces:**
 - Consumes: `guest.is_guest`.
 - Produces:
-  - `cardedit.GUEST_KEY = "G"`, in `LIST_KEYS` as `("G", "guest card: a friend's card; syncs only copy ROMs, BIOS and scrapes (again to undo)")` and `LIST_HINT` gains `· G guest`.
+  - `cardedit.GUEST_KEY = "F"`, in `LIST_KEYS` as `("F", "guest card: a friend's card; syncs only copy ROMs, BIOS and scrapes (again to undo)")` and `LIST_HINT` gains `· F guest`.
   - `cardedit.toggle_guest(name) -> bool`: flips the card's `guest` (sets `True` / pops it) in one `cards.json` write; returns the new state.
-  - `cardedit.edit_card(name, setup=None, to_fetch=None, card_match=None, on_guest=None)`: on `G`, `toggle_guest(name)`; if it turned on and `on_guest` is given, call `on_guest()` (the sync's reseed) and recount every system (`changed = ALL`). The title adds ` · 👤 guest` while on.
+  - `cardedit.edit_card(name, setup=None, to_fetch=None, card_match=None, on_guest=None)`: on `F`, `toggle_guest(name)`; if it turned on and `on_guest` is given, call `on_guest()` (the sync's reseed) and recount every system (`changed = ALL`). The title adds ` · 👤 guest` while on.
   - `surprise.run_surprise(..., card_match=None, on_guest=None)`: passes `on_guest` to both `edit_card` calls.
 
 - [ ] **Step 1: Write the failing tests** (test_cardedit.py, using the existing editor test helpers such as `helpers.feed_list`/`pilot_list`):
-  - `test_g_toggles_guest`: pressing `G` twice in the system list sets then removes `guest` in cards.json.
-  - `test_g_on_calls_on_guest_once`: with `on_guest` a mock, `G` (on) calls it once; `G` again (off) doesn't call it.
+  - `test_f_toggles_guest`: pressing `F` twice in the system list sets then removes `guest` in cards.json.
+  - `test_f_on_calls_on_guest_once`: with `on_guest` a mock, `F` (on) calls it once; `F` again (off) doesn't call it.
   - `test_title_shows_guest`: with `guest: true` saved, the list title contains `👤 guest`.
 
 - [ ] **Step 2: Run** `uv run python -m unittest tests.test_cardedit -v` → new tests FAIL.
 
-- [ ] **Step 3: Implement** as in Interfaces; `G` goes in `hotkeys` and is handled in the `isinstance(i, tuple)` branch.
+- [ ] **Step 3: Implement** as in Interfaces; `F` goes in `hotkeys` and is handled in the `isinstance(i, tuple)` branch.
 
 - [ ] **Step 4: Run** `uv run python -m unittest tests.test_cardedit tests.test_surprise -v` → PASS.
 
@@ -157,7 +157,7 @@ Behavior, in `sync_card` order:
 1. `--guest`: `ap.add_argument("--guest", action="store_true")`, in `PLAIN_FLAGS`, and in `check_modes`'s "only apply to syncing a card" check with `--no-delete`. After `choose_card_setup`, if `args.guest and not args.dry_run`: `store.update_card(card, guest=True)`. `guest = args.guest or guest.is_guest(store.saved_card(card))` (name the module import so it doesn't clash, e.g. `from . import guest as guests`).
 2. Guest skips: `nextui_folders.migrate`, `spruce_emu.legacy_systems` (the `dropped += legacy` block), and the `dropped` device systems (set `dropped = []`).
 3. `reseed()`: closure. For each system in `systems` (the synced list): `names = inventory.files(bucket + "/", sizes=False)`, keys = `[k for k in names if not k.endswith("/")]` minus ignored (`ignore.is_ignored`); names matched as in `guest.recognized`, then sizes from `inventory.stat(matched_candidates)` (only for name matches, so a share isn't stat'ed whole). `seed[bucket] = guest.recognized(dest_of(s), ...)`. Not a dry run: `guest.save_seed(card, seed)` then `reload_changes()`; dry run: `guest.apply_seed(systems, seed)` then `listings.clear(); relist()`. Systems whose folder is missing on the card get `{}`.
-4. If `guest`: `reseed()` before the editor; then, instead of `run_surprise`/`fill_surprises`: when `interactive and not args.dry_run`, `cardedit.edit_card(card, (device, layout_name), to_fetch, card_match)` then `reload_changes()`. Not guest: `run_surprise(..., on_guest=on_guest)` where `on_guest` sets `nonlocal guest = True` and calls `reseed()`; after it, `if not guest: fill_surprises(...)`; reload as now. A guest that `G` turned off mid-run stays guest this run (Review Focus 3).
+4. If `guest`: `reseed()` before the editor; then, instead of `run_surprise`/`fill_surprises`: when `interactive and not args.dry_run`, `cardedit.edit_card(card, (device, layout_name), to_fetch, card_match)` then `reload_changes()`. Not guest: `run_surprise(..., on_guest=on_guest)` where `on_guest` sets `nonlocal guest = True` and calls `reseed()`; after it, `if not guest: fill_surprises(...)`; reload as now. A guest that `F` turned off mid-run stays guest this run (Review Focus 3).
 5. Skipped when guest (dry run and real): `install_apps`, `onion_surprise.write_list`, `stage_spruce` (also the early `if not chosen` path), APK jobs, drivers (refresh, jobs, prune), `theme_jobs` and `theme_plan` (so no `t` answer and no theme removal/selection), `frontend_step`, `spruce_fixes.run`, `vita.add_psvita_files`, the over-capacity warning, `scrape_plan.prune_empty_systems`. `spruce_emu_step` and `downloads.hide_discs` still run.
 6. Deletions: when guest, no `downloads.find_extras` loop (so `extras`, `renames`, `card_moves` are empty). After the editor, `picked = {s["bucket"]: set(available(s)) for s in systems}`, `skipped = store.systems_off(store.saved_card(card))`, `extras = guest.deletions(seed, picked, skipped)` → existing `--no-delete` / `delete_extras` / dry-run "would delete" / JSON `delete` handling.
 7. No overwrite: when guest, seeded keys' jobs use the seed's card path (`rom_jobs` path replaced by `seed[bucket][key]` when present), then `rom_todo = guest.new_files(rom_todo)`, `bios_todo = guest.new_files(bios_todo)`; in `build_plan`, `plan["jobs"] = guest.new_files(plan["jobs"])`, `plan["writes"]` kept only for paths with `cardfs.size(path) is None`, `plan["gamelists"] = guest.new_gamelist_entries(plan["gamelists"])`.
@@ -192,7 +192,7 @@ Behavior, in `sync_card` order:
 ### Task 5: docs
 
 **Files:**
-- Modify: `CLAUDE.md` (a short "Guest cards" bullet in "What sync puts on a card": the steps a guest sync runs and skips, the seed, deletions, no-overwrite, `G`, `--guest`)
+- Modify: `CLAUDE.md` (a short "Guest cards" bullet in "What sync puts on a card": the steps a guest sync runs and skips, the seed, deletions, no-overwrite, `F`, `--guest`)
 - Modify: `README.md` (a short Guest cards section)
 
 - [ ] **Step 1:** Write both, matching the files' tone; no notes about storage contents.

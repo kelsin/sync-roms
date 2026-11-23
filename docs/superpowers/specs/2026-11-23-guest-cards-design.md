@@ -10,7 +10,7 @@ user's own cards.
 ## Goals
 
 - A card can be marked as a guest card: `guest: true` in its `cards.json` entry. Set by `sync-roms --guest` (saved,
-  so later syncs of that card are guest syncs without the flag) or toggled with `G` in the card editor.
+  so later syncs of that card are guest syncs without the flag) or toggled with `F` in the card editor.
 - A guest sync:
   - copies the picked ROMs, their BIOS (BIOS folder and ROM-folder `rom_files`) and their scrapes (media and the
     gamelists / `miyoogamelist.xml` the scrape plan writes);
@@ -65,9 +65,9 @@ user's own cards.
   Document it in CLAUDE.md's Card fields table and in `cards.schema.json`.
 - `--guest` on the sync (a `cli.PLAIN_FLAGS` entry, an `ap.add_argument` in `cli.build_parser`, an Options-table row in
   the README, `cli.check_modes` rejects it with another mode like `--no-delete`). It saves `guest: true` on the card
-  before anything else of the sync (not on a dry run, like the setup). There is no flag to turn it off; `G` in the
+  before anything else of the sync (not on a dry run, like the setup). There is no flag to turn it off; `F` in the
   editor does that.
-- `G` (`GUEST_KEY`) in the card editor's system list toggles the flag and is listed in `LIST_KEYS`/`LIST_HINT`. The
+- `F` (`GUEST_KEY`) in the card editor's system list toggles the flag and is listed in `LIST_KEYS`/`LIST_HINT`. The
   title shows `· 👤 guest` while on.
   - During a sync (the editor got `card_match`): turning guest on reseeds the picks right away (the same seeding as at
     sync start) and the sync becomes a guest sync from there; turning it off leaves the picks and the sync is a normal
@@ -145,13 +145,13 @@ completion's second words if flags are listed there). With `--all` the text outp
   are.
 - Skipped steps: a guest sync of a spruce/onion/esde card writes no theme, collection, app, settings or driver files;
   a spruce guest sync still updates the `ignoreList` and keeps the file's other contents.
-- `--guest` saves the flag; `G` toggles it; `cards list` hides guest cards and `--all` shows them.
+- `--guest` saves the flag; `F` toggles it; `cards list` hides guest cards and `--all` shows them.
 - `tests/test_readme.py` passes with the new flag documented.
 
 ## Left to the builder
 
 - Where in `sync_card` the guest checks go and how the seed reaches the delete step; keep each check next to the step
   it skips.
-- How the editor tells the sync that `G` turned guest on (re-reading `cards.json` after the editor is the expected
+- How the editor tells the sync that `F` turned guest on (re-reading `cards.json` after the editor is the expected
   way).
 - The exact media paths for a deleted ROM per layout (reuse `scrape_plan`'s own path functions rather than new ones).
