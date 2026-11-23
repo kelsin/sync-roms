@@ -14,11 +14,12 @@ import sys
 from PIL import Image
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from pixel_theme import arcade, handhelds, menu, nintendo_sega, others, variants  # noqa: E402
+from pixel_theme import app_icons, arcade, extras, handhelds, menu, nintendo_sega, others, ui_settings, ui_status, variants  # noqa: E402
 from pixel_theme.ids import IDS  # noqa: E402
 from pixel_theme.sprite import place, render  # noqa: E402
 
-BATCHES = (handhelds, nintendo_sega, others, arcade)
+BATCHES = (handhelds, nintendo_sega, others, arcade, extras)
+ICON_MODULES = (app_icons, ui_settings, ui_status)  # {path in the theme: draw fn}, sized to the base theme's file
 
 
 def systems(kind):
@@ -113,6 +114,14 @@ def build(base, out, name, spec):
         for state, folder in (("n", "icons"), ("sel", os.path.join("icons", "sel"))):
             place(render(sprite, 4, state), ICON_SIZE, ICON_CENTER).save(os.path.join(dest, folder, f"{icon}.png"))
             drawn.add(f"{folder}/{icon}.png")
+    for module in ICON_MODULES:
+        for rel, draw in module.ICONS.items():
+            target = os.path.join(dest, rel)
+            size = Image.open(target).size
+            sprite = draw()
+            scale = max(1, min(4, size[0] // (sprite.w + 2), size[1] // (sprite.h + 2)))
+            place(render(sprite, scale, "sel"), size, (size[0] / 2, size[1] / 2)).save(target)
+            drawn.add(rel)
     resize_variants(dest, drawn)
     preview(dest, spec)
     with open(os.path.join(dest, "CREDITS.txt"), "a") as f:
