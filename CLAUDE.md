@@ -80,6 +80,7 @@ Only one storage layout is supported; don't add support for others. Repo data an
 - `series.json`: the series names for a set game's `series`.
 - `spruce-fixes.json`: per Art Book theme fix in `spruce_fixes/`, its `title` and full `upstream` PR URL (a test checks both match the registered fixes).
 - `spruce-settings.json`: `sections`, spruceOS's `menuOptions` sections to the keys of the user's preferences that are safe on any spruce device (per-device hardware, network and debug settings stay off), and a `note` saying why.
+- `syncthing.json`: `note`, `cores` ({system id: libretro core}), `retroarch` ({retroarch.cfg key: value}) and `spruce.settings` ({section: {key: value}} for `spruce-config.json`), the settings that let Syncthing sync saves between devices.
 - `cards.schema.json`, `games.schema.json`, `collections.schema.json`: JSON schemas.
 
 BIOS lists cover every emulator a system can use (default and alternate libretro cores, standalone emulators), not just the default one. The files are small, so users get all of them all the time. Don't trim a list down to the default emulator's needs. Redundant extras that no emulator needs (e.g. a dozen regional dumps of one PS1 BIOS) are not kept.
@@ -90,7 +91,7 @@ The tests check these shapes.
 
 The data folder is `store.data_dir()`: `$XDG_DATA_HOME/sync-roms`, `%APPDATA%\sync-roms`, by default `~/.sync-roms` (used here).
 
-- `settings.json` (kept mode 600): the storage settings, `mirror`, `eject`, `storage_cache_declined`, `surprise_ttl_days`, `surprise_excluded_systems`, `screenscraper_user`, `screenscraper_password`, `spruce_ra_mode`, `spruce_ra_username`, `spruce_ra_password`, `spruce_ra_api_key`, `spruce_ra_offline_proxy`, `spruce_ra_proxy_stats`, `spruce_settings` (`{section: {key: value}}`, written by `config import`).
+- `settings.json` (kept mode 600): the storage settings, `mirror`, `eject`, `storage_cache_declined`, `surprise_ttl_days`, `surprise_excluded_systems`, `screenscraper_user`, `screenscraper_password`, `spruce_ra_mode`, `spruce_ra_username`, `spruce_ra_password`, `spruce_ra_api_key`, `spruce_ra_offline_proxy`, `spruce_ra_proxy_stats`, `spruce_syncthing`, `spruce_settings` (`{section: {key: value}}`, written by `config import`).
 - `surprises.json`: history of Surprise picks: system, bucket, title, card, ISO date. Pruned past `surprise_ttl_days` (default 183) on write.
 - `device-systems.json`: optional overlay, `{device id: {"add": [...], "remove": [...]}}` of system ids, applied to the repo defaults. Notes always come from the defaults.
 - `collections/<id>.json`: one per collection (`collections.py`); never in the repo or storage.

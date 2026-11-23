@@ -1,0 +1,13 @@
+{
+  "note": "Settings that let Syncthing sync RetroArch saves and states between devices: one libretro core per system on every device (so RetroArch's core-named save folders match), RetroArch's save settings, and per-firmware settings. Spruce cards get them from sync; Android gets them from the setup guide. N64, Saturn, Dreamcast and Jaguar keep each device's own core and don't sync between Spruce and Android.",
+  "cores": {"arduboy": "ardens", "atarilynx": "handy", "colecovision": "bluemsx", "fbneo": "fbneo", "fds": "fceumm",
+            "gamegear": "genesis_plus_gx", "gb": "gambatte", "gba": "mgba", "gbc": "gambatte", "genesis": "genesis_plus_gx",
+            "mastersystem": "genesis_plus_gx", "msx": "bluemsx", "msx2": "bluemsx", "nes": "fceumm", "ngp": "mednafen_ngp",
+            "ngpc": "mednafen_ngp", "psx": "pcsx_rearmed", "segacd": "genesis_plus_gx", "sg1000": "genesis_plus_gx",
+            "snes": "snes9x"},
+  "retroarch": {"autosave_interval": "10", "sort_savefiles_enable": "true", "sort_savestates_enable": "true",
+                "sort_savefiles_by_content_enable": "false", "sort_savestates_by_content_enable": "false",
+                "savefiles_in_content_dir": "false", "savestates_in_content_dir": "false"},
+  "spruce": {"settings": {"Emulator Settings": {"raAutoSave": "True", "raAutoLoad": "True", "keepSavesBetweenCores": "Always"},
+                          "Network Settings": {"enableSyncthing": "True"}}}
+}
