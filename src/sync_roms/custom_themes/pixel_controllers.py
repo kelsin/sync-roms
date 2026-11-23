@@ -1,6 +1,4 @@
 """The "Pixel Controllers" spruceOS theme: the SPRUCE theme with a black background and pixel-art controllers."""
-import os
-
 from .pixel.build import build_theme
 
 NAME = "Pixel Controllers"

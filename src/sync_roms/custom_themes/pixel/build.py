@@ -36,9 +36,21 @@ BLACKED = {
 
 
 def blacken(path):
-    img = Image.open(path).convert("RGBA")
+    if not os.path.exists(path):
+        return
+    with Image.open(path) as im:
+        img = im.convert("RGBA")
     img.putdata([BLACK if px[:3] == (40, 40, 40) and px[3] else px for px in img.getdata()])
     img.save(path)
+
+
+def blacken_all(path):
+    """A background: every pixel black, at the file's own size. A file the theme doesn't have is skipped."""
+    if not os.path.exists(path):
+        return
+    with Image.open(path) as im:
+        size = im.size
+    Image.new("RGBA", size, BLACK).save(path)
 
 
 def resize_variants(dest, drawn):
@@ -57,9 +69,11 @@ def resize_variants(dest, drawn):
                 if file in BLACKED.get("skin", []) and base == "skin":
                     blacken(target)
                 elif file == "background.png" and base == "skin":
-                    Image.new("RGBA", Image.open(target).size, BLACK).save(target)
+                    blacken_all(target)
                 elif rel in drawn:
-                    Image.open(src).resize(Image.open(target).size, Image.NEAREST).save(target)
+                    with Image.open(src) as drawn_img, Image.open(target) as old:
+                        resized = drawn_img.resize(old.size, Image.NEAREST)
+                    resized.save(target)
 
 
 def write_pair(img_for, directory, name_n, name_f, size, center):
@@ -76,11 +90,10 @@ SPECS = {
 def build_theme(base_dir, out_dir, name, kind):
     """Write <out_dir>/<name>/, a copy of base_dir with the pixel-art overlays (kind: CONSOLES or CONTROLLERS)."""
     spec = dict(SPECS[kind], systems=systems(kind))
-    base, out = base_dir, out_dir
-    dest = os.path.join(out, name)
+    dest = os.path.join(out_dir, name)
     if os.path.exists(dest):
         shutil.rmtree(dest)
-    shutil.copytree(base, dest)
+    shutil.copytree(base_dir, dest)
     for file in sorted(os.listdir(dest)):
         if not (file.startswith("config") and file.endswith(".json")):
             continue
@@ -93,12 +106,13 @@ def build_theme(base_dir, out_dir, name, kind):
         with open(config_path, "w") as f:
             json.dump(config, f, indent=4)
             f.write("\n")
-    for path in (os.path.join(dest, "skin", "background.png"),):
-        Image.new("RGBA", Image.open(path).size, BLACK).save(path)
+    blacken_all(os.path.join(dest, "skin", "background.png"))
     for folder, files in BLACKED.items():
         for file in files:
             blacken(os.path.join(dest, folder, file))
     skin = os.path.join(dest, "skin")
+    for folder in (skin, os.path.join(dest, "icons", "sel")):
+        os.makedirs(folder, exist_ok=True)
     drawn = set()
     sprites = dict(menu.SPRITES, game=spec["game"])
     for key, draw in sprites.items():
@@ -115,7 +129,8 @@ def build_theme(base_dir, out_dir, name, kind):
             target = os.path.join(dest, rel)
             if not os.path.exists(target):
                 continue
-            size = Image.open(target).size
+            with Image.open(target) as im:
+                size = im.size
             sprite = draw()
             scale = max(1, min(4, size[0] // (sprite.w + 2), size[1] // (sprite.h + 2)))
             place(render(sprite, scale, "sel"), size, (size[0] / 2, size[1] / 2)).save(target)
@@ -131,10 +146,12 @@ def preview(dest, spec):
     """preview.png (640x480): the main menu row over a grid of system icons, on black."""
     img = Image.new("RGBA", (640, 480), BLACK)
     for n, key in enumerate(list(menu.SPRITES) + ["game"]):
-        tile = Image.open(os.path.join(dest, "skin", f"ic-{key}-{'f' if n == 0 else 'n'}.png")).convert("RGBA").resize((70, 98), Image.NEAREST)
+        with Image.open(os.path.join(dest, "skin", f"ic-{key}-{'f' if n == 0 else 'n'}.png")) as im:
+            tile = im.convert("RGBA").resize((70, 98), Image.NEAREST)
         img.paste(tile, (20 + n * 86, 20), tile)
     ids = list(spec["systems"])[:18]
     for n, icon in enumerate(ids):
-        tile = Image.open(os.path.join(dest, "icons", "sel" if n == 0 else "", f"{icon}.png")).convert("RGBA").resize((100, 108), Image.NEAREST)
+        with Image.open(os.path.join(dest, "icons", "sel" if n == 0 else "", f"{icon}.png")) as im:
+            tile = im.convert("RGBA").resize((100, 108), Image.NEAREST)
         img.paste(tile, (20 + (n % 6) * 104, 140 + (n // 6) * 110), tile)
     img.save(os.path.join(dest, "preview.png"))

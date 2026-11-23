@@ -11,7 +11,6 @@ from PIL import Image  # noqa: E402
 
 from sync_roms import custom_themes  # noqa: E402
 
-MENU_FILES = ["ic-game-n.png", "ic-game-f.png"] + [f"ic-{k}-{s}.png" for k in ("favorites", "recent", "apps", "settings") for s in "nf"][:6]
 CONFIG = {"name": "SPRUCE", "author": "spruce", "description": "x", "screensaver": {"bgColor": "#282828"}, "extra": 1}
 
 
@@ -30,8 +29,6 @@ def make_base(path, ssh=True):
         png(os.path.join(path, "skin_640_480", name), (640, 480), (40, 40, 40, 255))
     png(os.path.join(path, "icons", "gba.png"), (120, 130))
     png(os.path.join(path, "icons", "sel", "gba.png"), (120, 130))
-    for name in MENU_FILES:
-        png(os.path.join(path, "skin", name), (100, 140))
     png(os.path.join(path, "icons_720x540", "gba.png"), (134, 146))
     if ssh:
         png(os.path.join(path, "icons", "app", "SSH.png"), (70, 70))
@@ -68,16 +65,17 @@ class Build(unittest.TestCase):
         module = custom_themes.THEMES["Pixel Consoles"]
         dest = module.build(self.base, os.path.join(self.tmp.name, "out"))
         self.assertEqual(dest, os.path.join(self.tmp.name, "out", module.NAME))
-        bg = Image.open(os.path.join(dest, "skin", "background.png")).convert("RGBA")
-        self.assertEqual(set(bg.getdata()), {(0, 0, 0, 255)})
-        sel = Image.open(os.path.join(dest, "icons", "sel", "gba.png")).convert("RGBA")
-        self.assertIsNotNone(sel.getbbox())
+        with Image.open(os.path.join(dest, "skin", "background.png")) as im:
+            self.assertEqual(set(im.convert("RGBA").getdata()), {(0, 0, 0, 255)})
+        with Image.open(os.path.join(dest, "icons", "sel", "gba.png")) as im:
+            self.assertIsNotNone(im.convert("RGBA").getbbox())
         with open(os.path.join(dest, "config.json")) as f:
             config = json.load(f)
         self.assertEqual(config["name"], module.NAME)
         self.assertEqual(config["screensaver"]["bgColor"], "#000000")
         self.assertEqual(config["extra"], 1)
-        self.assertEqual(Image.open(os.path.join(dest, "icons_720x540", "gba.png")).size, (134, 146))
+        with Image.open(os.path.join(dest, "icons_720x540", "gba.png")) as im:
+            self.assertEqual(im.size, (134, 146))
 
     def test_build_is_deterministic(self):
         make_base(self.base)
@@ -85,6 +83,18 @@ class Build(unittest.TestCase):
         a = module.build(self.base, os.path.join(self.tmp.name, "a"))
         b = module.build(self.base, os.path.join(self.tmp.name, "b"))
         self.assertEqual(hashes(a), hashes(b))
+
+    def test_files_missing_in_base_are_skipped(self):
+        make_base(self.base)
+        os.remove(os.path.join(self.base, "skin", "bg-title.png"))
+        os.remove(os.path.join(self.base, "skin", "background.png"))
+        dest = custom_themes.THEMES["Pixel Consoles"].build(self.base, os.path.join(self.tmp.name, "out"))
+        self.assertFalse(os.path.exists(os.path.join(dest, "skin", "bg-title.png")))
+
+    def test_icon_folders_missing_in_base_are_created(self):
+        os.makedirs(self.base)
+        dest = custom_themes.THEMES["Pixel Controllers"].build(self.base, os.path.join(self.tmp.name, "out"))
+        self.assertTrue(os.path.exists(os.path.join(dest, "icons", "sel", "gba.png")))
 
     def test_icons_missing_in_base_are_skipped(self):
         make_base(self.base, ssh=False)

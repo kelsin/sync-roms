@@ -1,6 +1,4 @@
 """The "Pixel Consoles" spruceOS theme: the SPRUCE theme with a black background and pixel-art consoles."""
-import os
-
 from .pixel.build import build_theme
 
 NAME = "Pixel Consoles"
