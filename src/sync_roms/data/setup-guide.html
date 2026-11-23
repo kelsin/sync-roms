@@ -1020,12 +1020,20 @@ const SECTIONS = [
         title: "spruceOS",
         when: { layout: ["spruce"] },
         body: `
+          <p><b>Set by sync-roms</b> on every sync (turn off with <code>sync-roms config set spruce_syncthing false</code>):</p>
+          <ul>
+            <li>The cores in "RetroArch cores", for each system's ROM folder.</li>
+            <li>Spruce settings: <code>raAutoSave</code> True, <code>raAutoLoad</code> True, <code>keepSavesBetweenCores</code> Always, and <code>enableSyncthing</code> True (WiFi devices only).</li>
+            <li>RetroArch keys: <code>autosave_interval</code> 10, <code>sort_savefiles_enable</code> and <code>sort_savestates_enable</code> true, <code>sort_savefiles_by_content_enable</code> and <code>sort_savestates_by_content_enable</code> false, <code>savefiles_in_content_dir</code> and <code>savestates_in_content_dir</code> false.</li>
+          </ul>
+          <p><b>By hand:</b></p>
           <ol>
-            <li>Turn it on in the network apps (<span class="path">${path("Advanced Settings")}</span> in recent releases); it needs WiFi on.</li>
-            <li>Open the device's web UI on port 8384 from the computer.</li>
-            <li>Pair it with the server and share the saves folder (see "Pair and share").</li>
+            <li>Turn WiFi on, and turn on <span class="path">${path("Advanced Settings > Network > Sync Time/RTC with network")}</span>.</li>
+            <li>Open <code>http://&lt;device IP&gt;:8384</code> from the computer. Login <code>spruce</code> / <code>happygaming</code>; change it under Settings &gt; GUI.</li>
+            <li>Pair it with the server (see "Pair and share"), then accept <code>ra-saves</code> (<code>jkx7j-mnlfo</code>) at <code>/mnt/SDCARD/Saves/saves</code> and <code>ra-states</code> (<code>w5nqg-xmpq6</code>) at <code>/mnt/SDCARD/Saves/states</code>.</li>
+            <li>On each of the two folders: Edit &gt; Advanced &gt; <code>modTimeWindowS</code> = 2.</li>
           </ol>
-          <p class="note">spruceOS's Syncthing sync checker makes sure a sync has finished when shutting down, launching a game and resuming.</p>`,
+          <p class="note">Spruce waits for Syncthing at boot after WiFi connects, and at save-and-shutdown (hold POWER). Leave a game that way before switching devices.</p>`,
       },
       {
         title: "Onion",
@@ -1057,7 +1065,15 @@ const SECTIONS = [
             <li>Android: install <b>Syncthing-Fork</b> from F-Droid (the original Android app is discontinued). Desktop and Steam Deck: install Syncthing normally.</li>
             <li>Open its web UI on the device (port 8384), pair it with the server and share the saves folders (see "Pair and share").</li>
           </ol>
-          <p class="note">On a Steam Deck, Flatpak emulators keep saves under <code>~/.var</code>; Syncthing may need access granted to those folders. EmuDeck also has its own cloud save feature.</p>`,
+          <p class="note">On a Steam Deck, Flatpak emulators keep saves under <code>~/.var</code>; Syncthing may need access granted to those folders. EmuDeck also has its own cloud save feature.</p>
+          <p><b>Android, RetroArch:</b></p>
+          <ol>
+            <li><span class="path">${path("Settings > Directory")}</span>: Save Files <code>/storage/emulated/0/RetroArch/saves</code>, Save States <code>/storage/emulated/0/RetroArch/states</code> (not under <code>Android/data</code>, which Syncthing-Fork can't read on Android 11+).</li>
+            <li><span class="path">${path("Settings > Saving")}</span>: Sort Saves / Save States into Folders by Core Name on, by Content Directory off, Write Saves / Save States to Content Directory off, SaveRAM Autosave Interval 10 seconds, Auto Save State on, Auto Load State on.</li>
+            <li><span class="path">${path("Main Menu > Configuration File > Save Current Configuration")}</span>.</li>
+            <li>In Syncthing-Fork share <code>ra-saves</code> (<code>jkx7j-mnlfo</code>) and <code>ra-states</code> (<code>w5nqg-xmpq6</code>) to those two folders, and set its run conditions so it runs when switching devices.</li>
+            <li>ES-DE: set each system's alternative emulator to its core in "RetroArch cores".</li>
+          </ol>`,
       },
       {
         title: "Pair and share",
@@ -1066,16 +1082,76 @@ const SECTIONS = [
             <li>On the device's Syncthing web UI: <b>Actions &gt; Show ID</b> and copy the device ID, then <b>Add Remote Device</b> with the server's ID (from <code>http://192.168.68.98:8384/</code> under Actions &gt; Show ID).</li>
             <li>On the server's web UI, accept the new device when it appears, and give it the saves folder to share.</li>
             <li>On the device, accept the shared folder and set its path to the device's saves folder.</li>
+            <li>On the server, set Staggered or Simple file versioning on both folders.</li>
             <li>Keep both on the home network: Syncthing here has no relay or cloud, so it only syncs when the device and the server can reach each other.</li>
           </ol>`,
       },
       {
         title: "Notes",
         body: `<ul>
-          <li>Sync the in-game saves (<code>.srm</code>) only, not save states: states break across cores and versions.</li>
+          <li>Saves and states both sync now, since the cores match. A state from another core version can fail to load; the in-game save still applies.</li>
+          <li>RetroAchievements Hardcore turns auto load off.</li>
           <li>Make an in-game save before switching devices.</li>
           <li>Syncthing and RetroArch Cloud Sync both touch saves; use one per device, not both.</li>
         </ul>`,
+      },
+    ],
+  },
+  {
+    id: "retroarch-cores",
+    title: "RetroArch cores",
+    lede: "One libretro core per system on every device, so RetroArch's core-named save and state folders match and Syncthing can share them. Spruce cards get these from sync; on Android set each system's alternative emulator in ES-DE to it.",
+    when: { layout: ["esde", "spruce"] },
+    items: [
+      {
+        title: "Cores",
+        body: `
+          <table class="settings">
+            <tr><th>System</th><th>Core</th></tr>
+              <tr><td>Arduboy Miniature Game System</td><td><code>ardens</code></td></tr>
+              <tr><td>Atari Lynx</td><td><code>handy</code></td></tr>
+              <tr><td>Coleco ColecoVision</td><td><code>bluemsx</code></td></tr>
+              <tr><td>FinalBurn Neo</td><td><code>fbneo</code></td></tr>
+              <tr><td>Nintendo Famicom Disk System</td><td><code>fceumm</code></td></tr>
+              <tr><td>Sega Game Gear</td><td><code>genesis_plus_gx</code></td></tr>
+              <tr><td>Nintendo Game Boy</td><td><code>gambatte</code></td></tr>
+              <tr><td>Nintendo Game Boy Advance</td><td><code>mgba</code></td></tr>
+              <tr><td>Nintendo Game Boy Color</td><td><code>gambatte</code></td></tr>
+              <tr><td>Sega Genesis</td><td><code>genesis_plus_gx</code></td></tr>
+              <tr><td>Sega Master System</td><td><code>genesis_plus_gx</code></td></tr>
+              <tr><td>MSX</td><td><code>bluemsx</code></td></tr>
+              <tr><td>MSX2</td><td><code>bluemsx</code></td></tr>
+              <tr><td>Nintendo Entertainment System</td><td><code>fceumm</code></td></tr>
+              <tr><td>SNK Neo Geo Pocket</td><td><code>mednafen_ngp</code></td></tr>
+              <tr><td>SNK Neo Geo Pocket Color</td><td><code>mednafen_ngp</code></td></tr>
+              <tr><td>Sony PlayStation</td><td><code>pcsx_rearmed</code></td></tr>
+              <tr><td>Sega CD</td><td><code>genesis_plus_gx</code></td></tr>
+              <tr><td>Sega SG-1000</td><td><code>genesis_plus_gx</code></td></tr>
+              <tr><td>Nintendo SNES (Super Nintendo)</td><td><code>snes9x</code></td></tr>
+              <tr><td>Multiple Arcade Machine Emulator</td><td><code>mame2003_plus</code></td></tr>
+              <tr><td>Atari 2600</td><td><code>stella2014</code></td></tr>
+              <tr><td>Atari 5200</td><td><code>a5200</code></td></tr>
+              <tr><td>Atari 7800 ProSystem</td><td><code>prosystem</code></td></tr>
+              <tr><td>Mattel Electronics Intellivision</td><td><code>freeintv</code></td></tr>
+              <tr><td>Magnavox Odyssey 2</td><td><code>o2em</code></td></tr>
+              <tr><td>GCE Vectrex</td><td><code>vecx</code></td></tr>
+              <tr><td>Fairchild Channel F</td><td><code>freechaf</code></td></tr>
+              <tr><td>Commodore 64</td><td><code>vice_x64</code></td></tr>
+              <tr><td>NEC PC-98</td><td><code>np2kai</code></td></tr>
+              <tr><td>Nintendo Virtual Boy</td><td><code>mednafen_vb</code></td></tr>
+              <tr><td>Bandai WonderSwan</td><td><code>mednafen_wswan</code></td></tr>
+              <tr><td>Bandai WonderSwan Color</td><td><code>mednafen_wswan</code></td></tr>
+              <tr><td>NEC TurboGrafx-16</td><td><code>mednafen_pce_fast</code></td></tr>
+              <tr><td>NEC TurboGrafx-CD</td><td><code>mednafen_pce_fast</code></td></tr>
+              <tr><td>NEC SuperGrafx</td><td><code>mednafen_supergrafx</code></td></tr>
+              <tr><td>Sega Mega Drive 32X</td><td><code>picodrive</code></td></tr>
+              <tr><td>Nintendo Satellaview</td><td><code>snes9x</code></td></tr>
+              <tr><td>Bandai SuFami Turbo</td><td><code>snes9x</code></td></tr>
+              <tr><td>Watara Supervision</td><td><code>potator</code></td></tr>
+              <tr><td>SNK Neo Geo CD</td><td><code>neocd</code></td></tr>
+              <tr><td>Nintendo Pokémon Mini</td><td><code>pokemini</code></td></tr>
+          </table>
+          <p class="note">N64, Saturn, Dreamcast and Jaguar keep each device's own core and sync only between Spruce devices or between Android devices. Mega Duck doesn't sync with Android.</p>`,
       },
     ],
   },
