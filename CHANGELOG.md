@@ -1,5 +1,20 @@
 # Changelog
 
+## [3.25.0](https://github.com/kelsin/sync-roms/compare/v3.24.0...v3.25.0) (2026-11-23)
+
+
+### :video_game: Features
+
+* **cards:** turn systems and collection games off per card ([#525](https://github.com/kelsin/sync-roms/issues/525)) ([d556891](https://github.com/kelsin/sync-roms/commit/d556891421e980728b98250dde88a18f6285e80c))
+* **devices:** add KONKR Pocket Block and make device ids consistent ([#523](https://github.com/kelsin/sync-roms/issues/523)) ([ccd0f8f](https://github.com/kelsin/sync-roms/commit/ccd0f8fbf55224d9427b7b850c5c521ddbb2eca1))
+* **themes:** build and publish pixel-art spruce themes in many palettes ([#526](https://github.com/kelsin/sync-roms/issues/526)) ([f37526d](https://github.com/kelsin/sync-roms/commit/f37526d11d855461a9def9f1638c73f5483bbaed))
+* **themes:** show download and upload progress in themes update ([#521](https://github.com/kelsin/sync-roms/issues/521)) ([a252189](https://github.com/kelsin/sync-roms/commit/a25218913b7bd77c7f57030b543b394d8ab9c11f))
+
+
+### :bug: Bug Fixes
+
+* **picker:** keep preview pictures at their aspect ratio ([#524](https://github.com/kelsin/sync-roms/issues/524)) ([4d009cc](https://github.com/kelsin/sync-roms/commit/4d009cc0087484a068caf5f5670e9b930a5a993e))
+
 ## [3.24.0](https://github.com/kelsin/sync-roms/compare/v3.23.0...v3.24.0) (2026-11-23)
 
 
