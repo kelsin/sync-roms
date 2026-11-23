@@ -87,11 +87,13 @@ def entries(base):
     "different" when it has it with another, None when it's missing. The password is never in an entry."""
     path = os.path.join(base, FILE)
     text = cardfs.text(path) if os.path.isfile(path) else ""
-    if broken(text):
-        text = ""
     shown = FILE.replace(os.sep, "/")
+    networks = wanted()
+    if networks and os.path.isfile(path) and broken(text):
+        ui.warn(f"{shown} couldn't be parsed; it would be replaced (the old one is kept as {os.path.basename(path)}.broken)")
+        text = ""
     states = {None: "present", "update": "different", "add": None}
-    return [applied.Entry(shown, f"network {ssid}", states[merge(text, ssid, psk)[1]], "present", False) for ssid, psk in wanted()]
+    return [applied.Entry(shown, f"network {ssid}", states[merge(text, ssid, psk)[1]], "present", False) for ssid, psk in networks]
 
 
 def install(card, layout_name, base, dry_run):

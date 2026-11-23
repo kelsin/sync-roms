@@ -47,6 +47,15 @@ class Install(helpers.CardDir):
         self.assertEqual({e.where for e in found}, {SHOWN})
         self.assertNotIn("device-pw", repr(found))
 
+    def test_entries_warn_when_the_file_would_be_replaced(self):
+        self.put("garbage")
+        usersettings.save_settings({"wifi_networks": [{"ssid": "Valefor", "psk": "cakeordeath"}]})
+        err = io.StringIO()
+        with contextlib.redirect_stderr(err):
+            found = spruce_wifi.entries(self.card)
+        self.assertIn(f"{SHOWN} couldn't be parsed; it would be replaced", err.getvalue())
+        self.assertIsNone(found[0].old)
+
     def test_other_layouts_are_untouched(self):
         self.assertEqual(self.run_install([{"ssid": "Valefor", "psk": "cakeordeath"}], layout="onion"), "")
         self.assertEqual(self.snapshot(), [])

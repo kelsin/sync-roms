@@ -112,6 +112,26 @@ class Card(helpers.CardDir):
         self.put("Emu/SFC/config.json", self.emu())
         self.assertEqual(spruce_syncthing.entries("c", self.card), [])
 
+    def entries_err(self):
+        err = io.StringIO()
+        with contextlib.redirect_stderr(err):
+            found = spruce_syncthing.entries("c", self.card)
+        return found, err.getvalue()
+
+    def test_entries_warn_like_run(self):
+        self.put("Emu/SFC/config.json", "{nope")
+        path = self.cp("Saves", "ra-configs", "retroarch-A.cfg")
+        os.makedirs(os.path.dirname(path))
+        with open(path, "wb") as f:
+            f.write(b"\xff\xfe = bad")
+        found, err = self.entries_err()
+        self.assertEqual(found, [])
+        self.assertIn("Emu/SFC/config.json can't be read; its core left as it is", err)
+        self.assertIn("Saves/ra-configs/retroarch-A.cfg can't be read; its save settings left as they are", err)
+
+    def test_entries_warn_without_a_cfg(self):
+        self.assertIn("Saves/ra-configs has no retroarch-*.cfg yet", self.entries_err()[1])
+
     def test_missing_emu_config_is_skipped_quietly(self):
         self.put("Saves/ra-configs/retroarch-A.cfg", self.CFG)
         self.assertNotIn("Emu/", self.run_sync())

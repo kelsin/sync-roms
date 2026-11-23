@@ -120,8 +120,9 @@ def entries(card, base):
     """[Entry] for every Syncthing core and RetroArch save setting, changed or not; [] when Syncthing is off."""
     if not enabled():
         return []
+    warnings = []
     result = []
-    for folder, core, _, _, config in _cores(base, []):
+    for folder, core, _, _, config in _cores(base, warnings):
         offering = _offering(config, core)
         if offering:
             old = next((e.get("selected") for e in offering if e.get("selected") != core), core)
@@ -130,11 +131,13 @@ def entries(card, base):
         try:
             text = cardfs.read(path).decode("utf-8")
         except (OSError, ValueError):
-            continue
+            continue  # retroarch_writes warns about it below
         for key, value in data()["retroarch"].items():
             found = _pattern(key).search(text)
             old = found.group(0).split("=", 1)[1].strip().strip('"') if found else None
             result.append(applied.Entry(f"Saves/ra-configs/{os.path.basename(path)}", key, old, value, False))
+    for warning in warnings + retroarch_writes(base)[2]:
+        ui.warn(warning)
     return result
 
 
