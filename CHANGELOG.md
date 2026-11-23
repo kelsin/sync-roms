@@ -1,5 +1,19 @@
 # Changelog
 
+## [3.24.0](https://github.com/kelsin/sync-roms/compare/v3.23.0...v3.24.0) (2026-11-23)
+
+
+### :video_game: Features
+
+* **saves:** add saves manage to inspect, label, move, prune and delete stashes ([#518](https://github.com/kelsin/sync-roms/issues/518)) ([c9b3e2f](https://github.com/kelsin/sync-roms/commit/c9b3e2fa72213888ba7537e7673eb0287a0c8d93))
+* **saves:** stash and apply android cards over wireless adb ([#520](https://github.com/kelsin/sync-roms/issues/520)) ([32d8969](https://github.com/kelsin/sync-roms/commit/32d8969ab3eb5d3fc6593043051c82ae2d7761f6))
+* **spruce:** add the reopen last collection setting until spruceOS ships it ([#516](https://github.com/kelsin/sync-roms/issues/516)) ([5b36ebf](https://github.com/kelsin/sync-roms/commit/5b36ebfa880d9e1062d9758ab2db86d813dd0619))
+* **spruce:** retro box art for collections ([#519](https://github.com/kelsin/sync-roms/issues/519)) ([b29fe48](https://github.com/kelsin/sync-roms/commit/b29fe48bda1bb5d8a87442f528f2b6220266b703))
+* **spruce:** set cores and save settings for syncthing ([#514](https://github.com/kelsin/sync-roms/issues/514)) ([7d1cf4c](https://github.com/kelsin/sync-roms/commit/7d1cf4ce02fc10fe79a0b51112fad2e12dca5ad5))
+* **spruce:** sync pyui themes to spruce cards ([#517](https://github.com/kelsin/sync-roms/issues/517)) ([e19bf6c](https://github.com/kelsin/sync-roms/commit/e19bf6c0e1d3cf344dee8ce4144d7458d83d8315))
+* **spruce:** sync saved wifi networks to spruce cards ([#512](https://github.com/kelsin/sync-roms/issues/512)) ([1b0c5ce](https://github.com/kelsin/sync-roms/commit/1b0c5ce2b806485329dd524598fb43222885f604))
+* **umount:** tidy and unmount a picked SD card ([#515](https://github.com/kelsin/sync-roms/issues/515)) ([dd45d0c](https://github.com/kelsin/sync-roms/commit/dd45d0ca2d8b3d94a496745b005f41f4ced978cf))
+
 ## [3.23.0](https://github.com/kelsin/sync-roms/compare/v3.22.0...v3.23.0) (2026-11-22)
 
 
