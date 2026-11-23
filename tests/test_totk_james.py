@@ -61,6 +61,7 @@ class Build(unittest.TestCase):
         with open(os.path.join(dest, "config.json"), encoding="utf-8") as f:
             config = json.load(f)
         self.assertEqual((config["name"], config["mainMenuTitle"], config["title"]), ("ToTK - James", "", {"size": 30}))
+        self.assertIs(config["collectionsEnabled"], True)
 
     def test_build_replaces_previous_output(self):
         self.config("{}")
