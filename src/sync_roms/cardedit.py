@@ -14,13 +14,13 @@ CLEAR_ALL_KEY = "D"
 COLLECTIONS_KEY = "l"
 SETTINGS_KEY = "S"
 KEEP_KEY = "K"
-GUEST_KEY = "G"
+GUEST_KEY = "F"
 PAST_SURPRISE_KEY = "p"
 META_KEY = "m"
 VARIANT_KEY = "v"
 SERIES_KEY = "r"
 ALL_KEY = "a"
-LIST_HINT = "Enter · a all · f full · x off · s set · l colls · S settings · G guest"
+LIST_HINT = "Enter · a all · f full · x off · s set · l colls · S settings · F guest"
 GAMES_HINT = "Space toggle · Enter done · s set · m meta · p past · v variant"
 META_HINT = "Enter list its values · Esc back"
 VALUES_HINT = "Enter narrow to it · Esc back · / filter"
@@ -32,7 +32,7 @@ LIST_KEYS = [("Enter", "the system's games"), ("f", "full system: every file in 
              ("a", "every game across this card's systems"),
              ("s", "a set's games across this card's systems"), ("l", "collections on this card"),
              ("S", "settings menu: Surprise, theme, collections and RAOfflineProxy on or off, and the systems Surprise may use"),
-             ("G", "guest card: a friend's card; syncs only copy ROMs, BIOS and scrapes (again to undo)"),
+             ("F", "guest card: a friend's card; syncs only copy ROMs, BIOS and scrapes (again to undo)"),
              ("D", "clear every pick, full system and set from the card")]
 KEEP_HINT = " · K keep card files"
 KEEP_KEYS = [("K", "pick every card file that matches a storage game")]
@@ -290,7 +290,7 @@ def edit_card(name, setup=None, to_fetch=None, card_match=None, on_guest=None):
     """The card's system list. setup: (device or None for Full, layout) to edit with instead of the saved one.
     to_fetch(system, keys): the keys not on the card yet, when editing from a sync; the status then shows how much
     a sync would download. card_match(system, keys): the keys of the system's storage files that are on the card, when
-    editing from a sync; it enables K. on_guest(): called when G turns the guest flag on, when editing from a sync
+    editing from a sync; it enables K. on_guest(): called when F turns the guest flag on, when editing from a sync
     (it reseeds the card's picks)."""
     catalog = store.load_catalog()
     cards = store.load_cards()

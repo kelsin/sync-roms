@@ -126,7 +126,7 @@ Old personal sets in `sets/` are left on disk and never read; a sync reads an ol
 | `spruce_theme` | card editor's S menu | `spruce` cards: the card's current PyUI theme (folder name), synced when storage has it and set as the selected theme. |
 | `spruce_themes_installed` | sync | `spruce` cards: sorted theme folders sync installed in `Themes/` (only those the card didn't have before); only these are removed when no longer synced. |
 | `spruce_emu` | sync | `{ROM folder: [file names]}`: the BIOS zips sync added to that folder's `Emu/<folder>/config.json` `ignoreList` on a `spruce` card; only these are removed when the file stops being synced. |
-| `guest` | `--guest`, card editor's `G` | `true` on a guest card (a friend's card): its sync only copies ROMs, BIOS and scrapes, deletes only the recognized ROMs deselected that session, never overwrites a card file; hidden from `cards list` without `--all`. Absent otherwise. |
+| `guest` | `--guest`, card editor's `F` | `true` on a guest card (a friend's card): its sync only copies ROMs, BIOS and scrapes, deletes only the recognized ROMs deselected that session, never overwrites a card file; hidden from `cards list` without `--all`. Absent otherwise. |
 | `android_volume` | `saves stash`/`apply` | The SD card's Android volume id (`/storage/<id>`). |
 | `muos_storage` | by hand | `sd1` (default) or `sd2`: the mount (`/mnt/mmc` or `/mnt/sdcard`) written into a `muos` card's collection entries. |
 
