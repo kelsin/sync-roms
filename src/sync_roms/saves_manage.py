@@ -116,6 +116,8 @@ def move(row, system, catalog_systems, dry_run=False):
     if not inside(row["dir"]):
         raise ValueError("the stash is outside the stash folder")
     base = os.path.join(saves.stash_root(), bucket, row["game"], os.path.basename(row["dir"]))
+    if saves._unsafe(row["game"]) or not inside(base):
+        raise ValueError("the stash's game name would put it outside the stash folder")
     new, n = base, 1
     while os.path.exists(new):
         n += 1
@@ -132,7 +134,13 @@ def move(row, system, catalog_systems, dry_run=False):
             if "rel" in f:
                 f["rel"] = "/".join([muos] + f["rel"].split("/")[1:])
     row["dir"] = new
-    _write(row, data)
+    try:
+        _write(row, data)
+    except OSError:
+        os.rename(new, old)
+        row["dir"] = old
+        _prune_empty(new)
+        raise
     row["system"] = bucket
     row["files"] = data["files"]
     _prune_empty(old)

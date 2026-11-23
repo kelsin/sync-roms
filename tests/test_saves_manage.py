@@ -7,6 +7,7 @@ import os
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "src"))
@@ -91,7 +92,9 @@ class OpsTest(helpers.DataDir):
     def test_move_dry_run_changes_nothing(self):
         d = self.stash()
         row = self.row_for(d)
-        saves_manage.move(row, GB, [GB], dry_run=True)
+        new = saves_manage.move(row, GB, [GB], dry_run=True)
+        self.assertEqual(new, os.path.join(saves.stash_root(), "gb", "Game", os.path.basename(d)))
+        self.assertFalse(os.path.exists(os.path.dirname(new)))
         self.assertTrue(os.path.isdir(d))
         self.assertEqual(row["system"], "gba")
 
@@ -103,6 +106,29 @@ class OpsTest(helpers.DataDir):
         self.assertEqual(new, other + "-2")
         self.assertTrue(os.path.isfile(os.path.join(other, "Game.srm")))
         self.assertEqual(self.meta(other)["system"], "gb")
+
+    def test_move_refuses_an_unsafe_game_name(self):
+        for game in ("..", "../../x", "a/b"):
+            d = self.stash()
+            data = self.meta(d)
+            data["game"] = game
+            with open(os.path.join(d, "stash.json"), "w") as f:
+                json.dump(data, f)
+            row = {"dir": d, "unreadable": False, **data}
+            with self.assertRaises(ValueError):
+                saves_manage.move(row, GB, [GB])
+            self.assertTrue(os.path.isdir(d))
+            shutil.rmtree(d)
+
+    def test_move_restores_the_folder_when_the_write_fails(self):
+        d = self.stash()
+        row = self.row_for(d)
+        with mock.patch.object(saves_manage, "_write", side_effect=OSError("disk")):
+            with self.assertRaises(OSError):
+                saves_manage.move(row, GB, [GB])
+        self.assertTrue(os.path.isfile(os.path.join(d, "Game.srm")))
+        self.assertEqual((row["dir"], row["system"]), (d, "gba"))
+        self.assertEqual(self.meta(d)["system"], "gba")
 
     def test_move_same_system_returns_none(self):
         d = self.stash()
