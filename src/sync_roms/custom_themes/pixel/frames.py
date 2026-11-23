@@ -6,6 +6,7 @@ pixels of a footprint that isn't a whole number of cells are split evenly (the e
 stepped 1:1 corners identical on all four sides. Drawers work in cells only.
 """
 import os
+import re
 from dataclasses import dataclass, field
 
 from PIL import Image
@@ -145,18 +146,26 @@ class FrameSpec:
     background: tuple = None  # painted over the whole footprint first (full-screen backgrounds stay opaque)
     group: tuple = field(default=())  # files (in the same folder) whose footprints are intersected: one shared grid
     small: bool = False  # the small-file cell rule whatever the width (see cell_for)
+    height: object = None  # height(screen_w, screen_h): the file's height on that screen, its footprint the whole file
 
 
 FRAMES = {}  # "skin/<file>.png": FrameSpec, drawn in every skin*/ folder that has the file
 
 
-def register(name, draw, symmetric=False, flush=(), background=None, group=(), small=False):
-    FRAMES[name] = FrameSpec(draw, symmetric, tuple(flush), background, tuple(group), small)
+def register(name, draw, symmetric=False, flush=(), background=None, group=(), small=False, height=None):
+    FRAMES[name] = FrameSpec(draw, symmetric, tuple(flush), background, tuple(group), small, height)
+
+
+def screen(folder):
+    """The screen a skin folder is for: skin_<W>x<H>, else the base theme's 640x480."""
+    m = re.fullmatch(r"skin_(\d+)x(\d+)", folder)
+    return (int(m[1]), int(m[2])) if m else (640, 480)
 
 
 def apply(theme_dir, palette):
     """Redraw every registered frame present in the theme's skin*/ folders; returns the relative paths written."""
     colors = shades(palette)
+    base_sizes = {name: _base_size(theme_dir, name.split("/", 1)[1]) for name in FRAMES}  # before skin/ is redrawn
     written = []
     for folder in sorted(os.listdir(theme_dir)):
         if not folder.startswith("skin") or not os.path.isdir(os.path.join(theme_dir, folder)):
@@ -180,7 +189,11 @@ def apply(theme_dir, palette):
                 if other_box is not None:
                     box = (max(box[0], other_box[0]), max(box[1], other_box[1]), min(box[2], other_box[2]),
                            min(box[3], other_box[3]))
-            canvas = Canvas(size, cell_for(size, _base_size(theme_dir, file), spec.small), box, spec.background)
+            cell = cell_for(size, base_sizes[name], spec.small)
+            if spec.height is not None:
+                height = spec.height(*screen(folder))
+                size, box = (size[0], height), (box[0], 0, box[2], height)
+            canvas = Canvas(size, cell, box, spec.background)
             spec.draw(canvas, colors)
             canvas.image().save(os.path.join(theme_dir, folder, file))
             written.append(f"{folder}/{file}")

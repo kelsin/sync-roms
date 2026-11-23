@@ -305,9 +305,13 @@ class Frames(unittest.TestCase):
             with self.subTest(rel):
                 spec = frames.FRAMES["skin/" + rel.split("/", 1)[1]]
                 (size, box), base_size = sizes[rel], BASE[rel.split("/", 1)[1]][0]
+                cell = frames.cell_for(size, base_size, spec.small)
+                if spec.height is not None:  # one list row tall, whatever the base's height
+                    size = (size[0], spec.height(*frames.screen(rel.split("/", 1)[0])))
+                    box = None
                 img = load(os.path.join(theme, rel))
                 self.assertEqual(img.size, size)
-                self.check_margins(img, box or (0, 0) + size, frames.cell_for(size, base_size, spec.small), spec)
+                self.check_margins(img, box or (0, 0) + size, cell, spec)
                 with open(os.path.join(theme, rel), "rb") as f, open(os.path.join(other, rel), "rb") as g:
                     self.assertEqual(f.read(), g.read())
                 second = load(os.path.join(arcade, rel))
@@ -648,13 +652,10 @@ class Frames(unittest.TestCase):
 
     def test_non_uniform_copy_uses_min_ratio_cell(self):
         theme, _ = self.build(GRUVBOX)
-        img = load(os.path.join(theme, "skin_1280x720", "bg-list-l.png"))
-        canvas = frames.Canvas((1280, 135), 6, (0, 0, 1280, 135))
-        self.assertEqual((canvas.cols, canvas.rows, canvas.ox, canvas.oy), (213, 22, 1, 1))
-        alpha = img.getchannel("A")
-        # the bar's first opaque row is one cell (6 px) below the grid top
-        self.assertEqual(alpha.getbbox()[1], 1 + 6)
-        self.assertEqual(alpha.getbbox()[3], 135 - 2 - 6)
+        img = load(os.path.join(theme, "skin_1280x720", "bg-game-item-f.png"))
+        canvas = frames.Canvas((231, 255), 6, (9, 0, 216, 230))  # min(231/154, 255/170) = 1.5: cell 6
+        self.assertEqual((canvas.cols, canvas.rows, canvas.ox, canvas.oy), (34, 38, 10, 1))
+        self.assertEqual(img.getchannel("A").getbbox(), (10, 1, 214, 229))
 
     def test_apply_skips_missing_files_and_other_folders(self):
         theme = os.path.join(self.tmp.name, "theme")
@@ -688,16 +689,38 @@ class Frames(unittest.TestCase):
         make_base(base)
         dest = pixel_build.build_theme(base, os.path.join(self.tmp.name, "out"), "T", "CONSOLES", GRUVBOX)
         img = load(os.path.join(dest, "skin_720x480", "bg-list-l.png"))
-        self.assertEqual(img.size, (720, 90))
-        canvas = frames.Canvas((720, 90), 4, (0, 0, 720, 90))
+        self.assertEqual(img.size, (720, 63))
+        canvas = frames.Canvas((720, 63), 4, (0, 0, 720, 63))
         cells = grid(img, canvas)
-        self.check_margins(img, (0, 0, 720, 90), 4, frames.FRAMES["skin/bg-list-l.png"])
-        # drawn on its own 180-cell grid, not the 640 bar stretched: the outline row's corner cut is whole cells
-        row = [cx for cx in range(canvas.cols) if cells[(cx, 1)][3]]
-        self.assertEqual((row[0], row[-1]), (2, canvas.cols - 3))
-        self.assertEqual(img.load()[7, 5][3], 0)
-        self.assertEqual(img.load()[8, 5][:3], frames.shades(GRUVBOX).hi)  # the light rim, visible on black
-        self.assertEqual(load(os.path.join(dest, "skin", "bg-list-l.png")).size, (640, 90))
+        self.check_margins(img, (0, 0, 720, 63), 4, frames.FRAMES["skin/bg-list-l.png"])
+        # drawn on its own 180-cell grid, not the 640 bar stretched: the rim's corner cut is whole cells
+        row = [cx for cx in range(canvas.cols) if cells[(cx, 0)][3]]
+        self.assertEqual((row[0], row[-1]), (3, canvas.cols - 4))
+        self.assertEqual(img.load()[11, 1][3], 0)
+        self.assertEqual(img.load()[12, 1][:3], frames.shades(GRUVBOX).hi)  # the light rim, visible on black
+        self.assertEqual(load(os.path.join(dest, "skin", "bg-list-l.png")).size, (640, 63))
+
+    def test_list_bars_are_one_row_tall(self):
+        """PyUI crops the selection bar to the row from its top: the file is the row, rims on all four sides."""
+        from sync_roms.custom_themes.pixel import frames_select
+        # 640x480: settings rows are the 5 px title offset, the 24 px title font (32 high), the 12 px description
+        # font (16 high) and 10 px padding; game list rows the title font and padding
+        self.assertEqual(frames_select.row_height(True)(640, 480), 5 + 32 + 16 + 10)
+        self.assertEqual(frames_select.row_height(False)(640, 480), 32 + 10)
+        self.assertEqual(frames_select.row_height(True)(1280, 720), 7 + 32 + 16 + 15)
+        theme, _ = self.build(GRUVBOX)
+        hi = frames.shades(GRUVBOX).hi
+        for file, height in (("bg-list-l.png", 63), ("bg-list-s.png", 42)):
+            with self.subTest(file):
+                img = load(os.path.join(theme, "skin", file))
+                self.assertEqual(img.size, (640, height))
+                px = img.load()
+                mid_x, mid_y = 320, height // 2
+                self.assertEqual(px[mid_x, 1][:3], hi)  # top rim (one leftover pixel above the grid)
+                self.assertEqual(px[mid_x, 1 + (height - 1) // 4 * 4 - 1][:3], hi)  # bottom rim, inside the file
+                self.assertEqual(px[3, mid_y][3], 0)  # one cell clear of the screen's side
+                self.assertEqual(px[4, mid_y][:3], hi)  # left rim
+                self.assertEqual(px[635, mid_y][:3], hi)  # right rim
 
     def test_resize_variants_leaves_native_files(self):
         theme = os.path.join(self.tmp.name, "theme")
