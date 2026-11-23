@@ -38,8 +38,8 @@ copying itself.
 - `CARD` is a path when it is an existing folder: today's behaviour, no adb.
 - `CARD` is a card name in `cards.json` (not a folder): an Android card goes over adb. Any other card fails (exit 2)
   saying to pass its mounted path.
-- No `CARD`: the adb flow, starting at the device picker. *(My call: this replaces today's "current folder" default;
-  `saves stash .` keeps the old behaviour.)*
+- No `CARD`: when the current folder's name is a card in `cards.json`, the current folder is that card's path (today's
+  behaviour); otherwise the adb flow, starting at the device picker.
 - `--retroarch DIR` still applies to path mode. With adb it is an error (exit 2).
 
 ### The adb flow (new module `android.py`, my call on the name)
