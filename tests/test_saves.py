@@ -735,6 +735,19 @@ class ApplyCommandTest(CommandTest):
         self.assertEqual(code, 0)
         self.assertIn("No stashed saves", out)
 
+    def test_apply_shows_the_label(self):
+        folder = self.stash()
+        path = os.path.join(folder, "stash.json")
+        with open(path) as f:
+            data = json.load(f)
+        with open(path, "w") as f:
+            json.dump(dict(data, note="boss"), f)
+        base = self.onion_card()
+        self.lists(None)
+        code, _, err = self.run_cmd("saves", "apply", base)
+        self.assertEqual(code, 0, err)
+        self.assertEqual(self.calls[0][2]["extras"][0][-1], ("boss", "dim"))
+
     def nextui_card(self, rom="Game.gba", folder="Game Boy Advance (GBA)"):
         base = self.card("NX", "nextui")
         if rom:
@@ -837,7 +850,7 @@ class ApplyCommandTest(CommandTest):
         self.assertEqual(labels, ["Game"])
         shown = [t for t, _ in kw["extras"][0]]
         self.assertEqual(shown[:2], ["Game Boy Advance", "from SHARE"])
-        self.assertEqual(shown[3:], ["1 save · 1 state", "gpSP", ""])
+        self.assertEqual(shown[3:], ["1 save · 1 state", "gpSP", "", ""])
         self.assertEqual(self.read_file(base, "saves/gba/Game.srm"), "save")
         self.assertEqual(self.read_file(base, "saves/gba/Game.state.auto"), "state")
         self.assertIn("Applied 2 file(s) of 1 game(s) to NEW", out)
@@ -886,7 +899,7 @@ class ApplyCommandTest(CommandTest):
         self.lists([True])
         code, out, err = self.run_cmd("saves", "apply", base)
         self.assertEqual(code, 0, err)
-        self.assertEqual(self.calls[0][2]["extras"][0][-1], ("not on card", "red"))
+        self.assertEqual(self.calls[0][2]["extras"][0][-2], ("not on card", "red"))
         self.assertEqual(self.read_file(base, "RetroArch/states/gpSP/Game.state.auto"), "state")
         self.assertEqual(self.read_file(base, "RetroArch/saves/gpSP/Game.srm"), "save")
 

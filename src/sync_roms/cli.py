@@ -200,7 +200,7 @@ TOPICS = {
   On layouts sorted by core and flat folders a save whose game isn't on the card is skipped; on Knulli and ROCKNIX the folder
   gives the system (on ROCKNIX, where saves sit beside the ROMs, a save or state whose game isn't in the system's ROM
   folder is skipped too).
-  apply lists the stashes of systems the card syncs (one per game) and copies them into the card's RetroArch folders.
+  apply lists the stashes of systems the card syncs (one per game, with each one's label from `saves manage`) and copies them into the card's RetroArch folders.
   A different file already there is only overwritten after you confirm (default no); identical ones are skipped.
   A stash without a core going to a layout sorted by core asks which core folder to use (skipped with --yes).
   manage lists every stash (unreadable ones too, which can only be inspected and deleted). Space picks; m and d act on
