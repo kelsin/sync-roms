@@ -128,11 +128,13 @@ def _sunburst(c, centre, rays=16):
     d = ImageDraw.Draw(im)
     cx, cy = centre
     r = 200
+    def point(turn):  # whole pixels, so the platform's trig rounding can't move a ray's edge
+        a = 2 * math.pi * turn / rays
+        return round(cx + r * math.cos(a)), round(cy + r * math.sin(a))
+
+    cx, cy = round(cx), round(cy)
     for i in range(rays):
-        a0 = 2 * math.pi * i / rays
-        a1 = 2 * math.pi * (i + 0.5) / rays
-        d.polygon([(cx, cy), (cx + r * math.cos(a0), cy + r * math.sin(a0)),
-                   (cx + r * math.cos(a1), cy + r * math.sin(a1))], fill=shade(c, 1.18))
+        d.polygon([(cx, cy), point(i), point(i + 0.5)], fill=shade(c, 1.18))
     return im
 
 
