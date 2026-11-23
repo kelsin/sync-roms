@@ -80,14 +80,17 @@ def new_gamelist_entries(gamelists):
         if os.path.exists(path):
             try:
                 with open(path, encoding="utf-8") as f:
-                    m = re.search(r"<gameList\b.*</gameList>", f.read(), re.S)
+                    text = f.read()
+                # as scrape_plan.update_gamelist finds it
+                m = re.search(r"<gameList\b[^>]*/>", text) or re.search(r"<gameList\b.*</gameList>", text, re.S)
                 if not m:
                     raise ValueError("no <gameList>")
-                listed = {(g.findtext("path") or "").strip() for g in ET.fromstring(m.group(0)).findall("game")}
+                listed = {downloads.name_key((g.findtext("path") or "").strip())
+                          for g in ET.fromstring(m.group(0)).findall("game")}
             except (ET.ParseError, OSError, UnicodeDecodeError, ValueError) as e:
                 ui.warn(f"{path} doesn't parse ({e}): left as it is")
                 continue
-        fresh = {rom: tags for rom, tags in entries.items() if "./" + rom not in listed}
+        fresh = {rom: tags for rom, tags in entries.items() if downloads.name_key("./" + rom) not in listed}
         if fresh:
             out[path] = fresh
     return out

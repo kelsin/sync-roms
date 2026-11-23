@@ -12,9 +12,13 @@ from sync_roms import cli, s3, store, ui
 GBA = {"name": "Game Boy Advance", "bucket": "gba", "folders": {"esde": "gba", "spruce": "GBA"},
        "bios": {"files": ["gba_bios.bin"]}, "games": []}
 NES = {"name": "Nintendo", "bucket": "nes", "folders": {"esde": "nes", "spruce": "FC"}, "bios": {"files": []}, "games": []}
+PSX = {"name": "PlayStation", "bucket": "psx", "folders": {"onion": "PS"}, "bios": {"files": []}, "games": []}
+DISCS = ["psx/Game (Disc 1).chd", "psx/Game (Disc 2).chd"]
 LAYOUTS = {"esde": {"label": "ES-DE", "roms_dir": "ROMs", "bios_dir": "BIOS"},
+           "onion": {"label": "Onion", "roms_dir": "Roms", "bios_dir": "BIOS", "disc_dir": ".multi-disc"},
            "spruce": {"label": "Spruce", "roms_dir": "Roms", "bios_dir": "BIOS"}}
-STORAGE = {"gba/Game.zip": 5, "nes/X.zip": 3, "BIOS/gba_bios.bin": 3, "scrapes/gba/covers/Game.png": 4}
+STORAGE = {"gba/Game.zip": 5, "nes/X.zip": 3, "BIOS/gba_bios.bin": 3, "scrapes/gba/covers/Game.png": 4,
+           DISCS[0]: 5, DISCS[1]: 5, "psx/Game.m3u": 30}
 CARD = "friend"
 
 
@@ -22,7 +26,7 @@ def load_manifest(names=(), keep_off=False):
     """The test systems with the card's games as saved in cards.json (its systems_off emptied, as the real one does)."""
     entry = store.saved_card(names[0]) if names else {}
     games, off = entry.get("games") or {}, store.systems_off(entry)
-    systems = copy.deepcopy([GBA, NES])
+    systems = copy.deepcopy([GBA, NES, PSX])
     for s in systems:
         s["games"] = [] if s["bucket"] in off else [{"bucket": k} for k in games.get(s["bucket"], [])]
     return {"systems": systems, "devices": [], "layouts": LAYOUTS}
@@ -151,10 +155,11 @@ class GuestSyncTest(DataDir):
         game = self.card_file("ROMs/gba/Game.zip")
 
         def editor(card, *a, **k):
-            store.update_card(card, games={}, systems_off=["gba"])
+            store.update_card(card, games={"nes": ["nes/X.zip"]}, systems_off=["gba"])  # nes: the sync goes on
         self.sync(yes=False, editor=editor)
         self.assertTrue(os.path.exists(game))
         self.assertFalse([k for k in self.job_keys() if k.startswith(("gba/", "scrapes/gba/"))])
+        self.assertNotIn("BIOS/gba_bios.bin", self.job_keys())
 
     def test_guest_sync_leaves_a_same_named_file_of_another_size(self):
         self.save(guest=True)
@@ -199,6 +204,17 @@ class GuestSyncTest(DataDir):
         self.assertIn("gba/Game.zip", self.out.getvalue() + self.err.getvalue())
         self.assertNotIn("gba/Game.zip", self.job_keys())
 
+    def test_guest_sync_leaves_loose_discs_where_they_are(self):
+        self.save(guest=True, layout="onion")
+        loose = [self.card_file(f"Roms/PS/{os.path.basename(k)}") for k in DISCS]
+
+        def editor(card, *a, **k):
+            store.update_card(card, games={"psx": [*DISCS, "psx/Game.m3u"]})
+        self.sync(layout="onion", yes=False, editor=editor)
+        for path in loose:
+            self.assertTrue(os.path.exists(path), path)
+            self.assertFalse(os.path.exists(os.path.join(os.path.dirname(path), ".multi-disc", os.path.basename(path))))
+
     def test_guest_sync_adds_a_new_pick(self):
         self.save(guest=True)
 
@@ -229,12 +245,18 @@ class GuestSyncTest(DataDir):
         self.save(games={"nes": ["nes/X.zip"]})
         self.card_file("ROMs/gba/Game.zip")
 
+        manifests = mock.Mock(wraps=load_manifest)
+
         def run_surprise(card, setup, chosen, interactive, dry_run, to_fetch=None, card_match=None, on_guest=None):
             store.update_card(card, guest=True)
+            before = manifests.call_count
             on_guest()
+            self.assertEqual(manifests.call_count, before, "reloaded while the editor is open")
+            self.assertEqual(self.saved()["games"], {"gba": ["gba/Game.zip"]})  # the editor shows the seed
             return []
         fill = mock.Mock(return_value=[])
-        self.sync(patches=((cli.surprise, {"run_surprise": run_surprise, "fill_surprises": fill}),))
+        self.sync(patches=((store, {"load_manifest": manifests}),
+                           (cli.surprise, {"run_surprise": run_surprise, "fill_surprises": fill})))
         self.assertEqual(self.saved()["games"], {"gba": ["gba/Game.zip"]})
         self.assertFalse(fill.called)
         self.assertNotIn("nes/X.zip", self.job_keys())

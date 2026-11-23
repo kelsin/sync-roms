@@ -386,7 +386,7 @@ For a card that isn't yours (a friend's), run `sync-roms sync CARD --guest` once
 
 - Each sync starts from what the card already holds: every ROM in storage whose file is on the card (same name, ignoring case and Unicode form, and same size) becomes a pick. The editor opens on those picks; add games to copy them.
 - A file already on the card is never overwritten, and a gamelist only gains entries for ROMs it doesn't list (one that can't be read is left as it is, with a warning).
-- Only the ROMs found on the card at the start that you deselect in the editor are deleted (after you confirm, unless `--no-delete`), with their scraped media. A system turned off with `x` is skipped entirely. Your friend's other files are never deleted or overwritten. The exceptions: on Spruce cards, BIOS zips sync puts in a ROM folder are added to that system's `Emu/<folder>/config.json` ignore list; loose discs of picked multi-disc games are moved into the disc folder; and the usual end-of-run tidy runs.
+- Only the ROMs found on the card at the start that you deselect in the editor are deleted (after you confirm, unless `--no-delete`), with their scraped media. A system turned off with `x` is skipped entirely. Your friend's other files are never deleted or overwritten. The exceptions: on Spruce cards, BIOS zips sync puts in a ROM folder are added to that system's `Emu/<folder>/config.json` ignore list, and the usual end-of-run tidy runs. Loose discs are left where they are.
 - Without the editor (`--yes`, `--json`, no terminal) the picks are what the card holds and nothing is deleted.
 - Turning guest off in the editor during a sync takes effect on the next sync.
 

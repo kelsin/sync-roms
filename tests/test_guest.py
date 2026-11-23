@@ -101,6 +101,17 @@ class GuestTest(RealDataDirGuard):
         helpers.touch(path, "<gameList><game><path>./A.zip</path></game></gameList>")
         self.assertEqual(guest.new_gamelist_entries({path: {"A.zip": {}}}), {})
 
+    def test_new_gamelist_entries_takes_an_empty_self_closing_gamelist(self):
+        path = os.path.join(self.dest, "gamelist.xml")
+        helpers.touch(path, '<?xml version="1.0"?>\n<gameList />\n')
+        self.assertEqual(guest.new_gamelist_entries({path: {"A.zip": {"name": "A"}}}), {path: {"A.zip": {"name": "A"}}})
+
+    def test_new_gamelist_entries_match_the_cards_spelling(self):
+        import unicodedata
+        path = os.path.join(self.dest, "gamelist.xml")
+        helpers.touch(path, f"<gameList><game><path>./{unicodedata.normalize('NFD', 'POKÉMON.zip')}</path></game></gameList>")
+        self.assertEqual(guest.new_gamelist_entries({path: {"Pokémon.zip": {}, "B.zip": {}}}), {path: {"B.zip": {}}})
+
     def test_new_gamelist_entries_drops_a_gamelist_that_does_not_parse(self):
         for text in ("<gameList><game><path>./A.zip</path>", "<gameList><game><path>./A.zip</game></gameList>"):
             path = os.path.join(self.dest, "gamelist.xml")

@@ -1204,9 +1204,10 @@ def sync_card(args):
 
     seed = {}  # guest syncs: {system id: {storage key: card path}}, the storage ROMs on the card when seeded
 
-    def reseed():
+    def reseed(reload=True):
         """Make the storage ROMs on the card (a matching name and storage's size) the card's picks, replacing the ones
-        saved before: in cards.json, or in memory on a dry run."""
+        saved before: in cards.json, or in memory on a dry run. reload=False (from the card editor): only saved, so
+        nothing prints or downloads under the editor; the sync reloads after it."""
         seed.clear()
         for s in systems:
             dest = os.path.join(roms_dir, s["folders"][layout_name])
@@ -1224,7 +1225,8 @@ def sync_card(args):
             relist()
         else:
             guests.save_seed(card, seed)
-            reload_changes()
+            if reload:
+                reload_changes()
 
     if guest:  # no Surprise: the card editor opens on the picks seeded from the card
         reseed()
@@ -1236,7 +1238,7 @@ def sync_card(args):
             """F in the card editor turned the card into a guest card: this sync is a guest sync from here."""
             nonlocal guest
             guest = True
-            reseed()
+            reseed(reload=False)  # run_surprise only returns after the editor, then the picks are reloaded
 
         # surprises come in two steps: which ones to replace first (then the card editor, which shows the ones kept), and
         # the empty slots last, right before the sync, from every system the card's device supports, games picked or not
@@ -1300,7 +1302,7 @@ def sync_card(args):
         have = listings[s["bucket"]]
         dest = dest_of(s)
         disc_keys = discs_of(s)
-        if disc_keys:  # discs a past sync left loose go where they belong rather than being downloaded again
+        if disc_keys and not guest:  # discs a past sync left loose go where they belong rather than being downloaded again
             moved.update(downloads.hide_discs(dest, disc_dir, disc_keys, args.dry_run))
         for key in wanted:
             if key in have and key in seed.get(s["bucket"], {}):  # guest: where the card has it, as the card spells it
@@ -1335,7 +1337,8 @@ def sync_card(args):
         extras += downloads.find_extras(dest, dest_keys[dest], onion, disc_dir, dest_discs[dest], dest_bios[dest] | own_files[dest] | (pico8.keep_in(dest, card, layout_name) if dest in pico8_dests else set()), renames=renames, folders=dest_folders[dest], skip_saves=saves.beside_roms(layout))
 
     # BIOS for every system with ROMs already on the card too, even when this sync doesn't touch that system
-    bios_systems = chosen + [s for s in systems if s["bucket"] not in chosen_ids
+    off = store.systems_off(store.saved_card(card)) if guest else set()  # x skips a system of a guest card, BIOS too
+    bios_systems = chosen + [s for s in systems if s["bucket"] not in chosen_ids and s["bucket"] not in off
                              and downloads.has_local_files(dest_of(s), onion, rom_bios_names(s) | own_files[dest_of(s)])]
     # (bucket key, folder, path in it) of each BIOS file: in the BIOS folder, or in the ROM folder of a system with ROMs to sync
     bios_dests = {("BIOS/" + f, folder, f) for s in bios_systems for folder in downloads.bios_folders(s, layout_name, layout, bios_dir)
