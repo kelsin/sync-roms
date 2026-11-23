@@ -64,12 +64,13 @@ def delete(canvas, s):
 
 
 def shift(canvas, s):
-    """Shift: a key outline with an up arrow centered in it, one cell of padding above and below the arrow."""
+    """Shift: a key outline with an up arrow centered in it, drawn like the backspace arrow (shaft and 1:1 head
+    strokes), its head as wide as the arrow's height allows and one cell of padding above and below it."""
     ring(canvas, s.text)
     w, h = canvas.cols - 2, canvas.rows - 2
-    t = 2 - w % 2
-    tall = max(3, h - 2)
-    k = max(1, min((w - t) // 2 - 1, tall - 2))
+    t = 2 - w % 2  # the shaft: the arrow's width has the inner width's parity, so it centers exactly
+    tall = max(2, h - 2)
+    k = max(1, min(tall - 1, (w - 2 - t) // 2))
     x0, y0 = 1 + (w - t) // 2, 1 + (h - tall) // 2
     canvas.rect(x0, y0, t, tall, s.text)
     for i in range(1, k + 1):
@@ -94,17 +95,19 @@ def space(canvas, s):
 
 def _trash_body(cols):
     """(overhang, lines, gap): the body inset `overhang` cells under the lid, its `lines` 1-cell lines spaced `gap`
-    cells apart and from the sides (equal everywhere, so the body is exactly mirrored)."""
-    for overhang in (1, 2, 3):
-        for lines in (3, 2):
+    cells apart and from the sides (equal everywhere, so the body is exactly mirrored). A grid no spacing fits gets a
+    plain body (no lines)."""
+    for lines in (3, 2, 1):
+        for overhang in (1, 2, 3):
             inner = cols - 2 * overhang - 2 - lines
             if inner > 0 and inner % (lines + 1) == 0:
                 return overhang, lines, inner // (lines + 1)
-    raise ValueError(f"no trash can fits {cols} cells")
+    return 1, 0, 0
 
 
 def trash(canvas, s):
-    """Delete all: a can with a handle, a full-width lid and an outlined body with evenly spaced lines."""
+    """Delete all: a can with a handle, a full-width lid and an outlined body with evenly spaced lines, as far from
+    the lid and the bottom as from each other and the sides (less when the body is too short for that)."""
     c, r = canvas.cols, canvas.rows
     handle = c // 3 + (c - c // 3) % 2
     hx = (c - handle) // 2
@@ -117,30 +120,35 @@ def trash(canvas, s):
     canvas.rect(left, 3, 1, r - 4, s.text)
     canvas.rect(right, 3, 1, r - 4, s.text)
     canvas.rect(left + 1, r - 1, right - left - 1, 1, s.text)
+    inside = r - 4  # the body's rows between the lid and its bottom edge
+    down = min(gap, (inside - 1) // 2)
+    if inside - 2 * down < 1:
+        return
     for i in range(lines):
-        canvas.rect(left + 1 + gap + i * (gap + 1), 4, 1, r - 7, s.text)
+        canvas.rect(left + 1 + gap + i * (gap + 1), 3 + down, 1, inside - 2 * down, s.text)
 
 
 # favorite and file glyphs
 
 def star_mask(cols, rows):
     """A five-pointed star of 1:1 edges as wide as the grid allows with even side margins: a spike, two arms, the
-    underside stepping in to the waist and two legs stepping out. Returns (cells, width, height)."""
+    underside stepping in to the waist, then two solid legs stepping out from a narrow notch to feet under the arm
+    tips. Returns (cells, width, height)."""
     peak = 2 - cols % 2
     arm = (cols - peak) // 2
-    while arm >= 3:
-        spike, waist = max(2, arm // 2), round(arm * 3 / 8)
-        legs, thick = arm - waist, 2 if arm >= 6 else 1
+    while arm >= 2:
+        spike, waist = max(1, arm // 2), max(1, arm // 2)
+        legs = arm - waist
         height = spike + 1 + (arm - waist) + legs
         if (rows - height) % 2:
             spike += 1 if height + 1 <= rows else -1
-            height = spike + 1 + (arm - waist) + legs
-        if height <= rows and spike >= 2:
+            height += 1 if spike > max(1, arm // 2) else -1
+        if height <= rows and spike >= 1:
             break
         arm -= 1
     rows_ = [[(-r, r)] for r in range(spike)] + [[(-arm, arm)]]
     rows_ += [[(-(arm - i), arm - i)] for i in range(1, arm - waist + 1)]
-    rows_ += [[(-(waist + j), -(waist - thick + j)), (waist - thick + j, waist + j)] for j in range(1, legs + 1)]
+    rows_ += [[(-(waist + j), -j), (j, waist + j)] for j in range(1, legs + 1)]
     cells = set()
     for y, segments in enumerate(rows_):
         for a, b in segments:
@@ -223,13 +231,14 @@ def hint(text):
 def tree_rows(cols, rows):
     """The tree's rows as (width, part) from the top, part 0 the top tier to 2 the bottom tier, 3 the trunk, None the
     gap above the trunk: three equal 1:1 tiers, each overlapping the one above by a row, one cell of margin at the
-    sides and equal margins above and below."""
+    sides and equal margins above and below. A grid too short for that width gets a narrower tree (still centered);
+    one too small for any, none."""
     width = cols - 2
     peak = 2 - width % 2
     tier = [peak + 2 * i for i in range((width - peak) // 2 + 1)]
     trunk_width = peak if peak == 2 else 3
     for step in range(len(tier) - 1, 0, -1):
-        for trunk in range(len(tier), 1, -1):
+        for trunk in range(max(2, len(tier)), 0, -1):
             height = len(tier) + 2 * step + 1 + trunk
             if height <= rows - 2 and (rows - height) % 2 == 0:
                 out = [None] * (len(tier) + 2 * step)
@@ -237,7 +246,7 @@ def tree_rows(cols, rows):
                     for i, w in enumerate(tier):
                         out[part * step + i] = (w, part)
                 return out + [None] + [(trunk_width, 3)] * trunk
-    raise ValueError(f"no tree fits {cols}x{rows} cells")
+    return tree_rows(cols - 2, rows) if cols > 4 else []  # too short for this width: a narrower tree, else none
 
 
 def tree(lit):

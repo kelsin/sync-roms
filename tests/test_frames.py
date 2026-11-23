@@ -10,7 +10,7 @@ from test_custom_themes import make_base as make_theme_base  # noqa: E402
 
 from sync_roms.custom_themes import palettes  # noqa: E402
 from sync_roms.custom_themes.pixel import build as pixel_build  # noqa: E402
-from sync_roms.custom_themes.pixel import frames, frames_panels  # noqa: E402
+from sync_roms.custom_themes.pixel import frames, frames_keys, frames_panels  # noqa: E402
 
 GRUVBOX = palettes.get("Gruvbox")
 ARCADE = palettes.get("Arcade")
@@ -396,6 +396,93 @@ class Frames(unittest.TestCase):
             x0, y0, x1, y1 = boxes[i]
             self.assertTrue(x0 <= bbox[0] and y0 <= bbox[1] and bbox[2] <= x1 and bbox[3] <= y1, (i, bbox))
             self.assertEqual(img.getchannel("A"), imgs[1].getchannel("A"), i)
+
+    def test_trash_lines_evenly_spaced_both_ways(self):
+        """The trash can's lines are as far from the lid and the bottom as from each other and the body's sides, at
+        the base's grid, the 1280 copy's, odd and even widths."""
+        s = frames.shades(GRUVBOX)
+        for size, cell in (((28, 25), 2), ((41, 37), 3), ((30, 27), 2), ((31, 23), 2), ((44, 40), 3)):
+            canvas = frames.Canvas(size, cell, (0, 0) + size)
+            with self.subTest(grid=(canvas.cols, canvas.rows)):
+                frames_keys.trash(canvas, s)
+                overhang, lines, gap = frames_keys._trash_body(canvas.cols)
+                self.assertGreater(lines, 0)
+                left, right = overhang, canvas.cols - 1 - overhang
+                xs = [left + 1 + gap + i * (gap + 1) for i in range(lines)]
+                for x in xs:
+                    column = [y for y in range(3, canvas.rows - 1) if (x, y) in canvas.cells]
+                    top, bottom = column[0] - 3, canvas.rows - 2 - column[-1]  # rows clear under the lid, over the base
+                    self.assertEqual(top, bottom, x)
+                    self.assertEqual(top, gap)
+                    self.assertEqual(column, list(range(column[0], column[-1] + 1)))
+                self.assertEqual(xs[0] - left - 1, right - 1 - xs[-1])
+
+    def test_small_grids_fall_back(self):
+        """A grid too small for the usual trash spacing or tree still draws (fewer or no lines, a narrower tree or
+        none), mirrored and centered, without raising."""
+        s = frames.shades(GRUVBOX)
+        for cols in (8, 10, 6, 5):
+            canvas = frames.Canvas((cols * 2, 24), 2, (0, 0, cols * 2, 24))
+            with self.subTest(trash=cols):
+                frames_keys.trash(canvas, s)
+                self.assertTrue(canvas.cells)
+                for (x, y), rgb in canvas.cells.items():
+                    self.assertEqual(canvas.cells.get((cols - 1 - x, y)), rgb, (x, y))
+        for cols, rows in ((12, 8), (6, 12), (4, 4), (12, 14)):
+            canvas = frames.Canvas((cols * 4, rows * 4), 4, (0, 0, cols * 4, rows * 4))
+            with self.subTest(tree=(cols, rows)):
+                frames_keys.tree(4)(canvas, s)
+                if canvas.cells:
+                    xs = [x for x, _ in canvas.cells]
+                    ys = [y for _, y in canvas.cells]
+                    self.assertEqual(min(xs), cols - 1 - max(xs))
+                    self.assertEqual(min(ys), rows - 1 - max(ys))
+        self.assertTrue(frames_keys.tree_rows(6, 12))  # narrower than the grid, but a tree
+
+    def test_shift_arrow_fills_its_key(self):
+        """The shift arrow is as big in its key as the backspace arrow: one cell of padding above and below it, and
+        at least as many cells as the backspace head's span."""
+        s = frames.shades(GRUVBOX)
+        for size, cell in (((26, 16), 2), ((29, 17), 2), ((39, 25), 3)):
+            canvas = frames.Canvas(size, cell, (0, 0) + size)
+            with self.subTest(grid=(canvas.cols, canvas.rows)):
+                frames_keys.shift(canvas, s)
+                arrow = [(x, y) for x, y in canvas.cells if 1 < x < canvas.cols - 2 and 1 < y < canvas.rows - 2]
+                ys = [y for _, y in arrow]
+                xs = [x for x, _ in arrow]
+                self.assertEqual((min(ys), max(ys)), (2, canvas.rows - 3))
+                self.assertEqual(min(xs) - 1, canvas.cols - 2 - max(xs))
+                self.assertGreaterEqual(max(xs) - min(xs) + 1, canvas.rows - 3)
+                self.assertGreaterEqual(len(arrow), 10)
+
+    def test_star_legs_are_solid(self):
+        """The star's legs are as wide as its waist half, from a notch only the peak's width at the top."""
+        for cols, rows in ((18, 17), (19, 18), (20, 19), (21, 20)):
+            cells, width, height = frames_keys.star_mask(cols, rows)
+            with self.subTest(grid=(cols, rows)):
+                peak = 2 - cols % 2
+                axis = range((width - peak) // 2, (width + peak) // 2)
+                notch = min(y for y in range(height) if all((x, y) not in cells for x in axis))
+                legs = []
+                for y in range(notch, height):
+                    runs, x = [], 0
+                    while x < width:
+                        if (x, y) in cells:
+                            start = x
+                            while (x, y) in cells:
+                                x += 1
+                            runs.append(x - start)
+                        x += 1
+                    self.assertEqual(len(runs), 2, y)
+                    legs.append(runs[0])
+                self.assertEqual(set(legs), {legs[0]})  # solid legs of one width all the way down
+                self.assertGreaterEqual(legs[0], width // 4)
+                gap = [x for x in range(width) if (x, notch) not in cells and
+                       any((xx, notch) in cells for xx in range(x)) and
+                       any((xx, notch) in cells for xx in range(x + 1, width))]
+                self.assertEqual(len(gap), peak)
+                for (x, y) in cells:
+                    self.assertIn((width - 1 - x, y), cells)
 
     def test_registry_has_all_panel_files(self):
         names = {key.split("/", 1)[1][:-len(".png")] for key in frames.FRAMES}
