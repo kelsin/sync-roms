@@ -213,12 +213,18 @@ def wanted(card, names):
     return result
 
 
+def _plain(name):
+    """Whether name is a plain folder name, so Themes/<name>/ is a folder inside Themes/ (a tampered cards.json can't
+    point a removal at Themes/ itself or outside it)."""
+    return isinstance(name, str) and name not in ("", ".", "..") and os.path.basename(name) == name
+
+
 def plan(card, base, names, keep):
     """What a card's themes need: jobs ([(key, path, size)] for every file of each wanted theme), remove (installed
     folders to delete) and installed (the card's new spruce_themes_installed). Only folders sync put on the card are
     removed, and never one that is wanted, the card's current theme, or in use by a device (Saves/*-system.json)."""
     saved = store.saved_card(card)
-    previous = [n for n in saved.get("spruce_themes_installed") or [] if isinstance(n, str)]
+    previous = [n for n in saved.get("spruce_themes_installed") or [] if _plain(n)]
     current = saved.get("spruce_theme")
     have = available()
     use = wanted(card, names)
@@ -258,7 +264,7 @@ def todo(jobs):
 def remove(base, names, dry_run):
     """Delete the card's Themes/<name>/ folders. Returns the number that failed."""
     failed = 0
-    for name in names:
+    for name in filter(_plain, names):
         path = os.path.join(base, "Themes", name)
         if dry_run:
             print(ui.dim(f"🧪 Dry run: would remove the Spruce theme {name}"))
@@ -272,6 +278,13 @@ def remove(base, names, dry_run):
             ui.warn(f"Couldn't remove the Spruce theme {name}: {e}")
             failed += 1
     return failed
+
+
+def freed(base, names):
+    """The bytes removing the card's Themes/<name>/ folders frees."""
+    return sum(os.path.getsize(os.path.join(dp, n)) for name in filter(_plain, names)
+               for dp, _, files in os.walk(os.path.join(base, "Themes", name)) for n in files
+               if not os.path.islink(os.path.join(dp, n)))
 
 
 def _system_files(base):
