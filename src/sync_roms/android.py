@@ -110,10 +110,11 @@ def setup_device():
         code = ui.ask("6-digit pairing code: ").strip() if addr else ""
         if not code:
             return
+        before = {d.serial for d in adb.devices() if d.state == "device"}
         adb.pair(addr, code)
         reconnect()
         for _ in range(10):
-            if any(d.state == "device" for d in adb.devices()):
+            if any(d.state == "device" and d.serial not in before for d in adb.devices()):
                 return
             time.sleep(1)
         addr = ui.ask("IP:port under Wireless debugging (not the pairing one): ").strip()

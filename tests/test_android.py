@@ -229,6 +229,17 @@ class SetupTest(unittest.TestCase):
         pair.assert_called_once_with("1.2.3.4:4000", "123456")
         reconnect.assert_called_once_with()
 
+    def test_setup_device_asks_address_when_no_new_device(self):
+        pairing = [("adb-Y", "_adb-tls-pairing._tcp", "1.2.3.4:4000")]
+        with contextlib.redirect_stdout(io.StringIO()), mock.patch.object(android.time, "sleep"), \
+                mock.patch.object(adb, "mdns_services", return_value=pairing), \
+                mock.patch.object(android.ui, "ask", side_effect=["123456", "1.2.3.4:5555"]), \
+                mock.patch.object(adb, "pair"), mock.patch.object(adb, "connect") as connect, \
+                mock.patch.object(adb, "devices", return_value=[NOVA]), \
+                mock.patch.object(android, "reconnect"):
+            android.setup_device()
+        connect.assert_called_once_with("1.2.3.4:5555")
+
 
 if __name__ == "__main__":
     unittest.main()
