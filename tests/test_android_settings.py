@@ -270,6 +270,36 @@ class Apply(helpers.DataDir):
         self.assertIn(("shell", "pm", "install", CARD_APK), self.calls)
         self.assertEqual([c for c in self.calls if c[0] in ("download", "install")], [])
 
+    def test_apply_bucket_downloads_once_and_removes_copy(self):
+        self.apk_setup()
+        self.assertEqual(self.run_apply(), 0)
+        self.assertEqual([c for c in self.calls if c[0] == "download"], [("download", APKS + "app.apk")])
+        self.assertFalse(os.path.exists(os.path.join(self.tmps[0], "apks", "app.apk")))
+
+    def test_apply_folder_storage_reads_and_installs_in_place(self):
+        self.apk_setup()
+        root = os.path.join(self.tmp.name, "root")
+        path = os.path.join(root, *(APKS + "app.apk").split("/"))
+        os.makedirs(os.path.dirname(path))
+        with open(path, "wb") as f:
+            f.write(self.apks[APKS + "app.apk"])
+        self.enterContext(mock.patch.object(s3, "read_root", lambda: root))
+        installed = []
+        self.enterContext(mock.patch.object(adb, "install", lambda s, local, replace=False: installed.append(local)))
+        self.assertEqual(self.run_apply(), 0)
+        self.assertEqual(installed, [path])
+        self.assertNotIn("download", self.names())
+
+    def test_apply_storage_error_in_apks_still_writes_cfg(self):
+        self.files[self.cfg_path] = OLD_CFG
+
+        def boom(prefix, sizes=True):
+            raise OSError("share gone")
+        self.enterContext(mock.patch.object(inventory, "files", boom))
+        self.assertEqual(self.run_apply(), 1)
+        self.assertIn(("push", self.cfg_path), self.calls)
+        self.assertIn("share gone", self.err.getvalue())
+
     def test_apply_ignores_card_copy_of_another_size(self):
         self.apk_setup()
         self.card_apks[CARD_APK] = self.apks[APKS + "app.apk"] + b"x"
