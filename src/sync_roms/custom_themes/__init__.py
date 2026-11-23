@@ -1,4 +1,5 @@
-"""Custom spruceOS themes sync-roms builds from a base theme. THEMES maps each theme's name to its module."""
+"""Custom spruceOS themes sync-roms builds from a base theme. STYLES maps each style's name to its module; a built
+theme is one style in one palette (palettes.py), named `<style> - <palette>`."""
 import os
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
@@ -6,11 +7,16 @@ from dataclasses import dataclass, field
 from .. import downloads, inventory, runtime, s3, store
 from . import manifest, pixel_consoles, pixel_controllers
 
-THEMES = {module.NAME: module for module in (pixel_consoles, pixel_controllers)}
+STYLES = {module.STYLE: module for module in (pixel_consoles, pixel_controllers)}
 
 
-def names():
-    return sorted(THEMES, key=str.lower)
+def styles():
+    return sorted(STYLES, key=str.lower)
+
+
+def theme_name(style, palette_name):
+    """The theme's folder name in storage and on cards."""
+    return f"{style} - {palette_name}"
 
 
 class BaseMissing(ValueError):
@@ -55,21 +61,25 @@ def _prune(folder, keep):
             os.rmdir(dirpath)
 
 
-def build(selected, out=None):
-    """Build the named themes (all when None) into out, or the cache's build folder; returns {name: built folder}.
-    Raises KeyError for an unknown name and BaseMissing when a base theme isn't in storage."""
-    chosen = names() if selected is None else list(selected)
-    for name in chosen:
-        if name not in THEMES:
-            raise KeyError(name)
+def build(styles, palettes, out=None):
+    """Build each named style (all when None) in each palette into out, or the cache's build folder; returns
+    {theme name: built folder}. Raises KeyError for an unknown style, ValueError for no palettes and BaseMissing when a
+    base theme isn't in storage."""
+    if not palettes:
+        raise ValueError("no palettes to build")
+    chosen = sorted(STYLES, key=str.lower) if styles is None else list(styles)
+    for style in chosen:
+        if style not in STYLES:
+            raise KeyError(style)
     out = out or os.path.join(store.cache_dir(), "themes", "build")
     bases = {}
     built = {}
-    for name in chosen:
-        module = THEMES[name]
+    for style in chosen:
+        module = STYLES[style]
         if module.BASE not in bases:
             bases[module.BASE] = fetch_base(module.BASE)
-        built[name] = module.build(bases[module.BASE], out)
+        for palette in palettes:
+            built[theme_name(style, palette.name)] = module.build(bases[module.BASE], out, palette)
     return built
 
 
@@ -111,13 +121,13 @@ def _tags(keys):
         return dict(zip(keys, ex.map(inventory.tag, keys)))
 
 
-def publish(selected, dry_run=False):
-    """Build the named themes (all when None) and make their storage folders match: upload new and changed files,
+def publish(styles, palettes, dry_run=False):
+    """Build the named styles (all when None) in each palette and make their storage folders match: upload new and changed files,
     delete the files a build no longer makes, and record each file's hash in the manifest. Returns the exit code.
     Raises BaseMissing, DownloadFailed, a storage error, or ValueError for a malformed manifest or themes.json."""
     from .. import spruce_themes, ui, upload
     s3.check_root()  # an unmounted share must never read as empty theme folders
-    built = build(selected)
+    built = build(styles, palettes)
     state = manifest.read()
     downloaded = {v["folder"] for v in spruce_themes.read_state().values()}
     plans, trees, jobs, stale, sizes = [], {}, [], [], {}

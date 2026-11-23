@@ -7,7 +7,7 @@ import shutil
 
 from PIL import Image
 
-from . import app_icons, arcade, extras, handhelds, menu, nintendo_sega, others, ui_settings, ui_status, variants
+from . import app_icons, arcade, extras, handhelds, menu, nintendo_sega, others, recolor, ui_settings, ui_status, variants
 from .sprite import place, render
 
 BATCHES = (handhelds, nintendo_sega, others, arcade, extras)
@@ -88,13 +88,15 @@ SPECS = {
 }
 
 
-def build_theme(base_dir, out_dir, name, kind):
-    """Write <out_dir>/<name>/, a copy of base_dir with the pixel-art overlays (kind: CONSOLES or CONTROLLERS)."""
+def build_theme(base_dir, out_dir, name, kind, palette):
+    """Write <out_dir>/<name>/, a copy of base_dir with the pixel-art overlays (kind: CONSOLES or CONTROLLERS) in the
+    palette's colors."""
     spec = dict(SPECS[kind], systems=systems(kind))
     dest = os.path.join(out_dir, name)
     if os.path.exists(dest):
         shutil.rmtree(dest)
     shutil.copytree(base_dir, dest)
+    recolor.recolor_bar(dest, palette)  # the base's own skins and pre-scaled copies, before anything is drawn
     for file in sorted(os.listdir(dest)):
         if not (file.startswith("config") and file.endswith(".json")):
             continue
@@ -104,6 +106,7 @@ def build_theme(base_dir, out_dir, name, kind):
         config.update({"name": name, "author": "sync-roms", "description": spec["description"]})
         if "screensaver" in config:
             config["screensaver"]["bgColor"] = "#000000"
+        recolor.recolor_config(config, palette)
         with open(config_path, "w") as f:
             json.dump(config, f, indent=4)
             f.write("\n")

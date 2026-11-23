@@ -129,16 +129,20 @@ TOPICS = {
 
   sync-roms themes pick                       choose the PyUI themes every spruce card gets by default (saved as spruce_themes)
 
-  sync-roms themes build [THEME...] [--out DIR]   build custom spruce themes from the SPRUCE base theme in storage
+  sync-roms themes build [STYLE...] (--palette NAME... | --all-palettes) [--out DIR]   build custom spruce themes
 
-  Builds each named custom theme (all of them without names) into the cache's themes/build/ folder, or into DIR/<theme>
-  with --out (replaced), and prints the folders. The base theme is read from os/spruceos/themes/SPRUCE/ in storage, so run
-  `sync-roms themes update` first. Nothing is written to storage.
+  Builds each named custom theme style (Pixel Consoles, Pixel Controllers; all of them without names) in each chosen
+  palette: --palette NAME, repeatable, or --all-palettes for all 28 (Gruvbox, Arcade, Candy, ..., Monochrome). Each
+  theme is named "<style> - <palette>", e.g. "Pixel Consoles - Gruvbox", and goes into the cache's themes/build/
+  folder, or into DIR/<theme> with --out (replaced); the folders are printed. The base theme is read from
+  os/spruceos/themes/SPRUCE/ in storage, so run `sync-roms themes update` first. Nothing is written to storage.
 
-  sync-roms themes publish [THEME...] [--dry-run] [--yes]   build custom spruce themes and put them in storage
+  sync-roms themes publish [STYLE...] (--palette NAME... | --all-palettes) [--dry-run] [--yes]   put them in storage
 
   Builds as above, then makes each theme's os/spruceos/themes/<theme>/ match the build (write profile): uploads the
-  files whose content changed and deletes the files the build no longer makes, after one confirmation. Each file's
+  files whose content changed and deletes the files the build no longer makes, after one confirmation. Only the
+  themes built this run are touched: other palettes' folders stay as they are, and so do the folders of the earlier
+  single-palette themes (Pixel Consoles, Pixel Controllers), which are never adopted. Each file's
   hash is kept in os/spruceos/custom-themes.json, so an unchanged rebuild uploads nothing and a failed upload is retried
   next time. A custom theme's name is reserved: an existing folder of that name is adopted (every file uploaded, the
   others deleted), except a theme `themes update` downloaded, which is left alone (exit code 1). `themes pick` and

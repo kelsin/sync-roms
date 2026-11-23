@@ -1199,14 +1199,37 @@ def themes_update(args):
     return max(themeart.update_storage(args.dry_run), spruce_themes.update_storage(args.dry_run))
 
 
+def style_args(args):
+    """The style names given (None for all of them); an unknown one exits 2 naming the styles."""
+    from . import custom_themes
+    unknown = [n for n in args.names if n not in custom_themes.STYLES]
+    if unknown:
+        ui.fail(f"Unknown theme style {', '.join(unknown)}; the custom theme styles are: {', '.join(custom_themes.styles())}", 2)
+    return args.names or None
+
+
+def palette_args(args):
+    """The palettes --palette names (duplicates dropped, first order kept) or every one with --all-palettes; none
+    given or an unknown name exits 2 naming the palettes."""
+    from .custom_themes import palettes
+    known = ", ".join(palettes.names())
+    if args.all_palettes:
+        return list(palettes.PALETTES.values())
+    chosen = list(dict.fromkeys(args.palette or []))
+    if not chosen:
+        ui.fail(f"Choose the palettes with --palette NAME (repeatable) or --all-palettes; the palettes are: {known}", 2)
+    unknown = [n for n in chosen if n not in palettes.PALETTES]
+    if unknown:
+        ui.fail(f"Unknown palette {', '.join(unknown)}; the palettes are: {known}", 2)
+    return [palettes.get(n) for n in chosen]
+
+
 def themes_build(args):
     from . import custom_themes
     usersettings.ensure_bucket()
-    unknown = [n for n in args.names if n not in custom_themes.THEMES]
-    if unknown:
-        ui.fail(f"Unknown theme {', '.join(unknown)}; the custom themes are: {', '.join(custom_themes.names())}", 2)
+    styles, chosen = style_args(args), palette_args(args)
     try:
-        built = custom_themes.build(args.names or None, args.out)
+        built = custom_themes.build(styles, chosen, args.out)
     except custom_themes.BaseMissing as e:
         ui.fail(f"{e}: run `sync-roms themes update` first (or `sync-roms cache update` if another machine put it there)", 1)
     except s3.ERRORS as e:
@@ -1219,11 +1242,9 @@ def themes_build(args):
 def themes_publish(args):
     from . import custom_themes
     usersettings.ensure_bucket()
-    unknown = [n for n in args.names if n not in custom_themes.THEMES]
-    if unknown:
-        ui.fail(f"Unknown theme {', '.join(unknown)}; the custom themes are: {', '.join(custom_themes.names())}", 2)
+    styles, chosen = style_args(args), palette_args(args)
     try:
-        return custom_themes.publish(args.names or None, args.dry_run)
+        return custom_themes.publish(styles, chosen, args.dry_run)
     except custom_themes.BaseMissing as e:
         ui.fail(f"{e}: run `sync-roms themes update` first (or `sync-roms cache update` if another machine put it there)", 1)
     except custom_themes.DownloadFailed as e:
@@ -1398,8 +1419,12 @@ def build_parser():
     themes = sub.add_parser("themes", add_help=False, allow_abbrev=False)
     tsub = themes.add_subparsers(dest="action", required=True)
     p = tsub.add_parser("update", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=themes_update)
-    p = tsub.add_parser("build", allow_abbrev=False); common(p, card=False); p.add_argument("names", nargs="*"); p.add_argument("--out", metavar="DIR"); p.set_defaults(fn=themes_build)
-    p = tsub.add_parser("publish", allow_abbrev=False); common(p, card=False); p.add_argument("names", nargs="*"); p.set_defaults(fn=themes_publish)
+    for action, fn in (("build", themes_build), ("publish", themes_publish)):
+        p = tsub.add_parser(action, allow_abbrev=False); common(p, card=False); p.add_argument("names", nargs="*")
+        p.add_argument("--palette", action="append", metavar="NAME"); p.add_argument("--all-palettes", action="store_true")
+        if action == "build":
+            p.add_argument("--out", metavar="DIR")
+        p.set_defaults(fn=fn)
     p = tsub.add_parser("pick", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=themes_pick)
 
     download = sub.add_parser("download", add_help=False, allow_abbrev=False)
