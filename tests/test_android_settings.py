@@ -2,11 +2,13 @@ import contextlib
 import io
 import os
 import tempfile
+import zipfile
 import unittest
 from unittest import mock
 
 import helpers
-from sync_roms import adb, android, android_settings, applied, ui, usersettings
+from test_apk import manifest_bytes
+from sync_roms import adb, android, android_settings, applied, inventory, s3, store, ui, usersettings
 
 E = applied.Entry
 
@@ -129,6 +131,8 @@ RIGHT_CFG = "".join(f'{k} = "{v}"\n' for k, v in android_settings.CLOUD_SYNC.ite
 ESDE_SYSTEMS = [{"bucket": "nes", "folders": {"esde": "nes"}}]
 TARGET = android.Target("S", "Pixel", "6AF3-53E9", "card")
 LAYOUT = {"roms_dir": "ROMs"}
+APKS = "os/android/APKs/"
+CARD_APK = "/storage/6AF3-53E9/APKs/app.apk"
 
 
 class Apply(helpers.DataDir):
@@ -137,8 +141,9 @@ class Apply(helpers.DataDir):
     def setUp(self):
         super().setUp()
         quiet = contextlib.ExitStack()
-        quiet.enter_context(contextlib.redirect_stdout(io.StringIO()))
-        quiet.enter_context(contextlib.redirect_stderr(io.StringIO()))
+        self.out, self.err = io.StringIO(), io.StringIO()
+        quiet.enter_context(contextlib.redirect_stdout(self.out))
+        quiet.enter_context(contextlib.redirect_stderr(self.err))
         self.addCleanup(quiet.close)
         usersettings.save_settings({"spruce_syncthing": False})
         self.calls = []
@@ -152,14 +157,51 @@ class Apply(helpers.DataDir):
         self.cfg_path = pkg
         for name, fn in (("retroarch_package", lambda s: "com.retroarch"), ("wait_closed", self.wait_closed)):
             self.enterContext(mock.patch.object(android, name, fn))
-        self.enterContext(mock.patch.object(adb, "is_file", lambda s, p: p in self.files))
+        self.enterContext(mock.patch.object(adb, "is_file", lambda s, p: p in self.files or p in self.card_apks))
         self.enterContext(mock.patch.object(adb, "is_dir", lambda s, p: p in self.dirs))
         self.enterContext(mock.patch.object(adb, "pull", self.pull))
         self.enterContext(mock.patch.object(adb, "push", self.push))
-        self.enterContext(mock.patch.object(adb, "shell", lambda s, *w, check=True: self.calls.append(("shell",) + w) or ""))
+        self.enterContext(mock.patch.object(adb, "shell", self.shell))
+        self.apks = {}  # storage key -> APK bytes
+        self.packages = {}  # installed package -> versionCode
+        self.card_apks = {}  # card path -> APK bytes
+        self.pm_install = "Success"
+        self.install_error = None
+        self.enterContext(mock.patch.object(inventory, "files", lambda prefix, sizes=True: {k: len(v) for k, v in self.apks.items()}))
+        self.enterContext(mock.patch.object(s3, "download", self.download))
+        self.enterContext(mock.patch.object(adb, "exec_out", self.exec_out))
+        self.enterContext(mock.patch.object(adb, "install", self.install))
+        self.enterContext(mock.patch.object(adb, "installed_version", lambda s, pkg: self.packages.get(pkg)))
         self.enterContext(mock.patch.object(ui, "confirm", lambda q, default=True: self.confirm))
         real = tempfile.mkdtemp
         self.enterContext(mock.patch.object(tempfile, "mkdtemp", lambda **k: self.tmps.append(real(**k)) or self.tmps[-1]))
+
+    def shell(self, serial, *words, check=True):
+        self.calls.append(("shell",) + words)
+        if words[:3] == ("pm", "list", "packages"):
+            return "".join(f"package:{p}\n" for p in self.packages)
+        if words[0] == "stat":
+            return f"{len(self.card_apks[words[-1]])}\n"
+        if words[:2] == ("pm", "install"):
+            return self.pm_install
+        return ""
+
+    def download(self, job):
+        key, path, size = job
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "wb") as f:
+            f.write(self.apks[key])
+        self.calls.append(("download", key))
+
+    def exec_out(self, serial, *words):
+        self.calls.append(("exec_out",) + words)
+        with zipfile.ZipFile(io.BytesIO(self.card_apks[words[2]])) as z:
+            return z.read("AndroidManifest.xml")
+
+    def install(self, serial, local, replace=False):
+        if self.install_error:
+            raise adb.AdbError(self.install_error)
+        self.calls.append(("install", os.path.basename(local), replace))
 
     def wait_closed(self, serial, pkg):
         self.calls.append(("wait_closed",))
@@ -182,6 +224,82 @@ class Apply(helpers.DataDir):
 
     def run_apply(self, dry_run=False):
         return android_settings.apply(TARGET, LAYOUT, ESDE_SYSTEMS, dry_run)
+
+    def apk_setup(self, name="app.apk", package="com.example.app", version=65, installed=None):
+        self.files[self.cfg_path] = RIGHT_CFG
+        self.apks[APKS + name] = apk_zip(package, version)
+        if installed is not None:
+            self.packages[package] = installed
+
+    def test_apply_installs_only_missing_packages(self):
+        self.apk_setup()
+        self.assertEqual(self.run_apply(), 0)
+        self.assertEqual(self.calls, [("shell", "pm", "list", "packages"), ("download", APKS + "app.apk"), ("install", "app.apk", False)])
+        self.calls.clear()
+        self.packages["com.example.app"] = 65
+        self.assertEqual(self.run_apply(), 0)
+        self.assertNotIn("install", self.names())
+        self.assertEqual(self.run_apply(dry_run=True), 0)
+        self.assertIn("up to date", self.out.getvalue())
+
+    def test_apply_upgrades_newer_apk(self):
+        self.apk_setup(installed=64)
+        self.assertEqual(self.run_apply(dry_run=True), 0)
+        self.assertIn("would upgrade 64 → 65", self.out.getvalue())
+        self.assertNotIn("install", self.names())
+        self.assertEqual(self.run_apply(), 0)
+        self.assertIn(("install", "app.apk", True), self.calls)
+        self.assertIn("⬆️ Upgrading app.apk (64 → 65)", self.out.getvalue())
+
+    def test_apply_never_downgrades(self):
+        self.apk_setup(installed=66)
+        self.assertEqual(self.run_apply(), 0)
+        self.assertNotIn("install", self.names())
+        self.assertNotIn("Upgrading", self.out.getvalue())
+
+    def test_apply_warns_on_incompatible_upgrade(self):
+        self.apk_setup(installed=64)
+        self.install_error = "Failure [INSTALL_FAILED_UPDATE_INCOMPATIBLE: signatures do not match]"
+        self.assertEqual(self.run_apply(), 1)
+        self.assertIn("uninstall", self.err.getvalue())
+
+    def test_apply_installs_from_card_copy_when_same_size(self):
+        self.apk_setup()
+        self.card_apks[CARD_APK] = self.apks[APKS + "app.apk"]
+        self.assertEqual(self.run_apply(), 0)
+        self.assertIn(("shell", "pm", "install", CARD_APK), self.calls)
+        self.assertEqual([c for c in self.calls if c[0] in ("download", "install")], [])
+
+    def test_apply_ignores_card_copy_of_another_size(self):
+        self.apk_setup()
+        self.card_apks[CARD_APK] = self.apks[APKS + "app.apk"] + b"x"
+        self.run_apply()
+        self.assertIn(("download", APKS + "app.apk"), self.calls)
+
+    def test_apply_falls_back_to_storage_when_pm_install_fails(self):
+        self.apk_setup(installed=64)
+        self.card_apks[CARD_APK] = self.apks[APKS + "app.apk"]
+        self.pm_install = "Failure [INSTALL_FAILED_INVALID_URI]"
+        self.assertEqual(self.run_apply(), 0)
+        self.assertIn(("shell", "pm", "install", "-r", CARD_APK), self.calls)
+        self.assertIn(("install", "app.apk", True), self.calls)
+
+    def test_apply_dry_run_lists_every_apk(self):
+        self.apk_setup()
+        self.apks[APKS + "dawn-zero.apk"] = apk_zip("com.dawn", 1)
+        self.apks[APKS + "obtainium.json"] = b"{}"
+        self.assertEqual(self.run_apply(dry_run=True), 0)
+        self.assertEqual([c[0] for c in self.calls if c[0] in ("install",)], [])
+        shown = self.out.getvalue()
+        self.assertIn("app.apk: would install", shown)
+        self.assertIn("dawn-zero.apk: skipped (not needed)", shown)
+        self.assertNotIn("obtainium", shown)
+
+    def test_apply_skips_unreadable_apk(self):
+        self.files[self.cfg_path] = RIGHT_CFG
+        self.apks[APKS + "bad.apk"] = b"not a zip"
+        self.assertEqual(self.run_apply(), 0)
+        self.assertIn("Can't read bad.apk", self.err.getvalue())
 
     def test_apply_dry_run_writes_nothing(self):
         self.files[self.cfg_path] = OLD_CFG
@@ -263,3 +381,47 @@ class Apply(helpers.DataDir):
         self.assertIn(("shell", "mkdir", "-p", "/storage/6AF3-53E9/ES-DE/gamelists/nes"), self.calls)
         self.assertLess(self.calls.index(("shell", "mkdir", "-p", "/storage/6AF3-53E9/ES-DE/gamelists/nes")),
                         self.calls.index(("push", gamelist)))
+
+
+def apk_zip(package="com.example.app", version=65):
+    out = io.BytesIO()
+    with zipfile.ZipFile(out, "w") as z:
+        z.writestr("AndroidManifest.xml", manifest_bytes(package, version))
+    return out.getvalue()
+
+
+class ApkRules(helpers.DataDir):
+    def rule(self, device, name, **card):
+        self.write_json("cards.json", {"c": {"device": device, "layout": "esde", **card}})
+        return android_settings.apk_rules("c")(name)
+
+    def test_never(self):
+        self.assertEqual(self.rule("full", "dawn-zero-1.apk"), "not needed")
+
+    def test_tier(self):
+        for name in ("gamenative-1.apk", "DroidDeck.apk"):
+            self.assertIsNone(self.rule("retroid-pocket-nova", name))
+            self.assertIsNone(self.rule("full", name))
+            self.assertEqual(self.rule("retroid-pocket-mini", name), "device is below the Nova's tier")
+        self.write_json("device-systems.json", {"retroid-pocket-mini": {"add": ["switch"]}})
+        self.assertEqual(self.rule("retroid-pocket-mini", "gamenative-1.apk"), "device is below the Nova's tier")
+
+    def test_systems(self):
+        self.assertIsNone(self.rule("retroid-pocket-nova", "Eden-1.apk"))
+        self.assertEqual(self.rule("retroid-pocket-mini", "Eden-1.apk"), "device doesn't play Switch")
+        self.assertIsNone(self.rule("full", "eden.apk"))
+        self.write_json("device-systems.json", {"retroid-pocket-mini": {"add": ["switch"]}})
+        self.assertIsNone(self.rule("retroid-pocket-mini", "Eden-1.apk"))
+
+    def test_dual_screen(self):
+        self.assertIsNone(self.rule("retroid-pocket-duo", "gba-ds.apk"))
+        self.assertEqual(self.rule("retroid-pocket-nova", "gba-ds.apk"), "not a dual-screen device")
+        self.assertIsNone(self.rule("full", "gba-ds.apk"))
+
+    def test_raofflineproxy(self):
+        self.assertIsNone(self.rule("full", "RAOfflineProxy-1.apk"))
+        self.assertEqual(self.rule("full", "RAOfflineProxy-1.apk", raofflineproxy=False),
+                         "RAOfflineProxy is off for this card")
+
+    def test_full_installs_everything_else(self):
+        self.assertIsNone(self.rule("full", "Obtainium.apk"))

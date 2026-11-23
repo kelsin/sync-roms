@@ -1,5 +1,6 @@
 """RAOfflineProxy (the RetroAchievements offline proxy) from storage's os/<layout>/ folders, put on cards that have it on."""
 import os
+import re
 import tempfile
 import zipfile
 from pathlib import PurePosixPath
@@ -16,6 +17,7 @@ KINDS = {
     "rocknix": (runtime.ROCKNIX_PREFIX, r"RAOfflineProxy-Rocknix-v[^/]+-Install\.sh", None, "roms/ports/RAOfflineProxy Install.sh"),
 }
 LAUNCH = "launch.sh"
+APK_NAME = re.compile(r"RAOfflineProxy.*\.apk")  # the Android build, in os/android/APKs/
 
 
 def prefixes():

@@ -4,9 +4,10 @@ import posixpath
 import re
 import shutil
 import tempfile
+import zipfile
 from xml.sax.saxutils import escape, unescape
 
-from . import adb, android, applied, spruce_syncthing, store, ui, usersettings
+from . import adb, android, apk, applied, inventory, raofflineproxy, runtime, s3, spruce_syncthing, store, ui, usersettings
 
 CFG = "retroarch.cfg"
 SECRETS = ("cheevos_password", "webdav_password", "cheevos_token")
@@ -178,6 +179,141 @@ def _write_esde(serial, volume, gamelists, tmp, failed):
     adb.shell(serial, "am", "start", "-a", "android.intent.action.MAIN", "-c", "android.intent.category.HOME")
 
 
+def apk_rules(card_name):
+    """A function of an APK's file name: None to install it, else why this card's device skips it."""
+    card = store.saved_card(card_name)
+    device_id = card.get("device", "full")
+    tiers = [t["id"] for t in store.repo_json("device-systems")["tiers"]]
+    device = next((d for d in store.load_catalog()["devices"] if d["id"] == device_id), None)  # None: `full`, which has everything
+    tier = store.repo_json("device-systems")["devices"].get(device_id, {}).get("tier") if device else None
+    rules = store.repo_json("android-apks")["apks"]
+    proxy_on = store.card_flag(card, "raofflineproxy")
+
+    def reason(name):
+        if raofflineproxy.APK_NAME.fullmatch(name) and not proxy_on:
+            return "RAOfflineProxy is off for this card"
+        for rule in rules:
+            if not name.lower().startswith(rule["prefix"].lower()):
+                continue
+            if rule.get("never"):
+                return "not needed"
+            if device is None:
+                continue
+            if "tier" in rule and (tier not in tiers or tiers.index(tier) < tiers.index(rule["tier"])):
+                return "device is below the Nova's tier"
+            if "systems" in rule and not set(rule["systems"]) & set(device["systems"]):
+                return "device doesn't play Switch"
+            if rule.get("dualscreen") and not device.get("screen2"):
+                return "not a dual-screen device"
+        return None
+    return reason
+
+
+def _card_copy(serial, volume, name, size):
+    """The card's copy of the APK when it is there at storage's size, else None."""
+    path = f"/storage/{volume}/APKs/{name}"
+    if not adb.is_file(serial, path):
+        return None
+    try:
+        return path if int(adb.shell(serial, "stat", "-c", "%s", path).strip()) == size else None
+    except ValueError:
+        return None
+
+
+def _fetch(key, size, tmp):
+    local = os.path.join(tmp, "apks", posixpath.basename(key))
+    s3.download((key, local, size))
+    return local
+
+
+def _read_manifest(serial, card_path, key, size, tmp):
+    """(package, versionCode, local copy or None): from the card's copy when it has one, else from storage's, fetched."""
+    if card_path:
+        try:
+            return (*apk.manifest(adb.exec_out(serial, "/system/bin/unzip", "-p", card_path, "AndroidManifest.xml")), None)
+        except (adb.AdbError, ValueError):
+            pass
+    local = _fetch(key, size, tmp)
+    with zipfile.ZipFile(local) as z:
+        return (*apk.manifest(z.read("AndroidManifest.xml")), local)
+
+
+def apk_entries(serial, volume, card_name, listing, tmp):
+    """[(file name, key, size, state, package, new version, old version, card path, local copy)] for each APK in the
+    listing {key: size}. state: install, upgrade, current, newer, or the skip reason in parentheses; unreadable ones are
+    warned about and left out."""
+    if not any(not k.endswith("/") and k.lower().endswith(".apk") for k in listing):
+        return []
+    reason = apk_rules(card_name)
+    installed = {line[8:].strip() for line in adb.shell(serial, "pm", "list", "packages").splitlines() if line.startswith("package:")}
+    result = []
+    for key, size in sorted(listing.items()):
+        name = posixpath.basename(key)
+        if key.endswith("/") or not name.lower().endswith(".apk"):
+            continue
+        skip = reason(name)
+        if skip:
+            result.append((name, key, size, f"skipped ({skip})", None, None, None, None, None))
+            continue
+        card_path = _card_copy(serial, volume, name, size)
+        try:
+            pkg, new, local = _read_manifest(serial, card_path, key, size, tmp)
+        except (ValueError, KeyError, zipfile.BadZipFile, *s3.ERRORS) as e:
+            ui.warn(f"Can't read {name}: {e}; skipping it")
+            continue
+        old = adb.installed_version(serial, pkg) if pkg in installed else None
+        if pkg not in installed:
+            state = "install"
+        elif old is None:
+            ui.warn(f"Can't read the installed version of {pkg}: skipping {name}")
+            continue
+        else:
+            state = "upgrade" if new > old else "current" if new == old else "newer"
+        result.append((name, key, size, state, pkg, new, old, card_path, local))
+    return result
+
+
+def _show_apks(entries):
+    print(ui.dim("🧪 Dry run: APKs"))
+    for name, _, _, state, _, new, old, _, _ in entries:
+        what = {"install": "would install", "upgrade": f"would upgrade {old} → {new}", "current": "up to date",
+                "newer": f"left alone (installed {old} is newer than {new})"}.get(state, state)
+        print(f"   {name}: {what}")
+
+
+def _install(serial, entry, tmp):
+    """Install or upgrade one APK, from the card's copy when it has one, else from storage's; an error message, or None."""
+    name, key, size, state, pkg, new, old, card_path, local = entry
+    replace = state == "upgrade"
+    if card_path:
+        out = adb.shell(serial, "pm", "install", *(["-r"] if replace else []), card_path, check=False)
+        if "Success" in out:
+            return None
+        if "INSTALL_FAILED_UPDATE_INCOMPATIBLE" in out:
+            return out.strip()
+    try:
+        adb.install(serial, local or _fetch(key, size, tmp), replace)
+    except (adb.AdbError, *s3.ERRORS) as e:
+        return str(e)
+    return None
+
+
+def _install_apks(serial, entries, tmp, failed):
+    for entry in entries:
+        name, _, _, state, pkg, new, old, _, _ = entry
+        if state not in ("install", "upgrade"):
+            continue
+        print(f"📦 Installing {name}" if state == "install" else f"⬆️ Upgrading {name} ({old} → {new})")
+        error = _install(serial, entry, tmp)
+        if error is None:
+            continue
+        failed.append(name)
+        if "INSTALL_FAILED_UPDATE_INCOMPATIBLE" in error:
+            ui.warn(f"Couldn't upgrade {name}: it is signed differently from the installed {pkg}; uninstall that app by hand first")
+        else:
+            ui.warn(f"Couldn't install {name}: {error}")
+
+
 def apply(target, layout, systems, dry_run):
     """Set the wanted RetroArch and ES-DE settings on the device; 0, or 1 when a write failed. adb errors propagate."""
     serial = target.serial
@@ -189,12 +325,16 @@ def apply(target, layout, systems, dry_run):
         gamelists = _esde_part(serial, target.volume, layout["roms_dir"], systems, tmp)
         esde_entries = [g[0] for g in gamelists]
         applied.show(ra_entries + esde_entries, dry_run)
+        apks = apk_entries(serial, target.volume, target.card, inventory.files(runtime.APKS_PREFIX, sizes=True), tmp)
         if dry_run:
+            if apks:
+                _show_apks(apks)
             return 0
         if any(applied.changed(e) for e in ra_entries):
             _write_retroarch(serial, pkg, cfg_remote, tmp, failed)
         if any(applied.changed(e) for e in esde_entries):
             _write_esde(serial, target.volume, gamelists, tmp, failed)
+        _install_apks(serial, apks, tmp, failed)
         return 1 if failed else 0
     finally:
         shutil.rmtree(tmp, ignore_errors=True)

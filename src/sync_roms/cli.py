@@ -1287,7 +1287,7 @@ def sync_card(args):
     apk_dir = os.path.join(base, "APKs")
     apk_jobs = ([(k, os.path.join(apk_dir, k[len(runtime.APKS_PREFIX):]), size) for k, size in sorted(inventory.files(runtime.APKS_PREFIX, sizes=False).items())
                  if not k.endswith("/") and (store.card_flag(store.saved_card(card), "raofflineproxy")
-                                             or not re.fullmatch(r"RAOfflineProxy.*\.apk", os.path.basename(k)))] if layout_name == "esde" else [])
+                                             or not raofflineproxy.APK_NAME.fullmatch(os.path.basename(k)))] if layout_name == "esde" else [])
     apk_jobs = downloads.with_sizes(apk_jobs)
     # and the suggested GPU drivers for the device's Adreno GPU, kept up to date in storage first, in a Drivers/ folder
     driver_entries = drivers.for_device(device, layout_name)
