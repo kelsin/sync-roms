@@ -460,7 +460,7 @@ class ConvertCommandTest(unittest.TestCase):
         self.enterContext(mock.patch.object(store, "data_dir", lambda: self.data))
         self.base = os.path.join(root, "SD")
         os.makedirs(self.base)
-        self.set_card({"device": "anbernic-rg34xx-sp", "layout": "knulli"})
+        self.set_card({"device": "anbernic-rg-34xxsp", "layout": "knulli"})
         touch(os.path.join(self.base, "roms", "gba", "Game.zip"))
         self.out, self.err = io.StringIO(), io.StringIO()
         self.redirect = contextlib.redirect_stdout
@@ -480,7 +480,7 @@ class ConvertCommandTest(unittest.TestCase):
         listed = " (deleted)\n  roms/gba: gamelist.xml, images\n  roms/psx: gamelist.xml\n"
         self.assertEqual(self.run_cmd(dry_run=True, yes=False), 0)
         self.assertIn("Old knulli media" + listed, self.out.getvalue())
-        self.set_card({"device": "anbernic-rg34xx-sp", "layout": "nextui"})
+        self.set_card({"device": "anbernic-rg-34xxsp", "layout": "nextui"})
         self.assertEqual(self.run_clean(), 0)
         self.assertIn("SD (nextui): media from other layouts" + listed, self.out.getvalue())
         self.assertIn("deleted media in 2 folders", self.out.getvalue())
@@ -510,13 +510,13 @@ class ConvertCommandTest(unittest.TestCase):
         self.assertEqual(self.layout(), "nextui")
 
     def test_convert_drops_the_pico8_record(self):
-        self.set_card({"device": "anbernic-rg34xx-sp", "layout": "knulli", "pico8": "pico-8_0.2.7_raspi.zip"})
+        self.set_card({"device": "anbernic-rg-34xxsp", "layout": "knulli", "pico8": "pico-8_0.2.7_raspi.zip"})
         self.assertEqual(self.run_cmd(dry_run=True, yes=False), 0)
         with open(os.path.join(self.data, "cards.json")) as f:
             self.assertIn("pico8", self.json.load(f)["SD"])
         self.assertEqual(self.run_cmd(), 0)
         with open(os.path.join(self.data, "cards.json")) as f:
-            self.assertEqual(self.json.load(f)["SD"], {"device": "anbernic-rg34xx-sp", "layout": "nextui"})
+            self.assertEqual(self.json.load(f)["SD"], {"device": "anbernic-rg-34xxsp", "layout": "nextui"})
 
     def test_convert_deletes_old_media(self):
         touch(os.path.join(self.base, "roms", "gba", "gamelist.xml"))
@@ -535,7 +535,7 @@ class ConvertCommandTest(unittest.TestCase):
             return convert.clean_command(args)
 
     def test_clean_deletes_other_layouts_media_only(self):
-        self.set_card({"device": "anbernic-rg34xx-sp", "layout": "nextui"})
+        self.set_card({"device": "anbernic-rg-34xxsp", "layout": "nextui"})
         touch(os.path.join(self.base, "Roms", "Game Boy Advance (GBA)", "Game.zip"))
         touch(os.path.join(self.base, "Roms", "Game Boy Advance (GBA)", ".media", "Game.png"))
         for f in ("gamelist.xml", "images/a.png", "videos/a.mp4"):
@@ -565,7 +565,7 @@ class ConvertCommandTest(unittest.TestCase):
     def test_from_muos_leaves_pickles_saves_and_says_so(self):
         import shutil
         shutil.rmtree(os.path.join(self.base, "roms"))
-        self.set_card({"device": "anbernic-rg34xx-sp", "layout": "muos"})
+        self.set_card({"device": "anbernic-rg-34xxsp", "layout": "muos"})
         touch(os.path.join(self.base, "ROMS", "gba", "Game.zip"))
         save = os.path.join(self.base, "MUOS", "pickles", "sram", "mGBA", "gba", "Game.srm")
         touch(save)
@@ -592,7 +592,7 @@ class ConvertCommandTest(unittest.TestCase):
         """An unknown card is reported before its unusable layout, and that before a missing folder."""
         os.rename(self.base, self.base + "-gone")
         checks = ((None, "No card named 'SD'"), ({}, "'SD' has no usable layout"),
-                  ({"device": "anbernic-rg34xx-sp", "layout": "knulli"}, f"No folder {self.base}"))
+                  ({"device": "anbernic-rg-34xxsp", "layout": "knulli"}, f"No folder {self.base}"))
         for command in (convert.convert_command, convert.clean_command):
             for i, (entry, said) in enumerate(checks):
                 self.set_card(entry)

@@ -52,9 +52,9 @@ class NextUIDataTest(unittest.TestCase):
 
     def test_the_sp_devices_default_to_nextui(self):
         devices = {d["id"]: d for d in store.repo_json("devices")}
-        for id in ("anbernic-rg-sp", "anbernic-rg34xx-sp"):
+        for id in ("anbernic-rg-sp", "anbernic-rg-34xxsp"):
             self.assertEqual(devices[id]["firmwares"][0], "nextui", id)
-        self.assertEqual(devices["anbernic-rg34xx-sp"]["firmwares"][1], "knulli")
+        self.assertEqual(devices["anbernic-rg-34xxsp"]["firmwares"][1], "knulli")
 
     def test_layout(self):
         layout = store.repo_json("layouts")["nextui"]

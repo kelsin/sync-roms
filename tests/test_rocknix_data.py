@@ -37,7 +37,7 @@ class RocknixDataTest(unittest.TestCase):
 
     def test_devices_listed(self):
         devices = {d["id"]: d for d in store.repo_json("devices")}
-        for id in ("anbernic-rg-cubexx", "anbernic-rg353ps", "anbernic-rg353vs", "anbernic-rg503",
+        for id in ("anbernic-rg-cubexx", "anbernic-rg-353ps", "anbernic-rg-353vs", "anbernic-rg-503",
                    "ayn-odin-2", "ayn-odin-2-mini", "ayn-odin-2-portal", "ayn-odin-3", "ayn-thor"):
             self.assertIn("rocknix", devices[id]["firmwares"], id)
 

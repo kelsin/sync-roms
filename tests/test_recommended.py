@@ -66,7 +66,7 @@ class Recommended(unittest.TestCase):
         for d in store.repo_json("devices"):
             got = store.recommended_systems(dict(d), SYSTEMS)
             self.assertLessEqual(got, set(defaults.get(d["id"], {"systems": []})["systems"]), d["id"])
-        d = dict(next(x for x in store.repo_json("devices") if x["id"] == "anbernic-rg35xx-sp"))
+        d = dict(next(x for x in store.repo_json("devices") if x["id"] == "anbernic-rg-35xxsp"))
         base = store.recommended_systems(dict(d), SYSTEMS)
         manifest = [dict(d)]
         store.apply_device_overlay(manifest, SYSTEMS, {d["id"]: {"add": ["gba"], "remove": ["nes"]}})

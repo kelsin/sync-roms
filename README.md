@@ -127,7 +127,7 @@ On `esde` and `emudeck` cards every Vita game zip in `psvita/` gets a `.psvita` 
 `--yes` answers every prompt with its default (deleting local files stays "no"; `clean` commands do delete with it). A first sync can skip the setup picker:
 
 ```bash
-sync-roms sync /Volumes/SD --device anbernic-rg35xx-sp --layout knulli --yes
+sync-roms sync /Volumes/SD --device anbernic-rg-35xxsp --layout knulli --yes
 sync-roms sync /Volumes/SD --dry-run     # preview a saved card
 ```
 

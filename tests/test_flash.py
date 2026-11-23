@@ -32,18 +32,18 @@ class Flash(unittest.TestCase):
     def test_baseos_matches_and_sorts_newest_version_first(self):
         keys = ["os/baseos/baseos-rg35xxsp-1.4.0.img.zip", "os/baseos/baseos-rg35xxsp-1.10.0.img.zip",
                 "os/baseos/baseos-rgsp-1.4.0.img.zip", KEYS[0]]
-        got = flash.sort_images(keys, "anbernic-rg35xx-sp")
+        got = flash.sort_images(keys, "anbernic-rg-35xxsp")
         self.assertEqual(got[:2], [(keys[1], True), (keys[0], True)])
         self.assertEqual(flash.sort_images(keys, "anbernic-rg-sp")[0], (keys[2], True))
 
     def test_flashable_devices_adds_baseos_matches(self):
         devs = [{"id": "anbernic-rg-sp", "firmwares": ["nextui"]}, {"id": "b", "firmwares": ["knulli"]},
-                {"id": "anbernic-rg28xx", "firmwares": ["esde"]}]
+                {"id": "anbernic-rg-28xx", "firmwares": ["esde"]}]
         self.assertEqual([d["id"] for d in flash.flashable_devices(devs, ["os/baseos/baseos-rgsp-1.4.0.img.zip"])],
                          ["anbernic-rg-sp", "b"])
 
     def test_sort_puts_matches_first_newest_first(self):
-        got = flash.sort_images(KEYS, "anbernic-rg35xxh")
+        got = flash.sort_images(KEYS, "anbernic-rg-35xxh")
         self.assertEqual(got[:2], [(KEYS[0], True), (KEYS[2], True)])
         self.assertTrue(all(not m for _, m in got[2:]))
 
@@ -51,10 +51,10 @@ class Flash(unittest.TestCase):
         self.assertEqual(flash.sort_images(KEYS, "miyoo-flip")[0], (KEYS[3], True))
 
     def test_sort_matches_sp(self):
-        self.assertEqual(flash.sort_images(KEYS, "anbernic-rg34xx-sp")[0], (KEYS[1], True))
+        self.assertEqual(flash.sort_images(KEYS, "anbernic-rg-34xxsp")[0], (KEYS[1], True))
 
     def test_no_match_still_lists_all(self):
-        self.assertEqual(len(flash.sort_images(KEYS, "anbernic-rg28xx")), 4)
+        self.assertEqual(len(flash.sort_images(KEYS, "anbernic-rg-28xx")), 4)
 
     def test_parse_disks_skips_excluded_and_reads_info(self):
         infos = {"disk4": {"TotalSize": 64_000_000_000, "MediaName": "SD Card Reader"},
@@ -207,7 +207,7 @@ class FlashMuos(unittest.TestCase):
         self.assertEqual([d["id"] for d in flash.devices_for(devs, "muos")], ["b", "c"])
 
     def test_muos_images_are_never_marked_as_matching(self):
-        self.assertTrue(all(not m for _, m in flash.sort_images(self.MUOS, "anbernic-rg35xxh")))
+        self.assertTrue(all(not m for _, m in flash.sort_images(self.MUOS, "anbernic-rg-35xxh")))
         self.assertTrue(all(not m for _, m in flash.sort_images(self.MUOS, "pixie")))
 
 
@@ -225,13 +225,13 @@ class FlashRocknix(unittest.TestCase):
     def test_h700_device_matches_both_variants_first(self):
         old = "os/rocknix/ROCKNIX-H700.aarch64-20250101-DDR4.img.gz"
         other = "os/rocknix/ROCKNIX-RK3566.aarch64-20261102-Generic.img.gz"
-        got = flash.sort_images([other, old, self.DDR3, self.DDR4], "anbernic-rg35xxh", "H700")
+        got = flash.sort_images([other, old, self.DDR3, self.DDR4], "anbernic-rg-35xxh", "H700")
         self.assertEqual(got, [(self.DDR3, True), (self.DDR4, True), (old, True), (other, False)])
 
     def test_other_soc_never_matches_h700(self):
         got = flash.sort_images([self.DDR3, self.DDR4], "ayn-odin-2", "SM8550")
         self.assertTrue(all(not m for _, m in got))
-        self.assertTrue(all(not m for _, m in flash.sort_images([self.DDR3], "anbernic-rg35xxh")))
+        self.assertTrue(all(not m for _, m in flash.sort_images([self.DDR3], "anbernic-rg-35xxh")))
 
     def test_variant_device_matches_only_its_variant(self):
         generic = "os/rocknix/ROCKNIX-RK3566.aarch64-20261101-Generic.img.gz"
@@ -302,7 +302,7 @@ class Run(helpers.StorageDir):
                   mock.patch.object(flash, "write_image", self.write_image),
                   mock.patch.object(flash.tempfile, "mkdtemp", mkdtemp),
                   mock.patch.object(store, "repo_json", return_value=[
-                      {"id": "anbernic-rg35xxh", "name": "Anbernic RG35XX H", "firmwares": ["knulli"]}])):
+                      {"id": "anbernic-rg-35xxh", "name": "Anbernic RG35XX H", "firmwares": ["knulli"]}])):
             self.enterContext(p)
 
     def flash(self, dry_run=False):
@@ -543,7 +543,7 @@ class Run(helpers.StorageDir):
         self.assertEqual(asked, ["🎯 Which device?"])
 
     def test_rocknix_h700_device_is_offered_both_variants(self):
-        code, asked = self.rocknix_run({"id": "anbernic-rg35xxh", "rocknix_image": "H700"})
+        code, asked = self.rocknix_run({"id": "anbernic-rg-35xxh", "rocknix_image": "H700"})
         self.assertEqual(code, 0)
         self.assertEqual(self.filter_list.call_args_list[1].args[1],
                          [f"rocknix/ROCKNIX-H700.aarch64-20261101-{v}.img.gz" for v in ("DDR3", "DDR4")])

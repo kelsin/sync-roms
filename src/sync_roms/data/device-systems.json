@@ -194,91 +194,94 @@
     "anbernic-rg-vita-pro": {
       "tier": "psp-n64-dc"
     },
-    "anbernic-rg28xx": {
+    "anbernic-rg-28xx": {
       "tier": "nds"
     },
-    "anbernic-rg34xx": {
+    "anbernic-rg-34xx": {
       "tier": "nds"
     },
-    "anbernic-rg34xx-sp": {
+    "anbernic-rg-34xxsp": {
       "tier": "nds"
     },
-    "anbernic-rg353ps": {
+    "anbernic-rg-353ps": {
       "tier": "nds",
       "note": "Stable through PS1 and NDS. N64, Dreamcast, Saturn and PSP are inconsistent, so left off."
     },
-    "anbernic-rg353vs": {
+    "anbernic-rg-353vs": {
       "tier": "nds",
       "note": "Stable through PS1 and NDS. N64, Dreamcast, Saturn and PSP are inconsistent, so left off."
     },
-    "anbernic-rg35xx-2024": {
+    "anbernic-rg-35xx-2024": {
       "tier": "nds"
     },
-    "anbernic-rg35xxh": {
+    "anbernic-rg-35xxh": {
       "tier": "nds"
     },
-    "anbernic-rg35xx-plus": {
+    "anbernic-rg-35xx-plus": {
       "tier": "nds"
     },
-    "anbernic-rg35xx-pro": {
+    "anbernic-rg-35xx-pro": {
       "tier": "nds"
     },
-    "anbernic-rg35xx-sp": {
+    "anbernic-rg-35xxsp": {
       "tier": "nds"
     },
-    "anbernic-rg405m": {
+    "anbernic-rg-405m": {
       "tier": "psp-n64-dc"
     },
-    "anbernic-rg405v": {
+    "anbernic-rg-405v": {
       "tier": "psp-n64-dc"
     },
-    "anbernic-rg406h": {
+    "anbernic-rg-406h": {
       "tier": "gc-ps2"
     },
-    "anbernic-rg406v": {
+    "anbernic-rg-406v": {
       "tier": "gc-ps2"
     },
-    "anbernic-rg40xxh": {
+    "anbernic-rg-40xxh": {
       "tier": "nds"
     },
-    "anbernic-rg40xxv": {
+    "anbernic-rg-40xxv": {
       "tier": "nds"
     },
-    "anbernic-rg476h": {
+    "anbernic-rg-476h": {
       "tier": "gc-ps2"
     },
-    "anbernic-rg477m": {
+    "anbernic-rg-477m": {
       "tier": "switch",
       "note": "Dimensity 8300 is a step below the Snapdragon 8 Gen 2. The same list as the Retroid Pocket 6, with Switch, Vita and the heavier GameCube, Wii and PS2 titles game-dependent."
     },
-    "anbernic-rg477v": {
+    "anbernic-rg-477v": {
       "tier": "switch",
       "note": "Dimensity 8300 is a step below the Snapdragon 8 Gen 2. The same list as the Retroid Pocket 6, with Switch, Vita and the heavier GameCube, Wii and PS2 titles game-dependent."
     },
-    "anbernic-rg503": {
+    "anbernic-rg-503": {
       "tier": "nds",
       "note": "Stable through PS1 and NDS. N64, Dreamcast, Saturn and PSP are inconsistent, so left off."
     },
-    "anbernic-rg505": {
+    "anbernic-rg-505": {
       "tier": "psp-n64-dc"
     },
-    "anbernic-rg556": {
+    "anbernic-rg-556": {
       "tier": "gc-ps2"
     },
-    "anbernic-rg557": {
+    "anbernic-rg-557": {
       "tier": "switch",
       "note": "Dimensity 8300 is a step below the Snapdragon 8 Gen 2. The same list as the Retroid Pocket 6, with Switch, Vita and the heavier GameCube, Wii and PS2 titles game-dependent."
     },
-    "anbernic-rg55g1": {
+    "anbernic-rg-55g1": {
       "tier": "saturn"
     },
     "ayaneo-konkr-pocket-fit": {
       "tier": "switch"
     },
+    "ayaneo-konkr-pocket-block": {
+      "tier": "psp-n64-dc"
+    },
     "ayaneo-pocket-ace": {
       "tier": "switch"
     },
-    "ayaneo-pocket-advance": {
+    "ayaneo-konkr-pocket-advance": {
       "tier": "psp-n64-dc"
     },
     "ayaneo-pocket-air": {
