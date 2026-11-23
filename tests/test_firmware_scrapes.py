@@ -796,7 +796,8 @@ class NoSpruceArtHintTest(unittest.TestCase):
                                                  lambda p: True, base)
 
     def test_counts_roms_with_a_source_picture_and_no_spruce_art(self):
-        self.assertEqual(self.build("spruce")["no_spruce_art"], 3)  # b, c, d; not a (has art), e (no picture), sub/b
+        # c, d; not a (has art), b (Onion art only, which `scrape art` can't make it from), e (no picture), sub/b
+        self.assertEqual(self.build("spruce")["no_spruce_art"], 2)
 
     def test_no_count_when_every_rom_has_spruce_art(self):
         plan = self.build("spruce", {"scrapes/gba/spruce/a.qoi": 1, "scrapes/gba/onion/a.png": 1}, ["a.zip"])
