@@ -220,7 +220,7 @@ TOPICS = {
 """,
     "cards": """
   sync-roms cards edit                        same as `games edit`
-  sync-roms cards [list] [--json]             list is the default
+  sync-roms cards [list] [--all] [--json]     list is the default; guest cards are hidden unless --all
   sync-roms cards new NAME --device ID|full --layout NAME [--size 512GB]
   sync-roms cards set NAME [--device ID|full] [--layout NAME] [--size 512GB]
   sync-roms cards rename OLD NEW
