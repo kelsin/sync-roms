@@ -166,31 +166,59 @@ class SyncThemes(helpers.StorageDir):
             f.write(b"old")
         return os.path.dirname(path)
 
-    def test_updated_theme_loses_pyui_icon_copies(self):
-        icons, bg = self.resized("A"), self.resized("A", "bg_640x480")
-        self.assertEqual(self.sync(), 0, self.err.getvalue())
-        self.assertFalse(os.path.exists(icons))
-        self.assertTrue(os.path.isdir(bg))
-        self.assertIn("Cleared the 640x480 icons PyUI made for the Spruce theme A", self.out.getvalue())
+    def resized_config(self, name, file="config_640x480.json"):
+        path = os.path.join(self.card, "Themes", name, file)
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "wb") as f:
+            f.write(b"{}")
+        return path
 
-    def test_unchanged_theme_keeps_pyui_icon_copies(self):
+    def test_updated_theme_loses_pyui_resized_copy(self):
+        icons, skin = self.resized("A"), self.resized("A", "skin_640x480")
+        config, bg = self.resized_config("A"), self.resized("A", "bg_640x480")
         self.assertEqual(self.sync(), 0, self.err.getvalue())
-        icons = self.resized("A")
+        for path in (icons, skin, config):
+            self.assertFalse(os.path.exists(path), path)
+        self.assertTrue(os.path.isdir(bg))
+        self.assertEqual(self.out.getvalue().count("Cleared the 640x480 copy PyUI made of the Spruce theme A"), 1)
+
+    def test_other_size_copy_is_cleared_alone(self):
+        config = self.resized_config("A", "config_720x480.json")
+        skin, icons = self.resized("A", "skin_720x480"), self.resized("A", "icons_720x480")
+        self.assertEqual(self.sync(), 0, self.err.getvalue())
+        for path in (config, skin, icons):
+            self.assertFalse(os.path.exists(path), path)
+        self.assertIn("Cleared the 720x480 copy PyUI made of the Spruce theme A", self.out.getvalue())
+
+    def test_unchanged_theme_keeps_pyui_resized_copy(self):
+        self.assertEqual(self.sync(), 0, self.err.getvalue())
+        icons, config = self.resized("A"), self.resized_config("A")
         self.assertEqual(self.sync(), 0, self.err.getvalue())
         self.assertTrue(os.path.isdir(icons))
+        self.assertTrue(os.path.isfile(config))
 
-    def test_icon_copies_storage_ships_are_kept(self):
+    def test_resized_copies_storage_ships_are_kept(self):
         self.put(f"{PREFIX}A/icons_640x480/a.png", b"new")
+        self.put(f"{PREFIX}A/config_720x480.json", b"{}")
+        self.put(f"{PREFIX}A/skin_720x480/a.png", b"new")
         inventory.reset()
         icons = self.resized("A")
+        config, skin = self.resized_config("A", "config_720x480.json"), self.resized("A", "skin_720x480")
         self.assertEqual(self.sync(), 0, self.err.getvalue())
-        self.assertTrue(os.path.isdir(icons))
+        for path in (icons, config, skin):
+            self.assertTrue(os.path.exists(path), path)
 
-    def test_dry_run_keeps_pyui_icon_copies(self):
+    def test_underscore_skin_and_bg_folders_are_kept(self):
+        custom, bg = self.resized("A", "skin_640_480"), self.resized("A", "bg_640x480")
+        self.assertEqual(self.sync(), 0, self.err.getvalue())
+        self.assertTrue(os.path.isdir(custom))
+        self.assertTrue(os.path.isdir(bg))
+
+    def test_dry_run_keeps_pyui_resized_copy(self):
         icons = self.resized("A")
         self.assertEqual(self.sync(dry_run=True), 0, self.err.getvalue())
         self.assertTrue(os.path.isdir(icons))
-        self.assertIn("would clear the 640x480 icons PyUI made for the Spruce theme A", self.out.getvalue())
+        self.assertIn("would clear the 640x480 copy PyUI made of the Spruce theme A", self.out.getvalue())
 
     def test_dry_run_never_asks(self):
         store.update_card("card", spruce_theme="B", spruce_themes_installed=["C"])
