@@ -261,6 +261,17 @@ def diff_lists(before, after):
     return found
 
 
+            for k in new:
+                if k not in old:
+                    continue
+                if (old[k].get("series") or "") != (new[k].get("series") or ""):
+                    lines.append(f"~ {game_line(new[k])}: series {old[k].get('series') or 'none'} → {new[k].get('series') or 'none'}")
+                other = sorted(f for f in set(old[k]) | set(new[k])
+                               if f not in ("category", "series") and old[k].get(f) != new[k].get(f))
+                if other:
+                    lines.append(f"~ {game_line(new[k])}: {', '.join(other)} changed")
+            if not lines and [g["bucket"] for g in a["games"] if g.get("bucket")] != [g["bucket"] for g in b["games"] if g.get("bucket")]:
+                lines.append("order changed")
 def print_changes(found):
     print(ui.bold("\n📝 Changes"))
     for kind, sid, lines in found:

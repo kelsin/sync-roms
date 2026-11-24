@@ -101,6 +101,21 @@ class Changes(unittest.TestCase):
         self.assertEqual(lines, ["~ B (gba/B.zip): category Other → Cave"])
 
 
+    def test_series_and_other_field_changes_are_listed(self):
+        before = {"a": {"name": "A", "description": "", "games": games()}}
+        after = games()
+        after[0]["series"] = "Alpha"
+        after[1]["note"] = "x"
+        after[1]["files"] = ["gba/B2.zip"]
+        lines = listedit.diff_lists(before, {"a": {"name": "A", "description": "", "games": after}})[0][2]
+        self.assertEqual(lines, ["~ A (gba/A.zip): series none → Alpha", "~ B (gba/B.zip): files, note changed"])
+
+    def test_a_reorder_alone_is_listed(self):
+        before = {"a": {"name": "A", "description": "", "games": games()}}
+        lines = listedit.diff_lists(before, {"a": {"name": "A", "description": "", "games": games()[::-1]}})[0][2]
+        self.assertEqual(lines, ["order changed"])
+
+
 class Save(StorageDir):
     """Done saves to storage: the new and changed sets' files are written (with their local copies), removed ones deleted."""
 
