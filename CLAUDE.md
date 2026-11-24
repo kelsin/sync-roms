@@ -202,7 +202,7 @@ Rules for sets:
 - `emoji.json`: each art id's own emoji, for the editors.
 - `logo-font.json`: the logo font's outlines (OFL).
 
-With the card's `theme` on, sync copies the art into the copy of the theme in ES-DE's folder (the theme itself is a GitHub archive in `os/esde/themes/`, refreshed by `sync-roms themes update`), the theme customizations (Knulli, ROCKNIX), `MUOS/info/catalogue/Collection/box|grid` (muOS) or `Collections/Imgs/<name>.png` plus `Imgs_med/` and `Imgs_small/` from `art-box/` (Spruce: PyUI shows them by exact name, PNG only, never QOI; the theme plays no part).
+With the card's `theme` on, sync copies the art into the copy of the theme in ES-DE's folder (the theme itself is a GitHub archive in `os/esde/themes/`, refreshed by `sync-roms themes update`), the theme customizations (Knulli, ROCKNIX), `MUOS/info/catalogue/Collection/box|grid` (muOS) or `Collections/Imgs/<name>.png` plus `Imgs_med/` and `Imgs_small/` from `art-box/`, or `totk-james/collections/` when the card's `spruce_theme` is a ToTK theme (Spruce: PyUI shows them by exact name, PNG only, never QOI; the theme plays no part).
 
 The names sync gave art are listed in the theme copy's `.sync-roms-collections` (ES-DE; not ROCKNIX's staging folder of that name) or in `.sync-roms-art` (Knulli, ROCKNIX, muOS), and only those lose their art (on Knulli their `subset.<name>.*` settings too) when the collection or its art goes; on Spruce, only the collections sync owns do. With no art left to add, the theme isn't copied for that. A theme update that ships metadata for a listed name takes it off the ES-DE list (the theme's from then on, never removed).
 

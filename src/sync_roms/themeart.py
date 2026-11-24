@@ -136,11 +136,18 @@ def _reserved(layout_name):
                                          "spinner"}
 
 
-def usable(layout_name, arts):
-    """The {collection name: art png} of arts ({name: art id}) that can be installed, warning about the rest."""
+ZELDA_THEMES = ("ToTK", "ToTK - James")  # the spruce themes whose cards get the ToTK-style collection art
+ZELDA_ART = os.path.join(os.path.dirname(THEME_DATA), "totk-james", "collections")
+
+
+def usable(layout_name, arts, spruce_theme=None):
+    """The {collection name: art png} of arts ({name: art id}) that can be installed, warning about the rest.
+    spruce_theme (Spruce only): the card's theme; a ToTK one gets the Zelda art instead of the box art."""
     out, taken = {}, set()
     for name, art_id in sorted(arts.items()):
         png = art_png(art_id, "art-box/Imgs" if layout_name == "spruce" else "art")
+        if png and layout_name == "spruce" and spruce_theme in ZELDA_THEMES:
+            png = os.path.join(ZELDA_ART, "Imgs", f"{art_id}.png")
         if not png:
             ui.warn(f"{name}: there is no theme art called {art_id!r}; skipped")
         elif layout_name != "spruce" and (name.lower() in _reserved(layout_name) or name.lower().startswith("auto-")):
@@ -559,13 +566,13 @@ def describe_spruce(base, arts, owned):
         print(ui.dim(f"🎨 would remove the art for {', '.join(stale)} from {where}/ (and Imgs_med/, Imgs_small/)"))
 
 
-def install(layout_name, base, arts, owned=()):
+def install(layout_name, base, arts, owned=(), spruce_theme=None):
     """Give the custom collections in arts ({name: art id}) their art in the frontend's theme. Returns whether files
     changed. NextUI has no theme to put it in. owned (Spruce only): the collections sync-roms writes, whose art is
     removed when they have none."""
     if layout_name == "nextui":
         return False
-    arts = usable(layout_name, arts)
+    arts = usable(layout_name, arts, spruce_theme)
     if layout_name == "spruce":
         return install_spruce(base, arts, owned)
     if layout_name == "muos":
@@ -575,10 +582,10 @@ def install(layout_name, base, arts, owned=()):
     return install_esde(layout_name, base, arts) if layout_name in frontend.ESDE_LAYOUTS else install_knulli(base, arts)
 
 
-def describe(layout_name, base, arts, owned=()):
+def describe(layout_name, base, arts, owned=(), spruce_theme=None):
     if layout_name == "nextui":
         return
-    arts = usable(layout_name, arts)
+    arts = usable(layout_name, arts, spruce_theme)
     if layout_name == "spruce":
         return describe_spruce(base, arts, owned)
     if layout_name == "muos":

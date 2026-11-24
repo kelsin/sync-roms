@@ -805,6 +805,28 @@ class Spruce(Card):
                 self.assertEqual(f.read(), g.read())
         self.assertFalse(themeart.install("spruce", self.base, SURPRISE))
 
+    def zelda(self, art_id, size="Imgs"):
+        return os.path.join(themeart.ZELDA_ART, size, f"{art_id}.png")
+
+    def test_totk_cards_get_the_zelda_art(self):
+        for theme in themeart.ZELDA_THEMES:
+            self.assertEqual(themeart.install("spruce", self.base, SURPRISE, spruce_theme=theme),
+                             theme == themeart.ZELDA_THEMES[0])  # the second theme's files are already there
+            for size in themeart.SPRUCE_SIZES:
+                with open(self.path("Surprise", size), "rb") as f, open(self.zelda("surprise", size), "rb") as g:
+                    self.assertEqual(f.read(), g.read())
+
+    def test_other_themes_get_the_box_art(self):
+        for theme in (None, "ToTK - James ", "Art Book Next"):
+            themeart.install("spruce", self.base, SURPRISE, spruce_theme=theme)
+            with open(self.path("Surprise"), "rb") as f, open(themeart.art_png("surprise", "art-box/Imgs"), "rb") as g:
+                self.assertEqual(f.read(), g.read(), theme)
+
+    def test_switching_theme_swaps_the_art(self):
+        themeart.install("spruce", self.base, SURPRISE, spruce_theme="ToTK")
+        self.assertTrue(themeart.install("spruce", self.base, SURPRISE))
+        self.assertFalse(themeart.install("spruce", self.base, SURPRISE))
+
     def test_old_square_art_is_replaced(self):
         from PIL import Image
         write(self.path("Surprise"), "old 300x300")
