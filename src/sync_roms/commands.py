@@ -691,6 +691,7 @@ CONFIG_KINDS = {"bucket": str, "root": str, "endpoint": str, "profile": str, "wr
                 "ra_password": str, "ra_api_key": str, "ra_offline_proxy": bool,
                 "ra_proxy_stats": bool, "syncthing": bool}  # the settings `config set` and `config unset` take
 HIDDEN = {"screenscraper_password", "ra_password", "ra_api_key"}  # set, never printed
+ACCOUNTS = {"screenscraper_user", "ra_username"}  # `config show` says only that they are set
 
 
 def config_value(name, text):
@@ -784,8 +785,16 @@ def config_cmd(args):
         print(store.data_dir())
         return 0
     print(ui.bold("⚙️  sync-roms settings") + ui.dim(f"  {store.data_dir()}"))
-    for name, value, source in effective_settings():
-        print(f"  {name:<14} {(json.dumps(value) if isinstance(value, bool) else str(value)) if value is not None else ui.dim('(not set)'):<28} {ui.dim(source)}")
+    rows = effective_settings()
+    saved = usersettings.load_settings()
+    shown = {name for name, _, _ in rows}
+    for name in CONFIG_KINDS:
+        if name not in shown and name in saved:
+            value = "(set, not shown)" if name in HIDDEN | ACCOUNTS else ",".join(saved[name]) if isinstance(saved[name], list) \
+                else json.dumps(saved[name])
+            rows.append((name, value, "settings.json"))
+    for name, value, source in rows:
+        print(f"  {name:<26} {(json.dumps(value) if isinstance(value, bool) else str(value)) if value is not None else ui.dim('(not set)'):<28} {ui.dim(source)}")
     return 0
 
 

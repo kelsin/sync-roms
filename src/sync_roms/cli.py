@@ -395,7 +395,7 @@ TOPICS = {
   Files no longer referenced are deleted (after confirming when it is a lot).
 """,
     "config": """
-  sync-roms config show                 the effective bucket, endpoint, profiles and mirror, and where each came from
+  sync-roms config show                 the effective bucket, endpoint, profiles and mirror, and where each came from; other saved settings follow (accounts and passwords as `(set, not shown)`)
   sync-roms config path                 the data folder
   sync-roms config set NAME VALUE       save one setting in settings.json
   sync-roms config unset NAME           remove it (back to its default)

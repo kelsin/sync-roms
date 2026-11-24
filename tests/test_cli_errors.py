@@ -177,6 +177,20 @@ class UsageHelpTest(Isolated):
         code, out, _ = self.sync(["config", "show"])
         self.assertRegex(out, r"eject\s+true\s")
 
+    def test_config_show_lists_the_other_saved_settings(self):
+        code, out, _ = self.sync(["config", "show"], {"syncthing": True, "ra_username": "me", "ra_password": "pw", "ra_mode": "hardcore",
+                                                      "surprise_excluded_systems": ["gba", "nes"]})
+        self.assertEqual(code, 0)
+        self.assertRegex(out, r"syncthing\s+true\s")
+        self.assertRegex(out, r"ra_mode\s+\"hardcore\"\s")
+        self.assertRegex(out, r"ra_username\s+\(set, not shown\)")
+        self.assertRegex(out, r"ra_password\s+\(set, not shown\)")
+        self.assertRegex(out, r"surprise_excluded_systems\s+gba,nes")
+        self.assertNotIn('"me"', out)
+        self.assertNotIn("pw", out)
+        code, out, _ = self.sync(["config", "show"])
+        self.assertNotIn("syncthing", out)
+
 
 class QuietColorTest(unittest.TestCase):
     class Stream(io.StringIO):
