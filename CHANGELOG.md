@@ -1,5 +1,22 @@
 # Changelog
 
+## [3.33.0](https://github.com/kelsin/sync-roms/compare/v3.32.0...v3.33.0) (2026-11-24)
+
+
+### :video_game: Features
+
+* **guide:** pick a saved card to set the device and layout, spruce first ([#567](https://github.com/kelsin/sync-roms/issues/567)) ([d8b064b](https://github.com/kelsin/sync-roms/commit/d8b064b9845c595c2a91d8863153cf69ef7a42b2))
+
+
+### :book: Documentation
+
+* **guide:** point to the real modTimeWindowS location in Syncthing ([#568](https://github.com/kelsin/sync-roms/issues/568)) ([6fa4544](https://github.com/kelsin/sync-roms/commit/6fa4544368887beff16297b20222cab897ce01e0))
+
+
+### :hammer_and_wrench: Code Refactoring
+
+* **settings:** drop the spruce prefix from the RA and syncthing settings ([#565](https://github.com/kelsin/sync-roms/issues/565)) ([75ec336](https://github.com/kelsin/sync-roms/commit/75ec336e07bca73c9983d3ce5b2e3a973117ece3))
+
 ## [3.32.0](https://github.com/kelsin/sync-roms/compare/v3.31.0...v3.32.0) (2026-11-24)
 
 
