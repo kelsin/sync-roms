@@ -1,5 +1,18 @@
 # Changelog
 
+## [3.32.0](https://github.com/kelsin/sync-roms/compare/v3.31.0...v3.32.0) (2026-11-24)
+
+
+### :video_game: Features
+
+* **esde:** hide multi-disc discs on guest cards too ([#564](https://github.com/kelsin/sync-roms/issues/564)) ([02d0b6c](https://github.com/kelsin/sync-roms/commit/02d0b6c42b988d57226205ea28226f07472c97d4))
+* **esde:** hide the discs of multi-disc games so only the playlist shows ([#563](https://github.com/kelsin/sync-roms/issues/563)) ([6bd69ee](https://github.com/kelsin/sync-roms/commit/6bd69eede99b9c79f72c51c7f86c89cdad09f970))
+
+
+### :bug: Bug Fixes
+
+* **guest:** remove the gamelist entries of the ROMs a guest sync deletes ([#561](https://github.com/kelsin/sync-roms/issues/561)) ([bfce27b](https://github.com/kelsin/sync-roms/commit/bfce27b676cea6b9c92272f78642435aa0562cc8))
+
 ## [3.31.0](https://github.com/kelsin/sync-roms/compare/v3.30.1...v3.31.0) (2026-11-24)
 
 
