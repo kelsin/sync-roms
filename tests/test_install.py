@@ -112,7 +112,8 @@ class Run(helpers.CardDir):
     def setUp(self):
         super().setUp()
         store.update_card("card", device="full", layout="spruce", boot_logos=["a.png"],
-                          spruce_themes_installed=["ART_BOOK_NEXT", "TechDweeb_BMO"])
+                          spruce_themes_installed=["ART_BOOK_NEXT", "TechDweeb_BMO"],
+                          spruce_os_kept=["spruceV4.5.0.7z"])
         for d in ("App", "Roms/GBA", "Themes/ART_BOOK_NEXT", "Themes/TechDweeb_BMO"):
             os.makedirs(self.cp(d))
         helpers.touch(self.cp("App", "f"), b"12345")
@@ -155,7 +156,7 @@ class Run(helpers.CardDir):
     def test_run_damaged_archive_deletes_nothing(self):
         self.check.return_value = "ERROR: CRC Failed"
         self.assertEqual(self.run_cmd(), 1)
-        self.assertIn("CRC Failed", self.out.getvalue())
+        self.assertIn("CRC Failed", self.err.getvalue())
         self.check.assert_called_once_with(os.path.join(self.tmpdir, V46), 1000)
         self.assertTrue(os.path.isdir(self.cp("App")))
         self.assertFalse(os.path.exists(self.tmpdir))
@@ -195,14 +196,15 @@ class Run(helpers.CardDir):
     def test_run_download_failure_deletes_nothing(self):
         self.downloads.side_effect = lambda todo, label, icon, base, failures: failures.append((todo[0][0], "boom")) or 1
         self.assertEqual(self.run_cmd(), 1)
-        self.assertIn("boom", self.out.getvalue())
+        self.assertIn("boom", self.err.getvalue())
         self.assertTrue(os.path.isdir(self.cp("App")))
         self.assertFalse(os.path.exists(self.tmpdir))
         self.unpack.assert_not_called()
 
     def test_run_declined_deletes_nothing(self):
         with mock.patch.object(install.ui, "confirm", return_value=False) as confirm:
-            self.assertEqual(self.run_cmd(yes=False, terminal=True), 1)
+            self.assertEqual(self.run_cmd(yes=False, terminal=True), 0)
+        self.assertIn("Kept everything as it was", self.out.getvalue())
         self.assertIn(f"Delete 2 items from {self.card} and install spruceOS {V46}?", confirm.call_args.args[0])
         self.assertTrue(confirm.call_args.kwargs.get("default", True))
         self.assertTrue(os.path.isdir(self.cp("App")))
@@ -236,12 +238,13 @@ class Run(helpers.CardDir):
         entry = self.entry()
         self.assertNotIn("boot_logos", entry)
         self.assertNotIn("spruce_themes_installed", entry)
+        self.assertNotIn("spruce_os_kept", entry)
         self.assertEqual(entry["spruce_os"], V46)
 
     def test_run_unreadable_archive_deletes_nothing(self):
         install.unpacked_size.return_value = None
         self.assertEqual(self.run_cmd(), 1)
-        self.assertIn("can't read", self.out.getvalue())
+        self.assertIn("can't read", self.err.getvalue())
         self.assertTrue(os.path.isdir(self.cp("App")))
         self.assertFalse(os.path.exists(self.tmpdir))
         self.unpack.assert_not_called()
@@ -249,8 +252,8 @@ class Run(helpers.CardDir):
     def test_run_unpack_failure_exits_3(self):
         self.unpack.return_value = "ERROR: broken"
         self.assertEqual(self.run_cmd(), 3)
-        self.assertIn("ERROR: broken", self.out.getvalue())
-        self.assertIn("card has no spruceOS now", self.out.getvalue())
+        self.assertIn("ERROR: broken", self.err.getvalue())
+        self.assertIn("card has no spruceOS now", self.err.getvalue())
         self.assertNotIn("spruce_os", self.entry())
         self.assertFalse(os.path.exists(self.tmpdir))
 

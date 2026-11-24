@@ -283,8 +283,8 @@ TOPICS = {
   sync-roms cards import FILE                 keeps size, device, layout, games and excluded;
                                               Surprise off; r renames, p prefixes all
 
-  CARD (convert, clean) is a saved card's name or its mounted folder (default: the current
-  directory).
+  CARD (convert, install, clean) is a saved card's name or its mounted folder (default: the
+  current directory).
 
   A card is a folder name (the card root's basename) with a remembered device, firmware and games.
   new, set, rename, delete, copy, export and import take --dry-run (-n): they say what they would do
