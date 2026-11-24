@@ -73,6 +73,25 @@ class PlanRomUploadTest(unittest.TestCase):
         self.assertEqual([(k, s) for k, _, s in changed], [("gba/c.gba", 30)])
         self.assertEqual([(k, s) for k, _, s in same], [("gba/b.gba", 20)])
 
+    def test_a_name_storage_finds_by_another_case_or_unicode_form_is_the_same_file(self):
+        import unicodedata
+        nfd = lambda s: unicodedata.normalize("NFD", s)  # noqa: E731
+        for local, stored in (("Game.gba", "game.gba"), ("Pok\u00e9mon.gba", nfd("Pok\u00e9mon.gba"))):
+            for stored_size, want in ((10, "same"), (99, "changed")):
+                with self.subTest(local=local, stored_size=stored_size), tempfile.TemporaryDirectory() as root:
+                    touch(root, local, 10)
+                    new, changed, same = upload.plan_rom_upload(root, "gba", {f"gba/{stored}": stored_size})
+                    self.assertEqual(new, [])
+                    got = {"same": same, "changed": changed}[want]
+                    self.assertEqual([(k, s) for k, _, s in got], [(f"gba/{stored}", 10)])  # the stored spelling
+                    self.assertEqual(os.path.basename(got[0][1]), local)  # the local file is what goes up
+
+    def test_names_that_fold_together_locally_are_matched_exactly(self):
+        with mock.patch.object(upload, "local_roms", lambda *a: {"a.gba": 10, "A.gba": 10}):
+            new, changed, same = upload.plan_rom_upload("/x", "gba", {"gba/a.gba": 10})
+        self.assertEqual([k for k, _, _ in new], ["gba/A.gba"])
+        self.assertEqual([k for k, _, _ in same], ["gba/a.gba"])
+
     def test_files_come_in_name_order_within_each_folder_as_walked(self):
         with tempfile.TemporaryDirectory() as root:
             walked = [(root, ["b.gba", "a.gba"]), (os.path.join(root, "Z"), ["d.gba", "c.gba"]), (os.path.join(root, "A"), ["e.gba"])]

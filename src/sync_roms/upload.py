@@ -6,6 +6,7 @@ import queue
 import tempfile
 import threading
 import time
+import unicodedata
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 
 from botocore.exceptions import BotoCoreError, ClientError
@@ -36,8 +37,17 @@ def plan_rom_upload(root, bucket, existing):
     existing: {key: size} listing of storage folder; a file whose size matches is the same.
     """
     new, changed, same = [], [], []
-    for rel, size in local_roms(root, bucket).items():
+    local = local_roms(root, bucket)
+
+    def loose(key):
+        return unicodedata.normalize("NFC", key).lower()
+    # a storage folder finds a name in any case or Unicode form (see s3.move_groups), when that is unambiguous
+    found = {loose(k): k for k in existing} if len({loose(k) for k in existing}) == len(existing) and \
+        len({loose(f"{bucket}/{r}") for r in local}) == len(local) else {}
+    for rel, size in local.items():
         key, path = f"{bucket}/{rel}", os.path.join(root, *rel.split("/"))
+        if key not in existing:
+            key = found.get(loose(key), key)
         if key not in existing:
             new.append((key, path, size))
         elif existing[key] == size:
