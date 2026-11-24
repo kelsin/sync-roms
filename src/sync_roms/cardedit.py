@@ -426,29 +426,34 @@ def card_status(name, setup, systems, to_fetch=None):
 def settings_menu(name, systems, playable):
     """S in the system list: turn the card's Surprise, theme, custom collections or RAOfflineProxy on or off, pick the systems
     Surprise may use on every card or on this card (playable: the systems the card can play) and, on a spruce card, its current theme."""
-    entry = store.load_cards().get(name)
     state = lambda on: "on" if on else "off"
-    spruce = isinstance(entry, dict) and entry.get("layout") == "spruce"
-    current = entry.get("spruce_theme") if spruce else None
-    current = current if isinstance(current, str) and current else None
-    i = picker.filter_list("⚙️  Settings", [
-        f"🎁 Surprise: {state(surprise.enabled(entry))}",
-        f"🎨 Theme (Art Book Next, ES-DE theme, collection art): {state(store.card_flag(entry, 'theme'))}",
-        f"💖 Collections (written to the frontend, Surprise's too): {state(store.card_flag(entry, 'custom_collections'))}",
-        f"🏆 RAOfflineProxy (RetroAchievements offline proxy app): {state(store.card_flag(entry, 'raofflineproxy'))}",
-        "Systems Surprise may use (every card)",
-        "Systems Surprise may use (this card)",
-        *([f"🎨 Spruce theme: {current or 'none'}"] if spruce else [])])
-    if i == 0:
-        toggle_surprise(name)
-    elif i in (1, 2, 3):
-        toggle_flag(name, ("theme", "custom_collections", "raofflineproxy")[i - 1])
-    elif i == 4:
-        pick_surprise_systems(systems)
-    elif i == 5:
-        pick_card_surprise_systems(name, playable)
-    elif i == 6 and spruce:
-        pick_spruce_theme(name, current)
+    pos = 0
+    while True:
+        entry = store.load_cards().get(name)
+        spruce = isinstance(entry, dict) and entry.get("layout") == "spruce"
+        current = entry.get("spruce_theme") if spruce else None
+        current = current if isinstance(current, str) and current else None
+        i = picker.filter_list("⚙️  Settings", [
+            f"🎁 Surprise: {state(surprise.enabled(entry))}",
+            f"🎨 Theme (Art Book Next, ES-DE theme, collection art): {state(store.card_flag(entry, 'theme'))}",
+            f"💖 Collections (written to the frontend, Surprise's too): {state(store.card_flag(entry, 'custom_collections'))}",
+            f"🏆 RAOfflineProxy (RetroAchievements offline proxy app): {state(store.card_flag(entry, 'raofflineproxy'))}",
+            "Systems Surprise may use (every card)",
+            "Systems Surprise may use (this card)",
+            *([f"🎨 Spruce theme: {current or 'none'}"] if spruce else [])], cursor=pos)
+        if i is None:
+            return
+        pos = i
+        if i == 0:
+            toggle_surprise(name)
+        elif i in (1, 2, 3):
+            toggle_flag(name, ("theme", "custom_collections", "raofflineproxy")[i - 1])
+        elif i == 4:
+            pick_surprise_systems(systems)
+        elif i == 5:
+            pick_card_surprise_systems(name, playable)
+        elif i == 6 and spruce:
+            pick_spruce_theme(name, current)
 
 
 def pick_spruce_theme(name, current):

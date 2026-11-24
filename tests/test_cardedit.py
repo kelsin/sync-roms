@@ -182,18 +182,18 @@ class Flow(DataDir):
 
     def test_u_toggles_surprise_and_the_title_shows_it(self):
         self.card(size="1 GB")
-        calls = self.run_card(returns((cardedit.SETTINGS_KEY, 0)), returns(0), returns((cardedit.SETTINGS_KEY, 0)),
-                              returns(0), returns(None))
+        calls = self.run_card(returns((cardedit.SETTINGS_KEY, 0)), returns(0), returns(None),
+                              returns((cardedit.SETTINGS_KEY, 0)), returns(0), returns(None), returns(None))
         self.assertIn("🎁 Surprise on", calls[0][0])
         self.assertEqual(calls[1][1][0], "🎁 Surprise: on")
-        self.assertIn("🎁 Surprise off", calls[2][0])
-        self.assertEqual(calls[3][1][0], "🎁 Surprise: off")
-        self.assertIn("🎁 Surprise on", calls[4][0])
+        self.assertIn("🎁 Surprise off", calls[3][0])
+        self.assertEqual(calls[4][1][0], "🎁 Surprise: off")
+        self.assertIn("🎁 Surprise on", calls[6][0])
         self.assertNotIn("surprise", self.read("cards.json")["c"])
 
     def test_u_off_saves_false(self):
         self.card(size="1 GB")
-        self.run_card(returns((cardedit.SETTINGS_KEY, 0)), returns(0), returns(None))
+        self.run_card(returns((cardedit.SETTINGS_KEY, 0)), returns(0), returns(None), returns(None))
         self.assertIs(self.read("cards.json")["c"]["surprise"], False)
 
     def test_u_on_an_allium_card_saves_true_and_off_drops_it(self):
@@ -213,7 +213,7 @@ class Flow(DataDir):
         self.card(size="1 GB")
         self.write_json("settings.json", {"surprise_excluded_systems": ["gone"], "bucket": "b"})
         names = [s["name"] for s in CATALOG["systems"]]
-        calls = self.run_card(returns((cardedit.SETTINGS_KEY, 0)), returns(4), flip(0), returns(None))
+        calls = self.run_card(returns((cardedit.SETTINGS_KEY, 0)), returns(4), flip(0), returns(None), returns(None))
         self.assertTrue(calls[2][1] and all(calls[2][1][i] == names[i] for i in range(len(names))))
         self.assertEqual(self.read_settings()["surprise_excluded_systems"], sorted(["gone", CATALOG["systems"][0]["bucket"]]))
         self.assertEqual(self.read_settings()["bucket"], "b")
@@ -223,7 +223,7 @@ class Flow(DataDir):
         self.card(size="1 GB")
         first = CATALOG["systems"][0]
         self.write_json("settings.json", {"surprise_excluded_systems": [first["bucket"]]})
-        self.run_card(returns((cardedit.SETTINGS_KEY, 0)), returns(4), flip(0), returns(None))
+        self.run_card(returns((cardedit.SETTINGS_KEY, 0)), returns(4), flip(0), returns(None), returns(None))
         self.assertNotIn("surprise_excluded_systems", self.read_settings())
 
     def playable(self):
@@ -232,7 +232,7 @@ class Flow(DataDir):
     def test_u_card_systems_saves_the_unchecked_ones_on_the_card_only(self):
         self.card(size="1 GB", surprise_excluded_systems=["gone"])
         first = self.playable()[0]
-        calls = self.run_card(returns((cardedit.SETTINGS_KEY, 0)), returns(5), flip(0), returns(None))
+        calls = self.run_card(returns((cardedit.SETTINGS_KEY, 0)), returns(5), flip(0), returns(None), returns(None))
         self.assertEqual(calls[2][1], [s["name"] for s in self.playable()])
         self.assertEqual(self.read("cards.json")["c"]["surprise_excluded_systems"], sorted(["gone", first["bucket"]]))
         self.assertIsNone(self.read_settings().get("surprise_excluded_systems"))
@@ -240,7 +240,7 @@ class Flow(DataDir):
     def test_u_card_systems_all_checked_removes_the_field(self):
         first = self.playable()[0]
         self.card(size="1 GB", surprise_excluded_systems=[first["bucket"]])
-        self.run_card(returns((cardedit.SETTINGS_KEY, 0)), returns(5), flip(0), returns(None))
+        self.run_card(returns((cardedit.SETTINGS_KEY, 0)), returns(5), flip(0), returns(None), returns(None))
         self.assertNotIn("surprise_excluded_systems", self.read("cards.json")["c"])
 
     def test_u_card_systems_keeps_a_system_the_card_and_the_global_setting_both_exclude(self):
@@ -248,7 +248,7 @@ class Flow(DataDir):
         self.card(size="1 GB", surprise_excluded_systems=[first["bucket"]])
         self.write_json("settings.json", {"surprise_excluded_systems": [first["bucket"]]})
         self.run_card(returns((cardedit.SETTINGS_KEY, 0)), returns(5),
-                      returns([True] * len(self.playable())), returns(None))
+                      returns([True] * len(self.playable())), returns(None), returns(None))
         self.assertEqual(self.read("cards.json")["c"]["surprise_excluded_systems"], [first["bucket"]])
 
     def test_u_card_systems_shows_globally_excluded_ones_unchecked_and_keeps_them_global(self):
@@ -256,7 +256,7 @@ class Flow(DataDir):
         self.card(size="1 GB")
         self.write_json("settings.json", {"surprise_excluded_systems": [first["bucket"]]})
         calls = self.run_card(returns((cardedit.SETTINGS_KEY, 0)), returns(5),
-                              returns([True] * len(self.playable())), returns(None))
+                              returns([True] * len(self.playable())), returns(None), returns(None))
         self.assertIn("off on every card", calls[2][1][0])
         self.assertFalse(calls[2][2]["initial"][0])
         self.assertNotIn("surprise_excluded_systems", self.read("cards.json")["c"])
@@ -274,11 +274,12 @@ class Flow(DataDir):
 
     def test_s_menu_turns_theme_and_collections_off_and_on(self):
         self.card(size="1 GB")
-        calls = self.run_card(returns((cardedit.SETTINGS_KEY, 0)), returns(1), returns((cardedit.SETTINGS_KEY, 0)),
-                              returns(2), returns((cardedit.SETTINGS_KEY, 0)), returns(1), returns(None))
+        calls = self.run_card(returns((cardedit.SETTINGS_KEY, 0)), returns(1), returns(None),
+                              returns((cardedit.SETTINGS_KEY, 0)), returns(2), returns(None),
+                              returns((cardedit.SETTINGS_KEY, 0)), returns(1), returns(None), returns(None))
         self.assertIn("Theme", calls[1][1][1])
         self.assertTrue(calls[1][1][1].endswith("on"))
-        self.assertTrue(calls[3][1][1].endswith("off"))  # the theme, turned off by the first menu
+        self.assertTrue(calls[4][1][1].endswith("off"))  # the theme, turned off by the first menu
         self.assertIs(self.read("cards.json")["c"]["custom_collections"], False)
         self.assertNotIn("theme", self.read("cards.json")["c"])  # the last menu turned it back on: on is not stored
 
@@ -353,20 +354,35 @@ class Flow(DataDir):
     def test_settings_menu_toggles_raofflineproxy_and_shifts_the_systems_entries(self):
         self.card()
         seen = []
-        with mock.patch.object(picker, "filter_list", lambda t, labels, **kw: seen.append(labels) or 3), \
-                mock.patch.object(cardedit, "pick_surprise_systems") as every, \
+
+        def answers(*picks):
+            queue = iter(picks)
+            return lambda t, labels, **kw: seen.append(labels) or next(queue)
+        with mock.patch.object(cardedit, "pick_surprise_systems") as every, \
                 mock.patch.object(cardedit, "pick_card_surprise_systems") as one:
-            cardedit.settings_menu("c", CATALOG["systems"], [])
-            self.assertEqual(seen[0][3], "🏆 RAOfflineProxy (RetroAchievements offline proxy app): on")
-            self.assertIs(self.read("cards.json")["c"]["raofflineproxy"], False)
-            cardedit.settings_menu("c", CATALOG["systems"], [])
-            self.assertNotIn("raofflineproxy", self.read("cards.json")["c"])
-            with mock.patch.object(picker, "filter_list", return_value=4):
+            with mock.patch.object(picker, "filter_list", answers(3, 3, None)):
                 cardedit.settings_menu("c", CATALOG["systems"], [])
-            with mock.patch.object(picker, "filter_list", return_value=5):
+            self.assertEqual(seen[0][3], "🏆 RAOfflineProxy (RetroAchievements offline proxy app): on")
+            self.assertEqual(seen[1][3], "🏆 RAOfflineProxy (RetroAchievements offline proxy app): off")
+            self.assertNotIn("raofflineproxy", self.read("cards.json")["c"])  # on again: on is not stored
+            with mock.patch.object(picker, "filter_list", answers(4, None)):
+                cardedit.settings_menu("c", CATALOG["systems"], [])
+            with mock.patch.object(picker, "filter_list", answers(5, None)):
                 cardedit.settings_menu("c", CATALOG["systems"], [])
         every.assert_called_once()
         one.assert_called_once()
+
+    def test_settings_menu_reopens_on_the_row_just_used_until_esc(self):
+        self.card()
+        cursors = []
+        picks = iter([2, 0, None])
+
+        def fake(title, labels, **kw):
+            cursors.append(kw.get("cursor"))
+            return next(picks)
+        with mock.patch.object(picker, "filter_list", fake):
+            cardedit.settings_menu("c", CATALOG["systems"], [])
+        self.assertEqual(cursors, [0, 2, 0])
 
     def test_settings_menu_spruce_theme_entry_only_on_spruce(self):
         seen = []
@@ -379,18 +395,19 @@ class Flow(DataDir):
 
     def test_settings_menu_sets_and_clears_spruce_theme(self):
         self.card(layout="spruce")
-        with mock.patch.object(picker, "filter_list", return_value=6), \
+        with mock.patch.object(picker, "filter_list", side_effect=[6, None]), \
                 mock.patch.object(cardedit.spruce_themes, "pick_one", return_value="Mono") as pick:
             cardedit.settings_menu("c", CATALOG["systems"], [])
         self.assertEqual(self.read("cards.json")["c"]["spruce_theme"], "Mono")
         self.assertEqual(pick.call_args.args[1], None)
         seen = []
-        with mock.patch.object(picker, "filter_list", lambda t, labels, **kw: seen.append(labels) or 6), \
+        picks = iter([6, None])
+        with mock.patch.object(picker, "filter_list", lambda t, labels, **kw: seen.append(labels) or next(picks)), \
                 mock.patch.object(cardedit.spruce_themes, "pick_one", return_value=False):
             cardedit.settings_menu("c", CATALOG["systems"], [])
         self.assertEqual(seen[0][-1], "🎨 Spruce theme: Mono")
         self.assertEqual(self.read("cards.json")["c"]["spruce_theme"], "Mono")
-        with mock.patch.object(picker, "filter_list", return_value=6), \
+        with mock.patch.object(picker, "filter_list", side_effect=[6, None]), \
                 mock.patch.object(cardedit.spruce_themes, "pick_one", return_value=None) as pick:
             cardedit.settings_menu("c", CATALOG["systems"], [])
         self.assertEqual(pick.call_args.args[1], "Mono")
@@ -1482,7 +1499,7 @@ class Flow(DataDir):
                                         [returns((cardedit.COLLECTIONS_KEY, 0)), returns((" ", 0)), returns(None)]),
             "clear all": ({"games": {"gba": [g("gba/Ruby.zip")], "gb": {"full_system": True}, "sets": ["pk"]},
                            "excluded": {"gba": ["gba/Ruby.sav"]}}, [returns((cardedit.CLEAR_ALL_KEY, 0))]),
-            "surprise off": ({"surprises": zelda}, [returns((cardedit.SETTINGS_KEY, 0)), returns(0)]),
+            "surprise off": ({"surprises": zelda}, [returns((cardedit.SETTINGS_KEY, 0)), returns(0), returns(None)]),
             "exclude a set game": ({"games": {"sets": ["pk"]}}, [returns(1), game_view_is_fresh(toggle("Ruby.zip"))]),
         }
         for case, (entry, steps) in cases.items():
