@@ -1161,6 +1161,15 @@ class MatchRoundTwoTest(RunBase):
         self.run_match()
         self.assertIn("1 media file(s) already there are kept", self.confirm.call_args.args[0])
 
+    def test_plain_match_defaults_to_yes_and_replace_to_no(self):
+        self.put("gba/a.zip")
+        self.client.games["x"] = game(7, "Seven")
+        self.run_match()
+        self.assertTrue(self.confirm.call_args.kwargs["default"])
+        self.existing()
+        self.run_match()
+        self.assertFalse(self.confirm.call_args.kwargs["default"])
+
     def test_replace_warns_about_same_stem_roms(self):
         self.existing()
         self.put("gba/a.7z")

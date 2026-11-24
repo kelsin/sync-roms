@@ -1101,7 +1101,7 @@ def match_command(args):
         note = f"; the {kept} media file(s) already there are kept" if kept else ""
         question = (f"🖼️  Scrape {name}/{args.rom} as ScreenScraper game {game_id} and write its media and metadata to "
                     f"{where}{note} ?")
-    if not getattr(args, "confirmed", False) and not ui.confirm(question, default=False):
+    if not getattr(args, "confirmed", False) and not ui.confirm(question, default=not replace):
         print(ui.yellow("👋 Cancelled."))
         return 0
     print(f"🔗 {name}/{args.rom} → ScreenScraper game {game_id}")
