@@ -272,7 +272,7 @@ def upload_command(args):
         if len(new) > 20:
             print(ui.dim(f"  … and {len(new) - 20} more"))
         return 0
-    if not ui.confirm(f"☁️  Upload {len(todo)} file(s) to {s3.location()}/{bucket}/" + (f", overwriting {len(changed)}" if changed else "") + "?", default=False):
+    if not ui.confirm(f"☁️  Upload {len(todo)} file(s) to {s3.location()}/{bucket}/" + (f", overwriting {len(changed)}" if changed else "") + "?", default=True):
         print(ui.yellow("👋 Cancelled."))
         return 0
     failed = run_uploads(todo)

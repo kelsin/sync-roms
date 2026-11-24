@@ -281,6 +281,20 @@ class OverwriteListTest(unittest.TestCase):
             with self.subTest(replace=replace):
                 self.assertEqual(self.overwrites(replace), want + ["\x1b[33m     … and 2 more\x1b[0m"])
 
+    def test_upload_asks_with_yes_as_the_default_and_replace_with_no(self):
+        for replace, default in ((False, True), (True, False)):
+            with self.subTest(replace=replace), tempfile.TemporaryDirectory() as root:
+                touch(root, "new.gba", 10)
+                ask = mock.Mock(return_value=False)
+                args = argparse.Namespace(upload=root, replace=replace, dry_run=False)
+                with mock.patch.object(store, "load_manifest", lambda: {"systems": SYSTEMS}), \
+                        mock.patch.object(upload.picker, "filter_list", lambda *a, **k: 0), \
+                        mock.patch.object(inventory, "files", lambda prefix: {}), \
+                        mock.patch.object(inventory, "etags", lambda prefix: {}), \
+                        mock.patch.object(ui, "confirm", ask), contextlib.redirect_stdout(io.StringIO()):
+                    self.assertEqual(upload.upload_command(args), 0)
+                self.assertEqual(ask.call_args.kwargs["default"], default)
+
 
 class RenameChainTest(unittest.TestCase):
     """upload --replace on a storage folder: renames through a name another rename moves away never overwrite it."""
