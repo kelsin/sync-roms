@@ -15,7 +15,8 @@ from . import cardfs, downloads, external, github, inventory, picker, previews, 
 REPO = "spruceUI/PyUI-Themes"
 TAG = "1"
 MEMBER_ROOT = ("mnt", "SDCARD", "Themes")  # where each archive keeps its one theme folder
-ICON_COPY = re.compile(r"^icons_(\d+)x(\d+)$")  # PyUI's resized copy of a theme's icons/
+# what PyUI makes when it patches a theme for a screen: config_<W>x<H>.json, skin_<W>x<H>/ and icons_<W>x<H>/
+RESIZED = re.compile(r"^(?:config_(\d+)x(\d+)\.json|(?:skin|icons)_(\d+)x(\d+))$")
 
 
 def _junk(name):
@@ -365,9 +366,16 @@ def remove(base, names, dry_run):
     return failed
 
 
+def _resized_size(entry):
+    """'<W>x<H>' for the name of a file or folder PyUI made when it patched a theme, else None."""
+    match = RESIZED.match(entry)
+    return match and "x".join(g for g in match.groups() if g)
+
+
 def stale_copies(base, todo):
-    """[(name, folder)], sorted: for each theme with a file to copy, the card's Themes/<name>/icons_<W>x<H> folders PyUI
-    made (it never remakes them) that storage's theme doesn't itself hold."""
+    """[(name, size, [entries])], sorted: for each theme with a file to copy, the card's Themes/<name>/ config, skin and
+    icons copies PyUI made for each screen size (it patches a theme only while that size's config is missing) that
+    storage's theme doesn't itself hold."""
     prefix = runtime.SPRUCE_THEMES_PREFIX
     root = os.path.join(base, "Themes")
     themes = {os.path.relpath(path, root).split(os.sep)[0] for _, path, _ in todo}
@@ -375,32 +383,44 @@ def stale_copies(base, todo):
     for name in sorted(filter(_plain, themes)):
         folder = os.path.join(base, "Themes", name)
         try:
-            found = [n for n in os.listdir(folder) if ICON_COPY.match(n) and os.path.isdir(os.path.join(folder, n))]
+            found = os.listdir(folder)
         except OSError:
             continue
         shipped = {key[len(prefix) + len(name) + 1:].split("/")[0] for key in inventory.files(f"{prefix}{name}/")}
-        result += [(name, n) for n in sorted(found) if n not in shipped]
+        sizes = {}
+        for entry in sorted(found):
+            size = _resized_size(entry)
+            if size and entry not in shipped and os.path.isdir(os.path.join(folder, entry)) == (not entry.endswith(".json")):
+                sizes.setdefault(size, []).append(entry)
+        result += [(name, size, sizes[size]) for size in sorted(sizes)]
     return result
 
 
 def clear_copies(base, copies, dry_run):
-    """Delete the [(name, folder)] icon copies of stale_copies. Returns the number that failed."""
+    """Delete the [(name, size, [entries])] copies of stale_copies. Returns the number of sizes that failed."""
     failed = 0
-    for name, folder in copies:
-        if not _plain(name) or not ICON_COPY.match(folder):
+    for name, size, entries in copies:
+        if not _plain(name) or not all(_resized_size(e) == size for e in entries):
             continue
-        size = "x".join(ICON_COPY.match(folder).groups())
         if dry_run:
-            print(ui.dim(f"🧪 Dry run: would clear the {size} icons PyUI made for the Spruce theme {name}"))
+            print(ui.dim(f"🧪 Dry run: would clear the {size} copy PyUI made of the Spruce theme {name}"))
             continue
-        try:
-            shutil.rmtree(os.path.join(base, "Themes", name, folder))
-            print(f"🧹 Cleared the {size} icons PyUI made for the Spruce theme {name}")
-        except FileNotFoundError:
-            pass
-        except OSError as e:
-            ui.warn(f"Couldn't clear the {size} icons PyUI made for the Spruce theme {name}: {e}")
+        error = None
+        cleared = False
+        for entry in entries:
+            path = os.path.join(base, "Themes", name, entry)
+            try:
+                shutil.rmtree(path) if os.path.isdir(path) else os.remove(path)
+                cleared = True
+            except FileNotFoundError:
+                pass
+            except OSError as e:
+                error = error or e
+        if error:
+            ui.warn(f"Couldn't clear the {size} copy PyUI made of the Spruce theme {name}: {error}")
             failed += 1
+        elif cleared:
+            print(f"🧹 Cleared the {size} copy PyUI made of the Spruce theme {name}")
     return failed
 
 
