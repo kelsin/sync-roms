@@ -300,8 +300,8 @@ class OverwriteListTest(unittest.TestCase):
             with self.subTest(replace=replace):
                 self.assertEqual(self.overwrites(replace), want + ["\x1b[33m     … and 2 more\x1b[0m"])
 
-    def test_upload_asks_with_yes_as_the_default_and_replace_with_no(self):
-        for replace, default in ((False, True), (True, False)):
+    def test_upload_and_replace_ask_with_no_as_the_default(self):
+        for replace, default in ((False, False), (True, False)):
             with self.subTest(replace=replace), tempfile.TemporaryDirectory() as root:
                 touch(root, "new.gba", 10)
                 ask = mock.Mock(return_value=False)
@@ -310,9 +310,49 @@ class OverwriteListTest(unittest.TestCase):
                         mock.patch.object(upload.picker, "filter_list", lambda *a, **k: 0), \
                         mock.patch.object(inventory, "files", lambda prefix: {}), \
                         mock.patch.object(inventory, "etags", lambda prefix: {}), \
-                        mock.patch.object(ui, "confirm", ask), contextlib.redirect_stdout(io.StringIO()):
+                        mock.patch.object(ui, "confirm", ask), mock.patch.object(ui, "has_terminal", return_value=True), \
+                        contextlib.redirect_stdout(io.StringIO()):
                     self.assertEqual(upload.upload_command(args), 0)
                 self.assertEqual(ask.call_args.kwargs["default"], default)
+
+
+class UploadConfirmTest(unittest.TestCase):
+    """Plain upload asks before it uploads or overwrites: Enter and no terminal change nothing, --yes goes ahead."""
+
+    def run_upload(self, assume_yes, terminal, answer=""):
+        with tempfile.TemporaryDirectory() as root:
+            touch(root, "new.gba", 10)
+            args = argparse.Namespace(upload=root, replace=False, dry_run=False)
+            ran = mock.Mock(return_value=0)
+            with mock.patch.object(store, "load_manifest", lambda: {"systems": SYSTEMS}), \
+                    mock.patch.object(upload.picker, "filter_list", lambda *a, **k: 0), \
+                    mock.patch.object(inventory, "files", lambda prefix: {}), \
+                    mock.patch.object(upload, "run_uploads", ran), \
+                    mock.patch.object(ui, "ASSUME_YES", assume_yes), mock.patch.object(ui, "has_terminal", return_value=terminal), \
+                    mock.patch.object(ui, "_input", lambda prompt: answer), contextlib.redirect_stdout(io.StringIO()):
+                code = upload.upload_command(args)
+        return code, ran
+
+    def test_enter_uploads_nothing(self):
+        code, ran = self.run_upload(False, True)
+        self.assertEqual(code, 0)
+        ran.assert_not_called()
+
+    def test_y_uploads(self):
+        code, ran = self.run_upload(False, True, "y")
+        self.assertEqual(code, 0)
+        ran.assert_called_once()
+
+    def test_yes_uploads(self):
+        code, ran = self.run_upload(True, False)
+        self.assertEqual(code, 0)
+        ran.assert_called_once()
+
+    def test_no_terminal_without_yes_exits_2(self):
+        with self.assertRaises(SystemExit) as raised, contextlib.redirect_stderr(io.StringIO()) as err:
+            self.run_upload(False, False)
+        self.assertEqual(raised.exception.code, 2)
+        self.assertIn("Pass --yes to upload without a terminal to confirm on", err.getvalue())
 
 
 class RenameChainTest(unittest.TestCase):

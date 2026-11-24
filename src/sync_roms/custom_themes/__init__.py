@@ -191,9 +191,12 @@ def publish(styles, palettes, dry_run=False):
         f" in {s3.location()}/{runtime.SPRUCE_THEMES_PREFIX}?"
     if ui.ASSUME_YES:
         print(f"{question} (--yes)")
-    elif not ui.confirm(question, default=True):
-        print(ui.yellow("👋 Cancelled."))
-        return 1 if skipped else 0
+    else:
+        if not ui.has_terminal():
+            ui.fail("Pass --yes to publish without a terminal to confirm on", 2)
+        if not ui.confirm(question, default=False):
+            print(ui.yellow("👋 Cancelled."))
+            return 1 if skipped else 0
     active = [p for p in plans if not p.skipped]
 
     def claim(data):  # before the first upload: an interrupted run leaves folders the next one knows as its own

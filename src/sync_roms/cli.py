@@ -494,8 +494,10 @@ def help_text(topic=None):
 {ui.bold('GLOBAL OPTIONS')}
   {ui.yellow('-n, --dry-run')}   show what would happen, change nothing (commands that can't honor it refuse it)
   {ui.yellow('-y, --yes')}       answer prompts with their default (deleting stays "no"). In these commands --yes is the
-                  confirmation, so they delete: `clean scrapes`, `cards clean`, `cards convert` (the old layout's
-                  media), `cards install` (the card's other files), `cards delete` and `download pico8` (old cart revisions)
+                  confirmation, so they go ahead: `upload` (overwrites), `clean scrapes`, `cards clean`,
+                  `cards convert` (the old layout's media), `cards install` (the card's other files),
+                  `cards delete`, `themes publish` (stale theme files) and `download pico8` (old cart
+                  revisions); without a terminal they exit 2 unless --yes is given
   {ui.yellow('--quiet')}         print only errors, warnings and --json data (prompts go to stderr)
   {ui.yellow('--verbose')}       also print the effective settings
   {ui.yellow('--json')}          machine-readable output for devices, layouts, diff, games list, cards list and `sync --dry-run` (use --device/--layout to skip the pickers)

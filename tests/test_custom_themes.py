@@ -480,15 +480,31 @@ class Publish(helpers.StorageDir):
 
     def test_cancelled_with_skipped_theme_exits_1(self):
         self.put(runtime.SPRUCE_THEMES_STATE, json.dumps({"x.7z": {"folder": "Pixel Consoles - Gruvbox"}}).encode())
-        with mock.patch.object(ui, "ASSUME_YES", False), mock.patch.object(ui, "confirm", return_value=False):
+        with mock.patch.object(ui, "ASSUME_YES", False), mock.patch.object(ui, "has_terminal", return_value=True), \
+                mock.patch.object(ui, "confirm", return_value=False):
             self.assertEqual(custom_themes.publish(None, PAL), 1)
         self.assertEqual(self.stored(C), set())
 
     def test_command_cancelled_without_yes(self):
-        with mock.patch.object(ui, "ASSUME_YES", False), mock.patch.object(ui, "confirm", return_value=False) as ask:
+        with mock.patch.object(ui, "ASSUME_YES", False), mock.patch.object(ui, "has_terminal", return_value=True), \
+                mock.patch.object(ui, "confirm", return_value=False) as ask:
             self.assertEqual(commands.run(["themes", "publish", "--palette", "Gruvbox"]), 0)
         ask.assert_called_once()
-        self.assertIs(ask.call_args.kwargs["default"], True)  # Enter uploads
+        self.assertIs(ask.call_args.kwargs["default"], False)  # Enter uploads nothing
+        self.assertEqual(self.stored(P), set())
+
+    def test_enter_uploads_nothing(self):
+        with mock.patch.object(ui, "ASSUME_YES", False), mock.patch.object(ui, "has_terminal", return_value=True), \
+                mock.patch.object(ui, "_input", lambda prompt: ""):
+            self.assertEqual(custom_themes.publish(None, PAL), 0)
+        self.assertEqual(self.stored(P), set())
+
+    def test_no_terminal_without_yes_exits_2(self):
+        with mock.patch.object(ui, "ASSUME_YES", False), mock.patch.object(ui, "has_terminal", return_value=False), \
+                self.assertRaises(SystemExit) as raised, contextlib.redirect_stderr(io.StringIO()) as err:
+            custom_themes.publish(None, PAL)
+        self.assertEqual(raised.exception.code, 2)
+        self.assertIn("Pass --yes to publish without a terminal to confirm on", err.getvalue())
         self.assertEqual(self.stored(P), set())
 
 

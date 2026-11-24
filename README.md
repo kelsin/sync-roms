@@ -124,7 +124,7 @@ On `esde` and `emudeck` cards every Vita game zip in `psvita/` gets a `.psvita` 
 
 ### Unattended use
 
-`--yes` answers every prompt with its default (deleting local files stays "no"; `clean` commands do delete with it). A first sync can skip the setup picker:
+`--yes` answers every prompt with its default (deleting local files stays "no"; `upload`, `clean` commands and `themes publish` go ahead with it, and without it ask with default no and exit 2 without a terminal). A first sync can skip the setup picker:
 
 ```bash
 sync-roms sync /Volumes/SD --device anbernic-rg-35xxsp --layout knulli --yes
@@ -174,7 +174,7 @@ Every mode is a command (plain `sync-roms [CARD]` syncs a card):
 | `collections edit` | edit your [collections](#collections-collections-edit) of favourite games | |
 | `themes update` | put the latest Art Book Next for ES-DE (for collections' [theme art](#theme-art)) and every [PyUI theme](#spruce) (needs `7z`) in storage | |
 | `themes build [STYLE...] [--palette NAME\|--all-palettes] [--out DIR]` | build the custom spruce theme styles (Pixel Consoles, Pixel Controllers, ToTK - James) in each chosen palette (without a flag: picked in a list, or the saved `custom_theme_palettes`; `ToTK - James` has no palette and is built once, from the ToTK theme in storage, so naming only it asks for none) from the SPRUCE base theme in storage into the cache, or into `DIR` with `--out`; writes nothing to storage | |
-| `themes publish [STYLE...] [--palette NAME\|--all-palettes]` | build the custom spruce themes in each chosen palette (chosen as for `themes build`) and make their `os/spruceos/themes/<theme>/` folders in storage match: upload what changed and delete what the build no longer makes, after one question (`--yes` answers it, `--dry-run` only shows the plan) | |
+| `themes publish [STYLE...] [--palette NAME\|--all-palettes]` | build the custom spruce themes in each chosen palette (chosen as for `themes build`) and make their `os/spruceos/themes/<theme>/` folders in storage match: upload what changed and delete what the build no longer makes, after one question (default no; `--yes` answers it, without a terminal and `--yes` it exits 2; `--dry-run` only shows the plan) | |
 | `themes palettes` | write the overview image of all 28 palettes (a numbered mock list screen for each) and open it | |
 | `themes pick` | choose the PyUI themes every spruce card gets by default (`spruce_themes` setting) | |
 | `download pico8` | add the [PICO-8 BBS Featured carts](#pico-8-carts-from-the-bbs-download-pico8) storage doesn't have, and newer revisions of those it has | |
@@ -209,7 +209,7 @@ For every command they make sense with:
 | Flag | Description |
 | --- | --- |
 | `-n`, `--dry-run` | Show what would be done (a sync: what would be downloaded, with total sizes; `mirror`: what it would download and delete) and change nothing. Commands that only read (`diff`, `check`, `doctor`, `guide`, `cache`, `config` (except `config apply`, which lists what it would set), `completion`, `games list`/`export`/`sets list`) or can't honor it (`edit`, `scrape review`, `scrape missing`, ...) refuse it with exit 2 |
-| `-y`, `--yes` | Answer prompts with their default |
+| `-y`, `--yes` | Answer prompts with their default. It is the confirmation of `upload` (overwrites), `clean scrapes`, `cards clean`, `cards convert`, `cards delete`, `themes publish` (stale theme files) and `download pico8` (`upload`, `clean scrapes` and `themes publish` ask with default no otherwise, and exit 2 without a terminal) |
 | `--json` | `devices`, `layouts`, `games list`, `cards list`, `diff` and `sync --dry-run`: one JSON document on stdout, nothing else (pass `--device`/`--layout` so no picker is needed; `diff` also needs `--system ID` unless the folder is named after a system) |
 | `--quiet` | Print only errors (failed files and a sync's failure count included, and `check`'s problems), warnings and `--json` data, all on stderr except the JSON; prompts are asked on stderr |
 | `--verbose` | Also print the effective settings and where each came from, on stderr |
@@ -511,7 +511,7 @@ States only load in the core they were made with (`gpSP` states don't load in `m
 
 `sync-roms upload [DIR]` uploads the ROMs in `DIR` (default: the current directory) and its subfolders to the storage folder of one system, keeping the relative paths (`DIR/Disc/a.chd` becomes `<system>/Disc/a.chd`). It asks which system, with the cursor already on a guess: the system whose storage folder or frontend folder name (`gba`, `megadrive`, `ARCADE`...) is the name of `DIR` (the top of the list when none is). Esc cancels.
 
-- Files that already exist with the same size are skipped; a file with a different size overwrites the one in storage. Both counts are shown first, the overwrites are listed, and nothing uploads until you confirm (default no). `--dry-run` shows the plan and uploads nothing.
+- Files that already exist with the same size are skipped; a file with a different size overwrites the one in storage. Both counts are shown first, the overwrites are listed, and nothing uploads until you confirm (default no; `--yes` uploads without asking, and without a terminal and `--yes` it exits 2). `--dry-run` shows the plan and uploads nothing.
 - `--replace` makes the storage folder match `DIR`. Renamed files are moved by content (big bucket files without an MD5 are compared on samples, and those renames are marked) and left-over storage files are listed so you tick which to delete (none are ticked at first).
 - Frontend and OS leftovers (`gamelist.xml`, `images/`, `Thumbs.db`, `.DS_Store`, `._*`...) are never uploaded; other dotfiles are. In a card's ROM folder, the layout's own `.multi-disc/` and `.media/` folders and the playlists a sync pointed into `.multi-disc/` are left out too (also with `--replace`).
 - It uploads with the write profile through one shared pool of requests, four per CPU core (at most 16), which the parts of big files share (64MB and up go as 32MB parts). The biggest files start first. To a storage folder, 8 files are copied at once.
@@ -600,7 +600,7 @@ Ignores are written when the review ends, by `q`, Ctrl-C or the last ROM, to `ig
 
 ## Cleaning scraped data (`clean scrapes`)
 
-`sync-roms clean scrapes` needs no folder. It compares storage's `scrapes/` media and `metadata.json` entries with every ROM file in storage's system folders (not only the games listed on your cards), lists what no longer matches (including whole systems with no folder in storage), and after you confirm (default yes, so `--yes` deletes) deletes the media and rewrites the metadata files. `--dry-run` only lists.
+`sync-roms clean scrapes` needs no folder. It compares storage's `scrapes/` media and `metadata.json` entries with every ROM file in storage's system folders (not only the games listed on your cards), lists what no longer matches (including whole systems with no folder in storage), and after you confirm (default no; `--yes` deletes without asking, and without a terminal it exits 2 unless `--yes`) deletes the media and rewrites the metadata files. `--dry-run` only lists.
 
 ## Local mirror (`mirror`)
 

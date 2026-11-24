@@ -397,9 +397,34 @@ class CleanStaleCacheTest(StorageDir):
         """Run it, saying yes; returns (what it printed, the ROMs metadata.json has entries for afterwards)."""
         out = io.StringIO()
         with mock.patch.object(scrape_files.store, "load_manifest", return_value={"systems": [{"bucket": "gba"}]}), \
-                mock.patch.object(scrape_files.ui, "confirm", return_value=True), contextlib.redirect_stdout(out):
+                mock.patch.object(scrape_files.ui, "confirm", return_value=True), \
+                mock.patch.object(scrape_files.ui, "has_terminal", return_value=True), contextlib.redirect_stdout(out):
             self.assertEqual(scrape_files.clean_scrapes(mock.Mock(dry_run=False)), 0)
         return out.getvalue(), sorted(self.read_json(self.META))
+
+    def clean_with(self, assume_yes, terminal, answer=""):
+        with mock.patch.object(scrape_files.store, "load_manifest", return_value={"systems": [{"bucket": "gba"}]}), \
+                mock.patch.object(scrape_files.ui, "ASSUME_YES", assume_yes), \
+                mock.patch.object(scrape_files.ui, "has_terminal", return_value=terminal), \
+                mock.patch.object(scrape_files.ui, "_input", lambda prompt: answer), contextlib.redirect_stdout(io.StringIO()):
+            return scrape_files.clean_scrapes(mock.Mock(dry_run=False))
+
+    def test_enter_deletes_nothing(self):
+        before = sorted(self.read_json(self.META))
+        self.assertEqual(self.clean_with(False, True), 0)
+        self.assertEqual(sorted(self.read_json(self.META)), before)
+
+    def test_yes_deletes_without_asking(self):
+        self.assertEqual(self.clean_with(True, False), 0)
+        self.assertEqual(sorted(self.read_json(self.META)), ["a.zip", "new.zip"])
+
+    def test_no_terminal_without_yes_exits_2(self):
+        before = sorted(self.read_json(self.META))
+        with self.assertRaises(SystemExit) as raised, contextlib.redirect_stderr(io.StringIO()) as err:
+            self.clean_with(False, False)
+        self.assertEqual(raised.exception.code, 2)
+        self.assertIn("Pass --yes to delete without a terminal to confirm on", err.getvalue())
+        self.assertEqual(sorted(self.read_json(self.META)), before)
 
     def test_clean_keeps_the_entry_of_a_rom_the_cache_lacks(self):
         said, entries = self.clean()

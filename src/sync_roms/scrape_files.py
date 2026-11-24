@@ -145,9 +145,15 @@ def clean_scrapes(args):
     if args.dry_run:
         print(ui.yellow("\n🧪 Dry run — nothing deleted"))
         return 0
-    if not ui.confirm(f"🗑️  Permanently delete {len(delete)} object(s) and rewrite {len(rewrites)} metadata file(s)?"):
-        print(ui.yellow("↩️  Keeping everything"))
-        return 0
+    question = f"🗑️  Permanently delete {len(delete)} file(s) and rewrite {len(rewrites)} metadata file(s)?"
+    if ui.ASSUME_YES:
+        print(f"{question} (--yes)")
+    else:
+        if not ui.has_terminal():
+            ui.fail("Pass --yes to delete without a terminal to confirm on", 2)
+        if not ui.confirm(question, default=False):
+            print(ui.yellow("↩️  Keeping everything"))
+            return 0
     failed = 0
     try:
         for key, text in rewrites:

@@ -282,9 +282,15 @@ def upload_command(args):
         if len(new) > 20:
             print(ui.dim(f"  … and {len(new) - 20} more"))
         return 0
-    if not ui.confirm(f"☁️  Upload {len(todo)} file(s) to {s3.location()}/{bucket}/" + (f", overwriting {len(changed)}" if changed else "") + "?", default=True):
-        print(ui.yellow("👋 Cancelled."))
-        return 0
+    question = f"☁️  Upload {len(todo)} file(s) to {s3.location()}/{bucket}/" + (f", overwriting {len(changed)}" if changed else "") + "?"
+    if ui.ASSUME_YES:
+        print(f"{question} (--yes)")
+    else:
+        if not ui.has_terminal():
+            ui.fail("Pass --yes to upload without a terminal to confirm on", 2)
+        if not ui.confirm(question, default=False):
+            print(ui.yellow("👋 Cancelled."))
+            return 0
     failed = run_uploads(todo)
     print(ui.green("\n🎉 Done!") if not failed else ui.red(f"\n⚠️  Done with {failed} failure(s)"))
     return 1 if failed else 0
