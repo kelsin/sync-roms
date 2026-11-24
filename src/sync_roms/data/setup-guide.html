@@ -978,9 +978,46 @@ const SECTIONS = [
   {
     id: "syncthing",
     title: "Syncthing",
-    lede: "Syncs saves between the device and my Syncthing server at <code>http://192.168.68.98:8384/</code>, only on the home network. Each device runs its own Syncthing and pairs with the server; the server's web UI is the one place to approve devices and folders.",
+    lede: "Syncs saves and states with my Syncthing server at <code>http://192.168.68.98:8384/</code>, through two folders: <code>ra-saves</code> (<code>jkx7j-mnlfo</code>) and <code>ra-states</code> (<code>w5nqg-xmpq6</code>). It only syncs on the home network (no relay or cloud). The server already keeps file versions on both folders; a new device only needs the steps below.",
     when: { layout: ["esde", "knulli", "muos", "spruce", "onion", "nextui", "emudeck"] },
     items: [
+      {
+        title: "spruceOS",
+        when: { layout: ["spruce"] },
+        body: `
+          <ol>
+            <li>Sync the card. Sync sets the cores in "RetroArch cores", RetroArch's save settings and auto save/load, turns Syncthing on (WiFi devices), and adds the WiFi networks in settings.json's <code>wifi_networks</code>.</li>
+            <li>On the device: turn WiFi on, and turn on <span class="path">${path("Advanced Settings > Network > Sync Time/RTC with network")}</span>.</li>
+            <li>From the computer, open <code>http://&lt;device IP&gt;:8384</code>. Login <code>spruce</code> / <code>happygaming</code>; change it under Settings &gt; GUI.</li>
+            <li>Device UI: <b>Add Remote Device</b> with the server's ID (server UI: Actions &gt; Show ID).</li>
+            <li>Server UI: accept the new device, and on its <b>Sharing</b> tab tick <code>ra-saves</code> and <code>ra-states</code>. Save.</li>
+            <li>Device UI: accept <code>ra-saves</code> at <code>/mnt/SDCARD/Saves/saves</code> and <code>ra-states</code> at <code>/mnt/SDCARD/Saves/states</code>.</li>
+            <li>Device UI, for each of the two folders: Actions &gt; Advanced &gt; Folders &gt; click the folder &gt; <code>modTimeWindowS</code> = 2 &gt; Save (it isn't in the folder's Edit dialog).</li>
+          </ol>`,
+      },
+      {
+        title: "Android",
+        when: { platform: ["android"] },
+        body: `
+          <ol>
+            <li>Install <b>Syncthing-Fork</b> from F-Droid (the original Android app is discontinued).</li>
+            <li>With RetroArch closed and the device on Wireless debugging, run <code>sync-roms config apply</code>. It sets RetroArch's save and state folders and save settings, turns Cloud Sync off, and sets each system's ES-DE emulator to its core in "RetroArch cores" (it asks before restarting ES-DE; declining skips the ES-DE part).</li>
+            <li>Syncthing-Fork: <b>Add Remote Device</b> with the server's ID (server UI: Actions &gt; Show ID).</li>
+            <li>Server UI: accept the new device, and on its <b>Sharing</b> tab tick <code>ra-saves</code> and <code>ra-states</code>. Save.</li>
+            <li>Syncthing-Fork: accept <code>ra-saves</code> at RetroArch's save folder and <code>ra-states</code> at its state folder (<code>/storage/emulated/0/RetroArch/saves</code> and <code>/states</code> unless RetroArch already had others).</li>
+            <li>Syncthing-Fork: set its run conditions so it runs when switching devices.</li>
+          </ol>`,
+      },
+      {
+        title: "Desktop",
+        when: { platform: ["windows", "steamos"] },
+        body: `
+          <ol>
+            <li>Install Syncthing.</li>
+            <li>Pair it with the server and share the saves folders (see "Pair and share").</li>
+          </ol>
+          <p class="note">On a Steam Deck, Flatpak emulators keep saves under <code>~/.var</code>; Syncthing may need access granted to those folders. EmuDeck also has its own cloud save feature.</p>`,
+      },
       {
         title: "Knulli",
         when: { layout: ["knulli"] },
@@ -1001,25 +1038,6 @@ const SECTIONS = [
             <li>Open <code>http://muos.local:7070</code> from the computer (the port is 7070, not 8384).</li>
             <li>Pair it with the server and share the saves folder, <code>/run/muos/storage/save</code> (see "Pair and share").</li>
           </ol>`,
-      },
-      {
-        title: "spruceOS",
-        when: { layout: ["spruce"] },
-        body: `
-          <p><b>Set by sync-roms</b> on every sync (turn off with <code>sync-roms config set syncthing false</code>):</p>
-          <ul>
-            <li>The cores in "RetroArch cores", for each system's ROM folder.</li>
-            <li>Spruce settings: <code>raAutoSave</code> True, <code>raAutoLoad</code> True, <code>keepSavesBetweenCores</code> Always, and <code>enableSyncthing</code> True (WiFi devices only).</li>
-            <li>RetroArch keys: <code>autosave_interval</code> 10, <code>sort_savefiles_enable</code> and <code>sort_savestates_enable</code> true, <code>sort_savefiles_by_content_enable</code> and <code>sort_savestates_by_content_enable</code> false, <code>savefiles_in_content_dir</code> and <code>savestates_in_content_dir</code> false.</li>
-          </ul>
-          <p><b>By hand:</b></p>
-          <ol>
-            <li>Turn WiFi on, and turn on <span class="path">${path("Advanced Settings > Network > Sync Time/RTC with network")}</span>.</li>
-            <li>Open <code>http://&lt;device IP&gt;:8384</code> from the computer. Login <code>spruce</code> / <code>happygaming</code>; change it under Settings &gt; GUI.</li>
-            <li>Pair it with the server (see "Pair and share"), then accept <code>ra-saves</code> (<code>jkx7j-mnlfo</code>) at <code>/mnt/SDCARD/Saves/saves</code> and <code>ra-states</code> (<code>w5nqg-xmpq6</code>) at <code>/mnt/SDCARD/Saves/states</code>.</li>
-            <li>On each of the two folders: Actions &gt; Advanced &gt; Folders &gt; click the folder &gt; <code>modTimeWindowS</code> = 2 &gt; Save (it isn't in the folder's Edit dialog).</li>
-          </ol>
-          <p class="note">Spruce waits for Syncthing at boot after WiFi connects, and at save-and-shutdown (hold POWER). Leave a game that way before switching devices.</p>`,
       },
       {
         title: "Onion",
@@ -1044,37 +1062,22 @@ const SECTIONS = [
           <p class="note">The pak lists MinUI devices (Miyoo Mini Plus, A30, Flip, several RG35XX, Trimui Brick and Smart Pro); not confirmed on NextUI itself.</p>`,
       },
       {
-        title: "Android and desktop",
-        when: { layout: ["esde", "emudeck"] },
-        body: `
-          <ol>
-            <li>Android: install <b>Syncthing-Fork</b> from F-Droid (the original Android app is discontinued). Desktop and Steam Deck: install Syncthing normally.</li>
-            <li>Open its web UI on the device (port 8384), pair it with the server and share the saves folders (see "Pair and share").</li>
-          </ol>
-          <p class="note">On a Steam Deck, Flatpak emulators keep saves under <code>~/.var</code>; Syncthing may need access granted to those folders. EmuDeck also has its own cloud save feature.</p>
-          <p><b>Android, RetroArch:</b></p>
-          <ol>
-            <li>Run <code>sync-roms config apply</code> with the device on Wireless debugging: it sets RetroArch's save and state folders and save settings, turns Cloud Sync off, and sets each system's ES-DE emulator to its core in "RetroArch cores" (RetroArch closed; it asks before restarting ES-DE, and declining skips the ES-DE part).</li>
-            <li>In Syncthing-Fork share <code>ra-saves</code> (<code>jkx7j-mnlfo</code>) and <code>ra-states</code> (<code>w5nqg-xmpq6</code>) to those two folders, and set its run conditions so it runs when switching devices.</li>
-          </ol>`,
-      },
-      {
         title: "Pair and share",
+        when: { layout: ["esde", "knulli", "muos", "onion", "nextui", "emudeck"], platform: ["windows", "steamos", "linux"] },
         body: `
           <ol>
-            <li>On the device's Syncthing web UI: <b>Actions &gt; Show ID</b> and copy the device ID, then <b>Add Remote Device</b> with the server's ID (from <code>http://192.168.68.98:8384/</code> under Actions &gt; Show ID).</li>
-            <li>On the server's web UI, accept the new device when it appears, and give it the saves folder to share.</li>
-            <li>On the device, accept the shared folder and set its path to the device's saves folder.</li>
-            <li>On the server, set Staggered or Simple file versioning on both folders.</li>
-            <li>Keep both on the home network: Syncthing here has no relay or cloud, so it only syncs when the device and the server can reach each other.</li>
+            <li>Device UI: <b>Add Remote Device</b> with the server's ID (server UI: Actions &gt; Show ID).</li>
+            <li>Server UI: accept the new device, and on its <b>Sharing</b> tab tick the folders to share.</li>
+            <li>Device UI: accept each folder and set its path to the device's folder.</li>
           </ol>`,
       },
       {
-        title: "Notes",
-        body: `<ul>
-          <li>Saves and states both sync now, since the cores match. A state from another core version can fail to load; the in-game save still applies.</li>
+        title: "Switching devices",
+        body: ctx => `<ul>
+          <li>Make an in-game save, then leave the game.</li>
+          ${ctx.layout === "spruce" ? `<li>spruceOS waits for Syncthing at boot after WiFi connects, and at save-and-shutdown (hold POWER): leave a game that way.</li>` : ""}
+          <li>A state from another core version can fail to load; the in-game save still applies.</li>
           <li>RetroAchievements Hardcore turns auto load off.</li>
-          <li>Make an in-game save before switching devices.</li>
         </ul>`,
       },
     ],
