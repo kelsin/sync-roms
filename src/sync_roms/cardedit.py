@@ -20,7 +20,7 @@ META_KEY = "m"
 VARIANT_KEY = "v"
 SERIES_KEY = "r"
 ALL_KEY = "a"
-LIST_HINT = "Enter · a all games · f full · x off · s set · l colls · S settings"
+LIST_HINT = "Enter · a all games · f full · s set · l colls · S settings"
 GAMES_HINT = "Space toggle · Enter done · a all · s set · m meta · p past · v variant"
 META_HINT = "Enter list its values · Esc back"
 VALUES_HINT = "Enter narrow to it · Esc back · / filter"
@@ -34,7 +34,7 @@ LIST_KEYS = [("Enter", "the system's games"), ("f", "full system: every file in 
              ("S", "settings menu: Surprise, theme, collections and RAOfflineProxy on or off, and the systems Surprise may use"),
              ("F", "guest card: a friend's card; syncs only copy ROMs, BIOS and scrapes (again to undo)"),
              ("D", "clear every pick, full system and set from the card")]
-KEEP_HINT = " · K keep card files"
+KEEP_HINT = " · K keep"
 KEEP_KEYS = [("K", "pick every card file that matches a storage game")]
 GAMES_KEYS = [("s", "sets on this system: narrow to one, or pick its games"),
               ("r", "narrow the set picked with s to one series of games"),

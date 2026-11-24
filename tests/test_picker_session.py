@@ -392,6 +392,24 @@ class Session(unittest.TestCase):
                 self.assertEqual(seen, ["🎉 PR opened: url · 👋 Done."] if shown else [])
                 self.assertEqual(out.getvalue(), "🎉 PR opened: url\n" if shown else "🎉 PR opened: url\n👋 Done.\n")
 
+    def test_a_note_wider_than_the_terminal_is_also_printed_after_the_app_closed(self):
+        long_note = "❌ " + "a long error that the status row clips " * 3
+        short_note = "ℹ️  short"
+        for note, printed in ((long_note, long_note + "\n"), (short_note, "")):
+            with self.subTest(note=note[:12]):
+                def editor():
+                    picker.queue_note(note)
+                    picker.filter_list("A", ["a0"])
+
+                async def script(app, pilot):
+                    await wait_for(pilot, lambda: showing(app, "A"))
+                    await pilot.press("enter")
+                out = io.StringIO()
+                with contextlib.redirect_stdout(out), \
+                        mock.patch("shutil.get_terminal_size", return_value=os.terminal_size((80, 24))):
+                    self.run_editor(editor, script)
+                self.assertEqual(out.getvalue(), printed)
+
     def test_a_long_prompt_wraps_so_its_legend_and_answer_stay_in_view(self):
         from textual.geometry import Region
         question = "💾 Save these changes?"

@@ -6,6 +6,7 @@ import math
 import os
 import queue
 import re
+import shutil
 import signal
 import sys
 import threading
@@ -307,7 +308,7 @@ class _ListModel:
         if self.reverting:
             return f"Revert {added + removed} change(s)? [y/N]", "red", None
         if self.asking:
-            return (f"Keep +{added} −{removed} pending change(s)?  y/Enter keep · u revert · any other key keeps editing",
+            return (f"Keep +{added} −{removed} pending change(s)?  y/Enter keep · u revert · else edit",
                     "red", None)
         if self.note is not None:
             return NOTE_PROMPT + self.note[0], None, len(NOTE_PROMPT) + self.note[1]
@@ -1318,7 +1319,7 @@ def one_app(fn):
 def queue_note(text, keep=False):
     """On an editor session's worker: show text (escape codes dropped, trimmed) on the status line of the session's
     next list, after any other notes queued for it, and return True. Elsewhere False. keep: also print it once the
-    app has closed, even when a list showed it (a link to keep)."""
+    app has closed, even when a list showed it (a link to keep). A note that doesn't fit the terminal's width is kept too."""
     if not _in_session():
         return False
     if _ESCAPES.sub("", text).strip():
@@ -1330,9 +1331,11 @@ def _run(model):
     """Show the list full screen until it is done; returns its result. Ctrl-C raises KeyboardInterrupt."""
     if _in_session():
         if _session.notes:
-            model.notice = " · ".join(_ESCAPES.sub("", text).strip() for text, _ in _session.notes), "yellow"
+            shown = " · ".join(_ESCAPES.sub("", text).strip() for text, _ in _session.notes)
+            model.notice = shown, "yellow"
             model.update()
-            _session.kept += [text for text, keep in _session.notes if keep]
+            clipped = ui.cell_width(shown) > shutil.get_terminal_size().columns  # the status row cuts it and the next key clears it
+            _session.kept += [text for text, keep in _session.notes if keep or clipped]
             _session.notes = []
         return _session.ask("list", model)
     app = _app_class()(model)

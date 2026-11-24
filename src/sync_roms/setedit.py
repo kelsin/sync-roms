@@ -17,6 +17,7 @@ set_text = store.set_text  # the format of a set's file lives in store
 
 # --- Editing the games of one set --------------------------------------------------------------------
 
+GAMES_HINT = "Space toggle · Enter done · w note · a all · o view · r series"
 GAMES_KEYS = [k for k in cardedit.SET_GAMES_KEYS if k[0] != cardedit.VARIANT_KEY]  # what ? lists in a set's games list
 
 
@@ -44,7 +45,7 @@ def edit_one(game_set, systems, keys_of):
                     narrowed = [r for r in rows if r[1] in series_keys(game_set, series_filter)] if series_filter else rows
                     pressed = edit.toggle_games(
                         f"✏️  {label} — ✅ in the set, ⬜ remove it", narrowed,
-                        hotkeys=(cardedit.SERIES_KEY, cardedit.CLEAR_KEY), hint=edit.GAMES_HINT + " · r series · c clear filters",
+                        hotkeys=(cardedit.SERIES_KEY, cardedit.CLEAR_KEY), hint=GAMES_HINT,
                         key_help=GAMES_KEYS, filters=f"{series_filter} (c clear filters)" if series_filter else "")
                     if pressed == cardedit.CLEAR_KEY:
                         series_filter = None

@@ -420,7 +420,7 @@ class SeriesEditor(unittest.TestCase):
         self.assertEqual(seen[2][1], "")
         self.assertEqual(seen[0][2], (setedit.cardedit.SERIES_KEY, setedit.cardedit.CLEAR_KEY))
         self.assertIn("series", seen[0][3])
-        self.assertIn("c clear filters", seen[0][3])
+        self.assertNotIn("c clear", seen[0][3])  # c is in the ? help and on the filter line below
         self.assertEqual(seen[1][1], "Alpha (c clear filters)")
         self.assertEqual([k for k, _ in seen[0][4]], ["r", "c"])  # what ? lists
         self.assertEqual([g["bucket"] for g in game_set["games"]], ["gba/A.zip", "gen/C.zip"])  # B off, C kept
