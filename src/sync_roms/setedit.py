@@ -2,7 +2,7 @@
 import copy
 
 from . import cardedit, edit, inventory, picker, previews, runtime, s3, store, themeart, ui
-from .listedit import add_from_set, add_from_system, ask_category, diff_lists, edit_menu, folder_lister, game_label, insert_game, recategorize, reconcile, series_keys, set_series, view
+from .listedit import add_from_set, add_from_system, ask_category, diff_lists, edit_menu, folder_lister, game_label, insert_game, pick_name, recategorize, reconcile, series_keys, set_series, view
 
 
 # --- Set files ---------------------------------------------------------------------------------------
@@ -66,9 +66,11 @@ def edit_one(game_set, systems, keys_of):
             j = picker.filter_list("✏️  Change which game's category?", [game_label(g, names) for g in games],
                                 **previews.game_pane([g["bucket"] for g in games]))
             if j is not None:
-                typed = ask_category(game_set["games"], games[j].get("title", "it"), cancellable=True)
-                if typed is not None:
-                    recategorize(game_set["games"], games[j], typed)
+                cats = list(dict.fromkeys(g["category"] for g in game_set["games"] if g.get("category")))
+                picked = pick_name(f"🏷️  Category for {games[j].get('title', 'it')}", cats, games[j].get("category", ""),
+                                   "category", games[j].get("title", "it"))
+                if picked is not None:
+                    recategorize(game_set["games"], games[j], picked)
         elif i == 4:
             games = [g for g in game_set["games"] if g.get("bucket")]
             j = picker.filter_list("✏️  Set which game's series?", [game_label(g, names) for g in games],
@@ -76,12 +78,10 @@ def edit_one(game_set, systems, keys_of):
             if j is not None:
                 known = list(dict.fromkeys([*(n if isinstance(n, str) else n.get("name", "") for n in store.repo_json("series")),
                                             *(g["series"] for g in game_set["games"] if g.get("series"))]))
-                if known:
-                    print(ui.dim(f"  Series: {', '.join(known)}"))
-                typed = ui.ask(f"🎮 Series for {games[j].get('title', 'it')} (empty for none): ", cancellable=True)
-                if typed is not None:
-                    typed = typed.strip()
-                    set_series(game_set["games"], games[j], next((n for n in known if n.casefold() == typed.casefold()), typed))
+                picked = pick_name(f"🎮 Series for {games[j].get('title', 'it')}", known, games[j].get("series", ""),
+                                   "series", games[j].get("title", "it"))
+                if picked is not None:
+                    set_series(game_set["games"], games[j], picked)
         else:
             name = ui.ask(f"Name [{game_set['name']}] (empty keeps it): ").strip()
             desc = ui.ask("Description (empty keeps it): ").strip()

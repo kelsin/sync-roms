@@ -130,15 +130,30 @@ def series_keys(game_set, series):
     return {k for g in game_set["games"] if g.get("series") == series for k in [g["bucket"], *g.get("files", [])]}
 
 
-def ask_category(games, what, cancellable=False):
-    """The category typed for what, "" for none; None when cancellable and the question was cancelled."""
-    cats = list(dict.fromkeys(g["category"] for g in games if g.get("category")))
-    if cats:
-        print(ui.dim(f"  Categories: {', '.join(cats)}"))
-    typed = ui.ask(f"🏷️  Category for {what} (empty for none): ", cancellable=cancellable)
+def pick_name(title, names, current, noun, what):
+    """Pick a name from a list: "" for none (first row), a known name, or a new one typed (last row); None when
+    cancelled. The cursor starts on current."""
+    i = picker.filter_list(title, ["(none)", *names, "new…"], hint="Enter pick · Esc cancel",
+                           cursor=next((n + 1 for n, x in enumerate(names) if x.casefold() == (current or "").casefold()), 0))
+    if i is None:
+        return None
+    if i == 0:
+        return ""
+    if i <= len(names):
+        return names[i - 1]
+    typed = ui.ask(f"🏷️  New {noun} for {what}: ", cancellable=True)
     if typed is None:
         return None
     typed = typed.strip()
+    return next((n for n in names if n.casefold() == typed.casefold()), typed)  # "cave" is the existing "Cave"
+
+
+def ask_category(games, what):
+    """The category typed for what, "" for none."""
+    cats = list(dict.fromkeys(g["category"] for g in games if g.get("category")))
+    if cats:
+        print(ui.dim(f"  Categories: {', '.join(cats)}"))
+    typed = ui.ask(f"🏷️  Category for {what} (empty for none): ").strip()
     return next((c for c in cats if c.casefold() == typed.casefold()), typed)  # "cave" is the existing "Cave"
 
 
