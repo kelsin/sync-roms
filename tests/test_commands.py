@@ -681,7 +681,9 @@ class CardSizeTest(Cmd):
         self.assertIn("Mine", text)
         friend = [l for l in text.splitlines() if "Friend" in l]
         self.assertEqual(len(friend), 1)
-        self.assertIn("👤", friend[0])
+        self.assertTrue(friend[0].endswith("🎁🎨💖🏆👤"))  # in the badge slots on the right, not by the name
+        self.assertTrue(friend[0].startswith("Friend "))
+        self.assertNotIn("👤", [l for l in text.splitlines() if "Mine" in l][0])
         self.assertNotIn("hidden", text)
 
     def test_cards_list_json_has_guest_field(self):
