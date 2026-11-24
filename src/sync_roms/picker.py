@@ -256,6 +256,7 @@ class _ListModel:
         self.cur, self.top = cursor, self.session.get("top", 0)
         self.notice = ""  # or (text, color)
         self.asking = False  # multi-mode Esc: waiting for keep or revert
+        self.reverting = False  # multi-mode u with several changes: waiting for y
         self.note = None  # (text, cursor position) while a note for row note_row is typed after w
         self.note_row = None
         self.help = None  # the help lines while they are shown
@@ -302,8 +303,10 @@ class _ListModel:
         """The bottom row as (text, color or None, cursor index or None): the keep/revert question, the note being
         typed, or the status (a notice, the highlighted locked row's note, its row note, or the counts)."""
         added, removed = self.pending()
+        added, removed = added + self.outside[0], removed + self.outside[1]
+        if self.reverting:
+            return f"Revert {added + removed} change(s)? [y/N]", "red", None
         if self.asking:
-            added, removed = added + self.outside[0], removed + self.outside[1]
             return (f"Keep +{added} −{removed} pending change(s)?  y/Enter keep · u revert · any other key keeps editing",
                     "red", None)
         if self.note is not None:
@@ -330,14 +333,22 @@ class _ListModel:
     def position(self, compact=False):
         """Where the cursor is and how many rows the filter shows, for the right end of the status row when it fits ("" while
         a prompt has the row). compact: the same numbers without words, for when the full form doesn't fit."""
-        if self.asking or self.note is not None:
+        if self.asking or self.reverting or self.note is not None:
             return ""
         shown = f"{len(self.vis)}/{len(self.labels)}" + ("" if compact else " shown")
         return (f"{self.cur + 1} · " if compact else f"row {self.cur + 1} · ") + shown if self.vis else shown
 
+    def revert(self):
+        """Put every row back as it was when opened, and have the caller put back what it keeps in rows this list doesn't show."""
+        self.state = list(self.start)
+        if any(self.outside) and self.on_revert:
+            self.on_revert()
+            self.outside = (0, 0)
+        self.notice = "Reverted this list to how it was when opened"
+
     def tick(self):
         """Call poll, unless help or a prompt is up (those wait for a key). Returns KEEP."""
-        if self.poll and not self.help and not self.asking and self.note is None:
+        if self.poll and not self.help and not self.asking and not self.reverting and self.note is None:
             self.poll()
             self.update()
         return KEEP
@@ -360,6 +371,11 @@ class _ListModel:
         if self.help:
             if k in ("escape", "q", "?", "ctrl+g"):
                 self.help = None
+            return KEEP
+        if self.reverting:
+            self.reverting = False
+            if k in ("y", "Y"):
+                self.revert()
             return KEEP
         if self.asking:
             self.asking = False
@@ -431,8 +447,10 @@ class _ListModel:
         elif not self.multi:
             pass
         elif k == "u":
-            self.state = list(self.start)
-            self.notice = "Reverted this list to how it was when opened"
+            if sum(self.pending()) + sum(self.outside) > 1:
+                self.reverting = True
+            else:
+                self.revert()
         elif k in ("o", "ctrl+o"):
             self.view_mode = (self.view_mode + 1) % 3
             self.cur = self.top = 0

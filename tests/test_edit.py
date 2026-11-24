@@ -68,6 +68,53 @@ class EscPrompt(unittest.TestCase):
         self.assertEqual(polled, [])  # the prompt waits for its key
 
 
+class RevertKey(unittest.TestCase):
+    def run_keys(self, keys, **kw):
+        """filter_list over three rows with real keys: (its result, the status row after each key)."""
+        rows = []
+
+        def run(model):
+            for k in keys:
+                got = model.key(k)
+                rows.append(model.line[0])
+                if got is not picker.KEEP:
+                    return got
+            raise AssertionError("the list is still open after the last key")
+        with mock.patch.object(picker, "_run", run):
+            return picker.filter_list("t", ["a", "b", "c"], multi=True, diff_marks=True, **kw), rows
+
+    def test_u_with_one_change_reverts_at_once(self):
+        state, rows = self.run_keys(["space", "u", "enter"])
+        self.assertEqual(state, [False, False, False])
+        self.assertTrue(rows[0].startswith("+1 −0"))
+
+    def test_u_with_several_changes_asks_first_and_y_reverts(self):
+        state, rows = self.run_keys(["space", "j", "space", "u", "y", "enter"])
+        self.assertEqual(rows[3], "Revert 2 change(s)? [y/N]")
+        self.assertEqual(state, [False, False, False])
+
+    def test_any_other_key_than_y_keeps_the_changes(self):
+        for answer in ("n", "enter", "escape"):
+            state, rows = self.run_keys(["space", "j", "space", "u", answer, "enter"])
+            self.assertEqual(state, [True, True, False], answer)
+            self.assertTrue(rows[4].startswith("+2 −0"), answer)
+
+    def test_the_count_includes_changes_the_caller_keeps_in_hidden_rows(self):
+        reverted = []
+        state, rows = self.run_keys(["space", "u", "y", "j", "enter"], outside=(0, 1), on_revert=lambda: reverted.append(1))
+        self.assertTrue(rows[0].startswith("+1 −1"))  # the counter shows them too
+        self.assertEqual(rows[1], "Revert 2 change(s)? [y/N]")
+        self.assertEqual(state, [False, False, False])
+        self.assertEqual(reverted, [1])
+        self.assertTrue(rows[3].startswith("+0 −0"))  # and they are gone from it once reverted
+
+    def test_u_with_only_a_hidden_change_reverts_it_at_once(self):
+        reverted = []
+        _, rows = self.run_keys(["u", "j", "enter"], outside=(1, 0), on_revert=lambda: reverted.append(1))
+        self.assertEqual(reverted, [1])
+        self.assertTrue(rows[1].startswith("+0 −0"))
+
+
 class EditBase(DataDir):
     """The edit_manifest() driver the flow tests build on; holds no tests, so subclasses don't rerun any."""
 

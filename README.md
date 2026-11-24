@@ -154,7 +154,7 @@ Every list works the same way, vim-style with Emacs line editing:
 | `Tab` (while filtering) | keep the filter and go back to moving |
 | `Esc` / `^G` | clear the filter, then go back / cancel |
 | `Space` `Tab` | toggle (lists with checkboxes) |
-| `a` `o` `u` | all or none shown / cycle view (all rows, only those that are on, only those you changed) / revert (lists with checkboxes) |
+| `a` `o` `u` | all or none shown / cycle view (all rows, only those that are on, only those you changed) / revert (lists with checkboxes; asks first when more than one row changed, the rows a filter hides included) |
 | `?` | every key of the list, including the list's own (scroll with `j` `k`; `Esc`, `q` or `?` closes it) |
 
 The hint line under the filter starts with `? help`. The bottom line ends with the highlighted row's number and how many rows the filter shows (`row 12 · 340/3700 shown`) when the list's own status (a card's size, say) leaves room for it. Leaving a game list for `s`, `m`, `p` or `v` and coming back keeps your row, filter and view when the list shows the same games.

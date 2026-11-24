@@ -723,6 +723,14 @@ class Flow(DataDir):
         self.assertTrue(rows[2][0].startswith("Keep +1 −0 pending change(s)?"))
         self.assertEqual(store.card_games("c"), {})
 
+    def test_u_in_a_narrowed_list_reverts_a_toggle_the_set_hides_and_counts_it(self):
+        self.card()  # Emerald on, s, the Pokemon set (no Emerald): the counter shows it, u reverts it
+        rows = self.keyed(lambda: edit.edit_card_system("c", "gba", (DEVICE, "esde")),
+                          ["space", "s"], ["enter"], ["j", "u", "j", "enter"])
+        self.assertTrue(rows[2][0].startswith("+1 −0"))
+        self.assertTrue(rows[2][2].startswith("+0 −0"))
+        self.assertEqual(store.card_games("c"), {})
+
     def test_keep_at_esc_in_a_narrowed_list_saves_a_toggle_the_set_hides(self):
         self.card()
         self.keyed(lambda: edit.edit_card_system("c", "gba", (DEVICE, "esde")), ["space", "s"], ["enter"], ["escape", "y"])
