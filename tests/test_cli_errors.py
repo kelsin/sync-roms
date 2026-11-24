@@ -183,6 +183,12 @@ class QuietColorTest(unittest.TestCase):
         self.assertIn("\033[31m", self.failure_line(stdout_tty=False, stderr_tty=True))
         self.assertNotIn("\033[", self.failure_line(stdout_tty=True, stderr_tty=False))
 
+    def test_failure_lines_go_to_stderr_without_quiet(self):
+        out, err = io.StringIO(), io.StringIO()
+        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+            ui.failure("❌ x")
+        self.assertEqual((out.getvalue(), err.getvalue()), ("", "❌ x\n"))
+
 
 class ExitCodeTest(Isolated):
     def code_of(self, fn, *a):

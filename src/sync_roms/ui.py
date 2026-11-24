@@ -154,8 +154,8 @@ def emit_json(data):
 
 
 def failure(text):
-    """Print a line about something that failed: on stdout, or on stderr under --quiet (which discards stdout)."""
-    print(text, file=sys.stderr if QUIET else sys.stdout)
+    """Print a line about something that failed, on stderr."""
+    print(text, file=sys.stderr)
 
 
 def debug(text):

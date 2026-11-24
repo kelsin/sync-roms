@@ -162,10 +162,10 @@ class FirstRunAnswerTest(unittest.TestCase):
 
     def test_path_without_leading_slash_is_not_saved_as_a_bucket(self):
         with tempfile.TemporaryDirectory() as d:
-            saved, ask, out, _ = self.first_run(["Volumes/roms", d])
+            saved, ask, _, err = self.first_run(["Volumes/roms", d])
         self.assertEqual(saved, {"root": os.path.abspath(d)})
         self.assertEqual(ask.call_count, 2)  # asked again, and no endpoint question
-        self.assertIn("Volumes/roms is not an absolute path", out)
+        self.assertIn("Volumes/roms is not an absolute path", err)
 
     def test_existing_folder_name_is_a_folder_and_must_be_absolute(self):
         with tempfile.TemporaryDirectory() as d, tempfile.TemporaryDirectory() as cwd:
@@ -173,11 +173,11 @@ class FirstRunAnswerTest(unittest.TestCase):
             old = os.getcwd()
             os.chdir(cwd)
             try:
-                saved, _, out, _ = self.first_run(["roms", d])
+                saved, _, _, err = self.first_run(["roms", d])
             finally:
                 os.chdir(old)
         self.assertEqual(saved, {"root": os.path.abspath(d)})
-        self.assertIn("roms is not an absolute path", out)
+        self.assertIn("roms is not an absolute path", err)
 
     def test_home_folder_answer_is_expanded(self):
         with tempfile.TemporaryDirectory() as home, mock.patch.dict(os.environ, {"HOME": home}):

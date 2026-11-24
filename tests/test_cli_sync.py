@@ -813,7 +813,7 @@ class SyncSmokeTest(DataDir):
         with mock.patch.object(cli.os, "replace", replace):
             got, _, _, _ = self.sync_card_files(os.path.join("vectrex", "Game.zip"), 5)
         self.assertEqual(got, ["gba/Game.zip"])
-        self.assertIn("busy", self.out.getvalue())
+        self.assertIn("busy", self.err.getvalue())
 
     def test_a_rename_that_fails_is_a_failure(self):
         def fail(path, new):
@@ -824,7 +824,7 @@ class SyncSmokeTest(DataDir):
                        (cli, {"free_space": lambda path: 10**9}))
             code = self.run_sync(False, prepare=self.card_rom(os.path.join("gba", "GAME.zip"), 5), patches=patches)
         self.assertEqual(code, 1)
-        self.assertIn("busy", self.out.getvalue())
+        self.assertIn("busy", self.err.getvalue())
 
     def test_a_dry_run_does_not_delete_loose_discs_the_real_run_tucks_away(self):
         discs = ["Fahrenheit (USA) (Disc 1) (Sega CD).chd", "Fahrenheit (USA) (Disc 2) (Sega CD).chd"]
@@ -951,7 +951,7 @@ class SyncSmokeTest(DataDir):
         self.assertEqual(self.run_sync(True, patches=patches), 0)
         out = self.out.getvalue()
         self.assertIn("Free on the card: 1000 B", out)
-        self.assertIn("Not enough space: 2.0 KB to download, 1000 B free", out)
+        self.assertIn("Not enough space: 2.0 KB to download, 1000 B free", self.err.getvalue())
         self.assertIn("Would download 2 file(s) (2.0 KB)", out)
         self.assertEqual(out.count("Scraped data:"), 1)
 
@@ -1288,7 +1288,7 @@ class SyncSmokeTest(DataDir):
             return len(todo)
         patches = ((cli, {"free_space": lambda path: 10**9}), (cli.downloads, {"run_downloads": run_downloads}))
         self.assertEqual(self.run_sync(False, patches=patches), 1)
-        self.assertRegex(self.out.getvalue().splitlines()[-1], r"^⚠️  Done with 1 failure\(s\): downloaded 0 file\(s\) \(0 B\) in \d+m\d\ds$")
+        self.assertRegex(self.err.getvalue().splitlines()[-1], r"^⚠️  Done with 1 failure\(s\): downloaded 0 file\(s\) \(0 B\) in \d+m\d\ds$")
 
     def test_a_settings_file_that_cannot_be_written_is_a_failure_and_the_card_is_not_ejected(self):
         def fail():

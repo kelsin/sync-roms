@@ -349,7 +349,8 @@ class ChdTest(unittest.TestCase):
                 return "SHA1:         " + f.read().encode().hex()
 
         with mock.patch.object(external, "run_tool", fake_run), mock.patch.object(external, "find_tool", lambda t: t), \
-                mock.patch.object(external, "tool_output", info), contextlib.redirect_stdout(io.StringIO()) as out:
+                mock.patch.object(external, "tool_output", info), contextlib.redirect_stdout(io.StringIO()) as out, \
+                contextlib.redirect_stderr(io.StringIO()) as err:
             self.assertEqual(chd.chd_command(SimpleNamespace(chd=self.dir, dry_run=False)), 1)
         kept = [n for n in os.listdir(psx) if n.endswith(".zip")]  # the jobs run in parallel: either archive may come second
         self.assertEqual(len(kept), 1)
@@ -357,7 +358,7 @@ class ChdTest(unittest.TestCase):
         with open(os.path.join(psx, "Game (USA).chd")) as f:
             self.assertEqual({f.read(), kept[0]}, {"Game (USA) (Rev 1).zip", "Game (USA).zip"})
         self.assertIn(f"❌ psx/{kept[0]}: Game (USA).chd already exists and doesn't match this disc (kept)", out.getvalue())
-        self.assertIn("1 converted, 1 failed", out.getvalue())
+        self.assertIn("1 converted, 1 failed", err.getvalue())
 
     def race(self, gate, first, second, after=False):
         """[first's error, second's] for two jobs with one output, run at once. second starts when first is at self.hold()
@@ -1098,8 +1099,8 @@ class ChdTest(unittest.TestCase):
                 self.touch("SD/psx/Game.iso")
                 got, out, err = self.run_on_card(root, **kwargs)
                 self.assertEqual(got, code)
-                self.assertIn("card SD", out)
-                self.assertIn("download", out)
+                self.assertIn("card SD", err)
+                self.assertIn("download", err)
                 self.assertEqual(os.listdir(root), ["Game.chd"] if code == 0 else ["Game.iso"])
                 if code:
                     self.assertIn("Not converting", err)
@@ -1108,9 +1109,9 @@ class ChdTest(unittest.TestCase):
     def test_dry_run_inside_a_saved_card_only_warns(self):
         self.touch("SD/psx/Game.iso")
         with mock.patch.object(ui, "confirm", side_effect=AssertionError("asked")):
-            code, out, _ = self.run_on_card(os.path.join(self.dir, "SD", "psx"), dry_run=True)
+            code, _, err = self.run_on_card(os.path.join(self.dir, "SD", "psx"), dry_run=True)
         self.assertEqual(code, 0)
-        self.assertIn("card SD", out)
+        self.assertIn("card SD", err)
 
     def test_card_warning_shows_on_stderr_under_quiet(self):
         self.touch("SD/psx/Game.iso")
@@ -1173,19 +1174,19 @@ class ChdTest(unittest.TestCase):
     def test_job_that_raises_an_oserror_fails_like_the_others(self):
         self.touch("psx/Game.iso", "psx/Bad.zip")
         with mock.patch.object(tempfile, "mkdtemp", side_effect=PermissionError(13, "Permission denied")):
-            code, out, _ = self.run_on_card(os.path.join(self.dir, "psx"))
+            code, out, err = self.run_on_card(os.path.join(self.dir, "psx"))
         self.assertEqual(code, 1)
         self.assertIn("❌ Bad.zip: [Errno 13] Permission denied", out)
-        self.assertIn("1 converted, 1 failed", out)
+        self.assertIn("1 converted, 1 failed", err)
         self.assertEqual(sorted(os.listdir(os.path.join(self.dir, "psx"))), ["Bad.zip", "Game.chd"])
 
     def test_job_that_raises_an_oserror_with_no_text_fails_too(self):
         self.touch("psx/Bad.zip")
         with mock.patch.object(tempfile, "mkdtemp", side_effect=OSError()):
-            code, out, _ = self.run_on_card(os.path.join(self.dir, "psx"))
+            code, out, err = self.run_on_card(os.path.join(self.dir, "psx"))
         self.assertEqual(code, 1)
         self.assertIn("❌ Bad.zip: OSError", out)
-        self.assertIn("0 converted, 1 failed", out)
+        self.assertIn("0 converted, 1 failed", err)
 
 
 if __name__ == "__main__":

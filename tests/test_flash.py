@@ -306,9 +306,10 @@ class Run(helpers.StorageDir):
             self.enterContext(p)
 
     def flash(self, dry_run=False):
-        with contextlib.redirect_stdout(io.StringIO()) as out, contextlib.redirect_stderr(io.StringIO()):
+        with contextlib.redirect_stdout(io.StringIO()) as out, contextlib.redirect_stderr(io.StringIO()) as err:
             code = flash.run(Args(dry_run))
         self.out = out.getvalue()
+        self.err = err.getvalue()
         return code
 
     def steps(self):
@@ -325,7 +326,7 @@ class Run(helpers.StorageDir):
             self.assertEqual(self.flash(), 1)
             self.write_image.assert_not_called()
             self.assertNotIn(SUDO, self.calls)
-            self.assertIn("Not flashed", self.out)
+            self.assertIn("Not flashed", self.err)
 
     def test_confirmation_strips_whitespace(self):
         self.answer = " disk4 \n"
@@ -377,7 +378,7 @@ class Run(helpers.StorageDir):
         self.assert_temp_removed()
         self.assertEqual(self.steps()[-1], ["diskutil", "unmountDisk", "disk4"])
         self.assertNotIn(["diskutil", "eject", "disk4"], self.calls)
-        self.assertIn("dd: boom", self.out)
+        self.assertIn("dd: boom", self.err)
 
     def test_ctrl_c_cleans_up(self):
         self.write_image.side_effect = KeyboardInterrupt
@@ -411,7 +412,7 @@ class Run(helpers.StorageDir):
         flash._run.side_effect = run
         self.assertEqual(self.flash(), 1)
         self.write_image.assert_not_called()
-        self.assertIn("disk busy", self.out)
+        self.assertIn("disk busy", self.err)
 
     def test_sudo_uses_terminal(self):
         self.flash()
@@ -431,7 +432,7 @@ class Run(helpers.StorageDir):
         self.assertEqual(self.flash(), 1)
         self.write_image.assert_not_called()
         self.assertFalse([c for c in self.calls if isinstance(c, list) and c[0] == "diskutil" and "disk4" in c])
-        self.assertIn("changed since you picked it", self.out)
+        self.assertIn("changed since you picked it", self.err)
 
     def test_download_storage_error_fails(self):
         from botocore.exceptions import ClientError
@@ -455,7 +456,7 @@ class Run(helpers.StorageDir):
         self.assertEqual(self.filter_list.call_count, 2)
         self.write_image.assert_not_called()
         self.assertEqual(self.steps(), [])
-        self.assertIn("couldn't tell which disk holds /", self.out)
+        self.assertIn("couldn't tell which disk holds /", self.err)
         self.assert_temp_removed()
 
     def test_temp_disk_lookup_failure_aborts(self):
@@ -483,13 +484,13 @@ class Run(helpers.StorageDir):
         with mock.patch.object(ui, "ask", ask):
             self.assertEqual(self.flash(), 1)
         ask.assert_not_called()
-        self.assertIn("no SD card found", self.out)
+        self.assertIn("no SD card found", self.err)
         self.assert_temp_removed()
 
     def test_no_images(self):
         os.remove(os.path.join(self.root, IMAGE))
         self.assertEqual(self.flash(), 1)
-        self.assertIn("no Knulli, BaseOS, muOS, ROCKNIX or OakMoss images", self.out)
+        self.assertIn("no Knulli, BaseOS, muOS, ROCKNIX or OakMoss images", self.err)
 
     def test_both_firmwares_ask_which(self):
         self.put("os/muos/muos-banana-20260101.img.gz", gzip.compress(b"img"))
@@ -534,7 +535,7 @@ class Run(helpers.StorageDir):
         code, asked = self.rocknix_run({"id": "ayn-odin-2", "rocknix_image": "SM8550"})
         self.assertEqual(code, 1)
         self.assertEqual(asked, ["🎯 Which device?"])  # never offered the H700 images
-        self.assertIn("No ROCKNIX image for SM8550 in storage's os/rocknix/", self.out)
+        self.assertIn("No ROCKNIX image for SM8550 in storage's os/rocknix/", self.err)
         self.write_image.assert_not_called()
 
     def test_rocknix_device_with_no_rocknix_image_stops(self):
@@ -565,7 +566,7 @@ class Run(helpers.StorageDir):
         with mock.patch.object(flash.sys, "platform", "linux"):
             self.assertEqual(self.flash(), 1)
         self.filter_list.assert_not_called()
-        self.assertIn("flash needs macOS", self.out)
+        self.assertIn("flash needs macOS", self.err)
 
 
 class Dispatch(Isolated):

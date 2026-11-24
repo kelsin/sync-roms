@@ -38,9 +38,21 @@ def read_from(card_dir, *parts):
 
 
 def captured(fn, *a, **kw):
-    out = io.StringIO()
-    with contextlib.redirect_stdout(out):
+    out, err, outer = io.StringIO(), io.StringIO(), sys.stderr
+
+    class Tee:  # also keeps writing to a stderr a test already redirected
+        def write(self, text):
+            err.write(text)
+            return outer.write(text)
+
+        def flush(self):
+            outer.flush()
+
+        def isatty(self):
+            return outer.isatty()
+    with contextlib.redirect_stdout(out), contextlib.redirect_stderr(Tee()):
         result = fn(*a, **kw)
+    captured.err = err.getvalue()  # what the call wrote on stderr
     return result, out.getvalue()
 
 
@@ -174,7 +186,7 @@ class CleanDirsTest(unittest.TestCase):
             walks, _, out = self.run_real_walk(removable=False)
         self.assertEqual(len(walks), 2)
         self.assertEqual(out.count("Removing the 2 ._ file(s) left"), clean.DELETE_RETRIES)
-        self.assertIn("2 ._ file(s) are still there after deleting", out)
+        self.assertIn("2 ._ file(s) are still there after deleting", captured.err)
 
     def test_sudo_is_skipped_when_spotlight_is_off(self):
         calls, out = self.run_clean(lambda p: [], tty=True, yes=False, spotlight=False)
@@ -455,8 +467,8 @@ class EjectTest(unittest.TestCase):
 
     def test_a_busy_card_says_why(self):
         _, out = self.run_eject({"Ejectable": True, "ParentWholeDisk": "disk4"}, unmount_code=1)
-        self.assertIn("could not be unmounted", out)
-        self.assertIn("diskutil unmountDisk disk4", out)
+        self.assertIn("could not be unmounted", captured.err)
+        self.assertIn("diskutil unmountDisk disk4", captured.err)
 
     def test_quiet_still_says_why_a_busy_card_stayed_mounted(self):
         with mock.patch.object(ui, "QUIET", True), contextlib.redirect_stderr(io.StringIO()) as err:
@@ -640,7 +652,7 @@ class SyncFlowTest(unittest.TestCase):
                 self.assertEqual("Removed old driver" in out, not keep)
         code, _, _, out = self.install_steps(MANIFEST["systems"][0]["games"], False, result=1)
         self.assertEqual(code, 1)
-        self.assertIn("Done with 4 failure(s)", out)
+        self.assertIn("Done with 4 failure(s)", captured.err)
 
     def test_stale_media_listed_before_removal(self):
         _, out, _, _, left = self.run_sync(stale=("a.png", "b.png"))

@@ -221,8 +221,8 @@ class ScrapeRunTest(RunBase):
         self.assertNotIn("e.zip", self.client.lookups)
         self.assertNotIn("f.zip", self.client.lookups)
         self.assertFalse(scrape_state.is_unknown("gba", "c.zip"))
-        self.assertIn("quota", self.out.getvalue().lower())
-        self.assertIn("again", self.out.getvalue().lower())
+        self.assertIn("quota", self.err.getvalue().lower())
+        self.assertIn("again", self.err.getvalue().lower())
 
     def test_not_found_marks_unknown_and_writes_nothing_for_it(self):
         self.put("gba/a.zip")
@@ -254,7 +254,7 @@ class ScrapeRunTest(RunBase):
         self.assertEqual(self.run_scrape(), 1)
         self.assertEqual(set(self.metadata()), {"b.zip"})
         self.assertFalse(scrape_state.is_unknown("gba", "a.zip"))
-        self.assertIn("a.zip", self.out.getvalue())
+        self.assertIn("a.zip", self.err.getvalue())
 
     def test_missing_media_type_is_not_a_failure(self):
         self.put("gba/a.zip")
@@ -331,9 +331,9 @@ class ScrapeRunTest(RunBase):
         self.assertEqual(self.metadata(), {})
         self.assertEqual(self.stored(), set())
         out = self.out.getvalue()
-        self.assertIn("gba/a.zip: ScreenScraper download failed (TimeoutError); skipped", out)
-        self.assertIn("couldn't be reached for 3 ROMs in a row", out)
-        self.assertIn("run `sync-roms scrape` again later", out)
+        self.assertIn("gba/a.zip: ScreenScraper download failed (TimeoutError); skipped", self.err.getvalue())
+        self.assertIn("couldn't be reached for 3 ROMs in a row", self.err.getvalue())
+        self.assertIn("run `sync-roms scrape` again later", self.err.getvalue())
         self.assertNotIn("media file(s) skipped", out)
 
     def test_rom_whose_only_media_file_keeps_failing_is_unreachable(self):
@@ -369,7 +369,7 @@ class ScrapeRunTest(RunBase):
                 self.client.download_errors[f"http://media/{gid}/{mtype}"] = screenscraper.RateLimited("ScreenScraper answered HTTP 429")
         self.assertEqual(self.run_scrape(), 1)
         self.assertEqual(self.client.lookups, ["a.zip", "b.zip", "c.zip"])
-        self.assertIn("couldn't be reached for 3 ROMs in a row", self.out.getvalue())
+        self.assertIn("couldn't be reached for 3 ROMs in a row", self.err.getvalue())
 
     def test_refused_login_stops_the_run_after_one_rom(self):
         for r in ("a.zip", "b.zip", "c.zip", "d.zip"):
@@ -384,8 +384,8 @@ class ScrapeRunTest(RunBase):
         self.assertFalse(scrape_state.is_unknown("gba", "a.zip"))
         self.assertEqual(scrape_state.snapshot().not_offered("gba", "a.zip"), set())
         out = self.out.getvalue()
-        self.assertIn("refused the login", out)
-        self.assertIn("scrape --set-credentials", out)
+        self.assertIn("refused the login", self.err.getvalue())
+        self.assertIn("scrape --set-credentials", self.err.getvalue())
         self.assertNotIn("Done", out)
 
     def down(self, *roms):
@@ -403,9 +403,9 @@ class ScrapeRunTest(RunBase):
         self.assertEqual(self.metadata(), {})
         self.assertFalse(scrape_state.is_unknown("gba", "a.zip"))
         out = self.out.getvalue()
-        self.assertIn("couldn't be reached for 3 ROMs in a row", out)
-        self.assertIn("URLError", out)
-        self.assertIn("run `sync-roms scrape` again later", out)
+        self.assertIn("couldn't be reached for 3 ROMs in a row", self.err.getvalue())
+        self.assertIn("URLError", self.err.getvalue())
+        self.assertIn("run `sync-roms scrape` again later", self.err.getvalue())
 
     def test_systems_with_unreadable_metadata_are_skipped_in_the_manifests_order(self):
         self.systems = [NES, {**GBA, "bucket": "gb"}, GBA]
@@ -430,7 +430,7 @@ class ScrapeRunTest(RunBase):
         self.down("a.zip", "b.zip", "c.zip")
         self.assertEqual(self.run_scrape(all=True), 1)
         self.assertNotIn("d.zip", self.client.lookups)
-        self.assertIn("in a row", self.out.getvalue())
+        self.assertIn("in a row", self.err.getvalue())
 
     def test_a_success_resets_the_count(self):
         for r in "abcdef":
@@ -451,7 +451,7 @@ class ScrapeRunTest(RunBase):
         with mock.patch.object(scrape_online, "BATCH", 1):
             self.assertEqual(self.run_scrape(), 1)
         self.assertEqual(set(self.metadata()), {"b.zip", "c.zip"})
-        self.assertIn("a.zip: ScreenScraper request failed (URLError); skipped", self.out.getvalue())
+        self.assertIn("a.zip: ScreenScraper request failed (URLError); skipped", self.err.getvalue())
         self.assertNotIn("in a row", self.out.getvalue())
 
     def test_local_save_errors_are_not_retried_or_counted(self):
@@ -464,7 +464,7 @@ class ScrapeRunTest(RunBase):
         self.assertEqual(self.run_scrape(), 1)
         self.assertEqual(self.client.downloads.count("http://media/1/box-2D"), 1)
         self.assertEqual(set(self.metadata()), {"d.zip"})
-        self.assertIn("a.zip: Couldn't save a ScreenScraper download (No space left on device); skipped", self.out.getvalue())
+        self.assertIn("a.zip: Couldn't save a ScreenScraper download (No space left on device); skipped", self.err.getvalue())
         self.assertNotIn("in a row", self.out.getvalue())
 
     def test_quota_checked_before_the_confirm(self):
@@ -627,7 +627,7 @@ class FinalReviewTest(RunBase):
         self.assertEqual(self.run_scrape(), 1)
         self.assertEqual(set(self.metadata()), {"b.zip"})
         self.assertFalse(scrape_state.is_unknown("gba", "a.zip"))
-        self.assertIn("a.zip", self.out.getvalue())
+        self.assertIn("a.zip", self.err.getvalue())
 
     def test_existing_media_and_derived_art_kept(self):
         self.put("gba/a.zip")
@@ -972,7 +972,7 @@ class RoundTwoRunTest(RunBase):
         self.client.quota_errors = [screenscraper.QuotaExceeded("quota")]
         self.assertEqual(self.run_scrape(), 1)
         self.assertEqual(self.client.lookups, [])
-        self.assertIn("tomorrow", self.out.getvalue())
+        self.assertIn("tomorrow", self.err.getvalue())
 
     def test_refused_login_from_the_first_quota_call_stops_like_mid_run(self):
         self.put("gba/a.zip")
@@ -980,14 +980,14 @@ class RoundTwoRunTest(RunBase):
         self.assertEqual(self.run_scrape(), 1)
         self.assertEqual(self.client.quota_calls, 1)
         self.assertEqual(self.client.lookups, [])
-        self.assertIn("⛔ ScreenScraper refused the login (HTTP 403). Everything scraped so far is saved", self.out.getvalue())
+        self.assertIn("⛔ ScreenScraper refused the login (HTTP 403). Everything scraped so far is saved", self.err.getvalue())
 
     def test_quota_from_a_download(self):
         self.put("gba/a.zip")
         self.client.download_errors["http://media/1/box-2D"] = screenscraper.QuotaExceeded("quota")
         self.assertEqual(self.run_scrape(), 1)
         self.assertEqual(self.metadata(), {})
-        self.assertIn("quota", self.out.getvalue())
+        self.assertIn("quota", self.err.getvalue())
         self.assertFalse(scrape_state.is_unknown("gba", "a.zip"))
 
     def test_431_reported_as_its_own_condition(self):
@@ -995,7 +995,7 @@ class RoundTwoRunTest(RunBase):
         self.client.quota_at = None
         self.client.errors = {"a.zip": [screenscraper.TooManyUnrecognized("431")]}
         self.assertEqual(self.run_scrape(), 1)
-        self.assertIn("unrecognized", self.out.getvalue())
+        self.assertIn("unrecognized", self.err.getvalue())
         self.assertNotIn("daily quota", self.out.getvalue())
 
     def test_quota_stops_a_sibling_roms_downloads(self):
@@ -1205,7 +1205,7 @@ class MatchRoundTwoTest(RunBase):
         self.client.games["x"] = dict(game(8, screenscraper.NOTGAME), id=8)
         self.assertEqual(self.run_match(game_q="8"), 1)
         out = self.out.getvalue()
-        self.assertIn("8 is not a playable game", out)
+        self.assertIn("8 is not a playable game", self.err.getvalue())
         self.assertNotIn("has no game 8", out)
         self.assertNotIn("Done!", out)
         self.assertIsNone(scrape_state.manual_match("gba", "a.zip"))
@@ -1462,9 +1462,9 @@ class ProgressTest(RunBase):
         out = self.out.getvalue()
         self.assertRegex(out, r"\[\d/4\] ✅ gba/a\.zip → Alpha  name\+size, 2 media")
         self.assertRegex(out, r"\[\d/4\] 🚫 gba/n\.zip → Test Cart: ScreenScraper lists it as a non-game")
-        self.assertRegex(out, r"\[\d/4\] ⚠️  gba/x\.zip: ScreenScraper request failed \(HTTP 500\); skipped")
+        self.assertRegex(self.err.getvalue(), r"\[\d/4\] ⚠️  gba/x\.zip: ScreenScraper request failed \(HTTP 500\); skipped")
         self.assertRegex(out, r"\[\d/4\] ❔ gba/zzz\.zip: not on ScreenScraper")
-        self.assertEqual(sorted(int(n) for n in __import__("re").findall(r"\[(\d)/4\]", out)), [1, 2, 3, 4])
+        self.assertEqual(sorted(int(n) for n in __import__("re").findall(r"\[(\d)/4\]", out + self.err.getvalue())), [1, 2, 3, 4])
 
     def test_media_is_copied_without_a_line_per_file(self):
         self.put("gba/a.zip")
@@ -1485,7 +1485,7 @@ class ProgressTest(RunBase):
         with mock.patch.object(s3, "write_file", side_effect=write_file):
             self.assertEqual(self.run_scrape(), 1)
         self.assertIn("❌ scrapes/gba/covers/a.png: disk full", self.out.getvalue())
-        self.assertIn("gba/a.zip: its media didn't all upload; skipped", self.out.getvalue())
+        self.assertIn("gba/a.zip: its media didn't all upload; skipped", self.err.getvalue())
 
     def test_batch_header_shows_time_and_quota(self):
         for r in ("a.zip", "b.zip", "c.zip"):
@@ -1542,8 +1542,8 @@ class ProgressTest(RunBase):
         self.assertNotIn("e.zip", self.client.lookups)
         out = self.out.getvalue()
         self.assertIn("Interrupted", out)
-        self.assertIn("3 ROM(s) scraped this run are saved and 3 are left", out)
-        self.assertIn("run `sync-roms scrape` again to continue", out)
+        self.assertIn("3 ROM(s) scraped this run are saved and 3 are left", self.err.getvalue())
+        self.assertIn("run `sync-roms scrape` again to continue", self.err.getvalue())
         self.assertNotIn("Done", out)
 
     def test_lookup_without_its_media_is_not_saved_on_ctrl_c(self):
@@ -1559,7 +1559,7 @@ class ProgressTest(RunBase):
         self.assertEqual(self.run_scrape(), 130)
         self.assertEqual(set(self.metadata()), {"a.zip"})
         self.assertFalse(any("/b." in k for k in self.stored()))
-        self.assertIn("1 ROM(s) scraped this run are saved and 1 are left", self.out.getvalue())
+        self.assertIn("1 ROM(s) scraped this run are saved and 1 are left", self.err.getvalue())
 
     def test_ctrl_c_during_the_media_copy_keeps_the_roms_copied_whole(self):
         self.put("gba/a.zip")
@@ -1574,7 +1574,7 @@ class ProgressTest(RunBase):
         self.assertEqual(set(self.metadata()), {"a.zip"})
         out = self.out.getvalue()
         self.assertNotIn("didn't all upload", out)
-        self.assertIn("1 ROM(s) scraped this run are saved and 1 are left", out)
+        self.assertIn("1 ROM(s) scraped this run are saved and 1 are left", self.err.getvalue())
 
     def test_ctrl_c_while_waiting_in_the_run_saves_what_finished(self):
         for r in "abcd":
@@ -1602,7 +1602,7 @@ class ProgressTest(RunBase):
             self.assertEqual(self.run_scrape(), 130)
         self.assertEqual(set(self.metadata()), {"a.zip"})
         self.assertFalse(any("/b." in k for k in self.stored()))  # its lookup ended after the stop: no media kept
-        self.assertIn("1 ROM(s) scraped this run are saved and 3 are left", self.out.getvalue())
+        self.assertIn("1 ROM(s) scraped this run are saved and 3 are left", self.err.getvalue())
 
     def test_ctrl_c_after_a_quota_stop_still_exits_130(self):
         for r in ("b.zip", "c.zip"):
