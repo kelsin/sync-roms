@@ -763,7 +763,7 @@ class DownloadsTest(unittest.TestCase):
                 mock.patch.object(clean.shutil, "which", return_value=diskutil), \
                 mock.patch.object(clean.os.path, "ismount", side_effect=lambda p: p == "/Volumes/SD"), \
                 mock.patch.object(clean.subprocess, "run", return_value=info) as run, \
-                contextlib.redirect_stdout(io.StringIO()) as out:
+                contextlib.redirect_stderr(io.StringIO()) as out:
             cli.report_failures(failures)
         return out.getvalue(), run
 
