@@ -1,4 +1,4 @@
-"""The Syncthing settings sync puts on spruce cards (data/syncthing.json), switched off by `spruce_syncthing: false`."""
+"""The Syncthing settings sync puts on spruce cards (data/syncthing.json), switched off by `syncthing: false`."""
 import glob
 import json
 import os
@@ -14,7 +14,7 @@ def data():
 
 
 def enabled():
-    return usersettings.load_settings().get("spruce_syncthing") is not False
+    return usersettings.load_settings().get("syncthing") is not False
 
 
 def forced_keys():

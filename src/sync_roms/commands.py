@@ -682,10 +682,10 @@ def effective_settings():
 
 CONFIG_KINDS = {"bucket": str, "root": str, "endpoint": str, "profile": str, "write_profile": str, "mirror": str,
                 "eject": bool, "storage_cache_declined": bool, "surprise_ttl_days": int, "surprise_excluded_systems": list,
-                "screenscraper_user": str, "screenscraper_password": str, "spruce_ra_mode": str, "spruce_ra_username": str,
-                "spruce_ra_password": str, "spruce_ra_api_key": str, "spruce_ra_offline_proxy": bool,
-                "spruce_ra_proxy_stats": bool, "spruce_syncthing": bool}  # the settings `config set` and `config unset` take
-HIDDEN = {"screenscraper_password", "spruce_ra_password", "spruce_ra_api_key"}  # set, never printed
+                "screenscraper_user": str, "screenscraper_password": str, "ra_mode": str, "ra_username": str,
+                "ra_password": str, "ra_api_key": str, "ra_offline_proxy": bool,
+                "ra_proxy_stats": bool, "syncthing": bool}  # the settings `config set` and `config unset` take
+HIDDEN = {"screenscraper_password", "ra_password", "ra_api_key"}  # set, never printed
 
 
 def config_value(name, text):
@@ -707,7 +707,7 @@ def config_value(name, text):
             ui.fail(f"{name} takes comma-separated system ids; unknown: {', '.join(unknown) or '(none given)'}\n"
                     "   `sync-roms completion list systems` lists them.", 2)
         return ids
-    if name == "spruce_ra_mode" and text not in spruce_settings.MODES:
+    if name == "ra_mode" and text not in spruce_settings.MODES:
         ui.fail(f"{name} is one of {', '.join(spruce_settings.MODES)}, not {text!r}", 2)
     if not text:
         ui.fail(f"{name} can't be empty: `sync-roms config unset {name}` removes it", 2)

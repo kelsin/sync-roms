@@ -36,9 +36,9 @@ class Setting(helpers.DataDir):
 
     def test_on_by_default(self):
         self.assertTrue(spruce_syncthing.enabled())
-        usersettings.save_settings({"spruce_syncthing": False})
+        usersettings.save_settings({"syncthing": False})
         self.assertFalse(spruce_syncthing.enabled())
-        usersettings.save_settings({"spruce_syncthing": True})
+        usersettings.save_settings({"syncthing": True})
         self.assertTrue(spruce_syncthing.enabled())
 
     def test_forced_settings_skip_syncthing_without_wifi(self):
@@ -46,11 +46,11 @@ class Setting(helpers.DataDir):
         self.assertNotIn(self.ENABLE, spruce_syncthing.forced_settings("c"))
         store.write_cards({"c": {"device": "anbernic-rg-sp", "layout": "spruce"}})
         self.assertIn(self.ENABLE, spruce_syncthing.forced_settings("c"))
-        usersettings.save_settings({"spruce_syncthing": False})
+        usersettings.save_settings({"syncthing": False})
         self.assertEqual(spruce_syncthing.forced_settings("c"), [])
 
     def test_config_set_takes_it(self):
-        self.assertIs(commands.config_value("spruce_syncthing", "false"), False)
+        self.assertIs(commands.config_value("syncthing", "false"), False)
 
 
 class Card(helpers.CardDir):
@@ -110,7 +110,7 @@ class Card(helpers.CardDir):
         self.assertFalse(any(e.secret for e in found.values()))
 
     def test_entries_empty_when_off(self):
-        usersettings.save_settings({"spruce_syncthing": False})
+        usersettings.save_settings({"syncthing": False})
         self.put("Emu/SFC/config.json", self.emu())
         self.assertEqual(spruce_syncthing.entries("c", self.card), [])
 
@@ -192,7 +192,7 @@ class Card(helpers.CardDir):
         self.assertEqual(before, {rel: self.read(rel) for rel in before})
 
     def test_off_leaves_the_card_identical(self):
-        usersettings.save_settings({"spruce_syncthing": False})
+        usersettings.save_settings({"syncthing": False})
         self.put("Emu/SFC/config.json", self.emu())
         self.put("Saves/ra-configs/retroarch-A.cfg", self.CFG)
         before = self.snapshot(), self.read("Emu/SFC/config.json"), self.read("Saves/ra-configs/retroarch-A.cfg")
