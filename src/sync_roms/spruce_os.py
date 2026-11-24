@@ -49,5 +49,11 @@ def install(card, layout_name, base, dry_run, wrote=None, keep=False):
     if wrote is not None:
         wrote.append(target)
     store.update_card(card, spruce_os=name)
-    print(f"🌲 spruceOS {ui.green(name)} → card root (run Apps → EZ Updater on the device)")
+    print(f"🌲 spruceOS {ui.green(name)} → card root")
     return 0
+
+
+def remind(staged):
+    """The last line of a sync that staged a spruceOS 7z (staged: its card paths): how to install it."""
+    for path in staged:
+        print(ui.bold(f"🌲 spruceOS {os.path.basename(path)} is on the card: run Apps → EZ Updater on the device to install it"))
