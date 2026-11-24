@@ -29,7 +29,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "flash": ("", "write a Knulli, BaseOS, muOS, ROCKNIX or OakMoss image from storage's os/ to an SD card"),
     "unmount": ("", "clean the macOS junk off an SD card and unmount it"),
     "mount": ("", "mount again an SD card that was unmounted but not pulled out"),
-    "cards": ("[edit|list|new|set|rename|convert|clean|delete|copy|export|import]", "list and manage the cards you've synced"),
+    "cards": ("[edit|list|new|set|rename|convert|install|clean|delete|copy|export|import]", "list and manage the cards you've synced"),
     "saves": ("stash|apply [CARD] [--retroarch DIR], manage", "copy RetroArch saves and states off a card, or onto one (Android: over adb), or tidy the stashes"),
     "devices": ("[ID]", "list the supported devices, or one device's systems"),
     "layouts": ("[ID]", "list the firmware card layouts, or one layout's folders and devices"),
@@ -226,6 +226,7 @@ TOPICS = {
   sync-roms cards set NAME [--device ID|full] [--layout NAME] [--size 512GB]
   sync-roms cards rename OLD NEW
   sync-roms cards convert [CARD] --layout NAME [--dry-run] [--yes]   move the card's ROMs, BIOS and saves to another layout's folders
+  sync-roms cards install [CARD] [--dry-run] [--yes]   put storage's newest spruceOS on a spruce card: deletes all but Roms, BIOS, Saves and spruce themes, then unpacks it
   sync-roms cards clean [CARD] [--dry-run] [--yes]   delete the media other layouts' scrapes left in the card's ROM folders
   sync-roms cards delete NAME [--yes]
   sync-roms cards copy SRC DST                merge SRC's games, sets, excluded and collections into DST (not surprises); skips systems DST can't play
@@ -494,7 +495,7 @@ def help_text(topic=None):
   {ui.yellow('-n, --dry-run')}   show what would happen, change nothing (commands that can't honor it refuse it)
   {ui.yellow('-y, --yes')}       answer prompts with their default (deleting stays "no"). In these commands --yes is the
                   confirmation, so they delete: `clean scrapes`, `cards clean`, `cards convert` (the old layout's
-                  media), `cards delete` and `download pico8` (old cart revisions)
+                  media), `cards install` (the card's other files), `cards delete` and `download pico8` (old cart revisions)
   {ui.yellow('--quiet')}         print only errors, warnings and --json data (prompts go to stderr)
   {ui.yellow('--verbose')}       also print the effective settings
   {ui.yellow('--json')}          machine-readable output for devices, layouts, diff, games list, cards list and `sync --dry-run` (use --device/--layout to skip the pickers)
