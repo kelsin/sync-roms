@@ -72,6 +72,20 @@ class FolderStorageTest(unittest.TestCase):
                 mirroring.mirror_command(mock.Mock(clear_mirror=False, use_mirror=mirror, mirror=None))
         self.assertIsNone(runtime._mirror_root)
 
+    def test_mirror_dry_run_is_labelled_and_saves_nothing(self):
+        mirror = os.path.join(self.root, "mirror")
+        for use, saved in ((mirror, "wasn't saved"), (None, None)):
+            args = mock.Mock(clear_mirror=False, use_mirror=use, mirror=None if use else mirror, dry_run=True)
+            out = io.StringIO()
+            with mock.patch.object(runtime, "ROOT", None), mock.patch.object(s3, "access", return_value="bucket"), \
+                    mock.patch.object(mirroring, "refresh_mirror", return_value=0), \
+                    mock.patch.object(usersettings, "save_setting", side_effect=AssertionError("saved")), \
+                    contextlib.redirect_stdout(out):
+                self.assertEqual(mirroring.mirror_command(args), 0)
+            self.assertIn("🧪 Dry run — nothing downloaded or deleted", out.getvalue())
+            self.assertNotIn("Done!", out.getvalue())
+            self.assertEqual("not saved" in out.getvalue(), saved is not None)
+
     def test_list_with_etags_marks_folder_tags_as_not_md5(self):
         s3.put_text("gba/a.zip", "abc")
         (size, etag), = s3.list_with_etags("gba/").values()

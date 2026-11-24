@@ -173,8 +173,14 @@ def mirror_command(args):
     root = os.path.abspath(os.path.expanduser(root))
     print(ui.bold(f"🪞 Mirror {ui.cyan(root)}") + ui.dim(f"  {s3.access()}"))
     failed = refresh_mirror(root, args.dry_run)
-    if args.use_mirror and not args.dry_run:
-        usersettings.save_setting("mirror", root)
-        print(ui.green(f"💾 Saved {root} as the local mirror"))
-    print(ui.green("\n🎉 Done!") if not failed else ui.red(f"\n⚠️  Done with {failed} failure(s)"))
+    if args.use_mirror:
+        if args.dry_run:
+            print(ui.dim(f"  (dry run: {root} was not saved as the local mirror)"))
+        else:
+            usersettings.save_setting("mirror", root)
+            print(ui.green(f"💾 Saved {root} as the local mirror"))
+    if args.dry_run:
+        print(ui.yellow("\n🧪 Dry run — nothing downloaded or deleted"))
+    else:
+        print(ui.green("\n🎉 Done!") if not failed else ui.red(f"\n⚠️  Done with {failed} failure(s)"))
     return 1 if failed else 0
