@@ -192,6 +192,21 @@ class UsageHelpTest(Isolated):
                 with self.subTest(topic=topic, line=line[:40]):
                     self.assertEqual(plain.sub("", line).count("`") % 2, 0)
 
+    def test_every_usage_row_is_its_own_line(self):
+        """No row is fused into another's description, and each subcommand has its row in its command's topic."""
+        for topic, text in cli.TOPICS.items():
+            for line in text.splitlines():
+                if line.strip().startswith("sync-roms "):
+                    with self.subTest(topic=topic, line=line[:40]):
+                        self.assertIsNone(re.search(r"(?<![`\w/.-])sync-roms ", line.strip()[1:]), line)
+        for command, words in commands.second_words().items():
+            if command not in cli.TOPICS:
+                continue
+            rows = [line.strip() for line in cli.TOPICS[command].splitlines() if line.strip().startswith("sync-roms ")]
+            for word in words:
+                with self.subTest(command=command, word=word):
+                    self.assertTrue(any(re.match(rf"sync-roms {command} \[?(?:[\w-]+\|)*{re.escape(word)}\b", row) for row in rows), rows)
+
     def test_a_long_command_row_continues_under_its_usage_and_summary_indent(self):
         usage = "[SYSTEM | match SYSTEM ROM GAME | review [SYSTEM] | missing [SYSTEM] | art [SYSTEM]]"
         summary = "scrape the ROMs that have no metadata from ScreenScraper into `storage's scrapes/` folder and more words"

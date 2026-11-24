@@ -184,7 +184,8 @@ TOPICS = {
   build/publish shows the same panels as its previews.
 
   sync-roms themes publish [STYLE...] [--palette NAME (repeatable) | --all-palettes] [--dry-run]
-      [--yes]   put them in storage
+          [--yes]
+      put them in storage
 
   Builds as above (the palettes chosen the same way; a choice made in the picker is saved even with
   --dry-run), then makes each theme's os/spruceos/themes/<theme>/ match the build (write profile):
@@ -272,9 +273,9 @@ TOPICS = {
   sync-roms cards install [CARD] [--dry-run] [--yes]
       put storage's newest spruceOS on a spruce card: a clean install: deletes all but Roms, then
       unpacks it
-  sync-roms cards clean [CARD] [--dry-run] [--yes]   delete the media other layouts' scrapes left in
-                                                     the card's ROM folders sync-roms cards delete
-                                                     NAME [--yes]
+  sync-roms cards clean [CARD] [--dry-run] [--yes]
+      delete the media other layouts' scrapes left in the card's ROM folders
+  sync-roms cards delete NAME [--yes]
   sync-roms cards copy SRC DST                merge SRC's games, sets, excluded and collections into
                                               DST (not surprises); skips systems DST can't play
   sync-roms cards export FILE [--yes]         surprises and collections go into the file as plain
@@ -329,8 +330,10 @@ TOPICS = {
   allium    Saves/CurrentProfile         saves/<core>     states/<core>
   spruce    Saves                        saves/<core>     states/<core>
   muos      MUOS/pickles                 sram/<core>      state/<core>
+                                                          (Pickles, not RetroArch)
   emudeck   Emulation/saves/retroarch    saves            states
   nextui    (card root)                  Saves/<TAG>      .userdata/shared/<TAG>-<core>
+                                                          (MinUI .sav naming)
 
   --retroarch DIR   read or write that folder instead of a mounted card's RetroArch folder (not over
                     adb): the real folder EmuDeck's symlinks point to, or a copy of an Android
