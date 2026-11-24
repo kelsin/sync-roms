@@ -228,6 +228,7 @@ TOPICS = {
   sync-roms cards convert [CARD] --layout NAME [--dry-run] [--yes]   move the card's ROMs, BIOS and saves to another layout's folders
   sync-roms cards install [CARD] [--dry-run] [--yes]   put storage's newest spruceOS on a spruce card: a clean install: deletes all but Roms, then unpacks it
   sync-roms cards clean [CARD] [--dry-run] [--yes]   delete the media other layouts' scrapes left in the card's ROM folders
+  CARD (convert, clean) is a saved card's name or its mounted folder (default: the current directory).
   sync-roms cards delete NAME [--yes]
   sync-roms cards copy SRC DST                merge SRC's games, sets, excluded and collections into DST (not surprises); skips systems DST can't play
   sync-roms cards export FILE [--yes]         surprises and collections go into the file as plain games; asks before overwriting FILE (--yes overwrites)
@@ -241,7 +242,7 @@ TOPICS = {
   sync-roms saves apply [CARD] [--retroarch DIR] [--dry-run]    copy picked stashed ones onto the card
   sync-roms saves manage [--dry-run] [--yes]                    inspect, label, move, prune and delete stashes
 
-  CARD is the card's folder (default: the current directory); it needs a layout (`sync-roms cards set NAME --layout`).
+  CARD is a saved card's name or its mounted folder (default: the current directory); it needs a layout (`sync-roms cards set NAME --layout`).
   An Android card (esde, not windows-pc) is reached over wireless adb instead: CARD is its name, or with no CARD (and
   the current folder isn't a card) a device is picked from those adb sees, the last row walking through pairing a new
   one (Wireless debugging). It needs adb (brew install android-platform-tools). The card's SD card is remembered

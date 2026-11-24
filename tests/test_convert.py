@@ -633,6 +633,19 @@ class ConvertCommandTest(unittest.TestCase):
                 for _, later in checks[i + 1:]:
                     self.assertNotIn(later, self.err.getvalue())
 
+    def test_card_name_resolves_to_its_mounted_folder(self):
+        with open(os.path.join(self.data, "cards.json"), "w") as f:
+            self.json.dump({"NOSUCHCARD7": {"device": "anbernic-rg-34xxsp", "layout": "knulli"}}, f)
+        for command in (convert.convert_command, convert.clean_command):
+            self.err.truncate(0)
+            self.err.seek(0)
+            args = self.argparse.Namespace(card="NOSUCHCARD7", layout="nextui", dry_run=False, yes=True)
+            with self.redirect_err(self.err), self.assertRaises(SystemExit) as caught:
+                command(args)
+            self.assertEqual(caught.exception.code, 2)
+            self.assertIn("No folder /Volumes/NOSUCHCARD7: give the card's mounted folder, e.g. `/Volumes/NOSUCHCARD7`",
+                          self.err.getvalue())
+
     def test_conflicts_reported_and_layout_still_saved(self):
         touch(os.path.join(self.base, "Roms", "Game Boy Advance (GBA)", "Game.zip"), b"other")
         self.assertEqual(self.run_cmd(), 0)
