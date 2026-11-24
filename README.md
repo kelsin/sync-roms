@@ -43,7 +43,7 @@ Your settings and cards in the data folder are never touched by an install or up
 
 - **python3** (3.12+); boto3, textual and textual-image (which brings Pillow) are installed with the package
 - An AWS profile named **`roms-readonly`** with read access to storage (not needed with a storage folder; set `ROMS_PROFILE` to use a different profile name), defined in `~/.aws/config` and `~/.aws/credentials`
-- Only for `convert`: **7z** and **chdman**, and optionally **unar** (used for `.rar` when installed; `sync-roms tools install` installs all three with Homebrew), plus **extract-xiso** for Xbox (no Homebrew formula: build it from [XboxDev/extract-xiso](https://github.com/XboxDev/extract-xiso) with `cmake -B build && cmake --build build`) and **iso2zar** for Xbox 360 (no formula: build it from [iso2zar](https://codeberg.org/NeverAnswers/iso2zar) with `cargo build --release`)
+- Only for `convert` (and `cards install`, which needs just the 7z): **7z** and **chdman**, and optionally **unar** (used for `.rar` when installed; `sync-roms tools install` installs all three with Homebrew), plus **extract-xiso** for Xbox (no Homebrew formula: build it from [XboxDev/extract-xiso](https://github.com/XboxDev/extract-xiso) with `cmake -B build && cmake --build build`) and **iso2zar** for Xbox 360 (no formula: build it from [iso2zar](https://codeberg.org/NeverAnswers/iso2zar) with `cargo build --release`)
 
 ### AWS profiles
 
