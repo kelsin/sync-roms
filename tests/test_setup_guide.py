@@ -60,14 +60,25 @@ class SetupGuideTest(unittest.TestCase):
         self.assertIn("jkx7j-mnlfo", html)
         self.assertIn("w5nqg-xmpq6", html)
 
-    def test_guide_command_opens_the_packaged_page(self):
+    def test_guide_command_opens_a_copy_with_your_cards(self):
+        import json
+        import re
         from unittest import mock
-        from sync_roms import commands
+        from sync_roms import commands, store
+        store.write_cards({"Main": {"device": "trimui-brick-pro", "layout": "spruce"},
+                           "Friend": {"device": "trimui-brick-pro", "layout": "spruce", "guest": True}})
         with mock.patch("webbrowser.open", return_value=True) as opened:
             self.assertEqual(commands.run(["guide"]), 0)
         url = opened.call_args[0][0]
-        self.assertTrue(url.startswith("file://") and url.endswith("/sync_roms/data/setup-guide.html"))
-        self.assertTrue(os.path.exists(update_setup_guide.GUIDE))
+        self.assertTrue(url.startswith("file://") and url.endswith("/cache/setup-guide.html"))
+        with open(os.path.join(store.cache_dir(), "setup-guide.html")) as f:
+            html = f.read()
+        cards = json.loads(re.search(r'id="cards-data">(.*?)</script>', html, re.S).group(1))
+        self.assertEqual(cards, [{"name": "Main", "device": "trimui-brick-pro", "layout": "spruce"}])
+
+    def test_packaged_page_holds_no_cards(self):
+        with open(update_setup_guide.GUIDE) as f:
+            self.assertIn('id="cards-data">[]</script>', f.read())
 
 
 if __name__ == "__main__":

@@ -244,6 +244,7 @@ details.emu .body .label { font-size: .72rem; text-transform: uppercase; letter-
       <h1>Device Setup Guide</h1>
       <p>What I do to set up each handheld after <code>sync-roms</code> writes its card.</p>
     </div>
+    <label class="pick" id="card-pick" hidden>Card <select id="card"></select></label>
     <label class="pick">Device <select id="device"></select></label>
     <label class="pick">Layout <select id="layout"></select></label>
   </div>
@@ -254,6 +255,9 @@ details.emu .body .label { font-size: .72rem; text-transform: uppercase; letter-
   <nav class="toc" id="toc"></nav>
   <div id="steps"></div>
 </main>
+
+<!-- Your cards, filled in by `sync-roms guide` into the copy it opens; empty in the repo. -->
+<script type="application/json" id="cards-data">[]</script>
 
 <!-- Copied from src/sync_roms/data/devices.json; tests/test_setup_guide.py keeps them in step. -->
 <script type="application/json" id="devices-data">
@@ -1491,12 +1495,33 @@ function readHash() {
   return { device: h.get("device"), layout: h.get("layout") };
 }
 
+// Spruce first, and the default unless the device can run Android (ES-DE).
 function fillLayouts(device, wanted) {
+  const layouts = [...device.firmwares].sort((a, b) => (b === "spruce") - (a === "spruce"));
   $layout.innerHTML = "";
-  for (const id of device.firmwares) $layout.append(new Option(LAYOUTS[id] || id, id));
-  $layout.value = device.firmwares.includes(wanted) ? wanted : device.firmwares[0];
-  $layout.disabled = device.firmwares.length < 2;
+  for (const id of layouts) $layout.append(new Option(LAYOUTS[id] || id, id));
+  const fallback = layouts.includes("spruce") && !layouts.includes("esde") ? "spruce" : device.firmwares[0];
+  $layout.value = layouts.includes(wanted) ? wanted : fallback;
+  $layout.disabled = layouts.length < 2;
 }
+
+// Saved cards: picking one sets the device and layout; changing either afterwards clears the pick.
+const CARDS = JSON.parse(document.getElementById("cards-data").textContent)
+  .filter(c => DEVICES.some(d => d.id === c.device));
+const $card = document.getElementById("card");
+if (CARDS.length) {
+  document.getElementById("card-pick").hidden = false;
+  $card.append(new Option("Pick a card…", ""));
+  for (const c of CARDS) $card.append(new Option(c.name, c.name));
+}
+$card.addEventListener("change", () => {
+  const c = CARDS.find(x => x.name === $card.value);
+  if (!c) return;
+  $device.value = c.device;
+  fillLayouts(DEVICES.find(d => d.id === c.device), c.layout);
+  render();
+  $card.value = c.name;
+});
 
 function render() {
   const device = DEVICES.find(d => d.id === $device.value);
@@ -1576,10 +1601,11 @@ function applyHash() {
   render();
 }
 $device.addEventListener("change", () => {
+  $card.value = "";
   fillLayouts(DEVICES.find(d => d.id === $device.value), $layout.value);
   render();
 });
-$layout.addEventListener("change", render);
+$layout.addEventListener("change", () => { $card.value = ""; render(); });
 window.addEventListener("hashchange", applyHash);
 applyHash();
 </script>
