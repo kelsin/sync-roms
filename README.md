@@ -585,6 +585,8 @@ It is local only, so storage holds the `.chd` and `.m3u` files and the card's ga
 - `b` takes back the last `i` and goes back to that ROM (a search already scraped stays: `scrape match` changes it).
 - `q` stops.
 
+Every letter but `i` and `I` works in either case.
+
 Ignores are written when the review ends, by `q`, Ctrl-C or the last ROM, to `ignored.json` at the root of storage, shared by everyone using that storage: sync-roms never shows, syncs, uploads or scrapes the ROMs listed there, and never deletes their files. Each run checks the file and keeps a copy in the data folder. To stop ignoring a ROM, remove it from `ignored.json` in storage.
 
 **Progress.** Before it asks to start, the run says the most requests it can make (one lookup and one download per media type for each ROM) and how many are left today. ROMs go in batches of 25. Each batch's heading shows today's requests as ScreenScraper last reported them and, from the second batch on, the time elapsed and left. Each ROM gets a line as it ends: the game it matched, how (hash, name+size or manual) and its media count, or that it isn't on ScreenScraper, is a non-game or failed. The media is then copied or uploaded behind a progress bar that lists only failures.

@@ -8,7 +8,7 @@ import sys
 
 from . import ignore, inventory, s3, scrape_online, scrape_state, screenscraper, ui
 
-PROMPT = "[i]gnore · [s]earch · [t]ranslated · [k]eep for later · [b]ack · [q]uit · [I]gnore all the rest  (k): "
+PROMPT = "[i]gnore · [s]earch · [t]ranslated · [k]eep for later · [b] undo last ignore · [q]uit · [I]gnore all the rest  (k): "
 NOTHING = "No non-game or unknown ROMs to review ✨"
 _TAGS = re.compile(r"\s*[\(\[][^\)\]]*[\)\]]")
 
@@ -82,6 +82,8 @@ def review(systems, keys, sizes, client=None):
             _show(key, sizes.get(key), scrape_state.notgames().get(key), (i + 1, len(keys)))
             while True:
                 answer = ui.ask(PROMPT).strip()
+                if answer != "I":
+                    answer = answer.lower()  # i and I mean different things; every other letter means one
                 if answer in ("", "k"):
                     scrape_state.keep(name, rom)
                     i += 1
