@@ -6,7 +6,7 @@ import os
 import re
 import tempfile
 
-from . import collections, drivers, github, ignore, inventory, runtime, s3, scrape_plan, scrape_state, store, surprise, ui, usersettings
+from . import collections, drivers, github, ignore, inventory, runtime, s3, scrape_plan, scrape_state, screenscraper, store, surprise, ui, usersettings
 
 LISTING = "https://www.lexaloffle.com/bbs/?cat=7&sub=2&orderby=featured"
 _CARTS = "https://www.lexaloffle.com/bbs/cposts/"
@@ -276,7 +276,7 @@ def download_pico8(args):
     if not args.yes and not ui.confirm(f"Add these to {s3.location()}?", default=False):
         return 1 if failed else 0
     try:
-        meta = scrape_plan.load_metadata("pico8", fresh=True)
+        scrape_plan.load_metadata("pico8", fresh=True)  # readable before anything is downloaded
     except (*s3.ERRORS, ValueError) as e:
         ui.warn(f"Couldn't read {META} ({e})")
         return 1
@@ -292,9 +292,18 @@ def download_pico8(args):
             return True
         done = pending[:]
         pending.clear()
-        try:
+        titles = {}
+        try:  # re-read, so entries another machine wrote since are kept; only this run's changes are applied
+            meta = scrape_plan.load_metadata("pico8", fresh=True)
+            for old, c, key in done:
+                entry = {"name": c["title"], "developer": c["author"]}
+                if old is not None:
+                    previous = meta.pop(old[len("pico8/"):], {})
+                    entry = screenscraper.qualify({**previous, **entry}) if previous.get("qualifier") else {**previous, **entry}
+                titles[key] = entry["name"]
+                meta = scrape_plan.merge_metadata(meta, {c["file"]: entry})
             s3.put_text(META, scrape_plan.dump_json(meta))
-        except s3.ERRORS as e:
+        except (*s3.ERRORS, ValueError) as e:
             keys = [key for _, _, key in done]
             ui.warn(f"Couldn't write {META} ({e}); removing {', '.join(keys)} again and stopping")
             with contextlib.suppress(*s3.ERRORS):
@@ -311,7 +320,7 @@ def download_pico8(args):
                 code = 1
             _move_state(old_file, c["file"])
             try:
-                still = retarget(old, key, c["title"])
+                still = retarget(old, key, titles[key])
             except OSError as e:  # the references still name the old revision, so it stays
                 ui.warn(f"Couldn't move cards and collections from {old} to {key} ({e}); keeping {old}")
                 code = 1
@@ -346,10 +355,6 @@ def download_pico8(args):
                     ui.warn(f"Couldn't write {file} to {s3.location()} ({e}); stopping")
                     code = 1
                     break
-                entry = {"name": c["title"], "developer": c["author"]}
-                if old is not None:
-                    entry = {**meta.pop(old[len("pico8/"):], {}), **entry}
-                meta = scrape_plan.merge_metadata(meta, {file: entry})
                 pending.append((old, c, key))
                 if len(pending) >= META_EVERY and not finish():
                     break
