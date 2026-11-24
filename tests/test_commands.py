@@ -512,6 +512,14 @@ class CheckShapesTest(Cmd):
                           "cards.json: c: surprises: 'gba/A2.zip' isn't in storage"])
 
 
+class CardsInstallParserTest(unittest.TestCase):
+    def test_parses(self):
+        args = commands.build_parser().parse_args(["cards", "install", "TF2", "--dry-run", "--yes"])
+        self.assertEqual((args.card, args.dry_run, args.yes), ("TF2", True, True))
+        self.assertIs(args.fn, commands.cards_install)
+        self.assertIn("install", commands.second_words()["cards"])
+
+
 class CliTest(unittest.TestCase):
     def test_translate_maps_subcommands_to_flags(self):
         t = cli.translate
