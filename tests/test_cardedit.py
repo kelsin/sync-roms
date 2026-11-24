@@ -1948,10 +1948,61 @@ class SetFlow(Flow):
         self.assertEqual(len(notes), 1)
         self.assertEqual(calls[1][1], calls[0][1])
 
-    def test_no_select_all(self):
+    def test_select_all(self):
         self.card()
         _, calls = self.run_set(returns([False, False]))
-        self.assertIs(calls[0][2]["select_all"], False)
+        self.assertIs(calls[0][2]["select_all"], True)
+
+    def test_a_picks_every_game_shown(self):
+        self.card()
+        self.keyed(lambda: cardedit.edit_set("c", SET, (DEVICE, "esde")), ["a", "enter"])
+        games = store.card_games("c")
+        self.assertEqual({x["bucket"] for x in games["gba"]}, {"gba/Ruby.zip", "gba/Ruby.sav"})
+        self.assertEqual(games["gb"], [g("gb/Red.gb")])
+
+    def run_sets_list(self, *steps):
+        script = Script(*steps)
+        with mock.patch.object(picker, "filter_list", script), contextlib.redirect_stdout(io.StringIO()):
+            chosen = cardedit.pick_card_set("c", (DEVICE, "esde"), [GBA, GB])
+        return chosen, script.calls
+
+    def test_space_in_the_sets_list_switches_the_sets_games_on_then_off(self):
+        self.card(games={"gb": [g("gb/Red.gb")]})
+        counts = []
+
+        def look(labels, kw):
+            counts.append(kw["extras"][0][0][0].strip())
+            return (" ", 0)
+        chosen, calls = self.run_sets_list(look, lambda labels, kw: None)
+        self.assertIsNone(chosen)
+        self.assertEqual(calls[0][2]["hotkeys"], (" ", "\t"))
+        games = store.card_games("c")
+        self.assertEqual({x["bucket"] for x in games["gba"]}, {"gba/Ruby.zip", "gba/Ruby.sav"})
+        self.assertEqual(games["gb"], [g("gb/Red.gb")])
+        self.run_sets_list(look, lambda labels, kw: counts.append(kw["extras"][0][0][0].strip()))
+        self.assertEqual(counts, ["1/2", "✅", "0/2"])
+        self.assertEqual(store.card_games("c"), {})
+
+    def test_tab_in_the_sets_list_excludes_games_a_referenced_set_syncs(self):
+        self.card(games={store.SETS_KEY: ["pk"]})
+        self.run_sets_list(returns(("\t", 0)), returns(None))
+        self.assertEqual(store.card_games("c"), {store.SETS_KEY: ["pk"]})
+        self.assertEqual(store.card_excluded("c"), {"gb": ["gb/Red.gb"], "gba": ["gba/Ruby.sav", "gba/Ruby.zip"]})
+
+    def test_the_sets_list_keeps_its_toggles_on_ctrl_c(self):
+        self.card()
+
+        def interrupt(labels, kw):
+            raise KeyboardInterrupt
+        with self.assertRaises(KeyboardInterrupt):
+            self.run_sets_list(returns((" ", 0)), interrupt)
+        self.assertEqual(store.card_games("c")["gb"], [g("gb/Red.gb")])
+
+    def test_enter_in_the_sets_list_opens_the_set(self):
+        self.card()
+        chosen, _ = self.run_sets_list(returns(0))
+        self.assertEqual(chosen["id"], "pk")
+        self.assertEqual(store.card_games("c"), {})
 
     def test_status_counts_picked_games_and_their_bios(self):
         self.card()
@@ -2346,6 +2397,6 @@ class GameFiltersTest(unittest.TestCase):
 
 class DeadHints(unittest.TestCase):
     def test_the_lists_that_turn_a_off_do_not_hint_at_it_and_the_systems_hint_says_all_games(self):
-        for hint in (cardedit.SET_GAMES_HINT, cardedit.ALL_GAMES_HINT):
-            self.assertNotIn("a all", hint)
+        self.assertNotIn("a all", cardedit.ALL_GAMES_HINT)
+        self.assertIn("a all", cardedit.SET_GAMES_HINT)
         self.assertIn("a all games", cardedit.LIST_HINT)

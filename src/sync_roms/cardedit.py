@@ -26,7 +26,8 @@ META_HINT = "Enter list its values · Esc back"
 VALUES_HINT = "Enter narrow to it · Esc back · / filter"
 COLLECTIONS_HINT = "Space/Tab toggle · Enter done · / filter"
 SETS_HINT = "Enter show its games · Space/Tab toggle its games here · / filter"
-SET_GAMES_HINT = "Space toggle · Enter done · w note · v variant · r series"
+SET_GAMES_HINT = "Space toggle · Enter done · a all · w note · v variant · r series"
+CARD_SETS_HINT = "Enter show its games · Space/Tab toggle its games · / filter"
 ALL_GAMES_HINT = "Space toggle · Enter done · w note · v variant · s set · c clear"
 LIST_KEYS = [("Enter", "the system's games"), ("f", "full system: every file in its folder (again to undo)"),
              ("x", "turn the system off on this card: nothing of it syncs, its picks stay (again to turn it back on)"),
@@ -368,7 +369,7 @@ def edit_card(name, setup=None, to_fetch=None, card_match=None, on_guest=None):
                 if chosen:
                     set_pos = chosen["name"]
                     edit_set(name, chosen, setup, to_fetch, usages)
-                    changed = ALL
+                changed = ALL  # Space/Tab in the list may have switched games
             elif key == COLLECTIONS_KEY:
                 pick_collections(name, {s["bucket"] for s in can_play(catalog["systems"], setup)},
                                  lambda: card_status(name, setup, systems, to_fetch))
@@ -575,7 +576,9 @@ def pick_collections(name, playable, card_status=None):
 
 def pick_card_set(name, setup, systems, current=None):
     """The set to open as a card's set view, or None: single-select, the sets with a game in storage on systems (the
-    card editor's list), starting on the one named current, each with how many of those games the card syncs."""
+    card editor's list), starting on the one named current, each with how many of those games the card syncs.
+    Space/Tab switches a set's games in storage on, or off when all are synced already, on every system but the full
+    ones (as toggling each in its set view would), saved to cards.json when the list is left."""
     picks = cardpicks.CardPicks(name, setup)
     views = [(x, set_view_keys(x, systems)) for x in store.load_sets()]
     in_storage = {}  # {system bucket: its keys, or True for a full system} of the systems with set games
@@ -584,26 +587,55 @@ def pick_card_set(name, setup, systems, current=None):
             if picks.full(s["bucket"]):
                 in_storage[s["bucket"]] = True
                 continue
-            in_storage[s["bucket"]] = store.folder_keys(s["bucket"])
+            in_storage[s["bucket"]] = picks.system(s).in_storage  # listed now, not while the list is on screen
     except s3.ERRORS as e:
         edit.note(ui.yellow(f"⚠️  Couldn't list storage: {e}"))
         return None
-    shown = []
+    shown = []  # (set, [(system, bucket key, files)] of its games in storage)
     for x, view in views:
-        keys = [k for s, k, _ in view if in_storage[s["bucket"]] is True or k in in_storage[s["bucket"]]]
-        if keys:
-            shown.append((x, keys))
+        rows = [r for r in view if in_storage[r[0]["bucket"]] is True or r[1] in in_storage[r[0]["bucket"]]]
+        if rows:
+            shown.append((x, rows))
     if not shown:
         edit.note("ℹ️  No set has games in storage for this card's systems.")
         return None
-    labels = [f"{themeart.set_emoji(x)} {x['name']}  ({len(keys)} games)" for x, keys in shown]
+    labels = [f"{themeart.set_emoji(x)} {x['name']}  ({len(rows)} games)" for x, rows in shown]
     extras = []
-    for _, keys in shown:
-        have = sum(1 for k in keys if picks.on_card(k))
-        extras.append([(f"  {'✅' if have == len(keys) else f'{have}/{len(keys)}'}", "cyan")])
+
+    def mark():
+        def count(rows):
+            have = sum(1 for _, k, _ in rows if picks.on_card(k))
+            return f"  {'✅' if have == len(rows) else f'{have}/{len(rows)}'}"
+        extras[:] = [[(count(rows), "cyan")] for _, rows in shown]
+
+    def on_hotkey(_key, idx):
+        """Toggles in place, so the screen isn't torn down and redrawn."""
+        if idx is None:
+            return False
+        rows = shown[idx][1]
+        on = not all(picks.on_card(k) for _, k, _ in rows)
+        by_system = {}
+        for s, k, files in rows:
+            if not picks.full(s["bucket"]):
+                by_system.setdefault(s["bucket"], (s, []))[1].extend((k, *files))
+        for s, keys in by_system.values():
+            sp = picks.system(s)  # listed before the list opened
+            cover = picks.cover()
+            base = sp.states(cover)
+            keys = [k for k in keys if k in base]  # a key with no row (a Vita DLC or update) can't be picked here
+            sp.apply(keys, cover, base, [on] * len(keys))
+        mark()
+        return True
+
+    mark()
     cursor = next((n for n, (x, _) in enumerate(shown) if x["name"] == current), 0)
-    i = picker.filter_list(f"📦 Sets on {name}'s systems", labels, extras=extras, cursor=cursor,
-                           preview=lambda i: previews.collection(themeart.set_art(shown[i][0])) if i < len(shown) else None)
+    try:
+        i = picker.filter_list(f"📦 Sets on {name}'s systems", labels, extras=extras, cursor=cursor,
+                               hotkeys=(" ", "\t"), hint=CARD_SETS_HINT, on_hotkey=on_hotkey,
+                               key_help=[("Space/Tab", "switch the set's games on (or off when all are on)")],
+                               preview=lambda i: previews.collection(themeart.set_art(shown[i][0])) if i < len(shown) else None)
+    finally:  # Ctrl-C too: the toggles are kept
+        picks.save()
     return None if i is None else shown[i][0]
 
 
@@ -1029,7 +1061,7 @@ def edit_set(name, game_set, setup, to_fetch=None, card_usages=None, narrow_sets
             result = _games_pass(
                 f"{emoji} {game_set['name']} on {name} — ✅ synced, ⬜ not, 📦 from a set", shown, picks, sps, files_of,
                 start, work, capacity, to_fetch, place, hint=hint, hotkeys=hotkeys, key_help=key_help, filters=filters,
-                select_all=False)
+                select_all=not narrow_sets)
             if not isinstance(result, tuple):
                 break
             if result[0] == CLEAR_KEY:
