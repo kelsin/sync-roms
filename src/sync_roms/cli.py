@@ -1587,7 +1587,7 @@ def sync_card(args):
             else:
                 frontend.describe_collections(plan, layout_name)
             if layout_name == "spruce":
-                themeart.describe(layout_name, base, arts, {*owned, *plan["owned"]})
+                themeart.describe(layout_name, base, arts, {*owned, *plan["owned"]}, entry.get("spruce_theme"))
             elif arts or store.card_flag(entry, "theme"):  # with no art to add it still names the art that would go
                 themeart.describe(layout_name, base, arts)
             return
@@ -1604,7 +1604,7 @@ def sync_card(args):
         if plan["owned"] != owned:
             store.update_card(card, frontend_collections=plan["owned"])
         if layout_name == "spruce":  # also removes the pictures of collections that lost their art
-            art = themeart.install(layout_name, base, arts, {*owned, *plan["owned"]})
+            art = themeart.install(layout_name, base, arts, {*owned, *plan["owned"]}, entry.get("spruce_theme"))
         else:  # with no art to add it still removes the art sync-roms wrote before
             art = (bool(arts) or store.card_flag(entry, "theme")) and themeart.install(layout_name, base, arts)
         # EmuDeck's ES-DE is on this computer, not the card, so its writes leave the card as it was

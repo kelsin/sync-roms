@@ -198,10 +198,11 @@ Rules for sets:
 - `art.json`: the art ids, one per set among them (`surprise` has art too).
 - `art/<id>.png`, drawn by `tools/gen_theme_art.py`, with a generated `art/README.md` gallery for GitHub that sync never copies.
 - `art-box/Imgs|Imgs_med|Imgs_small/<id>.png`: retro game boxes for SpruceOS, 336x480, 210x300 and 140x200, drawn by `tools/gen_box_art.py` from `sprites/<id>.txt` (32x32 pixel sprites, colours in `box-palette.json`) with the art's title in `box-font.json` and a badge picked by the id's hash. Run it after changing a sprite and commit both.
+- `../totk-james/collections/Imgs|Imgs_med|Imgs_small/<id>.png`: ToTK-style collection art (gold glowing outline drawings from `gen_theme_art.py` on the theme's swirl card, title in its HYLIA font), 336x480, 210x300 and 140x200 128-colour palette PNGs, drawn by `tools/gen_zelda_art.py` (reads HYLIA from the ToTK theme in storage). Sync uses it instead of `art-box/` on `spruce` cards whose `spruce_theme` is `ToTK` or `ToTK - James`. Run it after changing a drawing or a title and commit both.
 - `emoji.json`: each art id's own emoji, for the editors.
 - `logo-font.json`: the logo font's outlines (OFL).
 
-With the card's `theme` on, sync copies the art into the copy of the theme in ES-DE's folder (the theme itself is a GitHub archive in `os/esde/themes/`, refreshed by `sync-roms themes update`), the theme customizations (Knulli, ROCKNIX), `MUOS/info/catalogue/Collection/box|grid` (muOS) or `Collections/Imgs/<name>.png` plus `Imgs_med/` and `Imgs_small/` from `art-box/` (Spruce: PyUI shows them by exact name, PNG only, never QOI; the theme plays no part).
+With the card's `theme` on, sync copies the art into the copy of the theme in ES-DE's folder (the theme itself is a GitHub archive in `os/esde/themes/`, refreshed by `sync-roms themes update`), the theme customizations (Knulli, ROCKNIX), `MUOS/info/catalogue/Collection/box|grid` (muOS) or `Collections/Imgs/<name>.png` plus `Imgs_med/` and `Imgs_small/` from `art-box/`, or `totk-james/collections/` when the card's `spruce_theme` is a ToTK theme (Spruce: PyUI shows them by exact name, PNG only, never QOI; the theme plays no part).
 
 The names sync gave art are listed in the theme copy's `.sync-roms-collections` (ES-DE; not ROCKNIX's staging folder of that name) or in `.sync-roms-art` (Knulli, ROCKNIX, muOS), and only those lose their art (on Knulli their `subset.<name>.*` settings too) when the collection or its art goes; on Spruce, only the collections sync owns do. With no art left to add, the theme isn't copied for that. A theme update that ships metadata for a listed name takes it off the ES-DE list (the theme's from then on, never removed).
 
@@ -241,7 +242,7 @@ Checking:
 
 - Never finish without looking at the result. Read the generated PNG (the drawing is in y 600..1050), and also crop that part and enlarge it 2x to check every join, line end and overlap.
 - Compare with the pictures next to it in a contact sheet of all of `art/`, and show the user that sheet or the changed pictures. Keep review images out of the commit.
-- The tests check that every `art.json` id has a PNG in `art/`, a sprite (and no sprite lacks an id), the three `art-box/` sizes (equal to what the sprite renders to) and its own emoji; `sync-roms check` notes sets in storage that have no art or share one.
+- The tests check that every `art.json` id has a PNG in `art/`, a sprite (and no sprite lacks an id), the three `art-box/` sizes (equal to what the sprite renders to), the three `totk-james/collections/` sizes and its own emoji; `sync-roms check` notes sets in storage that have no art or share one.
 
 ## Devices
 
