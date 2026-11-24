@@ -307,8 +307,10 @@ def edit_manifest():
             return
         store.save_card(name, *setup)
         open_card(name)
-        if not store.card_games(name) and not ui.confirm(
-                f"Keep new card {name} with no games? (it keeps just the device and firmware)"):
+        card = store.saved_card(name)
+        if not (store.card_games(name) or card.get("collections") or card.get("guest") is True) and ui.confirm(
+                f"Keep new card {name} with no games? (it keeps just the device and firmware)",
+                cancellable=True) is False:
             store.delete_card(name)
 
     def change_setup(name):

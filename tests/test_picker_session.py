@@ -271,6 +271,22 @@ class Session(unittest.TestCase):
             await pilot.press("enter")
         self.assertEqual(self.run_editor(editor, script), (None, ""))
 
+    def test_esc_at_a_cancellable_confirm_is_none_and_enter_is_the_default(self):
+        def editor():
+            picker.filter_list("A", ["a0"])
+            return ui.confirm("One?", cancellable=True), ui.confirm("Two?", False, cancellable=True), ui.confirm("Three?")
+
+        async def script(app, pilot):
+            await wait_for(pilot, lambda: showing(app, "A"))
+            await pilot.press("enter")
+            await wait_for(pilot, lambda: prompting(app, "One? [Y/n] "))
+            await pilot.press("escape")
+            await wait_for(pilot, lambda: prompting(app, "Two? [y/N] "))
+            await pilot.press("enter")
+            await wait_for(pilot, lambda: prompting(app, "Three? [Y/n] "))
+            await pilot.press("escape")
+        self.assertEqual(self.run_editor(editor, script), (None, False, False))
+
     def test_ctrl_c_in_a_prompt_raises_in_the_editor(self):
         def editor():
             picker.filter_list("A", ["a0"])

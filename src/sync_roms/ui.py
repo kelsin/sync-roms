@@ -213,16 +213,19 @@ def ask(prompt, cancellable=False):
         return None if cancellable else ""
 
 
-def _confirm_keys(question, default=True):
-    """confirm's question in the list app: y/n, Enter the default, Esc or ^G no."""
+def _confirm_keys(question, default=True, cancellable=False):
+    """confirm's question in the list app: y/n, Enter the default, Esc or ^G no (None when cancellable)."""
     if not ASSUME_YES:
+        stop = None if cancellable else False
         return (f"{question} {'[Y/n]' if default else '[y/N]'} ",
-                {"y": True, "n": False, "enter": default, "escape": False, "ctrl+g": False})
+                {"y": True, "n": False, "enter": default, "escape": stop, "ctrl+g": stop})
 
 
 @in_app(_confirm_keys)
 @uses_terminal
-def confirm(question, default=True):
+def confirm(question, default=True, cancellable=False):
+    """Ask yes or no. With cancellable, end of input (and Esc or ^G in the list app) gives None instead of the
+    default (or no), so the caller can tell a cancel from an answer."""
     suffix = "[Y/n]" if default else "[y/N]"
     if ASSUME_YES:
         print(f"{question} {suffix} {'y' if default else 'n'} (--yes)")
@@ -232,7 +235,7 @@ def confirm(question, default=True):
             a = _input(f"{question} {suffix} ").strip().lower()
         except EOFError:  # no terminal to answer on: take the default
             print()
-            return default
+            return None if cancellable else default
         if not a:
             return default
         if a in ("y", "yes"):

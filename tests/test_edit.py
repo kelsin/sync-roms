@@ -71,14 +71,27 @@ class EscPrompt(unittest.TestCase):
 class EditBase(DataDir):
     """The edit_manifest() driver the flow tests build on; holds no tests, so subclasses don't rerun any."""
 
-    def run_edit(self, picks, confirmed, name="newcard"):
+    def run_edit(self, picks, confirmed, name="newcard", extra=None, asked=None):
+        """extra: card fields the new card gets when saved; asked: gets the keyword arguments of each ui.confirm."""
         picks = iter(picks)
+        real_save = store.save_card
+
+        def save(card, *setup):
+            real_save(card, *setup)
+            if extra:
+                store.update_card(card, **extra)
+
+        def confirm(*a, **k):
+            if asked is not None:
+                asked.append(k)
+            return confirmed
         with mock.patch.object(runtime, "BUCKET", "b", create=True), \
                 mock.patch.object(s3, "list_sizes", return_value={}), \
                 mock.patch.object(picker, "filter_list", side_effect=lambda *a, **k: next(picks)), \
                 mock.patch("builtins.input", return_value=name), \
                 mock.patch.object(picker, "choose_setup", return_value=(None, "esde")), \
-                mock.patch.object(ui, "confirm", return_value=confirmed), \
+                mock.patch.object(store, "save_card", side_effect=save), \
+                mock.patch.object(ui, "confirm", side_effect=confirm), \
                 mock.patch.object(ui, "choose", side_effect=lambda *a, **k: "s" if confirmed else "d"), \
                 mock.patch.object(edit, "note"), \
                 contextlib.redirect_stdout(io.StringIO()):
@@ -90,6 +103,21 @@ class EditFlow(EditBase):
         # top menu: Cards; "New card" is option 0 with no cards; the card editor Esc; back; the top menu Esc to finish
         self.assertEqual(self.run_edit([0, 0, None, None, None], confirmed=False), 0)
         self.assertNotIn("newcard", self.read("cards.json"))
+
+    def test_new_card_left_empty_and_cancelled_is_kept(self):
+        asked = []
+        self.assertEqual(self.run_edit([0, 0, None, None, None], confirmed=None, asked=asked), 0)
+        self.assertIn("newcard", self.read("cards.json"))
+        self.assertEqual(asked, [{"cancellable": True}])
+
+    def test_the_keep_question_is_not_asked_for_a_card_with_collections_or_guest(self):
+        for extra in ({"collections": ["x"]}, {"guest": True}):
+            with self.subTest(extra):
+                asked = []
+                self.run_edit([0, 0, None, None, None], confirmed=False, extra=extra, asked=asked)
+                self.assertEqual(asked, [])
+                self.assertIn("newcard", self.read("cards.json"))
+                os.remove(self.path("cards.json"))
 
     def test_new_card_saved_with_setup(self):
         self.assertEqual(self.run_edit([0, 0, None, None, None], confirmed=True), 0)
