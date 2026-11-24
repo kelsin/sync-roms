@@ -38,7 +38,8 @@ def recognized(dest, keys, sizes, disc_dir=None, folders=None):
 
 def seed_games(seed):
     """The cards.json `games` value for a seed {bucket: {key: card path}}."""
-    return store.sorted_list({b: sorted(keys) for b, keys in seed.items() if keys})
+    return store.sorted_list({b: [{"bucket": k, "title": store.key_title(k)} for k in sorted(keys)]
+                              for b, keys in seed.items() if keys})
 
 
 def save_seed(card, seed):
