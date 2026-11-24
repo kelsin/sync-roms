@@ -1,4 +1,4 @@
-"""sync-roms umount: tidy a mounted SD card the way the end of a sync does, then unmount it."""
+"""sync-roms unmount: tidy a mounted SD card the way the end of a sync does, then unmount it."""
 import sys
 
 from . import clean, flash, picker, runtime, ui
@@ -6,7 +6,7 @@ from . import clean, flash, picker, runtime, ui
 
 def run(args):
     if sys.platform != "darwin":
-        ui.failure(ui.red("❌ umount needs macOS"))
+        ui.failure(ui.red("❌ unmount needs macOS"))
         return 1
     exclude = flash.disks_of(runtime.ROOT) if runtime.ROOT else set()  # never offer the disk holding storage
     cards = [d for d in flash.external_disks(exclude) if d.mounts]

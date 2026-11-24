@@ -1,4 +1,4 @@
-"""sync-roms mount: mount again an SD card that was unmounted (by umount or the end of a sync) but not pulled."""
+"""sync-roms mount: mount again an SD card that was unmounted (by unmount or the end of a sync) but not pulled."""
 import subprocess
 import sys
 

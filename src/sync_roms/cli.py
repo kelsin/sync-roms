@@ -16,6 +16,7 @@ from . import collections as colls
 from . import guest as guests
 
 
+ALIASES = {"umount": "unmount"}  # other names for a command, same help
 SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "sync": ("[CARD]", "download the ROMs, BIOS and scraped data for a card (this is what plain `sync-roms CARD` does)"),
     "edit": ("", "interactive editor: cards, sets, collections, device systems (same as `games edit`)"),
@@ -25,7 +26,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "themes": ("update|pick|build|publish|palettes", "copy the latest Art Book Next for ES-DE and the PyUI themes for spruce from GitHub into storage; build and publish custom spruce themes"),
     "download": ("pico8", "add the PICO-8 BBS Featured carts storage doesn't have, and newer revisions of those it has"),
     "flash": ("", "write a Knulli, BaseOS, muOS, ROCKNIX or OakMoss image from storage's os/ to an SD card"),
-    "umount": ("", "clean the macOS junk off an SD card and unmount it"),
+    "unmount": ("", "clean the macOS junk off an SD card and unmount it"),
     "mount": ("", "mount again an SD card that was unmounted but not pulled out"),
     "cards": ("[edit|list|new|set|rename|convert|clean|delete|copy|export|import]", "list and manage the cards you've synced"),
     "saves": ("stash|apply [CARD] [--retroarch DIR], manage", "copy RetroArch saves and states off a card, or onto one (Android: over adb), or tidy the stashes"),
@@ -192,8 +193,8 @@ TOPICS = {
   writes it, decompressed (gz, xz or zip) on the fly, with 4 MiB blocks (sudo may ask for your password before downloading and
   writing). Last, the temp folder is removed and the card is ejected; after a failure it is unmounted instead, so you can retry.
 """,
-    "umount": """
-  sync-roms umount [--dry-run]                clean the macOS junk off an SD card and unmount it (macOS only)
+    "unmount": """
+  sync-roms unmount [--dry-run]                clean the macOS junk off an SD card and unmount it (macOS only)
 
   Lists the mounted external SD cards (disk id, size, name and volume names; never the disk holding storage), then
   runs the end-of-sync tidy on each volume of the one you pick: .metadata_never_index, .fseventsd/no_log and the
@@ -204,7 +205,7 @@ TOPICS = {
   sync-roms mount [--dry-run]                 mount again an SD card that was unmounted but not pulled out (macOS only)
 
   Lists the external SD cards with no volume mounted (never the disk holding storage), then runs
-  `diskutil mountDisk` on the one you pick, so you don't have to pull it out and put it back after umount or a sync.
+  `diskutil mountDisk` on the one you pick, so you don't have to pull it out and put it back after unmount or a sync.
   An ejected card (as flash leaves it) is gone from the list: that one has to be put back in.
 """,
     "edit": """
@@ -856,13 +857,13 @@ def run(argv):
     if lead < len(argv) and argv[lead] in commands.COMMANDS and argv[lead:lead + 2] not in (["games", "edit"], ["cards", "edit"]):
         cmd = argv[lead:] + argv[:lead]  # leading global flags go after the command, where its parser reads them
         if "-h" in cmd or "--help" in cmd:
-            print(help_text(cmd[0]))
+            print(help_text(ALIASES.get(cmd[0], cmd[0])))
             return 0
         return commands.run(cmd)
     if argv and argv[0] == "help":
-        print(help_text(argv[1] if len(argv) > 1 else None))
+        print(help_text(ALIASES.get(argv[1], argv[1]) if len(argv) > 1 else None))
         return 0
-    topic = next((a for a in argv if a in SUBCOMMANDS), None) if ("-h" in argv or "--help" in argv) else None
+    topic = next((ALIASES.get(a, a) for a in argv if a in SUBCOMMANDS or a in ALIASES), None) if ("-h" in argv or "--help" in argv) else None
     if topic:  # before translate(), which refuses `upload` and the others without their subcommand
         print(help_text(topic))
         return 0
