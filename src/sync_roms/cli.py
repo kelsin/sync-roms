@@ -1469,7 +1469,19 @@ def sync_card(args):
                                              lambda path: True, base, all_media=True)
         return sorted({p for p in [j[1] for j in plan["jobs"]] + [w[0] for w in plan["writes"]] if cardfs.size(p) is not None})
 
+    def deleted_gamelists(paths):
+        """Guest syncs: {gamelist file: [(rom rel, card path)]} for the seeded ROMs at paths, where this layout lists them."""
+        out = defaultdict(list)
+        if esde_problem:
+            return out
+        for s in systems:
+            gl = scrape_plan.gamelist_path(layout_name, s, es_dir, dest_of(s))
+            if gl:
+                out[gl] += [(k.split("/", 1)[1], p) for k, p in seed.get(s["bucket"], {}).items() if p in paths]
+        return {gl: roms for gl, roms in out.items() if roms}
+
     # computed before the ROMs go; removed after, only those no ROM left on the card still names
+    gamelists_gone = deleted_gamelists(set(extras)) if guest else {}
     media_gone = deleted_media(set(extras) | set(kept_extras)) if guest else []
 
     # the media of every ROM that will be on the card, so the totals and the space check count it
@@ -1696,6 +1708,8 @@ def sync_card(args):
     if extras:  # cleared first so the free space shown below is what the downloads really get
         delete_extras(extras)
     cardfs.clear()
+    for gl, roms in gamelists_gone.items():  # the entries of the ROMs that really went
+        guests.remove_gamelist_entries(gl, [r for r, p in roms if not os.path.exists(p)])
 
     # on spruce cards t picks this sync's themes; the removals wait for the answer, so a kept theme isn't copied again
     pick_themes = theme_plan is not None and not ui.ASSUME_YES and ui.has_terminal()
