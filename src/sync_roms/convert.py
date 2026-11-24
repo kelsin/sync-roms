@@ -2,6 +2,7 @@
 and delete the old layout's scraped media. `cards clean`: delete the media other layouts left in the card's ROM folders."""
 import os
 import shutil
+import time
 
 from sync_roms import commands, downloads, frontend, m3u, muos_saves, saves, scrape_plan, store, ui
 
@@ -243,13 +244,14 @@ def _respell(src, dst):
     return os.sep.join(s)
 
 
-def apply_moves(moves, base=None):
+def apply_moves(moves, base=None, step=lambda: None):
     """Rename each (src, dst), making dst's folders; (done, conflicts, failures): a dst that is already another file is
     left alone with its src, a src that is gone is skipped, and a move the filesystem refuses is a (src, dst, error)
     failure while the rest go on. A case-only rename goes through a temporary name. Folders emptied by the moves are
-    removed (never base)."""
+    removed (never base). step() is called before each move."""
     done, conflicts, failures = [], [], []
     for src, dst in moves:
+        step()
         if not os.path.lexists(src):
             continue
         try:
@@ -333,11 +335,12 @@ def plan_media(base, systems, old_name, old, new_name, new):
     return found
 
 
-def remove_media(paths, base=None):
+def remove_media(paths, base=None, step=lambda: None):
     """Delete each file or folder in paths and the ROM folders that are then empty (never base); the (path, error)
-    pairs that could not be removed."""
+    pairs that could not be removed. step() is called before each path."""
     failures = []
     for path in paths:
+        step()
         try:
             if os.path.isdir(path) and not os.path.islink(path):
                 shutil.rmtree(path)
@@ -359,6 +362,22 @@ def _print_media(title, media, base):
     for folder, names in by_folder.items():
         print(f"  {folder}: {', '.join(names)}")
     return len(by_folder)
+
+
+def _progress(total):
+    """(step, bar): step() counts one file moved or deleted and redraws the bar at most every ui.POLL seconds (a big
+    card takes minutes on an SD card); bar.clear() wipes it."""
+    done = [0]
+    bar = ui.ProgressBar(total, lambda: done[0] / total)
+    last = [time.monotonic()]
+
+    def step():
+        now = time.monotonic()
+        if now - last[0] >= ui.POLL:
+            last[0] = now
+            bar.draw(done[0])
+        done[0] += 1
+    return step, bar
 
 
 def convert_command(args):
@@ -392,17 +411,22 @@ def convert_command(args):
                 ui.fail("Pass --yes to convert without a terminal to confirm on", 2)
             if not ui.confirm(f"Move {len(planned)} files" + (f" and delete the old media in {folders} folders?" if media else "?")):
                 return 1
-        failures = []
+        step, bar = _progress(len(planned) + len(media))
+        conflicts, failures = [], []
         for moves in (save_moves, bios_moves, rom_moves):
-            _, conflicts, failed = apply_moves(moves, base)
+            _, conflicted, failed = apply_moves(moves, base, step)
+            conflicts += conflicted
             failures += failed
-            for src, dst in conflicts:
-                ui.warn(f"{dst} already exists; left {src} in place")
+        if not failures:
+            media_failures = remove_media(media, base, step)
+        bar.clear()
+        for src, dst in conflicts:
+            ui.warn(f"{dst} already exists; left {src} in place")
         if failures:
             for src, dst, err in failures:
                 ui.warn(f"could not move {src} → {dst}: {err}")
             ui.fail(f"{len(failures)} move(s) failed; the layout is still {old_name}. Fix the cause and run convert again", 3)
-        for path, err in remove_media(media, base):
+        for path, err in media_failures:
             ui.warn(f"could not delete {path}: {err}")
     if not store.update_card(name, layout=new_name):
         return 3

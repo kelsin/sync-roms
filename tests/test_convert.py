@@ -509,6 +509,33 @@ class ConvertCommandTest(unittest.TestCase):
         self.assertFalse(os.path.exists(os.path.join(self.base, "roms", "gba", "Game.zip")))
         self.assertEqual(self.layout(), "nextui")
 
+    def convert_with_clock(self, out, step):
+        """Convert with a gamelist to delete, each clock reading step seconds after the last, printing to out."""
+        import itertools
+        touch(os.path.join(self.base, "roms", "gba", "gamelist.xml"))
+        self.out = out
+        with mock.patch.object(convert.time, "monotonic", side_effect=itertools.count(0, step)), \
+                mock.patch("shutil.get_terminal_size", return_value=os.terminal_size((80, 24))):
+            self.assertEqual(self.run_cmd(), 0)
+        self.assertTrue(self.moved())
+        return out.getvalue()
+
+    def test_convert_draws_a_progress_bar_on_a_terminal(self):
+        import io
+
+        class Tty(io.StringIO):
+            def isatty(self):
+                return True
+        out = self.convert_with_clock(Tty(), convert.ui.POLL)
+        self.assertIn("1/2 files done   50%", out)
+        self.assertNotIn("files done", out.split("\r\033[J")[-1])  # cleared before the last line
+
+    def test_convert_prints_plain_progress_off_a_terminal(self):
+        import io
+        out = self.convert_with_clock(io.StringIO(), convert.ui.PLAIN_INTERVAL)
+        self.assertIn("progress: 1/2 files done, 50%", out)
+        self.assertNotIn("\033", out)
+
     def test_convert_drops_the_pico8_record(self):
         self.set_card({"device": "anbernic-rg-34xxsp", "layout": "knulli", "pico8": "pico-8_0.2.7_raspi.zip"})
         self.assertEqual(self.run_cmd(dry_run=True, yes=False), 0)
