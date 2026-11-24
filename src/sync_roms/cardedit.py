@@ -815,6 +815,20 @@ def _games_pass(title, shown, picks, sps, files_of, start, work, capacity, to_fe
     links = [[index[m] for m in sp.groups.get(k, ()) if m in index] if sp else [] for k, sp in zip(keys, sp_of)]
     session = {"sel": [base[k] for k in keys]}
     picker.carry_place(place, keys, session)  # where the last pass was, when it listed the same games
+    hidden, seen = {}, set()  # {system bucket: (keys, states when the editor opened)} of what earlier passes switched
+    outside = [0, 0]  # in rows this pass doesn't show, each multi-disc game once: (switched on, switched off)
+    for k, was in start.items():
+        b = k.partition("/")[0]
+        group = sps[b].groups.get(k, [k]) if b in sps and k in bases[b] else ()
+        if group and bases[b][k] != was and not any(m in index or m in seen for m in group):
+            seen.update(group)
+            outside[was] += 1
+            ks, ws = hidden.setdefault(b, ([], []))
+            for f in (k, *files_of.get(k, ())):
+                if f in bases[b]:
+                    ks.append(f)
+                    ws.append(was)
+    reverted = []
 
     def on_card(key):
         """picks.on_card, from this pass's states where the key's system has them."""
@@ -859,11 +873,13 @@ def _games_pass(title, shown, picks, sps, files_of, start, work, capacity, to_fe
             **previews.game_pane(keys), links=links,
             locked=[sp is None or k in sp.surprise for k, sp in zip(keys, sp_of)],
             locked_note=[edit.FULL_SYSTEM_NOTE if sp is None else _locked_note(sp, k) for k, sp in zip(keys, sp_of)],
-            **list_kw)
+            outside=tuple(outside), on_revert=lambda: reverted.append(True), **list_kw)
     except KeyboardInterrupt:  # Ctrl-C: keep the toggles
         apply(session["sel"])
         raise
     apply(session["sel"] if isinstance(result, tuple) else result)
+    for b, (ks, ws) in hidden.items() if reverted else ():  # u at Esc's question: what the pass hid goes back too
+        sps[b].apply(ks, picks.cover(), sps[b].states(picks.cover()), ws)
     return result
 
 

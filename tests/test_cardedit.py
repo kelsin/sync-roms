@@ -672,6 +672,43 @@ class Flow(DataDir):
             changed = edit.edit_card_system("c", bucket, (DEVICE, "esde"))
         return changed, script.calls
 
+    def keyed(self, edit_fn, *lists):
+        """Runs edit_fn() with real list models, each list in turn given the keys of the next of lists; returns the
+        status rows each list showed after each key."""
+        lists, rows = iter(lists), []
+
+        def run(model):
+            shown = []
+            rows.append(shown)
+            for k in next(lists):
+                got = model.key(k)
+                shown.append(model.line[0])
+                if got is not picker.KEEP:
+                    return got
+            raise AssertionError("the list is still open after the last key")
+        with mock.patch.object(picker, "_run", run), \
+                mock.patch.object(previews, "game_pane", lambda keys: {}), contextlib.redirect_stdout(io.StringIO()):
+            edit_fn()
+        return rows
+
+    def test_esc_in_a_narrowed_list_asks_about_a_toggle_the_set_hides(self):
+        self.card()  # Emerald on, s, the Pokemon set (no Emerald), Esc: asked; u reverts Emerald too
+        rows = self.keyed(lambda: edit.edit_card_system("c", "gba", (DEVICE, "esde")),
+                          ["space", "s"], ["enter"], ["escape", "u"])
+        self.assertTrue(rows[2][0].startswith("Keep +1 −0 pending change(s)?"))
+        self.assertEqual(store.card_games("c"), {})
+
+    def test_keep_at_esc_in_a_narrowed_list_saves_a_toggle_the_set_hides(self):
+        self.card()
+        self.keyed(lambda: edit.edit_card_system("c", "gba", (DEVICE, "esde")), ["space", "s"], ["enter"], ["escape", "y"])
+        self.assertEqual(store.card_games("c"), {"gba": [g("gba/Emerald.zip")]})
+
+    def test_esc_in_a_narrowed_list_with_nothing_pending_just_leaves(self):
+        self.card()  # Emerald on and off again: the list returns on Esc
+        self.keyed(lambda: edit.edit_card_system("c", "gba", (DEVICE, "esde")),
+                   ["space", "space", "s"], ["enter"], ["escape"])
+        self.assertEqual(store.card_games("c"), {})
+
     def test_system_list_hides_systems_cached_as_empty_unless_picked(self):
         self.card(size="1 GB")
         self.cache = {"gb/": {}, "gba/": self.files["gba/"], "scrapes/gba/": {}, "BIOS/": {}}
@@ -2006,6 +2043,22 @@ class SetFlow(Flow):
 
     ALL_LABELS = ["Game Boy Advance — Emerald.zip", "Game Boy — Red.gb", "Game Boy Advance — Ruby.sav",
                   "Game Boy Advance — Ruby.zip", "Game Boy Advance — Zelda.zip"]
+
+    def test_esc_in_the_all_games_list_narrowed_to_a_set_asks_about_a_toggle_it_hides(self):
+        for answer, games in (("u", {}), ("y", {"gba": [g("gba/Emerald.zip")]})):
+            self.card()  # Emerald on, s, the Pokemon set (no Emerald), Esc
+            rows = self.keyed(lambda: cardedit.edit_all("c", (DEVICE, "esde"), [GBA, GB]),
+                              ["space", "s"], ["enter"], ["escape", answer])
+            self.assertTrue(rows[2][0].startswith("Keep +1 −0 pending change(s)?"))
+            self.assertEqual(store.card_games("c"), games)
+
+    def test_esc_in_the_set_list_narrowed_to_a_series_asks_about_a_toggle_it_hides(self):
+        for answer, games in (("u", {}), ("y", {"gb": [g("gb/Red.gb")]})):
+            self.card()  # Red (series B) on, r, series A, Esc
+            rows = self.keyed(lambda: cardedit.edit_set("c", self.series_set(), (DEVICE, "esde")),
+                              ["space", "r"], ["enter"], ["escape", answer])
+            self.assertTrue(rows[2][0].startswith("Keep +1 −0 pending change(s)?"))
+            self.assertEqual(store.card_games("c"), games)
 
     def test_edit_all_lists_every_file_of_every_system_with_system_names(self):
         self.card()

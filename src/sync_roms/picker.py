@@ -231,9 +231,10 @@ class _ListModel:
 
     def __init__(self, title, labels, multi, initial, hint, cursor, extras, locked, locked_note, hotkeys, note_text,
                  on_note, esc_asks, hidden, status, diff_marks, session, poll, links, on_hotkey, preview=None, row_note=None,
-                 key_help=None, filters="", preview_width=None, select_all=True):
+                 key_help=None, filters="", preview_width=None, select_all=True, outside=(0, 0), on_revert=None):
         self.preview, self.row_note, self.key_help, self.filters = preview, row_note, key_help, filters
         self.preview_width, self.select_all = preview_width, select_all
+        self.outside, self.on_revert = outside, on_revert
         self.title, self.labels, self.multi, self.hint, self.extras = title, labels, multi, hint, extras
         self.locked_note, self.hotkeys, self.note_text, self.on_note = locked_note, hotkeys, note_text, on_note
         self.esc_asks, self.status, self.diff_marks, self.poll = esc_asks, status, diff_marks, poll
@@ -302,6 +303,7 @@ class _ListModel:
         typed, or the status (a notice, the highlighted locked row's note, its row note, or the counts)."""
         added, removed = self.pending()
         if self.asking:
+            added, removed = added + self.outside[0], removed + self.outside[1]
             return (f"Keep +{added} −{removed} pending change(s)?  y/Enter keep · u revert · any other key keeps editing",
                     "red", None)
         if self.note is not None:
@@ -364,6 +366,8 @@ class _ListModel:
             if k in ("y", "Y", "enter"):
                 return self.state
             if k in ("u", "U"):
+                if self.on_revert:
+                    self.on_revert()
                 return list(self.start)
             return KEEP
         if self.note is not None:
@@ -411,7 +415,7 @@ class _ListModel:
                 return KEEP
             if not self.multi or not self.esc_asks:
                 return None
-            if self.state == self.start:
+            if self.state == self.start and not any(self.outside):
                 return self.state
             self.asking = True
         elif k == "enter":
@@ -1382,7 +1386,7 @@ def _draws_images():
 def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, extras=None, locked=None, locked_note="",
                 hotkeys=(), note_text=None, on_note=None, esc_asks=True, hidden=None, status=None, diff_marks=True,
                 session=None, poll=None, links=None, on_hotkey=None, preview=None, row_note=None, key_help=None, filters="",
-                preview_width=None, select_all=True):
+                preview_width=None, select_all=True, outside=(0, 0), on_revert=None):
     """Modal list: vim keys for moving and acting, Emacs keys for editing the filter.
 
     Normal mode: j/k ↑/↓ ^N/^P move · g/G top/bottom · ^D/^U half page · ^F/^B/PgUp/PgDn/^V page · / filter ·
@@ -1423,6 +1427,8 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
     row_note: optional callable(label index) -> text; when non-empty for the highlighted row it replaces the status
     line (below a notice and a locked row's note).
     select_all: False turns `a` (toggle all shown) off.
+    outside: (on, off) pending changes the caller keeps in rows this list doesn't show (multi mode): Esc asks about
+    them too, and counts them in its question; on_revert() is called when u answers it.
     """
     if preview and not _in_session():  # a session asks the terminal once, before its app starts
         _app_class()  # first: it sets up Textual's environment
@@ -1430,7 +1436,7 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
             preview = None
     return _run(_ListModel(title, labels, multi, initial, hint, cursor, extras, locked, locked_note, hotkeys, note_text,
                            on_note, esc_asks, hidden, status, diff_marks, session, poll, links, on_hotkey, preview, row_note,
-                           key_help, filters, preview_width, select_all))
+                           key_help, filters, preview_width, select_all, outside, on_revert))
 
 
 PLACE = ("row", "query", "view_mode", "top")  # the session entries carry_place keeps
