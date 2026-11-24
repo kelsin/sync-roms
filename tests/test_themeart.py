@@ -59,7 +59,8 @@ class Assets(unittest.TestCase):
             for size, dims in (("Imgs", (336, 480)), ("Imgs_med", (210, 300)), ("Imgs_small", (140, 200))):
                 with Image.open(os.path.join(folder, size, f"{art_id}.png")) as im:
                     self.assertEqual(im.size, dims, (art_id, size))
-                    self.assertEqual(im.mode, "RGBA", (art_id, size))
+                    self.assertEqual(im.mode, "P", (art_id, size))
+                    self.assertEqual(im.convert("RGBA").getpixel((0, 0))[3], 0, (art_id, size))
 
     def test_every_art_has_its_own_emoji_and_no_art_has_the_default(self):
         ids = [*themeart.art_choices(), themeart.SURPRISE_ART]

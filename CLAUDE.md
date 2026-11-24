@@ -198,7 +198,7 @@ Rules for sets:
 - `art.json`: the art ids, one per set among them (`surprise` has art too).
 - `art/<id>.png`, drawn by `tools/gen_theme_art.py`, with a generated `art/README.md` gallery for GitHub that sync never copies.
 - `art-box/Imgs|Imgs_med|Imgs_small/<id>.png`: retro game boxes for SpruceOS, 336x480, 210x300 and 140x200, drawn by `tools/gen_box_art.py` from `sprites/<id>.txt` (32x32 pixel sprites, colours in `box-palette.json`) with the art's title in `box-font.json` and a badge picked by the id's hash. Run it after changing a sprite and commit both.
-- `../totk-james/collections/Imgs|Imgs_med|Imgs_small/<id>.png`: ToTK-style collection art (gold glowing outline drawings from `gen_theme_art.py` on the theme's swirl card, title in its HYLIA font), 336x480, 210x300 and 140x200, drawn by `tools/gen_zelda_art.py` (reads HYLIA from the ToTK theme in storage). Sync uses it instead of `art-box/` on `spruce` cards whose `spruce_theme` is `ToTK` or `ToTK - James`. Run it after changing a drawing or a title and commit both.
+- `../totk-james/collections/Imgs|Imgs_med|Imgs_small/<id>.png`: ToTK-style collection art (gold glowing outline drawings from `gen_theme_art.py` on the theme's swirl card, title in its HYLIA font), 336x480, 210x300 and 140x200 128-colour palette PNGs, drawn by `tools/gen_zelda_art.py` (reads HYLIA from the ToTK theme in storage). Sync uses it instead of `art-box/` on `spruce` cards whose `spruce_theme` is `ToTK` or `ToTK - James`. Run it after changing a drawing or a title and commit both.
 - `emoji.json`: each art id's own emoji, for the editors.
 - `logo-font.json`: the logo font's outlines (OFL).
 

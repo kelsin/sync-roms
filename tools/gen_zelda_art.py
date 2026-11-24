@@ -143,8 +143,20 @@ def render(art_id, font_path):
     return img
 
 
+def palette_image(img):
+    """img as a 128-colour palette image; the octree can merge clear pixels with nearly clear ones, so those go clear."""
+    q = img.quantize(128, method=Image.Quantize.FASTOCTREE)
+    pal = q.getpalette("RGBA")
+    for i in range(3, len(pal), 4):
+        if pal[i] < 8:
+            pal[i] = 0
+    q.putpalette(pal, "RGBA")
+    return q
+
+
 def sizes(img):
-    return {size: img if dims == img.size else img.resize(dims, Image.LANCZOS) for size, dims in SIZES.items()}
+    """The three sizes, each resized from the RGBA render and then made a palette image."""
+    return {size: palette_image(img if dims == img.size else img.resize(dims, Image.LANCZOS)) for size, dims in SIZES.items()}
 
 
 def contact_sheet(cards, path, cols=8, pad=12):
