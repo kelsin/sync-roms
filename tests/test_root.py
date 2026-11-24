@@ -83,7 +83,7 @@ class FolderStorageTest(unittest.TestCase):
         s3.put_text("gba/b.zip", "def")
         with contextlib.redirect_stdout(io.StringIO()):
             self.assertEqual(s3.move_keys([("gba/a.zip", "gba/sub/c.zip")]), 0)
-            self.assertEqual(s3.delete_keys(["gba/b.zip", "gba/missing.zip"])[0]["Key"], "gba/missing.zip")
+            self.assertEqual(s3.delete_keys(["gba/b.zip", "gba/missing.zip"]), [])  # a missing file is already deleted
         self.assertEqual(set(s3.list_sizes("gba/")), {"gba/sub/c.zip"})
 
     def test_run_copies(self):

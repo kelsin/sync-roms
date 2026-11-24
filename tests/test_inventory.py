@@ -353,6 +353,13 @@ class FolderMtimeTest(helpers.StorageFolder):
             self.assertEqual(self.update(), ((0, 0, 0), []))
         self.assertNotIn(threading.main_thread(), threads)
 
+    def test_deleting_a_file_that_is_already_gone_counts_as_deleted(self):
+        self.update()
+        os.remove(os.path.join(self.root.name, "BIOS/x.bin"))
+        errors, _ = quiet(s3.delete_keys, ["BIOS/x.bin"])
+        self.assertEqual(errors, [])
+        self.assertNotIn("BIOS/x.bin", inventory.current().files)
+
     def test_own_writes_into_trusted_folders_keep_them_trusted(self):
         self.update()
         s3.write_file("gba/c.zip", lambda tmp: helpers.touch(tmp, b"1234"))
