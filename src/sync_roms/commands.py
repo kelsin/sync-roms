@@ -498,8 +498,9 @@ def cards_list(args):
 
     # one fixed two-column slot per status emoji (blank when it doesn't apply), so several line up; add new ones here
     badges = lambda r: "".join(emoji if on else "  " for emoji, on in [("🎁", r["surprise"]), ("🎨", r["theme"]),
-                                                                         ("💖", r["collections"]), ("🏆", r["raofflineproxy"])])
-    ui.table([(("👤 " if r["guest"] else "") + r["name"], r["device"] or "(no device set)", r["layout"] or "", used(r), *picks(r), badges(r))
+                                                                         ("💖", r["collections"]), ("🏆", r["raofflineproxy"]),
+                                                                         ("👤", r["guest"])])
+    ui.table([(r["name"], r["device"] or "(no device set)", r["layout"] or "", used(r), *picks(r), badges(r))
               for r in rows])
     if hidden:
         print(ui.dim(f"{hidden} guest card{'' if hidden == 1 else 's'} hidden (--all shows them)"))
