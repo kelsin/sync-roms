@@ -1,5 +1,18 @@
 # Changelog
 
+## [3.30.1](https://github.com/kelsin/sync-roms/compare/v3.30.0...v3.30.1) (2026-11-24)
+
+
+### :bug: Bug Fixes
+
+* **guest:** save seeded picks as game entries so they aren't deleted ([#555](https://github.com/kelsin/sync-roms/issues/555)) ([9d67d61](https://github.com/kelsin/sync-roms/commit/9d67d61bd64fe3dc46171883416e664195629ad4))
+* **themes:** clear pyui's whole resized theme copy, not just its icons ([#552](https://github.com/kelsin/sync-roms/issues/552)) ([097faca](https://github.com/kelsin/sync-roms/commit/097faca3b848f3347be2075e192146e537542170))
+
+
+### :hammer_and_wrench: Code Refactoring
+
+* **cli:** rename umount to unmount, keep umount as an alias ([#553](https://github.com/kelsin/sync-roms/issues/553)) ([66e3840](https://github.com/kelsin/sync-roms/commit/66e3840d98f819dde9e49dc7625e94b93ad8da5b))
+
 ## [3.30.0](https://github.com/kelsin/sync-roms/compare/v3.29.0...v3.30.0) (2026-11-24)
 
 
