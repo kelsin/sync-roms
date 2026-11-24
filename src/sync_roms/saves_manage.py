@@ -182,16 +182,18 @@ def delete(rows, dry_run=False):
 
 
 def prune_picks(rows, keep):
-    """Per row, whether it is beyond the newest `keep` readable stashes of its system, game and ROM dir."""
+    """Per row, whether it is beyond the newest `keep` runs of readable stashes of its system, game and ROM dir (the
+    stashes one `saves stash` made, with the same time and card, are one run)."""
     picks = [False] * len(rows)
     groups = {}
     for i, r in enumerate(rows):
         if not r.get("unreadable"):
             groups.setdefault((r["system"], r["game"], muos_saves.stash_rel(r)), []).append(i)
     for idx in groups.values():
-        idx.sort(key=lambda i: rows[i]["stashed"], reverse=True)
-        for i in idx[keep:]:
-            picks[i] = True
+        runs = sorted({(rows[i]["stashed"], rows[i].get("card") or "") for i in idx}, reverse=True)
+        for i in idx:
+            if (rows[i]["stashed"], rows[i].get("card") or "") in runs[keep:]:
+                picks[i] = True
     return picks
 
 

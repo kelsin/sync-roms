@@ -218,6 +218,14 @@ class OpsTest(helpers.DataDir):
         got = {(r["game"], r["stashed"][:10]) for r, p in zip(rows, picks) if p}
         self.assertEqual(got, {("Game", "2026-01-01"), ("Game", "2026-01-02")})
 
+    def test_prune_keeps_every_stash_of_a_kept_run(self):
+        def row(core, stashed, card="X"):
+            return {"system": "gba", "game": "Game", "stashed": stashed, "card": card, "files": [{"core": core}]}
+        rows = [row("a", "2026-01-02"), row("b", "2026-01-02"), row("a", "2026-01-01")]  # one run made two stashes
+        self.assertEqual(saves_manage.prune_picks(rows, 1), [False, False, True])
+        rows.append(row("a", "2026-01-02", card="Y"))  # another card's run at the same time is its own run
+        self.assertEqual(saves_manage.prune_picks(rows, 2), [False, False, True, False])
+
     def test_prune_skips_unreadable(self):
         bad = os.path.join(saves.stash_root(), "gba", "Game", "20260101-000000-X")
         helpers.touch(os.path.join(bad, "Game.srm"), "abc")
