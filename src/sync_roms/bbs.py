@@ -255,7 +255,7 @@ def download_pico8(args):
     usersettings.ensure_bucket()
     if runtime.ROOT and not os.path.isdir(runtime.ROOT):
         ui.warn(f"The storage folder {runtime.ROOT} isn't there (is it mounted?)")
-        return 1
+        return 3
     if not args.dry_run and not drivers.can_write():
         ui.fail(f"No write access to {s3.location()}: `download pico8` adds files to storage")
     keys = set(inventory.files("pico8/", sizes=False))

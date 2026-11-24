@@ -323,7 +323,7 @@ class Run(helpers.StorageDir):
         for answer in ("Disk4", "y", ""):
             self.calls.clear()
             self.answer = answer
-            self.assertEqual(self.flash(), 1)
+            self.assertEqual(self.flash(), 0)
             self.write_image.assert_not_called()
             self.assertNotIn(SUDO, self.calls)
             self.assertIn("Not flashed", self.err)

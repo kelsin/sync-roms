@@ -381,7 +381,7 @@ def run(args):
         print(ui.yellow(f"⚠️  Everything on {disk.id} ({size}, {disk.name}{volumes}) will be erased."))
         if ui.ask(f"Type {disk.id} to flash it: ").strip() != disk.id:
             ui.failure(ui.red("❌ Not flashed"))
-            return 1
+            return 0
         if args.dry_run:
             print(f"Would download {key} ({ui.human_size(gz_size)}) and write it to {disk.id}")
             return 0
