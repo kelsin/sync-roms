@@ -821,7 +821,7 @@ class Flow(DataDir):
             return kw["session"]["sel"]
         self.run_system(step)
         self.assertEqual(cardedit.GAMES_HINT,
-                         "Space toggle · Enter done · s set · m meta · p past · v variant")
+                         "Space toggle · Enter done · a all · s set · m meta · p past · v variant")
 
     def test_a_game_with_its_variant_on_the_card_is_marked_in_the_list(self):
         self.with_variants(self.RED)

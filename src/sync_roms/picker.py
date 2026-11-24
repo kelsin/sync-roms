@@ -91,18 +91,23 @@ QUIT_NOW = "   Press Ctrl-C again to quit now: unsaved changes in the open edito
 QUIT_AFTER = 1  # seconds after that Ctrl-C from which another one quits; sooner, it is the same press (a double tap, a held key)
 
 
-def help_lines(multi, hint, hidden_count=False, has_note=False, key_help=None, select_all=True):
+def help_lines(multi, hint, hidden_count=False, has_note=False, key_help=None, select_all=True, esc_asks=False,
+               has_locked=False):
     """Every key a filter_list accepts, then this screen's own keys: key_help's (keys, what they do) pairs, or else
-    the hint's entries. A key key_help describes is listed only there."""
+    the hint's entries (less the ones this list already describes). A key key_help describes is listed only there."""
     lines = ["j/k ↑/↓ ^N/^P   move", "g/G             top / bottom", "^D/^U           half page",
              "^F/^B PgDn/PgUp page",
              "/               filter (Enter or Tab keeps it, Esc clears it)",
-             "Enter           " + ("done" if multi else "pick"), "Esc/q/^G        clear the filter, then go back"]
+             "Enter           " + ("done" if multi else "pick"), "Esc/q/^G        clear the filter, then go back"
+             + (" (asks whether to keep changes)" if multi and esc_asks else "")]
     if multi:
-        lines += ["Space/Tab       toggle the row", *(["a               toggle all shown"] if select_all else []),
+        lines += ["Space/Tab       toggle the row",
+                  *(["a               toggle all shown (all off if all are on)"] if select_all else []),
                   "o               view: all / on / changed", "u               revert this list"]
         if has_note:
             lines.append("w               edit the row's note")
+        if has_locked:
+            lines.append("🔒              locked rows can't be toggled (a skips them)")
     if hidden_count:
         lines.append("z               show / hide hidden rows")
     lines.append("?               this help")
@@ -112,7 +117,8 @@ def help_lines(multi, hint, hidden_count=False, has_note=False, key_help=None, s
         described = set().union(*(keys(k) for k, _ in key_help))
         lines = [line for line in lines if not (own := keys(line[:16])) or not own <= described]  # the "/" line's key splits to nothing
         return lines + ["", "This screen:"] + [f"{k:<15} {what}" for k, what in key_help]
-    extra = [e for e in hint.split(" · ") if e] if hint else []
+    generic = ("/ filter", "? help", "j/k ")
+    extra = [e for e in hint.split(" · ") if e and not e.startswith(generic)] if hint else []
     if extra:
         lines += ["", "This screen:"] + ["  " + e for e in extra]
     return lines
@@ -397,7 +403,7 @@ class _ListModel:
             self.typing, self.qpos = True, len(self.query)
         elif k == "?":
             self.help = help_lines(self.multi, self.hint, self.hidden_count, bool(self.on_note), self.key_help,
-                                   self.select_all)
+                                   self.select_all, self.esc_asks, any(self.locked))
         elif k in ("escape", "q", "ctrl+g"):
             if self.query:
                 self.query, self.qpos = "", 0

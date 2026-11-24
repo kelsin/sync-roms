@@ -6,7 +6,7 @@ from . import cardedit, edit, picker, store, themeart, ui
 from .listedit import add_from_set, add_from_system, diff_lists, edit_menu, folder_lister, reconcile, view
 
 
-GAMES_HINT = "Space toggle · Enter done · s set · m meta · c clear filters · p past"
+GAMES_HINT = "Space toggle · Enter done · a all · s set · m meta · c clear · p past"
 GAMES_KEYS = [k for k in cardedit.GAMES_KEYS if k[0] != cardedit.VARIANT_KEY]  # what ? lists in a system's games list
 
 
