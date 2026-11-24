@@ -4,6 +4,7 @@ import json
 import os
 import stat as statmode
 import sys
+import tempfile
 import threading
 import unicodedata
 import unittest
@@ -165,6 +166,16 @@ class BucketCacheTest(helpers.DataDir):
         quiet(inventory.update)
         with mock.patch.object(runtime, "ENDPOINT", "http://minio"):
             self.assertIsNone(inventory.current())
+
+    def test_stat_lists_the_bucket_not_the_mirror_without_a_cache(self):
+        mirror = self.enterContext(tempfile.TemporaryDirectory())
+        self.enterContext(mock.patch.object(runtime, "_mirror_root", mirror))
+        self.assertEqual(inventory.stat(["gba/a.zip", "gba/gone.zip", "BIOS/x.bin"]), {"gba/a.zip": 1, "BIOS/x.bin": 3})
+        self.assertEqual(inventory.stat(["gba/a.zip"]), {"gba/a.zip": 1})
+
+    def test_stat_with_no_mirror_does_not_crash(self):
+        self.enterContext(mock.patch.object(runtime, "_mirror_root", None))
+        self.assertEqual(inventory.stat(["gba/a.zip"]), {"gba/a.zip": 1})
 
 
 class FolderMtimeTest(helpers.StorageFolder):

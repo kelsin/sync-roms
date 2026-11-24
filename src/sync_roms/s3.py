@@ -143,6 +143,11 @@ def read_range(key, start, end):
 def list_sizes(prefix, sizes=True):
     if read_root():
         return mirror_sizes(read_root(), prefix, sizes)
+    return list_bucket(prefix)
+
+
+def list_bucket(prefix):
+    """{key: size} of the bucket's objects whose key starts with prefix, whatever mirror reads come from."""
     pages = s3_client().get_paginator("list_objects_v2").paginate(Bucket=runtime.BUCKET, Prefix=prefix)
     return {o["Key"]: o["Size"] for page in pages for o in page.get("Contents", [])}
 
@@ -157,14 +162,21 @@ def list_folders():
 
 
 def stat_sizes(keys):
-    """{key: size} of the keys that exist as files in the read folder, checked in parallel (one stat each, no folder walk)."""
+    """{key: size} of the keys that exist as files in storage: for a bucket, one listing per system folder (never the
+    mirror, which holds only some of it); else those in the read folder, checked in parallel (one stat each, no folder walk)."""
+    keys = list(keys)
+    if not runtime.ROOT:
+        wanted = set(keys)
+        listed = {}
+        for folder in sorted({k.split("/", 1)[0] for k in wanted}):
+            listed.update(list_bucket(folder + "/"))
+        return {k: n for k, n in listed.items() if k in wanted and not k.endswith("/")}
     def size(key):
         try:
             st = os.stat(safe_join(read_root(), key))
         except (OSError, ValueError):
             return None
         return st.st_size if stat.S_ISREG(st.st_mode) else None
-    keys = list(keys)
     with ThreadPoolExecutor(STAT_WORKERS) as ex:
         return {k: n for k, n in zip(keys, ex.map(size, keys)) if n is not None}
 
