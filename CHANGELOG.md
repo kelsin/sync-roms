@@ -1,5 +1,23 @@
 # Changelog
 
+## [3.31.0](https://github.com/kelsin/sync-roms/compare/v3.30.1...v3.31.0) (2026-11-24)
+
+
+### :video_game: Features
+
+* **themes:** redraw pixel menu icons for collections, games, apps and settings ([#556](https://github.com/kelsin/sync-roms/issues/556)) ([13d4859](https://github.com/kelsin/sync-roms/commit/13d4859f51a4425282274988dc959d78024e6e33))
+
+
+### :bug: Bug Fixes
+
+* **editor:** make the ? help and games hints list a, Esc and locked rows ([#560](https://github.com/kelsin/sync-roms/issues/560)) ([ea66282](https://github.com/kelsin/sync-roms/commit/ea66282e6caf98ec05273a8a032d4a440ebad4b2))
+* **guest:** scrape only the games added this sync ([#559](https://github.com/kelsin/sync-roms/issues/559)) ([5172c1b](https://github.com/kelsin/sync-roms/commit/5172c1ba26ddbbfb9163f46c9b8228fbe8bc12d9))
+
+
+### :book: Documentation
+
+* **cards:** show --all in cards help ([#557](https://github.com/kelsin/sync-roms/issues/557)) ([0e4f2a6](https://github.com/kelsin/sync-roms/commit/0e4f2a64e55aea6f61bfb9bd1b7203587449ca66))
+
 ## [3.30.1](https://github.com/kelsin/sync-roms/compare/v3.30.0...v3.30.1) (2026-11-24)
 
 
