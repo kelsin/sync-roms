@@ -172,6 +172,22 @@ def card_disk(path):
     return info.get("ParentWholeDisk") or None
 
 
+def volume_device(path):
+    """The device identifier (e.g. disk5s1) of the volume holding path, for diskutil repairVolume; None off macOS, on
+    the boot volume or when diskutil can't say."""
+    if sys.platform != "darwin" or not shutil.which("diskutil"):
+        return None
+    mount = os.path.realpath(path)
+    while not os.path.ismount(mount):
+        mount = os.path.dirname(mount)
+    if mount == "/":
+        return None
+    r = subprocess.run(["diskutil", "info", "-plist", mount], capture_output=True)
+    if r.returncode != 0:
+        return None
+    return plistlib.loads(r.stdout).get("DeviceIdentifier") or None
+
+
 def eject():
     """Unmount every volume on the card's disk with diskutil unmountDisk (macOS only), so it can be pulled right away.
 
