@@ -9,7 +9,8 @@ from . import applied, cardfs, spruce_emu, store, ui, usersettings
 
 NO_WIFI_SKIPS = ("Network Settings", "enableSyncthing")
 CARD_ROOT = "/mnt/SDCARD/"
-DEVICE_ID = re.compile(r"^[A-Z2-7]{7}(-[A-Z2-7]{7}){7}$")
+DEVICE_ID = re.compile(r"[A-Z2-7]{7}(-[A-Z2-7]{7}){7}")
+CONFIG = ("Saves", "syncthing", "config", "config.xml")
 GUI_PASSWORD = "$2a$10$Eycxnvj3BtN8fq7suC4.W.ZrDRyH6fgN/pFY.LrOJCG6xIBeDSxdO"  # bcrypt of spruce's public default
 
 
@@ -30,10 +31,14 @@ def forced_settings(card):
     """[(section, key, value)] sync sets on the card's spruce-config.json: [] when off, and without enableSyncthing on a device with no WiFi."""
     if not enabled():
         return []
-    device = store.saved_card(card).get("device")
-    no_wifi = any(d.get("id") == device and d.get("network") is False for d in store.repo_json("devices"))
+    no_wifi = _no_wifi(card)
     return [(section, key, value) for section, keys in data()["spruce"]["settings"].items()
             for key, value in keys.items() if not (no_wifi and (section, key) == NO_WIFI_SKIPS)]
+
+
+def _no_wifi(card):
+    device = store.saved_card(card).get("device")
+    return any(d.get("id") == device and d.get("network") is False for d in store.repo_json("devices"))
 
 
 def server():
@@ -50,7 +55,7 @@ def server():
     else:
         ident = setting.get("id")
         ids = setting.get("folders")
-        if not isinstance(ident, str) or not DEVICE_ID.match(ident.upper()):
+        if not isinstance(ident, str) or not DEVICE_ID.fullmatch(ident.upper()):
             problem = '"id" must be the server\'s Syncthing device ID'
         elif "address" in setting and not (isinstance(setting["address"], str) and setting["address"]):
             problem = '"address" must be a non-empty string'
@@ -122,7 +127,7 @@ def merge_config(old, srv):
             _insert(root, _new_folder(srv, folder_id, label, path), "folder")
             lines.append(f"   config.xml: folder {label} at {path}")
             continue
-        if found.get("path") != path:
+        if (found.get("path") or "").rstrip("/") != path.rstrip("/"):
             warnings.append(f"Syncthing folder {folder_id} is at {found.get('path')} in config.xml, not {path}; left as it is")
             continue
         if not any(d.get("id") == srv["id"] for d in found.findall("device")):
@@ -139,6 +144,23 @@ def merge_config(old, srv):
     if old is None:
         ET.indent(root)
     return ET.tostring(root, encoding="unicode") + "\n", lines, warnings
+
+
+def _config_plan(card, base, srv):
+    """(writes, lines, warnings) for config.xml given the validated server (None: nothing to do)."""
+    if srv is None or _no_wifi(card):
+        return [], [], []
+    path = os.path.join(base, *CONFIG)
+    old = cardfs.text(path) or None
+    if old is None and not cardfs.is_dir(os.path.join(base, "Saves")):
+        return [], [], ["Saves/ is missing (spruceOS isn't installed?); Syncthing's config not written"]
+    new, lines, warnings = merge_config(old, srv)
+    return ([(path, new)] if new is not None else []), lines, warnings
+
+
+def config_writes(card, base):
+    """(writes, lines, warnings): Saves/syncthing/config/config.xml with the server device and shared folders."""
+    return _config_plan(card, base, server())
 
 
 def _cores(base, warnings):
@@ -225,6 +247,23 @@ def _same(line, value):
     return line.split("=", 1)[1].strip().strip('"') == value
 
 
+def _config_entries(base, srv):
+    where = "/".join(CONFIG)
+    root = None
+    try:
+        root = ET.fromstring(cardfs.text(os.path.join(base, *CONFIG)) or "")
+    except ET.ParseError:
+        pass
+    if root is not None and root.tag != "configuration":
+        root = None
+    found = root is not None and any(d.get("id") == srv["id"] for d in root.findall("device"))
+    result = [applied.Entry(where, "server", srv["id"] if found else None, srv["id"], False)]
+    for _, folder_id, label, path in srv["folders"]:
+        folder = next((f for f in root.findall("folder") if f.get("id") == folder_id), None) if root is not None else None
+        result.append(applied.Entry(where, label, None if folder is None else folder.get("path"), path, False))
+    return result
+
+
 def entries(card, base):
     """[Entry] for every Syncthing core and RetroArch save setting, changed or not; [] when Syncthing is off."""
     if not enabled():
@@ -245,7 +284,12 @@ def entries(card, base):
             found = _pattern(key).search(text)
             old = found.group(0).split("=", 1)[1].strip().strip('"') if found else None
             result.append(applied.Entry(f"Saves/ra-configs/{os.path.basename(path)}", key, old, value, False))
-    for warning in warnings + retroarch_writes(base)[2]:
+    srv = server()
+    config_warnings = []
+    if srv is not None and not _no_wifi(card):
+        config_warnings = _config_plan(card, base, srv)[2]
+        result += _config_entries(base, srv)
+    for warning in warnings + retroarch_writes(base)[2] + config_warnings:
         ui.warn(warning)
     return result
 
@@ -255,7 +299,8 @@ def run(card, layout_name, base, dry_run):
     if layout_name != "spruce" or not enabled():
         return 0
     writes, lines, warnings = [], [], []
-    for part in (core_writes(base), retroarch_writes(base)):
+    srv = server()
+    for part in (core_writes(base), retroarch_writes(base), _config_plan(card, base, srv)):
         writes += part[0]
         lines += part[1]
         warnings += part[2]
@@ -270,6 +315,9 @@ def run(card, layout_name, base, dry_run):
         return 0
     for path, text in writes:
         cardfs.write_text(path, text)
+    if any(path == os.path.join(base, *CONFIG) for path, _ in writes):
+        for _, _, _, path in srv["folders"]:
+            os.makedirs(os.path.join(base, path[len(CARD_ROOT):], ".stfolder"), exist_ok=True)
     print(ui.green(f"🔄 Syncthing: set {len(lines)} setting(s) so saves and states sync"))
     for line in lines:
         print(line)

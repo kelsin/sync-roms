@@ -162,6 +162,17 @@ class Config(helpers.DataDir):
         for part in ("jkx7j-mnlfo", "/mnt/SDCARD/Elsewhere", "/mnt/SDCARD/Saves/saves"):
             self.assertIn(part, warnings[0])
 
+    def test_merge_folder_path_trailing_slash_is_same(self):
+        text, lines, warnings = spruce_syncthing.merge_config(self.existing(path="/mnt/SDCARD/Saves/saves/"), self.server())
+        self.assertEqual(warnings, [])
+        self.assertEqual(ET.fromstring(text).findall("folder")[0].get("path"), "/mnt/SDCARD/Saves/saves/")
+
+    def test_server_id_with_trailing_newline_is_malformed(self):
+        err = io.StringIO()
+        with contextlib.redirect_stderr(err):
+            self.assertIsNone(self.server({**SETTING, "id": SERVER + "\n"}))
+        self.assertIn("ignored", err.getvalue())
+
     def test_merge_existing_server_device_untouched(self):
         old = ('<configuration><device id="%s" name="mine"><address>tcp://x:1</address></device></configuration>' % SERVER)
         text, lines, _ = spruce_syncthing.merge_config(old, self.server())
@@ -345,6 +356,82 @@ class Card(helpers.CardDir):
         self.assertIn("retroarch-A.cfg: autosave_interval = 10", out)
         self.assertEqual(self.read("Saves/ra-configs/retroarch-A.cfg"), self.CFG)
         self.assertEqual(self.read("Emu/SFC/config.json"), self.emu())
+
+    CONF = "Saves/syncthing/config/config.xml"
+
+    def set_server(self):
+        usersettings.save_settings({"syncthing_server": SETTING})
+
+    def test_fresh_config_written(self):
+        self.set_server()
+        os.makedirs(self.cp("Saves"))
+        out = self.run_sync()
+        self.assertIn("config.xml: new config", out)
+        root = ET.fromstring(self.read(self.CONF))
+        self.assertEqual([f.get("id") for f in root.findall("folder")], ["jkx7j-mnlfo", "w5nqg-xmpq6"])
+        self.assertTrue(os.path.isdir(self.cp("Saves", "saves", ".stfolder")))
+        self.assertTrue(os.path.isdir(self.cp("Saves", "states", ".stfolder")))
+
+    def test_no_saves_folder_warns(self):
+        self.set_server()
+        self.assertIn("spruceOS isn't installed", self.run_sync())
+        self.assertFalse(os.path.exists(self.cp("Saves")))
+
+    def test_existing_config_merged(self):
+        self.set_server()
+        self.put(self.CONF, "<configuration><device id=\"MINE\"/></configuration>")
+        self.run_sync()
+        root = ET.fromstring(self.read(self.CONF))
+        self.assertEqual([d.get("id") for d in root.findall("device")], ["MINE", SERVER])
+        self.assertEqual(len(root.findall("folder")), 2)
+
+    def test_no_wifi_device_skipped(self):
+        self.set_server()
+        store.write_cards({"c": {"device": "miyoo-mini", "layout": "spruce"}})
+        os.makedirs(self.cp("Saves"))
+        self.assertNotIn("config.xml", self.run_sync())
+        self.assertFalse(os.path.exists(self.cp(*self.CONF.split("/"))))
+
+    def test_unset_setting_skipped(self):
+        os.makedirs(self.cp("Saves"))
+        self.assertNotIn("config.xml", self.run_sync())
+        self.assertFalse(os.path.exists(self.cp(*self.CONF.split("/"))))
+
+    def test_dry_run_writes_nothing_config(self):
+        self.set_server()
+        os.makedirs(self.cp("Saves"))
+        out = self.run_sync(dry_run=True)
+        self.assertIn("would set for Syncthing", out)
+        self.assertIn("config.xml: new config", out)
+        self.assertFalse(os.path.exists(self.cp(*self.CONF.split("/"))))
+        self.assertFalse(os.path.exists(self.cp("Saves", "saves")))
+
+    def test_second_sync_quiet_config(self):
+        self.set_server()
+        os.makedirs(self.cp("Saves"))
+        self.run_sync()
+        self.assertNotIn("config.xml", self.run_sync())
+
+    def test_bad_setting_still_applies_cores(self):
+        usersettings.save_settings({"syncthing_server": {"id": "nope"}})
+        self.put("Saves/ra-configs/retroarch-A.cfg", self.CFG)
+        out = self.run_sync()
+        self.assertIn("syncthing_server in settings.json is ignored", out)
+        self.assertIn('autosave_interval = "10"', self.read("Saves/ra-configs/retroarch-A.cfg"))
+        self.assertFalse(os.path.exists(self.cp("Saves", "syncthing")))
+
+    def test_entries_list_config(self):
+        self.set_server()
+        os.makedirs(self.cp("Saves"))
+        found = {(e.where, e.key): e for e in spruce_syncthing.entries("c", self.card)}
+        server = found[(self.CONF, "server")]
+        self.assertEqual((server.old, server.new), (None, SERVER))
+        saves = found[(self.CONF, "RetroArch saves")]
+        self.assertEqual((saves.old, saves.new), (None, "/mnt/SDCARD/Saves/saves"))
+        self.run_sync()
+        found = {(e.where, e.key): e for e in spruce_syncthing.entries("c", self.card)}
+        self.assertEqual(found[(self.CONF, "server")].old, SERVER)
+        self.assertEqual(found[(self.CONF, "RetroArch saves")].old, "/mnt/SDCARD/Saves/saves")
 
     def test_emu_ignore_list_and_core_both_kept_in_one_sync(self):
         # cli.py runs spruce_emu_step (apply) before stage_spruce (this run) in a real sync
