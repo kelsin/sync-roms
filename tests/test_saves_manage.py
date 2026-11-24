@@ -31,11 +31,11 @@ class OpsTest(helpers.DataDir):
             p = os.path.join(self.src, system, game, name)
             helpers.touch(p, data)
             e = {"path": p, "name": name, "kind": saves.classify(name)[1]}
-            if rel:
+            if rel is not None:
                 e.update(rel=rel, core="mGBA")
             entries.append(e)
         now = datetime.datetime(2026, 1, day, 0, 0, 0)
-        return saves.write_stash(card, "muos" if rel else "onion", system, game, "gpSP", entries, now=now)
+        return saves.write_stash(card, "muos" if rel is not None else "onion", system, game, "gpSP", entries, now=now)
 
     def meta(self, d):
         with open(os.path.join(d, "stash.json")) as f:
@@ -140,6 +140,11 @@ class OpsTest(helpers.DataDir):
         d = self.stash(rel="GBA/Hacks")
         new = saves_manage.move(self.row_for(d), GB, [GB])
         self.assertEqual([f["rel"] for f in self.meta(new)["files"]], ["GB/Hacks", "GB/Hacks"])
+
+    def test_move_pickles_keeps_an_empty_rel_empty(self):
+        d = self.stash(rel="")
+        new = saves_manage.move(self.row_for(d), GB, [GB])
+        self.assertEqual([f["rel"] for f in self.meta(new)["files"]], ["", ""])
 
     def test_move_refuses_a_pickles_stash_without_muos_folder(self):
         d = self.stash(rel="GBA/Hacks")

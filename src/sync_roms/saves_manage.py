@@ -145,7 +145,7 @@ def move(row, system, catalog_systems, dry_run=False):
     data["system"] = bucket
     if pickles:
         for f in data["files"]:
-            if "rel" in f:
+            if f.get("rel"):
                 f["rel"] = "/".join([muos] + f["rel"].split("/")[1:])
     row["dir"] = new
     try:
