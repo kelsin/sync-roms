@@ -204,7 +204,7 @@ class Run(helpers.CardDir):
         with mock.patch.object(install.ui, "confirm", return_value=False) as confirm:
             self.assertEqual(self.run_cmd(yes=False, terminal=True), 1)
         self.assertIn(f"Delete 2 items from {self.card} and install spruceOS {V46}?", confirm.call_args.args[0])
-        self.assertIs(confirm.call_args.kwargs.get("default"), False)
+        self.assertTrue(confirm.call_args.kwargs.get("default", True))
         self.assertTrue(os.path.isdir(self.cp("App")))
         self.assertFalse(os.path.exists(self.tmpdir))
         self.unpack.assert_not_called()

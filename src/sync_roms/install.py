@@ -142,8 +142,7 @@ def run(args):
             ui.failure(ui.red(f"❌ not enough room on {name}: spruceOS needs {ui.human_size(total + spruce_os.MARGIN)}, "
                               f"the card would have {ui.human_size(free)} free"))
             return 1
-        if not args.yes and not ui.confirm(f"Delete {len(deleted)} items from {base} and install spruceOS {release}?",
-                                       default=False):
+        if not args.yes and not ui.confirm(f"Delete {len(deleted)} items from {base} and install spruceOS {release}?"):
             return 1
         if deleted:
             step, bar = convert._progress(len(deleted))
