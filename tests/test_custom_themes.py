@@ -490,14 +490,17 @@ class Publish(helpers.StorageDir):
                 mock.patch.object(ui, "confirm", return_value=False) as ask:
             self.assertEqual(commands.run(["themes", "publish", "--palette", "Gruvbox"]), 0)
         ask.assert_called_once()
-        self.assertIs(ask.call_args.kwargs["default"], False)  # Enter uploads nothing
+        self.assertIs(ask.call_args.kwargs.get("default", True), True)  # Enter uploads
         self.assertEqual(self.stored(P), set())
 
-    def test_enter_uploads_nothing(self):
-        with mock.patch.object(ui, "ASSUME_YES", False), mock.patch.object(ui, "has_terminal", return_value=True), \
-                mock.patch.object(ui, "_input", lambda prompt: ""):
-            self.assertEqual(custom_themes.publish(None, PAL), 0)
-        self.assertEqual(self.stored(P), set())
+    def test_n_uploads_nothing_and_enter_uploads(self):
+        with mock.patch.object(ui, "ASSUME_YES", False), mock.patch.object(ui, "has_terminal", return_value=True):
+            with mock.patch.object(ui, "_input", lambda prompt: "n"):
+                self.assertEqual(custom_themes.publish(None, PAL), 0)
+            self.assertEqual(self.stored(P), set())
+            with mock.patch.object(ui, "_input", lambda prompt: ""):
+                self.assertEqual(custom_themes.publish(None, PAL), 0)
+        self.assertNotEqual(self.stored(P), set())
 
     def test_no_terminal_without_yes_exits_2(self):
         with mock.patch.object(ui, "ASSUME_YES", False), mock.patch.object(ui, "has_terminal", return_value=False), \

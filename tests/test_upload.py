@@ -300,8 +300,8 @@ class OverwriteListTest(unittest.TestCase):
             with self.subTest(replace=replace):
                 self.assertEqual(self.overwrites(replace), want + ["\x1b[33m     … and 2 more\x1b[0m"])
 
-    def test_upload_and_replace_ask_with_no_as_the_default(self):
-        for replace, default in ((False, False), (True, False)):
+    def test_upload_asks_with_yes_and_replace_with_no_as_the_default(self):
+        for replace, default in ((False, True), (True, False)):
             with self.subTest(replace=replace), tempfile.TemporaryDirectory() as root:
                 touch(root, "new.gba", 10)
                 ask = mock.Mock(return_value=False)
@@ -313,11 +313,11 @@ class OverwriteListTest(unittest.TestCase):
                         mock.patch.object(ui, "confirm", ask), mock.patch.object(ui, "has_terminal", return_value=True), \
                         contextlib.redirect_stdout(io.StringIO()):
                     self.assertEqual(upload.upload_command(args), 0)
-                self.assertEqual(ask.call_args.kwargs["default"], default)
+                self.assertEqual(ask.call_args.kwargs.get("default", True), default)
 
 
 class UploadConfirmTest(unittest.TestCase):
-    """Plain upload asks before it uploads or overwrites: Enter and no terminal change nothing, --yes goes ahead."""
+    """Plain upload asks before it uploads or overwrites: Enter and --yes go ahead, n and no terminal change nothing."""
 
     def run_upload(self, assume_yes, terminal, answer=""):
         with tempfile.TemporaryDirectory() as root:
@@ -333,8 +333,13 @@ class UploadConfirmTest(unittest.TestCase):
                 code = upload.upload_command(args)
         return code, ran
 
-    def test_enter_uploads_nothing(self):
+    def test_enter_uploads(self):
         code, ran = self.run_upload(False, True)
+        self.assertEqual(code, 0)
+        ran.assert_called_once()
+
+    def test_n_uploads_nothing(self):
+        code, ran = self.run_upload(False, True, "n")
         self.assertEqual(code, 0)
         ran.assert_not_called()
 

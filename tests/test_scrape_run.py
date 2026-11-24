@@ -804,7 +804,13 @@ class QualifierRecordTest(RunBase):
         self.assertEqual(self.metadata()["Game (T).zip"]["name"], "One (Japan) - Translated")
 
 
-class MatchReplaceTest(RunBase):
+class MatchBase(RunBase):
+    def setUp(self):
+        super().setUp()
+        self.enterContext(mock.patch.object(ui, "has_terminal", return_value=True))  # to confirm the match on
+
+
+class MatchReplaceTest(MatchBase):
     def run_match(self, rom="a.zip", game_q="7", **kw):
         args = SimpleNamespace(**{"system": "gba", "rom": rom, "game": game_q, "skip_media": [], "dry_run": False, **kw})
         with contextlib.redirect_stdout(self.out), contextlib.redirect_stderr(self.err):
@@ -1117,7 +1123,7 @@ class FillMediaLedgerTest(RunBase):
         self.assertEqual(sorted(self.client.lookups), ["a.zip", "b.zip", "c.zip"])
 
 
-class MatchRoundTwoTest(RunBase):
+class MatchRoundTwoTest(MatchBase):
     def run_match(self, rom="a.zip", game_q="7", skip=()):
         args = SimpleNamespace(system="gba", rom=rom, game=game_q, skip_media=list(skip), dry_run=False)
         with contextlib.redirect_stdout(self.out), contextlib.redirect_stderr(self.err):
@@ -1161,14 +1167,14 @@ class MatchRoundTwoTest(RunBase):
         self.run_match()
         self.assertIn("1 media file(s) already there are kept", self.confirm.call_args.args[0])
 
-    def test_plain_match_defaults_to_yes_and_replace_to_no(self):
+    def test_plain_match_and_replace_default_to_yes(self):
         self.put("gba/a.zip")
         self.client.games["x"] = game(7, "Seven")
         self.run_match()
-        self.assertTrue(self.confirm.call_args.kwargs["default"])
+        self.assertTrue(self.confirm.call_args.kwargs.get("default", True))
         self.existing()
         self.run_match()
-        self.assertFalse(self.confirm.call_args.kwargs["default"])
+        self.assertTrue(self.confirm.call_args.kwargs.get("default", True))
 
     def test_replace_warns_about_same_stem_roms(self):
         self.existing()
@@ -1318,7 +1324,7 @@ class SystemsTest(RunBase):
             self.run_scrape(system="nope")
 
 
-class MatchCommandTest(RunBase):
+class MatchCommandTest(MatchBase):
     def run_match(self, system="gba", rom="a.zip", game_q="7"):
         args = SimpleNamespace(system=system, rom=rom, game=game_q, skip_media=[], dry_run=False)
         with contextlib.redirect_stdout(self.out), contextlib.redirect_stderr(self.err):
@@ -1333,6 +1339,20 @@ class MatchCommandTest(RunBase):
         self.assertEqual(self.metadata(), {"a.zip": {"name": "Seven"}})
         self.assertEqual(self.client.lookups, [])
         self.assertEqual(self.client.games_asked, [7])
+
+    def test_no_terminal_needs_yes(self):
+        self.put("gba/a.zip")
+        self.client.games["x"] = game(7, "Seven")
+        with mock.patch.object(ui, "has_terminal", return_value=False), self.assertRaises(SystemExit) as e:
+            self.run_match()
+        self.assertEqual(e.exception.code, 2)
+        self.confirm.assert_not_called()
+        self.assertEqual(self.client.games_asked, [])
+        self.assertIsNone(scrape_state.manual_match("gba", "a.zip"))
+        self.assertEqual(self.stored(), set())
+        with mock.patch.object(ui, "has_terminal", return_value=False), mock.patch.object(ui, "ASSUME_YES", True):
+            self.assertEqual(self.run_match(), 0)
+        self.assertEqual(scrape_state.manual_match("gba", "a.zip"), 7)
 
     def test_unknown_rom_fails(self):
         with self.assertRaises(SystemExit):

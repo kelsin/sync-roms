@@ -273,8 +273,11 @@ def download_pico8(args):
     if args.dry_run:
         print(ui.dim("🧪 Dry run: nothing downloaded or written"))
         return 1 if failed else 0
-    if not args.yes and not ui.confirm(f"Add these to {s3.location()}?", default=False):
-        return 1 if failed else 0
+    if not args.yes:
+        if not ui.has_terminal():
+            ui.fail("Pass --yes to download pico8 without a terminal to confirm on", 2)
+        if not ui.confirm(f"Add these to {s3.location()}?"):
+            return 1 if failed else 0
     try:
         scrape_plan.load_metadata("pico8", fresh=True)  # readable before anything is downloaded
     except (*s3.ERRORS, ValueError) as e:

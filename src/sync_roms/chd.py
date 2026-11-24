@@ -543,7 +543,7 @@ def chd_command(args):
             else:
                 if not ui.has_terminal():
                     ui.fail("Pass --yes to convert without a terminal to confirm on", 2)
-                if not ui.confirm(question, default=False):
+                if not ui.confirm(question):
                     print(ui.yellow("👋 Cancelled."))
                     return 0
     if args.dry_run:

@@ -82,9 +82,21 @@ class CardsExportTest(Cmd):
         with open(self.out, "w") as f:
             f.write("old")
         with mock.patch.object(cardshare, "pick_export", return_value=["SD"]), \
+                mock.patch.object(ui, "has_terminal", return_value=True), \
                 mock.patch.object(ui, "confirm", return_value=False):
             code = self.run_cmd("cards", "export", self.out)[0]
         self.assertEqual(code, 0)
+        with open(self.out) as f:
+            self.assertEqual(f.read(), "old")
+
+    def test_export_overwrite_without_terminal_needs_yes(self):
+        with open(self.out, "w") as f:
+            f.write("old")
+        with mock.patch.object(cardshare, "pick_export", return_value=["SD"]), \
+                mock.patch.object(ui, "has_terminal", return_value=False):
+            code, _, err = self.run_cmd("cards", "export", self.out)
+        self.assertEqual(code, 2)
+        self.assertIn("Pass --yes", err)
         with open(self.out) as f:
             self.assertEqual(f.read(), "old")
 

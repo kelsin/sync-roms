@@ -1139,8 +1139,6 @@ class ChdTest(unittest.TestCase):
             self.assertIn("Convert 1 file(s) and remove the originals?", self.prompts[-1])
             self.assertIn("Cancelled", out)
             code, out, err = self.run_on_card(root, answer="", yes=False)
-            self.assertEqual((code, os.listdir(root)), (0, ["Game.iso"]))
-            code, out, err = self.run_on_card(root, answer="y", yes=False)
             self.assertEqual((code, os.listdir(root)), (0, ["Game.chd"]))
         self.touch("psx/Other.iso")
         code, out, err = self.run_on_card(root, yes=True)

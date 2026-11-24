@@ -409,7 +409,8 @@ def convert_command(args):
         if not args.yes:
             if not ui.has_terminal():
                 ui.fail("Pass --yes to convert without a terminal to confirm on", 2)
-            if not ui.confirm(f"Move {len(planned)} files" + (f" and delete the old media in {folders} folders?" if media else "?")):
+            if not ui.confirm(f"Move {len(planned)} files" + (f" and delete the old media in {folders} folders?" if media else "?"),
+                              default=False):
                 print(ui.yellow("↩️  Kept everything as it was"))
                 return 0
         step, bar = _progress(len(planned) + len(media))
@@ -453,7 +454,7 @@ def clean_command(args):
     if not args.yes:
         if not ui.has_terminal():
             ui.fail("Pass --yes to delete without a terminal to confirm on", 2)
-        if not ui.confirm(f"Delete the media in {folders} folders?"):
+        if not ui.confirm(f"Delete the media in {folders} folders?", default=False):
             print(ui.yellow("↩️  Kept the media"))
             return 0
     failures = remove_media(media, base)

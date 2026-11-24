@@ -194,7 +194,7 @@ def publish(styles, palettes, dry_run=False):
     else:
         if not ui.has_terminal():
             ui.fail("Pass --yes to publish without a terminal to confirm on", 2)
-        if not ui.confirm(question, default=False):
+        if not ui.confirm(question):
             print(ui.yellow("👋 Cancelled."))
             return 1 if skipped else 0
     active = [p for p in plans if not p.skipped]
