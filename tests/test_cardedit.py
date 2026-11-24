@@ -451,11 +451,21 @@ class Flow(DataDir):
             calls = self.run_card(returns((cardedit.COLLECTIONS_KEY, 0)), returns(None), returns(None))
         self.assertEqual(calls[1][2]["extras"][0][1], ("  2 playable, 1 not playable", "dim"))
 
-    def test_enter_toggles_a_collection_off_again(self):
+    def test_space_toggles_a_collection_off_again_and_enter_is_done(self):
         self.favs()
         self.card(collections=["favs"])
-        self.run_card(returns((cardedit.COLLECTIONS_KEY, 0)), returns(0), returns(None), returns(None))
+        calls = self.run_card(returns((cardedit.COLLECTIONS_KEY, 0)), returns((" ", 0)), returns(0), returns(None))
         self.assertEqual(self.read("cards.json")["c"]["collections"], [])
+        self.assertNotIn("enter", calls[1][2]["hotkeys"])  # Enter picks the row: the list is done
+        self.assertEqual(len(calls), 3)  # the system list, the collections once, the system list
+        self.assertIn("Space", calls[1][0])
+        self.assertNotIn("Enter toggles", calls[1][0])
+
+    def test_enter_in_the_collections_list_changes_nothing(self):
+        self.favs()
+        self.card(collections=["favs"])
+        self.run_card(returns((cardedit.COLLECTIONS_KEY, 0)), returns(0), returns(None))
+        self.assertEqual(self.read("cards.json")["c"]["collections"], ["favs"])
 
     def test_collections_list_of_a_missing_or_malformed_card_entry_marks_none(self):
         self.favs()
@@ -1303,19 +1313,19 @@ class Flow(DataDir):
         self.assertNotIn(cardedit.KEEP_KEY, calls[0][2]["hotkeys"])
         self.assertNotIn("K keep", calls[0][2]["hint"])
 
-    def test_collections_screen_toggles_with_enter_in_place(self):
+    def test_collections_screen_toggles_with_space_in_place(self):
         favs = {"id": "favs", "name": "Favs", "games": []}
         self.card()
         seen = {}
 
         def look(labels, kw):
             seen.update(kw)
-            self.assertTrue(kw["on_hotkey"]("enter", 0))  # handled in the list: it isn't torn down and reopened
+            self.assertTrue(kw["on_hotkey"](" ", 0))  # handled in the list: it isn't torn down and reopened
             return None
         with mock.patch.object(collections, "load_collections", lambda: [favs]), \
                 mock.patch.object(picker, "filter_list", Script(look)), contextlib.redirect_stdout(io.StringIO()):
             cardedit.pick_collections("c", {"gba"})
-        self.assertIn("enter", seen["hotkeys"])
+        self.assertIn(" ", seen["hotkeys"])
         self.assertEqual(store.load_cards()["c"]["collections"], ["favs"])
 
     def test_collections_screen_shows_the_card_status_after_each_toggle(self):

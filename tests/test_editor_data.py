@@ -167,7 +167,7 @@ class Hints(unittest.TestCase):
     def test_every_hint_and_the_keep_question_fit_80_cells_with_the_help_prefix(self):
         hints = {"systems": cardedit.LIST_HINT, "systems from a sync": cardedit.LIST_HINT + cardedit.KEEP_HINT,
                  "set games": cardedit.SET_GAMES_HINT, "all games": cardedit.ALL_GAMES_HINT,
-                 "card games": cardedit.GAMES_HINT, "sets": cardedit.SETS_HINT, "set editor games": setedit.GAMES_HINT,
+                 "card games": cardedit.GAMES_HINT, "sets": cardedit.SETS_HINT, "collections": cardedit.COLLECTIONS_HINT, "set editor games": setedit.GAMES_HINT,
                  "collection games": collectionedit.GAMES_HINT, "card list": edit.MENU_HINT,
                  "multi": picker.MULTI_HINT, "single": picker.SINGLE_HINT}
         for name, hint in hints.items():

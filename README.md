@@ -322,7 +322,7 @@ sync-roms edit
    - `Enter` opens a system, `f` makes it a full system (again brings the game list back).
    - `x` turns the system off on this card: nothing of it syncs and Surprise skips it, while its picks, sets and collections stay saved (again turns it back on).
    - `a` lists every game across the card's systems and `s` a set's games across them.
-   - `l` adds a collection to the card (each shows how many of its games are playable on the card's device, and `Space`/`Enter` toggles the whole collection).
+   - `l` adds a collection to the card (each shows how many of its games are playable on the card's device, and `Space`/`Tab` toggles the whole collection, `Enter` is done).
    - `S` opens a settings menu: turn [Surprise](#surprise) (🎁), the card's theme (🎨), its custom collections (💖) and RAOfflineProxy (🏆) on or off, or pick the systems Surprise may use on every card or on this card. The menu stays open on the row you used until `Esc`.
    - `D` clears every pick, full system and set from the card.
    - `K` (opened from a sync) picks, in every system that isn't a full one, the files already on the card that match a storage game (names compared ignoring case), so a sync keeps them.

@@ -24,6 +24,7 @@ LIST_HINT = "Enter · a all games · f full · s set · l colls · S settings"
 GAMES_HINT = "Space toggle · Enter done · a all · s set · m meta · p past · v variant"
 META_HINT = "Enter list its values · Esc back"
 VALUES_HINT = "Enter narrow to it · Esc back · / filter"
+COLLECTIONS_HINT = "Space/Tab toggle · Enter done · / filter"
 SETS_HINT = "Enter show its games · Space/Tab toggle its games here · / filter"
 SET_GAMES_HINT = "Space toggle · Enter done · w note · v variant · r series"
 ALL_GAMES_HINT = "Space toggle · Enter done · w note · v variant · s set · c clear"
@@ -532,7 +533,7 @@ def toggle_surprise(name):
 
 
 def pick_collections(name, playable, card_status=None):
-    """Toggle the collections a card includes (Space/Tab/Enter, in place), saving each
+    """Toggle the collections a card includes (Space/Tab, in place; Enter is done), saving each
     toggle at once. Each is shown with how many of its games are on systems in playable (system buckets the card syncs).
     card_status(): the card's size status, worked out again after each toggle."""
     found = colls.load_collections()
@@ -555,30 +556,21 @@ def pick_collections(name, playable, card_status=None):
         extras[:] = [[("  ✅ on the card" if c["id"] in ids else "", "green"), count] for c, count in zip(found, counts)]
         shown["status"] = card_status() if card_status else None
 
-    def toggle(idx):
+    def on_hotkey(_key, idx):
+        if idx is None:
+            return False
         cid = found[idx]["id"]
         ids.remove(cid) if cid in ids else ids.append(cid)
         store.update_card(name, collections=list(ids))
         mark()
-
-    def on_hotkey(_key, idx):
-        if idx is None:
-            return False
-        toggle(idx)
         return True
 
     mark()
-    pos = 0
-    while True:
-        i = picker.filter_list(f"💖 Collections on {name} (Space/Enter toggles)", labels, extras=extras, cursor=pos,
-                               hotkeys=(" ", "\t", "enter"), on_hotkey=on_hotkey,
-                               key_help=[("Space/Tab/Enter", "put the collection on the card or take it off")],
-                               status=(lambda _state: shown["status"]) if card_status else None,
-                               preview=lambda i: previews.collection(found[i].get("art")) if i < len(found) else None)
-        if i is None:
-            return
-        toggle(i)
-        pos = i
+    picker.filter_list(f"💖 Collections on {name} (Space toggles · Enter done)", labels, extras=extras,
+                       hotkeys=(" ", "\t"), on_hotkey=on_hotkey, hint=COLLECTIONS_HINT,
+                       key_help=[("Space/Tab", "put the collection on the card or take it off")],
+                       status=(lambda _state: shown["status"]) if card_status else None,
+                       preview=lambda i: previews.collection(found[i].get("art")) if i < len(found) else None)
 
 
 def pick_card_set(name, setup, systems, current=None):
