@@ -2,6 +2,7 @@ import contextlib
 import io
 import os
 import shutil
+import subprocess
 import sys
 import tempfile
 import threading
@@ -241,6 +242,15 @@ class ChdTest(unittest.TestCase):
         self.assertEqual(stale, [os.path.join(self.dir, "psx", ".chd-abc123")])
         chd.remove_stale_chd_temp(stale)
         self.assertEqual(os.listdir(os.path.join(self.dir, "psx")), ["Game.zip"])
+
+    def test_stale_sweep_keeps_the_work_folder_of_a_running_convert(self):
+        done = subprocess.Popen([sys.executable, "-c", ""])
+        done.wait()
+        self.touch(f"psx/.chd-{os.getpid()}-live/Game.bin", f"psx/.chd-{done.pid}-dead/Game.bin", "psx/.chd-nopid/Game.bin")
+        stale = []
+        chd.plan_chd(self.dir, {}, stale=stale)
+        self.assertEqual(sorted(stale), [os.path.join(self.dir, "psx", f".chd-{done.pid}-dead"),
+                                         os.path.join(self.dir, "psx", ".chd-nopid")])
 
     def test_stop_tools_ends_a_running_tool_and_blocks_new_ones(self):
         self.addCleanup(setattr, external, "_tools_stopped", False)

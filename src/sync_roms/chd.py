@@ -87,7 +87,8 @@ def plan_chd(root, folders, skipped=None, roots=None, stale=None):
     jobs = []
     for dirpath, dirs, files in os.walk(root):
         if stale is not None:
-            stale += [os.path.join(dirpath, d) for d in dirs if d.startswith((".chd-", ".xiso-"))]
+            stale += [os.path.join(dirpath, d) for d in dirs
+                      if d.startswith((".chd-", ".xiso-")) and not work_folder_running(d)]
         dirs[:] = sorted(d for d in dirs if not external.own_temp(d))
         system, sysroot = chd_system(root, dirpath, folders)
         if not system:
@@ -444,19 +445,27 @@ def job_scratch(tools, jobs):
     return scratch, max(1, min(fits)), job_sizes
 
 
+def work_folder_running(name):
+    """True when a .chd-<pid>- work folder's name carries the pid of a process that is running."""
+    match = re.match(r"\.chd-(\d+)-", name)
+    if not match:
+        return False
+    try:
+        os.kill(int(match.group(1)), 0)
+    except ProcessLookupError:
+        return False
+    except OSError:
+        pass  # running, as another user
+    return True
+
+
 def stale_local_scratch():
     """The .chd-<pid>-* folders in the system temp folder left by a convert run that is no longer running."""
     temp = tempfile.gettempdir()
     stale = []
     for name in os.listdir(temp):
-        match = re.match(r"\.chd-(\d+)-", name)
-        if match:
-            try:
-                os.kill(int(match.group(1)), 0)
-            except ProcessLookupError:
-                stale.append(os.path.join(temp, name))
-            except OSError:
-                pass  # running, as another user
+        if re.match(r"\.chd-\d+-", name) and not work_folder_running(name):
+            stale.append(os.path.join(temp, name))
     return stale
 
 
