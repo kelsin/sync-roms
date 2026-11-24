@@ -1,0 +1,194 @@
+import argparse
+import contextlib
+import io
+import os
+import subprocess
+import sys
+import unittest
+from unittest import mock
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import isolate  # noqa: E402,F401
+import helpers  # noqa: E402
+from sync_roms import external, install, store  # noqa: E402
+
+P = "os/spruceos/"
+V46 = "spruceV4.6.0.7z"
+
+
+class Plan(helpers.CardDir):
+    def test_plan_keeps_roms_bios_saves_any_case(self):
+        for d in ("ROMS", "bios", "Saves", ".Trashes", "App", "miyoo"):
+            os.makedirs(self.cp(d))
+        for f in ("._x", "autorun.inf"):
+            helpers.touch(self.cp(f))
+        deleted, kept = install.plan(self.card, set())
+        self.assertEqual(deleted, [self.cp("App"), self.cp("autorun.inf"), self.cp("miyoo")])
+        self.assertEqual(kept, sorted(self.cp(n) for n in ("ROMS", "bios", "Saves", ".Trashes", "._x")))
+
+    def test_plan_keeps_only_spruce_themes(self):
+        for d in ("ART_BOOK_NEXT", "TechDweeb_BMO"):
+            os.makedirs(self.cp("Themes", d))
+        helpers.touch(self.cp("Themes", "x.7z"))
+        deleted, kept = install.plan(self.card, {"art_book_next"})
+        self.assertEqual(deleted, [self.cp("Themes", "TechDweeb_BMO"), self.cp("Themes", "x.7z")])
+        self.assertEqual(kept, [self.cp("Themes"), self.cp("Themes", "ART_BOOK_NEXT")])
+        self.assertNotIn(self.cp("Themes"), deleted)
+
+
+class UnpackedSize(unittest.TestCase):
+    def test_unpacked_size_sums_sizes(self):
+        listing = ("Path = x.7z\nPhysical Size = 99\nHeaders Size = 9\n\n"
+                   "Path = a\nSize = 10\nPacked Size = 7\n\nPath = b\nSize = 5\n")
+        done = subprocess.CompletedProcess([], 0, stdout=listing, stderr="")
+        with mock.patch.object(install.external, "find_tool", return_value="7z"), \
+                mock.patch.object(install.subprocess, "run", return_value=done):
+            self.assertEqual(install.unpacked_size("x.7z"), 15)
+
+
+@unittest.skipIf(external.find_tool("7z") is None, "needs 7z")
+class Unpack(helpers.CardDir):
+    def test_unpack_skips_existing(self):
+        src = os.path.join(self.tmp.name, "src")
+        helpers.touch(os.path.join(src, "Saves", "spruce", "spruce-config.json"), "new")
+        helpers.touch(os.path.join(src, "App", "a"), "a")
+        archive = os.path.join(self.tmp.name, V46)
+        subprocess.run([external.find_tool("7z"), "a", archive, "Saves", "App"], cwd=src, check=True,
+                       stdout=subprocess.DEVNULL)
+        helpers.touch(self.cp("Saves", "spruce", "spruce-config.json"), "old")
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.assertIsNone(install.unpack(archive, self.card, install.unpacked_size(archive)))
+        with open(self.cp("Saves", "spruce", "spruce-config.json")) as f:
+            self.assertEqual(f.read(), "old")
+        self.assertTrue(os.path.isfile(self.cp("App", "a")))
+
+    def test_unpack_reports_a_broken_archive(self):
+        archive = os.path.join(self.tmp.name, V46)
+        helpers.touch(archive, b"not a 7z")
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.assertIsNotNone(install.unpack(archive, self.card, 1))
+
+
+class Run(helpers.CardDir):
+    def setUp(self):
+        super().setUp()
+        store.update_card("card", device="full", layout="spruce", boot_logos=["a.png"],
+                          spruce_themes_installed=["ART_BOOK_NEXT", "TechDweeb_BMO"])
+        for d in ("App", "Roms/GBA", "Themes/ART_BOOK_NEXT", "Themes/TechDweeb_BMO"):
+            os.makedirs(self.cp(d))
+        helpers.touch(self.cp("App", "f"), b"12345")
+        self.enterContext(mock.patch.object(install.inventory, "files", return_value={P + V46: 100}))
+        self.enterContext(mock.patch.object(install.spruce_themes, "available", return_value=["art_book_next"]))
+        self.downloads = self.enterContext(mock.patch.object(install.downloads, "run_downloads", return_value=0))
+        self.enterContext(mock.patch.object(install.external, "find_tool", return_value="7z"))
+        self.enterContext(mock.patch.object(install, "unpacked_size", return_value=1000))
+        self.unpack = self.enterContext(mock.patch.object(install, "unpack", return_value=None))
+        self.tmpdir = os.path.join(self.tmp.name, "install-tmp")
+
+        def mkdtemp(**_):
+            os.makedirs(self.tmpdir)
+            return self.tmpdir
+        self.enterContext(mock.patch.object(install.tempfile, "mkdtemp", side_effect=mkdtemp))
+
+    def run_cmd(self, dry_run=False, yes=True, terminal=False):
+        args = argparse.Namespace(card=self.card, dry_run=dry_run, yes=yes)
+        self.out, self.err = io.StringIO(), io.StringIO()
+        with mock.patch.object(install.ui, "has_terminal", return_value=terminal), \
+                contextlib.redirect_stdout(self.out), contextlib.redirect_stderr(self.err):
+            try:
+                return install.run(args)
+            except SystemExit as e:
+                return e.code
+
+    def entry(self):
+        return store.load_cards()["card"]
+
+    def test_run_rejects_other_layout(self):
+        store.update_card("card", layout="onion")
+        self.assertEqual(self.run_cmd(), 2)
+        self.assertIn("supports only spruce cards; card is onion", self.err.getvalue())
+        self.assertTrue(os.path.isdir(self.cp("App")))
+
+    def test_run_without_a_release_in_storage_fails(self):
+        install.inventory.files.return_value = {}
+        self.assertEqual(self.run_cmd(), 1)
+        self.downloads.assert_not_called()
+        self.assertTrue(os.path.isdir(self.cp("App")))
+
+    def test_run_dry_run_touches_nothing(self):
+        self.assertEqual(self.run_cmd(dry_run=True, yes=False), 0)
+        self.downloads.assert_not_called()
+        self.unpack.assert_not_called()
+        self.assertTrue(os.path.isdir(self.cp("App")))
+        self.assertTrue(os.path.isdir(self.cp("Themes", "TechDweeb_BMO")))
+        self.assertNotIn("spruce_os", self.entry())
+        out = self.out.getvalue()
+        self.assertIn("App", out)
+        self.assertIn("Themes/TechDweeb_BMO", out)
+        self.assertIn("5 B", out)
+        self.assertIn(V46, out)
+        self.assertIn("Dry run: nothing downloaded, deleted or unpacked", out)
+
+    def test_run_without_terminal_or_yes_exits_2(self):
+        self.assertEqual(self.run_cmd(yes=False), 2)
+        self.downloads.assert_not_called()
+        self.assertTrue(os.path.isdir(self.cp("App")))
+
+    def test_run_download_failure_deletes_nothing(self):
+        self.downloads.return_value = 1
+        self.downloads.side_effect = lambda todo, label, icon, base, failures: failures.append((todo[0][0], "boom")) or 1
+        self.assertEqual(self.run_cmd(), 1)
+        self.assertIn("boom", self.out.getvalue())
+        self.assertTrue(os.path.isdir(self.cp("App")))
+        self.assertFalse(os.path.exists(self.tmpdir))
+        self.unpack.assert_not_called()
+
+    def test_run_declined_deletes_nothing(self):
+        with mock.patch.object(install.ui, "confirm", return_value=False) as confirm:
+            self.assertEqual(self.run_cmd(yes=False, terminal=True), 1)
+        self.assertIn(f"Delete 2 items from card and install spruceOS {V46}?", confirm.call_args.args[0])
+        self.assertTrue(os.path.isdir(self.cp("App")))
+        self.assertFalse(os.path.exists(self.tmpdir))
+        self.unpack.assert_not_called()
+        self.assertNotIn("spruce_os", self.entry())
+
+    def test_run_without_room_on_the_card_deletes_nothing(self):
+        with mock.patch.object(install.downloads, "free_space", return_value=0):
+            self.assertEqual(self.run_cmd(), 1)
+        self.assertTrue(os.path.isdir(self.cp("App")))
+        self.unpack.assert_not_called()
+
+    def test_run_installs_and_records(self):
+        self.assertEqual(self.run_cmd(), 0)
+        todo = self.downloads.call_args.args[0]
+        self.assertEqual(todo, [(P + V46, os.path.join(self.tmpdir, V46), 100)])
+        self.unpack.assert_called_once_with(os.path.join(self.tmpdir, V46), self.card, 1000)
+        self.assertFalse(os.path.exists(self.cp("App")))
+        self.assertFalse(os.path.exists(self.cp("Themes", "TechDweeb_BMO")))
+        self.assertTrue(os.path.isdir(self.cp("Roms", "GBA")))
+        self.assertTrue(os.path.isdir(self.cp("Themes", "ART_BOOK_NEXT")))
+        self.assertFalse(os.path.exists(self.tmpdir))
+        entry = self.entry()
+        self.assertEqual(entry["spruce_os"], V46)
+        self.assertNotIn("boot_logos", entry)
+        self.assertEqual(entry["spruce_themes_installed"], ["ART_BOOK_NEXT"])
+        self.assertEqual(entry["layout"], "spruce")
+        self.assertIn(f"spruceOS {V46} installed on card", self.out.getvalue())
+
+    def test_run_unpack_failure_exits_3(self):
+        self.unpack.return_value = "ERROR: broken"
+        self.assertEqual(self.run_cmd(), 3)
+        self.assertIn("ERROR: broken", self.err.getvalue())
+        self.assertNotIn("spruce_os", self.entry())
+        self.assertFalse(os.path.exists(self.tmpdir))
+
+    def test_run_deletion_failure_exits_3_before_unpacking(self):
+        with mock.patch.object(install.convert, "remove_media", return_value=[(self.cp("App"), OSError("busy"))]):
+            self.assertEqual(self.run_cmd(), 3)
+        self.assertIn("busy", self.err.getvalue())
+        self.unpack.assert_not_called()
+        self.assertNotIn("spruce_os", self.entry())
+
+
+if __name__ == "__main__":
+    unittest.main()
