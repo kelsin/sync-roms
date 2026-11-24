@@ -255,13 +255,13 @@ class QuietColorTest(unittest.TestCase):
         def isatty(self):
             return self.tty
 
-    def failure_line(self, stdout_tty, stderr_tty):
+    def failure_line(self, stdout_tty, stderr_tty, quiet=True):
         out, err = self.Stream(stdout_tty), self.Stream(stderr_tty)
         with mock.patch.dict(os.environ, clear=False), mock.patch.object(sys, "stdout", out), \
                 mock.patch.object(sys, "stderr", err), mock.patch.object(ui, "_COLOR", stdout_tty):
             for var in ("NO_COLOR", "FORCE_COLOR", "CLICOLOR_FORCE", "TERM"):
                 os.environ.pop(var, None)
-            ui.set_output(True, False)
+            ui.set_output(quiet, False)
             try:
                 ui.failure(ui.red("❌ x"))
             finally:
@@ -271,6 +271,10 @@ class QuietColorTest(unittest.TestCase):
     def test_quiet_failure_lines_are_colored_by_stderr(self):
         self.assertIn("\033[31m", self.failure_line(stdout_tty=False, stderr_tty=True))
         self.assertNotIn("\033[", self.failure_line(stdout_tty=True, stderr_tty=False))
+
+    def test_failure_lines_are_not_colored_when_stderr_is_not_a_terminal(self):
+        self.assertEqual(self.failure_line(stdout_tty=True, stderr_tty=False, quiet=False), "❌ x\n")
+        self.assertIn("\033[31m", self.failure_line(stdout_tty=True, stderr_tty=True, quiet=False))
 
     def test_failure_lines_go_to_stderr_without_quiet(self):
         out, err = io.StringIO(), io.StringIO()

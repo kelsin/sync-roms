@@ -154,8 +154,9 @@ def emit_json(data):
 
 
 def failure(text):
-    """Print a line about something that failed, on stderr."""
-    print(text, file=sys.stderr)
+    """Print a line about something that failed, on stderr, without colours when stderr takes none (callers colour the
+    text by stdout's state)."""
+    print(text if _use_color(sys.stderr) else re.sub(r"\033\[[0-9;]*m", "", text), file=sys.stderr)
 
 
 def debug(text):
