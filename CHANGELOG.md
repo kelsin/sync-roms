@@ -1,5 +1,28 @@
 # Changelog
 
+## [3.34.0](https://github.com/kelsin/sync-roms/compare/v3.33.0...v3.34.0) (2026-11-24)
+
+
+### :video_game: Features
+
+* **clean:** show live progress while deleting ._ files ([#572](https://github.com/kelsin/sync-roms/issues/572)) ([9334815](https://github.com/kelsin/sync-roms/commit/9334815a1ae20c16ae1fa31b5e1ed0d53e7e6046))
+* **convert:** show a progress bar while cards convert moves and deletes files ([#577](https://github.com/kelsin/sync-roms/issues/577)) ([b1d9e42](https://github.com/kelsin/sync-roms/commit/b1d9e42a13ddcb7286e0f7bfe16ce66d29b98384))
+* **spruce:** remind to run ez updater at the end of a sync that staged spruceos ([#573](https://github.com/kelsin/sync-roms/issues/573)) ([78ef2f3](https://github.com/kelsin/sync-roms/commit/78ef2f34f949ee2f8cf702d9b02cdf40bcc59a31))
+* **sync:** remove the Surprise app from cards that aren't Onion ([#576](https://github.com/kelsin/sync-roms/issues/576)) ([7fc9c91](https://github.com/kelsin/sync-roms/commit/7fc9c916b1e7a05205b5e3619e6b1117c9afb1a2))
+* **syncthing:** set up the shared folders on spruce cards ([#578](https://github.com/kelsin/sync-roms/issues/578)) ([6906cd8](https://github.com/kelsin/sync-roms/commit/6906cd84f94394a930f8dc4bf261ae216483ab6e))
+
+
+### :bug: Bug Fixes
+
+* **guide:** keep the header dropdowns on one row ([#575](https://github.com/kelsin/sync-roms/issues/575)) ([48ef813](https://github.com/kelsin/sync-roms/commit/48ef813b74d5c9cbe58cb61362f021c4d82e6646))
+* **scrape:** print a single Nothing to make line when scrape art has nothing to do ([#569](https://github.com/kelsin/sync-roms/issues/569)) ([eb60d87](https://github.com/kelsin/sync-roms/commit/eb60d87c92c9fa8d165617fcce50688b1c4dc4ff))
+
+
+### :book: Documentation
+
+* **guide:** add click-to-copy to share paths, IDs and commands ([#574](https://github.com/kelsin/sync-roms/issues/574)) ([3e40cc5](https://github.com/kelsin/sync-roms/commit/3e40cc58819dd9596559beb85909d17539fb306e))
+* **guide:** make the syncthing steps one checklist per device ([#570](https://github.com/kelsin/sync-roms/issues/570)) ([84c0885](https://github.com/kelsin/sync-roms/commit/84c08851fcc6d87bdbc4c00befa18264bd3ad48c))
+
 ## [3.33.0](https://github.com/kelsin/sync-roms/compare/v3.32.0...v3.33.0) (2026-11-24)
 
 
