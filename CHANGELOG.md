@@ -1,5 +1,14 @@
 # Changelog
 
+## [3.35.0](https://github.com/kelsin/sync-roms/compare/v3.34.0...v3.35.0) (2026-11-24)
+
+
+### :video_game: Features
+
+* **cards:** add cards install for a clean spruceOS install ([#582](https://github.com/kelsin/sync-roms/issues/582)) ([c782377](https://github.com/kelsin/sync-roms/commit/c78237713da3d2f4c0b8917f26e81a70e68f90b8))
+* **sync:** point to a file system repair when a card folder is damaged ([#579](https://github.com/kelsin/sync-roms/issues/579)) ([18a06b0](https://github.com/kelsin/sync-roms/commit/18a06b05fd15d81a40da34a0a2de8ace4a66285a))
+* **themes:** add ToTK-style collection art for spruce cards ([#581](https://github.com/kelsin/sync-roms/issues/581)) ([e1e2b08](https://github.com/kelsin/sync-roms/commit/e1e2b086c123a3698555f84fa32a35bfa433328c))
+
 ## [3.34.0](https://github.com/kelsin/sync-roms/compare/v3.33.0...v3.34.0) (2026-11-24)
 
 
