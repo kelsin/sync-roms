@@ -313,7 +313,7 @@ def edit_menu(noun, before, working, state, emoji, art, delete_note, new_item, o
     did (False, its error noted, goes back to the menu). Without empty_ok, a list with no games can't be saved."""
     pos = 0
     while True:
-        ids = sorted(working, key=lambda x: working[x]["name"].lower())
+        ids = sorted(working, key=lambda x: store.sort_key(working[x]["name"]))
         n = len(ids)
         found = diff_lists(before, working)
         edited = {x for _, x, _ in found}
@@ -378,7 +378,7 @@ def all_rows(shown, systems, keys_of):
         rows += [(s, key, title, f"{system['name']} — {label}")
                  for _, key, title, label in system_rows(s, keys_of(system["bucket"]))]
     names = {s["bucket"]: s["name"].lower() for s in systems}
-    return sorted(rows, key=lambda r: (r[2].lower(), names[r[0]["bucket"]]))
+    return sorted(rows, key=lambda r: (store.sort_key(r[2]), names[r[0]["bucket"]]))
 
 
 def pick_row_set(sets, row_keys, current=None):

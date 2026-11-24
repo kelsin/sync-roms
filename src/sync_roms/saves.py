@@ -273,7 +273,7 @@ def load_stashes(systems=None):
         if systems is None or data["system"] in systems:
             out.append({"dir": dirpath, **data})
     out.sort(key=lambda s: s["stashed"], reverse=True)
-    out.sort(key=lambda s: (s["game"].casefold(), s["system"]))
+    out.sort(key=lambda s: (store.sort_key(s["game"]), s["system"]))
     return out
 
 
@@ -425,7 +425,7 @@ def _rel_prefix(entry):
 @picker.one_app
 def pick_stash(games, names):
     """The entries to stash, picked as games (none on) then their files (all on); None on Esc or nothing picked."""
-    keys = sorted(games, key=lambda k: (k[1].casefold(), names.get(k[0], k[0])))
+    keys = sorted(games, key=lambda k: (store.sort_key(k[1]), names.get(k[0], k[0])))
     extras = [[(names.get(system, system), "dim"), (_counts([e["kind"] for e in games[(system, stem)]]), ""),
                (", ".join(sorted({e["core"] for e in games[(system, stem)] if e["core"]})), "cyan")]
               for system, stem in keys]
