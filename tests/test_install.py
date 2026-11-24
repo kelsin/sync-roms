@@ -4,7 +4,6 @@ import io
 import os
 import subprocess
 import sys
-import unicodedata
 import unittest
 from unittest import mock
 
@@ -18,30 +17,21 @@ V46 = "spruceV4.6.0.7z"
 
 
 class Plan(helpers.CardDir):
-    def test_plan_keeps_roms_bios_saves_any_case(self):
-        for d in ("ROMS", "bios", "Saves", ".Trashes", "App", "miyoo"):
+    def test_plan_keeps_roms_any_case(self):
+        for d in ("ROMS", ".Trashes", "App", "miyoo"):
             os.makedirs(self.cp(d))
         for f in ("._x", "autorun.inf"):
             helpers.touch(self.cp(f))
-        deleted, kept = install.plan(self.card, set())
+        deleted, kept = install.plan(self.card)
         self.assertEqual(deleted, [self.cp("App"), self.cp("autorun.inf"), self.cp("miyoo")])
-        self.assertEqual(kept, sorted(self.cp(n) for n in ("ROMS", "bios", "Saves", ".Trashes", "._x")))
+        self.assertEqual(kept, sorted(self.cp(n) for n in ("ROMS", ".Trashes", "._x")))
 
-    def test_plan_keeps_only_spruce_themes(self):
-        for d in ("ART_BOOK_NEXT", "TechDweeb_BMO"):
-            os.makedirs(self.cp("Themes", d))
-        helpers.touch(self.cp("Themes", "x.7z"))
-        deleted, kept = install.plan(self.card, {"art_book_next"})
-        self.assertEqual(deleted, [self.cp("Themes", "TechDweeb_BMO"), self.cp("Themes", "x.7z")])
-        self.assertEqual(kept, [self.cp("Themes"), self.cp("Themes", "ART_BOOK_NEXT")])
-        self.assertNotIn(self.cp("Themes"), deleted)
-
-    def test_plan_matches_theme_names_in_any_unicode_form(self):
-        nfd = unicodedata.normalize("NFD", "Pokémon")
-        os.makedirs(self.cp("Themes", nfd))
-        deleted, kept = install.plan(self.card, {install.theme_key(unicodedata.normalize("NFC", "Pokémon"))})
-        self.assertEqual(deleted, [])
-        self.assertIn(self.cp("Themes", nfd), kept)
+    def test_plan_keeps_only_roms(self):
+        for d in ("Saves", "Themes", "Roms", "BIOS", "App"):
+            os.makedirs(self.cp(d))
+        deleted, kept = install.plan(self.card)
+        self.assertEqual(deleted, [self.cp(n) for n in ("App", "BIOS", "Saves", "Themes")])
+        self.assertEqual(kept, [self.cp("Roms")])
 
 
 class UnpackedSize(unittest.TestCase):
@@ -127,7 +117,6 @@ class Run(helpers.CardDir):
             os.makedirs(self.cp(d))
         helpers.touch(self.cp("App", "f"), b"12345")
         self.enterContext(mock.patch.object(install.inventory, "files", return_value={P + V46: 100}))
-        self.enterContext(mock.patch.object(install.spruce_themes, "available", return_value=["art_book_next"]))
         self.downloads = self.enterContext(mock.patch.object(install.downloads, "run_downloads", return_value=0))
         self.enterContext(mock.patch.object(install.external, "find_tool", return_value="7z"))
         self.enterContext(mock.patch.object(install, "unpacked_size", return_value=1000))
@@ -172,16 +161,6 @@ class Run(helpers.CardDir):
         self.assertFalse(os.path.exists(self.tmpdir))
         self.unpack.assert_not_called()
 
-    def test_run_warns_when_storage_has_no_themes(self):
-        install.spruce_themes.available.return_value = []
-        self.assertEqual(self.run_cmd(dry_run=True), 0)
-        self.assertIn("storage has no spruce themes", self.err.getvalue())
-        self.assertIn("Themes/ART_BOOK_NEXT", self.out.getvalue())
-
-    def test_run_keeps_quiet_about_themes_when_storage_has_them(self):
-        self.assertEqual(self.run_cmd(dry_run=True), 0)
-        self.assertNotIn("no spruce themes", self.err.getvalue())
-
     def test_run_rejects_other_layout(self):
         store.update_card("card", layout="onion")
         self.assertEqual(self.run_cmd(), 2)
@@ -203,7 +182,7 @@ class Run(helpers.CardDir):
         self.assertNotIn("spruce_os", self.entry())
         out = self.out.getvalue()
         self.assertIn("App", out)
-        self.assertIn("Themes/TechDweeb_BMO", out)
+        self.assertIn("Themes", out)
         self.assertIn("5 B", out)
         self.assertIn(V46, out)
         self.assertIn("Dry run: nothing downloaded, deleted or unpacked", out)
@@ -245,14 +224,19 @@ class Run(helpers.CardDir):
         self.assertFalse(os.path.exists(self.cp("App")))
         self.assertFalse(os.path.exists(self.cp("Themes", "TechDweeb_BMO")))
         self.assertTrue(os.path.isdir(self.cp("Roms", "GBA")))
-        self.assertTrue(os.path.isdir(self.cp("Themes", "ART_BOOK_NEXT")))
+        self.assertFalse(os.path.exists(self.cp("Themes")))
         self.assertFalse(os.path.exists(self.tmpdir))
         entry = self.entry()
         self.assertEqual(entry["spruce_os"], V46)
-        self.assertNotIn("boot_logos", entry)
-        self.assertEqual(entry["spruce_themes_installed"], ["ART_BOOK_NEXT"])
         self.assertEqual(entry["layout"], "spruce")
         self.assertIn(f"spruceOS {V46} installed on card", self.out.getvalue())
+
+    def test_run_clears_theme_and_logo_records(self):
+        self.assertEqual(self.run_cmd(), 0)
+        entry = self.entry()
+        self.assertNotIn("boot_logos", entry)
+        self.assertNotIn("spruce_themes_installed", entry)
+        self.assertEqual(entry["spruce_os"], V46)
 
     def test_run_unreadable_archive_deletes_nothing(self):
         install.unpacked_size.return_value = None

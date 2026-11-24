@@ -1,43 +1,30 @@
-"""`cards install`: a fresh spruceOS on a card. Everything at the card root but its ROMs, BIOS, saves and storage's
-themes is deleted, then storage's newest spruceOS 7z is unpacked onto it without replacing the files kept."""
+"""`cards install`: a clean spruceOS on a card. Everything at the card root but its ROMs is deleted (BIOS, saves and
+themes too; a sync puts BIOS and themes back), then storage's newest spruceOS 7z is unpacked onto it without replacing
+the files kept."""
 import os
 import re
 import shutil
 import subprocess
 import tempfile
-import unicodedata
 
-from . import convert, downloads, external, flash, inventory, runtime, saves, spruce_os, spruce_themes, store, ui
+from . import convert, downloads, external, flash, inventory, runtime, saves, spruce_os, store, ui
 
-KEEP = frozenset({"roms", "bios", "saves", "themes", ".spotlight-v100", ".trashes", ".fseventsd",
-                  "system volume information"})
+KEEP = frozenset({"roms", ".spotlight-v100", ".trashes", ".fseventsd", "system volume information"})
 
 
 def _kept(name):
     return name.lower() in KEEP or name.startswith("._")
 
 
-def theme_key(name):
-    """A theme folder name compared ignoring case and Unicode form (a card can hold an NFD name, storage an NFC one)."""
-    return unicodedata.normalize("NFC", name).lower()
-
-
 def _mounted(path):
     return os.path.ismount(path)
 
 
-def plan(base, themes):
-    """(deleted, kept), sorted absolute paths: the root entries not kept and the Themes/ entries whose theme_key isn't
-    in themes are deleted; the kept root entries and theme folders are kept."""
+def plan(base):
+    """(deleted, kept), sorted absolute paths: the root entries not kept are deleted, the others kept."""
     deleted, kept = [], []
     for entry in os.scandir(base):
-        if not _kept(entry.name):
-            deleted.append(entry.path)
-            continue
-        kept.append(entry.path)
-        if entry.name.lower() == "themes" and entry.is_dir(follow_symlinks=False):
-            for theme in os.scandir(entry.path):
-                (kept if theme_key(theme.name) in themes else deleted).append(theme.path)
+        (kept if _kept(entry.name) else deleted).append(entry.path)
     return sorted(deleted), sorted(kept)
 
 
@@ -115,10 +102,7 @@ def run(args):
         ui.failure(ui.red(f"❌ no spruceOS release ({runtime.SPRUCE_PREFIX}spruceV<version>.7z) in storage"))
         return 1
     release, size = key[len(runtime.SPRUCE_PREFIX):], listing[key]
-    themes = {theme_key(n) for n in spruce_themes.available()}
-    deleted, kept = plan(base, themes)
-    if not themes and any(os.path.dirname(p) != base for p in deleted):
-        ui.warn("storage has no spruce themes, so everything in Themes/ goes; run `sync-roms themes update` first to keep them")
+    deleted, kept = plan(base)
     sizes = {path: _size(path) for path in deleted}
     print(ui.bold(f"{name}: install spruceOS {release} ({ui.human_size(size)})"))
     if kept:
@@ -182,10 +166,7 @@ def run(args):
     entry = dict(store.saved_card(name, cards))
     entry["spruce_os"] = release
     entry.pop("boot_logos", None)  # App/BootLogo/Imgs/ was replaced
-    installed = entry.get("spruce_themes_installed")
-    if isinstance(installed, list):
-        left = {theme_key(os.path.basename(p)) for p in kept if os.path.dirname(p) != base}
-        entry["spruce_themes_installed"] = sorted(t for t in installed if isinstance(t, str) and theme_key(t) in left)
+    entry.pop("spruce_themes_installed", None)  # Themes/ was deleted
     cards[name] = entry
     if not store.write_cards(cards):
         return 3

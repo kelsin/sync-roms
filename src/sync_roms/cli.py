@@ -226,7 +226,7 @@ TOPICS = {
   sync-roms cards set NAME [--device ID|full] [--layout NAME] [--size 512GB]
   sync-roms cards rename OLD NEW
   sync-roms cards convert [CARD] --layout NAME [--dry-run] [--yes]   move the card's ROMs, BIOS and saves to another layout's folders
-  sync-roms cards install [CARD] [--dry-run] [--yes]   put storage's newest spruceOS on a spruce card: deletes all but Roms, BIOS, Saves and spruce themes, then unpacks it
+  sync-roms cards install [CARD] [--dry-run] [--yes]   put storage's newest spruceOS on a spruce card: a clean install: deletes all but Roms, then unpacks it
   sync-roms cards clean [CARD] [--dry-run] [--yes]   delete the media other layouts' scrapes left in the card's ROM folders
   sync-roms cards delete NAME [--yes]
   sync-roms cards copy SRC DST                merge SRC's games, sets, excluded and collections into DST (not surprises); skips systems DST can't play
