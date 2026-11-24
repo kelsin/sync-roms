@@ -104,7 +104,8 @@ def help_lines(multi, hint, hidden_count=False, has_note=False, key_help=None, s
     if multi:
         lines += ["Space/Tab       toggle the row",
                   *(["a               toggle all shown (all off if all are on)"] if select_all else []),
-                  "o               view: all / on / changed", "u               revert this list"]
+                  "o               view: all / on / changed",
+                  "u               revert this list and hidden rows (asks if more than one change)"]
         if has_note:
             lines.append("w               edit the row's note")
         if has_locked:
@@ -1452,7 +1453,8 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
     line (below a notice and a locked row's note).
     select_all: False turns `a` (toggle all shown) off.
     outside: (on, off) pending changes the caller keeps in rows this list doesn't show (multi mode): Esc asks about
-    them too, and counts them in its question; on_revert() is called when u answers it.
+    them too, and counts them in its question; on_revert() is called whenever they are reverted: by u (which asks first
+    when there is more than one change in all) or by u at the Esc question.
     """
     if preview and not _in_session():  # a session asks the terminal once, before its app starts
         _app_class()  # first: it sets up Textual's environment

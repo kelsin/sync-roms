@@ -735,7 +735,8 @@ class TextualList(unittest.TestCase):
         pilot_list(script, "t", self.LABELS, multi=True, hint="Space toggle · Enter done · s set", hotkeys=("s",),
                    key_help=[("s", "narrow the list to a set's games")], on_note=lambda i, t: "")
         for line in ("a               toggle all shown (all off if all are on)", "o               view: all / on / changed",
-                     "u               revert this list", "w               edit the row's note", "?               this help",
+                     "u               revert this list and hidden rows (asks if more than one change)",
+                     "w               edit the row's note", "?               this help",
                      "s               narrow the list to a set's games"):
             self.assertIn(line, text[0])
         self.assertNotIn("Space toggle", text[0])  # the hint isn't repeated once the keys are described
