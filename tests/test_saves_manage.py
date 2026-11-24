@@ -287,6 +287,22 @@ class ManageCommandTest(helpers.Cmd):
         self.assertEqual(code, 0, err)
         self.assertIn("No stashed saves", out)
 
+    def test_w_shows_the_new_label_in_the_row_at_once(self):
+        self.stash()
+        seen = []
+
+        def label(labels):
+            kw = self.calls[0][2]
+            kw["on_note"](0, "boss")
+            seen.append(kw["extras"][0][-1])
+            kw["on_note"](0, "")
+            seen.append(kw["extras"][0][-1])
+            return None
+        self.lists(label)
+        code, out, err = self.run_cmd("saves", "manage")
+        self.assertEqual(code, 0, err)
+        self.assertEqual(seen, [("boss", "dim"), ("", "dim")])
+
     def test_delete_highlighted_after_confirm(self):
         d = self.stash()
         self.lists(("d", 0), None)

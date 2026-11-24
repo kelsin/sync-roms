@@ -273,13 +273,15 @@ def _manage(rows, systems, dry_run):
         if not changed:
             return f"Label unchanged: {row['game']}"
         labelled.add(id(row))
+        extras[i] = _extras(row, names)
         what = f"labelled {text.strip()!r}" if text.strip() else "label removed"
         return f"{'Would be ' if dry_run else ''}{what}: {row['game']}"
 
     while rows:
+        extras = [_extras(r, names) for r in rows]
         state = picker.filter_list(
             "🗂️ Stashed saves", [_label(r) for r in rows], multi=True, initial=[False] * len(rows), esc_asks=False,
-            extras=[_extras(r, names) for r in rows], session=session, hotkeys=("enter", "m", "p", "d"),
+            extras=extras, session=session, hotkeys=("enter", "m", "p", "d"),
             on_note=on_note, note_text=lambda i: rows[i].get("note", ""),
             hint="? help · Space toggle · Enter files · w label · m move · p prune · d delete · Esc done",
             key_help=KEY_HELP)
