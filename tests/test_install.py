@@ -4,6 +4,7 @@ import io
 import os
 import subprocess
 import sys
+import unicodedata
 import unittest
 from unittest import mock
 
@@ -34,6 +35,13 @@ class Plan(helpers.CardDir):
         self.assertEqual(deleted, [self.cp("Themes", "TechDweeb_BMO"), self.cp("Themes", "x.7z")])
         self.assertEqual(kept, [self.cp("Themes"), self.cp("Themes", "ART_BOOK_NEXT")])
         self.assertNotIn(self.cp("Themes"), deleted)
+
+    def test_plan_matches_theme_names_in_any_unicode_form(self):
+        nfd = unicodedata.normalize("NFD", "Pokémon")
+        os.makedirs(self.cp("Themes", nfd))
+        deleted, kept = install.plan(self.card, {install.theme_key(unicodedata.normalize("NFC", "Pokémon"))})
+        self.assertEqual(deleted, [])
+        self.assertIn(self.cp("Themes", nfd), kept)
 
 
 class UnpackedSize(unittest.TestCase):
@@ -69,12 +77,45 @@ class Unpack(helpers.CardDir):
             self.assertEqual(f.read(), "old")
         self.assertTrue(os.path.isfile(self.cp("App", "a")))
 
+    def test_check_passes_a_whole_archive_and_fails_a_broken_one(self):
+        src = os.path.join(self.tmp.name, "src")
+        helpers.touch(os.path.join(src, "App", "a"), "a")
+        archive = os.path.join(self.tmp.name, V46)
+        subprocess.run([external.find_tool("7z"), "a", archive, "App"], cwd=src, check=True, stdout=subprocess.DEVNULL)
+        broken = os.path.join(self.tmp.name, "broken.7z")
+        helpers.touch(broken, b"not a 7z")
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.assertIsNone(install.check(archive, 1))
+            self.assertIsNotNone(install.check(broken, 1))
+
     def test_unpack_reports_a_broken_archive(self):
         archive = os.path.join(self.tmp.name, V46)
         helpers.touch(archive, b"not a 7z")
         with contextlib.redirect_stdout(io.StringIO()):
             self.assertIsNotNone(install.unpack(archive, self.card, 1))
         self.assertIsNone(install.unpacked_size(archive))
+
+
+class ExitCodes(helpers.CardDir):
+    def fake_7z(self, code):
+        tool = os.path.join(self.tmp.name, f"7z-{code}")
+        helpers.touch(tool, f"#!/bin/sh\necho 'first line' >&2\necho 'WARNING: attributes' >&2\nexit {code}\n")
+        os.chmod(tool, 0o755)
+        return tool
+
+    def unpack_with(self, code):
+        err = io.StringIO()
+        with mock.patch.object(install.external, "find_tool", return_value=self.fake_7z(code)), \
+                contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(err):
+            return install.unpack("x.7z", self.card, 1), err.getvalue()
+
+    def test_exit_code_1_is_a_warning(self):
+        result, err = self.unpack_with(1)
+        self.assertIsNone(result)
+        self.assertIn("WARNING: attributes", err)
+
+    def test_exit_code_2_is_a_failure(self):
+        self.assertEqual(self.unpack_with(2)[0], "WARNING: attributes")
 
 
 class Run(helpers.CardDir):
@@ -91,6 +132,8 @@ class Run(helpers.CardDir):
         self.enterContext(mock.patch.object(install.external, "find_tool", return_value="7z"))
         self.enterContext(mock.patch.object(install, "unpacked_size", return_value=1000))
         self.unpack = self.enterContext(mock.patch.object(install, "unpack", return_value=None))
+        self.check = self.enterContext(mock.patch.object(install, "check", return_value=None))
+        self.mounted = self.enterContext(mock.patch.object(install, "_mounted", return_value=True))
         self.tmpdir = os.path.join(self.tmp.name, "install-tmp")
 
         def mkdtemp(**_):
@@ -110,6 +153,34 @@ class Run(helpers.CardDir):
 
     def entry(self):
         return store.load_cards()["card"]
+
+    def test_run_refuses_a_folder_that_isnt_mounted(self):
+        self.mounted.return_value = False
+        for dry_run in (True, False):
+            self.assertEqual(self.run_cmd(dry_run=dry_run), 2)
+            self.assertIn(f"{self.card} isn't a mounted card", self.err.getvalue())
+        self.mounted.assert_called_with(self.card)
+        self.downloads.assert_not_called()
+        self.assertTrue(os.path.isdir(self.cp("App")))
+
+    def test_run_damaged_archive_deletes_nothing(self):
+        self.check.return_value = "ERROR: CRC Failed"
+        self.assertEqual(self.run_cmd(), 1)
+        self.assertIn("CRC Failed", self.out.getvalue())
+        self.check.assert_called_once_with(os.path.join(self.tmpdir, V46), 1000)
+        self.assertTrue(os.path.isdir(self.cp("App")))
+        self.assertFalse(os.path.exists(self.tmpdir))
+        self.unpack.assert_not_called()
+
+    def test_run_warns_when_storage_has_no_themes(self):
+        install.spruce_themes.available.return_value = []
+        self.assertEqual(self.run_cmd(dry_run=True), 0)
+        self.assertIn("storage has no spruce themes", self.err.getvalue())
+        self.assertIn("Themes/ART_BOOK_NEXT", self.out.getvalue())
+
+    def test_run_keeps_quiet_about_themes_when_storage_has_them(self):
+        self.assertEqual(self.run_cmd(dry_run=True), 0)
+        self.assertNotIn("no spruce themes", self.err.getvalue())
 
     def test_run_rejects_other_layout(self):
         store.update_card("card", layout="onion")
@@ -153,7 +224,8 @@ class Run(helpers.CardDir):
     def test_run_declined_deletes_nothing(self):
         with mock.patch.object(install.ui, "confirm", return_value=False) as confirm:
             self.assertEqual(self.run_cmd(yes=False, terminal=True), 1)
-        self.assertIn(f"Delete 2 items from card and install spruceOS {V46}?", confirm.call_args.args[0])
+        self.assertIn(f"Delete 2 items from {self.card} and install spruceOS {V46}?", confirm.call_args.args[0])
+        self.assertIs(confirm.call_args.kwargs.get("default"), False)
         self.assertTrue(os.path.isdir(self.cp("App")))
         self.assertFalse(os.path.exists(self.tmpdir))
         self.unpack.assert_not_called()

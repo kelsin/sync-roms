@@ -5,6 +5,7 @@ import re
 import shutil
 import subprocess
 import tempfile
+import unicodedata
 
 from . import convert, downloads, external, flash, inventory, runtime, saves, spruce_os, spruce_themes, store, ui
 
@@ -16,9 +17,18 @@ def _kept(name):
     return name.lower() in KEEP or name.startswith("._")
 
 
+def theme_key(name):
+    """A theme folder name compared ignoring case and Unicode form (a card can hold an NFD name, storage an NFC one)."""
+    return unicodedata.normalize("NFC", name).lower()
+
+
+def _mounted(path):
+    return os.path.ismount(path)
+
+
 def plan(base, themes):
-    """(deleted, kept), sorted absolute paths: the root entries not kept and the Themes/ entries whose lower-cased name
-    isn't in themes are deleted; the kept root entries and theme folders are kept."""
+    """(deleted, kept), sorted absolute paths: the root entries not kept and the Themes/ entries whose theme_key isn't
+    in themes are deleted; the kept root entries and theme folders are kept."""
     deleted, kept = [], []
     for entry in os.scandir(base):
         if not _kept(entry.name):
@@ -27,7 +37,7 @@ def plan(base, themes):
         kept.append(entry.path)
         if entry.name.lower() == "themes" and entry.is_dir(follow_symlinks=False):
             for theme in os.scandir(entry.path):
-                (kept if theme.name.lower() in themes else deleted).append(theme.path)
+                (kept if theme_key(theme.name) in themes else deleted).append(theme.path)
     return sorted(deleted), sorted(kept)
 
 
@@ -46,10 +56,10 @@ def unpacked_size(archive):
     return sum(sizes) if done.returncode == 0 and sizes else None
 
 
-def unpack(archive, base, total):
-    """Unpack archive onto base, skipping the files base already has, with a progress bar by total (bytes). None on
-    success, else the last line 7z printed on stderr."""
-    cmd = [external.find_tool("7z"), "x", "-y", "-aos", "-bso0", "-bsp1", f"-o{base}", "--", archive]
+def _run_7z(args, total):
+    """Run 7z with args, its percent driving a progress bar by total (bytes). None on success, else the last line it
+    printed on stderr; exit code 1 is a warning (e.g. attributes a FAT card can't keep), warned about and a success."""
+    cmd = [external.find_tool("7z"), *args]
     percent = [0]
     bar = ui.ProgressBar(1, lambda: percent[0] / 100, total)
     with tempfile.TemporaryFile() as err:  # a file, not a pipe: 7z can't block on it while stdout is read
@@ -74,13 +84,29 @@ def unpack(archive, base, total):
         if proc.returncode:
             err.seek(0)
             lines = [line.strip() for line in err.read().decode(errors="replace").splitlines() if line.strip()]
-            return lines[-1] if lines else f"exit code {proc.returncode}"
+            last = lines[-1] if lines else f"exit code {proc.returncode}"
+            if proc.returncode != 1:
+                return last
+            ui.warn(f"7z: {last}")
     return None
+
+
+def check(archive, total):
+    """Test every file in archive (7z t), with a progress bar by total (bytes): None when it is whole, else 7z's error."""
+    return _run_7z(["t", "-bso0", "-bsp1", "--", archive], total)
+
+
+def unpack(archive, base, total):
+    """Unpack archive onto base, skipping the files base already has, with a progress bar by total (bytes). None on
+    success, else the last line 7z printed on stderr."""
+    return _run_7z(["x", "-y", "-aos", "-bso0", "-bsp1", f"-o{base}", "--", archive], total)
 
 
 def run(args):
     """`cards install [CARD] [--dry-run] [--yes]`: install storage's newest spruceOS onto a spruce card."""
     base, name, (_, layout), _ = saves.card_setup(args)
+    if not _mounted(base):
+        ui.fail(f"{base} isn't a mounted card: cards install only runs on an SD card's root", 2)
     if layout != "spruce":
         ui.fail(f"cards install supports only spruce cards; {name} is {layout}", 2)
     listing = inventory.files(runtime.SPRUCE_PREFIX)
@@ -89,8 +115,10 @@ def run(args):
         ui.failure(ui.red(f"❌ no spruceOS release ({runtime.SPRUCE_PREFIX}spruceV<version>.7z) in storage"))
         return 1
     release, size = key[len(runtime.SPRUCE_PREFIX):], listing[key]
-    themes = {n.lower() for n in spruce_themes.available()}
+    themes = {theme_key(n) for n in spruce_themes.available()}
     deleted, kept = plan(base, themes)
+    if not themes and any(os.path.dirname(p) != base for p in deleted):
+        ui.warn("storage has no spruce themes, so everything in Themes/ goes; run `sync-roms themes update` first to keep them")
     sizes = {path: _size(path) for path in deleted}
     print(ui.bold(f"{name}: install spruceOS {release} ({ui.human_size(size)})"))
     if kept:
@@ -120,12 +148,18 @@ def run(args):
         if total is None:
             ui.failure(ui.red(f"❌ 7z can't read the downloaded {release}: nothing deleted"))
             return 1
+        print(f"🔍 Testing spruceOS {release}…")
+        error = check(archive, total)
+        if error:
+            ui.failure(ui.red(f"❌ the downloaded {release} is damaged ({error}): nothing deleted"))
+            return 1
         free = downloads.free_space(base) + sum(sizes.values())
         if free < total + spruce_os.MARGIN:
             ui.failure(ui.red(f"❌ not enough room on {name}: spruceOS needs {ui.human_size(total + spruce_os.MARGIN)}, "
                               f"the card would have {ui.human_size(free)} free"))
             return 1
-        if not args.yes and not ui.confirm(f"Delete {len(deleted)} items from {name} and install spruceOS {release}?"):
+        if not args.yes and not ui.confirm(f"Delete {len(deleted)} items from {base} and install spruceOS {release}?",
+                                       default=False):
             return 1
         if deleted:
             step, bar = convert._progress(len(deleted))
@@ -150,8 +184,8 @@ def run(args):
     entry.pop("boot_logos", None)  # App/BootLogo/Imgs/ was replaced
     installed = entry.get("spruce_themes_installed")
     if isinstance(installed, list):
-        left = {os.path.basename(p).lower() for p in kept if os.path.dirname(p) != base}
-        entry["spruce_themes_installed"] = sorted(t for t in installed if isinstance(t, str) and t.lower() in left)
+        left = {theme_key(os.path.basename(p)) for p in kept if os.path.dirname(p) != base}
+        entry["spruce_themes_installed"] = sorted(t for t in installed if isinstance(t, str) and theme_key(t) in left)
     cards[name] = entry
     if not store.write_cards(cards):
         return 3
