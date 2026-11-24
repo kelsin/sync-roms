@@ -162,10 +162,10 @@ def list_folders():
 
 
 def stat_sizes(keys):
-    """{key: size} of the keys that exist as files in storage: for a bucket, one listing per system folder (never the
-    mirror, which holds only some of it); else those in the read folder, checked in parallel (one stat each, no folder walk)."""
+    """{key: size} of the keys that exist as files in the read folder, checked in parallel (one stat each, no folder walk);
+    with no read folder, one bucket listing per system folder."""
     keys = list(keys)
-    if not runtime.ROOT:
+    if not read_root():
         wanted = set(keys)
         listed = {}
         for folder in sorted({k.split("/", 1)[0] for k in wanted}):

@@ -167,15 +167,16 @@ class BucketCacheTest(helpers.DataDir):
         with mock.patch.object(runtime, "ENDPOINT", "http://minio"):
             self.assertIsNone(inventory.current())
 
-    def test_stat_lists_the_bucket_not_the_mirror_without_a_cache(self):
+    def test_stat_reads_the_mirror_without_a_cache_and_needs_no_bucket(self):
         mirror = self.enterContext(tempfile.TemporaryDirectory())
+        helpers.touch(os.path.join(mirror, "gba/a.zip"), b"12")
         self.enterContext(mock.patch.object(runtime, "_mirror_root", mirror))
-        self.assertEqual(inventory.stat(["gba/a.zip", "gba/gone.zip", "BIOS/x.bin"]), {"gba/a.zip": 1, "BIOS/x.bin": 3})
-        self.assertEqual(inventory.stat(["gba/a.zip"]), {"gba/a.zip": 1})
+        self.enterContext(mock.patch.object(s3, "s3_client", side_effect=AssertionError("read the bucket")))
+        self.assertEqual(inventory.stat(["gba/a.zip", "gba/gone.zip", "BIOS/x.bin"]), {"gba/a.zip": 2})
 
-    def test_stat_with_no_mirror_does_not_crash(self):
+    def test_stat_lists_the_bucket_without_a_cache_or_a_mirror(self):
         self.enterContext(mock.patch.object(runtime, "_mirror_root", None))
-        self.assertEqual(inventory.stat(["gba/a.zip"]), {"gba/a.zip": 1})
+        self.assertEqual(inventory.stat(["gba/a.zip", "gba/gone.zip", "BIOS/x.bin"]), {"gba/a.zip": 1, "BIOS/x.bin": 3})
 
 
 class UnmountedShareTest(helpers.StorageFolder):

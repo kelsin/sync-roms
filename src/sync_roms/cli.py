@@ -1394,7 +1394,9 @@ def sync_card(args):
                 folders = m3u.game_folders(keys) if disc_folders else None
                 named = guests.named(dest, keys, disc_dir, folders)  # sizes only for these: a share is slow to stat
                 if named:
-                    found = guests.recognized(dest, keys, inventory.stat(sorted(named)), disc_dir, folders)
+                    with mirroring.storage_reads():  # storage's sizes, not the mirror's
+                        sizes = inventory.stat(sorted(named))
+                    found = guests.recognized(dest, keys, sizes, disc_dir, folders)
             seed[s["bucket"]] = found
         if args.dry_run:
             guests.apply_seed(systems, seed)
