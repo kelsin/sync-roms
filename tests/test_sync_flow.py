@@ -40,10 +40,10 @@ def read_from(card_dir, *parts):
 def captured(fn, *a, **kw):
     out, err, outer = io.StringIO(), io.StringIO(), sys.stderr
 
-    class Tee:  # also keeps writing to a stderr a test already redirected
+    class Tee:  # also keeps writing to a stderr a test already redirected (never to the real one)
         def write(self, text):
             err.write(text)
-            return outer.write(text)
+            return len(text) if outer is sys.__stderr__ else outer.write(text)
 
         def flush(self):
             outer.flush()

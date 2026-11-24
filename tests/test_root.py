@@ -68,7 +68,7 @@ class FolderStorageTest(unittest.TestCase):
         open(os.path.join(mirror, runtime.MIRROR_MARKER), "w").close()
         with mock.patch.object(mirroring, "refresh_mirror", side_effect=AssertionError("refreshed")):
             mirroring.use_mirror(mirror, False)
-            with self.assertRaises(SystemExit):
+            with self.assertRaises(SystemExit), contextlib.redirect_stderr(io.StringIO()):
                 mirroring.mirror_command(mock.Mock(clear_mirror=False, use_mirror=mirror, mirror=None))
         self.assertIsNone(runtime._mirror_root)
 
@@ -150,7 +150,7 @@ class RootSettingTest(unittest.TestCase):
                 mock.patch.object(usersettings, "resolve_settings", lambda: {k: (None, "unset") for k in ("bucket", "root", "endpoint")} | {"profile": ("p", ""), "write_profile": ("w", "")}), \
                 mock.patch.object(runtime, "ROOT", None), mock.patch.object(runtime, "BUCKET", None), \
                 mock.patch("builtins.input", side_effect=["/no/such/folder", d]), \
-                contextlib.redirect_stdout(io.StringIO()):
+                contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
             usersettings.ensure_bucket()
             self.assertEqual(saved, {"root": os.path.abspath(d)})
             self.assertEqual(runtime.ROOT, os.path.abspath(d))

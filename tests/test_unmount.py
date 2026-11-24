@@ -112,7 +112,8 @@ class Eject(unittest.TestCase):
 
     def eject(self, code):
         r = subprocess.CompletedProcess([], code, "", "busy")
-        with mock.patch.object(clean.subprocess, "run", return_value=r), contextlib.redirect_stdout(io.StringIO()):
+        with mock.patch.object(clean.subprocess, "run", return_value=r), contextlib.redirect_stdout(io.StringIO()), \
+                contextlib.redirect_stderr(io.StringIO()):
             return clean.eject()
 
     def test_true_when_unmounted(self):

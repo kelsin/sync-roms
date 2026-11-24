@@ -69,7 +69,7 @@ class MakeArtTest(unittest.TestCase):
         self.checkerboard().save(src)
         scrape_plan.shrink_png(src, dst, (50, 50))
         with Image.open(dst) as im:
-            self.assertIn(len({v for v in im.convert("L").getdata() if 0 < v < 255}), range(1, 300))
+            self.assertIn(len({v for v in im.convert("L").get_flattened_data() if 0 < v < 255}), range(1, 300))
 
     def test_make_art_smooths_a_palette_image(self):
         src, dst = os.path.join(self.dir, "p.png"), os.path.join(self.dir, "p.qoi")
