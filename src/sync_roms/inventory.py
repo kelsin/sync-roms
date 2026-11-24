@@ -132,7 +132,10 @@ def files(prefix, sizes=True):
     and with sizes=False a storage folder's values are None (names list fast on a network share; each size is a stat).
     Ignored ROMs are left out here and in every read below."""
     tree = current()
-    return _unignored(s3.list_sizes(prefix, sizes) if tree is None else tree.under(prefix))
+    if tree is None:
+        s3.check_root()  # an unmounted share, not an empty one
+        return _unignored(s3.list_sizes(prefix, sizes))
+    return _unignored(tree.under(prefix))
 
 
 def newest(listing, prefix, pattern):
@@ -152,6 +155,7 @@ def stat(keys):
     """{key: size} of the keys that are files in storage."""
     tree = current()
     if tree is None:
+        s3.check_root()  # an unmounted share, not an empty one
         return _unignored(s3.stat_sizes(keys))
     return _unignored({k: tree.files[k] for k in keys if k in tree.files and not k.endswith("/")})
 
@@ -160,6 +164,7 @@ def etags(prefix):
     """{path under prefix: (size, ETag)}, as s3.list_with_etags. A file whose ETag isn't known has "-", like a folder's."""
     tree = current()
     if tree is None:
+        s3.check_root()  # an unmounted share, not an empty one
         return _unignored(s3.list_with_etags(prefix), prefix)
     return _unignored({k[len(prefix):]: (n, tree.etags.get(k, "-")) for k, n in tree.under(prefix).items()
                        if not k.endswith("/")}, prefix)

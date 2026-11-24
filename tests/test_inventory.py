@@ -35,7 +35,7 @@ class NoCacheTest(helpers.StorageFolder):
         self.build()
         with mock.patch.object(runtime, "ROOT", "/elsewhere"):
             self.assertIsNone(inventory.current())
-            with mock.patch.object(s3, "stat_sizes", return_value={}) as live:
+            with mock.patch.object(s3, "check_root"), mock.patch.object(s3, "stat_sizes", return_value={}) as live:
                 inventory.stat(["gba/a.zip"])
             live.assert_called_once()
 
@@ -176,6 +176,18 @@ class BucketCacheTest(helpers.DataDir):
     def test_stat_with_no_mirror_does_not_crash(self):
         self.enterContext(mock.patch.object(runtime, "_mirror_root", None))
         self.assertEqual(inventory.stat(["gba/a.zip"]), {"gba/a.zip": 1})
+
+
+class UnmountedShareTest(helpers.StorageFolder):
+    def setUp(self):
+        super().setUp()
+        self.enterContext(mock.patch.object(runtime, "ROOT", os.path.join(self.root.name, "unmounted")))
+
+    def test_reads_without_a_cache_raise_instead_of_listing_empty(self):
+        for read in (lambda: inventory.files("gba/"), lambda: inventory.stat(["gba/a.zip"]),
+                     lambda: inventory.etags("gba/")):
+            with self.assertRaisesRegex(FileNotFoundError, "unmounted is missing"):
+                read()
 
 
 class FolderMtimeTest(helpers.StorageFolder):
