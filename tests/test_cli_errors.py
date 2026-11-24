@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 
-from sync_roms import chd, cli, commands, diff, edit, inventory, m3u, picker, runtime, s3, scrape_files, store, ui, upload  # noqa: E402
+from sync_roms import chd, cli, commands, diff, edit, inventory, m3u, picker, runtime, s3, scrape_files, store, ui, upload, usersettings  # noqa: E402
 from test_edit import EditBase  # noqa: E402
 from test_scripting import Isolated  # noqa: E402
 
@@ -107,6 +107,27 @@ class UsageHelpTest(Isolated):
                     code, out, err = self.sync([name, flag])
                     self.assertEqual((code, err), (0, ""))
                     self.assertIn(f"sync-roms {name}", out)
+
+    def test_a_mistyped_command_fails_before_any_storage_access(self):
+        with mock.patch.object(usersettings, "ensure_bucket", side_effect=AssertionError("asked for storage")), \
+                mock.patch.object(inventory, "prepare", side_effect=AssertionError("read storage")), \
+                tempfile.TemporaryDirectory() as cwd:
+            old = os.getcwd()
+            os.chdir(cwd)
+            try:
+                code, out, err = self.sync(["bogus"])
+            finally:
+                os.chdir(old)
+        self.assertEqual((code, out), (2, ""))
+        self.assertIn("bogus isn't a command or a folder", err)
+        self.assertIn("is the card mounted?", err)
+        self.assertIn("sync-roms help", err)
+
+    def test_help_for_an_unknown_topic_exits_2(self):
+        code, out, err = self.sync(["help", "bogus"])
+        self.assertEqual((code, out), (2, ""))
+        self.assertIn("No help for 'bogus'", err)
+        self.assertEqual(self.sync(["help", "upload"])[0], 0)
 
     def test_word_command_errors_point_at_that_command_help(self):
         for argv, name in ((["cache", "update", "--json"], "cache"), (["cards", "list", "-n"], "cards"),
@@ -238,6 +259,7 @@ class MissingStorageOrCardTest(Isolated):
 
     def test_missing_storage_folder_stops_a_sync_before_planning(self):
         gone = os.path.join(self.tmp, "roms")
+        os.makedirs(os.path.join(self.tmp, "SD"))
         tree = inventory.Tree(gone, 1, {"gba/Game.zip": 5}, {})
         with mock.patch.object(cli, "sync_card") as plan, mock.patch.object(inventory, "_load", return_value=tree), \
                 mock.patch.object(inventory, "prepare") as prepare:
@@ -283,9 +305,9 @@ class MissingStorageOrCardTest(Isolated):
                 mock.patch.object(store, "load_cards", return_value={}), mock.patch.object(store, "save_card"):
             code, out, err = self.sync([card, "--yes"], {"root": storage})
         self.assertEqual(code, 2)
-        self.assertIn(f"{card} isn't a folder", err)
+        self.assertIn(f"{card} isn't a command or a folder", err)
         self.assertIn("mounted?", err)
-        self.assertIn("sync-roms --help", err)
+        self.assertIn("sync-roms help", err)
         self.assertFalse(os.path.exists(os.path.join(self.tmp, "typo")))
 
     def test_unusable_card_folders_are_setup_problems(self):

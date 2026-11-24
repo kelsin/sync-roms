@@ -866,6 +866,8 @@ def run(argv):
             return 0
         return commands.run(cmd)
     if argv and argv[0] == "help":
+        if len(argv) > 1 and ALIASES.get(argv[1], argv[1]) not in SUBCOMMANDS:
+            ui.fail(f"No help for {argv[1]!r}: it isn't a command. See `sync-roms help` for the commands.", 2)
         print(help_text(ALIASES.get(argv[1], argv[1]) if len(argv) > 1 else None))
         return 0
     topic = next((ALIASES.get(a, a) for a in argv if a in SUBCOMMANDS or a in ALIASES), None) if ("-h" in argv or "--help" in argv) else None
@@ -884,6 +886,8 @@ def run(argv):
     mode = check_modes(args)
     if args.json and mode in (None, "--diff"):  # the JSON document is all that reaches stdout
         ui.set_output(True, ui.VERBOSE)
+    if mode is None and args.base_dir and not os.path.isdir(os.path.abspath(os.path.expanduser(args.base_dir))):
+        ui.fail(f"{args.base_dir} isn't a command or a folder (is the card mounted?)\n   See `sync-roms help` for the commands.", 2)
     handled, code = dispatch_mode(args, mode)
     return code if handled else sync_card(args)
 
