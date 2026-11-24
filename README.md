@@ -8,7 +8,7 @@ The first run asks where storage is and saves the answer in `settings.json` in t
 - **An absolute folder path** (a mounted network share, `/Volumes/roms`, or `~/roms`) is saved as `root` and replaces the bucket and AWS entirely, with the same layout (`<system>/…`, `BIOS/…`, `scrapes/…`). An answer with a `/` (other than `s3://…`) or naming an existing folder is a folder, never a bucket name.
 - **With no terminal to ask on**, set `ROMS_BUCKET` or `ROMS_ROOT` (or pass `--bucket` or `--root`).
 
-It can also keep a [local mirror](#local-mirror-mirror) of storage and sync from that. The device setup guide (`sync-roms guide` opens it in a browser) lists the steps to finish a device by hand once its card is synced: apps to install and the frontend, RetroArch and emulator settings to change, for the device and layout you pick.
+It can also keep a [local mirror](#local-mirror-mirror) of storage and sync from that. The device setup guide (`sync-roms guide` opens it in a browser) lists the steps to finish a device by hand once its card is synced: apps to install and the frontend, RetroArch and emulator settings to change, for the device and layout you pick (or a card, which sets both; Spruce is the first and default layout of a device that doesn't run Android).
 
 ## Install
 

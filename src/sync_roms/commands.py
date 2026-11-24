@@ -1115,8 +1115,16 @@ def check_cmd(args):
 
 
 def guide_cmd(args):
-    """Open the device setup guide, a page inside the package, in the default browser."""
-    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "setup-guide.html")
+    """Open the device setup guide in the default browser: a copy in the cache folder with your cards filled in."""
+    src = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "setup-guide.html")
+    with open(src, encoding="utf-8") as f:
+        html = f.read()
+    cards = [{"name": n, "device": c.get("device"), "layout": c.get("layout")}
+             for n, c in store.load_cards().items() if isinstance(c, dict) and not c.get("guest")]
+    block = json.dumps(cards).replace("<", "\\u003c")
+    path = os.path.join(store.cache_dir(), "setup-guide.html")
+    os.makedirs(store.cache_dir(), exist_ok=True)
+    store.write_text(path, html.replace('id="cards-data">[]<', f'id="cards-data">{block}<', 1))
     print(path)
     if not webbrowser.open(pathlib.Path(path).as_uri()):
         ui.fail("Couldn't open a browser: open the file above yourself", 1)
