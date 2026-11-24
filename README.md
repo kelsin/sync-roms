@@ -333,7 +333,7 @@ sync-roms edit
    - `c` clears every filter. Filters on different fields, the set filter and `/` all combine, and the filter line shows what is active.
    - `v` on a game puts one of its variants on other systems (listed on the highlighted row) on the card, or takes it off.
    - `w` writes a note on a picked game.
-4. **When you leave the menu**, device, layout and device-system changes are summarized, then **save**, **keep editing**, **discard**, or **list every change**. Nothing is uploaded.
+4. **When you leave the menu**, device, layout and device-system changes are summarized, then **save**, **keep editing** (`Esc` too), **discard**, or **list every change**. Nothing is uploaded.
 
 While an editor is busy between two lists (the screen says `Working...`), `Ctrl-C` takes effect when that step ends: the editor then stops as it does for `Ctrl-C` in a list. Another `Ctrl-C` a second or more later, with the step still running, quits at once, and unsaved changes in the open editor are lost (the screen says when; a double press or a held key counts as one). The same goes for the set and collection editors.
 

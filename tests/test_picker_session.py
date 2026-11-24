@@ -257,6 +257,20 @@ class Session(unittest.TestCase):
         self.assertEqual(self.run_editor(editor, script), (True, True, False, False, "a bdec", "", "e", "s"))
         self.assertEqual(self.events, ["app closed"])
 
+    def test_esc_answers_a_choose_that_names_an_esc_answer(self):
+        def editor():
+            picker.filter_list("A", ["a0"])
+            return ui.choose("Save these?", "sed", "s", esc="e"), ui.choose("Again?", "sed", "s", esc="e")
+
+        async def script(app, pilot):
+            await wait_for(pilot, lambda: showing(app, "A"))
+            await pilot.press("enter")
+            await wait_for(pilot, lambda: prompting(app, "Save these? [S/e/d] "))
+            await pilot.press("escape")
+            await wait_for(pilot, lambda: prompting(app, "Again?"))
+            await pilot.press("ctrl+g")
+        self.assertEqual(self.run_editor(editor, script), ("e", "e"))
+
     def test_esc_at_a_cancellable_ask_is_none_and_enter_on_nothing_is_empty(self):
         def editor():
             picker.filter_list("A", ["a0"])

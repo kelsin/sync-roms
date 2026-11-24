@@ -145,6 +145,26 @@ class EditBase(DataDir):
             return edit.edit_manifest()
 
 
+class SaveReview(EditBase):
+    def test_esc_at_the_save_review_means_keep_editing(self):
+        asked, picks = [], iter([3, 0, None, 4])
+
+        def fake(title, options, *a, **k):
+            if k.get("multi"):
+                return [not k["initial"][0]] + list(k["initial"][1:])
+            return next(picks)
+        answers = iter(["l", "d"])  # the full review's own question after l too
+
+        def choose(question, letters, default, legend="", **k):
+            asked.append(k)
+            return next(answers)
+        with mock.patch.object(runtime, "BUCKET", "b", create=True), mock.patch.object(s3, "list_sizes", return_value={}), \
+                mock.patch.object(picker, "filter_list", side_effect=fake), mock.patch.object(edit, "note"), \
+                mock.patch.object(ui, "choose", side_effect=choose), contextlib.redirect_stdout(io.StringIO()):
+            edit.edit_manifest()
+        self.assertEqual(asked, [{"esc": "e"}, {"esc": "e"}])
+
+
 class EditFlow(EditBase):
     def test_new_card_left_empty_and_declined_is_removed(self):
         # top menu: Cards; "New card" is option 0 with no cards; the card editor Esc; back; the top menu Esc to finish

@@ -493,10 +493,11 @@ def edit_manifest():
             print(ui.yellow("👋 Nothing else to save (card games are saved as you edit them)."))
             return 0
         print_changes(changed, runtime.MAX_MISSING_SHOWN)
-        answer = ui.choose("💾 Save these changes?", "sedl", "s", "s save · e keep editing · d discard · l list every change")
+        answer = ui.choose("💾 Save these changes?", "sedl", "s", "s save · e keep editing · d discard · l list every change",
+                             esc="e")
         while answer == "l":
             print_changes(changed, 10 ** 6)
-            answer = ui.choose("💾 Save these changes?", "sed", "s", "s save · e keep editing · d discard")
+            answer = ui.choose("💾 Save these changes?", "sed", "s", "s save · e keep editing · d discard", esc="e")
         if answer == "e":
             continue
         if answer == "d":

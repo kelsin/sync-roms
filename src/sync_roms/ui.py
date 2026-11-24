@@ -255,18 +255,19 @@ def require_terminal(what, flag):
         fail(f"Can't {what} without a terminal: pass {flag}", 2)
 
 
-def _choose_keys(question, letters, default, legend=""):
-    """choose's question in the list app: one of letters, Enter the default."""
+def _choose_keys(question, letters, default, legend="", esc=None):
+    """choose's question in the list app: one of letters, Enter the default, Esc or ^G the answer esc (ignored without one)."""
     if not ASSUME_YES:
         suffix = "/".join(l.upper() if l == default else l for l in letters)
         return (f"{question} [{suffix}]{' (' + legend + ')' if legend else ''} ",
-                {**dict(zip(letters, letters)), "enter": default})
+                {**dict(zip(letters, letters)), "enter": default, **({"escape": esc, "ctrl+g": esc} if esc else {})})
 
 
 @in_app(_choose_keys)
 @uses_terminal
-def choose(question, letters, default, legend=""):
-    """Ask for one of `letters` (a string of single characters); Enter, --yes and EOF give `default`."""
+def choose(question, letters, default, legend="", esc=None):
+    """Ask for one of `letters` (a string of single characters); Enter, --yes and EOF give `default`. esc: the answer
+    Esc or ^G give in the list app (they do nothing without one; a plain terminal has no Esc key to give it)."""
     suffix = "/".join(l.upper() if l == default else l for l in letters)
     if ASSUME_YES:
         print(f"{question} [{suffix}] {default} (--yes)")

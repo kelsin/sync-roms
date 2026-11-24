@@ -57,6 +57,22 @@ class MenusKeepTheCursor(unittest.TestCase):
         self.assertEqual(len(opened), 2)
 
 
+class SetsReview(unittest.TestCase):
+    def test_esc_at_the_save_review_means_keep_editing(self):
+        before = {"a": {"name": "A", "games": [RUBY]}}
+        working = {"a": {"name": "A", "games": []}}
+        asked = []
+
+        def choose(question, letters, default, legend="", **k):
+            asked.append(k)
+            return "d"
+        with mock.patch.object(picker, "filter_list", side_effect=[None]), mock.patch.object(ui, "choose", side_effect=choose), \
+                mock.patch.object(edit, "note"), mock.patch("builtins.print"):
+            listedit.edit_menu("set", before, working, {"review": False}, lambda g: "", lambda g: None, lambda x: "", None,
+                               lambda item: None, None, "?", empty_ok=True)
+        self.assertEqual(asked, [{"esc": "e"}])
+
+
 class Stocked(unittest.TestCase):
     SYSTEMS = SYSTEMS + [{"name": "Game Boy", "bucket": "gb"}, {"name": "Saturn", "bucket": "saturn"}]
 
@@ -439,7 +455,7 @@ class Editor(DataDir):
                 mock.patch.object(picker, "filter_list", lambda *a, **k: answer(next(picks))), \
                 mock.patch.object(ui, "ask", side_effect=list(asks)), \
                 mock.patch.object(ui, "confirm", lambda text, **k: confirms.append(text) or answer(confirm)), \
-                mock.patch.object(ui, "choose", lambda question, *a: self.asked.append(question) or next(choose, "s")), \
+                mock.patch.object(ui, "choose", lambda question, *a, **k: self.asked.append(question) or next(choose, "s")), \
                 mock.patch.object(listedit, "print_changes", lambda found: self.reviewed.append(found)), \
                 mock.patch.object(collectionedit, "edit_one", edit_one or (lambda c, systems, keys_of: c["games"].append(dict(RUBY)))), \
                 mock.patch("subprocess.run") as run:

@@ -339,7 +339,7 @@ def edit_menu(noun, before, working, state, emoji, art, delete_note, new_item, o
             state["review"] = False
             continue
         print_changes(found)
-        answer = ui.choose(question, "sed", "s", "s save · e keep editing · d discard")
+        answer = ui.choose(question, "sed", "s", "s save · e keep editing · d discard", esc="e")
         if answer == "e":
             state["review"] = False
             continue
