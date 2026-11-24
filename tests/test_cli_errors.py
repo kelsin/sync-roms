@@ -71,7 +71,9 @@ class UnhonoredFlagsTest(Isolated):
                  (["config", "-n"], "config show"), (["config", "path", "-n"], "config path"),
                  (["doctor", "-n"], "doctor"), (["check", "--dry-run"], "check"), (["completion", "bash", "-n"], "completion"),
                  (["games", "list", "-n", "--card", "SD"], "games list"), (["games", "export", "-n", "--card", "SD"], "games export"),
-                 (["games", "sets", "list", "-n", "--card", "SD"], "games sets list")]
+                 (["games", "sets", "list", "-n", "--card", "SD"], "games sets list"),
+                 (["themes", "pick", "-n"], "themes pick"), (["themes", "build", "--out", "/nowhere", "-n"], "themes build"),
+                 (["themes", "palettes", "--dry-run"], "themes palettes")]
         for argv, name in cases:
             with self.subTest(argv=argv):
                 self.refused(argv, f"--dry-run has no effect on `{name}`",
