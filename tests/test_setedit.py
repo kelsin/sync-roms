@@ -102,6 +102,7 @@ class Reconcile(unittest.TestCase):
         self.assertTrue(asked.call_args.kwargs["cancellable"])
         self.assertEqual(pick(3, typed="Z")[0], "Z")
         self.assertIsNone(pick(3, typed=None)[0])  # Esc at the name
+        self.assertIsNone(pick(3, typed="  ")[0])  # an empty name changes nothing too
 
 
 class Changes(unittest.TestCase):

@@ -132,7 +132,7 @@ def series_keys(game_set, series):
 
 def pick_name(title, names, current, noun, what):
     """Pick a name from a list: "" for none (first row), a known name, or a new one typed (last row); None when
-    cancelled. The cursor starts on current."""
+    cancelled (an empty new name too). The cursor starts on current."""
     i = picker.filter_list(title, ["(none)", *names, "new…"], hint="Enter pick · Esc cancel",
                            cursor=next((n + 1 for n, x in enumerate(names) if x.casefold() == (current or "").casefold()), 0))
     if i is None:
@@ -142,9 +142,9 @@ def pick_name(title, names, current, noun, what):
     if i <= len(names):
         return names[i - 1]
     typed = ui.ask(f"🏷️  New {noun} for {what}: ", cancellable=True)
-    if typed is None:
+    typed = (typed or "").strip()
+    if not typed:
         return None
-    typed = typed.strip()
     return next((n for n in names if n.casefold() == typed.casefold()), typed)  # "cave" is the existing "Cave"
 
 
