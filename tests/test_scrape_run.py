@@ -344,6 +344,33 @@ class ScrapeRunTest(RunBase):
             got = scrape_online.scrape_rom(self.client, GBA, ("a.zip", 3, '"x-1"'), tmp, set(), threading.Event())
         self.assertEqual(got, ("unreachable", error))
 
+    def test_rate_limited_media_file_is_skipped_and_the_rom_kept(self):
+        self.put("gba/a.zip")
+        self.client.download_errors["http://media/1/ss"] = screenscraper.RateLimited("ScreenScraper answered HTTP 429")
+        self.assertEqual(self.run_scrape(), 0)
+        self.assertEqual(set(self.metadata()), {"a.zip"})
+        self.assertIn("scrapes/gba/covers/a.png", self.stored())
+        self.assertNotIn("scrapes/gba/screenshots/a.png", self.stored())
+
+    def test_rom_whose_only_media_file_is_rate_limited_is_unreachable(self):
+        self.put("gba/a.zip")
+        self.client.games["a.zip"] = game(1, "Alpha", media=("ss",))
+        self.client.download_errors["http://media/1/ss"] = error = screenscraper.RateLimited("ScreenScraper answered HTTP 429")
+        with tempfile.TemporaryDirectory() as tmp:
+            got = scrape_online.scrape_rom(self.client, GBA, ("a.zip", 3, '"x-1"'), tmp, set(), threading.Event())
+        self.assertEqual(got, ("unreachable", error))
+
+    def test_roms_that_keep_being_rate_limited_stop_the_run_as_unreachable(self):
+        for r in ("a.zip", "b.zip", "c.zip", "d.zip"):
+            self.put(f"gba/{r}")
+        self.client.threads = 1
+        for gid in (1, 2, 3, 4):
+            for mtype in ("box-2D", "ss"):
+                self.client.download_errors[f"http://media/{gid}/{mtype}"] = screenscraper.RateLimited("ScreenScraper answered HTTP 429")
+        self.assertEqual(self.run_scrape(), 1)
+        self.assertEqual(self.client.lookups, ["a.zip", "b.zip", "c.zip"])
+        self.assertIn("couldn't be reached for 3 ROMs in a row", self.out.getvalue())
+
     def test_refused_login_stops_the_run_after_one_rom(self):
         for r in ("a.zip", "b.zip", "c.zip", "d.zip"):
             self.put(f"gba/{r}")
