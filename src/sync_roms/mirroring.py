@@ -78,7 +78,7 @@ def refresh_mirror(root, dry_run=False):
         if not dry_run:
             os.makedirs(root, exist_ok=True)
             open(os.path.join(root, runtime.MIRROR_MARKER), "w").close()
-    print("📄 Fetching manifests...")
+    print("📄 Reading the cards' games lists...")
     manifest = store.load_manifest(store.all_card_names())
     print("📏 Listing storage...")
     wanted = mirror_wanted(manifest)
@@ -161,7 +161,7 @@ def use_mirror(root, dry_run):
 
 def mirror_command(args):
     if runtime.ROOT:
-        ui.fail("A mirror isn't used with a root folder: it already reads from a folder", 2)
+        ui.fail("A mirror isn't used with a storage folder: it already reads from a folder", 2)
     if args.clear_mirror:
         usersettings.save_setting("mirror", None)
         print(ui.green("🪞 Mirror setting cleared") + ui.dim(" (the mirror's files are left alone)"))
@@ -169,7 +169,7 @@ def mirror_command(args):
     given = args.use_mirror or args.mirror
     root = given or usersettings.load_settings().get("mirror")
     if not root:
-        ui.fail("No mirror folder: give one (--mirror DIR) or save one with --use-mirror DIR", 2)
+        ui.fail("No mirror folder: give one (`sync-roms mirror DIR`) or save one with `sync-roms mirror use DIR`", 2)
     root = os.path.abspath(os.path.expanduser(root))
     print(ui.bold(f"🪞 Mirror {ui.cyan(root)}") + ui.dim(f"  {s3.access()}"))
     failed = refresh_mirror(root, args.dry_run)
