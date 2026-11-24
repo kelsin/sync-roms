@@ -185,6 +185,11 @@ class Hints(unittest.TestCase):
         lines = picker.help_lines(True, setedit.GAMES_HINT, key_help=setedit.GAMES_KEYS, has_note=True)
         for key in ("r", "c", "w", "a", "o", "/"):
             self.assertTrue(any(line.startswith(key + " ") for line in lines), key)
+        for hint, keys in ((cardedit.SET_GAMES_HINT, cardedit.SET_GAMES_KEYS), (cardedit.ALL_GAMES_HINT, cardedit.ALL_GAMES_KEYS)):
+            lines = picker.help_lines(True, hint, key_help=keys, select_all=False, has_note=True)
+            self.assertFalse(any(line.startswith("a ") for line in lines), hint)  # a is dead there: neither hint nor help offers it
+            for key in ("w", "o", "/", *(k for k, _ in keys)):
+                self.assertTrue(any(line.startswith(key + " ") for line in lines), (hint, key))
 
 
 class Table(unittest.TestCase):
