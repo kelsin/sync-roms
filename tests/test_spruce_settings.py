@@ -31,7 +31,7 @@ class InstallBase(helpers.CardDir):
 
     def run_install(self, layout="spruce", dry_run=False, **settings):
         if not self.syncthing:
-            settings.setdefault("spruce_syncthing", False)
+            settings.setdefault("syncthing", False)
         usersettings.save_settings(settings)
         out, self.err = io.StringIO(), io.StringIO()
         with contextlib.redirect_stdout(out), contextlib.redirect_stderr(self.err):
@@ -45,8 +45,8 @@ class InstallBase(helpers.CardDir):
 class Install(InstallBase):
     def test_sets_keys_and_keeps_the_rest(self):
         self.put_config(BASE)
-        out = self.run_install(spruce_ra_mode="Hardcore", spruce_ra_username="me", spruce_ra_password="pw1",
-                               spruce_ra_api_key="key1")
+        out = self.run_install(ra_mode="Hardcore", ra_username="me", ra_password="pw1",
+                               ra_api_key="key1")
         self.assertEqual(self.failures, 0)
         self.assertEqual(self.block(), {"modeToggle": {"selected": "Hardcore"}, "username": {"selected": "me"},
                                         "password": {"selected": "pw1"}, "webApiKey": {"selected": "key1"}})
@@ -63,12 +63,12 @@ class Install(InstallBase):
     def test_existing_entry_keeps_its_sibling_fields(self):
         self.put_config({"menuOptions": {"RetroAchievements Settings": {
             "username": {"selected": "old", "options": ["a"]}, "other": {"selected": "z"}}}})
-        self.run_install(spruce_ra_username="new")
+        self.run_install(ra_username="new")
         self.assertEqual(self.block(), {"username": {"selected": "new", "options": ["a"]}, "other": {"selected": "z"}})
 
     def test_bools_become_strings(self):
         self.put_config(BASE)
-        self.run_install(spruce_ra_offline_proxy=True, spruce_ra_proxy_stats=False)
+        self.run_install(ra_offline_proxy=True, ra_proxy_stats=False)
         self.assertEqual(self.block(), {"enableOfflineProxy": {"selected": "True"},
                                         "raproxyUsageStats": {"selected": "False"}})
 
@@ -84,13 +84,13 @@ class Install(InstallBase):
         self.put_config(BASE, raw=json.dumps({"menuOptions": {"RetroAchievements Settings": {
             "username": {"selected": "me"}}}}))  # compact formatting would change if rewritten
         before = os.stat(self.path).st_mtime_ns
-        self.assertEqual(self.run_install(spruce_ra_username="me"), "")
+        self.assertEqual(self.run_install(ra_username="me"), "")
         with open(self.path, encoding="utf-8") as f:
             self.assertNotIn("\n", f.read())
         self.assertEqual(os.stat(self.path).st_mtime_ns, before)
 
     def test_missing_file_is_skipped_with_a_warning(self):
-        self.run_install(spruce_ra_username="me")
+        self.run_install(ra_username="me")
         self.assertFalse(os.path.exists(self.path))
         self.assertIn("spruce-config.json is missing", self.err.getvalue())
         self.assertEqual(self.failures, 0)
@@ -99,7 +99,7 @@ class Install(InstallBase):
         for raw in ("{not json", "[]", '{"menuOptions": 3}', "{}"):
             with self.subTest(raw=raw):
                 self.put_config(None, raw=raw)
-                self.run_install(spruce_ra_username="me")
+                self.run_install(ra_username="me")
                 self.assertIn("can't be read", self.err.getvalue())
                 with open(self.path, encoding="utf-8") as f:
                     self.assertEqual(f.read(), raw)
@@ -107,13 +107,13 @@ class Install(InstallBase):
     def test_other_layouts_are_untouched(self):
         self.put_config(BASE)
         before = self.snapshot()
-        self.assertEqual(self.run_install("onion", spruce_ra_username="me"), "")
+        self.assertEqual(self.run_install("onion", ra_username="me"), "")
         self.assertEqual(self.snapshot(), before)
         self.assertNotIn("RetroAchievements Settings", self.config()["menuOptions"])
 
     def test_dry_run_writes_nothing(self):
         self.put_config(BASE)
-        out = self.run_install(dry_run=True, spruce_ra_password="pw1", spruce_ra_username="me")
+        out = self.run_install(dry_run=True, ra_password="pw1", ra_username="me")
         self.assertIn("Dry run: would set 2", out)
         self.assertIn("username = me", out)
         self.assertIn("password = (hidden)", out)
@@ -122,7 +122,7 @@ class Install(InstallBase):
 
     def test_keeps_the_files_indent(self):
         self.put_config(None, raw=json.dumps(BASE, indent=2))
-        self.run_install(spruce_ra_username="me")
+        self.run_install(ra_username="me")
         with open(self.path, encoding="utf-8") as f:
             text = f.read()
         self.assertIn('\n  "menuOptions"', text)
@@ -139,14 +139,14 @@ RICH = {"menuOptions": {
 class Entries(InstallBase):
     def entries(self, **settings):
         if not self.syncthing:
-            settings.setdefault("spruce_syncthing", False)
+            settings.setdefault("syncthing", False)
         usersettings.save_settings(settings)
         with contextlib.redirect_stderr(io.StringIO()):
             return spruce_settings.entries("c", self.card)
 
     def test_entries_lists_unchanged_too(self):
         self.put_config({"menuOptions": {"RetroAchievements Settings": {"modeToggle": {"selected": "Casual"}}}})
-        found = {e.key: e for e in self.entries(spruce_ra_mode="Casual", spruce_ra_username="me")}
+        found = {e.key: e for e in self.entries(ra_mode="Casual", ra_username="me")}
         self.assertEqual(found["RetroAchievements Settings / modeToggle"].old, "Casual")
         self.assertEqual(found["RetroAchievements Settings / modeToggle"].new, "Casual")
         self.assertIsNone(found["RetroAchievements Settings / username"].old)
@@ -155,15 +155,15 @@ class Entries(InstallBase):
 
     def test_entries_hides_password(self):
         self.put_config(BASE)
-        found = {e.key: e for e in self.entries(spruce_ra_password="pw1", spruce_ra_api_key="k", spruce_ra_username="me")}
+        found = {e.key: e for e in self.entries(ra_password="pw1", ra_api_key="k", ra_username="me")}
         self.assertTrue(found["RetroAchievements Settings / password"].secret)
         self.assertTrue(found["RetroAchievements Settings / webApiKey"].secret)
         self.assertFalse(found["RetroAchievements Settings / username"].secret)
 
     def test_entries_empty_when_the_file_is_missing_or_unreadable(self):
-        self.assertEqual(self.entries(spruce_ra_mode="Casual"), [])
+        self.assertEqual(self.entries(ra_mode="Casual"), [])
         self.put_config(None, raw="not json")
-        self.assertEqual(self.entries(spruce_ra_mode="Casual"), [])
+        self.assertEqual(self.entries(ra_mode="Casual"), [])
 
     def test_entries_leaves_out_settings_the_file_lacks(self):
         self.put_config({"menuOptions": {"Emulator Settings": {"raAutoSave": {"selected": "True"}}}})
@@ -223,7 +223,7 @@ class SharedSettings(Install):
 
     def test_combined_with_retroachievements_in_one_write(self):
         self.put_config(RICH)
-        out = self.run_install(spruce_ra_username="you", spruce_settings={"Button Settings": {"menuButton": "Select"}})
+        out = self.run_install(ra_username="you", spruce_settings={"Button Settings": {"menuButton": "Select"}})
         self.assertIn("(2 set)", out)
         self.assertEqual(self.block()["username"]["selected"], "you")
         self.assertEqual(self.selected("Button Settings", "menuButton"), "Select")
@@ -274,7 +274,7 @@ class Forced(InstallBase):
         self.assertEqual(self.values(), ["True", "True", "Always", "False"])
 
     def test_off_uses_saved_values(self):
-        out = self.run_install(spruce_syncthing=False, spruce_settings={"Emulator Settings": {"raAutoLoad": "False"}})
+        out = self.run_install(syncthing=False, spruce_settings={"Emulator Settings": {"raAutoLoad": "False"}})
         self.assertEqual(self.values(), ["Custom", "False", "Prompt", "False"])
         self.assertNotIn("Syncthing", out)
 
@@ -288,14 +288,14 @@ class Forced(InstallBase):
     def test_allowlist_drops_forced_keys_only_while_on(self):
         keys = {k for ks in spruce_settings.allowed().values() for k in ks}
         self.assertFalse(keys & {"raAutoSave", "raAutoLoad", "keepSavesBetweenCores", "enableSyncthing"})
-        usersettings.save_settings({"spruce_syncthing": False})
+        usersettings.save_settings({"syncthing": False})
         self.assertIn("raAutoSave", spruce_settings.allowed()["Emulator Settings"])
 
 
 class Import(helpers.Cmd):
     def setUp(self):
         super().setUp()
-        usersettings.save_settings({"spruce_syncthing": False})
+        usersettings.save_settings({"syncthing": False})
         self.card = os.path.join(self.tmp.name, "RGSP")
         store.write_cards({"RGSP": {"device": "full", "layout": "spruce"}})
         path = os.path.join(self.card, "Saves", "spruce", "spruce-config.json")
@@ -346,7 +346,7 @@ class Import(helpers.Cmd):
                                         "Emulator Settings": {"raAutoSave": "Custom"}})
 
     def test_lists_identical_and_different(self):
-        usersettings.save_settings({"mirror": "/m", "spruce_syncthing": False, "spruce_settings": {
+        usersettings.save_settings({"mirror": "/m", "syncthing": False, "spruce_settings": {
             "Button Settings": {"menuButton": "L3"}, "Emulator Settings": {"raAutoSave": "Old"}}})
         code, out, _ = self.imp(["y"])
         self.assertIn("Identical (1)", out)
@@ -357,7 +357,7 @@ class Import(helpers.Cmd):
         self.assertEqual(saved["spruce_settings"], self.ALL)
 
     def test_nothing_different_does_not_prompt(self):
-        usersettings.save_settings({"spruce_syncthing": False, "spruce_settings": self.ALL})
+        usersettings.save_settings({"syncthing": False, "spruce_settings": self.ALL})
         code, out, _ = self.imp([])  # any input() call would raise StopIteration
         self.assertEqual(code, 0)
         self.assertIn("nothing to import", out)
@@ -441,15 +441,15 @@ class AllowlistData(unittest.TestCase):
 
 class ConfigSet(helpers.Cmd):
     def test_mode_is_validated(self):
-        code, _, err = self.run_cmd("config", "set", "spruce_ra_mode", "Nope")
+        code, _, err = self.run_cmd("config", "set", "ra_mode", "Nope")
         self.assertEqual(code, 2)
         self.assertIn("Hardcore", err)
-        code, _, err = self.run_cmd("config", "set", "spruce_ra_mode", "Softcore")
+        code, _, err = self.run_cmd("config", "set", "ra_mode", "Softcore")
         self.assertEqual(code, 0)
-        self.assertEqual(self.read("settings.json"), {"spruce_ra_mode": "Softcore"})
+        self.assertEqual(self.read("settings.json"), {"ra_mode": "Softcore"})
 
     def test_hidden_values_are_never_printed(self):
-        for name in ("spruce_ra_password", "spruce_ra_api_key"):
+        for name in ("ra_password", "ra_api_key"):
             with self.subTest(name=name):
                 self.assertIn(name, commands.HIDDEN)
                 code, out, err = self.run_cmd("config", "set", name, "s3cret")
@@ -457,10 +457,10 @@ class ConfigSet(helpers.Cmd):
                 self.assertNotIn("s3cret", out + err)
 
     def test_bool_setting(self):
-        code, _, _ = self.run_cmd("config", "set", "spruce_ra_offline_proxy", "true")
+        code, _, _ = self.run_cmd("config", "set", "ra_offline_proxy", "true")
         self.assertEqual(code, 0)
-        self.assertIs(self.read("settings.json")["spruce_ra_offline_proxy"], True)
-        self.assertEqual(self.run_cmd("config", "set", "spruce_ra_offline_proxy", "yes")[0], 2)
+        self.assertIs(self.read("settings.json")["ra_offline_proxy"], True)
+        self.assertEqual(self.run_cmd("config", "set", "ra_offline_proxy", "yes")[0], 2)
 
 
 if __name__ == "__main__":

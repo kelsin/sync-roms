@@ -1,4 +1,4 @@
-"""The spruce settings saved in settings.json (the spruce_ra_* RetroAchievements ones and the allowlisted spruce_settings), written into a spruce card's Saves/spruce/spruce-config.json, and the import of the latter from a card."""
+"""The spruce settings saved in settings.json (the ra_* RetroAchievements ones and the allowlisted spruce_settings), written into a spruce card's Saves/spruce/spruce-config.json, and the import of the latter from a card."""
 import json
 import os
 import re
@@ -9,9 +9,9 @@ FILE = os.path.join("Saves", "spruce", "spruce-config.json")
 BLOCK = "RetroAchievements Settings"
 MODES = ("Manual", "Disabled", "Casual", "Softcore", "Hardcore")
 # settings.json key -> (key in the block, bool setting)
-KEYS = {"spruce_ra_mode": ("modeToggle", False), "spruce_ra_username": ("username", False),
-        "spruce_ra_password": ("password", False), "spruce_ra_api_key": ("webApiKey", False),
-        "spruce_ra_offline_proxy": ("enableOfflineProxy", True), "spruce_ra_proxy_stats": ("raproxyUsageStats", True)}
+KEYS = {"ra_mode": ("modeToggle", False), "ra_username": ("username", False),
+        "ra_password": ("password", False), "ra_api_key": ("webApiKey", False),
+        "ra_offline_proxy": ("enableOfflineProxy", True), "ra_proxy_stats": ("raproxyUsageStats", True)}
 
 
 def wanted():

@@ -30,8 +30,8 @@ def cfg_wanted():
         wanted["savestate_auto_save"] = "true"  # spruce's raAutoSave and raAutoLoad
         wanted["savestate_auto_load"] = "true"
     settings = usersettings.load_settings()
-    wanted.update(RA_MODES.get(settings.get("spruce_ra_mode"), {}))
-    for setting, key in (("spruce_ra_username", "cheevos_username"), ("spruce_ra_password", "cheevos_password")):
+    wanted.update(RA_MODES.get(settings.get("ra_mode"), {}))
+    for setting, key in (("ra_username", "cheevos_username"), ("ra_password", "cheevos_password")):
         if settings.get(setting):
             wanted[key] = settings[setting]
     wanted.update(CLOUD_SYNC)

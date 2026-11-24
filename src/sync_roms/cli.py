@@ -400,14 +400,14 @@ TOPICS = {
   sync-roms config apply [CARD] [--dry-run] [--yes]   apply the saved settings to a spruce card or an Android device
 
   NAME is bucket, root, endpoint, profile, write_profile, mirror, screenscraper_user or screenscraper_password (text),
-  eject, storage_cache_declined or spruce_syncthing (true or false), surprise_ttl_days (a positive number of days) or
+  eject, storage_cache_declined or syncthing (true or false), surprise_ttl_days (a positive number of days) or
   surprise_excluded_systems (comma-separated system ids, e.g. gba,snes). root and mirror must be absolute
   paths (~ is expanded). The password is saved but never printed;
   `scrape --set-credentials` asks for it without echoing it.
 
-  spruce_ra_mode (Manual, Disabled, Casual, Softcore or Hardcore), spruce_ra_username, spruce_ra_password and
-  spruce_ra_api_key (text, the last two never printed), spruce_ra_offline_proxy and spruce_ra_proxy_stats (true or
-  false): the RetroAchievements settings every sync writes into a spruce card's Saves/spruce/spruce-config.json.
+  ra_mode (Manual, Disabled, Casual, Softcore or Hardcore), ra_username, ra_password and
+  ra_api_key (text, the last two never printed), ra_offline_proxy and ra_proxy_stats (true or
+  false): the RetroAchievements settings written into a spruce card or an Android device's Saves/spruce/spruce-config.json.
   Set them with `config set`; `config import` doesn't read them from the card.
 
   config import takes CARD (a card name from cards.json, found at /Volumes/<name>, or the card's folder; default the current

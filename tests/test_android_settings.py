@@ -23,14 +23,14 @@ class CfgWanted(helpers.DataDir):
         return android_settings.cfg_wanted()
 
     def test_by_mode(self):
-        self.assertEqual(self.wanted(spruce_ra_mode="Disabled")["cheevos_enable"], "false")
+        self.assertEqual(self.wanted(ra_mode="Disabled")["cheevos_enable"], "false")
         for mode in ("Casual", "Softcore"):
-            w = self.wanted(spruce_ra_mode=mode)
+            w = self.wanted(ra_mode=mode)
             self.assertEqual((w["cheevos_enable"], w["cheevos_hardcore_mode_enable"]), ("true", "false"))
-        w = self.wanted(spruce_ra_mode="Hardcore", spruce_ra_username="u", spruce_ra_password="p")
+        w = self.wanted(ra_mode="Hardcore", ra_username="u", ra_password="p")
         self.assertEqual((w["cheevos_enable"], w["cheevos_hardcore_mode_enable"]), ("true", "true"))
         self.assertEqual((w["cheevos_username"], w["cheevos_password"]), ("u", "p"))
-        for settings in ({}, {"spruce_ra_mode": "Manual"}):
+        for settings in ({}, {"ra_mode": "Manual"}):
             w = self.wanted(**settings)
             self.assertNotIn("cheevos_enable", w)
             self.assertNotIn("cheevos_hardcore_mode_enable", w)
@@ -45,12 +45,12 @@ class CfgWanted(helpers.DataDir):
         self.assertEqual(w["sort_savefiles_enable"], "true")
 
     def test_syncthing_turns_on_savestate_auto_save_and_load(self):
-        w = self.wanted(spruce_syncthing=True)
+        w = self.wanted(syncthing=True)
         self.assertEqual((w["savestate_auto_save"], w["savestate_auto_load"]), ("true", "true"))
-        self.assertNotIn("savestate_auto_save", self.wanted(spruce_syncthing=False))
+        self.assertNotIn("savestate_auto_save", self.wanted(syncthing=False))
 
     def test_without_syncthing(self):
-        w = self.wanted(spruce_syncthing=False)
+        w = self.wanted(syncthing=False)
         self.assertNotIn("savefile_directory", w)
         self.assertNotIn("sort_savefiles_enable", w)
         self.assertEqual(w["cloud_sync_enable"], "false")
@@ -135,7 +135,7 @@ class EsdeWanted(helpers.DataDir):
         self.assertEqual(found, [("nes", "FCEUmm"), ("sg-1000", "Genesis Plus GX")])
 
     def test_off_without_syncthing(self):
-        usersettings.save_settings({"spruce_syncthing": False})
+        usersettings.save_settings({"syncthing": False})
         self.assertEqual(android_settings.esde_wanted(["nes"]), [])
 
 
@@ -158,7 +158,7 @@ class Apply(helpers.DataDir):
         quiet.enter_context(contextlib.redirect_stdout(self.out))
         quiet.enter_context(contextlib.redirect_stderr(self.err))
         self.addCleanup(quiet.close)
-        usersettings.save_settings({"spruce_syncthing": False})
+        usersettings.save_settings({"syncthing": False})
         self.calls = []
         self.files = {}
         self.dirs = {"/storage/6AF3-53E9/ROMs/nes"}
@@ -368,7 +368,7 @@ class Apply(helpers.DataDir):
         self.assertIn('cloud_sync_enable = "false"', self.files[self.cfg_path])
 
     def test_apply_restarts_esde_after_writing_gamelists(self):
-        usersettings.save_settings({"spruce_syncthing": True})
+        usersettings.save_settings({"syncthing": True})
         self.files[self.cfg_path] = "".join(f'{k} = "{v}"\n' for k, v in android_settings.cfg_wanted().items())
         self.run_apply()
         gamelist = "/storage/6AF3-53E9/ES-DE/gamelists/nes/gamelist.xml"
@@ -377,7 +377,7 @@ class Apply(helpers.DataDir):
         self.assertIn("FCEUmm", self.files[gamelist])
 
     def test_apply_declined_esde_skips_gamelists(self):
-        usersettings.save_settings({"spruce_syncthing": True})
+        usersettings.save_settings({"syncthing": True})
         self.files[self.cfg_path] = "".join(f'{k} = "{v}"\n' for k, v in android_settings.cfg_wanted().items())
         self.confirm = False
         self.assertEqual(self.run_apply(), 0)
@@ -397,7 +397,7 @@ class Apply(helpers.DataDir):
         self.run_apply()
         self.assertNotIn("cloud_sync_enable", self.out.getvalue())
         self.out.truncate(0), self.out.seek(0)
-        usersettings.save_settings({"spruce_syncthing": True})
+        usersettings.save_settings({"syncthing": True})
         self.push_error = None
         self.files[self.cfg_path] = self.synced_cfg()
         self.confirm = False
@@ -408,7 +408,7 @@ class Apply(helpers.DataDir):
         self.assertIn("alternativeEmulator = FCEUmm", self.out.getvalue())
 
     def test_apply_relaunches_home_when_a_write_raises(self):
-        usersettings.save_settings({"spruce_syncthing": True})
+        usersettings.save_settings({"syncthing": True})
         self.files[self.cfg_path] = self.synced_cfg()
         self.push_error = RuntimeError("boom")
         with self.assertRaises(RuntimeError):
@@ -416,7 +416,7 @@ class Apply(helpers.DataDir):
         self.assertEqual([n for n in self.names() if n in ("force-stop", "start")], ["force-stop", "start"])
 
     def test_apply_skips_gamelist_that_is_not_a_gamelist(self):
-        usersettings.save_settings({"spruce_syncthing": True})
+        usersettings.save_settings({"syncthing": True})
         gamelist = "/storage/6AF3-53E9/ES-DE/gamelists/nes/gamelist.xml"
         self.files[self.cfg_path] = self.synced_cfg()
         self.files[gamelist] = "<html>oops</html>"
@@ -475,7 +475,7 @@ class Apply(helpers.DataDir):
         self.assertIn("retroarch.cfg", warn.call_args[0][0])
 
     def test_apply_creates_missing_gamelist(self):
-        usersettings.save_settings({"spruce_syncthing": True})
+        usersettings.save_settings({"syncthing": True})
         self.files[self.cfg_path] = "".join(f'{k} = "{v}"\n' for k, v in android_settings.cfg_wanted().items())
         self.run_apply()
         gamelist = "/storage/6AF3-53E9/ES-DE/gamelists/nes/gamelist.xml"

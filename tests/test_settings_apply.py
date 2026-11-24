@@ -39,7 +39,7 @@ class Apply(helpers.Cmd):
         cfg = os.path.join(base, "Saves", "spruce", "spruce-config.json")
         with open(cfg, "w") as f:
             json.dump({"menuOptions": {"RetroAchievements Settings": {"modeToggle": {"selected": value}}}}, f)
-        usersettings.save_settings({"spruce_ra_mode": "Casual", "spruce_syncthing": False})
+        usersettings.save_settings({"ra_mode": "Casual", "syncthing": False})
         return base, cfg
 
     def mode(self, cfg):
