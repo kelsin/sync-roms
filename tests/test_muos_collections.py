@@ -70,6 +70,12 @@ class PlanTests(unittest.TestCase):
         self.assertEqual(plan["deletes"], [cfg])
         self.assertEqual(plan["disable"], {"Old"})
 
+    def test_keep_leaves_a_dropped_collection_s_files_and_owns_it_still(self):
+        cfg = os.path.join(self.folder("Old"), "Game-00000000.cfg")
+        open(cfg, "w").close()
+        plan = muos_collections.plan(self.base, {}, ["Old"], keep=True)
+        self.assertEqual((plan["deletes"], plan["disable"], plan["owned"], plan["kept"]), ([], set(), ["Old"], ["Old"]))
+
     def test_a_dropped_then_wanted_again_collection_is_written_without_a_warning(self):
         rel = "MUOS/info/collection/Old/Game-00000000.cfg"
         cfg = os.path.join(self.folder("Old"), "Game-00000000.cfg")

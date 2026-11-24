@@ -80,7 +80,7 @@ TOPICS = {
 
   --dry-run   show what would be downloaded and deleted, change nothing
   --yes       answer every prompt with its default (a default-no prompt, like deleting files, stays no)
-  --no-delete never delete anything from the card: ROMs no longer in the lists, their media, old drivers and empty
+  --no-delete never delete anything from the card: ROMs no longer in the lists, their media, old drivers, retired collections and empty
               system folders are listed as kept and the delete prompt is skipped (for adding games to a card
               someone set up by hand)
   --guest     make CARD a guest card (saved; F in the card editor turns it off): its picks are seeded from the storage
@@ -1571,13 +1571,13 @@ def sync_card(args):
             return (s["bucket"], rel) in coming or cardfs.exists(os.path.join(dest_of(s), rel))
 
         if layout_name == "muos":
-            plan = muos_collections.plan(base, muos_collections.wanted(card_colls, systems, on_card, mount), owned)
+            plan = muos_collections.plan(base, muos_collections.wanted(card_colls, systems, on_card, mount), owned, args.no_delete)
         elif layout_name == "spruce":
-            plan = spruce_collections.plan(base, spruce_collections.wanted(card_colls, systems, on_card), owned)
+            plan = spruce_collections.plan(base, spruce_collections.wanted(card_colls, systems, on_card), owned, args.no_delete)
         else:
             wanted = frontend.wanted_collections(layout_name, card_colls, systems, on_card,
                                                  {k: d for s in systems for k, d in folders_of(s).items()})
-            plan = frontend.plan_collections(layout_name, base, wanted, owned)
+            plan = frontend.plan_collections(layout_name, base, wanted, owned, args.no_delete)
         arts = {frontend.safe_name(c["name"]): c["art"] for c in card_colls if c.get("art")}
         if surprise.COLLECTION in plan["enable"]:
             arts[surprise.COLLECTION] = themeart.SURPRISE_ART
@@ -1593,9 +1593,11 @@ def sync_card(args):
                 frontend.describe_collections(plan, layout_name)
             if layout_name == "spruce":
                 if not plan["unreadable"]:
-                    themeart.describe(layout_name, base, arts, {*owned, *plan["owned"]}, entry.get("spruce_theme"))
+                    themeart.describe(layout_name, base, arts, {*owned, *plan["owned"]}, entry.get("spruce_theme"),
+                                      keep=args.no_delete)
             elif arts or store.card_flag(entry, "theme"):  # with no art to add it still names the art that would go
-                themeart.describe(layout_name, base, arts)
+                themeart.describe(layout_name, base, arts, keep=args.no_delete)
+            list_kept(plan.get("kept", []), "retired collection(s) and their art")
             return
         for warning in plan["warnings"]:
             ui.warn(warning)
@@ -1611,9 +1613,10 @@ def sync_card(args):
             store.update_card(card, frontend_collections=plan["owned"])
         if layout_name == "spruce":  # also removes the pictures of collections that lost their art
             art = not plan["unreadable"] and themeart.install(layout_name, base, arts, {*owned, *plan["owned"]},
-                                                              entry.get("spruce_theme"))
+                                                              entry.get("spruce_theme"), keep=args.no_delete)
         else:  # with no art to add it still removes the art sync-roms wrote before
-            art = (bool(arts) or store.card_flag(entry, "theme")) and themeart.install(layout_name, base, arts)
+            art = (bool(arts) or store.card_flag(entry, "theme")) and themeart.install(layout_name, base, arts, keep=args.no_delete)
+        list_kept(plan.get("kept", []), "retired collection(s) and their art")
         # EmuDeck's ES-DE is on this computer, not the card, so its writes leave the card as it was
         if clean_card and layout_name != "emudeck" and (plan["writes"] or plan["deletes"] or listed or art):
             clean._clean_root = base

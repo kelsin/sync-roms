@@ -297,14 +297,14 @@ def _esde_remove(dest, keep):
     return bool(stale) and cardfs.write_bytes(os.path.join(dest, ESDE_OWNED), "".join(f"{n}\n" for n in owned if n in keep).encode())
 
 
-def install_esde(layout_name, base, arts):
+def install_esde(layout_name, base, arts, keep=False):
     """Put Art Book Next with the collections' art in the card's ES-DE and select it, and remove the art sync-roms gave
     collections no longer in arts. Returns whether anything changed."""
     if not esde_wanted(layout_name, base):
         return False
     dest = _esde_dir(layout_name, base)
     if not arts:  # nothing to add, so the theme is neither copied nor selected
-        return _esde_remove(dest, ())
+        return False if keep else _esde_remove(dest, ())
     commit = _stored_commit()
     changed = False
     if not commit:
@@ -326,7 +326,7 @@ def install_esde(layout_name, base, arts):
     for name in [n for n in arts if _theme_has(dest, n.lower())]:
         ui.warn(f"{name}: Art Book Next already has art of its own for that name; skipped")
         del arts[name]
-    changed |= _esde_remove(dest, {n.lower() for n in arts})
+    changed |= False if keep else _esde_remove(dest, {n.lower() for n in arts})
     owned = set(_read(os.path.join(dest, ESDE_OWNED)).splitlines()) | {n.lower() for n in arts}
     changed |= cardfs.write_bytes(os.path.join(dest, ESDE_OWNED), "".join(f"{n}\n" for n in sorted(owned)).encode())
     for rel, data in _esde_files(arts).items():
@@ -335,10 +335,10 @@ def install_esde(layout_name, base, arts):
     return changed
 
 
-def describe_esde(layout_name, base, arts):
+def describe_esde(layout_name, base, arts, keep=False):
     if not esde_wanted(layout_name, base):
         return
-    stale = _esde_stale(_esde_dir(layout_name, base), {n.lower() for n in arts})
+    stale = [] if keep else _esde_stale(_esde_dir(layout_name, base), {n.lower() for n in arts})
     if stale:
         print(ui.dim(f"🎨 would remove the art for {', '.join(stale)} from {_shown(layout_name, base).replace(os.sep, '/')}"))
     if not arts:
@@ -434,41 +434,42 @@ def _custom_stale(root, arts):
             if n and frontend.safe_name(n) == n and n not in arts]
 
 
-def _custom_remove(root, arts, files=CUSTOM_FILES):
+def _custom_remove(root, arts, files=CUSTOM_FILES, keep=False):
     """Remove from the customizations folder root the art sync-roms put there (the names on its list, each name's files
     being <folder>/<name><extension> for files) for collections no longer in arts, and list the ones in arts instead.
-    Returns the names it removed."""
-    stale = _custom_stale(root, arts)
+    Returns the names it removed. With keep (--no-delete) it removes nothing and the names stay on the list."""
+    stale = [] if keep else _custom_stale(root, arts)
     for name in stale:
         for folder, ext in files:
             with contextlib.suppress(FileNotFoundError):
                 os.remove(os.path.join(root, folder, name + ext))
-    if arts:
-        cardfs.write_bytes(os.path.join(root, CUSTOM_OWNED), "".join(f"{n}\n" for n in sorted(arts)).encode())
+    listed = {*arts, *_custom_stale(root, arts)} if keep else set(arts)
+    if listed:
+        cardfs.write_bytes(os.path.join(root, CUSTOM_OWNED), "".join(f"{n}\n" for n in sorted(listed)).encode())
     else:
         with contextlib.suppress(FileNotFoundError):
             os.remove(os.path.join(root, CUSTOM_OWNED))
     return stale
 
 
-def _custom_describe(base, rel_dir, arts, what="art"):
+def _custom_describe(base, rel_dir, arts, what="art", keep=False):
     """Print what installing arts in the customizations folder rel_dir of the card at base would do."""
     shown = rel_dir.replace(os.sep, "/")
-    stale = _custom_stale(os.path.join(base, rel_dir), arts)
+    stale = [] if keep else _custom_stale(os.path.join(base, rel_dir), arts)
     if stale:
         print(ui.dim(f"🎨 would remove the {what} for {', '.join(stale)} from {shown}/"))
     if arts:
         print(ui.dim(f"🎨 would add art for {', '.join(arts)} to {shown}/"))
 
 
-def install_knulli(base, arts):
+def install_knulli(base, arts, keep=False):
     """Put the collections' art ({name: art png}) in Knulli's theme customizations, and remove the art and settings
     sync-roms gave collections no longer in arts. Returns whether files changed."""
     if not knulli_wanted(base):
         return False
     root = os.path.join(base, KNULLI_DIR)
     path = frontend.settings_path("knulli", base)
-    stale = _custom_remove(root, arts)  # before the art is written: a card that ignores case has one file for Favs and favs
+    stale = _custom_remove(root, arts, keep=keep)  # before the art is written: a card that ignores case has one file for Favs and favs
     text = cardfs.text(path)
     for name in stale:
         for option in ("system-view-artwork", "system-logos"):
@@ -488,19 +489,19 @@ def install_knulli(base, arts):
     return changed
 
 
-def describe_knulli(base, arts):
+def describe_knulli(base, arts, keep=False):
     if knulli_wanted(base):
-        _custom_describe(base, KNULLI_DIR, arts, "art and settings")
+        _custom_describe(base, KNULLI_DIR, arts, "art and settings", keep)
 
 
 # --- ROCKNIX -------------------------------------------------------------------------------------------------------
 
-def install_rocknix(base, arts):
+def install_rocknix(base, arts, keep=False):
     """Put the collections' art ({name: art png}) in Art Book Next's ROCKNIX customizations on the card, and remove the
     art sync-roms gave collections no longer in arts. Its settings are on internal storage: the collections' install
     script turns the art on and off. Returns whether files changed."""
     root = os.path.join(base, rocknix_collections.ART_DIR)
-    changed = bool(_custom_remove(root, arts))
+    changed = bool(_custom_remove(root, arts, keep=keep))
     for name, png in arts.items():
         with open(png, "rb") as f:
             changed |= cardfs.write_bytes(os.path.join(root, "artwork", f"{name}.png"), f.read())
@@ -516,11 +517,11 @@ MUOS_DIR = os.path.join("MUOS", "info", "catalogue", "Collection")
 MUOS_FILES = (("box", ".png"), ("grid", ".png"))  # muOS shows <collection folder>.png of both
 
 
-def install_muos(base, arts):
+def install_muos(base, arts, keep=False):
     """Put the collections' art ({name: art png}) in muOS's catalogue as box and grid pictures, and remove what
     sync-roms put there for collections no longer in arts. Returns whether files changed."""
     root = os.path.join(base, MUOS_DIR)
-    changed = bool(_custom_remove(root, arts, MUOS_FILES))  # before the art is written, as in install_knulli
+    changed = bool(_custom_remove(root, arts, MUOS_FILES, keep))  # before the art is written, as in install_knulli
     for name, png in arts.items():
         with open(png, "rb") as f:
             data = f.read()
@@ -535,14 +536,14 @@ SPRUCE_SIZES = ("Imgs", "Imgs_med", "Imgs_small")  # PyUI shows <size>/<collecti
 SPRUCE_DIR = os.path.join("Collections", SPRUCE_SIZES[0])
 
 
-def _spruce_stale(base, arts, owned):
+def _spruce_stale(base, arts, owned, keep=False):
     """The pictures, in every size, of the collections sync-roms owns (owned) that have no art in arts any more."""
     paths = (os.path.join(base, "Collections", size, f"{name}.png")
-             for name in dict.fromkeys(owned) if name not in arts for size in SPRUCE_SIZES)
+             for name in dict.fromkeys(owned) if name not in arts and not keep for size in SPRUCE_SIZES)
     return [p for p in paths if os.path.exists(p)]
 
 
-def install_spruce(base, arts, owned):
+def install_spruce(base, arts, owned, keep=False):
     """Put the collections' art ({name: art png of the Imgs size}) in Collections/Imgs/, Imgs_med/ and Imgs_small/
     and remove the pictures of each collection in owned that has none now. Other files there are left alone.
     Returns whether files changed."""
@@ -551,45 +552,45 @@ def install_spruce(base, arts, owned):
         for size in SPRUCE_SIZES:
             with open(os.path.join(os.path.dirname(os.path.dirname(png)), size, os.path.basename(png)), "rb") as f:
                 changed |= cardfs.write_bytes(os.path.join(base, "Collections", size, f"{name}.png"), f.read())
-    for path in _spruce_stale(base, arts, owned):
+    for path in _spruce_stale(base, arts, owned, keep):
         os.remove(path)
         changed = True
     return changed
 
 
-def describe_spruce(base, arts, owned):
+def describe_spruce(base, arts, owned, keep=False):
     where = SPRUCE_DIR.replace(os.sep, "/")
     if arts:
         print(ui.dim(f"🎨 would add the art for {', '.join(arts)} to {where}/ (and Imgs_med/, Imgs_small/)"))
-    stale = list(dict.fromkeys(os.path.basename(p)[:-4] for p in _spruce_stale(base, arts, owned)))
+    stale = list(dict.fromkeys(os.path.basename(p)[:-4] for p in _spruce_stale(base, arts, owned, keep)))
     if stale:
         print(ui.dim(f"🎨 would remove the art for {', '.join(stale)} from {where}/ (and Imgs_med/, Imgs_small/)"))
 
 
-def install(layout_name, base, arts, owned=(), spruce_theme=None):
+def install(layout_name, base, arts, owned=(), spruce_theme=None, keep=False):
     """Give the custom collections in arts ({name: art id}) their art in the frontend's theme. Returns whether files
     changed. NextUI has no theme to put it in. owned (Spruce only): the collections sync-roms writes, whose art is
-    removed when they have none."""
+    removed when they have none. keep (--no-delete): no art is removed."""
     if layout_name == "nextui":
         return False
     arts = usable(layout_name, arts, spruce_theme)
     if layout_name == "spruce":
-        return install_spruce(base, arts, owned)
+        return install_spruce(base, arts, owned, keep)
     if layout_name == "muos":
-        return install_muos(base, arts)
+        return install_muos(base, arts, keep)
     if layout_name == "rocknix":
-        return install_rocknix(base, arts)
-    return install_esde(layout_name, base, arts) if layout_name in frontend.ESDE_LAYOUTS else install_knulli(base, arts)
+        return install_rocknix(base, arts, keep)
+    return install_esde(layout_name, base, arts, keep) if layout_name in frontend.ESDE_LAYOUTS else install_knulli(base, arts, keep)
 
 
-def describe(layout_name, base, arts, owned=(), spruce_theme=None):
+def describe(layout_name, base, arts, owned=(), spruce_theme=None, keep=False):
     if layout_name == "nextui":
         return
     arts = usable(layout_name, arts, spruce_theme)
     if layout_name == "spruce":
-        return describe_spruce(base, arts, owned)
+        return describe_spruce(base, arts, owned, keep)
     if layout_name == "muos":
-        return _custom_describe(base, MUOS_DIR, arts)
+        return _custom_describe(base, MUOS_DIR, arts, keep=keep)
     if layout_name == "rocknix":
-        return _custom_describe(base, rocknix_collections.ART_DIR, arts)
-    describe_esde(layout_name, base, arts) if layout_name in frontend.ESDE_LAYOUTS else describe_knulli(base, arts)
+        return _custom_describe(base, rocknix_collections.ART_DIR, arts, keep=keep)
+    describe_esde(layout_name, base, arts, keep) if layout_name in frontend.ESDE_LAYOUTS else describe_knulli(base, arts, keep)

@@ -596,6 +596,16 @@ class Knulli(Card):
         self.assertTrue(settings.endswith("</config>\n"))
         self.assertFalse(themeart.install("knulli", self.base, dict(SURPRISE)))  # nothing left to remove
 
+    def test_keep_leaves_the_art_and_settings_of_a_collection_that_is_gone_and_listed(self):
+        themeart.install("knulli", self.base, {**SURPRISE, "Favs": "rpg"})
+        self.assertFalse(themeart.install("knulli", self.base, dict(SURPRISE), keep=True))
+        for rel in (("artwork", "Favs.png"), ("logos", "Favs.svg"), ("artwork", "Surprise.png")):
+            self.assertTrue(os.path.exists(self.path(*rel)), rel)
+        self.assertEqual(read(self.path(themeart.CUSTOM_OWNED)).splitlines(), ["Favs", "Surprise"])
+        self.assertIn("subset.Favs.", read(frontend.settings_path("knulli", self.base)))
+        self.assertTrue(themeart.install("knulli", self.base, dict(SURPRISE)))  # a later sync without it removes them
+        self.assertFalse(os.path.exists(self.path("artwork", "Favs.png")))
+
     def test_the_last_collection_s_art_and_settings_are_removed(self):
         themeart.install("knulli", self.base, dict(SURPRISE))
         self.assertTrue(themeart.install("knulli", self.base, {}))
