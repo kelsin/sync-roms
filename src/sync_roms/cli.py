@@ -804,7 +804,8 @@ def check_modes(args):
 
 
 GLOBAL_VALUE_FLAGS = {"--profile": "profile", "--write-profile": "write_profile", "--bucket": "bucket", "--root": "root", "--endpoint": "endpoint"}
-DATA_COMMANDS = {("devices",), ("layouts",), ("completion",), ("games", "list"), ("games", "export"), ("cards", "list"), ("config", "path")}
+DATA_COMMANDS = {("devices",), ("layouts",), ("completion",), ("games", "list"), ("games", "export"), ("cards", "list"), ("config", "path"),
+                 ("config", "show"), ("doctor",), ("games", "sets", "list")}
 
 
 def extract_globals(argv):
@@ -835,7 +836,7 @@ def extract_globals(argv):
 def is_data_command(argv):
     """Whether the command's stdout is its result (so --quiet must not discard it)."""
     words = tuple(a for a in argv if not a.startswith("-"))
-    return "--devices" in argv or words == ("cards",) or any(words[:len(d)] == d for d in DATA_COMMANDS)
+    return "--devices" in argv or words in (("cards",), ("cache",)) or any(words[:len(d)] == d for d in DATA_COMMANDS)
 
 
 def sync(reset=True):

@@ -189,6 +189,14 @@ class QuietColorTest(unittest.TestCase):
             ui.failure("❌ x")
         self.assertEqual((out.getvalue(), err.getvalue()), ("", "❌ x\n"))
 
+    def test_report_commands_keep_their_output_under_quiet(self):
+        for argv in (["doctor"], ["config", "show"], ["cache"], ["games", "sets", "list"], ["cards", "list"]):
+            with self.subTest(argv=argv):
+                self.assertTrue(cli.is_data_command(argv))
+        for argv in (["cache", "update"], ["games", "sets", "add"], ["config", "set"], ["upload"]):
+            with self.subTest(argv=argv):
+                self.assertFalse(cli.is_data_command(argv))
+
 
 class ExitCodeTest(Isolated):
     def code_of(self, fn, *a):
