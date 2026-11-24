@@ -20,13 +20,13 @@ META_KEY = "m"
 VARIANT_KEY = "v"
 SERIES_KEY = "r"
 ALL_KEY = "a"
-LIST_HINT = "Enter · a all · f full · x off · s set · l colls · S settings · F guest"
+LIST_HINT = "Enter · a all games · f full · x off · s set · l colls · S settings"
 GAMES_HINT = "Space toggle · Enter done · a all · s set · m meta · p past · v variant"
 META_HINT = "Enter list its values · Esc back"
 VALUES_HINT = "Enter narrow to it · Esc back · / filter"
 SETS_HINT = "Enter show its games · Space/Tab toggle its games here · / filter"
-SET_GAMES_HINT = "Space toggle · Enter done · a all · w note · v variant · r series"
-ALL_GAMES_HINT = "Space toggle · Enter done · a all · w note · v variant · s set · c clear"
+SET_GAMES_HINT = "Space toggle · Enter done · w note · v variant · r series"
+ALL_GAMES_HINT = "Space toggle · Enter done · w note · v variant · s set · c clear"
 LIST_KEYS = [("Enter", "the system's games"), ("f", "full system: every file in its folder (again to undo)"),
              ("x", "turn the system off on this card: nothing of it syncs, its picks stay (again to turn it back on)"),
              ("a", "every game across this card's systems"),

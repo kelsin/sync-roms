@@ -2307,3 +2307,10 @@ class GameFiltersTest(unittest.TestCase):
         f = self.filters()
         for pressed in (None, cardedit.VARIANT_KEY):
             self.assertFalse(f.handle(pressed, self.KEYS, {}, None))
+
+
+class DeadHints(unittest.TestCase):
+    def test_the_lists_that_turn_a_off_do_not_hint_at_it_and_the_systems_hint_says_all_games(self):
+        for hint in (cardedit.SET_GAMES_HINT, cardedit.ALL_GAMES_HINT):
+            self.assertNotIn("a all", hint)
+        self.assertIn("a all games", cardedit.LIST_HINT)
