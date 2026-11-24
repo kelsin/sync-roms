@@ -34,7 +34,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "devices": ("[ID]", "list the supported devices, or one device's systems"),
     "layouts": ("[ID]", "list the firmware card layouts, or one layout's folders and devices"),
     "upload": ("[DIR]", "upload ROMs to the storage folder of a system you pick"),
-    "diff": ("[DIR]", "list the ROMs in only DIR or only the bucket, ignoring renames"),
+    "diff": ("[DIR]", "list the ROMs in only DIR or only storage, ignoring renames"),
     "scrape": ("[SYSTEM | match SYSTEM ROM GAME | review [SYSTEM] | missing [SYSTEM] | art [SYSTEM]]", "scrape the ROMs that have no metadata from ScreenScraper into storage's scrapes/ folder"),
     "clean": ("scrapes", "remove scrapes/ media and metadata for ROMs that aren't in storage"),
     "playlist": ("[DIR]", "create or fix the .m3u playlist of every multi-disc game"),
@@ -372,13 +372,14 @@ TOPICS = {
   subfolders. Playlists whose files are all missing are deleted (asks first). Local only. (Old name: --m3u)
 """,
     "convert": """
-  sync-roms convert [DIR] [--dry-run]
+  sync-roms convert [DIR] [--dry-run] [--yes]
 
   Unzips (7z, or unar for .rar) every .zip/.7z/.rar, and the archives inside them, and converts each disc image (.cue, .gdi, .toc, .iso) to a verified .chd (Xbox .iso to xiso, Xbox 360 .iso to .zar),
   per the `chd` key in systems.json of the system whose folder it is in. Archives and images are removed once their chd verifies,
   then the .m3u playlists are fixed. Archives that convert unpack in the system temp folder when it is on another drive with room, else beside
   themselves; as many files convert at once as there are CPU cores and free space for, biggest first. The progress bar goes by size, with the rate and time left,
-  and each file's result shows as it finishes. Inside a saved card's folder it warns that the next sync downloads the archives again and asks first (default no,
+  and each file's result shows as it finishes. Before it starts it asks to convert N files and remove the originals (default no; --yes goes ahead, no terminal exits 2).
+  Inside a saved card's folder it first warns that the next sync downloads the archives again and asks (default no,
   so --yes or no terminal stops it). Inside the storage folder, once a file converts, it ends by saying to run `sync-roms cache update`.
   Needs 7z, chdman and, for Xbox, extract-xiso and, for Xbox 360, iso2zar (see `tools install`). (Old names: --cd, --chd)
 """,
@@ -495,10 +496,11 @@ def help_text(topic=None):
 {ui.bold('GLOBAL OPTIONS')}
   {ui.yellow('-n, --dry-run')}   show what would happen, change nothing (commands that can't honor it refuse it)
   {ui.yellow('-y, --yes')}       answer prompts with their default (deleting stays "no"). In these commands --yes is the
-                  confirmation, so they go ahead: `upload` (overwrites), `clean scrapes`, `cards clean`,
-                  `cards convert` (the old layout's media), `cards install` (the card's other files),
-                  `cards delete`, `themes publish` (stale theme files) and `download pico8` (old cart
-                  revisions); without a terminal they exit 2 unless --yes is given
+                  confirmation, so they go ahead: `upload` (overwrites), `convert` (removes the originals),
+                  `clean scrapes`, `cards clean`, `cards convert` (the old layout's media), `cards install`
+                  (the card's other files), `cards delete`, `cards export` (overwrites FILE), `saves manage`
+                  (deletes the picked stashes), `themes publish` (stale theme files) and `download pico8`
+                  (old cart revisions); without a terminal they exit 2 unless --yes is given
   {ui.yellow('--quiet')}         print only errors, warnings and --json data (prompts go to stderr)
   {ui.yellow('--verbose')}       also print the effective settings
   {ui.yellow('--json')}          machine-readable output for devices, layouts, diff, games list, cards list and `sync --dry-run` (use --device/--layout to skip the pickers)
@@ -508,7 +510,7 @@ def help_text(topic=None):
 
 {ui.bold('ENVIRONMENT')}
   {ui.yellow('ROMS_BUCKET')}  {ui.yellow('ROMS_ROOT')}  {ui.yellow('ROMS_ENDPOINT')}  {ui.yellow('ROMS_PROFILE')} (default roms-readonly)  {ui.yellow('ROMS_WRITE_PROFILE')} (default roms)
-  override settings.json "bucket", "root" (a folder, e.g. a mounted network share, used instead of storage), "endpoint", "profile", "write_profile"; the flags above override these. {ui.yellow('NO_COLOR')} / {ui.yellow('FORCE_COLOR')} control colors.
+  override settings.json "bucket", "root" (a folder, e.g. a mounted network share, used as storage instead of a bucket), "endpoint", "profile", "write_profile"; the flags above override these. {ui.yellow('NO_COLOR')} / {ui.yellow('FORCE_COLOR')} control colors.
 
 {ui.bold('EXIT CODES')}
   0 done (or nothing to do, or you declined)   1 some files failed   2 bad usage   3 setup problem (credentials, bucket, tools, bad data file)   130 interrupted
@@ -1078,12 +1080,12 @@ def sync_card(args):
     mirror = usersettings.load_settings().get("mirror")
     if mirror:
         mirroring.use_mirror(mirror, args.dry_run)
-    print("📄 Fetching manifests...")
+    print("📄 Reading the card's games list...")
     card = os.path.basename(base) or base
     manifest = store.load_manifest([card])
     systems, layouts = manifest["systems"], manifest["layouts"]
     if not any(s["games"] or s.get("full_system") for s in systems):
-        print(ui.dim(f"  {card} has no games picked"))
+        print(ui.dim(f"  {card} has no games picked: add some with `sync-roms edit`"))
     old_list = os.path.join(store.data_dir(), "games.json")  # the core list from before cards had their own games
     if os.path.exists(old_list) and store.personal_json("games.json"):
         ui.warn(f"{old_list} is no longer read; pick its games for {card} in 'sync-roms edit'.")
@@ -1313,7 +1315,7 @@ def sync_card(args):
             if onion_surprise.write_list(card, layout_name, base, roms_dir, systems, args.dry_run) and clean_card:
                 clean._clean_root = base
             failed += stage_spruce(args.dry_run)
-        print(ui.yellow(f"👋 {card} has nothing to sync."))
+        print(ui.yellow(f"👋 {card} has nothing to sync. Add games with `sync-roms edit`."))
         spruce_os.remind(spruce_staged)
         return 1 if failed else 0
     print(ui.bold(f"\n🔎 Checking {len(chosen)} system(s) against storage..."))

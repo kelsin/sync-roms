@@ -209,7 +209,7 @@ For every command they make sense with:
 | Flag | Description |
 | --- | --- |
 | `-n`, `--dry-run` | Show what would be done (a sync: what would be downloaded, with total sizes; `mirror`: what it would download and delete) and change nothing. Commands that only read (`diff`, `check`, `doctor`, `guide`, `cache`, `config` (except `config apply`, which lists what it would set), `completion`, `themes pick`/`build`/`palettes`, `games list`/`export`/`sets list`) or can't honor it (`edit`, `scrape review`, `scrape missing`, ...) refuse it with exit 2 |
-| `-y`, `--yes` | Answer prompts with their default. It is the confirmation of `upload` (overwrites), `clean scrapes`, `cards clean`, `cards convert`, `cards delete`, `themes publish` (stale theme files) and `download pico8` (`upload`, `clean scrapes` and `themes publish` ask with default no otherwise, and exit 2 without a terminal) |
+| `-y`, `--yes` | Answer prompts with their default. It is the confirmation of `upload` (overwrites), `clean scrapes`, `convert` (removes the originals), `cards clean`, `cards convert`, `cards install` (deletes the card's other files), `cards delete`, `cards export` (overwrites FILE), `saves manage` (deletes the picked stashes), `themes publish` (stale theme files) and `download pico8` (`upload`, `convert`, `clean scrapes` and `themes publish` ask with default no otherwise, and exit 2 without a terminal) |
 | `--json` | `devices`, `layouts`, `games list`, `cards list`, `diff` and `sync --dry-run`: one JSON document on stdout, nothing else (pass `--device`/`--layout` so no picker is needed; `diff` also needs `--system ID` unless the folder is named after a system) |
 | `--quiet` | Print only errors (failed files and a sync's failure count included, and `check`'s problems), warnings and `--json` data, all on stderr except the JSON; commands whose whole output is the answer (`doctor`, `config show`, `cache`, `cards list`, `games list`, `games sets list`, ...) still print it; prompts are asked on stderr |
 | `--verbose` | Also print the effective settings and where each came from, on stderr |
@@ -550,7 +550,7 @@ sync-roms convert ~/roms/psx
 - **Progress**: in a terminal a bar shows the files done and the percent of the total size (each file counts by its size, its unpacked size for a `.zip`/`.7z`; an archive counts 20% once unpacked and its discs share the rest, from `chdman`'s own progress), the rate and the time left; each file's result prints as it finishes. Under `--quiet` only failed files and the closing line of a run with failures are shown (on stderr).
 - **`Ctrl-C`** stops `7z` and `chdman`, removes the partial files and exits (130) without starting anything else; a rerun picks up where it stopped, and also deletes the extraction folders (`.chd-*`) a hard kill left behind, beside the archives and in the system temp folder.
 
-It is local only, so storage holds the `.chd` and `.m3u` files and the card's games list those names. Running it on a card synced from a storage that still has the `.zip` files makes the next sync list the `.chd` files as files not in the card's games (it asks before deleting, default no) and download the zips again. So when a folder in `DIR`'s path is named after a saved card, convert warns and asks first (default no: with `--yes` or without a terminal it stops and exits 1; `--dry-run` only warns). When `DIR` is inside the storage folder and a file converted, it ends by saying to run `sync-roms cache update`.
+It is local only, so storage holds the `.chd` and `.m3u` files and the card's games list those names. Running it on a card synced from a storage that still has the `.zip` files makes the next sync list the `.chd` files as files not in the card's games (it asks before deleting, default no) and download the zips again. Before it starts it asks `Convert N file(s) and remove the originals?` (default no: `--yes` goes ahead, and without a terminal it exits 2 unless `--yes` is given; `--dry-run` only lists). So when a folder in `DIR`'s path is named after a saved card, convert warns and asks first (default no: with `--yes` or without a terminal it stops and exits 1; `--dry-run` only warns). When `DIR` is inside the storage folder and a file converted, it ends by saying to run `sync-roms cache update`.
 
 ## PICO-8 carts from the BBS (`download pico8`)
 
@@ -659,7 +659,7 @@ The repo ships [Claude Code](https://claude.com/claude-code) skills in `.claude/
 | --- | --- |
 | `AccessDenied` / `Unable to locate credentials` | Define the `roms-readonly` profile in `~/.aws/config` and `~/.aws/credentials`; `sync-roms doctor` checks the profile, storage and tools |
 | `cards.json isn't valid JSON` (or another data file) | Fix the file (the last good copy of `cards.json` is `cards.json.bak`); sync-roms never overwrites a file it can't parse. `sync-roms check` lists the problems |
-| "listed in manifest but not in storage" warnings | A game on your card (or a required BIOS file) isn't in storage; it is skipped |
+| "listed but not in storage" warnings | A game on your card (or a required BIOS file) isn't in storage; it is skipped |
 | `<card> has no games picked` or `<card> has nothing to sync` | Your card has no games picked, or none of them are in storage. Add games with `sync-roms edit` |
 
 ## Transfer speed (AWS CLI only)

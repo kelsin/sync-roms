@@ -1322,7 +1322,8 @@ def themes_palettes(args):
 def themes_pick(args):
     from . import spruce_themes
     usersettings.ensure_bucket()
-    ui.require_terminal("pick themes", "a terminal")
+    if not ui.has_terminal():
+        ui.fail("`themes pick` needs a terminal to pick from", 2)
     chosen = spruce_themes.pick("🎨 Spruce themes synced by default", spruce_themes.default_list())
     if chosen is None:
         return 0

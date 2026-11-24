@@ -554,12 +554,12 @@ class SyncFlowTest(unittest.TestCase):
     def test_rom_missing_from_the_cache_points_at_cache_update(self):
         tree = inventory.Tree("s3://b", inventory._clock(), {"gba/Other.zip": 5}, {})
         _, out, _, _, _ = self.run_sync(extra=[(inventory, "current", lambda: tree)])
-        self.assertIn("listed in manifest but not in storage", out)
+        self.assertIn("listed but not in storage", out)
         self.assertIn("sync-roms cache update", out)
 
     def test_rom_missing_without_a_cache_has_no_cache_pointer(self):
         _, out, _, _, _ = self.run_sync(extra=[(s3, "list_sizes", lambda prefix, sizes=True: {})])
-        self.assertIn("listed in manifest but not in storage", out)
+        self.assertIn("listed but not in storage", out)
         self.assertNotIn("cache update", out)
 
     def test_nothing_downloaded_skips_card_cleaning(self):

@@ -472,7 +472,7 @@ def report_missing(keys, what):
     if not keys:
         return
     from . import inventory  # imported here: inventory imports this module
-    print(yellow(f"  ⚠️  {len(keys)} {what} listed in manifest but not in storage"))
+    print(yellow(f"  ⚠️  {len(keys)} {what} listed but not in storage"))
     print_head(keys, runtime.MAX_MISSING_SHOWN)
     if inventory.current() is not None:
         print(dim(f"     Added to storage since the cache was built? Run: {inventory.UPDATE_HINT}"))

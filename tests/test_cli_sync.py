@@ -674,7 +674,7 @@ class SyncSmokeTest(DataDir):
                 self.assertEqual([line for line in lines if "skipping" in line],
                                  [f"  ⚠️  skipping unsafe path: '../evil.{ext}'" for ext in ("zip", "bin", "json")])
                 self.assertEqual([line.strip() for line in lines if "evil" in line and "skipping" not in line], [])
-                self.assertEqual([line.strip() for line in lines[lines.index("  ⚠️  1 ROM(s) listed in manifest but not in storage") + 1:]
+                self.assertEqual([line.strip() for line in lines[lines.index("  ⚠️  1 ROM(s) listed but not in storage") + 1:]
                                   if line.startswith("       ")], ["gba/Gone.zip"])
                 if not dry_run:
                     self.assertEqual(got, ["gba/Game.zip", "BIOS/ok.bin", "os/onion/Themes/A/config.json"])

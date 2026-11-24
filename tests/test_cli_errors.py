@@ -177,6 +177,13 @@ class UsageHelpTest(Isolated):
         code, out, _ = self.sync(["config", "show"])
         self.assertRegex(out, r"eject\s+true\s")
 
+    def test_themes_pick_without_a_terminal_says_what_it_needs(self):
+        with mock.patch.object(ui, "has_terminal", return_value=False):
+            code, _, err = self.sync(["themes", "pick"], {"bucket": "b"})
+        self.assertEqual(code, 2)
+        self.assertIn("`themes pick` needs a terminal to pick from", err)
+        self.assertNotIn("pass a terminal", err)
+
     def test_config_show_lists_the_other_saved_settings(self):
         code, out, _ = self.sync(["config", "show"], {"syncthing": True, "ra_username": "me", "ra_password": "pw", "ra_mode": "hardcore",
                                                       "surprise_excluded_systems": ["gba", "nes"]})
@@ -260,7 +267,8 @@ class ExitCodeTest(Isolated):
             os.makedirs(os.path.join(tmp, "psx"))
             open(os.path.join(tmp, "psx", "g.cue"), "w").close()
             with mock.patch.object(chd, "plan_chd", return_value=[({"chd": {"mode": "cd"}}, None, "x.cue", "o")]), \
-                    mock.patch.object(chd.external, "find_tool", return_value=None):
+                    mock.patch.object(chd.external, "find_tool", return_value=None), \
+                    mock.patch.object(ui, "ASSUME_YES", True):
                 self.assertEqual(self.code_of(chd.chd_command, mock.Mock(chd=tmp, dry_run=False)), 3)
 
 
