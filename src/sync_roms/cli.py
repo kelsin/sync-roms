@@ -1,5 +1,6 @@
 """Download ROMs and BIOS files from your ROM storage."""
 import argparse
+import ast
 import contextlib
 import os
 import re
@@ -1034,10 +1035,25 @@ def report_failures(failures):
         ui.failure(f"   {key}: {ui.dim(reason)}")
     if len(failures) > 20:
         ui.failure(ui.dim(f"   … and {len(failures) - 20} more"))
+    damaged = [reason for _, reason in failures if reason.endswith(downloads.DAMAGED_HINT)]
+    if damaged:
+        ui.failure(ui.dim(f"   {damaged_advice(damaged[0])}"))
     if all(reason.endswith(downloads.STALE_HINT) for _, reason in failures):
         ui.failure(ui.dim(f"   These are gone from storage since the cache was built: run {inventory.UPDATE_HINT}, then sync again."))
-    else:
+    elif len(damaged) < len(failures):
         ui.failure(ui.dim("   Files already downloaded are skipped, so run the same command again to retry just these."))
+
+
+def damaged_advice(reason):
+    """What to do about a damaged card file system, from a DAMAGED_HINT failure reason (str of the OSError, so the
+    damaged path is its quoted filename)."""
+    m = re.search(r"Invalid argument: ('.*'|\".*\")" + re.escape(downloads.DAMAGED_HINT) + "$", reason)
+    path = ast.literal_eval(m.group(1)) if m else None
+    device = path and clean.volume_device(path)
+    if not device:
+        return "The card's file system is damaged: check it (First Aid, chkdsk or fsck), then sync again."
+    return (f"The card's file system is damaged: close anything using the card, run diskutil repairVolume {device} (it "
+            f"unmounts the card while it works), then sync again. If that doesn't fix it, delete {path} and sync again.")
 
 
 @cardfs.caching()  # the card's folder listings, kept until sync changes the card

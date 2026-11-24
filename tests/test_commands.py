@@ -3,6 +3,7 @@ import hashlib
 import io
 import json
 import os
+import plistlib
 import sys
 import unittest
 from unittest import mock
@@ -11,7 +12,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "src"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from sync_roms import cli, commands, downloads, inventory, mirroring, names, runtime, s3, store, themeart, ui  # noqa: E402
+from sync_roms import clean, cli, commands, downloads, inventory, mirroring, names, runtime, s3, store, themeart, ui  # noqa: E402
 from helpers import Cmd, DataDir, storage_sets  # noqa: E402,F401
 
 
@@ -740,6 +741,43 @@ class DownloadsTest(unittest.TestCase):
             last = out.getvalue().splitlines()[-1]
             self.assertEqual("sync-roms cache update" in last, cache)
             self.assertEqual("run the same command again" in last, retry)
+
+    def test_failure_hint_for_a_folder_the_card_cannot_open_says_the_file_system_is_damaged(self):
+        e = OSError(22, "Invalid argument", "/Volumes/SD/BIOS/neocd")
+        with mock.patch.object(downloads.os, "stat", side_effect=OSError(22, "Invalid argument")):
+            self.assertEqual(downloads.failure_hint(e), downloads.DAMAGED_HINT)
+        with mock.patch.object(downloads.os, "stat"):
+            self.assertEqual(downloads.failure_hint(e), "")
+
+    def damaged_summary(self, failures, platform="darwin", diskutil="/usr/sbin/diskutil"):
+        info = mock.Mock(returncode=0, stdout=plistlib.dumps({"DeviceIdentifier": "disk5s1"}))
+        with mock.patch.object(clean.sys, "platform", platform), \
+                mock.patch.object(clean.shutil, "which", return_value=diskutil), \
+                mock.patch.object(clean.os.path, "ismount", side_effect=lambda p: p == "/Volumes/SD"), \
+                mock.patch.object(clean.subprocess, "run", return_value=info) as run, \
+                contextlib.redirect_stdout(io.StringIO()) as out:
+            cli.report_failures(failures)
+        return out.getvalue(), run
+
+    def test_failure_summary_for_a_damaged_card_names_the_repair_instead_of_a_retry(self):
+        damaged = ("BIOS/neocd/000-lo.lo", "[Errno 22] Invalid argument: '/Volumes/SD/BIOS/neocd'" + downloads.DAMAGED_HINT)
+        out, run = self.damaged_summary([damaged, damaged])
+        self.assertIn("diskutil repairVolume disk5s1", out)
+        self.assertIn("delete /Volumes/SD/BIOS/neocd", out)
+        self.assertNotIn("run the same command again", out)
+        run.assert_called_with(["diskutil", "info", "-plist", "/Volumes/SD"], capture_output=True)
+        out, _ = self.damaged_summary([damaged, ("psx/B.chd", "[Errno 5] Input/output error")])
+        self.assertIn("diskutil repairVolume disk5s1", out)
+        self.assertIn("run the same command again", out)
+
+    def test_failure_summary_for_a_damaged_card_without_diskutil_says_to_check_the_file_system(self):
+        damaged = ("BIOS/neocd/000-lo.lo", "[Errno 22] Invalid argument: '/Volumes/SD/BIOS/neocd'" + downloads.DAMAGED_HINT)
+        for platform, diskutil in (("linux", None), ("darwin", None)):
+            with self.subTest(platform=platform):
+                out, run = self.damaged_summary([damaged], platform, diskutil)
+                self.assertIn("check it (First Aid, chkdsk or fsck), then sync again", out)
+                self.assertNotIn("repairVolume", out)
+                run.assert_not_called()
 
     def test_mirror_keeps_stale_files_when_a_download_failed(self):
         import tempfile

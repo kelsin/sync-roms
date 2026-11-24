@@ -1,5 +1,6 @@
 """Download planning, running and local ROM scanning."""
 import contextlib
+import errno
 import os
 import queue
 import re
@@ -14,6 +15,7 @@ from concurrent.futures import ThreadPoolExecutor
 from . import cardfs, external, inventory, m3u, pico8, raofflineproxy, rocknix_collections, runtime, s3, saves, store, ui
 
 STALE_HINT = " (not in storage any more: run sync-roms cache update)"  # a file the cache lists is gone from the storage folder
+DAMAGED_HINT = " (the card's file system is damaged here)"  # a folder listed on the card that can't be opened
 
 
 def rom_rel(key, disc_dir=None, discs=(), folders=None):
@@ -97,6 +99,8 @@ def hide_discs(dest, disc_dir, discs, dry_run=False):
 def failure_hint(error):
     """A short pointer for the common S3 failures; empty when there's nothing useful to add."""
     text = str(error)
+    if isinstance(error, OSError) and error.errno == errno.EINVAL and error.filename and damaged(error.filename):
+        return DAMAGED_HINT
     if "403" in text or "AccessDenied" in text or "Forbidden" in text:
         return " (access denied: check the profile can read this storage)"
     if "404" in text or "NoSuchKey" in text or "Not Found" in text:
@@ -109,6 +113,16 @@ def failure_hint(error):
     if "timed out" in text.lower() or "Could not connect" in text:
         return " (network problem: re-run to retry)"
     return ""
+
+
+def damaged(path):
+    """Whether path itself can't be looked up (EINVAL from stat): a corrupt entry in the card's file system, which a
+    retry can never get past."""
+    try:
+        os.stat(path)
+    except OSError as e:
+        return e.errno == errno.EINVAL
+    return False
 
 
 def hard_exit():
