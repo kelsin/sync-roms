@@ -408,6 +408,14 @@ def media_root_of(layout_name, system, base, es_dir):
     return os.path.join(es_dir, "downloaded_media", esde_name(system))
 
 
+def gamelist_path(layout_name, system, es_dir, rom_dir):
+    """The system's gamelist file in the layout, or None when the layout has none."""
+    if not GAMELIST_FILES[layout_name]:
+        return None
+    gl = os.path.join(es_dir, "gamelists", esde_name(system, layout_name)) if layout_name in frontend.ESDE_LAYOUTS else rom_dir
+    return os.path.join(gl, GAMELIST_FILES[layout_name])
+
+
 def build_scrape_plan(layout_name, systems, data, rom_rels, dest_of, es_dir, present, base, recheck=None, all_media=False):
     """Everything a sync installs from scrapes/: media jobs, gamelist entries per file, text files.
 
@@ -465,9 +473,7 @@ def build_scrape_plan(layout_name, systems, data, rom_rels, dest_of, es_dir, pre
             if all_media or not os.path.exists(path) or read_text(path) != text:
                 plan["writes"].append((path, text))
         if entries and GAMELIST_FILES[layout_name]:
-            gl = (os.path.join(es_dir, "gamelists", esde_name(s, layout_name)) if layout_name in frontend.ESDE_LAYOUTS
-                  else rom_dir)
-            plan["gamelists"][os.path.join(gl, GAMELIST_FILES[layout_name])].update(entries)
+            plan["gamelists"][gamelist_path(layout_name, s, es_dir, rom_dir)].update(entries)
     return plan
 
 
