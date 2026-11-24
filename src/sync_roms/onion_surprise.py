@@ -49,10 +49,39 @@ def _extract(z, folder):
             os.chmod(target, 0o755)
 
 
-def install(card, layout_name, base, dry_run):
-    """Install the newest Surprise app on an Onion card with Surprise and collections on, once per zip. The failure count."""
-    if layout_name != LAYOUT:
+def remove(card, base, dry_run, keep=False):
+    """Remove the Surprise app (with its icon and Roms/surprise.json) from a card that isn't Onion. The failure count."""
+    app = os.path.join(base, *ROOT.split("/"))
+    if not os.path.isdir(app) or not all(os.path.isfile(os.path.join(app, f)) for f in ("config.json", "surprise")):
         return 0
+    if keep:
+        print(ui.dim(f"🔒 --no-delete: keeping the Surprise app at {ROOT}"))
+        return 0
+    if dry_run:
+        print(ui.dim(f"🧪 Dry run: would remove the Surprise app at {ROOT} (the card isn't Onion)"))
+        return 0
+    try:
+        shutil.rmtree(app)
+        for rel in (ICON, "Roms/surprise.json"):
+            path = os.path.join(base, *rel.split("/"))
+            if os.path.isfile(path):
+                os.remove(path)
+    except OSError as e:
+        ui.warn(f"Couldn't remove the Surprise app from the card: {e}")
+        return 1
+    cards = store.load_cards()
+    if isinstance(cards.get(card), dict) and "surprise_app" in cards[card]:
+        cards[card] = {k: v for k, v in cards[card].items() if k != "surprise_app"}
+        store.write_cards(cards)
+    print(f"🧹 Removed the Surprise app from {ROOT} (the card isn't Onion)")
+    return 0
+
+
+def install(card, layout_name, base, dry_run, keep=False):
+    """Install the newest Surprise app on an Onion card with Surprise and collections on, once per zip; remove it from
+    other cards (keep, --no-delete: leave it). The failure count."""
+    if layout_name != LAYOUT:
+        return remove(card, base, dry_run, keep)
     entry = store.saved_card(card)
     if not surprise.enabled(entry) or not store.card_flag(entry, "custom_collections"):
         return 0

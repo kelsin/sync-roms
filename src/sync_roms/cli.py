@@ -1255,7 +1255,7 @@ def sync_card(args):
 
     def install_apps(dry_run, wrote=None):
         """Put PICO-8 (wrote, a list, gets what it put), the Surprise app and RAOfflineProxy on the card. The failure count."""
-        return (pico8.run(card, layout_name, base, dry_run, wrote) + onion_surprise.install(card, layout_name, base, dry_run)
+        return (pico8.run(card, layout_name, base, dry_run, wrote) + onion_surprise.install(card, layout_name, base, dry_run, keep=args.no_delete)
                 + raofflineproxy.install(card, layout_name, base, dry_run))
 
     def stage_spruce(dry_run):
