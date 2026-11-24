@@ -796,6 +796,17 @@ class Flow(DataDir):
         self.assertNotIn("systems_off", store.saved_card("c"))
         self.assertEqual(store.card_games("c"), {"gba": [g("gba/Ruby.zip")]})
 
+    def test_f_on_an_off_system_changes_nothing_and_says_to_turn_it_on(self):
+        self.card(games={"gba": [g("gba/Ruby.zip")]}, systems_off=["gba"])
+        result = []
+
+        def press(labels, kw):
+            result.append(kw["on_hotkey"](cardedit.FULL_KEY, 1))
+            return None
+        self.run_card(press)
+        self.assertIn("with x", result[0])
+        self.assertEqual(store.card_games("c"), {"gba": [g("gba/Ruby.zip")]})
+
     def test_an_off_system_still_opens_with_a_notice(self):
         self.card(games={"gba": [g("gba/Ruby.zip")]}, systems_off=["gba"])
         calls = self.run_card(returns(1), lambda labels, kw: kw["initial"], returns(None))

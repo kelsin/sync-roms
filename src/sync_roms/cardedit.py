@@ -337,6 +337,8 @@ def edit_card(name, setup=None, to_fetch=None, card_match=None, on_guest=None):
             """f and x switch full system and off in place, so the screen isn't torn down and redrawn."""
             if key not in (FULL_KEY, OFF_KEY) or idx is None:
                 return False
+            if key == FULL_KEY and systems[idx]["bucket"] in store.systems_off(card_entry(name, setup)):
+                return "This system is off on the card: turn it on with x first"
             (toggle_full if key == FULL_KEY else toggle_off)(name, systems[idx]["bucket"])
             usages[systems[idx]["bucket"]] = budget.system_usage(card_entry(name, setup), systems[idx])
             extras[:] = work_out()[1]

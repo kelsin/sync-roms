@@ -398,7 +398,10 @@ class _ListModel:
         moved = move_key(k, cur, len(vis) - 1, self.view)
         hot = HOTKEY_CHARS.get(k, k)
         if hot in self.hotkeys and (vis or self.multi):
-            if self.on_hotkey and self.on_hotkey(hot, vis[cur] if vis else None):
+            handled = self.on_hotkey and self.on_hotkey(hot, vis[cur] if vis else None)
+            if handled:
+                if isinstance(handled, str):  # a message to show
+                    self.notice = handled
                 return KEEP
             return hot, (vis[cur] if vis else None)
         if moved is not None:
@@ -1417,8 +1420,8 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
     so poll can update extras in place (and status can read what it changed).
     links: optional per-label lists of the label indexes switched together with it (multi mode): Space/Tab and `a`
     set them all to the toggled row's new state (locked ones excepted).
-    on_hotkey: optional callable(key, label index) -> bool, tried first for a hotkey; True means it handled the key
-    in place (the list stays open and is redrawn, so it can update extras), False returns (key, index) as usual.
+    on_hotkey: optional callable(key, label index) -> bool, tried first for a hotkey; True (or a message to show) means it
+    handled the key in place (the list stays open and is redrawn, so it can update extras), False returns (key, index) as usual.
     preview: optional callable(label index) -> path of an image file, or None; the list then shares the screen with an
     image pane showing the highlighted row's image (blank when there is none), updated as the cursor and filter change.
     Only in a terminal that draws real images (Kitty graphics or Sixel), and not inside tmux; elsewhere there is no pane.
