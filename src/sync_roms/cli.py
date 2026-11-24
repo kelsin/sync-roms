@@ -80,7 +80,7 @@ TOPICS = {
 
   --dry-run   show what would be downloaded and deleted, change nothing
   --yes       answer every prompt with its default (a default-no prompt, like deleting files, stays no)
-  --no-delete never delete anything from the card: ROMs no longer in the lists, their media, old drivers, retired collections and empty
+  --no-delete never delete anything from the card: ROMs no longer in the lists, their media, old drivers, retired collections and their art, and empty
               system folders are listed as kept and the delete prompt is skipped (for adding games to a card
               someone set up by hand)
   --guest     make CARD a guest card (saved; F in the card editor turns it off): its picks are seeded from the storage
@@ -477,7 +477,37 @@ TOPICS = {
 }
 
 
+HELP_WIDTH = 100
+_COLOR = re.compile(r"\x1b\[[0-9;]*m")
+
+
+def _wrap_line(line):
+    """The lines `line` breaks into at HELP_WIDTH visible columns. A row of a name and its description (two or more
+    spaces between, the description starting in column 40 or earlier) continues under the description; a list item
+    under its text; any other line at its own indent."""
+    plain = _COLOR.sub("", line)
+    if len(plain) <= HELP_WIDTH:
+        return [line]
+    indent = len(plain) - len(plain.lstrip(" "))
+    row = re.match(r"(\s*\S.*?\S\s{2,})\S", plain)
+    hang = len(row.group(1)) if row and len(row.group(1)) <= 40 else indent + (2 if plain.lstrip().startswith("- ") else 4 if row else 0)
+    out, cur, width = [], "", 0
+    for word in re.split(r"( +)", line):
+        w = len(_COLOR.sub("", word))
+        if cur.strip() and width + w > HELP_WIDTH and not word.isspace():
+            out.append(cur.rstrip())
+            cur, width = " " * hang, hang
+        if word.isspace() and not cur.strip() and out:
+            continue
+        cur, width = cur + word, width + w
+    return out + [cur.rstrip()]
+
+
 def help_text(topic=None):
+    return "\n".join(wrapped for line in _help_text(topic).split("\n") for wrapped in _wrap_line(line))
+
+
+def _help_text(topic=None):
     if topic in TOPICS:
         return f"\n{ui.bold('🎮 sync-roms ' + topic)} — {SUBCOMMANDS[topic][1]}\n{TOPICS[topic]}"
     rows = "\n".join(f"  {ui.green(name):<{20 + len(ui.green(''))}} {ui.cyan(usage) if usage else ''}\n      {summary}"

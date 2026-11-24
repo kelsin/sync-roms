@@ -2,6 +2,7 @@ import contextlib
 import io
 import json
 import os
+import re
 import sys
 import tempfile
 import unittest
@@ -169,6 +170,19 @@ class UsageHelpTest(Isolated):
         lines = [line.strip() for line in cli.help_text().splitlines()]
         self.assertTrue(any(line.startswith("--quiet") and "--verbose" not in line for line in lines))
         self.assertTrue(any(line.startswith("--verbose") for line in lines))
+
+    def test_help_lines_fit_100_columns(self):
+        plain = re.compile(r"\x1b\[[0-9;]*m")
+        for topic in (None, *cli.TOPICS):
+            for line in cli.help_text(topic).splitlines():
+                with self.subTest(topic=topic, line=line[:40]):
+                    self.assertLessEqual(len(plain.sub("", line)), 100)
+
+    def test_wrapped_help_keeps_its_words(self):
+        text = cli.help_text("games")
+        for line in cli.TOPICS["games"].splitlines():
+            for word in line.split():
+                self.assertIn(word, text.split())
 
     def test_config_show_prints_eject_as_a_word(self):
         code, out, _ = self.sync(["config", "show"], {"eject": False})
