@@ -524,7 +524,7 @@ def delete_keys(keys):
                     try:
                         os.remove(safe_join(runtime.ROOT, k))
                     except FileNotFoundError:  # already gone, as a bucket delete of a missing object succeeds
-                        pass
+                        check_root()  # unless the share is unmounted
                     inventory.removed([k], before)
                 except OSError as e:
                     errors.append({"Key": k, "Message": str(e)})

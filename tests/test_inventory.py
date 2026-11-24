@@ -372,6 +372,22 @@ class FolderMtimeTest(helpers.StorageFolder):
         self.assertEqual(errors, [])
         self.assertNotIn("BIOS/x.bin", inventory.current().files)
 
+    def test_deleting_from_an_unmounted_share_is_an_error_and_keeps_the_cache(self):
+        self.update()
+        files = dict(inventory.current().files)
+        os.rename(self.root.name, self.root.name + "-unmounted")
+        self.addCleanup(os.rename, self.root.name + "-unmounted", self.root.name)
+        errors, _ = quiet(s3.delete_keys, ["gba/a.zip", "BIOS/x.bin"])
+        self.assertEqual([e["Key"] for e in errors], ["gba/a.zip", "BIOS/x.bin"])
+        self.assertEqual(inventory.current().files, files)
+
+    def test_another_os_error_deleting_is_still_an_error(self):
+        self.update()
+        with mock.patch.object(os, "remove", side_effect=PermissionError("denied")):
+            errors, _ = quiet(s3.delete_keys, ["BIOS/x.bin"])
+        self.assertEqual(errors, [{"Key": "BIOS/x.bin", "Message": "denied"}])
+        self.assertIn("BIOS/x.bin", inventory.current().files)
+
     def test_own_writes_into_trusted_folders_keep_them_trusted(self):
         self.update()
         s3.write_file("gba/c.zip", lambda tmp: helpers.touch(tmp, b"1234"))
