@@ -49,9 +49,12 @@ def note_text(games, key):
     return game.get("note", "") if game else ""
 
 
-def save_note(games, key, text):
-    """Save the note typed after `w` for the game listed under key in games; the message the list shows."""
+def save_note(games, key, text, covered=False):
+    """Save the note typed after `w` for the game listed under key in games; the message the list shows. covered: the
+    game is on only because a set or collection brings it, so it has no direct pick to hold a note."""
     if not set_note({"games": games}, key, text):
+        if covered:
+            return "Notes go only on games picked directly; this one comes from a set or collection"
         return "Switch the game on and press Enter first, then add its note"
     return "Note saved" if text else "Note cleared"
 

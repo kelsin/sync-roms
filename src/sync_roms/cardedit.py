@@ -872,7 +872,9 @@ def _games_pass(title, shown, picks, sps, files_of, start, work, capacity, to_fe
             row_note=lambda i: edit.variant_line(keys[i], picks.variants, picks.parents, picks.system_names,
                                                  picks.on_card),
             session=session, note_text=lambda i: edit.note_text(sp_of[i].games, keys[i]),
-            on_note=lambda i, text: edit.save_note(sp_of[i].games, keys[i], text),
+            on_note=lambda i, text: edit.save_note(
+                sp_of[i].games, keys[i], text,
+                covered=(keys[i] in notes or keys[i] in sp_of[i].collected) and keys[i] not in sp_of[i].excluded),
             **previews.game_pane(keys), links=links,
             locked=[sp is None or k in sp.surprise for k, sp in zip(keys, sp_of)],
             locked_note=[edit.FULL_SYSTEM_NOTE if sp is None else _locked_note(sp, k) for k, sp in zip(keys, sp_of)],

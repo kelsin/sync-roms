@@ -1985,6 +1985,17 @@ class SetFlow(Flow):
         self.assertEqual(self.read("cards.json")["c"]["games"]["gba"],
                          [{**g("gba/Ruby.sav")}, {**g("gba/Ruby.zip"), "note": "best one"}])
 
+    def test_w_on_a_game_that_comes_from_a_set_says_notes_go_only_on_direct_picks(self):
+        self.card(games={"sets": ["pk"]})
+        answers = []
+
+        def step(labels, kw):
+            answers.append(kw["on_note"](labels.index("Game Boy — Red"), "x"))
+            return kw["session"]["sel"]
+        self.run_set(step)
+        self.assertIn("directly", answers[0])
+        self.assertIn("set or collection", answers[0])
+
     def test_v_adds_the_variant_to_the_card(self):
         vset = {**SET, "games": [{**SET["games"][0], "variants": [{"bucket": "gba/Emerald.zip", "note": "more"}]},
                                  SET["games"][1]]}
