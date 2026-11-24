@@ -4,6 +4,7 @@ import http.client
 import json
 import os
 import queue
+import re
 import shutil
 import subprocess
 import tempfile
@@ -14,6 +15,7 @@ from . import cardfs, downloads, external, github, inventory, picker, previews, 
 REPO = "spruceUI/PyUI-Themes"
 TAG = "1"
 MEMBER_ROOT = ("mnt", "SDCARD", "Themes")  # where each archive keeps its one theme folder
+ICON_COPY = re.compile(r"^icons_(\d+)x(\d+)$")  # PyUI's resized copy of a theme's icons/
 
 
 def _junk(name):
@@ -359,6 +361,45 @@ def remove(base, names, dry_run):
             pass
         except OSError as e:
             ui.warn(f"Couldn't remove the Spruce theme {name}: {e}")
+            failed += 1
+    return failed
+
+
+def stale_copies(base, todo):
+    """[(name, folder)], sorted: for each theme with a file to copy, the card's Themes/<name>/icons_<W>x<H> folders PyUI
+    made (it never remakes them) that storage's theme doesn't itself hold."""
+    prefix = runtime.SPRUCE_THEMES_PREFIX
+    root = os.path.join(base, "Themes")
+    themes = {os.path.relpath(path, root).split(os.sep)[0] for _, path, _ in todo}
+    result = []
+    for name in sorted(filter(_plain, themes)):
+        folder = os.path.join(base, "Themes", name)
+        try:
+            found = [n for n in os.listdir(folder) if ICON_COPY.match(n) and os.path.isdir(os.path.join(folder, n))]
+        except OSError:
+            continue
+        shipped = {key[len(prefix) + len(name) + 1:].split("/")[0] for key in inventory.files(f"{prefix}{name}/")}
+        result += [(name, n) for n in sorted(found) if n not in shipped]
+    return result
+
+
+def clear_copies(base, copies, dry_run):
+    """Delete the [(name, folder)] icon copies of stale_copies. Returns the number that failed."""
+    failed = 0
+    for name, folder in copies:
+        if not _plain(name) or not ICON_COPY.match(folder):
+            continue
+        size = "x".join(ICON_COPY.match(folder).groups())
+        if dry_run:
+            print(ui.dim(f"🧪 Dry run: would clear the {size} icons PyUI made for the Spruce theme {name}"))
+            continue
+        try:
+            shutil.rmtree(os.path.join(base, "Themes", name, folder))
+            print(f"🧹 Cleared the {size} icons PyUI made for the Spruce theme {name}")
+        except FileNotFoundError:
+            pass
+        except OSError as e:
+            ui.warn(f"Couldn't clear the {size} icons PyUI made for the Spruce theme {name}: {e}")
             failed += 1
     return failed
 

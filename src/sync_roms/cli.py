@@ -1637,6 +1637,7 @@ def sync_card(args):
             print(f"  {ui.red('would delete')} {path}")
         if theme_plan:
             spruce_themes.remove(base, theme_plan["remove"], True)
+            spruce_themes.clear_copies(base, spruce_themes.stale_copies(base, theme_todo), True)
             spruce_themes.select(card, base, True)
         if not guest:
             prune_drivers(True)
@@ -1722,6 +1723,8 @@ def sync_card(args):
                   + (f"; {len(theme_plan['remove'])} to remove" if theme_plan["remove"] else ""))
     present = [n for n in theme_plan["remove"] if os.path.isdir(os.path.join(base, "Themes", n))] if theme_plan else []
     removal_failed = spruce_themes.remove(base, theme_plan["remove"], False) if theme_plan else 0
+    if theme_plan:
+        removal_failed += spruce_themes.clear_copies(base, spruce_themes.stale_copies(base, theme_todo), False)
     themes_removed = any(not os.path.isdir(os.path.join(base, "Themes", n)) for n in present)
     if removal_failed:  # a folder that couldn't be removed stays recorded, so the next sync tries again
         theme_plan["installed"] = spruce_themes.sorted_names(
