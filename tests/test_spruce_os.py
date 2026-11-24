@@ -69,8 +69,16 @@ class Install(helpers.CardDir):
             self.assertEqual(f.read(), b"new")
         self.assertEqual(self.recorded(), V46)
         self.assertIn(V46, out)
-        self.assertIn("EZ Updater", out)
+        self.assertNotIn("EZ Updater", out)  # the sync's last line says it: spruce_os.remind
         self.assertIn(f"🌲 Staging spruceOS {V46} (3 B)…", out)
+
+    def test_remind_names_each_staged_7z(self):
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            spruce_os.remind([])
+            self.assertEqual(out.getvalue(), "")
+            spruce_os.remind([self.cp(V46)])
+        self.assertIn(f"spruceOS {V46} is on the card: run Apps → EZ Updater on the device to install it", out.getvalue())
 
     def test_stages_nothing_without_room_for_it(self):
         store.update_card("c", spruce_os="spruceV4.5.6.7z")

@@ -1144,6 +1144,11 @@ class SyncSmokeTest(DataDir):
                         (os.path.exists(os.path.join(card, "spruceV4.6.0.7z")),
                          (store.load_cards().get(os.path.basename(card)) or {}).get("spruce_os")))), 0)
                     self.assertEqual(found, [(False, None)] if dry_run else [(True, "spruceV4.6.0.7z")])
+                    last = self.out.getvalue().strip().splitlines()[-1]
+                    if dry_run:
+                        self.assertNotIn("EZ Updater", self.out.getvalue())
+                    else:  # the reminder is the sync's last line
+                        self.assertIn("spruceV4.6.0.7z is on the card: run Apps → EZ Updater", last)
                     if games and not dry_run:  # staged after the card's other writes
                         self.assertGreater(order.index("os/spruceos/spruceV4.6.0.7z"), order.index("flush"))
 

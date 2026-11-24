@@ -1258,11 +1258,14 @@ def sync_card(args):
         return (pico8.run(card, layout_name, base, dry_run, wrote) + onion_surprise.install(card, layout_name, base, dry_run)
                 + raofflineproxy.install(card, layout_name, base, dry_run))
 
+    spruce_staged = []  # the spruceOS 7z staged this sync, for the reminder at the end
+
     def stage_spruce(dry_run):
         """Stage boot logos, the newest spruceOS, the saved settings and WiFi networks on a spruce card. The failure count."""
         wrote = []
         failed = spruce_bootlogo.install(card, layout_name, device, base, dry_run, wrote, keep=args.no_delete)
-        failed += spruce_os.install(card, layout_name, base, dry_run, wrote, keep=args.no_delete)
+        failed += spruce_os.install(card, layout_name, base, dry_run, spruce_staged, keep=args.no_delete)
+        wrote += spruce_staged
         failed += spruce_settings.install(card, layout_name, base, dry_run)
         failed += spruce_wifi.install(card, layout_name, base, dry_run)
         failed += spruce_syncthing.run(card, layout_name, base, dry_run)
@@ -1284,6 +1287,7 @@ def sync_card(args):
                 clean._clean_root = base
             failed += stage_spruce(args.dry_run)
         print(ui.yellow(f"👋 {card} has nothing to sync."))
+        spruce_os.remind(spruce_staged)
         return 1 if failed else 0
     print(ui.bold(f"\n🔎 Checking {len(chosen)} system(s) against storage..."))
 
@@ -1844,6 +1848,7 @@ def sync_card(args):
         ui.failure(ui.red(f"\n⚠️  Done with {failed} failure(s): {done}"))
     else:
         print(ui.green(f"\n🎉 Done: {done}"))
+    spruce_os.remind(spruce_staged)
     return 1 if failed else 0
 
 
