@@ -3,6 +3,7 @@ import io
 import json
 import os
 import unittest
+import xml.etree.ElementTree as ET
 
 import helpers
 from sync_roms import commands, spruce_emu, spruce_syncthing, store, usersettings
@@ -51,6 +52,155 @@ class Setting(helpers.DataDir):
 
     def test_config_set_takes_it(self):
         self.assertIs(commands.config_value("syncthing", "false"), False)
+
+
+SERVER = "ABCDEFG-HIJKLMN-OPQRSTU-VWXYZ23-4567ABC-DEFGHIJ-KLMNOPQ-RSTUVWX"
+SETTING = {"id": SERVER.lower(), "folders": {"saves": "jkx7j-mnlfo", "states": "w5nqg-xmpq6"}}
+HASH = "$2a$10$Eycxnvj3BtN8fq7suC4.W.ZrDRyH6fgN/pFY.LrOJCG6xIBeDSxdO"
+
+
+class Config(helpers.DataDir):
+    def server(self, setting=SETTING):
+        usersettings.save_settings({"syncthing_server": setting})
+        return spruce_syncthing.server()
+
+    def test_data_has_folders(self):
+        folders = spruce_syncthing.data()["spruce"]["folders"]
+        self.assertEqual(set(folders), {"saves", "states"})
+        for folder in folders.values():
+            self.assertTrue(isinstance(folder["path"], str) and folder["path"])
+            self.assertTrue(isinstance(folder["label"], str) and folder["label"])
+
+    def test_server_unset_is_none(self):
+        self.assertIsNone(spruce_syncthing.server())
+
+    def test_server_parsed(self):
+        srv = self.server()
+        self.assertEqual(srv["id"], SERVER)
+        self.assertEqual(srv["address"], "dynamic")
+        self.assertEqual(srv["folders"][0], ("saves", "jkx7j-mnlfo", "RetroArch saves", "/mnt/SDCARD/Saves/saves"))
+        self.assertEqual(srv["folders"][1], ("states", "w5nqg-xmpq6", "RetroArch states", "/mnt/SDCARD/Saves/states"))
+        self.assertEqual(self.server({**SETTING, "address": "tcp://h:22000"})["address"], "tcp://h:22000")
+
+    def test_server_malformed_warns_and_is_none(self):
+        bad = [{**SETTING, "id": "nope"}, {**SETTING, "id": 5},
+               {"id": SERVER, "folders": {"saves": "a"}},
+               {"id": SERVER, "folders": {"saves": "a", "states": ""}},
+               {"id": SERVER, "folders": ["saves"]},
+               {**SETTING, "address": ""}, {**SETTING, "address": 3}, ["x"]]
+        for setting in bad:
+            err = io.StringIO()
+            with contextlib.redirect_stderr(err):
+                self.assertIsNone(self.server(setting), setting)
+            self.assertEqual(err.getvalue().count("syncthing_server in settings.json"), 1, setting)
+
+    def fresh(self):
+        return spruce_syncthing.merge_config(None, self.server())
+
+    def test_fresh_config(self):
+        text, lines, warnings = self.fresh()
+        root = ET.fromstring(text)
+        self.assertEqual(root.tag, "configuration")
+        gui = root.find("gui")
+        self.assertEqual(gui.findtext("address"), "0.0.0.0:8384")
+        self.assertEqual(gui.findtext("user"), "spruce")
+        self.assertEqual(gui.findtext("password"), HASH)
+        self.assertEqual(root.findtext("options/listenAddress"), "default")
+        device = root.find("device")
+        self.assertEqual((device.get("id"), device.get("name")), (SERVER, "server"))
+        self.assertEqual(device.findtext("address"), "dynamic")
+        folders = root.findall("folder")
+        self.assertEqual([f.get("id") for f in folders], ["jkx7j-mnlfo", "w5nqg-xmpq6"])
+        for f in folders:
+            self.assertEqual(f.get("type"), "sendreceive")
+            self.assertEqual([d.get("id") for d in f.findall("device")], [SERVER])
+            self.assertEqual(f.findtext("modTimeWindowS"), "2")
+        self.assertEqual(folders[0].get("path"), "/mnt/SDCARD/Saves/saves")
+        self.assertEqual(folders[0].get("label"), "RetroArch saves")
+        self.assertEqual(lines[0], "   config.xml: new config")
+        self.assertEqual(warnings, [])
+        self.assertTrue(text.endswith("\n"))
+
+    OLD = ('<configuration version="37"><folder id="other" label="o" path="/mnt/SDCARD/Other" type="sendreceive">'
+           '<device id="MINE"/></folder><device id="MINE" name="me"><address>dynamic</address></device>'
+           '<gui enabled="true"><apikey>KEY</apikey></gui></configuration>')
+
+    def test_merge_keeps_other_content(self):
+        srv = self.server()
+        text, lines, warnings = spruce_syncthing.merge_config(self.OLD, srv)
+        root = ET.fromstring(text)
+        self.assertEqual([f.get("id") for f in root.findall("folder")], ["other", "jkx7j-mnlfo", "w5nqg-xmpq6"])
+        self.assertEqual([d.get("id") for d in root.findall("device")], ["MINE", SERVER])
+        self.assertEqual(root.findtext("gui/apikey"), "KEY")
+        self.assertIn("   config.xml: server device", lines)
+        self.assertIn("   config.xml: folder RetroArch saves at /mnt/SDCARD/Saves/saves", lines)
+        self.assertNotIn("   config.xml: new config", lines)
+        self.assertEqual(warnings, [])
+
+    def existing(self, path="/mnt/SDCARD/Saves/saves", window="0"):
+        return ('<configuration><folder id="jkx7j-mnlfo" label="x" path="%s" type="sendreceive">'
+                '<device id="MINE"/><modTimeWindowS>%s</modTimeWindowS></folder></configuration>' % (path, window))
+
+    def test_merge_existing_folder_same_path(self):
+        text, lines, warnings = spruce_syncthing.merge_config(self.existing(), self.server())
+        folder = ET.fromstring(text).findall("folder")[0]
+        self.assertEqual([d.get("id") for d in folder.findall("device")], ["MINE", SERVER])
+        self.assertEqual(folder.findtext("modTimeWindowS"), "2")
+        self.assertEqual(len(folder.findall("modTimeWindowS")), 1)
+        self.assertNotIn("   config.xml: folder RetroArch saves at /mnt/SDCARD/Saves/saves", lines)
+        self.assertIn("   config.xml: RetroArch saves modTimeWindowS = 2", lines)
+        self.assertEqual(warnings, [])
+
+    def test_merge_folder_at_other_path_warns(self):
+        old = self.existing(path="/mnt/SDCARD/Elsewhere")
+        text, lines, warnings = spruce_syncthing.merge_config(old, self.server())
+        folder = [f for f in ET.fromstring(text).findall("folder") if f.get("id") == "jkx7j-mnlfo"]
+        self.assertEqual(len(folder), 1)
+        self.assertEqual(folder[0].get("path"), "/mnt/SDCARD/Elsewhere")
+        self.assertEqual([d.get("id") for d in folder[0].findall("device")], ["MINE"])
+        self.assertEqual(len(warnings), 1)
+        for part in ("jkx7j-mnlfo", "/mnt/SDCARD/Elsewhere", "/mnt/SDCARD/Saves/saves"):
+            self.assertIn(part, warnings[0])
+
+    def test_merge_folder_path_clash_warns(self):
+        old = self.existing().replace("jkx7j-mnlfo", "other-id")
+        text, lines, warnings = spruce_syncthing.merge_config(old, self.server())
+        ids = [f.get("id") for f in ET.fromstring(text).findall("folder")]
+        self.assertNotIn("jkx7j-mnlfo", ids)
+        self.assertEqual(len([w for w in warnings if "other-id" in w and "jkx7j-mnlfo" in w and "/mnt/SDCARD/Saves/saves" in w]), 1)
+
+    def test_merge_folder_path_trailing_slash_is_same(self):
+        text, lines, warnings = spruce_syncthing.merge_config(self.existing(path="/mnt/SDCARD/Saves/saves/"), self.server())
+        self.assertEqual(warnings, [])
+        self.assertEqual(ET.fromstring(text).findall("folder")[0].get("path"), "/mnt/SDCARD/Saves/saves/")
+
+    def test_server_id_with_trailing_newline_is_malformed(self):
+        err = io.StringIO()
+        with contextlib.redirect_stderr(err):
+            self.assertIsNone(self.server({**SETTING, "id": SERVER + "\n"}))
+        self.assertIn("ignored", err.getvalue())
+
+    def test_merge_existing_server_device_untouched(self):
+        old = ('<configuration><device id="%s" name="mine"><address>tcp://x:1</address></device></configuration>' % SERVER)
+        text, lines, _ = spruce_syncthing.merge_config(old, self.server())
+        devices = ET.fromstring(text).findall("device")
+        self.assertEqual(len(devices), 1)
+        self.assertEqual(devices[0].get("name"), "mine")
+        self.assertEqual(devices[0].findtext("address"), "tcp://x:1")
+        self.assertNotIn("   config.xml: server device", lines)
+
+    def test_merge_unchanged_returns_none(self):
+        srv = self.server()
+        text = spruce_syncthing.merge_config(self.OLD, srv)[0]
+        self.assertEqual(spruce_syncthing.merge_config(text, srv), (None, [], []))
+        fresh = spruce_syncthing.merge_config(None, srv)[0]
+        self.assertEqual(spruce_syncthing.merge_config(fresh, srv), (None, [], []))
+
+    def test_merge_unparsable_warns(self):
+        new, lines, warnings = spruce_syncthing.merge_config("<configuration", self.server())
+        self.assertEqual((new, lines), (None, []))
+        self.assertEqual(len(warnings), 1)
+        self.assertIn("config.xml", warnings[0])
 
 
 class Card(helpers.CardDir):
@@ -213,6 +363,88 @@ class Card(helpers.CardDir):
         self.assertIn("retroarch-A.cfg: autosave_interval = 10", out)
         self.assertEqual(self.read("Saves/ra-configs/retroarch-A.cfg"), self.CFG)
         self.assertEqual(self.read("Emu/SFC/config.json"), self.emu())
+
+    CONF = "Saves/syncthing/config/config.xml"
+
+    def set_server(self):
+        usersettings.save_settings({"syncthing_server": SETTING})
+
+    def test_fresh_config_written(self):
+        self.set_server()
+        os.makedirs(self.cp("Saves"))
+        out = self.run_sync()
+        self.assertIn("config.xml: new config", out)
+        root = ET.fromstring(self.read(self.CONF))
+        self.assertEqual([f.get("id") for f in root.findall("folder")], ["jkx7j-mnlfo", "w5nqg-xmpq6"])
+        self.assertTrue(os.path.isdir(self.cp("Saves", "saves", ".stfolder")))
+        self.assertTrue(os.path.isdir(self.cp("Saves", "states", ".stfolder")))
+
+    def test_no_saves_folder_warns(self):
+        self.set_server()
+        self.assertIn("spruceOS isn't installed", self.run_sync())
+        self.assertFalse(os.path.exists(self.cp("Saves")))
+
+    def test_existing_config_merged(self):
+        self.set_server()
+        self.put(self.CONF, "<configuration><device id=\"MINE\"/></configuration>")
+        self.run_sync()
+        root = ET.fromstring(self.read(self.CONF))
+        self.assertEqual([d.get("id") for d in root.findall("device")], ["MINE", SERVER])
+        self.assertEqual(len(root.findall("folder")), 2)
+
+    def test_no_wifi_device_skipped(self):
+        self.set_server()
+        store.write_cards({"c": {"device": "miyoo-mini", "layout": "spruce"}})
+        os.makedirs(self.cp("Saves"))
+        self.assertNotIn("config.xml", self.run_sync())
+        self.assertFalse(os.path.exists(self.cp(*self.CONF.split("/"))))
+
+    def test_unset_setting_skipped(self):
+        os.makedirs(self.cp("Saves"))
+        self.assertNotIn("config.xml", self.run_sync())
+        self.assertFalse(os.path.exists(self.cp(*self.CONF.split("/"))))
+
+    def test_dry_run_writes_nothing_config(self):
+        self.set_server()
+        os.makedirs(self.cp("Saves"))
+        out = self.run_sync(dry_run=True)
+        self.assertIn("would set for Syncthing", out)
+        self.assertIn("config.xml: new config", out)
+        self.assertFalse(os.path.exists(self.cp(*self.CONF.split("/"))))
+        self.assertFalse(os.path.exists(self.cp("Saves", "saves")))
+
+    def test_second_sync_quiet_config(self):
+        self.set_server()
+        os.makedirs(self.cp("Saves"))
+        self.run_sync()
+        self.assertNotIn("config.xml", self.run_sync())
+
+    def test_bad_setting_still_applies_cores(self):
+        usersettings.save_settings({"syncthing_server": {"id": "nope"}})
+        self.put("Saves/ra-configs/retroarch-A.cfg", self.CFG)
+        out = self.run_sync()
+        self.assertIn("syncthing_server in settings.json is ignored", out)
+        self.assertIn('autosave_interval = "10"', self.read("Saves/ra-configs/retroarch-A.cfg"))
+        self.assertFalse(os.path.exists(self.cp("Saves", "syncthing")))
+
+    def test_entries_list_config(self):
+        self.set_server()
+        os.makedirs(self.cp("Saves"))
+        found = {(e.where, e.key): e for e in spruce_syncthing.entries("c", self.card)}
+        server = found[(self.CONF, "server")]
+        self.assertEqual((server.old, server.new), (None, SERVER))
+        saves = found[(self.CONF, "RetroArch saves")]
+        self.assertEqual((saves.old, saves.new), (None, "/mnt/SDCARD/Saves/saves"))
+        shared = found[(self.CONF, "RetroArch saves shared with server")]
+        self.assertEqual((shared.old, shared.new), (None, "yes"))
+        window = found[(self.CONF, "RetroArch saves modTimeWindowS")]
+        self.assertEqual((window.old, window.new), (None, "2"))
+        self.run_sync()
+        found = {(e.where, e.key): e for e in spruce_syncthing.entries("c", self.card)}
+        self.assertEqual(found[(self.CONF, "RetroArch saves shared with server")].old, "yes")
+        self.assertEqual(found[(self.CONF, "RetroArch saves modTimeWindowS")].old, "2")
+        self.assertEqual(found[(self.CONF, "server")].old, SERVER)
+        self.assertEqual(found[(self.CONF, "RetroArch saves")].old, "/mnt/SDCARD/Saves/saves")
 
     def test_emu_ignore_list_and_core_both_kept_in_one_sync(self):
         # cli.py runs spruce_emu_step (apply) before stage_spruce (this run) in a real sync
