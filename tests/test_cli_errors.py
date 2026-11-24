@@ -236,7 +236,7 @@ class UsageHelpTest(Isolated):
                                                       "surprise_excluded_systems": ["gba", "nes"]})
         self.assertEqual(code, 0)
         self.assertRegex(out, r"syncthing\s+true\s")
-        self.assertRegex(out, r"ra_mode\s+\"hardcore\"\s")
+        self.assertRegex(out, r"ra_mode\s+hardcore\s")  # text bare, like the other rows
         self.assertRegex(out, r"ra_username\s+\(set, not shown\)")
         self.assertRegex(out, r"ra_password\s+\(set, not shown\)")
         self.assertRegex(out, r"surprise_excluded_systems\s+gba,nes")

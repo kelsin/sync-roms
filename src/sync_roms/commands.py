@@ -791,7 +791,7 @@ def config_cmd(args):
     for name in CONFIG_KINDS:
         if name not in shown and name in saved:
             value = "(set, not shown)" if name in HIDDEN | ACCOUNTS else ",".join(saved[name]) if isinstance(saved[name], list) \
-                else json.dumps(saved[name])
+                else saved[name] if isinstance(saved[name], str) else json.dumps(saved[name])
             rows.append((name, value, "settings.json"))
     for name, value, source in rows:
         print(f"  {name:<26} {(json.dumps(value) if isinstance(value, bool) else str(value)) if value is not None else ui.dim('(not set)'):<28} {ui.dim(source)}")
