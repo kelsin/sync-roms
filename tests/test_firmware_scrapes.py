@@ -780,6 +780,61 @@ class SpruceQoiTest(unittest.TestCase):
             self.assertFalse(os.path.exists(os.path.join(base, "Roms", "GBA")))
 
 
+class HiddenDiscsTest(unittest.TestCase):
+    PSX = {"name": "PlayStation", "bucket": "psx", "folders": {"esde": "psx", "onion": "PS"}}
+    RELS = ["G (Disc 1).chd", "G (Disc 2).chd", "G.m3u", "sub/H (Disc 1).chd", "Solo.chd"]
+    HIDDEN = {"psx": ["G (Disc 1).chd", "G (Disc 2).chd", "sub/H (Disc 1).chd"]}
+
+    def build(self, base, layout="esde", hidden=HIDDEN, meta=None, present=lambda p: True):
+        return scrape_plan.build_scrape_plan(layout, [self.PSX], {"psx": ({}, meta or {})}, {"psx": self.RELS},
+                                             lambda s: os.path.join(base, "psx"), os.path.join(base, "ES-DE"),
+                                             present, base, hidden=hidden)
+
+    def entries(self, plan):
+        (path, entries), = plan["gamelists"].items()
+        return path, entries
+
+    def test_discs_are_hidden_and_the_playlist_is_not(self):
+        for layout in ("esde", "emudeck"):
+            with self.subTest(layout=layout), tempfile.TemporaryDirectory() as base:
+                _, entries = self.entries(self.build(base, layout))
+                self.assertEqual(entries, {r: {"hidden": "true"} for r in self.HIDDEN["psx"]})
+
+    def test_a_disc_with_scrape_data_keeps_it(self):
+        with tempfile.TemporaryDirectory() as base:
+            _, entries = self.entries(self.build(base, meta={"G (Disc 1).chd": {"name": "G"}}))
+        self.assertEqual(entries["G (Disc 1).chd"], {"name": "G", "hidden": "true"})
+
+    def test_only_discs_on_the_card_are_hidden(self):
+        with tempfile.TemporaryDirectory() as base:
+            _, entries = self.entries(self.build(base, present=lambda p: "Disc 2" not in p))
+        self.assertNotIn("G (Disc 2).chd", entries)
+
+    def test_other_layouts_hide_nothing(self):
+        with tempfile.TemporaryDirectory() as base:
+            self.assertEqual(self.build(base, "onion")["gamelists"], {})
+
+    def test_gamelist_is_kept_and_a_second_run_writes_nothing(self):
+        with tempfile.TemporaryDirectory() as base:
+            path, entries = self.entries(self.build(base))
+            os.makedirs(os.path.dirname(path))
+            with open(path, "w", encoding="utf-8") as f:
+                f.write('<?xml version="1.0"?>\n<gameList><game><path>./G (Disc 1).chd</path><favorite>true</favorite></game></gameList>\n')
+            self.assertTrue(scrape_plan.update_gamelist(path, entries))
+            root = ET.parse(path).getroot()
+            first = next(g for g in root.findall("game") if g.findtext("path") == "./G (Disc 1).chd")
+            self.assertEqual((first.findtext("favorite"), first.findtext("hidden")), ("true", "true"))
+            self.assertFalse(any(g.findtext("path") == "./G.m3u" for g in root.findall("game")))
+            self.assertFalse(scrape_plan.update_gamelist(path, entries))
+
+    def test_hidden_only_plan_is_described_and_applied(self):
+        with tempfile.TemporaryDirectory() as base:
+            plan = self.build(base)
+            with mock.patch("builtins.print") as pr:
+                scrape_plan.describe_scrape_plan(plan)
+            self.assertIn("gamelist", "\n".join(str(c.args[0]) for c in pr.call_args_list).lower())
+
+
 class NoSpruceArtHintTest(unittest.TestCase):
     LISTING = {"scrapes/gba/spruce/a.qoi": 1, "scrapes/gba/onion/a.png": 1, "scrapes/gba/onion/b.png": 1,
                "scrapes/gba/covers/c.png": 1, "scrapes/gba/miximages/d.png": 1, "scrapes/gba/screenshots/e.png": 1}

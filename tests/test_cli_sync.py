@@ -274,7 +274,7 @@ class SyncSmokeTest(DataDir):
             with open(job[1], "w") as f:
                 f.write("x" * job[2])
 
-        def build_scrape_plan(layout_name, systems, data, rom_rels, dest_of, es_dir, check, base, recheck=None):
+        def build_scrape_plan(layout_name, systems, data, rom_rels, dest_of, es_dir, check, base, recheck=None, hidden=None):
             present.append(check(os.path.join(dest_of(psx), "Final Fantasy VII (USA).m3u")))
             return {"jobs": [], "gamelists": {}, "writes": []}
         patches = ((store, {"load_manifest": lambda names=(): manifest}),
