@@ -1,7 +1,9 @@
 import contextlib
 import io
 import itertools
+import json
 import os
+import pathlib
 import plistlib
 import sys
 import tempfile
@@ -36,9 +38,21 @@ def read_from(card_dir, *parts):
 
 
 def captured(fn, *a, **kw):
-    out = io.StringIO()
-    with contextlib.redirect_stdout(out):
+    out, err, outer = io.StringIO(), io.StringIO(), sys.stderr
+
+    class Tee:  # also keeps writing to a stderr a test already redirected (never to the real one)
+        def write(self, text):
+            err.write(text)
+            return len(text) if outer is sys.__stderr__ else outer.write(text)
+
+        def flush(self):
+            outer.flush()
+
+        def isatty(self):
+            return outer.isatty()
+    with contextlib.redirect_stdout(out), contextlib.redirect_stderr(Tee()):
         result = fn(*a, **kw)
+    captured.err = err.getvalue()  # what the call wrote on stderr
     return result, out.getvalue()
 
 
@@ -172,7 +186,7 @@ class CleanDirsTest(unittest.TestCase):
             walks, _, out = self.run_real_walk(removable=False)
         self.assertEqual(len(walks), 2)
         self.assertEqual(out.count("Removing the 2 ._ file(s) left"), clean.DELETE_RETRIES)
-        self.assertIn("2 ._ file(s) are still there after deleting", out)
+        self.assertIn("2 ._ file(s) are still there after deleting", captured.err)
 
     def test_sudo_is_skipped_when_spotlight_is_off(self):
         calls, out = self.run_clean(lambda p: [], tty=True, yes=False, spotlight=False)
@@ -453,8 +467,8 @@ class EjectTest(unittest.TestCase):
 
     def test_a_busy_card_says_why(self):
         _, out = self.run_eject({"Ejectable": True, "ParentWholeDisk": "disk4"}, unmount_code=1)
-        self.assertIn("could not be unmounted", out)
-        self.assertIn("diskutil unmountDisk disk4", out)
+        self.assertIn("could not be unmounted", captured.err)
+        self.assertIn("diskutil unmountDisk disk4", captured.err)
 
     def test_quiet_still_says_why_a_busy_card_stayed_mounted(self):
         with mock.patch.object(ui, "QUIET", True), contextlib.redirect_stderr(io.StringIO()) as err:
@@ -540,12 +554,12 @@ class SyncFlowTest(unittest.TestCase):
     def test_rom_missing_from_the_cache_points_at_cache_update(self):
         tree = inventory.Tree("s3://b", inventory._clock(), {"gba/Other.zip": 5}, {})
         _, out, _, _, _ = self.run_sync(extra=[(inventory, "current", lambda: tree)])
-        self.assertIn("listed in manifest but not in storage", out)
+        self.assertIn("listed but not in storage", out)
         self.assertIn("sync-roms cache update", out)
 
     def test_rom_missing_without_a_cache_has_no_cache_pointer(self):
         _, out, _, _, _ = self.run_sync(extra=[(s3, "list_sizes", lambda prefix, sizes=True: {})])
-        self.assertIn("listed in manifest but not in storage", out)
+        self.assertIn("listed but not in storage", out)
         self.assertNotIn("cache update", out)
 
     def test_nothing_downloaded_skips_card_cleaning(self):
@@ -638,7 +652,7 @@ class SyncFlowTest(unittest.TestCase):
                 self.assertEqual("Removed old driver" in out, not keep)
         code, _, _, out = self.install_steps(MANIFEST["systems"][0]["games"], False, result=1)
         self.assertEqual(code, 1)
-        self.assertIn("Done with 4 failure(s)", out)
+        self.assertIn("Done with 4 failure(s)", captured.err)
 
     def test_stale_media_listed_before_removal(self):
         _, out, _, _, left = self.run_sync(stale=("a.png", "b.png"))
@@ -809,6 +823,29 @@ class SyncFlowTest(unittest.TestCase):
         """The card as a first sync with FAVS left it: its collection written and enabled."""
         plan = frontend.plan_collections("esde", card_dir, {"Favs": ["%ROMPATH%/gba/Game.zip"]}, [])
         frontend.apply_collections(plan, "esde", card_dir)
+
+    def test_an_unreadable_spruce_collections_file_keeps_the_collection_art(self):
+        layouts = {"spruce": {"label": "Spruce", "roms_dir": "Roms", "bios_dir": "BIOS"}}
+        manifest = {**MANIFEST, "layouts": layouts, "systems": [{**MANIFEST["systems"][0], "folders": {"spruce": "GBA"}}]}
+        pictures = [os.path.join("Collections", d, "Favs.png") for d in ("Imgs", "Imgs_med", "Imgs_small")]
+
+        def prepare(card_dir):
+            for rel in pictures:
+                os.makedirs(os.path.join(card_dir, os.path.dirname(rel)), exist_ok=True)
+                with open(os.path.join(card_dir, rel), "wb") as f:
+                    f.write(b"x")
+            with open(os.path.join(card_dir, "Collections", "collections.json"), "w") as f:
+                f.write("not json")
+
+        for dry_run in (False, True):
+            with self.subTest(dry_run=dry_run), contextlib.redirect_stderr(io.StringIO()) as err:
+                _, out, _, _, _ = self.run_sync(cards={"collections": ["favs"], "frontend_collections": ["Favs"]}, colls=[FAVS],
+                                                manifest=manifest, setup=(None, "spruce"), dry_run=dry_run, prepare=prepare,
+                                                after=lambda d: [os.path.exists(os.path.join(d, rel)) for rel in pictures])
+                self.assertEqual(self.after, [True] * 3)
+                self.assertNotIn("would remove the art", out)
+                if not dry_run:
+                    self.assertIn("can't be read", err.getvalue())
 
     def test_a_second_identical_sync_writes_no_collection_and_skips_card_cleaning(self):
         _, out, updates, root, _ = self.run_sync(cards={"collections": ["favs"], "frontend_collections": ["Favs"]},
@@ -1018,8 +1055,8 @@ class SyncFlowTest(unittest.TestCase):
         saved = [{"system": "gba", "bucket": "gba/Game.zip", "title": "Game"}]
         favs = {**FAVS, "art": "rpg"}
         installed, described = [], []
-        art = ((cli.themeart, "install", lambda layout, base, arts: installed.append((layout, arts)) or True),
-               (cli.themeart, "describe", lambda layout, base, arts: described.append((layout, arts))))
+        art = ((cli.themeart, "install", lambda layout, base, arts, keep=False: installed.append((layout, arts)) or True),
+               (cli.themeart, "describe", lambda layout, base, arts, keep=False: described.append((layout, arts))))
         want = [("esde", {"Favs": "rpg", "Surprise": "surprise"})]
         self.run_sync(cards={"surprises": saved, "collections": ["favs"]}, colls=[favs], files=["ROMs/gba/Game.zip"],
                       plan=[], extra=art)
@@ -1055,13 +1092,13 @@ class SyncFlowTest(unittest.TestCase):
     def test_a_collection_with_art_but_no_games_on_the_card_gets_none(self):
         installed = []
         self.run_sync(cards={"collections": ["favs"], "surprise": False}, colls=[{**FAVS, "art": "rpg"}],
-                      extra=((cli.themeart, "install", lambda layout, base, arts: installed.append(arts)),))
+                      extra=((cli.themeart, "install", lambda layout, base, arts, keep=False: installed.append(arts)),))
         self.assertEqual(installed, [{}])  # still run: it removes the art sync-roms wrote before
 
     def test_collections_without_art_get_none(self):
         installed = []
         self.run_sync(cards={"collections": ["favs"], "surprise": False}, colls=[FAVS], files=["ROMs/gba/Game.zip"],
-                      extra=((cli.themeart, "install", lambda layout, base, arts: installed.append(arts)),))
+                      extra=((cli.themeart, "install", lambda layout, base, arts, keep=False: installed.append(arts)),))
         self.assertEqual(installed, [{}])
 
     def test_the_last_collection_s_theme_art_is_removed_with_it(self):
@@ -1075,6 +1112,49 @@ class SyncFlowTest(unittest.TestCase):
                                  after=lambda d: sorted(os.listdir(self.copy)))
         self.assertEqual(code, 0)
         self.assertEqual(self.after, sorted([cli.themeart.ESDE_OWNED, "snes"]))
+
+    def test_no_delete_keeps_a_retired_collection_its_art_and_its_record(self):
+        def prepare(card_dir):
+            self.put_favs(card_dir)
+            self.copy = os.path.join(card_dir, "ES-DE", "themes", cli.themeart.ESDE_COPY)
+            for rel in (cli.themeart.ESDE_OWNED, os.path.join("favs", "theme.xml")):
+                os.makedirs(os.path.dirname(os.path.join(self.copy, rel)), exist_ok=True)
+                with open(os.path.join(self.copy, rel), "w") as f:
+                    f.write("favs\n")
+        for dry_run in (False, True):
+            with self.subTest(dry_run=dry_run):
+                _, out, updates, *_ = self.run_sync(
+                    cards={"collections": [], "surprise": False, "frontend_collections": ["Favs"]}, args=["--no-delete"],
+                    prepare=prepare, dry_run=dry_run, files=["ROMs/gba/Game.zip"], plan=[],
+                    after=lambda d: (os.path.exists(frontend.collection_path("esde", d, "Favs")), sorted(os.listdir(self.copy))))
+                self.assertEqual(self.after, (True, sorted([cli.themeart.ESDE_OWNED, "favs"])))
+                self.assertIn("--no-delete: keeping 1 retired collection(s)", out)
+                self.assertFalse([u for u in updates if "frontend_collections" in u])
+
+    def test_no_delete_keeps_a_retired_spruce_collection_and_its_pictures(self):
+        layouts = {"spruce": {"label": "Spruce", "roms_dir": "Roms", "bios_dir": "BIOS"}}
+        manifest = {**MANIFEST, "layouts": layouts, "systems": [{**MANIFEST["systems"][0], "folders": {"spruce": "GBA"}}]}
+        pictures = [os.path.join("Collections", d, "Favs.png") for d in ("Imgs", "Imgs_med", "Imgs_small")]
+        listing = os.path.join("Collections", "collections.json")
+        entries = [{"collection_name": "Favs", "game_list": ["x"]}, {"collection_name": "Mine", "game_list": ["y"]}]
+
+        def prepare(card_dir):
+            for rel in pictures:
+                os.makedirs(os.path.join(card_dir, os.path.dirname(rel)), exist_ok=True)
+                with open(os.path.join(card_dir, rel), "wb") as f:
+                    f.write(b"x")
+            with open(os.path.join(card_dir, listing), "w") as f:
+                json.dump(entries, f)
+        for keep in (True, False):
+            with self.subTest(keep=keep):
+                _, out, updates, *_ = self.run_sync(
+                    cards={"collections": [], "surprise": False, "frontend_collections": ["Favs"]}, manifest=manifest,
+                    setup=(None, "spruce"), args=["--no-delete"] if keep else [], prepare=prepare,
+                    after=lambda d: ([os.path.exists(os.path.join(d, rel)) for rel in pictures],
+                                     [c["collection_name"] for c in json.loads(pathlib.Path(d, listing).read_text())]))
+                self.assertEqual(self.after, ([True] * 3, ["Mine", "Favs"]) if keep else ([False] * 3, ["Mine"]))
+                self.assertEqual("--no-delete: keeping 1 retired collection(s)" in out, keep)
+                self.assertEqual(bool([u for u in updates if "frontend_collections" in u]), not keep)
 
     def test_a_dry_run_names_the_theme_art_that_would_be_removed(self):
         def prepare(card_dir):

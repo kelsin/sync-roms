@@ -83,6 +83,27 @@ class Reconcile(unittest.TestCase):
         setedit.recategorize(g, g[2], "")
         self.assertNotIn("category", next(x for x in g if x["bucket"] == "gba/B.zip"))
 
+    def test_pick_name_lists_none_first_and_new_last_and_starts_on_the_current_one(self):
+        seen = {}
+
+        def pick(answer, typed=None, current="beta"):
+            def fake(title, labels, **kw):
+                seen.update(labels=list(labels), **kw)
+                return answer
+            with mock.patch.object(picker, "filter_list", fake), mock.patch.object(ui, "ask", return_value=typed) as asked:
+                return listedit.pick_name("t", ["Alpha", "Beta"], current, "series", "G"), asked
+        self.assertEqual(pick(1)[0], "Alpha")
+        self.assertEqual((seen["labels"], seen["cursor"]), (["(none)", "Alpha", "Beta", "new…"], 2))
+        self.assertEqual(pick(0, current="")[0], "")
+        self.assertEqual(seen["cursor"], 0)
+        self.assertIsNone(pick(None)[0])  # Esc changes nothing
+        out, asked = pick(3, typed=" alpha ")
+        self.assertEqual(out, "Alpha")  # a typed name matches a known one, ignoring case
+        self.assertTrue(asked.call_args.kwargs["cancellable"])
+        self.assertEqual(pick(3, typed="Z")[0], "Z")
+        self.assertIsNone(pick(3, typed=None)[0])  # Esc at the name
+        self.assertIsNone(pick(3, typed="  ")[0])  # an empty name changes nothing too
+
 
 class Changes(unittest.TestCase):
     def test_diff(self):
@@ -99,6 +120,21 @@ class Changes(unittest.TestCase):
         setedit.recategorize(moved, moved[1], "Cave")
         lines = listedit.diff_lists(before, {"a": {"name": "A", "description": "", "games": moved}})[0][2]
         self.assertEqual(lines, ["~ B (gba/B.zip): category Other → Cave"])
+
+
+    def test_series_and_other_field_changes_are_listed(self):
+        before = {"a": {"name": "A", "description": "", "games": games()}}
+        after = games()
+        after[0]["series"] = "Alpha"
+        after[1]["note"] = "x"
+        after[1]["files"] = ["gba/B2.zip"]
+        lines = listedit.diff_lists(before, {"a": {"name": "A", "description": "", "games": after}})[0][2]
+        self.assertEqual(lines, ["~ A (gba/A.zip): series none → Alpha", "~ B (gba/B.zip): files, note changed"])
+
+    def test_a_reorder_alone_is_listed(self):
+        before = {"a": {"name": "A", "description": "", "games": games()}}
+        lines = listedit.diff_lists(before, {"a": {"name": "A", "description": "", "games": games()[::-1]}})[0][2]
+        self.assertEqual(lines, ["order changed"])
 
 
 class Save(StorageDir):
@@ -405,20 +441,33 @@ class SeriesEditor(unittest.TestCase):
         self.assertEqual(seen[2][1], "")
         self.assertEqual(seen[0][2], (setedit.cardedit.SERIES_KEY, setedit.cardedit.CLEAR_KEY))
         self.assertIn("series", seen[0][3])
-        self.assertIn("c clear filters", seen[0][3])
+        self.assertNotIn("c clear", seen[0][3])  # c is in the ? help and on the filter line below
         self.assertEqual(seen[1][1], "Alpha (c clear filters)")
         self.assertEqual([k for k, _ in seen[0][4]], ["r", "c"])  # what ? lists
         self.assertEqual([g["bucket"] for g in game_set["games"]], ["gba/A.zip", "gen/C.zip"])  # B off, C kept
         self.assertEqual(game_set["games"][0]["series"], "Alpha")
 
     def test_set_a_games_series_keeps_key_order_and_empty_clears(self):
-        game_set, _ = self.run_editor([4, 2, 4, 0, None], [], ask=["Beta", ""])
+        game_set, _ = self.run_editor([4, 2, 2, 4, 0, 0, None], [], ask=["Beta"])
         c = game_set["games"][2]
         self.assertEqual(c["series"], "Beta")
         self.assertEqual(list(c), ["title", "series", "system", "bucket"])
-        self.assertNotIn("series", game_set["games"][0])  # A's cleared by the empty answer
+        self.assertNotIn("series", game_set["games"][0])  # A's cleared by the none row
         self.assertEqual(setedit.set_series(game_set["games"], game_set["games"][0], "Gamma")["series"], "Gamma")
         self.assertEqual(list(game_set["games"][0]), ["title", "category", "series", "system", "bucket"])
+
+
+    def test_esc_at_the_series_question_keeps_the_series(self):
+        game_set, _ = self.run_editor([4, 0, None, None], [])
+        self.assertEqual(game_set["games"][0]["series"], "Alpha")
+
+    def test_esc_at_the_category_question_keeps_the_category(self):
+        game_set, _ = self.run_editor([3, 0, None, None], [])
+        self.assertEqual(game_set["games"][0]["category"], "Cave")
+
+    def test_none_at_the_category_pick_removes_it(self):
+        game_set, _ = self.run_editor([3, 0, 0, None], [])
+        self.assertNotIn("category", game_set["games"][0])
 
 
 class Editor(unittest.TestCase):

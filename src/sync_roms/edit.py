@@ -49,9 +49,12 @@ def note_text(games, key):
     return game.get("note", "") if game else ""
 
 
-def save_note(games, key, text):
-    """Save the note typed after `w` for the game listed under key in games; the message the list shows."""
+def save_note(games, key, text, covered=False):
+    """Save the note typed after `w` for the game listed under key in games; the message the list shows. covered: the
+    game is on only because a set or collection brings it, so it has no direct pick to hold a note."""
     if not set_note({"games": games}, key, text):
+        if covered:
+            return "Notes go only on games picked directly; this one comes from a set or collection"
         return "Switch the game on and press Enter first, then add its note"
     return "Note saved" if text else "Note cleared"
 
@@ -307,8 +310,10 @@ def edit_manifest():
             return
         store.save_card(name, *setup)
         open_card(name)
-        if not store.card_games(name) and not ui.confirm(
-                f"Keep new card {name} with no games? (it keeps just the device and firmware)"):
+        card = store.saved_card(name)
+        if not (store.card_games(name) or card.get("collections") or card.get("guest") is True) and ui.confirm(
+                f"Keep new card {name} with no games? (it keeps just the device and firmware)",
+                cancellable=True) is False:
             store.delete_card(name)
 
     def change_setup(name):
@@ -364,6 +369,7 @@ def edit_manifest():
         n = pending_count(key)
         return [(f"  {n} change(s)", "cyan")] if n else []
 
+    device_pos = [0]  # the device list's row, kept while it is reopened after each device
     overlay_pending = {}  # device id -> (system ids added, system ids removed) relative to the repo defaults
 
     def edit_device_systems():
@@ -374,9 +380,10 @@ def edit_manifest():
         devices = manifest["devices"]
         extras = [[("  edited", "cyan")] if d["id"] in overlay_pending else [] for d in devices]
         i = picker.filter_list("🧩 Which device's recommended systems?", [d["name"] for d in devices], extras=extras,
-                               hint="/ filter · Enter open · Esc back")
+                               hint="/ filter · Enter open · Esc back", cursor=device_pos[0])
         if i is None:
             return False
+        device_pos[0] = i
         d = devices[i]
         base = defaults.get(d["id"], {}).get("systems", [])
         ids = list(names)
@@ -397,6 +404,7 @@ def edit_manifest():
 
     def edit_cards():
         """The card list: open a card, add one, or change/rename/delete the highlighted one. Esc goes back."""
+        pos = 0
         while True:
             saved = store.load_cards()
             cards = sorted(set(saved) | {k for k in targets if k is not None})
@@ -404,9 +412,10 @@ def edit_manifest():
             options = [f"💳 {name}" for name in cards] + ["➕ New card"]
             extras = [setup_extra(name, saved) + pending_extra(name) for name in cards] + [[]]
             i = picker.filter_list("💳 Which card?  (Esc = back)", options, extras=extras,
-                                   hotkeys=(SETUP_KEY, DELETE_KEY, RENAME_KEY), hint=MENU_HINT)
+                                   hotkeys=(SETUP_KEY, DELETE_KEY, RENAME_KEY), hint=MENU_HINT, cursor=pos)
             if i is None:
                 return
+            pos = i[1] if isinstance(i, tuple) else i
             if isinstance(i, tuple):
                 if i[1] < n:
                     {SETUP_KEY: change_setup, DELETE_KEY: delete_card, RENAME_KEY: rename_card}[i[0]](cards[i[1]])
@@ -484,10 +493,11 @@ def edit_manifest():
             print(ui.yellow("👋 Nothing else to save (card games are saved as you edit them)."))
             return 0
         print_changes(changed, runtime.MAX_MISSING_SHOWN)
-        answer = ui.choose("💾 Save these changes?", "sedl", "s", "s save · e keep editing · d discard · l list every change")
+        answer = ui.choose("💾 Save these changes?", "sedl", "s", "s save · e keep editing · d discard · l list every change",
+                             esc="e")
         while answer == "l":
             print_changes(changed, 10 ** 6)
-            answer = ui.choose("💾 Save these changes?", "sed", "s", "s save · e keep editing · d discard")
+            answer = ui.choose("💾 Save these changes?", "sed", "s", "s save · e keep editing · d discard", esc="e")
         if answer == "e":
             continue
         if answer == "d":

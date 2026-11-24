@@ -173,7 +173,7 @@ class SettingsPermissionsTest(RealDataDirGuard):
             commands.config_cmd(SimpleNamespace(action="show"))
         for value in CREDENTIALS.values():
             self.assertNotIn(value, out.getvalue())
-        self.assertNotIn("screenscraper", out.getvalue())
+        self.assertIn("(set, not shown)", out.getvalue())
 
 
 if __name__ == "__main__":

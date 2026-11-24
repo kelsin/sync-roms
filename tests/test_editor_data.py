@@ -9,7 +9,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from sync_roms import cardedit, collectionedit, commands, edit, picker, store, ui  # noqa: E402
+from sync_roms import cardedit, collectionedit, commands, edit, picker, saves_manage, setedit, store, ui  # noqa: E402
 from helpers import Cmd, DataDir, feed_list, storage_sets  # noqa: E402
 
 
@@ -162,6 +162,37 @@ class Hints(unittest.TestCase):
         self.assertLessEqual(ui.cell_width(picker.TYPING_HINT), 80)
         self.assertTrue(picker.MULTI_HINT.startswith("Space toggle · Enter done"))
         self.assertTrue(edit.MENU_HINT.startswith("Enter open"))
+
+
+    def test_every_hint_and_the_keep_question_fit_80_cells_with_the_help_prefix(self):
+        hints = {"systems": cardedit.LIST_HINT, "systems from a sync": cardedit.LIST_HINT + cardedit.KEEP_HINT,
+                 "set games": cardedit.SET_GAMES_HINT, "all games": cardedit.ALL_GAMES_HINT,
+                 "card games": cardedit.GAMES_HINT, "sets": cardedit.SETS_HINT, "collections": cardedit.COLLECTIONS_HINT, "set editor games": setedit.GAMES_HINT,
+                 "collection games": collectionedit.GAMES_HINT, "card list": edit.MENU_HINT,
+                 "multi": picker.MULTI_HINT, "single": picker.SINGLE_HINT, "saves manage": saves_manage.HINT}
+        for name, hint in hints.items():
+            self.assertLessEqual(ui.cell_width(picker.HELP_HINT + hint), 80, name)
+        model = picker._ListModel("t", ["a"], True, None, "", 0, None, None, None, (), None, None, True, None, None,
+                                  True, None, None, None, None)
+        model.asking, model.start = True, [False]
+        model.outside = (999, 999)
+        self.assertLessEqual(ui.cell_width(picker.HELP_HINT + model.status_line()[0]), 80)
+
+    def test_the_keys_left_out_of_the_hints_are_in_the_help(self):
+        lines = picker.help_lines(False, cardedit.LIST_HINT, key_help=cardedit.LIST_KEYS + cardedit.KEEP_KEYS)
+        for key in "fxasSFDK":
+            self.assertTrue(any(line.startswith(key + " ") for line in lines), key)
+        lines = picker.help_lines(True, setedit.GAMES_HINT, key_help=setedit.GAMES_KEYS, has_note=True)
+        for key in ("r", "c", "w", "a", "o", "/"):
+            self.assertTrue(any(line.startswith(key + " ") for line in lines), key)
+        lines = picker.help_lines(True, saves_manage.HINT, key_help=saves_manage.KEY_HELP)
+        for key in ("Space/Tab", "Enter", "w", "m", "p", "d", "Esc"):
+            self.assertTrue(any(line.startswith(key + " ") for line in lines), key)
+        for hint, keys in ((cardedit.SET_GAMES_HINT, cardedit.SET_GAMES_KEYS), (cardedit.ALL_GAMES_HINT, cardedit.ALL_GAMES_KEYS)):
+            lines = picker.help_lines(True, hint, key_help=keys, select_all=False, has_note=True)
+            self.assertFalse(any(line.startswith("a ") for line in lines), hint)  # a is dead there: neither hint nor help offers it
+            for key in ("w", "o", "/", *(k for k, _ in keys)):
+                self.assertTrue(any(line.startswith(key + " ") for line in lines), (hint, key))
 
 
 class Table(unittest.TestCase):

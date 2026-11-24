@@ -691,6 +691,7 @@ CONFIG_KINDS = {"bucket": str, "root": str, "endpoint": str, "profile": str, "wr
                 "ra_password": str, "ra_api_key": str, "ra_offline_proxy": bool,
                 "ra_proxy_stats": bool, "syncthing": bool}  # the settings `config set` and `config unset` take
 HIDDEN = {"screenscraper_password", "ra_password", "ra_api_key"}  # set, never printed
+ACCOUNTS = {"screenscraper_user", "ra_username"}  # `config show` says only that they are set
 
 
 def config_value(name, text):
@@ -784,8 +785,16 @@ def config_cmd(args):
         print(store.data_dir())
         return 0
     print(ui.bold("⚙️  sync-roms settings") + ui.dim(f"  {store.data_dir()}"))
-    for name, value, source in effective_settings():
-        print(f"  {name:<14} {(json.dumps(value) if isinstance(value, bool) else str(value)) if value is not None else ui.dim('(not set)'):<28} {ui.dim(source)}")
+    rows = effective_settings()
+    saved = usersettings.load_settings()
+    shown = {name for name, _, _ in rows}
+    for name in CONFIG_KINDS:
+        if name not in shown and name in saved:
+            value = "(set, not shown)" if name in HIDDEN | ACCOUNTS else ",".join(saved[name]) if isinstance(saved[name], list) \
+                else saved[name] if isinstance(saved[name], str) else json.dumps(saved[name])
+            rows.append((name, value, "settings.json"))
+    for name, value, source in rows:
+        print(f"  {name:<26} {(json.dumps(value) if isinstance(value, bool) else str(value)) if value is not None else ui.dim('(not set)'):<28} {ui.dim(source)}")
     return 0
 
 
@@ -1016,7 +1025,7 @@ def check_data(list_keys=None, repo_systems=None):
             problems.append(f"cards.json: {name}: 'collections' must be a list of collection ids")
         else:
             problems.extend(f"cards.json: {name}: unknown collection {i!r}" for i in picked if i not in collection_ids)
-        for field in ("frontend_collections", "drivers", "boot_logos"):
+        for field in ("frontend_collections", "drivers", "boot_logos", "spruce_os_kept"):
             names = entry.get(field, [])
             if not isinstance(names, list) or not all(isinstance(i, str) for i in names):
                 problems.append(f"cards.json: {name}: '{field}' must be a list of names")
@@ -1313,7 +1322,8 @@ def themes_palettes(args):
 def themes_pick(args):
     from . import spruce_themes
     usersettings.ensure_bucket()
-    ui.require_terminal("pick themes", "a terminal")
+    if not ui.has_terminal():
+        ui.fail("`themes pick` needs a terminal to pick from", 2)
     chosen = spruce_themes.pick("🎨 Spruce themes synced by default", spruce_themes.default_list())
     if chosen is None:
         return 0
@@ -1539,7 +1549,7 @@ def run(argv):
     ap = build_parser()
     ap.prog = f"sync-roms {argv[0]}"  # its errors (unrecognized arguments) point at the command's help
     args = ap.parse_args(argv)
-    if getattr(args, "dry_run", False) and not (args.fn is config_cmd and args.action == "apply") and (args.fn in (games_list, games_export, layouts_cmd, config_cmd, cache_cmd, doctor_cmd, guide_cmd, check_cmd, completion_cmd)
+    if getattr(args, "dry_run", False) and not (args.fn is config_cmd and args.action == "apply") and (args.fn in (games_list, games_export, layouts_cmd, config_cmd, cache_cmd, doctor_cmd, guide_cmd, check_cmd, completion_cmd, themes_pick, themes_build, themes_palettes)
                                             or (args.fn is games_sets and args.verb == "list")):
         name = " ".join(w for w in (args.command, getattr(args, "action", None), getattr(args, "verb", None)) if w)
         if args.fn is config_cmd and args.action in ("set", "unset"):

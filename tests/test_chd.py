@@ -2,6 +2,7 @@ import contextlib
 import io
 import os
 import shutil
+import subprocess
 import sys
 import tempfile
 import threading
@@ -66,6 +67,7 @@ class ChdTest(unittest.TestCase):
         self.dir = os.path.realpath(self.enterContext(tempfile.TemporaryDirectory()))
         systemp = self.enterContext(tempfile.TemporaryDirectory())  # stale_local_scratch looks at this, never at the real temp folder
         self.enterContext(mock.patch.object(tempfile, "tempdir", os.path.realpath(systemp)))
+        self.enterContext(mock.patch.object(ui, "ASSUME_YES", True))  # chd_command asks before converting
         self.tools = {"7z": "7z", "chdman": "chdman", "extract-xiso": "extract-xiso", "iso2zar": "iso2zar", "np": 1}
 
     def touch(self, *names, text=""):
@@ -242,6 +244,15 @@ class ChdTest(unittest.TestCase):
         chd.remove_stale_chd_temp(stale)
         self.assertEqual(os.listdir(os.path.join(self.dir, "psx")), ["Game.zip"])
 
+    def test_stale_sweep_keeps_the_work_folder_of_a_running_convert(self):
+        done = subprocess.Popen([sys.executable, "-c", ""])
+        done.wait()
+        self.touch(f"psx/.chd-{os.getpid()}-live/Game.bin", f"psx/.chd-{done.pid}-dead/Game.bin", "psx/.chd-nopid/Game.bin")
+        stale = []
+        chd.plan_chd(self.dir, {}, stale=stale)
+        self.assertEqual(sorted(stale), [os.path.join(self.dir, "psx", f".chd-{done.pid}-dead"),
+                                         os.path.join(self.dir, "psx", ".chd-nopid")])
+
     def test_stop_tools_ends_a_running_tool_and_blocks_new_ones(self):
         self.addCleanup(setattr, external, "_tools_stopped", False)
         result = []
@@ -339,7 +350,8 @@ class ChdTest(unittest.TestCase):
                 return "SHA1:         " + f.read().encode().hex()
 
         with mock.patch.object(external, "run_tool", fake_run), mock.patch.object(external, "find_tool", lambda t: t), \
-                mock.patch.object(external, "tool_output", info), contextlib.redirect_stdout(io.StringIO()) as out:
+                mock.patch.object(external, "tool_output", info), contextlib.redirect_stdout(io.StringIO()) as out, \
+                contextlib.redirect_stderr(io.StringIO()) as err:
             self.assertEqual(chd.chd_command(SimpleNamespace(chd=self.dir, dry_run=False)), 1)
         kept = [n for n in os.listdir(psx) if n.endswith(".zip")]  # the jobs run in parallel: either archive may come second
         self.assertEqual(len(kept), 1)
@@ -347,7 +359,7 @@ class ChdTest(unittest.TestCase):
         with open(os.path.join(psx, "Game (USA).chd")) as f:
             self.assertEqual({f.read(), kept[0]}, {"Game (USA) (Rev 1).zip", "Game (USA).zip"})
         self.assertIn(f"❌ psx/{kept[0]}: Game (USA).chd already exists and doesn't match this disc (kept)", out.getvalue())
-        self.assertIn("1 converted, 1 failed", out.getvalue())
+        self.assertIn("1 converted, 1 failed", err.getvalue())
 
     def race(self, gate, first, second, after=False):
         """[first's error, second's] for two jobs with one output, run at once. second starts when first is at self.hold()
@@ -1059,10 +1071,13 @@ class ChdTest(unittest.TestCase):
             self.assertIsNone(chd.chd_archive(self.tools, CD["chd"], os.path.join(self.dir, "Game.zip"), seen.append))
         self.assertEqual([round(f, 2) for f in seen], [0.2, 0.56, 0.6, 0.96, 1.0])  # unpacked, then each disc half the rest
 
-    def run_on_card(self, root, dry_run=False, answer=None, yes=False, fail=(), quiet=False):
+    def run_on_card(self, root, dry_run=False, answer=None, yes=True, fail=(), quiet=False):
         """chd_command on root with a saved card named SD; answer is what the terminal types (None: no terminal).
         fail: the tool steps that fail; quiet runs it under --quiet."""
+        self.prompts = []
+
         def ask(prompt):
+            self.prompts.append(prompt)
             if answer is None:
                 raise EOFError
             return answer
@@ -1082,14 +1097,16 @@ class ChdTest(unittest.TestCase):
 
     def test_converting_inside_a_saved_card_asks_first(self):
         root = os.path.join(self.dir, "SD", "psx")
-        for case, kwargs, code in (("yes typed", {"answer": "y"}, 0), ("no typed", {"answer": "n"}, 1), ("enter", {"answer": ""}, 1),
-                                   ("--yes", {"yes": True}, 1), ("no terminal", {}, 1)):
+        for case, kwargs, code in (("yes typed", {"answer": "y", "yes": False}, 0), ("no typed", {"answer": "n", "yes": False}, 1),
+                                   ("enter", {"answer": "", "yes": False}, 1),
+                                   ("--yes", {"yes": True}, 1), ("no terminal", {"yes": False}, 1)):
             with self.subTest(case):
                 self.touch("SD/psx/Game.iso")
-                got, out, err = self.run_on_card(root, **kwargs)
+                with mock.patch.object(ui, "has_terminal", return_value=True):
+                    got, out, err = self.run_on_card(root, **kwargs)
                 self.assertEqual(got, code)
-                self.assertIn("card SD", out)
-                self.assertIn("download", out)
+                self.assertIn("card SD", err)
+                self.assertIn("download", err)
                 self.assertEqual(os.listdir(root), ["Game.chd"] if code == 0 else ["Game.iso"])
                 if code:
                     self.assertIn("Not converting", err)
@@ -1098,9 +1115,9 @@ class ChdTest(unittest.TestCase):
     def test_dry_run_inside_a_saved_card_only_warns(self):
         self.touch("SD/psx/Game.iso")
         with mock.patch.object(ui, "confirm", side_effect=AssertionError("asked")):
-            code, out, _ = self.run_on_card(os.path.join(self.dir, "SD", "psx"), dry_run=True)
+            code, _, err = self.run_on_card(os.path.join(self.dir, "SD", "psx"), dry_run=True)
         self.assertEqual(code, 0)
-        self.assertIn("card SD", out)
+        self.assertIn("card SD", err)
 
     def test_card_warning_shows_on_stderr_under_quiet(self):
         self.touch("SD/psx/Game.iso")
@@ -1108,6 +1125,42 @@ class ChdTest(unittest.TestCase):
             code, out, err = self.run_on_card(os.path.join(self.dir, "SD", "psx"), answer="n")
         self.assertEqual(code, 1)
         self.assertIn("card SD", err)
+
+    def test_convert_confirms_before_removing_the_sources(self):
+        root = os.path.join(self.dir, "psx")
+        self.touch("psx/Game.iso")
+        code, out, err = self.run_on_card(root, yes=False)
+        self.assertEqual(code, 2)
+        self.assertIn("Pass --yes to convert without a terminal to confirm on", err)
+        self.assertEqual(os.listdir(root), ["Game.iso"])
+        with mock.patch.object(ui, "has_terminal", return_value=True):
+            code, out, err = self.run_on_card(root, answer="n", yes=False)
+            self.assertEqual((code, os.listdir(root)), (0, ["Game.iso"]))
+            self.assertIn("Convert 1 file(s) and remove the originals?", self.prompts[-1])
+            self.assertIn("Cancelled", out)
+            code, out, err = self.run_on_card(root, answer="", yes=False)
+            self.assertEqual((code, os.listdir(root)), (0, ["Game.iso"]))
+            code, out, err = self.run_on_card(root, answer="y", yes=False)
+            self.assertEqual((code, os.listdir(root)), (0, ["Game.chd"]))
+        self.touch("psx/Other.iso")
+        code, out, err = self.run_on_card(root, yes=True)
+        self.assertEqual(code, 0)
+        self.assertIn("(--yes)", out)
+        self.assertEqual(sorted(os.listdir(root)), ["Game.chd", "Other.chd"])
+
+    def test_messages_name_the_current_commands(self):
+        self.touch("psx/Game.iso")
+        code, out, err = self.run_on_card(os.path.join(self.dir, "psx"), dry_run=True)
+        self.assertIn("convert  ", out)
+        self.assertNotIn("💿 cd", out)
+        self.touch("x/Other.iso")
+        code, out, err = self.run_on_card(os.path.join(self.dir, "x"))
+        self.assertIn("`convert` only looks inside folders named", out)
+        with mock.patch.object(external, "find_tool", lambda t: None), mock.patch.object(chd, "plan_chd", return_value=[
+                ({"chd": {"mode": "cd"}}, None, "x.cue", "o")]), self.assertRaises(SystemExit), \
+                contextlib.redirect_stderr(io.StringIO()) as err:
+            chd.chd_command(SimpleNamespace(chd=os.path.join(self.dir, "psx"), dry_run=False))
+        self.assertIn("run sync-roms tools install", err.getvalue())
 
     def test_folder_outside_any_card_is_not_guarded(self):
         self.touch("psx/Game.iso")
@@ -1163,19 +1216,19 @@ class ChdTest(unittest.TestCase):
     def test_job_that_raises_an_oserror_fails_like_the_others(self):
         self.touch("psx/Game.iso", "psx/Bad.zip")
         with mock.patch.object(tempfile, "mkdtemp", side_effect=PermissionError(13, "Permission denied")):
-            code, out, _ = self.run_on_card(os.path.join(self.dir, "psx"))
+            code, out, err = self.run_on_card(os.path.join(self.dir, "psx"))
         self.assertEqual(code, 1)
         self.assertIn("❌ Bad.zip: [Errno 13] Permission denied", out)
-        self.assertIn("1 converted, 1 failed", out)
+        self.assertIn("1 converted, 1 failed", err)
         self.assertEqual(sorted(os.listdir(os.path.join(self.dir, "psx"))), ["Bad.zip", "Game.chd"])
 
     def test_job_that_raises_an_oserror_with_no_text_fails_too(self):
         self.touch("psx/Bad.zip")
         with mock.patch.object(tempfile, "mkdtemp", side_effect=OSError()):
-            code, out, _ = self.run_on_card(os.path.join(self.dir, "psx"))
+            code, out, err = self.run_on_card(os.path.join(self.dir, "psx"))
         self.assertEqual(code, 1)
         self.assertIn("❌ Bad.zip: OSError", out)
-        self.assertIn("0 converted, 1 failed", out)
+        self.assertIn("0 converted, 1 failed", err)
 
 
 if __name__ == "__main__":

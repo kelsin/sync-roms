@@ -143,7 +143,8 @@ def run(args):
                               f"the card would have {ui.human_size(free)} free"))
             return 1
         if not args.yes and not ui.confirm(f"Delete {len(deleted)} items from {base} and install spruceOS {release}?"):
-            return 1
+            print(ui.yellow("↩️  Kept everything as it was"))
+            return 0
         if deleted:
             step, bar = convert._progress(len(deleted))
             failed = convert.remove_media(deleted, base, step)
@@ -166,6 +167,7 @@ def run(args):
     entry["spruce_os"] = release
     entry.pop("boot_logos", None)  # App/BootLogo/Imgs/ was replaced
     entry.pop("spruce_themes_installed", None)  # Themes/ was deleted
+    entry.pop("spruce_os_kept", None)  # the 7z files --no-delete kept at the root were deleted
     cards[name] = entry
     if not store.write_cards(cards):
         return 3

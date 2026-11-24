@@ -115,6 +115,19 @@ class SyncSmokeTest(DataDir):
         self.assertEqual(self.run_sync(False, prepare=prepare, patches=patches), 0)
         return got[0]
 
+    def test_a_nextui_dry_run_plans_an_old_named_folder_as_renamed(self):
+        system = {**SYSTEM, "name": "Game Gear", "bucket": "gba", "folders": {"nextui": "Sega Game Gear (GG)"}}
+        layouts = {"nextui": {"label": "NextUI", "roms_dir": "Roms", "bios_dir": "Bios"}}
+
+        def prepare(card):
+            touch(os.path.join(card, "Roms", "Game Gear (GG)", "Game.zip"), b"x" * 5)
+        patches = ((store, {"load_manifest": lambda names=(): {**MANIFEST, "systems": [system], "layouts": layouts}}),
+                   (cli.picker, {"saved_setup": lambda *a: (None, "nextui")}),
+                   (cli.inventory, {"cached": lambda prefix: {"gba/Game.zip": 5}}))
+        self.assertEqual(self.run_sync(True, prepare=prepare, patches=patches, args=["--json"]), 0, self.err.getvalue())
+        plan = json.loads(self.out.getvalue())
+        self.assertEqual((plan["downloads"], plan["delete"]), ([], []))
+
     def test_a_disc_in_the_layouts_disc_folder_matches_its_key(self):
         discs = ["psx/Game (Disc 1).chd", "psx/Game (Disc 2).chd"]
         keys = discs + ["psx/Game.m3u", "psx/Other.chd"]
@@ -661,7 +674,7 @@ class SyncSmokeTest(DataDir):
                 self.assertEqual([line for line in lines if "skipping" in line],
                                  [f"  ⚠️  skipping unsafe path: '../evil.{ext}'" for ext in ("zip", "bin", "json")])
                 self.assertEqual([line.strip() for line in lines if "evil" in line and "skipping" not in line], [])
-                self.assertEqual([line.strip() for line in lines[lines.index("  ⚠️  1 ROM(s) listed in manifest but not in storage") + 1:]
+                self.assertEqual([line.strip() for line in lines[lines.index("  ⚠️  1 ROM(s) listed but not in storage") + 1:]
                                   if line.startswith("       ")], ["gba/Gone.zip"])
                 if not dry_run:
                     self.assertEqual(got, ["gba/Game.zip", "BIOS/ok.bin", "os/onion/Themes/A/config.json"])
@@ -800,7 +813,7 @@ class SyncSmokeTest(DataDir):
         with mock.patch.object(cli.os, "replace", replace):
             got, _, _, _ = self.sync_card_files(os.path.join("vectrex", "Game.zip"), 5)
         self.assertEqual(got, ["gba/Game.zip"])
-        self.assertIn("busy", self.out.getvalue())
+        self.assertIn("busy", self.err.getvalue())
 
     def test_a_rename_that_fails_is_a_failure(self):
         def fail(path, new):
@@ -811,7 +824,7 @@ class SyncSmokeTest(DataDir):
                        (cli, {"free_space": lambda path: 10**9}))
             code = self.run_sync(False, prepare=self.card_rom(os.path.join("gba", "GAME.zip"), 5), patches=patches)
         self.assertEqual(code, 1)
-        self.assertIn("busy", self.out.getvalue())
+        self.assertIn("busy", self.err.getvalue())
 
     def test_a_dry_run_does_not_delete_loose_discs_the_real_run_tucks_away(self):
         discs = ["Fahrenheit (USA) (Disc 1) (Sega CD).chd", "Fahrenheit (USA) (Disc 2) (Sega CD).chd"]
@@ -938,7 +951,7 @@ class SyncSmokeTest(DataDir):
         self.assertEqual(self.run_sync(True, patches=patches), 0)
         out = self.out.getvalue()
         self.assertIn("Free on the card: 1000 B", out)
-        self.assertIn("Not enough space: 2.0 KB to download, 1000 B free", out)
+        self.assertIn("Not enough space: 2.0 KB to download, 1000 B free", self.err.getvalue())
         self.assertIn("Would download 2 file(s) (2.0 KB)", out)
         self.assertEqual(out.count("Scraped data:"), 1)
 
@@ -1072,6 +1085,18 @@ class SyncSmokeTest(DataDir):
         self.assertEqual(self.run_sync(False, patches=patches), 0)
         self.assertNotIn("Android", self.out.getvalue())
         self.assertEqual(self.out.getvalue().count("Scraped data"), 1)
+
+    def test_onion_sync_of_a_pick_storage_lacks_finishes_without_a_system_folder(self):
+        layouts = {"onion": {"label": "Onion", "roms_dir": "Roms", "bios_dir": "BIOS", "disc_dir": ".multi-disc"}}
+        manifest = {**MANIFEST, "layouts": layouts,
+                    "systems": [{**SYSTEM, "folders": {"onion": "GBA"}, "games": [{"bucket": "gba/Gone.zip"}]}]}
+        patches = ((store, {"load_manifest": lambda names=(), m=manifest: m}),
+                   (cli.picker, {"saved_setup": lambda *a: (None, "onion")}),
+                   (cli, {"free_space": lambda path: 10**9}))
+        found = []
+        self.assertEqual(self.run_sync(False, patches=patches, after=lambda card: found.append(
+            os.path.exists(os.path.join(card, "Roms", "GBA")))), 0)
+        self.assertEqual(found, [False])
 
     def test_onion_sync_installs_surprise_app_and_list(self):
         layouts = {"onion": {"label": "Onion", "roms_dir": "Roms", "bios_dir": "BIOS"}}
@@ -1263,7 +1288,7 @@ class SyncSmokeTest(DataDir):
             return len(todo)
         patches = ((cli, {"free_space": lambda path: 10**9}), (cli.downloads, {"run_downloads": run_downloads}))
         self.assertEqual(self.run_sync(False, patches=patches), 1)
-        self.assertRegex(self.out.getvalue().splitlines()[-1], r"^⚠️  Done with 1 failure\(s\): downloaded 0 file\(s\) \(0 B\) in \d+m\d\ds$")
+        self.assertRegex(self.err.getvalue().splitlines()[-1], r"^⚠️  Done with 1 failure\(s\): downloaded 0 file\(s\) \(0 B\) in \d+m\d\ds$")
 
     def test_a_settings_file_that_cannot_be_written_is_a_failure_and_the_card_is_not_ejected(self):
         def fail():

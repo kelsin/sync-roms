@@ -536,6 +536,15 @@ def update_card(name, **values):
     return write_cards(cards)
 
 
+def drop_card_field(name, field):
+    """Take field out of a card's saved entry (absent, not empty)."""
+    cards = load_cards()
+    if isinstance(cards.get(name), dict) and field in cards[name]:
+        cards[name] = {k: v for k, v in cards[name].items() if k != field}
+        return write_cards(cards)
+    return True
+
+
 def write_cards(cards):
     """Write cards.json (keeping the one from before this run as cards.json.bak), unless the existing file can't be parsed."""
     path = os.path.join(data_dir(), "cards.json")

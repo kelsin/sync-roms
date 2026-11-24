@@ -68,21 +68,101 @@ class EscPrompt(unittest.TestCase):
         self.assertEqual(polled, [])  # the prompt waits for its key
 
 
+class RevertKey(unittest.TestCase):
+    def run_keys(self, keys, **kw):
+        """filter_list over three rows with real keys: (its result, the status row after each key)."""
+        rows = []
+
+        def run(model):
+            for k in keys:
+                got = model.key(k)
+                rows.append(model.line[0])
+                if got is not picker.KEEP:
+                    return got
+            raise AssertionError("the list is still open after the last key")
+        with mock.patch.object(picker, "_run", run):
+            return picker.filter_list("t", ["a", "b", "c"], multi=True, diff_marks=True, **kw), rows
+
+    def test_u_with_one_change_reverts_at_once(self):
+        state, rows = self.run_keys(["space", "u", "enter"])
+        self.assertEqual(state, [False, False, False])
+        self.assertTrue(rows[0].startswith("+1 −0"))
+
+    def test_u_with_several_changes_asks_first_and_y_reverts(self):
+        state, rows = self.run_keys(["space", "j", "space", "u", "y", "enter"])
+        self.assertEqual(rows[3], "Revert 2 change(s)? [y/N]")
+        self.assertEqual(state, [False, False, False])
+
+    def test_any_other_key_than_y_keeps_the_changes(self):
+        for answer in ("n", "enter", "escape"):
+            state, rows = self.run_keys(["space", "j", "space", "u", answer, "enter"])
+            self.assertEqual(state, [True, True, False], answer)
+            self.assertTrue(rows[4].startswith("+2 −0"), answer)
+
+    def test_the_count_includes_changes_the_caller_keeps_in_hidden_rows(self):
+        reverted = []
+        state, rows = self.run_keys(["space", "u", "y", "j", "enter"], outside=(0, 1), on_revert=lambda: reverted.append(1))
+        self.assertTrue(rows[0].startswith("+1 −1"))  # the counter shows them too
+        self.assertEqual(rows[1], "Revert 2 change(s)? [y/N]")
+        self.assertEqual(state, [False, False, False])
+        self.assertEqual(reverted, [1])
+        self.assertTrue(rows[3].startswith("+0 −0"))  # and they are gone from it once reverted
+
+    def test_u_with_only_a_hidden_change_reverts_it_at_once(self):
+        reverted = []
+        _, rows = self.run_keys(["u", "j", "enter"], outside=(1, 0), on_revert=lambda: reverted.append(1))
+        self.assertEqual(reverted, [1])
+        self.assertTrue(rows[1].startswith("+0 −0"))
+
+
 class EditBase(DataDir):
     """The edit_manifest() driver the flow tests build on; holds no tests, so subclasses don't rerun any."""
 
-    def run_edit(self, picks, confirmed, name="newcard"):
+    def run_edit(self, picks, confirmed, name="newcard", extra=None, asked=None):
+        """extra: card fields the new card gets when saved; asked: gets the keyword arguments of each ui.confirm."""
         picks = iter(picks)
+        real_save = store.save_card
+
+        def save(card, *setup):
+            real_save(card, *setup)
+            if extra:
+                store.update_card(card, **extra)
+
+        def confirm(*a, **k):
+            if asked is not None:
+                asked.append(k)
+            return confirmed
         with mock.patch.object(runtime, "BUCKET", "b", create=True), \
                 mock.patch.object(s3, "list_sizes", return_value={}), \
                 mock.patch.object(picker, "filter_list", side_effect=lambda *a, **k: next(picks)), \
                 mock.patch("builtins.input", return_value=name), \
                 mock.patch.object(picker, "choose_setup", return_value=(None, "esde")), \
-                mock.patch.object(ui, "confirm", return_value=confirmed), \
+                mock.patch.object(store, "save_card", side_effect=save), \
+                mock.patch.object(ui, "confirm", side_effect=confirm), \
                 mock.patch.object(ui, "choose", side_effect=lambda *a, **k: "s" if confirmed else "d"), \
                 mock.patch.object(edit, "note"), \
                 contextlib.redirect_stdout(io.StringIO()):
             return edit.edit_manifest()
+
+
+class SaveReview(EditBase):
+    def test_esc_at_the_save_review_means_keep_editing(self):
+        asked, picks = [], iter([3, 0, None, 4])
+
+        def fake(title, options, *a, **k):
+            if k.get("multi"):
+                return [not k["initial"][0]] + list(k["initial"][1:])
+            return next(picks)
+        answers = iter(["l", "d"])  # the full review's own question after l too
+
+        def choose(question, letters, default, legend="", **k):
+            asked.append(k)
+            return next(answers)
+        with mock.patch.object(runtime, "BUCKET", "b", create=True), mock.patch.object(s3, "list_sizes", return_value={}), \
+                mock.patch.object(picker, "filter_list", side_effect=fake), mock.patch.object(edit, "note"), \
+                mock.patch.object(ui, "choose", side_effect=choose), contextlib.redirect_stdout(io.StringIO()):
+            edit.edit_manifest()
+        self.assertEqual(asked, [{"esc": "e"}, {"esc": "e"}])
 
 
 class EditFlow(EditBase):
@@ -90,6 +170,21 @@ class EditFlow(EditBase):
         # top menu: Cards; "New card" is option 0 with no cards; the card editor Esc; back; the top menu Esc to finish
         self.assertEqual(self.run_edit([0, 0, None, None, None], confirmed=False), 0)
         self.assertNotIn("newcard", self.read("cards.json"))
+
+    def test_new_card_left_empty_and_cancelled_is_kept(self):
+        asked = []
+        self.assertEqual(self.run_edit([0, 0, None, None, None], confirmed=None, asked=asked), 0)
+        self.assertIn("newcard", self.read("cards.json"))
+        self.assertEqual(asked, [{"cancellable": True}])
+
+    def test_the_keep_question_is_not_asked_for_a_card_with_collections_or_guest(self):
+        for extra in ({"collections": ["x"]}, {"guest": True}):
+            with self.subTest(extra):
+                asked = []
+                self.run_edit([0, 0, None, None, None], confirmed=False, extra=extra, asked=asked)
+                self.assertEqual(asked, [])
+                self.assertIn("newcard", self.read("cards.json"))
+                os.remove(self.path("cards.json"))
 
     def test_new_card_saved_with_setup(self):
         self.assertEqual(self.run_edit([0, 0, None, None, None], confirmed=True), 0)
@@ -213,6 +308,30 @@ class MenuActions(EditBase):
     def test_choosing_device_systems_opens_the_device_list(self):
         seen = self.top_titles([3, None, 4])
         self.assertIn("recommended systems", seen[1][0])
+
+    def cursors_of(self, picks, prefix):
+        """edit_manifest() with filter_list answering picks in turn (a multi list: unchanged); the cursor each list whose
+        title starts with prefix was opened on."""
+        picks, cursors = iter(picks), []
+
+        def fake(title, options, *a, **k):
+            if title.startswith(prefix):
+                cursors.append(k.get("cursor"))
+            return list(k["initial"]) if k.get("multi") else next(picks)
+        with mock.patch.object(runtime, "BUCKET", "b", create=True), mock.patch.object(s3, "list_sizes", return_value={}), \
+                mock.patch.object(picker, "filter_list", side_effect=fake), mock.patch.object(edit, "note"), \
+                contextlib.redirect_stdout(io.StringIO()):
+            edit.edit_manifest()
+        return cursors
+
+    def test_the_card_list_reopens_on_the_row_just_used(self):
+        from sync_roms import cardedit
+        self.write_json("cards.json", {x: {"layout": "esde", "device": "full"} for x in "abc"})
+        with mock.patch.object(cardedit, "edit_card"):
+            self.assertEqual(self.cursors_of([0, 2, 1, None, 4], "💳 Which"), [0, 2, 1])
+
+    def test_the_device_list_reopens_on_the_row_just_used(self):
+        self.assertEqual(self.cursors_of([3, 2, 1, None, 4], "🧩 Which"), [0, 2, 1])
 
     def test_choosing_a_card_calls_the_card_editor(self):
         from sync_roms import cardedit
@@ -616,7 +735,8 @@ class TextualList(unittest.TestCase):
         pilot_list(script, "t", self.LABELS, multi=True, hint="Space toggle · Enter done · s set", hotkeys=("s",),
                    key_help=[("s", "narrow the list to a set's games")], on_note=lambda i, t: "")
         for line in ("a               toggle all shown (all off if all are on)", "o               view: all / on / changed",
-                     "u               revert this list", "w               edit the row's note", "?               this help",
+                     "u               revert this list and hidden rows (asks if more than one change)",
+                     "w               edit the row's note", "?               this help",
                      "s               narrow the list to a set's games"):
             self.assertIn(line, text[0])
         self.assertNotIn("Space toggle", text[0])  # the hint isn't repeated once the keys are described

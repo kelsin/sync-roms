@@ -430,7 +430,8 @@ class Card(helpers.CardDir):
     def test_entries_list_config(self):
         self.set_server()
         os.makedirs(self.cp("Saves"))
-        found = {(e.where, e.key): e for e in spruce_syncthing.entries("c", self.card)}
+        with contextlib.redirect_stderr(io.StringIO()):  # no retroarch-*.cfg on this card
+            found = {(e.where, e.key): e for e in spruce_syncthing.entries("c", self.card)}
         server = found[(self.CONF, "server")]
         self.assertEqual((server.old, server.new), (None, SERVER))
         saves = found[(self.CONF, "RetroArch saves")]
@@ -440,7 +441,8 @@ class Card(helpers.CardDir):
         window = found[(self.CONF, "RetroArch saves modTimeWindowS")]
         self.assertEqual((window.old, window.new), (None, "2"))
         self.run_sync()
-        found = {(e.where, e.key): e for e in spruce_syncthing.entries("c", self.card)}
+        with contextlib.redirect_stderr(io.StringIO()):
+            found = {(e.where, e.key): e for e in spruce_syncthing.entries("c", self.card)}
         self.assertEqual(found[(self.CONF, "RetroArch saves shared with server")].old, "yes")
         self.assertEqual(found[(self.CONF, "RetroArch saves modTimeWindowS")].old, "2")
         self.assertEqual(found[(self.CONF, "server")].old, SERVER)

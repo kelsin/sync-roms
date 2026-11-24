@@ -154,8 +154,9 @@ def emit_json(data):
 
 
 def failure(text):
-    """Print a line about something that failed: on stdout, or on stderr under --quiet (which discards stdout)."""
-    print(text, file=sys.stderr if QUIET else sys.stdout)
+    """Print a line about something that failed, on stderr, without colours when stderr takes none (callers colour the
+    text by stdout's state)."""
+    print(text if _use_color(sys.stderr) else re.sub(r"\033\[[0-9;]*m", "", text), file=sys.stderr)
 
 
 def debug(text):
@@ -201,27 +202,31 @@ def _input(prompt):
     return input(prompt)
 
 
-@in_app(lambda prompt: (prompt, None))
+@in_app(lambda prompt, cancellable=False: (prompt, None, cancellable))
 @uses_terminal
-def ask(prompt):
-    """input() that gives "" at end of input instead of raising, so a prompt with an empty answer means cancel."""
+def ask(prompt, cancellable=False):
+    """input() that gives "" at end of input instead of raising, so a prompt with an empty answer means cancel. With
+    cancellable, end of input (and Esc or ^G in the list app) gives None instead, so an empty line stays an answer."""
     try:
         return _input(prompt)
     except EOFError:
         print()
-        return ""
+        return None if cancellable else ""
 
 
-def _confirm_keys(question, default=True):
-    """confirm's question in the list app: y/n, Enter the default, Esc or ^G no."""
+def _confirm_keys(question, default=True, cancellable=False):
+    """confirm's question in the list app: y/n, Enter the default, Esc or ^G no (None when cancellable)."""
     if not ASSUME_YES:
+        stop = None if cancellable else False
         return (f"{question} {'[Y/n]' if default else '[y/N]'} ",
-                {"y": True, "n": False, "enter": default, "escape": False, "ctrl+g": False})
+                {"y": True, "n": False, "enter": default, "escape": stop, "ctrl+g": stop})
 
 
 @in_app(_confirm_keys)
 @uses_terminal
-def confirm(question, default=True):
+def confirm(question, default=True, cancellable=False):
+    """Ask yes or no. With cancellable, end of input (and Esc or ^G in the list app) gives None instead of the
+    default (or no), so the caller can tell a cancel from an answer."""
     suffix = "[Y/n]" if default else "[y/N]"
     if ASSUME_YES:
         print(f"{question} {suffix} {'y' if default else 'n'} (--yes)")
@@ -231,7 +236,7 @@ def confirm(question, default=True):
             a = _input(f"{question} {suffix} ").strip().lower()
         except EOFError:  # no terminal to answer on: take the default
             print()
-            return default
+            return None if cancellable else default
         if not a:
             return default
         if a in ("y", "yes"):
@@ -251,18 +256,19 @@ def require_terminal(what, flag):
         fail(f"Can't {what} without a terminal: pass {flag}", 2)
 
 
-def _choose_keys(question, letters, default, legend=""):
-    """choose's question in the list app: one of letters, Enter the default."""
+def _choose_keys(question, letters, default, legend="", esc=None):
+    """choose's question in the list app: one of letters, Enter the default, Esc or ^G the answer esc (ignored without one)."""
     if not ASSUME_YES:
         suffix = "/".join(l.upper() if l == default else l for l in letters)
         return (f"{question} [{suffix}]{' (' + legend + ')' if legend else ''} ",
-                {**dict(zip(letters, letters)), "enter": default})
+                {**dict(zip(letters, letters)), "enter": default, **({"escape": esc, "ctrl+g": esc} if esc else {})})
 
 
 @in_app(_choose_keys)
 @uses_terminal
-def choose(question, letters, default, legend=""):
-    """Ask for one of `letters` (a string of single characters); Enter, --yes and EOF give `default`."""
+def choose(question, letters, default, legend="", esc=None):
+    """Ask for one of `letters` (a string of single characters); Enter, --yes and EOF give `default`. esc: the answer
+    Esc or ^G give in the list app (they do nothing without one; a plain terminal has no Esc key to give it)."""
     suffix = "/".join(l.upper() if l == default else l for l in letters)
     if ASSUME_YES:
         print(f"{question} [{suffix}] {default} (--yes)")
@@ -468,7 +474,7 @@ def report_missing(keys, what):
     if not keys:
         return
     from . import inventory  # imported here: inventory imports this module
-    print(yellow(f"  ⚠️  {len(keys)} {what} listed in manifest but not in storage"))
+    print(yellow(f"  ⚠️  {len(keys)} {what} listed but not in storage"))
     print_head(keys, runtime.MAX_MISSING_SHOWN)
     if inventory.current() is not None:
         print(dim(f"     Added to storage since the cache was built? Run: {inventory.UPDATE_HINT}"))

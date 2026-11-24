@@ -257,6 +257,50 @@ class Session(unittest.TestCase):
         self.assertEqual(self.run_editor(editor, script), (True, True, False, False, "a bdec", "", "e", "s"))
         self.assertEqual(self.events, ["app closed"])
 
+    def test_esc_answers_a_choose_that_names_an_esc_answer(self):
+        def editor():
+            picker.filter_list("A", ["a0"])
+            return ui.choose("Save these?", "sed", "s", esc="e"), ui.choose("Again?", "sed", "s", esc="e")
+
+        async def script(app, pilot):
+            await wait_for(pilot, lambda: showing(app, "A"))
+            await pilot.press("enter")
+            await wait_for(pilot, lambda: prompting(app, "Save these? [S/e/d] "))
+            await pilot.press("escape")
+            await wait_for(pilot, lambda: prompting(app, "Again?"))
+            await pilot.press("ctrl+g")
+        self.assertEqual(self.run_editor(editor, script), ("e", "e"))
+
+    def test_esc_at_a_cancellable_ask_is_none_and_enter_on_nothing_is_empty(self):
+        def editor():
+            picker.filter_list("A", ["a0"])
+            return ui.ask("Name: ", cancellable=True), ui.ask("Again: ", cancellable=True)
+
+        async def script(app, pilot):
+            await wait_for(pilot, lambda: showing(app, "A"))
+            await pilot.press("enter")
+            await wait_for(pilot, lambda: prompting(app, "Name: "))
+            await pilot.press("x", "escape")
+            await wait_for(pilot, lambda: prompting(app, "Again: "))
+            await pilot.press("enter")
+        self.assertEqual(self.run_editor(editor, script), (None, ""))
+
+    def test_esc_at_a_cancellable_confirm_is_none_and_enter_is_the_default(self):
+        def editor():
+            picker.filter_list("A", ["a0"])
+            return ui.confirm("One?", cancellable=True), ui.confirm("Two?", False, cancellable=True), ui.confirm("Three?")
+
+        async def script(app, pilot):
+            await wait_for(pilot, lambda: showing(app, "A"))
+            await pilot.press("enter")
+            await wait_for(pilot, lambda: prompting(app, "One? [Y/n] "))
+            await pilot.press("escape")
+            await wait_for(pilot, lambda: prompting(app, "Two? [y/N] "))
+            await pilot.press("enter")
+            await wait_for(pilot, lambda: prompting(app, "Three? [Y/n] "))
+            await pilot.press("escape")
+        self.assertEqual(self.run_editor(editor, script), (None, False, False))
+
     def test_ctrl_c_in_a_prompt_raises_in_the_editor(self):
         def editor():
             picker.filter_list("A", ["a0"])
@@ -361,6 +405,24 @@ class Session(unittest.TestCase):
                     self.run_editor(editor, script if shown else None)
                 self.assertEqual(seen, ["🎉 PR opened: url · 👋 Done."] if shown else [])
                 self.assertEqual(out.getvalue(), "🎉 PR opened: url\n" if shown else "🎉 PR opened: url\n👋 Done.\n")
+
+    def test_a_note_wider_than_the_terminal_is_also_printed_after_the_app_closed(self):
+        long_note = "❌ " + "a long error that the status row clips " * 3
+        short_note = "ℹ️  short"
+        for note, printed in ((long_note, long_note + "\n"), (short_note, "")):
+            with self.subTest(note=note[:12]):
+                def editor():
+                    picker.queue_note(note)
+                    picker.filter_list("A", ["a0"])
+
+                async def script(app, pilot):
+                    await wait_for(pilot, lambda: showing(app, "A"))
+                    await pilot.press("enter")
+                out = io.StringIO()
+                with contextlib.redirect_stdout(out), \
+                        mock.patch("shutil.get_terminal_size", return_value=os.terminal_size((80, 24))):
+                    self.run_editor(editor, script)
+                self.assertEqual(out.getvalue(), printed)
 
     def test_a_long_prompt_wraps_so_its_legend_and_answer_stay_in_view(self):
         from textual.geometry import Region

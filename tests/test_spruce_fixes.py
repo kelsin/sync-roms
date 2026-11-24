@@ -44,6 +44,28 @@ class Base(unittest.TestCase):
 
 
 class PokeminiTests(Base):
+    def test_write_error_restores_the_fix_and_the_others_still_run(self):
+        self.put("ART_BOOK_OUTLINE/bg/pokemini.png", b"bg")
+        self.put("ART_BOOK_OUTLINE/icons/overlay/pokemini.png", b"logo")
+        self.put("ART_BOOK_OUTLINE/icons/pokemini.png", b"icon")
+        self.put("ART_BOOK_OUTLINE/icons/poke.png", b"old")
+        real, calls = cardfs.write_bytes, []
+
+        def flaky(path, data):
+            calls.append(path)
+            if len(calls) == 2:
+                raise OSError("read-only")
+            return real(path, data)
+
+        with mock.patch.object(cardfs, "write_bytes", flaky), mock.patch("sys.stderr", new=StringIO()) as err:
+            count, out = self.run_fixes()
+        cardfs.flush()
+        self.assertEqual(count, 0)
+        self.assertEqual(self.get("ART_BOOK_OUTLINE/icons/poke.png"), b"old")
+        self.assertFalse(os.path.exists(os.path.join(self.base, "Themes", "ART_BOOK_OUTLINE", "icons", "overlay", "poke.png")))
+        self.assertIn("read-only", err.getvalue())
+        self.assertIn(store.repo_json("spruce-fixes")[pokemini.ID]["upstream"], err.getvalue())
+
     def test_copies_missing_poke(self):
         self.put("ART_BOOK_OUTLINE/bg/pokemini.png", b"bg")
         self.put("ART_BOOK_OUTLINE/icons/overlay/pokemini.png", b"logo")

@@ -339,9 +339,12 @@ NO_CORE = "No core folder (sort by core off)"
 
 
 def card_setup(args):
-    """(base, card name, its saved (device or None for Full, layout name), catalog) of the command's card: args.card,
-    else the current folder. Exits 2 when it is no saved card, has no usable layout or is no folder."""
-    base = os.path.abspath(args.card or os.getcwd())
+    """(base, card name, its saved (device or None for Full, layout name), catalog) of the command's card: args.card
+    (a folder, or a saved card's name found at /Volumes), else the current folder. Exits 2 when it is no saved card, has no usable layout or is no folder."""
+    if args.card and not os.path.isdir(os.path.expanduser(args.card)) and os.sep not in args.card:
+        base = os.path.join("/Volumes", args.card)
+    else:
+        base = os.path.abspath(os.path.expanduser(args.card or os.getcwd()))
     name = os.path.basename(base)
     cards = store.load_cards()
     if name not in cards:
@@ -349,7 +352,7 @@ def card_setup(args):
     catalog = store.load_catalog()
     setup = _saved_setup(cards, name, catalog)
     if not os.path.isdir(base):
-        ui.fail(f"No folder {base}", 2)
+        ui.fail(f"No folder {base}: give the card's mounted folder, e.g. `/Volumes/{name}`", 2)
     return base, name, setup, catalog
 
 

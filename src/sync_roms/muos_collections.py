@@ -54,7 +54,7 @@ def _cfgs(base, name):
         return []
 
 
-def plan(base, wanted, owned):
+def plan(base, wanted, owned, keep=False):
     """What to write and delete on the card for the wanted {name: {path: text}}, given the names sync-roms owns."""
     result = {"writes": [], "deletes": [], "enable": set(), "disable": set(), "owned": [], "warnings": []}
     for name in sorted(wanted):
@@ -67,7 +67,7 @@ def plan(base, wanted, owned):
         result["deletes"] += [p for p in _cfgs(base, name) if p not in files]
         result["enable"].add(name)
     result["owned"] = sorted(result["enable"])
-    for name in frontend.retired(result, owned):
+    for name in frontend.retired(result, owned, keep):
         result["deletes"] += _cfgs(base, name)
     return result
 

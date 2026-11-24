@@ -39,7 +39,7 @@ class Install(helpers.CardDir):
     def test_entries_lists_unchanged_too(self):
         self.put(HEADER + VALEFOR + '\nnetwork={\n    ssid="Home"\n    psk="old"\n}\n')
         usersettings.save_settings({"wifi_networks": [{"ssid": "Valefor", "psk": "cakeordeath"}, {"ssid": "Home", "psk": "device-pw"},
-                                                      {"ssid": "Cafe", "psk": "new"}]})
+                                                      {"ssid": "Cafe", "psk": "newsecret"}]})
         found = spruce_wifi.entries(self.card)
         self.assertEqual([(e.key, e.old, e.new, e.secret) for e in found],
                          [("network Valefor", "present", "present", False), ("network Home", "different", "present", False),
@@ -116,9 +116,26 @@ class Install(helpers.CardDir):
     def test_open_network_up_to_date_and_turned_secured(self):
         self.put(HEADER + '\nnetwork={\n    ssid="Cafe"\n    key_mgmt=NONE\n}\n')
         self.assertIn("The Cafe WiFi network is already on the card", self.run_install([{"ssid": "Cafe"}]))
-        out = self.run_install([{"ssid": "Cafe", "psk": "pw"}])
+        out = self.run_install([{"ssid": "Cafe", "psk": "password1"}])
         self.assertIn("Updating the Cafe WiFi network", out)
-        self.assertEqual(self.conf(), HEADER + '\nnetwork={\n    ssid="Cafe"\n    psk="pw"\n}\n')
+        self.assertEqual(self.conf(), HEADER + '\nnetwork={\n    ssid="Cafe"\n    psk="password1"\n}\n')
+
+    def test_raw_hex_psk_is_written_unquoted(self):
+        raw = "0123456789abcdef" * 4
+        self.run_install([{"ssid": "Cafe", "psk": raw}])
+        self.assertEqual(self.conf(), HEADER + f'\nnetwork={{\n    ssid="Cafe"\n    psk={raw}\n}}\n')
+        self.assertIn("already on the card", self.run_install([{"ssid": "Cafe", "psk": raw}]))
+
+    def test_invalid_psk_length_skips_the_network_and_keeps_its_block(self):
+        self.put(HEADER + VALEFOR)
+        for psk in ("short", "x" * 64, "x" * 65):
+            with self.subTest(psk=psk):
+                self.run_install([{"ssid": "Valefor", "psk": psk}, {"ssid": "Home", "psk": "device-pw"}])
+                self.assertEqual(self.conf(), HEADER + VALEFOR + HOME)
+                self.assertIn("Valefor", self.err.getvalue())
+                self.assertNotIn(psk, self.err.getvalue() + self.out)
+                self.assertEqual(self.failures, 0)
+                self.put(HEADER + VALEFOR)
 
     def test_two_networks(self):
         out = self.run_install([{"ssid": "Valefor", "psk": "cakeordeath"}, {"ssid": "Home", "psk": "device-pw"}])

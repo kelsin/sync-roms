@@ -110,6 +110,36 @@ class Install(helpers.CardDir):
         self.assertIn("keeping", out)
         self.assertIn("spruceV4.5.6.7z", out)
 
+    def test_a_later_sync_removes_the_files_no_delete_kept(self):
+        V45, V47 = "spruceV4.5.6.7z", "spruceV4.7.0.7z"
+        self.put(P + V45, b"old")
+        self.run_install()
+        self.put(P + V46, b"new")
+        self.run_install(keep=True)
+        self.assertEqual(sorted(os.listdir(self.card)), [V45, V46])
+        self.assertEqual(store.load_cards()["c"]["spruce_os_kept"], [V45])
+        self.put(P + V47, b"newer")
+        self.run_install()
+        self.assertEqual(os.listdir(self.card), [V47])
+        self.assertNotIn("spruce_os_kept", store.load_cards()["c"])
+
+    def test_every_no_delete_sync_adds_to_the_kept_files(self):
+        for name in ("spruceV4.5.6.7z", V46, "spruceV4.7.0.7z"):
+            self.put(P + name, b"x")
+            self.run_install(keep=True)
+        self.assertEqual(self.recorded(), "spruceV4.7.0.7z")
+        self.assertEqual(store.load_cards()["c"]["spruce_os_kept"], ["spruceV4.5.6.7z", V46])
+
+    def test_a_kept_name_outside_the_pattern_is_never_removed(self):
+        outside = os.path.join(self.tmp.name, "outside.7z")
+        self.touch(outside)
+        self.touch(self.cp("game.zip"))
+        store.update_card("c", spruce_os_kept=["../outside.7z", "game.zip"])
+        self.put(P + V46, b"new")
+        self.run_install()
+        self.assertTrue(os.path.isfile(outside))
+        self.assertTrue(os.path.isfile(self.cp("game.zip")))
+
     def test_once_per_version_even_after_the_updater_removed_it(self):
         self.put(P + V46, b"new")
         store.update_card("c", spruce_os=V46)

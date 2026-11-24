@@ -744,7 +744,7 @@ class DownloadsTest(unittest.TestCase):
         stale = ("psx/A.chd", "[Errno 2] No such file or directory" + downloads.STALE_HINT)
         other = ("psx/B.chd", "[Errno 5] Input/output error")
         for failures, cache, retry in (([stale, stale], True, False), ([stale, other], False, True)):
-            with self.subTest(failures=failures), contextlib.redirect_stdout(io.StringIO()) as out:
+            with self.subTest(failures=failures), contextlib.redirect_stderr(io.StringIO()) as out:
                 cli.report_failures(failures)
             last = out.getvalue().splitlines()[-1]
             self.assertEqual("sync-roms cache update" in last, cache)
@@ -763,7 +763,7 @@ class DownloadsTest(unittest.TestCase):
                 mock.patch.object(clean.shutil, "which", return_value=diskutil), \
                 mock.patch.object(clean.os.path, "ismount", side_effect=lambda p: p == "/Volumes/SD"), \
                 mock.patch.object(clean.subprocess, "run", return_value=info) as run, \
-                contextlib.redirect_stdout(io.StringIO()) as out:
+                contextlib.redirect_stderr(io.StringIO()) as out:
             cli.report_failures(failures)
         return out.getvalue(), run
 

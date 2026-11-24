@@ -1,11 +1,15 @@
 """The WiFi networks saved in settings.json's wifi_networks, merged by SSID into a spruce card's Saves/spruce/wpa_supplicant.conf
 (shared by every spruceOS device using the card) in spruceOS's own format, keeping networks added on the device."""
 import os
+import re
 
 from . import applied, cardfs, ui, usersettings
 
 FILE = os.path.join("Saves", "spruce", "wpa_supplicant.conf")
 HEADER = "ctrl_interface=/var/run/wpa_supplicant\nupdate_config=1\n\n"
+
+
+RAW_PSK = re.compile(r"[0-9a-fA-F]{64}")
 
 
 def wanted():
@@ -21,6 +25,9 @@ def wanted():
         ssid = entry.get("ssid") if isinstance(entry, dict) else None
         psk = entry.get("psk") if isinstance(entry, dict) else None
         if isinstance(ssid, str) and ssid and (psk is None or isinstance(psk, str)):
+            if psk and not RAW_PSK.fullmatch(psk) and not 8 <= len(psk) <= 63:
+                ui.warn(f"wifi_networks in settings.json: the {ssid} psk must be 8 to 63 characters or 64 hex digits; skipped")
+                continue
             result.append((ssid, psk or ""))
         else:
             bad.append(str(i))
@@ -59,7 +66,8 @@ def blocks(lines):
 
 
 def body(ssid, psk):
-    return [f'ssid="{ssid}"', f'psk="{psk}"' if psk else "key_mgmt=NONE"]
+    secret = psk if RAW_PSK.fullmatch(psk) else f'"{psk}"'
+    return [f'ssid="{ssid}"', f"psk={secret}" if psk else "key_mgmt=NONE"]
 
 
 def merge(text, ssid, psk):

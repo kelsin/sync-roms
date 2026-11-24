@@ -6,6 +6,7 @@ import math
 import os
 import queue
 import re
+import shutil
 import signal
 import sys
 import threading
@@ -103,7 +104,8 @@ def help_lines(multi, hint, hidden_count=False, has_note=False, key_help=None, s
     if multi:
         lines += ["Space/Tab       toggle the row",
                   *(["a               toggle all shown (all off if all are on)"] if select_all else []),
-                  "o               view: all / on / changed", "u               revert this list"]
+                  "o               view: all / on / changed",
+                  "u               revert this list and hidden rows (asks if more than one change)"]
         if has_note:
             lines.append("w               edit the row's note")
         if has_locked:
@@ -231,9 +233,10 @@ class _ListModel:
 
     def __init__(self, title, labels, multi, initial, hint, cursor, extras, locked, locked_note, hotkeys, note_text,
                  on_note, esc_asks, hidden, status, diff_marks, session, poll, links, on_hotkey, preview=None, row_note=None,
-                 key_help=None, filters="", preview_width=None, select_all=True):
+                 key_help=None, filters="", preview_width=None, select_all=True, outside=(0, 0), on_revert=None):
         self.preview, self.row_note, self.key_help, self.filters = preview, row_note, key_help, filters
         self.preview_width, self.select_all = preview_width, select_all
+        self.outside, self.on_revert = outside, on_revert
         self.title, self.labels, self.multi, self.hint, self.extras = title, labels, multi, hint, extras
         self.locked_note, self.hotkeys, self.note_text, self.on_note = locked_note, hotkeys, note_text, on_note
         self.esc_asks, self.status, self.diff_marks, self.poll = esc_asks, status, diff_marks, poll
@@ -255,6 +258,7 @@ class _ListModel:
         self.cur, self.top = cursor, self.session.get("top", 0)
         self.notice = ""  # or (text, color)
         self.asking = False  # multi-mode Esc: waiting for keep or revert
+        self.reverting = False  # multi-mode u with several changes: waiting for y
         self.note = None  # (text, cursor position) while a note for row note_row is typed after w
         self.note_row = None
         self.help = None  # the help lines while they are shown
@@ -301,8 +305,11 @@ class _ListModel:
         """The bottom row as (text, color or None, cursor index or None): the keep/revert question, the note being
         typed, or the status (a notice, the highlighted locked row's note, its row note, or the counts)."""
         added, removed = self.pending()
+        added, removed = added + self.outside[0], removed + self.outside[1]
+        if self.reverting:
+            return f"Revert {added + removed} change(s)? [y/N]", "red", None
         if self.asking:
-            return (f"Keep +{added} −{removed} pending change(s)?  y/Enter keep · u revert · any other key keeps editing",
+            return (f"Keep +{added} −{removed} pending change(s)?  y/Enter keep · u revert · else edit",
                     "red", None)
         if self.note is not None:
             return NOTE_PROMPT + self.note[0], None, len(NOTE_PROMPT) + self.note[1]
@@ -328,14 +335,22 @@ class _ListModel:
     def position(self, compact=False):
         """Where the cursor is and how many rows the filter shows, for the right end of the status row when it fits ("" while
         a prompt has the row). compact: the same numbers without words, for when the full form doesn't fit."""
-        if self.asking or self.note is not None:
+        if self.asking or self.reverting or self.note is not None:
             return ""
         shown = f"{len(self.vis)}/{len(self.labels)}" + ("" if compact else " shown")
         return (f"{self.cur + 1} · " if compact else f"row {self.cur + 1} · ") + shown if self.vis else shown
 
+    def revert(self):
+        """Put every row back as it was when opened, and have the caller put back what it keeps in rows this list doesn't show."""
+        self.state = list(self.start)
+        if any(self.outside) and self.on_revert:
+            self.on_revert()
+            self.outside = (0, 0)
+        self.notice = "Reverted this list to how it was when opened"
+
     def tick(self):
         """Call poll, unless help or a prompt is up (those wait for a key). Returns KEEP."""
-        if self.poll and not self.help and not self.asking and self.note is None:
+        if self.poll and not self.help and not self.asking and not self.reverting and self.note is None:
             self.poll()
             self.update()
         return KEEP
@@ -359,11 +374,18 @@ class _ListModel:
             if k in ("escape", "q", "?", "ctrl+g"):
                 self.help = None
             return KEEP
+        if self.reverting:
+            self.reverting = False
+            if k in ("y", "Y"):
+                self.revert()
+            return KEEP
         if self.asking:
             self.asking = False
             if k in ("y", "Y", "enter"):
                 return self.state
             if k in ("u", "U"):
+                if self.on_revert:
+                    self.on_revert()
                 return list(self.start)
             return KEEP
         if self.note is not None:
@@ -394,7 +416,10 @@ class _ListModel:
         moved = move_key(k, cur, len(vis) - 1, self.view)
         hot = HOTKEY_CHARS.get(k, k)
         if hot in self.hotkeys and (vis or self.multi):
-            if self.on_hotkey and self.on_hotkey(hot, vis[cur] if vis else None):
+            handled = self.on_hotkey and self.on_hotkey(hot, vis[cur] if vis else None)
+            if handled:
+                if isinstance(handled, str):  # a message to show
+                    self.notice = handled
                 return KEEP
             return hot, (vis[cur] if vis else None)
         if moved is not None:
@@ -411,7 +436,7 @@ class _ListModel:
                 return KEEP
             if not self.multi or not self.esc_asks:
                 return None
-            if self.state == self.start:
+            if self.state == self.start and not any(self.outside):
                 return self.state
             self.asking = True
         elif k == "enter":
@@ -424,8 +449,10 @@ class _ListModel:
         elif not self.multi:
             pass
         elif k == "u":
-            self.state = list(self.start)
-            self.notice = "Reverted this list to how it was when opened"
+            if sum(self.pending()) + sum(self.outside) > 1:
+                self.reverting = True
+            else:
+                self.revert()
         elif k in ("o", "ctrl+o"):
             self.view_mode = (self.view_mode + 1) % 3
             self.cur = self.top = 0
@@ -448,11 +475,11 @@ class _ListModel:
 class _PromptModel:
     """A question an editor session asks in its app (ui.in_app): the text the editor printed before it (above), the
     question, and what each key does. keys maps keys (y, enter, ...) to answers, others are ignored; with keys None
-    the answer is a line of text, given by Enter, or "" by Esc or ^G."""
+    the answer is a line of text, given by Enter, or "" by Esc or ^G (None when cancellable)."""
     poll = preview = help = note = None  # what the app asks of a list's model
 
-    def __init__(self, question, keys, above):
-        self.question, self.keys, self.above = question, keys, above
+    def __init__(self, question, keys, above, cancellable=False):
+        self.question, self.keys, self.above, self.cancellable = question, keys, above, cancellable
         self.typing = keys is None  # pasted text goes in
         self.text, self.pos = "", 0
 
@@ -462,7 +489,7 @@ class _PromptModel:
         if k == "enter":
             return self.text
         if k in ("escape", "ctrl+g"):
-            return ""
+            return None if self.cancellable else ""
         self.text, self.pos = line_key(self.text, self.pos, k) or (self.text, self.pos)
         return KEEP
 
@@ -1264,13 +1291,13 @@ class _Session:
                     return plain
         return None
 
-    def prompt(self, question, keys):
+    def prompt(self, question, keys, cancellable=False):
         """ui.prompter: on the worker, ask in the app (_PromptModel), under what it printed since its last request was
         answered, which then is not printed again; elsewhere ui.NOT_ASKED."""
         if threading.get_ident() != self.worker:
             return ui.NOT_ASKED
         above = [self.printed.pop() for _ in range(len(self.printed) - self.answered_at)][::-1]
-        return self.ask("prompt", _PromptModel(question, keys, above))
+        return self.ask("prompt", _PromptModel(question, keys, above, cancellable))
 
     def outside(self, fn, *args, **kwargs):
         """ui.terminal_runner: fn called on the worker runs on the main thread, on the normal screen."""
@@ -1293,7 +1320,7 @@ def one_app(fn):
 def queue_note(text, keep=False):
     """On an editor session's worker: show text (escape codes dropped, trimmed) on the status line of the session's
     next list, after any other notes queued for it, and return True. Elsewhere False. keep: also print it once the
-    app has closed, even when a list showed it (a link to keep)."""
+    app has closed, even when a list showed it (a link to keep). A note that doesn't fit the terminal's width is kept too."""
     if not _in_session():
         return False
     if _ESCAPES.sub("", text).strip():
@@ -1305,9 +1332,11 @@ def _run(model):
     """Show the list full screen until it is done; returns its result. Ctrl-C raises KeyboardInterrupt."""
     if _in_session():
         if _session.notes:
-            model.notice = " · ".join(_ESCAPES.sub("", text).strip() for text, _ in _session.notes), "yellow"
+            shown = " · ".join(_ESCAPES.sub("", text).strip() for text, _ in _session.notes)
+            model.notice = shown, "yellow"
             model.update()
-            _session.kept += [text for text, keep in _session.notes if keep]
+            clipped = ui.cell_width(shown) > shutil.get_terminal_size().columns  # the status row cuts it and the next key clears it
+            _session.kept += [text for text, keep in _session.notes if keep or clipped]
             _session.notes = []
         return _session.ask("list", model)
     app = _app_class()(model)
@@ -1382,7 +1411,7 @@ def _draws_images():
 def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, extras=None, locked=None, locked_note="",
                 hotkeys=(), note_text=None, on_note=None, esc_asks=True, hidden=None, status=None, diff_marks=True,
                 session=None, poll=None, links=None, on_hotkey=None, preview=None, row_note=None, key_help=None, filters="",
-                preview_width=None, select_all=True):
+                preview_width=None, select_all=True, outside=(0, 0), on_revert=None):
     """Modal list: vim keys for moving and acting, Emacs keys for editing the filter.
 
     Normal mode: j/k ↑/↓ ^N/^P move · g/G top/bottom · ^D/^U half page · ^F/^B/PgUp/PgDn/^V page · / filter ·
@@ -1413,8 +1442,8 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
     so poll can update extras in place (and status can read what it changed).
     links: optional per-label lists of the label indexes switched together with it (multi mode): Space/Tab and `a`
     set them all to the toggled row's new state (locked ones excepted).
-    on_hotkey: optional callable(key, label index) -> bool, tried first for a hotkey; True means it handled the key
-    in place (the list stays open and is redrawn, so it can update extras), False returns (key, index) as usual.
+    on_hotkey: optional callable(key, label index) -> bool, tried first for a hotkey; True (or a message to show) means it
+    handled the key in place (the list stays open and is redrawn, so it can update extras), False returns (key, index) as usual.
     preview: optional callable(label index) -> path of an image file, or None; the list then shares the screen with an
     image pane showing the highlighted row's image (blank when there is none), updated as the cursor and filter change.
     Only in a terminal that draws real images (Kitty graphics or Sixel), and not inside tmux; elsewhere there is no pane.
@@ -1423,6 +1452,9 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
     row_note: optional callable(label index) -> text; when non-empty for the highlighted row it replaces the status
     line (below a notice and a locked row's note).
     select_all: False turns `a` (toggle all shown) off.
+    outside: (on, off) pending changes the caller keeps in rows this list doesn't show (multi mode): Esc asks about
+    them too, and counts them in its question; on_revert() is called whenever they are reverted: by u (which asks first
+    when there is more than one change in all) or by u at the Esc question.
     """
     if preview and not _in_session():  # a session asks the terminal once, before its app starts
         _app_class()  # first: it sets up Textual's environment
@@ -1430,7 +1462,7 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
             preview = None
     return _run(_ListModel(title, labels, multi, initial, hint, cursor, extras, locked, locked_note, hotkeys, note_text,
                            on_note, esc_asks, hidden, status, diff_marks, session, poll, links, on_hotkey, preview, row_note,
-                           key_help, filters, preview_width, select_all))
+                           key_help, filters, preview_width, select_all, outside, on_revert))
 
 
 PLACE = ("row", "query", "view_mode", "top")  # the session entries carry_place keeps

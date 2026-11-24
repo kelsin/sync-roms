@@ -2,6 +2,7 @@ import contextlib
 import io
 import json
 import os
+import re
 import sys
 import tempfile
 import unittest
@@ -11,7 +12,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 
-from sync_roms import chd, cli, commands, diff, edit, inventory, m3u, picker, runtime, s3, scrape_files, store, ui, upload  # noqa: E402
+from sync_roms import chd, cli, commands, diff, edit, inventory, m3u, picker, runtime, s3, scrape_files, store, ui, upload, usersettings  # noqa: E402
 from test_edit import EditBase  # noqa: E402
 from test_scripting import Isolated  # noqa: E402
 
@@ -71,7 +72,9 @@ class UnhonoredFlagsTest(Isolated):
                  (["config", "-n"], "config show"), (["config", "path", "-n"], "config path"),
                  (["doctor", "-n"], "doctor"), (["check", "--dry-run"], "check"), (["completion", "bash", "-n"], "completion"),
                  (["games", "list", "-n", "--card", "SD"], "games list"), (["games", "export", "-n", "--card", "SD"], "games export"),
-                 (["games", "sets", "list", "-n", "--card", "SD"], "games sets list")]
+                 (["games", "sets", "list", "-n", "--card", "SD"], "games sets list"),
+                 (["themes", "pick", "-n"], "themes pick"), (["themes", "build", "--out", "/nowhere", "-n"], "themes build"),
+                 (["themes", "palettes", "--dry-run"], "themes palettes")]
         for argv, name in cases:
             with self.subTest(argv=argv):
                 self.refused(argv, f"--dry-run has no effect on `{name}`",
@@ -105,6 +108,27 @@ class UsageHelpTest(Isolated):
                     code, out, err = self.sync([name, flag])
                     self.assertEqual((code, err), (0, ""))
                     self.assertIn(f"sync-roms {name}", out)
+
+    def test_a_mistyped_command_fails_before_any_storage_access(self):
+        with mock.patch.object(usersettings, "ensure_bucket", side_effect=AssertionError("asked for storage")), \
+                mock.patch.object(inventory, "prepare", side_effect=AssertionError("read storage")), \
+                tempfile.TemporaryDirectory() as cwd:
+            old = os.getcwd()
+            os.chdir(cwd)
+            try:
+                code, out, err = self.sync(["bogus"])
+            finally:
+                os.chdir(old)
+        self.assertEqual((code, out), (2, ""))
+        self.assertIn("bogus isn't a command or a folder", err)
+        self.assertIn("is the card mounted?", err)
+        self.assertIn("sync-roms help", err)
+
+    def test_help_for_an_unknown_topic_exits_2(self):
+        code, out, err = self.sync(["help", "bogus"])
+        self.assertEqual((code, out), (2, ""))
+        self.assertIn("No help for 'bogus'", err)
+        self.assertEqual(self.sync(["help", "upload"])[0], 0)
 
     def test_word_command_errors_point_at_that_command_help(self):
         for argv, name in ((["cache", "update", "--json"], "cache"), (["cards", "list", "-n"], "cards"),
@@ -147,12 +171,79 @@ class UsageHelpTest(Isolated):
         self.assertTrue(any(line.startswith("--quiet") and "--verbose" not in line for line in lines))
         self.assertTrue(any(line.startswith("--verbose") for line in lines))
 
+    def test_help_lines_fit_100_columns(self):
+        plain = re.compile(r"\x1b\[[0-9;]*m")
+        for topic in (None, *cli.TOPICS):
+            for line in cli.help_text(topic).splitlines():
+                with self.subTest(topic=topic, line=line[:40]):
+                    self.assertLessEqual(len(plain.sub("", line)), 100)
+
+    def test_help_topics_are_written_at_the_width_they_print(self):
+        """The hand-written text is broken in the source: nothing re-flows it when it prints."""
+        for topic, text in cli.TOPICS.items():
+            for line in text.splitlines():
+                with self.subTest(topic=topic, line=line[:40]):
+                    self.assertLessEqual(len(line), 100)
+
+    def test_help_never_splits_a_backticked_span(self):
+        plain = re.compile(r"\x1b\[[0-9;]*m")
+        for topic in (None, *cli.TOPICS):
+            for line in cli.help_text(topic).splitlines():
+                with self.subTest(topic=topic, line=line[:40]):
+                    self.assertEqual(plain.sub("", line).count("`") % 2, 0)
+
+    def test_every_usage_row_is_its_own_line(self):
+        """No row is fused into another's description, and each subcommand has its row in its command's topic."""
+        for topic, text in cli.TOPICS.items():
+            for line in text.splitlines():
+                if line.strip().startswith("sync-roms "):
+                    with self.subTest(topic=topic, line=line[:40]):
+                        self.assertIsNone(re.search(r"(?<![`\w/.-])sync-roms ", line.strip()[1:]), line)
+        for command, words in commands.second_words().items():
+            if command not in cli.TOPICS:
+                continue
+            rows = [line.strip() for line in cli.TOPICS[command].splitlines() if line.strip().startswith("sync-roms ")]
+            for word in words:
+                with self.subTest(command=command, word=word):
+                    self.assertTrue(any(re.match(rf"sync-roms {command} \[?(?:[\w-]+\|)*{re.escape(word)}\b", row) for row in rows), rows)
+
+    def test_a_long_command_row_continues_under_its_usage_and_summary_indent(self):
+        usage = "[SYSTEM | match SYSTEM ROM GAME | review [SYSTEM] | missing [SYSTEM] | art [SYSTEM]]"
+        summary = "scrape the ROMs that have no metadata from ScreenScraper into `storage's scrapes/` folder and more words"
+        lines = [re.sub(r"\x1b\[[0-9;]*m", "", line) for line in cli._row("scrape", usage, summary).splitlines()]
+        self.assertTrue(lines[0].startswith("  scrape"))
+        self.assertEqual(lines[0].index("["), 23)
+        self.assertEqual(len(lines[1]) - len(lines[1].lstrip()), 23)
+        self.assertTrue(all(len(line) <= 100 for line in lines))
+        self.assertEqual(len(lines[-1]) - len(lines[-1].lstrip()), 6)
+
     def test_config_show_prints_eject_as_a_word(self):
         code, out, _ = self.sync(["config", "show"], {"eject": False})
         self.assertEqual(code, 0)
         self.assertRegex(out, r"eject\s+false\s")
         code, out, _ = self.sync(["config", "show"])
         self.assertRegex(out, r"eject\s+true\s")
+
+    def test_themes_pick_without_a_terminal_says_what_it_needs(self):
+        with mock.patch.object(ui, "has_terminal", return_value=False):
+            code, _, err = self.sync(["themes", "pick"], {"bucket": "b"})
+        self.assertEqual(code, 2)
+        self.assertIn("`themes pick` needs a terminal to pick from", err)
+        self.assertNotIn("pass a terminal", err)
+
+    def test_config_show_lists_the_other_saved_settings(self):
+        code, out, _ = self.sync(["config", "show"], {"syncthing": True, "ra_username": "me", "ra_password": "pw", "ra_mode": "hardcore",
+                                                      "surprise_excluded_systems": ["gba", "nes"]})
+        self.assertEqual(code, 0)
+        self.assertRegex(out, r"syncthing\s+true\s")
+        self.assertRegex(out, r"ra_mode\s+hardcore\s")  # text bare, like the other rows
+        self.assertRegex(out, r"ra_username\s+\(set, not shown\)")
+        self.assertRegex(out, r"ra_password\s+\(set, not shown\)")
+        self.assertRegex(out, r"surprise_excluded_systems\s+gba,nes")
+        self.assertNotIn('"me"', out)
+        self.assertNotIn("pw", out)
+        code, out, _ = self.sync(["config", "show"])
+        self.assertNotIn("syncthing", out)
 
 
 class QuietColorTest(unittest.TestCase):
@@ -164,13 +255,13 @@ class QuietColorTest(unittest.TestCase):
         def isatty(self):
             return self.tty
 
-    def failure_line(self, stdout_tty, stderr_tty):
+    def failure_line(self, stdout_tty, stderr_tty, quiet=True):
         out, err = self.Stream(stdout_tty), self.Stream(stderr_tty)
         with mock.patch.dict(os.environ, clear=False), mock.patch.object(sys, "stdout", out), \
                 mock.patch.object(sys, "stderr", err), mock.patch.object(ui, "_COLOR", stdout_tty):
             for var in ("NO_COLOR", "FORCE_COLOR", "CLICOLOR_FORCE", "TERM"):
                 os.environ.pop(var, None)
-            ui.set_output(True, False)
+            ui.set_output(quiet, False)
             try:
                 ui.failure(ui.red("❌ x"))
             finally:
@@ -180,6 +271,24 @@ class QuietColorTest(unittest.TestCase):
     def test_quiet_failure_lines_are_colored_by_stderr(self):
         self.assertIn("\033[31m", self.failure_line(stdout_tty=False, stderr_tty=True))
         self.assertNotIn("\033[", self.failure_line(stdout_tty=True, stderr_tty=False))
+
+    def test_failure_lines_are_not_colored_when_stderr_is_not_a_terminal(self):
+        self.assertEqual(self.failure_line(stdout_tty=True, stderr_tty=False, quiet=False), "❌ x\n")
+        self.assertIn("\033[31m", self.failure_line(stdout_tty=True, stderr_tty=True, quiet=False))
+
+    def test_failure_lines_go_to_stderr_without_quiet(self):
+        out, err = io.StringIO(), io.StringIO()
+        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+            ui.failure("❌ x")
+        self.assertEqual((out.getvalue(), err.getvalue()), ("", "❌ x\n"))
+
+    def test_report_commands_keep_their_output_under_quiet(self):
+        for argv in (["doctor"], ["config", "show"], ["cache"], ["games", "sets", "list"], ["cards", "list"]):
+            with self.subTest(argv=argv):
+                self.assertTrue(cli.is_data_command(argv))
+        for argv in (["cache", "update"], ["games", "sets", "add"], ["config", "set"], ["upload"]):
+            with self.subTest(argv=argv):
+                self.assertFalse(cli.is_data_command(argv))
 
 
 class ExitCodeTest(Isolated):
@@ -209,7 +318,8 @@ class ExitCodeTest(Isolated):
             os.makedirs(os.path.join(tmp, "psx"))
             open(os.path.join(tmp, "psx", "g.cue"), "w").close()
             with mock.patch.object(chd, "plan_chd", return_value=[({"chd": {"mode": "cd"}}, None, "x.cue", "o")]), \
-                    mock.patch.object(chd.external, "find_tool", return_value=None):
+                    mock.patch.object(chd.external, "find_tool", return_value=None), \
+                    mock.patch.object(ui, "ASSUME_YES", True):
                 self.assertEqual(self.code_of(chd.chd_command, mock.Mock(chd=tmp, dry_run=False)), 3)
 
 
@@ -222,6 +332,7 @@ class MissingStorageOrCardTest(Isolated):
 
     def test_missing_storage_folder_stops_a_sync_before_planning(self):
         gone = os.path.join(self.tmp, "roms")
+        os.makedirs(os.path.join(self.tmp, "SD"))
         tree = inventory.Tree(gone, 1, {"gba/Game.zip": 5}, {})
         with mock.patch.object(cli, "sync_card") as plan, mock.patch.object(inventory, "_load", return_value=tree), \
                 mock.patch.object(inventory, "prepare") as prepare:
@@ -267,9 +378,9 @@ class MissingStorageOrCardTest(Isolated):
                 mock.patch.object(store, "load_cards", return_value={}), mock.patch.object(store, "save_card"):
             code, out, err = self.sync([card, "--yes"], {"root": storage})
         self.assertEqual(code, 2)
-        self.assertIn(f"{card} isn't a folder", err)
+        self.assertIn(f"{card} isn't a command or a folder", err)
         self.assertIn("mounted?", err)
-        self.assertIn("sync-roms --help", err)
+        self.assertIn("sync-roms help", err)
         self.assertFalse(os.path.exists(os.path.join(self.tmp, "typo")))
 
     def test_unusable_card_folders_are_setup_problems(self):

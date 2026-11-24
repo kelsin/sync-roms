@@ -20,13 +20,14 @@ META_KEY = "m"
 VARIANT_KEY = "v"
 SERIES_KEY = "r"
 ALL_KEY = "a"
-LIST_HINT = "Enter · a all · f full · x off · s set · l colls · S settings · F guest"
+LIST_HINT = "Enter · a all games · f full · s set · l colls · S settings"
 GAMES_HINT = "Space toggle · Enter done · a all · s set · m meta · p past · v variant"
 META_HINT = "Enter list its values · Esc back"
 VALUES_HINT = "Enter narrow to it · Esc back · / filter"
+COLLECTIONS_HINT = "Space/Tab toggle · Enter done · / filter"
 SETS_HINT = "Enter show its games · Space/Tab toggle its games here · / filter"
-SET_GAMES_HINT = "Space toggle · Enter done · a all · w note · v variant · r series"
-ALL_GAMES_HINT = "Space toggle · Enter done · a all · w note · v variant · s set · c clear"
+SET_GAMES_HINT = "Space toggle · Enter done · w note · v variant · r series"
+ALL_GAMES_HINT = "Space toggle · Enter done · w note · v variant · s set · c clear"
 LIST_KEYS = [("Enter", "the system's games"), ("f", "full system: every file in its folder (again to undo)"),
              ("x", "turn the system off on this card: nothing of it syncs, its picks stay (again to turn it back on)"),
              ("a", "every game across this card's systems"),
@@ -34,7 +35,7 @@ LIST_KEYS = [("Enter", "the system's games"), ("f", "full system: every file in 
              ("S", "settings menu: Surprise, theme, collections and RAOfflineProxy on or off, and the systems Surprise may use"),
              ("F", "guest card: a friend's card; syncs only copy ROMs, BIOS and scrapes (again to undo)"),
              ("D", "clear every pick, full system and set from the card")]
-KEEP_HINT = " · K keep card files"
+KEEP_HINT = " · K keep"
 KEEP_KEYS = [("K", "pick every card file that matches a storage game")]
 GAMES_KEYS = [("s", "sets on this system: narrow to one, or pick its games"),
               ("r", "narrow the set picked with s to one series of games"),
@@ -337,6 +338,8 @@ def edit_card(name, setup=None, to_fetch=None, card_match=None, on_guest=None):
             """f and x switch full system and off in place, so the screen isn't torn down and redrawn."""
             if key not in (FULL_KEY, OFF_KEY) or idx is None:
                 return False
+            if key == FULL_KEY and systems[idx]["bucket"] in store.systems_off(card_entry(name, setup)):
+                return "This system is off on the card: turn it on with x first"
             (toggle_full if key == FULL_KEY else toggle_off)(name, systems[idx]["bucket"])
             usages[systems[idx]["bucket"]] = budget.system_usage(card_entry(name, setup), systems[idx])
             extras[:] = work_out()[1]
@@ -377,8 +380,12 @@ def edit_card(name, setup=None, to_fetch=None, card_match=None, on_guest=None):
                 keep_card_files(name, setup, systems, card_match)
                 changed = ALL
             elif key == GUEST_KEY:
-                if toggle_guest(name) and on_guest:
-                    on_guest()
+                if guest.is_guest(store.saved_card(name)) or ui.confirm(
+                        f"Make {name} a guest card? Its picks are replaced by the ROMs found on the card, "
+                        f"{'now' if on_guest else 'at its next sync'}, and its collections and surprises dropped.",
+                        default=False):
+                    if toggle_guest(name) and on_guest:
+                        on_guest()
                 changed = ALL
             elif key == CLEAR_ALL_KEY:
                 if ui.confirm(f"🧹 Clear every pick, full system and set from {name}?", default=False):
@@ -420,29 +427,34 @@ def card_status(name, setup, systems, to_fetch=None):
 def settings_menu(name, systems, playable):
     """S in the system list: turn the card's Surprise, theme, custom collections or RAOfflineProxy on or off, pick the systems
     Surprise may use on every card or on this card (playable: the systems the card can play) and, on a spruce card, its current theme."""
-    entry = store.load_cards().get(name)
     state = lambda on: "on" if on else "off"
-    spruce = isinstance(entry, dict) and entry.get("layout") == "spruce"
-    current = entry.get("spruce_theme") if spruce else None
-    current = current if isinstance(current, str) and current else None
-    i = picker.filter_list("⚙️  Settings", [
-        f"🎁 Surprise: {state(surprise.enabled(entry))}",
-        f"🎨 Theme (Art Book Next, ES-DE theme, collection art): {state(store.card_flag(entry, 'theme'))}",
-        f"💖 Collections (written to the frontend, Surprise's too): {state(store.card_flag(entry, 'custom_collections'))}",
-        f"🏆 RAOfflineProxy (RetroAchievements offline proxy app): {state(store.card_flag(entry, 'raofflineproxy'))}",
-        "Systems Surprise may use (every card)",
-        "Systems Surprise may use (this card)",
-        *([f"🎨 Spruce theme: {current or 'none'}"] if spruce else [])])
-    if i == 0:
-        toggle_surprise(name)
-    elif i in (1, 2, 3):
-        toggle_flag(name, ("theme", "custom_collections", "raofflineproxy")[i - 1])
-    elif i == 4:
-        pick_surprise_systems(systems)
-    elif i == 5:
-        pick_card_surprise_systems(name, playable)
-    elif i == 6 and spruce:
-        pick_spruce_theme(name, current)
+    pos = 0
+    while True:
+        entry = store.load_cards().get(name)
+        spruce = isinstance(entry, dict) and entry.get("layout") == "spruce"
+        current = entry.get("spruce_theme") if spruce else None
+        current = current if isinstance(current, str) and current else None
+        i = picker.filter_list("⚙️  Settings", [
+            f"🎁 Surprise: {state(surprise.enabled(entry))}",
+            f"🎨 Theme (Art Book Next, ES-DE theme, collection art): {state(store.card_flag(entry, 'theme'))}",
+            f"💖 Collections (written to the frontend, Surprise's too): {state(store.card_flag(entry, 'custom_collections'))}",
+            f"🏆 RAOfflineProxy (RetroAchievements offline proxy app): {state(store.card_flag(entry, 'raofflineproxy'))}",
+            "Systems Surprise may use (every card)",
+            "Systems Surprise may use (this card)",
+            *([f"🎨 Spruce theme: {current or 'none'}"] if spruce else [])], cursor=pos)
+        if i is None:
+            return
+        pos = i
+        if i == 0:
+            toggle_surprise(name)
+        elif i in (1, 2, 3):
+            toggle_flag(name, ("theme", "custom_collections", "raofflineproxy")[i - 1])
+        elif i == 4:
+            pick_surprise_systems(systems)
+        elif i == 5:
+            pick_card_surprise_systems(name, playable)
+        elif i == 6 and spruce:
+            pick_spruce_theme(name, current)
 
 
 def pick_spruce_theme(name, current):
@@ -497,7 +509,8 @@ def pick_card_surprise_systems(name, playable):
     if states is None:
         return
     shown = {s["bucket"] for s in playable}
-    off = sorted((excluded - shown) | {s["bucket"] for s, on in zip(playable, states) if not on and s["bucket"] not in everywhere})
+    off = sorted((excluded - shown) | (excluded & everywhere)
+                 | {s["bucket"] for s, on in zip(playable, states) if not on and s["bucket"] not in everywhere})
     if off:
         entry["surprise_excluded_systems"] = off
     else:
@@ -520,7 +533,7 @@ def toggle_surprise(name):
 
 
 def pick_collections(name, playable, card_status=None):
-    """Toggle the collections a card includes (Space/Tab/Enter, in place), saving each
+    """Toggle the collections a card includes (Space/Tab, in place; Enter is done), saving each
     toggle at once. Each is shown with how many of its games are on systems in playable (system buckets the card syncs).
     card_status(): the card's size status, worked out again after each toggle."""
     found = colls.load_collections()
@@ -543,30 +556,21 @@ def pick_collections(name, playable, card_status=None):
         extras[:] = [[("  ✅ on the card" if c["id"] in ids else "", "green"), count] for c, count in zip(found, counts)]
         shown["status"] = card_status() if card_status else None
 
-    def toggle(idx):
+    def on_hotkey(_key, idx):
+        if idx is None:
+            return False
         cid = found[idx]["id"]
         ids.remove(cid) if cid in ids else ids.append(cid)
         store.update_card(name, collections=list(ids))
         mark()
-
-    def on_hotkey(_key, idx):
-        if idx is None:
-            return False
-        toggle(idx)
         return True
 
     mark()
-    pos = 0
-    while True:
-        i = picker.filter_list(f"💖 Collections on {name} (Space/Enter toggles)", labels, extras=extras, cursor=pos,
-                               hotkeys=(" ", "\t", "enter"), on_hotkey=on_hotkey,
-                               key_help=[("Space/Tab/Enter", "put the collection on the card or take it off")],
-                               status=(lambda _state: shown["status"]) if card_status else None,
-                               preview=lambda i: previews.collection(found[i].get("art")) if i < len(found) else None)
-        if i is None:
-            return
-        toggle(i)
-        pos = i
+    picker.filter_list(f"💖 Collections on {name} (Space toggles · Enter done)", labels, extras=extras,
+                       hotkeys=(" ", "\t"), on_hotkey=on_hotkey, hint=COLLECTIONS_HINT,
+                       key_help=[("Space/Tab", "put the collection on the card or take it off")],
+                       status=(lambda _state: shown["status"]) if card_status else None,
+                       preview=lambda i: previews.collection(found[i].get("art")) if i < len(found) else None)
 
 
 def pick_card_set(name, setup, systems, current=None):
@@ -811,6 +815,20 @@ def _games_pass(title, shown, picks, sps, files_of, start, work, capacity, to_fe
     links = [[index[m] for m in sp.groups.get(k, ()) if m in index] if sp else [] for k, sp in zip(keys, sp_of)]
     session = {"sel": [base[k] for k in keys]}
     picker.carry_place(place, keys, session)  # where the last pass was, when it listed the same games
+    hidden, seen = {}, set()  # {system bucket: (keys, states when the editor opened)} of what earlier passes switched
+    outside = [0, 0]  # in rows this pass doesn't show, each multi-disc game once: (switched on, switched off)
+    for k, was in start.items():
+        b = k.partition("/")[0]
+        group = sps[b].groups.get(k, [k]) if b in sps and k in bases[b] else ()
+        if group and bases[b][k] != was and not any(m in index or m in seen for m in group):
+            seen.update(group)
+            outside[was] += 1
+            ks, ws = hidden.setdefault(b, ([], []))
+            for f in (k, *files_of.get(k, ())):
+                if f in bases[b]:
+                    ks.append(f)
+                    ws.append(was)
+    reverted = []
 
     def on_card(key):
         """picks.on_card, from this pass's states where the key's system has them."""
@@ -851,15 +869,19 @@ def _games_pass(title, shown, picks, sps, files_of, start, work, capacity, to_fe
             row_note=lambda i: edit.variant_line(keys[i], picks.variants, picks.parents, picks.system_names,
                                                  picks.on_card),
             session=session, note_text=lambda i: edit.note_text(sp_of[i].games, keys[i]),
-            on_note=lambda i, text: edit.save_note(sp_of[i].games, keys[i], text),
+            on_note=lambda i, text: edit.save_note(
+                sp_of[i].games, keys[i], text,
+                covered=(keys[i] in notes or keys[i] in sp_of[i].collected) and keys[i] not in sp_of[i].excluded),
             **previews.game_pane(keys), links=links,
             locked=[sp is None or k in sp.surprise for k, sp in zip(keys, sp_of)],
             locked_note=[edit.FULL_SYSTEM_NOTE if sp is None else _locked_note(sp, k) for k, sp in zip(keys, sp_of)],
-            **list_kw)
+            outside=tuple(outside), on_revert=lambda: reverted.append(True), **list_kw)
     except KeyboardInterrupt:  # Ctrl-C: keep the toggles
         apply(session["sel"])
         raise
     apply(session["sel"] if isinstance(result, tuple) else result)
+    for b, (ks, ws) in hidden.items() if reverted else ():  # u at Esc's question: what the pass hid goes back too
+        sps[b].apply(ks, picks.cover(), sps[b].states(picks.cover()), ws)
     return result
 
 

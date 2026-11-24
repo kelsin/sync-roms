@@ -68,9 +68,23 @@ class FolderStorageTest(unittest.TestCase):
         open(os.path.join(mirror, runtime.MIRROR_MARKER), "w").close()
         with mock.patch.object(mirroring, "refresh_mirror", side_effect=AssertionError("refreshed")):
             mirroring.use_mirror(mirror, False)
-            with self.assertRaises(SystemExit):
+            with self.assertRaises(SystemExit), contextlib.redirect_stderr(io.StringIO()):
                 mirroring.mirror_command(mock.Mock(clear_mirror=False, use_mirror=mirror, mirror=None))
         self.assertIsNone(runtime._mirror_root)
+
+    def test_mirror_dry_run_is_labelled_and_saves_nothing(self):
+        mirror = os.path.join(self.root, "mirror")
+        for use, saved in ((mirror, "wasn't saved"), (None, None)):
+            args = mock.Mock(clear_mirror=False, use_mirror=use, mirror=None if use else mirror, dry_run=True)
+            out = io.StringIO()
+            with mock.patch.object(runtime, "ROOT", None), mock.patch.object(s3, "access", return_value="bucket"), \
+                    mock.patch.object(mirroring, "refresh_mirror", return_value=0), \
+                    mock.patch.object(usersettings, "save_setting", side_effect=AssertionError("saved")), \
+                    contextlib.redirect_stdout(out):
+                self.assertEqual(mirroring.mirror_command(args), 0)
+            self.assertIn("🧪 Dry run — nothing downloaded or deleted", out.getvalue())
+            self.assertNotIn("Done!", out.getvalue())
+            self.assertEqual("not saved" in out.getvalue(), saved is not None)
 
     def test_list_with_etags_marks_folder_tags_as_not_md5(self):
         s3.put_text("gba/a.zip", "abc")
@@ -83,7 +97,7 @@ class FolderStorageTest(unittest.TestCase):
         s3.put_text("gba/b.zip", "def")
         with contextlib.redirect_stdout(io.StringIO()):
             self.assertEqual(s3.move_keys([("gba/a.zip", "gba/sub/c.zip")]), 0)
-            self.assertEqual(s3.delete_keys(["gba/b.zip", "gba/missing.zip"])[0]["Key"], "gba/missing.zip")
+            self.assertEqual(s3.delete_keys(["gba/b.zip", "gba/missing.zip"]), [])  # a missing file is already deleted
         self.assertEqual(set(s3.list_sizes("gba/")), {"gba/sub/c.zip"})
 
     def test_run_copies(self):
@@ -136,7 +150,7 @@ class RootSettingTest(unittest.TestCase):
                 mock.patch.object(usersettings, "resolve_settings", lambda: {k: (None, "unset") for k in ("bucket", "root", "endpoint")} | {"profile": ("p", ""), "write_profile": ("w", "")}), \
                 mock.patch.object(runtime, "ROOT", None), mock.patch.object(runtime, "BUCKET", None), \
                 mock.patch("builtins.input", side_effect=["/no/such/folder", d]), \
-                contextlib.redirect_stdout(io.StringIO()):
+                contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
             usersettings.ensure_bucket()
             self.assertEqual(saved, {"root": os.path.abspath(d)})
             self.assertEqual(runtime.ROOT, os.path.abspath(d))
@@ -162,10 +176,10 @@ class FirstRunAnswerTest(unittest.TestCase):
 
     def test_path_without_leading_slash_is_not_saved_as_a_bucket(self):
         with tempfile.TemporaryDirectory() as d:
-            saved, ask, out, _ = self.first_run(["Volumes/roms", d])
+            saved, ask, _, err = self.first_run(["Volumes/roms", d])
         self.assertEqual(saved, {"root": os.path.abspath(d)})
         self.assertEqual(ask.call_count, 2)  # asked again, and no endpoint question
-        self.assertIn("Volumes/roms is not an absolute path", out)
+        self.assertIn("Volumes/roms is not an absolute path", err)
 
     def test_existing_folder_name_is_a_folder_and_must_be_absolute(self):
         with tempfile.TemporaryDirectory() as d, tempfile.TemporaryDirectory() as cwd:
@@ -173,11 +187,11 @@ class FirstRunAnswerTest(unittest.TestCase):
             old = os.getcwd()
             os.chdir(cwd)
             try:
-                saved, _, out, _ = self.first_run(["roms", d])
+                saved, _, _, err = self.first_run(["roms", d])
             finally:
                 os.chdir(old)
         self.assertEqual(saved, {"root": os.path.abspath(d)})
-        self.assertIn("roms is not an absolute path", out)
+        self.assertIn("roms is not an absolute path", err)
 
     def test_home_folder_answer_is_expanded(self):
         with tempfile.TemporaryDirectory() as home, mock.patch.dict(os.environ, {"HOME": home}):

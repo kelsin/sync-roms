@@ -11,7 +11,7 @@ from unittest import mock
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import helpers  # noqa: E402
 
-from sync_roms import bbs, ignore, store, ui, usersettings  # noqa: E402
+from sync_roms import bbs, ignore, runtime, store, ui, usersettings  # noqa: E402
 
 FIXTURE = os.path.join(os.path.dirname(__file__), "fixtures", "bbs-featured.html")
 
@@ -181,6 +181,12 @@ class Download(helpers.StorageDir):
                   mock.patch.object(ignore, "keys", return_value=frozenset())):
             self.enterContext(p)
 
+    def test_storage_that_is_not_there_is_a_setup_problem(self):
+        with mock.patch.object(runtime, "ROOT", os.path.join(self.root, "gone")):
+            code, _, err, fetched = self.run_download([PAGE1])
+        self.assertEqual((code, fetched), (3, []))
+        self.assertIn("is it mounted?", err)
+
     def serve(self, pages, carts=None, errors=()):
         """bbs._fetch serving listing pages in turn and carts by URL (PNG by default); URLs in errors raise."""
         listing = list(pages)
@@ -276,6 +282,27 @@ class Download(helpers.StorageDir):
         self.assertEqual(self.stored(), {"pico8/x-2.p8.png", "scrapes/pico8/covers/x-2.p8.png",
                                          "scrapes/pico8/covers/x-10.p8.png", META})
         self.assertEqual(self.meta(), {"x-2.p8.png": {"name": "X Two", "developer": "Ex", "genre": "g"}})
+
+    def test_upgrade_keeps_the_qualifier_in_the_name_and_the_retargeted_title(self):
+        self.put("pico8/x-1.p8.png")
+        self.put(META, json.dumps({"x-1.p8.png": {"name": "X (Hack)", "qualifier": "Hack", "developer": "old"}}).encode())
+        with mock.patch.object(bbs, "retarget", return_value=[]) as retarget:
+            code, _, _, _ = self.run_download([page(("x-2", "X Two", "Ex")), EMPTY])
+        self.assertEqual(code, 0)
+        retarget.assert_called_once_with("pico8/x-1.p8.png", "pico8/x-2.p8.png", "X Two (Hack)")
+        self.assertEqual(self.meta(), {"x-2.p8.png": {"name": "X Two (Hack)", "qualifier": "Hack", "developer": "Ex"}})
+
+    def test_metadata_written_meanwhile_by_another_machine_is_kept(self):
+        real = bbs._download
+
+        def download(cart, tmp):  # another machine adds an entry while the carts come down
+            self.put(META, json.dumps({"other.p8.png": {"name": "Other", "genre": "g"}}).encode())
+            return real(cart, tmp)
+        with mock.patch.object(bbs, "_download", download):
+            code, _, _, _ = self.run_download([page(("molemole-1", "Mole Mole", "Adam Atomic")), EMPTY])
+        self.assertEqual(code, 0)
+        self.assertEqual(self.meta(), {"other.p8.png": {"name": "Other", "genre": "g"},
+                                       "molemole-1.p8.png": {"name": "Mole Mole", "developer": "Adam Atomic"}})
 
     def test_upgrade_moves_the_old_revisions_files_in_any_scrapes_folder(self):
         self.put("pico8/x-1.p8.png")

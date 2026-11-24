@@ -273,6 +273,14 @@ def pillow_image():
     return Image
 
 
+def _resizable(im):
+    """im in a mode Pillow resizes with a smoothing filter: palette, bilevel, CMYK and the like become RGBA when they
+    have transparency, else RGB (Pillow resizes P and 1 with nearest-neighbour, and can't save CMYK as PNG)."""
+    if im.mode in ("RGB", "RGBA", "L", "LA"):
+        return im
+    return im.convert("RGBA" if "transparency" in im.info or im.mode in ("PA", "RGBa", "La") else "RGB")
+
+
 def shrink_png(src, dst, box=ONION_MAX):
     """Write src as a PNG that fits in box (never enlarged), with Pillow or macOS sips."""
     try:
@@ -281,6 +289,7 @@ def shrink_png(src, dst, box=ONION_MAX):
         Image = None
     if Image:
         with Image.open(src) as im:
+            im = _resizable(im)
             im.thumbnail(box)
             im.save(dst, "PNG", optimize=True)
         return
@@ -327,6 +336,7 @@ def make_art(src, dst, box):
     from . import qoi
     with Image.open(src) as im:
         im.load()
+        im = _resizable(im)
         size = fit(im.size, box)
         if size != im.size:
             im = im.resize(size, Image.LANCZOS)

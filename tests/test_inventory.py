@@ -4,6 +4,7 @@ import json
 import os
 import stat as statmode
 import sys
+import tempfile
 import threading
 import unicodedata
 import unittest
@@ -34,7 +35,7 @@ class NoCacheTest(helpers.StorageFolder):
         self.build()
         with mock.patch.object(runtime, "ROOT", "/elsewhere"):
             self.assertIsNone(inventory.current())
-            with mock.patch.object(s3, "stat_sizes", return_value={}) as live:
+            with mock.patch.object(s3, "check_root"), mock.patch.object(s3, "stat_sizes", return_value={}) as live:
                 inventory.stat(["gba/a.zip"])
             live.assert_called_once()
 
@@ -165,6 +166,29 @@ class BucketCacheTest(helpers.DataDir):
         quiet(inventory.update)
         with mock.patch.object(runtime, "ENDPOINT", "http://minio"):
             self.assertIsNone(inventory.current())
+
+    def test_stat_reads_the_mirror_without_a_cache_and_needs_no_bucket(self):
+        mirror = self.enterContext(tempfile.TemporaryDirectory())
+        helpers.touch(os.path.join(mirror, "gba/a.zip"), b"12")
+        self.enterContext(mock.patch.object(runtime, "_mirror_root", mirror))
+        self.enterContext(mock.patch.object(s3, "s3_client", side_effect=AssertionError("read the bucket")))
+        self.assertEqual(inventory.stat(["gba/a.zip", "gba/gone.zip", "BIOS/x.bin"]), {"gba/a.zip": 2})
+
+    def test_stat_lists_the_bucket_without_a_cache_or_a_mirror(self):
+        self.enterContext(mock.patch.object(runtime, "_mirror_root", None))
+        self.assertEqual(inventory.stat(["gba/a.zip", "gba/gone.zip", "BIOS/x.bin"]), {"gba/a.zip": 1, "BIOS/x.bin": 3})
+
+
+class UnmountedShareTest(helpers.StorageFolder):
+    def setUp(self):
+        super().setUp()
+        self.enterContext(mock.patch.object(runtime, "ROOT", os.path.join(self.root.name, "unmounted")))
+
+    def test_reads_without_a_cache_raise_instead_of_listing_empty(self):
+        for read in (lambda: inventory.files("gba/"), lambda: inventory.stat(["gba/a.zip"]),
+                     lambda: inventory.etags("gba/")):
+            with self.assertRaisesRegex(FileNotFoundError, "unmounted is missing"):
+                read()
 
 
 class FolderMtimeTest(helpers.StorageFolder):
@@ -341,6 +365,29 @@ class FolderMtimeTest(helpers.StorageFolder):
         with mock.patch.object(os, "stat", side_effect=spy), mock.patch.object(s3, "check_root"):
             self.assertEqual(self.update(), ((0, 0, 0), []))
         self.assertNotIn(threading.main_thread(), threads)
+
+    def test_deleting_a_file_that_is_already_gone_counts_as_deleted(self):
+        self.update()
+        os.remove(os.path.join(self.root.name, "BIOS/x.bin"))
+        errors, _ = quiet(s3.delete_keys, ["BIOS/x.bin"])
+        self.assertEqual(errors, [])
+        self.assertNotIn("BIOS/x.bin", inventory.current().files)
+
+    def test_deleting_from_an_unmounted_share_is_an_error_and_keeps_the_cache(self):
+        self.update()
+        files = dict(inventory.current().files)
+        os.rename(self.root.name, self.root.name + "-unmounted")
+        self.addCleanup(os.rename, self.root.name + "-unmounted", self.root.name)
+        errors, _ = quiet(s3.delete_keys, ["gba/a.zip", "BIOS/x.bin"])
+        self.assertEqual([e["Key"] for e in errors], ["gba/a.zip", "BIOS/x.bin"])
+        self.assertEqual(inventory.current().files, files)
+
+    def test_another_os_error_deleting_is_still_an_error(self):
+        self.update()
+        with mock.patch.object(os, "remove", side_effect=PermissionError("denied")):
+            errors, _ = quiet(s3.delete_keys, ["BIOS/x.bin"])
+        self.assertEqual(errors, [{"Key": "BIOS/x.bin", "Message": "denied"}])
+        self.assertIn("BIOS/x.bin", inventory.current().files)
 
     def test_own_writes_into_trusted_folders_keep_them_trusted(self):
         self.update()

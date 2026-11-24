@@ -410,7 +410,8 @@ def convert_command(args):
             if not ui.has_terminal():
                 ui.fail("Pass --yes to convert without a terminal to confirm on", 2)
             if not ui.confirm(f"Move {len(planned)} files" + (f" and delete the old media in {folders} folders?" if media else "?")):
-                return 1
+                print(ui.yellow("↩️  Kept everything as it was"))
+                return 0
         step, bar = _progress(len(planned) + len(media))
         conflicts, failures = [], []
         for moves in (save_moves, bios_moves, rom_moves):
@@ -453,7 +454,8 @@ def clean_command(args):
         if not ui.has_terminal():
             ui.fail("Pass --yes to delete without a terminal to confirm on", 2)
         if not ui.confirm(f"Delete the media in {folders} folders?"):
-            return 1
+            print(ui.yellow("↩️  Kept the media"))
+            return 0
     failures = remove_media(media, base)
     for path, err in failures:
         ui.warn(f"could not delete {path}: {err}")

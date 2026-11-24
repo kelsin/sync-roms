@@ -118,6 +118,8 @@ def prefix_playlists(dest, disc_dir, skip=()):
     """Point the playlists directly in dest at their discs in dest/disc_dir, except those in skip (paths written already
     prefixed). Returns how many it rewrote."""
     rewritten = 0
+    if not os.path.isdir(dest):  # a system's folder exists only once a ROM went into it
+        return rewritten
     skip = {os.path.normpath(p) for p in skip}
     for name in sorted(os.listdir(dest)):
         path = os.path.join(dest, name)

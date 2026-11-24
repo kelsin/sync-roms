@@ -633,6 +633,19 @@ class ConvertCommandTest(unittest.TestCase):
                 for _, later in checks[i + 1:]:
                     self.assertNotIn(later, self.err.getvalue())
 
+    def test_card_name_resolves_to_its_mounted_folder(self):
+        with open(os.path.join(self.data, "cards.json"), "w") as f:
+            self.json.dump({"NOSUCHCARD7": {"device": "anbernic-rg-34xxsp", "layout": "knulli"}}, f)
+        for command in (convert.convert_command, convert.clean_command):
+            self.err.truncate(0)
+            self.err.seek(0)
+            args = self.argparse.Namespace(card="NOSUCHCARD7", layout="nextui", dry_run=False, yes=True)
+            with self.redirect_err(self.err), self.assertRaises(SystemExit) as caught:
+                command(args)
+            self.assertEqual(caught.exception.code, 2)
+            self.assertIn("No folder /Volumes/NOSUCHCARD7: give the card's mounted folder, e.g. `/Volumes/NOSUCHCARD7`",
+                          self.err.getvalue())
+
     def test_conflicts_reported_and_layout_still_saved(self):
         touch(os.path.join(self.base, "Roms", "Game Boy Advance (GBA)", "Game.zip"), b"other")
         self.assertEqual(self.run_cmd(), 0)
@@ -657,6 +670,26 @@ class ConvertCommandTest(unittest.TestCase):
             self.assertEqual(self.run_cmd(), 3)
         self.assertEqual(self.layout(), "knulli")
         self.assertIn("run convert again", self.err.getvalue())
+
+    def decline(self, command):
+        with mock.patch("sync_roms.ui.has_terminal", return_value=True), mock.patch("sync_roms.ui.confirm", return_value=False), \
+                self.redirect(self.out), self.redirect_err(self.err):
+            return command()
+
+    def test_declining_the_convert_keeps_everything_and_exits_0(self):
+        args = self.argparse.Namespace(card=self.base, layout="nextui", dry_run=False, yes=False)
+        self.assertEqual(self.decline(lambda: convert.convert_command(args)), 0)
+        self.assertIn("Kept", self.out.getvalue())
+        self.assertFalse(self.moved())
+        self.assertEqual(self.layout(), "knulli")
+
+    def test_declining_the_clean_keeps_the_media_and_exits_0(self):
+        self.set_card({"device": "anbernic-rg-34xxsp", "layout": "nextui"})
+        touch(os.path.join(self.base, "roms", "gb", "images", "a.png"))
+        args = self.argparse.Namespace(card=self.base, dry_run=False, yes=False)
+        self.assertEqual(self.decline(lambda: convert.clean_command(args)), 0)
+        self.assertIn("Kept", self.out.getvalue())
+        self.assertTrue(os.path.exists(os.path.join(self.base, "roms", "gb", "images", "a.png")))
 
     def test_no_yes_and_no_terminal_fails(self):
         self.assertEqual(self.run_cmd(yes=False), 2)

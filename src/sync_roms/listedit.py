@@ -130,7 +130,26 @@ def series_keys(game_set, series):
     return {k for g in game_set["games"] if g.get("series") == series for k in [g["bucket"], *g.get("files", [])]}
 
 
+def pick_name(title, names, current, noun, what):
+    """Pick a name from a list: "" for none (first row), a known name, or a new one typed (last row); None when
+    cancelled (an empty new name too). The cursor starts on current."""
+    i = picker.filter_list(title, ["(none)", *names, "new…"], hint="Enter pick · Esc cancel",
+                           cursor=next((n + 1 for n, x in enumerate(names) if x.casefold() == (current or "").casefold()), 0))
+    if i is None:
+        return None
+    if i == 0:
+        return ""
+    if i <= len(names):
+        return names[i - 1]
+    typed = ui.ask(f"🏷️  New {noun} for {what}: ", cancellable=True)
+    typed = (typed or "").strip()
+    if not typed:
+        return None
+    return next((n for n in names if n.casefold() == typed.casefold()), typed)  # "cave" is the existing "Cave"
+
+
 def ask_category(games, what):
+    """The category typed for what, "" for none."""
     cats = list(dict.fromkeys(g["category"] for g in games if g.get("category")))
     if cats:
         print(ui.dim(f"  Categories: {', '.join(cats)}"))
@@ -257,6 +276,17 @@ def diff_lists(before, after):
             lines += [f"- {game_line(old[k])}" for k in old if k not in new]
             lines += [f"~ {game_line(new[k])}: category {old[k].get('category') or 'none'} → {new[k].get('category') or 'none'}"
                       for k in new if k in old and (old[k].get("category") or "") != (new[k].get("category") or "")]
+            for k in new:
+                if k not in old:
+                    continue
+                if (old[k].get("series") or "") != (new[k].get("series") or ""):
+                    lines.append(f"~ {game_line(new[k])}: series {old[k].get('series') or 'none'} → {new[k].get('series') or 'none'}")
+                other = sorted(f for f in set(old[k]) | set(new[k])
+                               if f not in ("category", "series") and old[k].get(f) != new[k].get(f))
+                if other:
+                    lines.append(f"~ {game_line(new[k])}: {', '.join(other)} changed")
+            if not lines and [g["bucket"] for g in a["games"] if g.get("bucket")] != [g["bucket"] for g in b["games"] if g.get("bucket")]:
+                lines.append("order changed")
             found.append(("changed", sid, lines or ["edited"]))
     return found
 
@@ -281,6 +311,7 @@ def edit_menu(noun, before, working, state, emoji, art, delete_note, new_item, o
     starting with a space (or ""); new_item(working) asks for a new list, adds it and returns its id (None when
     cancelled); open_item(item) edits one; save(found) saves the reviewed changes (diff_lists) and returns whether it
     did (False, its error noted, goes back to the menu). Without empty_ok, a list with no games can't be saved."""
+    pos = 0
     while True:
         ids = sorted(working, key=lambda x: working[x]["name"].lower())
         n = len(ids)
@@ -290,18 +321,21 @@ def edit_menu(noun, before, working, state, emoji, art, delete_note, new_item, o
                   + [f"➕ New {noun}", "✅ Done (review & save)", "🚪 Quit without saving"])
         extras = [[("  " + ("new" if x not in before else "edited"), "cyan")] if x in edited else [] for x in ids] + [[], [], []]
         i = n + 1 if state["review"] else picker.filter_list(f"✏️  Which {noun}?  (Esc = review & save)", labels, extras=extras,
-                                                    hotkeys=(edit.DELETE_KEY,), hint="/ filter · Enter open · d delete · Esc review",
+                                                    hotkeys=(edit.DELETE_KEY,), hint="/ filter · Enter open · d delete · Esc review", cursor=pos,
                                                     preview=lambda k: previews.collection(art({**working[ids[k]], "id": ids[k]})) if k < n else None)
         if isinstance(i, tuple):
+            pos = i[1]
             if i[1] < n:
                 x = ids[i[1]]
                 if ui.confirm(f"🗑️  Delete {noun} {emoji({**working[x], 'id': x})} {working[x]['name']}?{delete_note(x)}", default=False):
                     del working[x]
             continue
         if i is not None and i < n:
+            pos = i
             open_item(working[ids[i]])
             continue
         if i == n:
+            pos = i
             x = new_item(working)
             if x:
                 open_item(working[x])
@@ -320,7 +354,7 @@ def edit_menu(noun, before, working, state, emoji, art, delete_note, new_item, o
             state["review"] = False
             continue
         print_changes(found)
-        answer = ui.choose(question, "sed", "s", "s save · e keep editing · d discard")
+        answer = ui.choose(question, "sed", "s", "s save · e keep editing · d discard", esc="e")
         if answer == "e":
             state["review"] = False
             continue

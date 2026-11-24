@@ -31,11 +31,11 @@ class OpsTest(helpers.DataDir):
             p = os.path.join(self.src, system, game, name)
             helpers.touch(p, data)
             e = {"path": p, "name": name, "kind": saves.classify(name)[1]}
-            if rel:
+            if rel is not None:
                 e.update(rel=rel, core="mGBA")
             entries.append(e)
         now = datetime.datetime(2026, 1, day, 0, 0, 0)
-        return saves.write_stash(card, "muos" if rel else "onion", system, game, "gpSP", entries, now=now)
+        return saves.write_stash(card, "muos" if rel is not None else "onion", system, game, "gpSP", entries, now=now)
 
     def meta(self, d):
         with open(os.path.join(d, "stash.json")) as f:
@@ -141,6 +141,11 @@ class OpsTest(helpers.DataDir):
         new = saves_manage.move(self.row_for(d), GB, [GB])
         self.assertEqual([f["rel"] for f in self.meta(new)["files"]], ["GB/Hacks", "GB/Hacks"])
 
+    def test_move_pickles_keeps_an_empty_rel_empty(self):
+        d = self.stash(rel="")
+        new = saves_manage.move(self.row_for(d), GB, [GB])
+        self.assertEqual([f["rel"] for f in self.meta(new)["files"]], ["", ""])
+
     def test_move_refuses_a_pickles_stash_without_muos_folder(self):
         d = self.stash(rel="GBA/Hacks")
         before = self.meta(d)
@@ -218,6 +223,14 @@ class OpsTest(helpers.DataDir):
         got = {(r["game"], r["stashed"][:10]) for r, p in zip(rows, picks) if p}
         self.assertEqual(got, {("Game", "2026-01-01"), ("Game", "2026-01-02")})
 
+    def test_prune_keeps_every_stash_of_a_kept_run(self):
+        def row(core, stashed, card="X"):
+            return {"system": "gba", "game": "Game", "stashed": stashed, "card": card, "files": [{"core": core}]}
+        rows = [row("a", "2026-01-02"), row("b", "2026-01-02"), row("a", "2026-01-01")]  # one run made two stashes
+        self.assertEqual(saves_manage.prune_picks(rows, 1), [False, False, True])
+        rows.append(row("a", "2026-01-02", card="Y"))  # another card's run at the same time is its own run
+        self.assertEqual(saves_manage.prune_picks(rows, 2), [False, False, True, False])
+
     def test_prune_skips_unreadable(self):
         bad = os.path.join(saves.stash_root(), "gba", "Game", "20260101-000000-X")
         helpers.touch(os.path.join(bad, "Game.srm"), "abc")
@@ -273,6 +286,32 @@ class ManageCommandTest(helpers.Cmd):
         code, out, err = self.run_cmd("saves", "manage")
         self.assertEqual(code, 0, err)
         self.assertIn("No stashed saves", out)
+
+    def test_w_shows_the_new_label_in_the_row_at_once(self):
+        self.stash()
+        seen = []
+
+        def label(labels):
+            kw = self.calls[0][2]
+            kw["on_note"](0, "boss")
+            seen.append(kw["extras"][0][-1])
+            kw["on_note"](0, "")
+            seen.append(kw["extras"][0][-1])
+            return None
+        self.lists(label)
+        code, out, err = self.run_cmd("saves", "manage")
+        self.assertEqual(code, 0, err)
+        self.assertEqual(seen, [("  boss", "dim"), ("  ", "dim")])
+
+    def test_columns_are_separated_and_the_hint_has_no_second_help(self):
+        self.stash()
+        self.lists(None)
+        code, out, err = self.run_cmd("saves", "manage")
+        self.assertEqual(code, 0, err)
+        kw = self.calls[0][2]
+        self.assertTrue(all(text.startswith("  ") for text, _ in kw["extras"][0]), kw["extras"][0])
+        self.assertNotIn("? help", kw["hint"])
+        self.assertEqual(kw["hint"], saves_manage.HINT)
 
     def test_delete_highlighted_after_confirm(self):
         d = self.stash()
@@ -354,9 +393,22 @@ class ManageCommandTest(helpers.Cmd):
     def test_prune_rejects_a_superscript_digit(self):
         self.stash()
         self.lists(("p", 0), None)
-        with mock.patch.object(ui, "ask", lambda *a: "\u00b2"):
+        with mock.patch.object(ui, "ask", lambda *a, **k: "\u00b2"):
             code, out, err = self.run_cmd("saves", "manage")
         self.assertEqual(code, 0, err)
+
+    def test_esc_at_the_keep_question_picks_nothing(self):
+        self.stash(day=1)
+        self.stash(day=2)
+
+        def after(labels):
+            self.assertEqual(self.calls[-1][2]["session"]["sel"], [False, False])  # keep-1 would pick the older one
+            return None
+        self.lists(("p", 0), after)
+        with mock.patch.object(ui, "ask", return_value=None) as asked:
+            code, out, err = self.run_cmd("saves", "manage")
+        self.assertEqual(code, 0, err)
+        self.assertTrue(asked.call_args.kwargs["cancellable"])
 
     def test_dry_run_move_counts_a_stash_once(self):
         self.stash()
@@ -387,7 +439,7 @@ class ManageCommandTest(helpers.Cmd):
             self.assertEqual(self.calls[-1][2]["session"]["sel"], [False, True, True])
             return ("d", 0)
         self.lists(("p", 0), picks, None)
-        with mock.patch.object(ui, "ask", lambda *a: "1"), mock.patch.object(ui, "confirm", lambda *a, **k: True):
+        with mock.patch.object(ui, "ask", lambda *a, **k: "1"), mock.patch.object(ui, "confirm", lambda *a, **k: True):
             code, out, err = self.run_cmd("saves", "manage")
         self.assertEqual(code, 0, err)
         self.assertEqual([os.path.exists(d) for d in (old, mid, new)], [False, False, True])

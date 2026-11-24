@@ -7,7 +7,7 @@ from unittest import mock
 import helpers  # noqa: F401  (imports isolate first)
 import test_cli_sync
 from helpers import DataDir, touch
-from sync_roms import cli, s3, store, ui
+from sync_roms import cli, runtime, s3, store, ui
 
 GBA = {"name": "Game Boy Advance", "bucket": "gba", "folders": {"esde": "gba", "spruce": "GBA"},
        "bios": {"files": ["gba_bios.bin"]}, "games": []}
@@ -104,6 +104,19 @@ class GuestSyncTest(DataDir):
         self.assertEqual(self.picks(), {"gba": ["gba/Game.zip"]})
         self.assertNotIn("excluded", self.saved())
         self.assertNotIn("systems_off", self.saved())
+
+    def test_guest_seeding_reads_sizes_from_the_bucket_past_the_mirror(self):
+        self.save(guest=True)
+        self.card_file("ROMs/gba/Game.zip")
+        mirror = tempfile.TemporaryDirectory()
+        self.addCleanup(mirror.cleanup)
+        roots = []
+        def stat_from(keys):
+            roots.append(s3.read_root())
+            return stat_sizes(keys)
+        with mock.patch.object(runtime, "_mirror_root", mirror.name):
+            self.sync(dry_run=True, patches=((s3, {"stat_sizes": stat_from}),))
+        self.assertEqual(roots[0], None)  # the seeding, from storage itself
 
     def test_a_guest_dry_run_plans_from_the_seed_and_saves_nothing(self):
         self.save(guest=True, games=pick({"nes": ["nes/X.zip"]}))

@@ -122,6 +122,22 @@ class ReviewTest(ReviewBase):
         self.review()
         self.assertEqual(seen, [False])
 
+    def test_back_is_labelled_as_undoing_the_last_ignore(self):
+        self.assertIn("[b] undo last ignore", scrape_review.PROMPT)
+
+    def test_answers_are_accepted_in_either_case(self):
+        self.answers("K", "S", "", "Q")
+        self.patch(scrape_online, "make_client", lambda: object())
+        self.patch(scrape_review, "_search", lambda *a, **k: False)
+        self.assertEqual(self.review(), 0)
+        self.assertNotIn("Unknown answer", self.out.getvalue())
+
+    def test_capital_i_still_ignores_all_the_rest(self):
+        self.answers("I", "y")
+        self.patch(ui, "confirm", lambda *a, **k: True)
+        self.review()
+        self.assertEqual(sum(len(v) for e in self.added for v in e.values()), len(KEYS))
+
     def test_prompt_lists_translated(self):
         self.assertIn("[t]ranslated", scrape_review.PROMPT)
 

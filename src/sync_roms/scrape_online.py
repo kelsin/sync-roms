@@ -454,7 +454,7 @@ def _scrape_rom(client, system, item, tmp, skip, stop, game_id):
             except screenscraper.MediaRefused as e:  # too large or off screenscraper.fr: skip just this file
                 print(ui.yellow(f"  ⚠️  {system['bucket']}/{rom}: {mtype} skipped ({e})"))
                 continue
-            except screenscraper.Transient as e:
+            except (screenscraper.Transient, screenscraper.RateLimited) as e:
                 failing.append((mtype, e))
                 continue
             ext = _media_ext(dest, mtype)
@@ -474,7 +474,7 @@ def _scrape_rom(client, system, item, tmp, skip, stop, game_id):
         return "unknown", (how, "missing")
     except screenscraper.Stopped:
         return "skipped", None
-    except screenscraper.Transient as e:
+    except (screenscraper.Transient, screenscraper.RateLimited) as e:
         return "unreachable", e
     except ROM_ERRORS as e:
         return "failed", _reason(e)
@@ -511,7 +511,7 @@ def _stop_message(e, rerun, counts=(0, 0)):
                 "to continue where it stopped.")
     if isinstance(e, screenscraper.Refused):
         return f"⛔ {e}. Everything scraped so far is saved; run `{rerun}` again to continue where it stopped."
-    if isinstance(e, screenscraper.Transient):
+    if isinstance(e, (screenscraper.Transient, screenscraper.RateLimited)):
         return (f"🔌 ScreenScraper couldn't be reached for {UNREACHABLE_STOP} ROMs in a row; the last error: {e}. Everything "
                 f"scraped so far is saved; run `{rerun}` again later to continue where it stopped.")
     if isinstance(e, screenscraper.TooManyUnrecognized):
@@ -1101,7 +1101,7 @@ def match_command(args):
         note = f"; the {kept} media file(s) already there are kept" if kept else ""
         question = (f"🖼️  Scrape {name}/{args.rom} as ScreenScraper game {game_id} and write its media and metadata to "
                     f"{where}{note} ?")
-    if not getattr(args, "confirmed", False) and not ui.confirm(question, default=False):
+    if not getattr(args, "confirmed", False) and not ui.confirm(question, default=not replace):
         print(ui.yellow("👋 Cancelled."))
         return 0
     print(f"🔗 {name}/{args.rom} → ScreenScraper game {game_id}")

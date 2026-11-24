@@ -73,6 +73,25 @@ class PlanRomUploadTest(unittest.TestCase):
         self.assertEqual([(k, s) for k, _, s in changed], [("gba/c.gba", 30)])
         self.assertEqual([(k, s) for k, _, s in same], [("gba/b.gba", 20)])
 
+    def test_a_name_storage_finds_by_another_case_or_unicode_form_is_the_same_file(self):
+        import unicodedata
+        nfd = lambda s: unicodedata.normalize("NFD", s)  # noqa: E731
+        for local, stored in (("Game.gba", "game.gba"), ("Pok\u00e9mon.gba", nfd("Pok\u00e9mon.gba"))):
+            for stored_size, want in ((10, "same"), (99, "changed")):
+                with self.subTest(local=local, stored_size=stored_size), tempfile.TemporaryDirectory() as root:
+                    touch(root, local, 10)
+                    new, changed, same = upload.plan_rom_upload(root, "gba", {f"gba/{stored}": stored_size})
+                    self.assertEqual(new, [])
+                    got = {"same": same, "changed": changed}[want]
+                    self.assertEqual([(k, s) for k, _, s in got], [(f"gba/{stored}", 10)])  # the stored spelling
+                    self.assertEqual(os.path.basename(got[0][1]), local)  # the local file is what goes up
+
+    def test_names_that_fold_together_locally_are_matched_exactly(self):
+        with mock.patch.object(upload, "local_roms", lambda *a: {"a.gba": 10, "A.gba": 10}):
+            new, changed, same = upload.plan_rom_upload("/x", "gba", {"gba/a.gba": 10})
+        self.assertEqual([k for k, _, _ in new], ["gba/A.gba"])
+        self.assertEqual([k for k, _, _ in same], ["gba/a.gba"])
+
     def test_files_come_in_name_order_within_each_folder_as_walked(self):
         with tempfile.TemporaryDirectory() as root:
             walked = [(root, ["b.gba", "a.gba"]), (os.path.join(root, "Z"), ["d.gba", "c.gba"]), (os.path.join(root, "A"), ["e.gba"])]
@@ -281,8 +300,8 @@ class OverwriteListTest(unittest.TestCase):
             with self.subTest(replace=replace):
                 self.assertEqual(self.overwrites(replace), want + ["\x1b[33m     … and 2 more\x1b[0m"])
 
-    def test_upload_asks_with_yes_as_the_default_and_replace_with_no(self):
-        for replace, default in ((False, True), (True, False)):
+    def test_upload_and_replace_ask_with_no_as_the_default(self):
+        for replace, default in ((False, False), (True, False)):
             with self.subTest(replace=replace), tempfile.TemporaryDirectory() as root:
                 touch(root, "new.gba", 10)
                 ask = mock.Mock(return_value=False)
@@ -291,9 +310,49 @@ class OverwriteListTest(unittest.TestCase):
                         mock.patch.object(upload.picker, "filter_list", lambda *a, **k: 0), \
                         mock.patch.object(inventory, "files", lambda prefix: {}), \
                         mock.patch.object(inventory, "etags", lambda prefix: {}), \
-                        mock.patch.object(ui, "confirm", ask), contextlib.redirect_stdout(io.StringIO()):
+                        mock.patch.object(ui, "confirm", ask), mock.patch.object(ui, "has_terminal", return_value=True), \
+                        contextlib.redirect_stdout(io.StringIO()):
                     self.assertEqual(upload.upload_command(args), 0)
                 self.assertEqual(ask.call_args.kwargs["default"], default)
+
+
+class UploadConfirmTest(unittest.TestCase):
+    """Plain upload asks before it uploads or overwrites: Enter and no terminal change nothing, --yes goes ahead."""
+
+    def run_upload(self, assume_yes, terminal, answer=""):
+        with tempfile.TemporaryDirectory() as root:
+            touch(root, "new.gba", 10)
+            args = argparse.Namespace(upload=root, replace=False, dry_run=False)
+            ran = mock.Mock(return_value=0)
+            with mock.patch.object(store, "load_manifest", lambda: {"systems": SYSTEMS}), \
+                    mock.patch.object(upload.picker, "filter_list", lambda *a, **k: 0), \
+                    mock.patch.object(inventory, "files", lambda prefix: {}), \
+                    mock.patch.object(upload, "run_uploads", ran), \
+                    mock.patch.object(ui, "ASSUME_YES", assume_yes), mock.patch.object(ui, "has_terminal", return_value=terminal), \
+                    mock.patch.object(ui, "_input", lambda prompt: answer), contextlib.redirect_stdout(io.StringIO()):
+                code = upload.upload_command(args)
+        return code, ran
+
+    def test_enter_uploads_nothing(self):
+        code, ran = self.run_upload(False, True)
+        self.assertEqual(code, 0)
+        ran.assert_not_called()
+
+    def test_y_uploads(self):
+        code, ran = self.run_upload(False, True, "y")
+        self.assertEqual(code, 0)
+        ran.assert_called_once()
+
+    def test_yes_uploads(self):
+        code, ran = self.run_upload(True, False)
+        self.assertEqual(code, 0)
+        ran.assert_called_once()
+
+    def test_no_terminal_without_yes_exits_2(self):
+        with self.assertRaises(SystemExit) as raised, contextlib.redirect_stderr(io.StringIO()) as err:
+            self.run_upload(False, False)
+        self.assertEqual(raised.exception.code, 2)
+        self.assertIn("Pass --yes to upload without a terminal to confirm on", err.getvalue())
 
 
 class RenameChainTest(unittest.TestCase):

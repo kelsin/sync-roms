@@ -372,16 +372,23 @@ def run(args):
         if not cards:
             ui.failure(ui.red("❌ no SD card found"))
             return 1
+        if args.dry_run:
+            print(ui.yellow("🧪 Dry run: nothing is downloaded, erased or written"))
         i = picker.filter_list("🃏 Which SD card?", [_disk_label(d) for d in cards], hint=HINT)
         if i is None:
             return 0
         disk = cards[i]
         size = "?" if disk.size is None else ui.human_size(disk.size)
         volumes = f": {', '.join(disk.volumes)}" if disk.volumes else ""
-        print(ui.yellow(f"⚠️  Everything on {disk.id} ({size}, {disk.name}{volumes}) will be erased."))
-        if ui.ask(f"Type {disk.id} to flash it: ").strip() != disk.id:
+        if args.dry_run:
+            print(ui.yellow(f"⚠️  {disk.id} ({size}, {disk.name}{volumes}) would be erased."))
+            prompt = f"Type {disk.id} to see the rest of the dry run (nothing is written): "
+        else:
+            print(ui.yellow(f"⚠️  Everything on {disk.id} ({size}, {disk.name}{volumes}) will be erased."))
+            prompt = f"Type {disk.id} to flash it: "
+        if ui.ask(prompt).strip() != disk.id:
             ui.failure(ui.red("❌ Not flashed"))
-            return 1
+            return 0
         if args.dry_run:
             print(f"Would download {key} ({ui.human_size(gz_size)}) and write it to {disk.id}")
             return 0

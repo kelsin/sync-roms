@@ -100,8 +100,9 @@ def remove_string(text, name):
     return re.sub(rf'[ \t]*{_string_setting(name).pattern}\n?', "", text)
 
 
-def plan_collections(layout_name, base, wanted, owned):
-    """What to write and delete on the card for the wanted {name: lines}, given the names sync-roms owns."""
+def plan_collections(layout_name, base, wanted, owned, keep=False):
+    """What to write and delete on the card for the wanted {name: lines}, given the names sync-roms owns. keep
+    (--no-delete): the retired ones stay as they are (see retired)."""
     plan = {"writes": [], "deletes": [], "enable": set(), "disable": set(), "owned": [], "warnings": []}
     for name in sorted(wanted):
         path = collection_path(layout_name, base, name)
@@ -114,21 +115,26 @@ def plan_collections(layout_name, base, wanted, owned):
             plan["writes"].append((path, text))
         plan["enable"].add(name)
     plan["owned"] = sorted(plan["enable"])
-    for name in retired(plan, owned):
+    for name in retired(plan, owned, keep):
         path = collection_path(layout_name, base, name)
         if os.path.exists(path):
             plan["deletes"].append(path)
     return plan
 
 
-def retired(plan, owned):
+def retired(plan, owned, keep=False):
     """The names sync-roms owns that plan doesn't enable, added to its "disable"; a recorded name that isn't a valid
-    collection name is left out with a warning in plan."""
+    collection name is left out with a warning in plan. With keep (--no-delete) none is returned or disabled: they are
+    listed in plan["kept"] and stay in its "owned", so a later sync without --no-delete removes them."""
     names = []
     for name in dict.fromkeys(owned):
         if not name or safe_name(name) != name:
             plan["warnings"].append(f"ignoring the recorded collection name {name!r}; it isn't a valid name")
         elif name not in plan["enable"]:
+            if keep:
+                plan.setdefault("kept", []).append(name)
+                plan["owned"] = sorted({*plan["owned"], name})
+                continue
             plan["disable"].add(name)
             names.append(name)
     return names

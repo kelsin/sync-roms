@@ -124,7 +124,7 @@ On `esde` and `emudeck` cards every Vita game zip in `psvita/` gets a `.psvita` 
 
 ### Unattended use
 
-`--yes` answers every prompt with its default (deleting local files stays "no"; `clean` commands do delete with it). A first sync can skip the setup picker:
+`--yes` answers every prompt with its default (deleting local files stays "no"; `upload`, `clean` commands and `themes publish` go ahead with it, and without it ask with default no and exit 2 without a terminal). A first sync can skip the setup picker:
 
 ```bash
 sync-roms sync /Volumes/SD --device anbernic-rg-35xxsp --layout knulli --yes
@@ -135,7 +135,7 @@ Without a terminal and without those flags the pickers fail with the flag to use
 
 Exit codes: `0` done (or nothing to do, or you declined), `1` some files failed, `2` bad usage, `3` setup problem (credentials, storage, missing tool, unreadable data file), `130` interrupted. Errors go to stderr.
 
-`--dry-run` shows the same free space as a sync (counting the ROMs it would delete as freed) and says when the downloads would not fit. `sync --dry-run --json` prints `{downloads, delete, kept, theme_remove, rename, missing, stale_media, totals, free_space}`: `downloads` lists every file with its `kind` (scraped media as `scrape`, counted in `totals`), `kept` is what `--no-delete` keeps, `theme_remove` the PyUI theme folders a `spruce` card would lose, `rename` holds `{from, to}` pairs, `missing` has `roms` and `bios`, and `free_space` is in bytes.
+`--dry-run` shows the same free space as a sync (counting the ROMs it would delete as freed) and says when the downloads would not fit. `sync --dry-run --json` prints `{downloads, delete, kept, theme_remove, rename, missing, stale_media, totals, free_space}`: `downloads` lists every file with its `kind` (scraped media as `scrape`, counted in `totals`), `kept` lists the card's ROMs outside the selection that `--no-delete` keeps (not the retired collections it keeps), `theme_remove` the PyUI theme folders a `spruce` card would lose, `rename` holds `{from, to}` pairs, `missing` has `roms` and `bios`, and `free_space` is in bytes.
 
 The other `--json` documents: `devices` is a list of `{id, name, soc, systems, firmwares}` (`systems` a count), or one device's entry with its `systems` and `system_names`; `layouts` is the `layouts.json` entries plus `id` and `devices`; `games list` is `{full_systems, sets, games}`, each game `{system, bucket, title}`; `cards list` is a list of `{name, device, layout, size, used, sized, full_systems, games, extras, guest, surprise, theme, collections, raofflineproxy}`; `diff` is `{system, only_local, only_bucket}`, the last two lists of `{path, size}`.
 
@@ -154,7 +154,7 @@ Every list works the same way, vim-style with Emacs line editing:
 | `Tab` (while filtering) | keep the filter and go back to moving |
 | `Esc` / `^G` | clear the filter, then go back / cancel |
 | `Space` `Tab` | toggle (lists with checkboxes) |
-| `a` `o` `u` | all or none shown / cycle view (all rows, only those that are on, only those you changed) / revert (lists with checkboxes) |
+| `a` `o` `u` | all or none shown / cycle view (all rows, only those that are on, only those you changed) / revert (lists with checkboxes; asks first when more than one row changed, the rows a filter hides included) |
 | `?` | every key of the list, including the list's own (scroll with `j` `k`; `Esc`, `q` or `?` closes it) |
 
 The hint line under the filter starts with `? help`. The bottom line ends with the highlighted row's number and how many rows the filter shows (`row 12 · 340/3700 shown`) when the list's own status (a card's size, say) leaves room for it. Leaving a game list for `s`, `m`, `p` or `v` and coming back keeps your row, filter and view when the list shows the same games.
@@ -174,7 +174,7 @@ Every mode is a command (plain `sync-roms [CARD]` syncs a card):
 | `collections edit` | edit your [collections](#collections-collections-edit) of favourite games | |
 | `themes update` | put the latest Art Book Next for ES-DE (for collections' [theme art](#theme-art)) and every [PyUI theme](#spruce) (needs `7z`) in storage | |
 | `themes build [STYLE...] [--palette NAME\|--all-palettes] [--out DIR]` | build the custom spruce theme styles (Pixel Consoles, Pixel Controllers, ToTK - James) in each chosen palette (without a flag: picked in a list, or the saved `custom_theme_palettes`; `ToTK - James` has no palette and is built once, from the ToTK theme in storage, so naming only it asks for none) from the SPRUCE base theme in storage into the cache, or into `DIR` with `--out`; writes nothing to storage | |
-| `themes publish [STYLE...] [--palette NAME\|--all-palettes]` | build the custom spruce themes in each chosen palette (chosen as for `themes build`) and make their `os/spruceos/themes/<theme>/` folders in storage match: upload what changed and delete what the build no longer makes, after one question (`--yes` answers it, `--dry-run` only shows the plan) | |
+| `themes publish [STYLE...] [--palette NAME\|--all-palettes]` | build the custom spruce themes in each chosen palette (chosen as for `themes build`) and make their `os/spruceos/themes/<theme>/` folders in storage match: upload what changed and delete what the build no longer makes, after one question (default no; `--yes` answers it, without a terminal and `--yes` it exits 2; `--dry-run` only shows the plan) | |
 | `themes palettes` | write the overview image of all 28 palettes (a numbered mock list screen for each) and open it | |
 | `themes pick` | choose the PyUI themes every spruce card gets by default (`spruce_themes` setting) | |
 | `download pico8` | add the [PICO-8 BBS Featured carts](#pico-8-carts-from-the-bbs-download-pico8) storage doesn't have, and newer revisions of those it has | |
@@ -208,10 +208,10 @@ For every command they make sense with:
 
 | Flag | Description |
 | --- | --- |
-| `-n`, `--dry-run` | Show what would be done (a sync: what would be downloaded, with total sizes; `mirror`: what it would download and delete) and change nothing. Commands that only read (`diff`, `check`, `doctor`, `guide`, `cache`, `config` (except `config apply`, which lists what it would set), `completion`, `games list`/`export`/`sets list`) or can't honor it (`edit`, `scrape review`, `scrape missing`, ...) refuse it with exit 2 |
-| `-y`, `--yes` | Answer prompts with their default |
+| `-n`, `--dry-run` | Show what would be done (a sync: what would be downloaded, with total sizes; `mirror`: what it would download and delete) and change nothing. Commands that only read (`diff`, `check`, `doctor`, `guide`, `cache`, `config` (except `config apply`, which lists what it would set), `completion`, `themes pick`/`build`/`palettes`, `games list`/`export`/`sets list`) or can't honor it (`edit`, `scrape review`, `scrape missing`, ...) refuse it with exit 2 |
+| `-y`, `--yes` | Answer prompts with their default. It is the confirmation of `upload` (overwrites), `clean scrapes`, `convert` (removes the originals), `cards clean`, `cards convert`, `cards install` (deletes the card's other files), `cards delete`, `cards export` (overwrites FILE), `saves manage` (deletes the picked stashes), `themes publish` (stale theme files) and `download pico8` (`upload`, `convert`, `clean scrapes`, `cards install` and `themes publish` ask with default no otherwise, and exit 2 without a terminal) |
 | `--json` | `devices`, `layouts`, `games list`, `cards list`, `diff` and `sync --dry-run`: one JSON document on stdout, nothing else (pass `--device`/`--layout` so no picker is needed; `diff` also needs `--system ID` unless the folder is named after a system) |
-| `--quiet` | Print only errors (failed files and a sync's failure count included, and `check`'s problems), warnings and `--json` data, all on stderr except the JSON; prompts are asked on stderr |
+| `--quiet` | Print only errors (failed files and a sync's failure count included, and `check`'s problems), warnings and `--json` data, all on stderr except the JSON; commands whose whole output is the answer (`doctor`, `config show`, `cache`, `cards list`, `games list`, `games sets list`, ...) still print it; prompts are asked on stderr |
 | `--verbose` | Also print the effective settings and where each came from, on stderr |
 | `--profile P`, `--write-profile P`, `--bucket B`, `--root DIR`, `--endpoint URL` | Override those settings for this run. Precedence: flag, then environment variable, then `settings.json`, then the default |
 | `--version` | Print the version |
@@ -277,6 +277,7 @@ A card is a folder name (the card root's name) with a remembered device, layout 
 - `cards convert [CARD] --layout NAME` moves the mounted card's ROMs, BIOS and RetroArch saves and states to another layout's folders and saves the layout (the device stays). `--dry-run` previews, `--yes` skips the question. A progress bar counts the moves and deletions. Files already at a destination are left; the rest is for a sync to fill in. A convert to or from `muos` leaves saves and states where they are and lists them, since muOS uses Pickles' own, not RetroArch's. The old layout's scraped media (gamelists and media folders) is deleted from the old ROM folders; the new layout's own is installed by the next sync.
 - `cards install [CARD]` puts storage's newest `os/spruceos/spruceV<version>.7z` on a `spruce` card, for a new setup (for example after `cards convert --layout spruce`; run a sync after). It runs only on a mounted SD card's root, never on another folder named after the card. It downloads the release to a temporary folder and tests it, lists what is kept and what is deleted, and asks first (the answer defaults to yes). It is a clean install: everything at the card root is deleted except `Roms/` and the system folders macOS and Windows keep there (BIOS, saves, themes and the rest go; a sync afterwards puts BIOS, themes and the rest back); the release is then unpacked without replacing files already on the card. The download and the unpacking each show a progress bar (the download with its speed and time left). `--dry-run` downloads, deletes and writes nothing, `--yes` skips the question (without a terminal it is required, or the command exits 2). Only `spruce` cards for now. Needs the 7z (`sync-roms tools install`); a sync then doesn't stage that 7z again.
 - `cards clean [CARD]` deletes such media that other layouts left on a card (`--dry-run` previews).
+- For `cards convert`, `cards install` and `cards clean`, CARD is a saved card's name or its mounted folder (default: the current directory).
 - `cards copy SRC DST` merges games, sets, excluded and collections (not surprises) into DST, skipping systems it can't play.
 - `cards export FILE` writes the cards you pick to a file, flattening surprises and collections into games. `cards import FILE` adds the ones you pick from such a file, keeping size, device, layout, games and excluded and turning Surprise off (`r` renames a card, `p` prefixes all).
 
@@ -305,6 +306,7 @@ A card is a folder name (the card root's name) with a remembered device, layout 
 | `muos_storage` | `muos` cards: `"sd1"` (default, mounted at `/mnt/mmc`) or `"sd2"` (`/mnt/sdcard`), the storage muOS reads the ROMs from, which collection entries point at. Set it by hand; there is no editor for it |
 | `spruce_theme` | `spruce` cards: the current PyUI theme (a folder name from storage's `os/spruceos/themes/`), picked in the card editor's `S` menu; synced when storage has it and set as the card's selected theme |
 | `spruce_themes_installed` | written by sync: the theme folders it installed on a `spruce` card, the only ones it removes when they are no longer synced |
+| `spruce_os_kept` | written by sync: the spruceOS 7z files `--no-delete` kept at a `spruce` card's root, which the next sync without it removes |
 | `frontend_collections`, `drivers`, `pico8`, `surprise_app`, `raofflineproxy_app`, `spruce_os`, `spruce_emu` | written by sync: the collections, driver zips, PICO-8 zip, Surprise app, RAOfflineProxy file and spruceOS file it put on the card, so each is copied once and only sync's own files are replaced or removed |
 
 ## Editing a card's games (`edit`, `games`)
@@ -320,18 +322,18 @@ sync-roms edit
    - `Enter` opens a system, `f` makes it a full system (again brings the game list back).
    - `x` turns the system off on this card: nothing of it syncs and Surprise skips it, while its picks, sets and collections stay saved (again turns it back on).
    - `a` lists every game across the card's systems and `s` a set's games across them.
-   - `l` adds a collection to the card (each shows how many of its games are playable on the card's device, and `Space`/`Enter` toggles the whole collection).
-   - `S` opens a settings menu: turn [Surprise](#surprise) (🎁), the card's theme (🎨), its custom collections (💖) and RAOfflineProxy (🏆) on or off, or pick the systems Surprise may use on every card or on this card.
+   - `l` adds a collection to the card (each shows how many of its games are playable on the card's device, and `Space`/`Tab` toggles the whole collection, `Enter` is done).
+   - `S` opens a settings menu: turn [Surprise](#surprise) (🎁), the card's theme (🎨), its custom collections (💖) and RAOfflineProxy (🏆) on or off, or pick the systems Surprise may use on every card or on this card. The menu stays open on the row you used until `Esc`.
    - `D` clears every pick, full system and set from the card.
    - `K` (opened from a sync) picks, in every system that isn't a full one, the files already on the card that match a storage game (names compared ignoring case), so a sync keeps them.
-3. **A system** shows every file in its storage folder. `✅` is synced, `⬜` is not; 📦 marks a game that a set the card references syncs (switching it off excludes it on this card), 💖 one that a collection of the card syncs (switching it off excludes it on this card) and 🎁 Surprise a surprise: a surprise is always on and can't be switched off here, and all of them count in the card's budget and size warning. A multi-disc game's playlist and discs (marked 🔗) switch on and off together, even when a filter shows only some of them. Pending changes show as `➕` / `➖` and are counted at the start of the bottom line (`+2 −1`), which updates the card's total and free space as you toggle. `Enter` keeps your changes; `Esc` asks whether to keep or revert them if there are any. Besides the [list keys](#list-keys):
+3. **A system** shows every file in its storage folder. `✅` is synced, `⬜` is not; 📦 marks a game that a set the card references syncs (switching it off excludes it on this card), 💖 one that a collection of the card syncs (switching it off excludes it on this card) and 🎁 Surprise a surprise: a surprise is always on and can't be switched off here, and all of them count in the card's budget and size warning. A multi-disc game's playlist and discs (marked 🔗) switch on and off together, even when a filter shows only some of them. Pending changes show as `➕` / `➖` and are counted at the start of the bottom line (`+2 −1`), which updates the card's total and free space as you toggle. `Enter` keeps your changes; `Esc` asks whether to keep or revert them if there are any, those a filter hides included. Besides the [list keys](#list-keys):
    - `s` lists the sets with games on this system: `Enter` narrows the list to that set's games here, `Space` (or `Tab`) switches that set's games on this system on one by one (or off when all are on already), as toggling each in the list would; other systems are untouched. `r` narrows the set picked with `s` to one series of its games.
    - `m` filters by the system's scraped metadata (`scrapes/<system>/metadata.json`): pick **Developer**, **Publisher**, **Genre** (its first part, so `Sports / Baseball` is `Sports`) or **Year**, then a value (each shows how many games in the list have it). Values are matched ignoring case, so `Capcom` and `capcom` are one value. Picking another value of the same field replaces it. A game with no value for a field never matches a filter on it. The metadata is read in the background once per session, so the menu says it is loading at first.
    - `p` narrows the list to games that were surprises within the last `surprise_ttl_days` (🎁 past surprises only).
    - `c` clears every filter. Filters on different fields, the set filter and `/` all combine, and the filter line shows what is active.
    - `v` on a game puts one of its variants on other systems (listed on the highlighted row) on the card, or takes it off.
    - `w` writes a note on a picked game.
-4. **When you leave the menu**, device, layout and device-system changes are summarized, then **save**, **keep editing**, **discard**, or **list every change**. Nothing is uploaded.
+4. **When you leave the menu**, device, layout and device-system changes are summarized, then **save**, **keep editing** (`Esc` too), **discard**, or **list every change**. Nothing is uploaded.
 
 While an editor is busy between two lists (the screen says `Working...`), `Ctrl-C` takes effect when that step ends: the editor then stops as it does for `Ctrl-C` in a list. Another `Ctrl-C` a second or more later, with the step still running, quits at once, and unsaved changes in the open editor are lost (the screen says when; a double press or a held key counts as one). The same goes for the set and collection editors.
 
@@ -359,7 +361,7 @@ The sets live in storage as `sets/<id>.json` (the id is the file name), so every
 
 A set file is `{"name": ..., "description": ..., "games": [{"title": ..., "system": "gba", "bucket": "gba/Game.zip"}]}`, with an optional `"art": "<id>"` picking its [theme art](#theme-art) (without it a set uses the art under its own id). A multi-disc game adds `"files": [...]` with its other storage keys (the discs); `bucket` is the playlist (`.m3u`) or disc 1. Toggling the game adds or removes every file, one card entry each. A game may also have a `category` (the set editor groups rows by it), a `series` and `variants` (`[{"bucket", "note"}]`: later versions of the game that add something, shown by the editors and not synced with the set).
 
-`sync-roms sets edit` edits them. Pick a set to switch games off, add games from a system (those with files in storage, by company then name; with a storage cache each shows its file count) or from another set across all its systems (you're asked for a category; existing ones are listed), change a game's category, or rename it. **➕ New set** creates a set and `d` deletes the highlighted one (it warns if a card still references it). Esc shows the changes; confirming writes the new and changed set files to storage and deletes the deleted ones, and writes nothing else to storage or the data folder. The edits stay pending, with an error, when the storage folder is unmounted, when another machine saved a set since the editor opened, or when the sets were read from the local copies because storage couldn't be checked: quit and reopen to start from storage's sets. `Ctrl-C` with changes pending shows the same review first; the toggles of a games list open at that moment (or just left for its category question) count, and the games it adds get no category.
+`sync-roms sets edit` edits them. Pick a set to switch games off, add games from a system (those with files in storage, by company then name; with a storage cache each shows its file count) or from another set across all its systems (you're asked for a category; existing ones are listed), change a game's category or series (a list of the known names, `(none)` first and `new…` last, which asks for the name; the cursor starts on the game's current one and Esc changes nothing), or rename it. **➕ New set** creates a set and `d` deletes the highlighted one (it warns if a card still references it). Esc shows the changes; confirming writes the new and changed set files to storage and deletes the deleted ones, and writes nothing else to storage or the data folder. The edits stay pending, with an error, when the storage folder is unmounted, when another machine saved a set since the editor opened, or when the sets were read from the local copies because storage couldn't be checked: quit and reopen to start from storage's sets. `Ctrl-C` with changes pending shows the same review first; the toggles of a games list open at that moment (or just left for its category question) count, and the games it adds get no category.
 
 ### Collections (`collections edit`)
 
@@ -389,6 +391,7 @@ For a card that isn't yours (a friend's), run `sync-roms sync CARD --guest` once
 - A file already on the card is never overwritten, and a gamelist only gains entries for ROMs it doesn't list (one that can't be read is left as it is, with a warning).
 - Only the ROMs found on the card at the start that you deselect in the editor are deleted (after you confirm, unless `--no-delete`), with their scraped media. A system turned off with `x` is skipped entirely. Your friend's other files are never deleted or overwritten. The exceptions: on Spruce cards, BIOS zips sync puts in a ROM folder are added to that system's `Emu/<folder>/config.json` ignore list, and the usual end-of-run tidy runs. Loose discs are left where they are.
 - Without the editor (`--yes`, `--json`, no terminal) the picks are what the card holds and nothing is deleted.
+- `F` in the editor asks before making a card a guest card, since its picks are replaced by the ROMs found on the card (answer No or Esc to leave it alone); turning guest off asks nothing.
 - Turning guest off in the editor during a sync takes effect on the next sync.
 
 ## What each layout gets
@@ -414,7 +417,7 @@ Besides ROMs, BIOS and scraped data, a sync writes the card's [collections](#col
 - The files are rewritten each sync, so edits made to them in the frontend are lost.
 - Close the frontend before syncing: it rewrites its settings file from memory.
 
-**Collection art.** A sync removes the art it put on an ES-DE, Knulli or ROCKNIX card (on Knulli its `subset.<Name>.*` settings too) once the collection is renamed, removed or has no art any more. It only removes what it wrote: the names listed in the theme copy's `.sync-roms-collections` (ES-DE) or the customizations folder's `.sync-roms-art` (Knulli, ROCKNIX), so the theme's own art and yours stay, as does art an older sync-roms put on a Knulli or ROCKNIX card before it kept that list. With `"theme": false` nothing is removed. `--dry-run` names the collections whose art would be removed.
+**Collection art.** With `--no-delete` a sync keeps a retired collection's file and its art (and, on Knulli, its settings), leaves its name in `frontend_collections` and lists it as kept, so the next sync without the flag removes them. A sync removes the art it put on an ES-DE, Knulli or ROCKNIX card (on Knulli its `subset.<Name>.*` settings too) once the collection is renamed, removed or has no art any more. It only removes what it wrote: the names listed in the theme copy's `.sync-roms-collections` (ES-DE) or the customizations folder's `.sync-roms-art` (Knulli, ROCKNIX), so the theme's own art and yours stay, as does art an older sync-roms put on a Knulli or ROCKNIX card before it kept that list. With `"theme": false` nothing is removed. `--dry-run` names the collections whose art would be removed.
 
 **PICO-8 app** (the app itself, not games). Put the official PICO-8 Raspberry Pi zip in storage's `os/pico8/` (the newest `pico-8_*_raspi.zip` is used). A card gets the zip where its frontend's installer looks (run the installer once on the device) or the extracted files, once per zip, whether or not it syncs pico8 games.
 
@@ -511,7 +514,7 @@ States only load in the core they were made with (`gpSP` states don't load in `m
 
 `sync-roms upload [DIR]` uploads the ROMs in `DIR` (default: the current directory) and its subfolders to the storage folder of one system, keeping the relative paths (`DIR/Disc/a.chd` becomes `<system>/Disc/a.chd`). It asks which system, with the cursor already on a guess: the system whose storage folder or frontend folder name (`gba`, `megadrive`, `ARCADE`...) is the name of `DIR` (the top of the list when none is). Esc cancels.
 
-- Files that already exist with the same size are skipped; a file with a different size overwrites the one in storage. Both counts are shown first, the overwrites are listed, and nothing uploads until you confirm (default no). `--dry-run` shows the plan and uploads nothing.
+- Files that already exist with the same size are skipped; a file with a different size overwrites the one in storage. Both counts are shown first, the overwrites are listed, and nothing uploads until you confirm (default no; `--yes` uploads without asking, and without a terminal and `--yes` it exits 2). `--dry-run` shows the plan and uploads nothing.
 - `--replace` makes the storage folder match `DIR`. Renamed files are moved by content (big bucket files without an MD5 are compared on samples, and those renames are marked) and left-over storage files are listed so you tick which to delete (none are ticked at first).
 - Frontend and OS leftovers (`gamelist.xml`, `images/`, `Thumbs.db`, `.DS_Store`, `._*`...) are never uploaded; other dotfiles are. In a card's ROM folder, the layout's own `.multi-disc/` and `.media/` folders and the playlists a sync pointed into `.multi-disc/` are left out too (also with `--replace`).
 - It uploads with the write profile through one shared pool of requests, four per CPU core (at most 16), which the parts of big files share (64MB and up go as 32MB parts). The biggest files start first. To a storage folder, 8 files are copied at once.
@@ -547,7 +550,7 @@ sync-roms convert ~/roms/psx
 - **Progress**: in a terminal a bar shows the files done and the percent of the total size (each file counts by its size, its unpacked size for a `.zip`/`.7z`; an archive counts 20% once unpacked and its discs share the rest, from `chdman`'s own progress), the rate and the time left; each file's result prints as it finishes. Under `--quiet` only failed files and the closing line of a run with failures are shown (on stderr).
 - **`Ctrl-C`** stops `7z` and `chdman`, removes the partial files and exits (130) without starting anything else; a rerun picks up where it stopped, and also deletes the extraction folders (`.chd-*`) a hard kill left behind, beside the archives and in the system temp folder.
 
-It is local only, so storage holds the `.chd` and `.m3u` files and the card's games list those names. Running it on a card synced from a storage that still has the `.zip` files makes the next sync list the `.chd` files as files not in the card's games (it asks before deleting, default no) and download the zips again. So when a folder in `DIR`'s path is named after a saved card, convert warns and asks first (default no: with `--yes` or without a terminal it stops and exits 1; `--dry-run` only warns). When `DIR` is inside the storage folder and a file converted, it ends by saying to run `sync-roms cache update`.
+It is local only, so storage holds the `.chd` and `.m3u` files and the card's games list those names. Running it on a card synced from a storage that still has the `.zip` files makes the next sync list the `.chd` files as files not in the card's games (it asks before deleting, default no) and download the zips again. Before it starts it asks `Convert N file(s) and remove the originals?` (default no: `--yes` goes ahead, and without a terminal it exits 2 unless `--yes` is given; `--dry-run` only lists). So when a folder in `DIR`'s path is named after a saved card, convert warns and asks first (default no: with `--yes` or without a terminal it stops and exits 1; `--dry-run` only warns). When `DIR` is inside the storage folder and a file converted, it ends by saying to run `sync-roms cache update`.
 
 ## PICO-8 carts from the BBS (`download pico8`)
 
@@ -582,6 +585,8 @@ It is local only, so storage holds the `.chd` and `.m3u` files and the card's ga
 - `b` takes back the last `i` and goes back to that ROM (a search already scraped stays: `scrape match` changes it).
 - `q` stops.
 
+Every letter but `i` and `I` works in either case.
+
 Ignores are written when the review ends, by `q`, Ctrl-C or the last ROM, to `ignored.json` at the root of storage, shared by everyone using that storage: sync-roms never shows, syncs, uploads or scrapes the ROMs listed there, and never deletes their files. Each run checks the file and keeps a copy in the data folder. To stop ignoring a ROM, remove it from `ignored.json` in storage.
 
 **Progress.** Before it asks to start, the run says the most requests it can make (one lookup and one download per media type for each ROM) and how many are left today. ROMs go in batches of 25. Each batch's heading shows today's requests as ScreenScraper last reported them and, from the second batch on, the time elapsed and left. Each ROM gets a line as it ends: the game it matched, how (hash, name+size or manual) and its media count, or that it isn't on ScreenScraper, is a non-game or failed. The media is then copied or uploaded behind a progress bar that lists only failures.
@@ -600,7 +605,7 @@ Ignores are written when the review ends, by `q`, Ctrl-C or the last ROM, to `ig
 
 ## Cleaning scraped data (`clean scrapes`)
 
-`sync-roms clean scrapes` needs no folder. It compares storage's `scrapes/` media and `metadata.json` entries with every ROM file in storage's system folders (not only the games listed on your cards), lists what no longer matches (including whole systems with no folder in storage), and after you confirm (default yes, so `--yes` deletes) deletes the media and rewrites the metadata files. `--dry-run` only lists.
+`sync-roms clean scrapes` needs no folder. It compares storage's `scrapes/` media and `metadata.json` entries with every ROM file in storage's system folders (not only the games listed on your cards), lists what no longer matches (including whole systems with no folder in storage), and after you confirm (default no; `--yes` deletes without asking, and without a terminal it exits 2 unless `--yes`) deletes the media and rewrites the metadata files. `--dry-run` only lists.
 
 ## Local mirror (`mirror`)
 
@@ -656,7 +661,7 @@ The repo ships [Claude Code](https://claude.com/claude-code) skills in `.claude/
 | --- | --- |
 | `AccessDenied` / `Unable to locate credentials` | Define the `roms-readonly` profile in `~/.aws/config` and `~/.aws/credentials`; `sync-roms doctor` checks the profile, storage and tools |
 | `cards.json isn't valid JSON` (or another data file) | Fix the file (the last good copy of `cards.json` is `cards.json.bak`); sync-roms never overwrites a file it can't parse. `sync-roms check` lists the problems |
-| "listed in manifest but not in storage" warnings | A game on your card (or a required BIOS file) isn't in storage; it is skipped |
+| "listed but not in storage" warnings | A game on your card (or a required BIOS file) isn't in storage; it is skipped |
 | `<card> has no games picked` or `<card> has nothing to sync` | Your card has no games picked, or none of them are in storage. Add games with `sync-roms edit` |
 
 ## Transfer speed (AWS CLI only)

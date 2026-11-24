@@ -145,7 +145,7 @@ def move(row, system, catalog_systems, dry_run=False):
     data["system"] = bucket
     if pickles:
         for f in data["files"]:
-            if "rel" in f:
+            if f.get("rel"):
                 f["rel"] = "/".join([muos] + f["rel"].split("/")[1:])
     row["dir"] = new
     try:
@@ -182,16 +182,18 @@ def delete(rows, dry_run=False):
 
 
 def prune_picks(rows, keep):
-    """Per row, whether it is beyond the newest `keep` readable stashes of its system, game and ROM dir."""
+    """Per row, whether it is beyond the newest `keep` runs of readable stashes of its system, game and ROM dir (the
+    stashes one `saves stash` made, with the same time and card, are one run)."""
     picks = [False] * len(rows)
     groups = {}
     for i, r in enumerate(rows):
         if not r.get("unreadable"):
             groups.setdefault((r["system"], r["game"], muos_saves.stash_rel(r)), []).append(i)
     for idx in groups.values():
-        idx.sort(key=lambda i: rows[i]["stashed"], reverse=True)
-        for i in idx[keep:]:
-            picks[i] = True
+        runs = sorted({(rows[i]["stashed"], rows[i].get("card") or "") for i in idx}, reverse=True)
+        for i in idx:
+            if (rows[i]["stashed"], rows[i].get("card") or "") in runs[keep:]:
+                picks[i] = True
     return picks
 
 
@@ -199,6 +201,9 @@ KEY_HELP = [("Space/Tab", "pick the stash"), ("Enter", "list the stash's files")
             ("m", "move the picked stashes (or this one) to another system"),
             ("p", "pick all but the newest N stashes of each game"),
             ("d", "delete the picked stashes (or this one)"), ("Esc", "done")]
+
+
+HINT = "Enter files · w label · m move · p prune · d delete · Esc done"  # fits 80 cells after the picker's "? help · "
 
 
 def _note(text):
@@ -214,6 +219,10 @@ def _label(row):
 
 
 def _extras(row, names):
+    return [("  " + text, color) for text, color in _columns(row, names)]  # two spaces between columns, as the card editor
+
+
+def _columns(row, names):
     if row["unreadable"]:
         return [("", "dim"), ("", ""), ("", "dim"), ("", ""), (ui.human_size(row["size"]), ""), ("", "cyan"),
                 ("unreadable", "red"), ("", "dim")]
@@ -271,15 +280,17 @@ def _manage(rows, systems, dry_run):
         if not changed:
             return f"Label unchanged: {row['game']}"
         labelled.add(id(row))
+        extras[i] = _extras(row, names)
         what = f"labelled {text.strip()!r}" if text.strip() else "label removed"
         return f"{'Would be ' if dry_run else ''}{what}: {row['game']}"
 
     while rows:
+        extras = [_extras(r, names) for r in rows]
         state = picker.filter_list(
             "🗂️ Stashed saves", [_label(r) for r in rows], multi=True, initial=[False] * len(rows), esc_asks=False,
-            extras=[_extras(r, names) for r in rows], session=session, hotkeys=("enter", "m", "p", "d"),
+            extras=extras, session=session, hotkeys=("enter", "m", "p", "d"),
             on_note=on_note, note_text=lambda i: rows[i].get("note", ""),
-            hint="? help · Space toggle · Enter files · w label · m move · p prune · d delete · Esc done",
+            hint=HINT,
             key_help=KEY_HELP)
         if not isinstance(state, tuple):
             break
@@ -309,7 +320,10 @@ def _manage(rows, systems, dry_run):
             if not dry_run:
                 session["sel"][:] = [False] * len(rows)
         elif key == "p":
-            answer = ui.ask("✂️  Keep how many per game? [1] ").strip() or "1"
+            answer = ui.ask("✂️  Keep how many per game? [1] ", cancellable=True)
+            if answer is None:
+                continue
+            answer = answer.strip() or "1"
             if not answer.isdecimal() or int(answer) < 1:
                 _note(f"Keep how many: {answer!r} isn't a positive whole number")
                 continue

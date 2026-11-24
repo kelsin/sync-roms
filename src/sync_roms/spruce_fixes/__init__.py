@@ -26,6 +26,32 @@ def keeps(path):
     return any(fix.keeps(path) for fix in FIXES)
 
 
+def write_all(writes):
+    """Write a fix's files, all or none: on an OSError the ones already written go back to their earlier bytes (or are
+    removed when they weren't there). None on success, else the error."""
+    done = []
+    for path, data in writes:
+        try:
+            try:
+                with open(path, "rb") as f:
+                    before = f.read()
+            except FileNotFoundError:
+                before = None
+            cardfs.write_bytes(path, data)
+        except OSError as e:
+            for old_path, old in reversed(done):
+                try:
+                    if old is None:
+                        os.remove(old_path)
+                    else:
+                        cardfs.write_bytes(old_path, old)
+                except OSError:
+                    pass
+            return e
+        done.append((path, before))
+    return None
+
+
 def run(layout_name, base, dry_run):
     """Print one line per fix and write what each plans (nothing with dry_run). Returns the number of files written,
     or, with dry_run, that would be."""
@@ -39,8 +65,10 @@ def run(layout_name, base, dry_run):
         writes, skip = fix.plan(base)
         if writes:
             if not dry_run:
-                for path, data in writes:
-                    cardfs.write_bytes(path, data)
+                error = write_all(writes)
+                if error:
+                    ui.warn(f"{title}: not applied, {error} ({url})")
+                    continue
             verb = "would apply to" if dry_run else "applied to"
             print(ui.green(f"   ✅ {title}: {verb} {len(writes)} file(s) ({url})"))
             total += len(writes)
