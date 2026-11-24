@@ -186,6 +186,9 @@ class HiddenDiscsTest(unittest.TestCase):
         self.assertEqual(os.listdir(self.dir), [".multi-disc"])
         self.assertEqual(sorted(os.listdir(os.path.join(self.dir, ".multi-disc"))), sorted(FAH))
 
+    def test_prefix_playlists_has_nothing_to_do_for_a_folder_that_does_not_exist(self):
+        self.assertEqual(m3u.prefix_playlists(os.path.join(self.dir, "missing"), ".multi-disc"), 0)
+
     def test_prefix_playlists_points_at_the_discs_and_still_counts_as_current(self):
         self.disc_folder()
         original = "\n".join(FAH) + "\n"

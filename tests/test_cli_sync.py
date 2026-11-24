@@ -1073,6 +1073,18 @@ class SyncSmokeTest(DataDir):
         self.assertNotIn("Android", self.out.getvalue())
         self.assertEqual(self.out.getvalue().count("Scraped data"), 1)
 
+    def test_onion_sync_of_a_pick_storage_lacks_finishes_without_a_system_folder(self):
+        layouts = {"onion": {"label": "Onion", "roms_dir": "Roms", "bios_dir": "BIOS", "disc_dir": ".multi-disc"}}
+        manifest = {**MANIFEST, "layouts": layouts,
+                    "systems": [{**SYSTEM, "folders": {"onion": "GBA"}, "games": [{"bucket": "gba/Gone.zip"}]}]}
+        patches = ((store, {"load_manifest": lambda names=(), m=manifest: m}),
+                   (cli.picker, {"saved_setup": lambda *a: (None, "onion")}),
+                   (cli, {"free_space": lambda path: 10**9}))
+        found = []
+        self.assertEqual(self.run_sync(False, patches=patches, after=lambda card: found.append(
+            os.path.exists(os.path.join(card, "Roms", "GBA")))), 0)
+        self.assertEqual(found, [False])
+
     def test_onion_sync_installs_surprise_app_and_list(self):
         layouts = {"onion": {"label": "Onion", "roms_dir": "Roms", "bios_dir": "BIOS"}}
         manifest = {**MANIFEST, "layouts": layouts, "systems": [{**SYSTEM, "folders": {"onion": "GBA"}}]}
