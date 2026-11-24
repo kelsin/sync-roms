@@ -178,11 +178,29 @@ class UsageHelpTest(Isolated):
                 with self.subTest(topic=topic, line=line[:40]):
                     self.assertLessEqual(len(plain.sub("", line)), 100)
 
-    def test_wrapped_help_keeps_its_words(self):
-        text = cli.help_text("games")
-        for line in cli.TOPICS["games"].splitlines():
-            for word in line.split():
-                self.assertIn(word, text.split())
+    def test_help_topics_are_written_at_the_width_they_print(self):
+        """The hand-written text is broken in the source: nothing re-flows it when it prints."""
+        for topic, text in cli.TOPICS.items():
+            for line in text.splitlines():
+                with self.subTest(topic=topic, line=line[:40]):
+                    self.assertLessEqual(len(line), 100)
+
+    def test_help_never_splits_a_backticked_span(self):
+        plain = re.compile(r"\x1b\[[0-9;]*m")
+        for topic in (None, *cli.TOPICS):
+            for line in cli.help_text(topic).splitlines():
+                with self.subTest(topic=topic, line=line[:40]):
+                    self.assertEqual(plain.sub("", line).count("`") % 2, 0)
+
+    def test_a_long_command_row_continues_under_its_usage_and_summary_indent(self):
+        usage = "[SYSTEM | match SYSTEM ROM GAME | review [SYSTEM] | missing [SYSTEM] | art [SYSTEM]]"
+        summary = "scrape the ROMs that have no metadata from ScreenScraper into `storage's scrapes/` folder and more words"
+        lines = [re.sub(r"\x1b\[[0-9;]*m", "", line) for line in cli._row("scrape", usage, summary).splitlines()]
+        self.assertTrue(lines[0].startswith("  scrape"))
+        self.assertEqual(lines[0].index("["), 23)
+        self.assertEqual(len(lines[1]) - len(lines[1].lstrip()), 23)
+        self.assertTrue(all(len(line) <= 100 for line in lines))
+        self.assertEqual(len(lines[-1]) - len(lines[-1].lstrip()), 6)
 
     def test_config_show_prints_eject_as_a_word(self):
         code, out, _ = self.sync(["config", "show"], {"eject": False})
