@@ -228,6 +228,11 @@ details.emu .body { padding: 0 18px 14px 35px; }
 details.emu .body .label { font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 10px 0 2px; }
 .toggle-all { background: none; border: 0; color: var(--accent); font: inherit; font-size: .85rem; cursor: pointer; padding: 0; margin: 0 0 10px; }
 
+code.copy { cursor: pointer; }
+code.copy::after { content: "⧉"; margin-left: .35em; color: var(--muted); }
+code.copy:hover::after { color: var(--accent); }
+code.copy.copied::after { content: "✓ copied"; color: var(--accent); }
+
 @media (max-width: 560px) {
   section.step { padding-left: 0; }
   section.step::before { display: none; }
@@ -742,7 +747,7 @@ const SECTIONS = [
   {
     id: "flash",
     title: "Flash the firmware",
-    lede: "First, write the firmware image from storage to the SD card with <code>sync-roms flash</code> (macOS only). It erases the whole card.",
+    lede: `First, write the firmware image from storage to the SD card with <code class="copy">sync-roms flash</code> (macOS only). It erases the whole card.`,
     when: { layout: ["knulli", "muos", "rocknix"] },
     items: [
       {
@@ -750,7 +755,7 @@ const SECTIONS = [
         when: { layout: ["knulli"] },
         body: `
           <ol>
-            <li>Put the card in the Mac and run <code>sync-roms flash</code>. When storage has images of more than one firmware, pick <b>Knulli or BaseOS</b>.</li>
+            <li>Put the card in the Mac and run <code class="copy">sync-roms flash</code>. When storage has images of more than one firmware, pick <b>Knulli or BaseOS</b>.</li>
             <li>Pick this device, then the image: storage's <code>os/knulli/knulli-*.img.gz</code> and <code>os/baseos/baseos-*.img.zip</code>, the ones whose name matches the device first (marked <b>✓ matches</b>), newest first.</li>
             <li>Pick the SD card and type its disk id (like <code>disk4</code>) to confirm. Flash writes the image and ejects the card.</li>
           </ol>`,
@@ -760,7 +765,7 @@ const SECTIONS = [
         when: { layout: ["muos"] },
         body: `
           <ol>
-            <li>Put the card in the Mac and run <code>sync-roms flash</code>. When storage has images of more than one firmware, pick <b>muOS</b>.</li>
+            <li>Put the card in the Mac and run <code class="copy">sync-roms flash</code>. When storage has images of more than one firmware, pick <b>muOS</b>.</li>
             <li>Pick this device, then the image: every <code>os/muos/muos-*.img.gz</code> in storage. None is matched to the device, so pick the one for it by name.</li>
             <li>Pick the SD card and type its disk id (like <code>disk4</code>) to confirm. Flash writes the image and ejects the card.</li>
           </ol>`,
@@ -770,7 +775,7 @@ const SECTIONS = [
         when: { layout: ["rocknix"] },
         body: `
           <ol>
-            <li>Put the card in the Mac and run <code>sync-roms flash</code>. When storage has images of more than one firmware, pick <b>ROCKNIX</b>.</li>
+            <li>Put the card in the Mac and run <code class="copy">sync-roms flash</code>. When storage has images of more than one firmware, pick <b>ROCKNIX</b>.</li>
             <li>Pick this device, then the image: storage's <code>os/rocknix/ROCKNIX-*.img.gz</code> (the <code>.tar</code> update bundle isn't flashable), matched by the device's SoC image (marked <b>✓ matches</b>). Flash stops when none matches. H700 devices match both the DDR3 and DDR4 images: pick the one for the device's RAM.</li>
             <li>Pick the SD card and type its disk id (like <code>disk4</code>) to confirm. Flash writes the image and ejects the card.</li>
           </ol>`,
@@ -797,7 +802,7 @@ const SECTIONS = [
         title: "2. Sync the card",
         body: `
           <ol>
-            <li>Keep the card in the computer. Run <code>sync-roms sync</code> for this card and pick the <code>onion</code> layout.</li>
+            <li>Keep the card in the computer. Run <code class="copy">sync-roms sync</code> for this card and pick the <code>onion</code> layout.</li>
             <li>Sync writes <code>Roms/</code> (with <code>Imgs/</code> and <code>miyoogamelist.xml</code>), <code>BIOS/</code>, and the card's Onion extras:
               <ul>
                 <li><b>Surprise app</b>: the newest <code>os/onion/Surprise-v*.zip</code> as <code>App/Surprise/</code> (and its icon), plus <code>Roms/surprise.json</code> listing the card's picks. Only when Surprise is on for the card (the default for <code>onion</code>) and the card has picks.</li>
@@ -834,7 +839,7 @@ const SECTIONS = [
     items: [
       {
         title: "Over Wireless debugging",
-        body: `<p><code>sync-roms config apply</code> installs the card's APKs over Wireless debugging (all but those that don't fit the device); the steps below are the way by hand.</p>`,
+        body: `<p><code class="copy">sync-roms config apply</code> installs the card's APKs over Wireless debugging (all but those that don't fit the device); the steps below are the way by hand.</p>`,
       },
       {
         title: "Install ES-DE, Obtainium and MiXplorer",
@@ -978,7 +983,7 @@ const SECTIONS = [
   {
     id: "syncthing",
     title: "Syncthing",
-    lede: "Syncs saves and states with my Syncthing server at <code>http://192.168.68.98:8384/</code>, through two folders: <code>ra-saves</code> (<code>jkx7j-mnlfo</code>) and <code>ra-states</code> (<code>w5nqg-xmpq6</code>). It only syncs on the home network (no relay or cloud). The server already keeps file versions on both folders; a new device only needs the steps below.",
+    lede: `Syncs saves and states with my Syncthing server at <code class="copy">http://192.168.68.98:8384/</code>, through two folders: <code class="copy">ra-saves</code> (<code class="copy">jkx7j-mnlfo</code>) and <code class="copy">ra-states</code> (<code class="copy">w5nqg-xmpq6</code>). It only syncs on the home network (no relay or cloud). The server already keeps file versions on both folders; a new device only needs the steps below.`,
     when: { layout: ["esde", "knulli", "muos", "spruce", "onion", "nextui", "emudeck"] },
     items: [
       {
@@ -988,11 +993,11 @@ const SECTIONS = [
           <ol>
             <li>Sync the card. Sync sets the cores in "RetroArch cores", RetroArch's save settings and auto save/load, turns Syncthing on (WiFi devices), and adds the WiFi networks in settings.json's <code>wifi_networks</code>.</li>
             <li>On the device: turn WiFi on, and turn on <span class="path">${path("Advanced Settings > Network > Sync Time/RTC with network")}</span>.</li>
-            <li>From the computer, open <code>http://&lt;device IP&gt;:8384</code>. Login <code>spruce</code> / <code>happygaming</code>; change it under Settings &gt; GUI.</li>
+            <li>From the computer, open <code>http://&lt;device IP&gt;:8384</code>. Login <code class="copy">spruce</code> / <code class="copy">happygaming</code>; change it under Settings &gt; GUI.</li>
             <li>Device UI: <b>Add Remote Device</b> with the server's ID (server UI: Actions &gt; Show ID).</li>
-            <li>Server UI: accept the new device, and on its <b>Sharing</b> tab tick <code>ra-saves</code> and <code>ra-states</code>. Save.</li>
-            <li>Device UI: accept <code>ra-saves</code> at <code>/mnt/SDCARD/Saves/saves</code> and <code>ra-states</code> at <code>/mnt/SDCARD/Saves/states</code>.</li>
-            <li>Device UI, for each of the two folders: Actions &gt; Advanced &gt; Folders &gt; click the folder &gt; <code>modTimeWindowS</code> = 2 &gt; Save (it isn't in the folder's Edit dialog).</li>
+            <li>Server UI: accept the new device, and on its <b>Sharing</b> tab tick <code class="copy">ra-saves</code> and <code class="copy">ra-states</code>. Save.</li>
+            <li>Device UI: accept <code class="copy">ra-saves</code> at <code class="copy">/mnt/SDCARD/Saves/saves</code> and <code class="copy">ra-states</code> at <code class="copy">/mnt/SDCARD/Saves/states</code>.</li>
+            <li>Device UI, for each of the two folders: Actions &gt; Advanced &gt; Folders &gt; click the folder &gt; <code class="copy">modTimeWindowS</code> = 2 &gt; Save (it isn't in the folder's Edit dialog).</li>
           </ol>`,
       },
       {
@@ -1001,10 +1006,10 @@ const SECTIONS = [
         body: `
           <ol>
             <li>Install <b>Syncthing-Fork</b> from F-Droid (the original Android app is discontinued).</li>
-            <li>With RetroArch closed and the device on Wireless debugging, run <code>sync-roms config apply</code>. It sets RetroArch's save and state folders and save settings, turns Cloud Sync off, and sets each system's ES-DE emulator to its core in "RetroArch cores" (it asks before restarting ES-DE; declining skips the ES-DE part).</li>
+            <li>With RetroArch closed and the device on Wireless debugging, run <code class="copy">sync-roms config apply</code>. It sets RetroArch's save and state folders and save settings, turns Cloud Sync off, and sets each system's ES-DE emulator to its core in "RetroArch cores" (it asks before restarting ES-DE; declining skips the ES-DE part).</li>
             <li>Syncthing-Fork: <b>Add Remote Device</b> with the server's ID (server UI: Actions &gt; Show ID).</li>
-            <li>Server UI: accept the new device, and on its <b>Sharing</b> tab tick <code>ra-saves</code> and <code>ra-states</code>. Save.</li>
-            <li>Syncthing-Fork: accept <code>ra-saves</code> at RetroArch's save folder and <code>ra-states</code> at its state folder (<code>/storage/emulated/0/RetroArch/saves</code> and <code>/states</code> unless RetroArch already had others).</li>
+            <li>Server UI: accept the new device, and on its <b>Sharing</b> tab tick <code class="copy">ra-saves</code> and <code class="copy">ra-states</code>. Save.</li>
+            <li>Syncthing-Fork: accept <code class="copy">ra-saves</code> at RetroArch's save folder and <code class="copy">ra-states</code> at its state folder (<code class="copy">/storage/emulated/0/RetroArch/saves</code> and <code class="copy">/storage/emulated/0/RetroArch/states</code> unless RetroArch already had others).</li>
             <li>Syncthing-Fork: set its run conditions so it runs when switching devices.</li>
           </ol>`,
       },
@@ -1035,8 +1040,8 @@ const SECTIONS = [
         body: `
           <ol>
             <li>Turn it on at <span class="path">${path("Configuration > Connectivity > Web Services > Syncthing")}</span>.</li>
-            <li>Open <code>http://muos.local:7070</code> from the computer (the port is 7070, not 8384).</li>
-            <li>Pair it with the server and share the saves folder, <code>/run/muos/storage/save</code> (see "Pair and share").</li>
+            <li>Open <code class="copy">http://muos.local:7070</code> from the computer (the port is 7070, not 8384).</li>
+            <li>Pair it with the server and share the saves folder, <code class="copy">/run/muos/storage/save</code> (see "Pair and share").</li>
           </ol>`,
       },
       {
@@ -1085,7 +1090,7 @@ const SECTIONS = [
   {
     id: "retroarch-cores",
     title: "RetroArch cores",
-    lede: "One libretro core per system on every device, so RetroArch's core-named save and state folders match and Syncthing can share them. Spruce cards get these from sync; Android gets them from <code>sync-roms config apply</code>.",
+    lede: `One libretro core per system on every device, so RetroArch's core-named save and state folders match and Syncthing can share them. Spruce cards get these from sync; Android gets them from <code class="copy">sync-roms config apply</code>.`,
     when: { layout: ["esde", "emudeck", "spruce"] },
     items: [
       {
@@ -1385,7 +1390,7 @@ const SECTIONS = [
       {
         title: "Games card in slot 2",
         body: `
-          <p>The entries point at <code>/mnt/mmc</code>, the card in slot 1 (SD1, the default). If the games card is in slot 2, set <code>"muos_storage": "sd2"</code> on the card in <code>~/.sync-roms/cards.json</code> by hand and sync again: the entries then point at <code>/mnt/sdcard</code>.</p>`,
+          <p>The entries point at <code>/mnt/mmc</code>, the card in slot 1 (SD1, the default). If the games card is in slot 2, set <code class="copy">"muos_storage": "sd2"</code> on the card in <code>~/.sync-roms/cards.json</code> by hand and sync again: the entries then point at <code>/mnt/sdcard</code>.</p>`,
       },
     ],
   },
@@ -1586,6 +1591,28 @@ document.getElementById("steps").addEventListener("click", e => {
   const open = !all.every(d => d.open);
   all.forEach(d => (d.open = open));
   e.target.textContent = open ? "Collapse all" : "Expand all";
+});
+
+// Click a code.copy value to copy it to the clipboard (the execCommand fallback covers file:// pages without clipboard access).
+document.addEventListener("click", e => {
+  const code = e.target.closest("code.copy");
+  if (!code) return;
+  const text = code.textContent;
+  const done = () => {
+    code.classList.add("copied");
+    setTimeout(() => code.classList.remove("copied"), 1200);
+  };
+  const fallback = () => {
+    const r = document.createRange();
+    r.selectNodeContents(code);
+    const s = getSelection();
+    s.removeAllRanges();
+    s.addRange(r);
+    if (document.execCommand("copy")) done();
+    s.removeAllRanges();
+  };
+  if (navigator.clipboard) navigator.clipboard.writeText(text).then(done, fallback);
+  else fallback();
 });
 
 // The hash holds the device and layout, so section links scroll instead of navigating.
