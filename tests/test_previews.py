@@ -34,6 +34,21 @@ class PreviewsTests(unittest.TestCase):
         self.assertEqual(previews.collection("shmup"), themeart.art_png("shmup"))
         self.assertIsNone(previews.collection(None))
 
+    def test_card_collection_is_the_art_the_cards_frontend_gets(self):
+        box = os.path.join(themeart.THEME_DATA, "art-box", "Imgs", "favorites.png")
+        zelda = os.path.join(themeart.ZELDA_ART, "Imgs", "favorites.png")
+        self.assertEqual(previews.card_collection("favorites", {"layout": "spruce"}), box)
+        self.assertEqual(previews.card_collection("favorites", {"layout": "spruce", "spruce_theme": "Other"}), box)
+        for theme in themeart.ZELDA_THEMES:
+            self.assertEqual(previews.card_collection("favorites", {"layout": "spruce", "spruce_theme": theme}), zelda)
+        self.assertEqual(previews.card_collection("favorites", {"layout": "esde", "spruce_theme": "ToTK"}), themeart.art_png("favorites"))
+        self.assertEqual(previews.card_collection("favorites", {}), themeart.art_png("favorites"))
+        self.assertEqual(previews.card_collection("favorites", {"layout": "spruce", "spruce_theme": ["ToTK"]}), box)
+        for path in (box, zelda):
+            self.assertTrue(os.path.isfile(path))
+        self.assertIsNone(previews.card_collection("nope", {"layout": "spruce", "spruce_theme": "ToTK"}))
+        self.assertIsNone(previews.card_collection(None, {"layout": "spruce"}))
+
     def test_game_prefers_covers_then_mix_title_screenshot(self):
         with self.files("scrapes/gba/screenshots/G.png", "scrapes/gba/miximages/G.png"), self.root("/r"), self.isfile():
             self.assertTrue(previews.game("gba/G.zip").endswith("scrapes/gba/miximages/G.png"))
