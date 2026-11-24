@@ -1429,7 +1429,9 @@ def sync_card(args):
         if not scraped:
             print("🖼️  Reading scraped data...")
             scraped["data"] = scrape_plan.load_scrape_data(chosen)
-            scraped["rels"] = {s["bucket"]: [k.split("/", 1)[1] for k in available(s) if k in listings[s["bucket"]]]
+            # a guest card's own ROMs (the seed) get no scrapes: only the games added this sync do
+            scraped["rels"] = {s["bucket"]: [k.split("/", 1)[1] for k in available(s)
+                                             if k in listings[s["bucket"]] and k not in seed.get(s["bucket"], {})]
                                for s in chosen}
         if disc_folders:  # scrapes name a ROM by its storage path; a disc game is in its own folder on the card
             moved_to = {os.path.join(dest_of(s), k.split("/", 1)[1]): os.path.join(dest_of(s), downloads.rom_rel(k, folders=folders_of(s)))

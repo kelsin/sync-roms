@@ -120,7 +120,7 @@ class GuestSyncTest(DataDir):
         self.sync()
         for path in (game, mine, cover):
             self.assertTrue(os.path.exists(path), path)
-        self.assertEqual(self.job_keys(), ["BIOS/gba_bios.bin", "scrapes/gba/covers/Game.png"])
+        self.assertEqual(self.job_keys(), ["BIOS/gba_bios.bin"])  # the card's own ROMs get no scrapes
 
     def test_guest_sync_deletes_only_deselected_recognized_roms(self):
         self.save(guest=True)
