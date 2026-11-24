@@ -57,10 +57,10 @@ Downloading before the confirm means a failed download never leaves a half-wiped
 Module name (`install.py` with the spruce part beside `spruce_os.py`), exact messages, exit codes matching convert
 (1 declined, 3 failures).
 
-## Addendum (2026-11-24): clean install, keep only Roms and BIOS
+## Addendum (2026-11-24): clean install, keep only Roms
 
 `cards install` is only run for a clean install, so nothing spruce or sync made is worth keeping. Kept at the card
-root: `Roms/` and `BIOS/` (they save the next sync the most time) and the OS folders. `Saves/` and `Themes/` are
-deleted like the rest (sync reinstalls the themes). Unpacking keeps `-aos`, so files already in `Roms/` and `BIOS/`
-are never rewritten. The card record clears `spruce_themes_installed` and `boot_logos` (both pointed at deleted
+root: `Roms/` (it saves the next sync the most time) and the OS folders. `BIOS/` (small, sync refills it), `Saves/`
+and `Themes/` are deleted like the rest (sync reinstalls BIOS and themes). Unpacking keeps `-aos`, so files already in `Roms/` are never
+rewritten. The card record clears `spruce_themes_installed` and `boot_logos` (both pointed at deleted
 files) and sets `spruce_os`.
