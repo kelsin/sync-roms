@@ -296,6 +296,7 @@ def edit_menu(noun, before, working, state, emoji, art, delete_note, new_item, o
     starting with a space (or ""); new_item(working) asks for a new list, adds it and returns its id (None when
     cancelled); open_item(item) edits one; save(found) saves the reviewed changes (diff_lists) and returns whether it
     did (False, its error noted, goes back to the menu). Without empty_ok, a list with no games can't be saved."""
+    pos = 0
     while True:
         ids = sorted(working, key=lambda x: working[x]["name"].lower())
         n = len(ids)
@@ -305,18 +306,21 @@ def edit_menu(noun, before, working, state, emoji, art, delete_note, new_item, o
                   + [f"➕ New {noun}", "✅ Done (review & save)", "🚪 Quit without saving"])
         extras = [[("  " + ("new" if x not in before else "edited"), "cyan")] if x in edited else [] for x in ids] + [[], [], []]
         i = n + 1 if state["review"] else picker.filter_list(f"✏️  Which {noun}?  (Esc = review & save)", labels, extras=extras,
-                                                    hotkeys=(edit.DELETE_KEY,), hint="/ filter · Enter open · d delete · Esc review",
+                                                    hotkeys=(edit.DELETE_KEY,), hint="/ filter · Enter open · d delete · Esc review", cursor=pos,
                                                     preview=lambda k: previews.collection(art({**working[ids[k]], "id": ids[k]})) if k < n else None)
         if isinstance(i, tuple):
+            pos = i[1]
             if i[1] < n:
                 x = ids[i[1]]
                 if ui.confirm(f"🗑️  Delete {noun} {emoji({**working[x], 'id': x})} {working[x]['name']}?{delete_note(x)}", default=False):
                     del working[x]
             continue
         if i is not None and i < n:
+            pos = i
             open_item(working[ids[i]])
             continue
         if i == n:
+            pos = i
             x = new_item(working)
             if x:
                 open_item(working[x])

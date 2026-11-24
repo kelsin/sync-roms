@@ -25,6 +25,38 @@ class Shared(unittest.TestCase):
             self.assertIs(module.diff_lists, listedit.diff_lists)
 
 
+class MenusKeepTheCursor(unittest.TestCase):
+    def cursors(self, run, *picks):
+        """run() with filter_list answering picks in turn; the cursor each call was opened on."""
+        answers, seen = iter(picks), []
+
+        def fake(title, labels, **k):
+            seen.append(k.get("cursor"))
+            return next(answers)
+        with mock.patch.object(picker, "filter_list", fake):
+            run()
+        return seen
+
+    def test_the_set_and_collection_menus_reopen_on_the_row_just_used(self):
+        for module in (collectionedit, setedit):
+            with self.subTest(module.__name__), mock.patch.object(module, "add_from_system"), \
+                    mock.patch.object(module, "add_from_set"):
+                seen = self.cursors(lambda: module.edit_one({"name": "Favs", "games": []}, SYSTEMS, lambda b: set()),
+                                    2, 1, None)
+                self.assertEqual(seen, [0, 2, 1])
+
+    def test_the_sets_and_collections_menu_reopens_on_the_row_just_used(self):
+        working = {x: {"name": x, "games": [RUBY]} for x in "abc"}
+        opened = []
+        state = {"review": False}
+        with mock.patch.object(edit, "note"):
+            seen = self.cursors(lambda: listedit.edit_menu("set", working, working, state, lambda g: "", lambda g: None,
+                                                           lambda x: "", None, opened.append, None, "?"),
+                                2, 1, None)
+        self.assertEqual(seen, [0, 2, 1])
+        self.assertEqual(len(opened), 2)
+
+
 class Stocked(unittest.TestCase):
     SYSTEMS = SYSTEMS + [{"name": "Game Boy", "bucket": "gb"}, {"name": "Saturn", "bucket": "saturn"}]
 

@@ -24,15 +24,17 @@ GAMES_KEYS = [k for k in cardedit.SET_GAMES_KEYS if k[0] != cardedit.VARIANT_KEY
 def edit_one(game_set, systems, keys_of):
     """Edit one set: remove games, add games from a system or another set, change categories, rename."""
     names = {s["bucket"]: s["name"] for s in systems}
+    pos = 0
     while True:
         label = f"{themeart.set_emoji(game_set)} {game_set['name']}"  # a rename below changes it
         i = picker.filter_list(f"✏️  {label} (Esc = back)",
                                [f"Games in this set ({len(game_set['games'])}): switch some off",
                                 "Add games from a system", "Add games from a set", "Change a game's category",
                                 "Set a game's series",
-                                "Rename / change the description"])
+                                "Rename / change the description"], cursor=pos)
         if i is None:
             return
+        pos = i
         shown = view(game_set, systems)
         if i == 0:
             rows = edit.set_rows(game_set, shown, lambda s: keys_of(s["bucket"]))

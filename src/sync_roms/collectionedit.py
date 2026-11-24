@@ -50,14 +50,16 @@ def toggle_filtered(s, title, rows):
 
 def edit_one(collection, systems, keys_of):
     """Edit one collection: remove games, add games from a system or a set, rename."""
+    pos = 0
     while True:
         label = f"{themeart.collection_emoji(collection)} {collection['name']}"  # the art may change below
         i = picker.filter_list(f"{label} (Esc = back)",
                                [f"Games in this collection ({len(collection['games'])}): switch some off",
                                 "Add games from a system", "Add games from a set", "Rename / change the description",
-                                f"{themeart.art_emoji(collection.get('art'))} Theme art: {art_label(collection.get('art'))}"])
+                                f"{themeart.art_emoji(collection.get('art'))} Theme art: {art_label(collection.get('art'))}"], cursor=pos)
         if i is None:
             return
+        pos = i
         shown = view(collection, systems)
         if i == 0:
             rows = edit.set_rows(collection, shown, lambda s: keys_of(s["bucket"]))

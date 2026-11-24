@@ -289,6 +289,30 @@ class MenuActions(EditBase):
         seen = self.top_titles([3, None, 4])
         self.assertIn("recommended systems", seen[1][0])
 
+    def cursors_of(self, picks, prefix):
+        """edit_manifest() with filter_list answering picks in turn (a multi list: unchanged); the cursor each list whose
+        title starts with prefix was opened on."""
+        picks, cursors = iter(picks), []
+
+        def fake(title, options, *a, **k):
+            if title.startswith(prefix):
+                cursors.append(k.get("cursor"))
+            return list(k["initial"]) if k.get("multi") else next(picks)
+        with mock.patch.object(runtime, "BUCKET", "b", create=True), mock.patch.object(s3, "list_sizes", return_value={}), \
+                mock.patch.object(picker, "filter_list", side_effect=fake), mock.patch.object(edit, "note"), \
+                contextlib.redirect_stdout(io.StringIO()):
+            edit.edit_manifest()
+        return cursors
+
+    def test_the_card_list_reopens_on_the_row_just_used(self):
+        from sync_roms import cardedit
+        self.write_json("cards.json", {x: {"layout": "esde", "device": "full"} for x in "abc"})
+        with mock.patch.object(cardedit, "edit_card"):
+            self.assertEqual(self.cursors_of([0, 2, 1, None, 4], "💳 Which"), [0, 2, 1])
+
+    def test_the_device_list_reopens_on_the_row_just_used(self):
+        self.assertEqual(self.cursors_of([3, 2, 1, None, 4], "🧩 Which"), [0, 2, 1])
+
     def test_choosing_a_card_calls_the_card_editor(self):
         from sync_roms import cardedit
         self.write_json("cards.json", {"c": {"layout": "esde", "device": "full"}})
