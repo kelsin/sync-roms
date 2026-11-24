@@ -10,7 +10,7 @@ from xml.dom import minidom
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from sync_roms import frontend, github, runtime, themeart, ui  # noqa: E402
+from sync_roms import frontend, github, runtime, store, themeart, ui  # noqa: E402
 
 def archive(files):
     """A .tar.gz stream like GitHub's, its files under one top folder."""
@@ -51,6 +51,15 @@ class Assets(unittest.TestCase):
             for size, dims in (("Imgs", (336, 480)), ("Imgs_med", (210, 300)), ("Imgs_small", (140, 200))):
                 with Image.open(themeart.art_png(art_id, f"art-box/{size}")) as im:
                     self.assertEqual(im.size, dims, (art_id, size))
+
+    def test_every_art_has_zelda_art_in_three_sizes(self):
+        from PIL import Image
+        folder = os.path.join(store.REPO_DATA, "themes", "totk-james", "collections")
+        for art_id in [*themeart.art_choices(), themeart.SURPRISE_ART]:
+            for size, dims in (("Imgs", (336, 480)), ("Imgs_med", (210, 300)), ("Imgs_small", (140, 200))):
+                with Image.open(os.path.join(folder, size, f"{art_id}.png")) as im:
+                    self.assertEqual(im.size, dims, (art_id, size))
+                    self.assertEqual(im.mode, "RGBA", (art_id, size))
 
     def test_every_art_has_its_own_emoji_and_no_art_has_the_default(self):
         ids = [*themeart.art_choices(), themeart.SURPRISE_ART]
