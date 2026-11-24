@@ -599,16 +599,33 @@ class Flow(DataDir):
 
     def test_g_toggles_guest(self):
         self.card()
-        self.run_card(returns((cardedit.GUEST_KEY, 0)), returns(None))
+        with mock.patch.object(ui, "confirm", return_value=True):
+            self.run_card(returns((cardedit.GUEST_KEY, 0)), returns(None))
         self.assertIs(self.read("cards.json")["c"]["guest"], True)
-        self.run_card(returns((cardedit.GUEST_KEY, 0)), returns(None))
+        with mock.patch.object(ui, "confirm") as asked:
+            self.run_card(returns((cardedit.GUEST_KEY, 0)), returns(None))
+        asked.assert_not_called()
         self.assertNotIn("guest", self.read("cards.json")["c"])
+
+    def test_g_on_asks_first_defaulting_to_no_and_says_the_picks_are_replaced(self):
+        self.card(games={"gba": ["x"]})
+        for answer in (False, None):
+            with self.subTest(answer), mock.patch.object(ui, "confirm", return_value=answer) as asked:
+                on_guest = mock.Mock()
+                self.run_card(returns((cardedit.GUEST_KEY, 0)), returns(None), on_guest=on_guest)
+            self.assertIs(asked.call_args.kwargs["default"], False)
+            self.assertIn("replaced", asked.call_args.args[0])
+            self.assertNotIn("guest", self.read("cards.json")["c"])
+            self.assertEqual(self.read("cards.json")["c"]["games"], {"gba": ["x"]})
+            on_guest.assert_not_called()
 
     def test_g_on_calls_on_guest_once(self):
         self.card()
         on_guest = mock.Mock()
-        self.run_card(returns((cardedit.GUEST_KEY, 0)), returns((cardedit.GUEST_KEY, 0)), returns(None),
-                      on_guest=on_guest)
+        with mock.patch.object(ui, "confirm", return_value=True) as asked:
+            self.run_card(returns((cardedit.GUEST_KEY, 0)), returns((cardedit.GUEST_KEY, 0)), returns(None),
+                          on_guest=on_guest)
+        self.assertEqual(asked.call_count, 1)
         on_guest.assert_called_once_with()
 
     def test_title_shows_guest(self):

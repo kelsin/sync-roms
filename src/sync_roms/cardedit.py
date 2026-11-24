@@ -377,8 +377,12 @@ def edit_card(name, setup=None, to_fetch=None, card_match=None, on_guest=None):
                 keep_card_files(name, setup, systems, card_match)
                 changed = ALL
             elif key == GUEST_KEY:
-                if toggle_guest(name) and on_guest:
-                    on_guest()
+                if guest.is_guest(store.saved_card(name)) or ui.confirm(
+                        f"Make {name} a guest card? Its picks are replaced by the ROMs found on the card, "
+                        f"{'now' if on_guest else 'at its next sync'}, and its collections and surprises dropped.",
+                        default=False):
+                    if toggle_guest(name) and on_guest:
+                        on_guest()
                 changed = ALL
             elif key == CLEAR_ALL_KEY:
                 if ui.confirm(f"🧹 Clear every pick, full system and set from {name}?", default=False):
