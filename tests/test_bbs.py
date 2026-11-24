@@ -235,11 +235,18 @@ class Download(helpers.StorageDir):
         self.assertEqual(fetched, [bbs.page_url(1), bbs.cart_url("molemole-1.p8.png")])
         self.assertEqual(self.stored(), {"pico8/molemole-1.p8.png", META})
 
-    def test_confirmation_defaults_to_no(self):
-        code, _, _, _ = self.run_download([PAGE1, EMPTY], yes=False)
-        self.assertEqual(self.stored(), set())
-        code, _, _, _ = self.run_download([PAGE1, EMPTY], yes=False, answer=["y"])
+    def test_confirmation_defaults_to_yes(self):
+        with mock.patch.object(ui, "has_terminal", return_value=True):
+            code, _, _, _ = self.run_download([PAGE1, EMPTY], yes=False, answer=["n"])
+            self.assertEqual(self.stored(), set())
+            code, _, _, _ = self.run_download([PAGE1, EMPTY], yes=False, answer=[""])
         self.assertIn("pico8/molemole-1.p8.png", self.stored())
+
+    def test_no_terminal_needs_yes(self):
+        with mock.patch.object(ui, "has_terminal", return_value=False), self.assertRaises(SystemExit) as e:
+            self.run_download([PAGE1, EMPTY], yes=False)
+        self.assertEqual(e.exception.code, 2)
+        self.assertEqual(self.stored(), set())
 
     def test_failed_retarget_keeps_the_old_revision(self):
         self.put("pico8/x-1.p8.png")

@@ -1045,6 +1045,8 @@ def match_command(args):
     if "screenscraper" not in system:
         ui.fail(f"{name} has no ScreenScraper system id, so it can't be scraped", 2)
     translated, dry_run = getattr(args, "translated", False), getattr(args, "dry_run", False)
+    if not (dry_run or getattr(args, "confirmed", False) or ui.ASSUME_YES) and not ui.has_terminal():
+        ui.fail("Pass --yes to scrape match without a terminal to confirm on", 2)  # before anything is written
     try:
         key = f"{name}/{args.rom}"
         unignore = translated and ignore.is_ignored(key) and inventory.tag(key) is not None
@@ -1101,7 +1103,7 @@ def match_command(args):
         note = f"; the {kept} media file(s) already there are kept" if kept else ""
         question = (f"🖼️  Scrape {name}/{args.rom} as ScreenScraper game {game_id} and write its media and metadata to "
                     f"{where}{note} ?")
-    if not getattr(args, "confirmed", False) and not ui.confirm(question, default=not replace):
+    if not getattr(args, "confirmed", False) and not ui.confirm(question):
         print(ui.yellow("👋 Cancelled."))
         return 0
     print(f"🔗 {name}/{args.rom} → ScreenScraper game {game_id}")

@@ -620,7 +620,7 @@ def _apply(args, base, card, layout_name, layout, device, catalog, session):
         print(ui.yellow(f"⚠️  {len(differs)} file(s) on {card} differ from the stash:"))
         for dst in differs:
             print(ui.dim(f"  {shown(dst)}"))
-        overwrite = ui.confirm("Overwrite them?", default=False)
+        overwrite = ui.confirm("Overwrite them?")
     copied, games, state_cores, written = 0, 0, set(), []
     for stash, steps in plan:
         todo = [(f, src, dst) for f, (src, dst, state) in zip(stash["files"], steps)

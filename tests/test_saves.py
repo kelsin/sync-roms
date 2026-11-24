@@ -912,10 +912,22 @@ class ApplyCommandTest(CommandTest):
         with mock.patch.object(ui, "confirm", return_value=False) as confirm:
             code, out, err = self.run_cmd("saves", "apply", base)
         self.assertEqual(code, 0, err)
-        self.assertEqual(confirm.call_args.kwargs.get("default"), False)
+        self.assertEqual(confirm.call_args.kwargs.get("default", True), True)
         self.assertEqual(self.read_file(base, "RetroArch/saves/gpSP/Game.srm"), "old")
         self.assertEqual(self.read_file(base, "RetroArch/states/gpSP/Game.state.auto"), "state")
         self.assertIn("Applied 1 file(s) of 1 game(s)", out)
+
+    def test_differing_without_terminal_exits_before_asking(self):
+        self.stash()
+        base = self.card("PHONE", "esde")
+        helpers.touch(os.path.join(base, "RetroArch/saves/gpSP/Game.srm"), "old")
+        self.lists([True])
+        with mock.patch.object(ui, "has_terminal", lambda: False):
+            code, out, err = self.run_cmd("saves", "apply", base)
+        self.assertEqual(code, 2)
+        self.assertIn("needs a terminal", err)  # so "Overwrite them?" (default yes) is never answered by EOF
+        self.assertEqual(self.read_file(base, "RetroArch/saves/gpSP/Game.srm"), "old")
+        self.assertFalse(os.path.exists(os.path.join(base, "RetroArch/states/gpSP/Game.state.auto")))
 
     def test_differing_confirmed_and_same_skipped(self):
         self.stash()

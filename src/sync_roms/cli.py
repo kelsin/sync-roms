@@ -205,10 +205,11 @@ TOPICS = {
 
   Reads every page of the Lexaloffle BBS Featured PICO-8 listing (--count N: stops after N carts to
   add or upgrade), lists the carts storage doesn't have and those the BBS has a newer revision of,
-  and asks once (write profile). Each cart goes to pico8/<BBS file name> with its title and author
-  in scrapes/pico8/metadata.json. An upgrade removes the old revision, moves its metadata and
-  scraped media to the new name and points your cards, Surprise history and collections at it; sets
-  that name the old file are listed to change with sets edit. Carts in ignored.json are skipped.
+  and asks once (write profile; without a terminal it needs --yes). Each cart goes to
+  pico8/<BBS file name> with its title and author in scrapes/pico8/metadata.json. An upgrade
+  removes the old revision, moves its metadata and scraped media to the new name and points your
+  cards, Surprise history and collections at it; sets that name the old file are listed to change
+  with sets edit. Carts in ignored.json are skipped.
   Requests go one at a time; the first HTTP error stops it, keeping what was added.
 """,
     "flash": """
@@ -279,7 +280,8 @@ TOPICS = {
   sync-roms cards copy SRC DST                merge SRC's games, sets, excluded and collections into
                                               DST (not surprises); skips systems DST can't play
   sync-roms cards export FILE [--yes]         surprises and collections go into the file as plain
-                                              games; asks before overwriting FILE (--yes overwrites)
+                                              games; asks before overwriting FILE (--yes overwrites;
+                                              without a terminal it needs --yes)
   sync-roms cards import FILE                 keeps size, device, layout, games and excluded;
                                               Surprise off; r renames, p prefixes all
 
@@ -314,7 +316,7 @@ TOPICS = {
   ROMs, a save or state whose game isn't in the system's ROM folder is skipped too). apply lists the
   stashes of systems the card syncs (one per game, with each one's label from `saves manage`) and
   copies them into the card's RetroArch folders. A different file already there is only overwritten
-  after you confirm (default no); identical ones are skipped. A stash without a core going to a
+  after you confirm (default yes); identical ones are skipped. A stash without a core going to a
   layout sorted by core asks which core folder to use (skipped with --yes). manage lists every stash
   (unreadable ones too, which can only be inspected and deleted). Space picks; m and d act on the
   picked stashes, else the highlighted one. Enter lists a stash's files, w labels it, m moves it to
@@ -419,7 +421,7 @@ TOPICS = {
                      from), then scrape it; for a ROM that already has metadata it asks before
                      replacing the entry and deleting its old media. --translated: the ROM is a fan
                      translation: title '<name> - Translated'; an ignored ROM is taken off
-                     ignored.json first
+                     ignored.json first. Without a terminal it needs --yes
   review             go through the ROMs ScreenScraper calls non-games or doesn't know, each with
                      its position (3 of 120): i ignore, s search under another name and scrape the
                      game picked, t search like s and scrape the pick as a fan translation, k keep
@@ -470,7 +472,7 @@ TOPICS = {
   in the system temp folder when it is on another drive with room, else beside themselves; as many
   files convert at once as there are CPU cores and free space for, biggest first. The progress bar
   goes by size, with the rate and time left, and each file's result shows as it finishes. Before it
-  starts it asks to convert N files and remove the originals (default no; --yes goes ahead, no
+  starts it asks to convert N files and remove the originals (default yes; --yes goes ahead, no
   terminal exits 2). Inside a saved card's folder it first warns that the next sync downloads the
   archives again and asks (default no, so --yes or no terminal stops it). Inside the storage folder,
   once a file converts, it ends by saying to run `sync-roms cache update`. Needs 7z, chdman and, for
@@ -638,9 +640,10 @@ def help_text(topic=None):
                   (removes the originals), `clean scrapes`, `cards clean`, `cards convert` (the old
                   layout's media), `cards install` (the card's other files), `cards delete`,
                   `cards export` (overwrites FILE), `saves manage` (deletes the picked stashes),
-                  `themes publish` (stale theme files) and `download pico8` (old cart revisions).
-                  Without a terminal, `upload`, `convert`, `clean scrapes`, `cards install` and
-                  `themes publish` exit 2 unless --yes is given
+                  `themes publish` (stale theme files), `download pico8` (old cart revisions) and
+                  `scrape match`. Without a terminal, `upload`, `convert`, `clean scrapes`,
+                  `cards install`, `cards export` (over FILE), `themes publish`, `download pico8`
+                  and `scrape match` exit 2 unless --yes is given
   {ui.yellow('--quiet')}         print only errors, warnings and --json data (prompts go to stderr)
   {ui.yellow('--verbose')}       also print the effective settings
   {ui.yellow('--json')}          machine-readable output for devices, layouts, diff, games list, cards list and

@@ -629,9 +629,12 @@ def cards_export(args):
     if args.dry_run:
         print(ui.yellow(f"🧪 Would export {len(chosen)} card(s) to {args.file}"))
         return 0
-    if os.path.exists(args.file) and not args.yes and not ui.confirm(f"Overwrite {args.file}?", default=False):
-        print(ui.yellow("↩️  Kept"))
-        return 0
+    if os.path.exists(args.file) and not args.yes:
+        if not ui.has_terminal():
+            ui.fail(f"Pass --yes to overwrite {args.file} without a terminal to confirm on", 2)
+        if not ui.confirm(f"Overwrite {args.file}?"):
+            print(ui.yellow("↩️  Kept"))
+            return 0
     by_id = {c["id"]: c for c in colls.load_collections()}
     try:
         with open(args.file, "w") as f:

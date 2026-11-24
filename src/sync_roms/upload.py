@@ -288,7 +288,7 @@ def upload_command(args):
     else:
         if not ui.has_terminal():
             ui.fail("Pass --yes to upload without a terminal to confirm on", 2)
-        if not ui.confirm(question, default=False):
+        if not ui.confirm(question):
             print(ui.yellow("👋 Cancelled."))
             return 0
     failed = run_uploads(todo)
