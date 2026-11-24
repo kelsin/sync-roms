@@ -311,7 +311,10 @@ def _manage(rows, systems, dry_run):
             if not dry_run:
                 session["sel"][:] = [False] * len(rows)
         elif key == "p":
-            answer = ui.ask("✂️  Keep how many per game? [1] ").strip() or "1"
+            answer = ui.ask("✂️  Keep how many per game? [1] ", cancellable=True)
+            if answer is None:
+                continue
+            answer = answer.strip() or "1"
             if not answer.isdecimal() or int(answer) < 1:
                 _note(f"Keep how many: {answer!r} isn't a positive whole number")
                 continue

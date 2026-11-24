@@ -63,7 +63,9 @@ def edit_one(game_set, systems, keys_of):
             j = picker.filter_list("✏️  Change which game's category?", [game_label(g, names) for g in games],
                                 **previews.game_pane([g["bucket"] for g in games]))
             if j is not None:
-                recategorize(game_set["games"], games[j], ask_category(game_set["games"], games[j].get("title", "it")))
+                typed = ask_category(game_set["games"], games[j].get("title", "it"), cancellable=True)
+                if typed is not None:
+                    recategorize(game_set["games"], games[j], typed)
         elif i == 4:
             games = [g for g in game_set["games"] if g.get("bucket")]
             j = picker.filter_list("✏️  Set which game's series?", [game_label(g, names) for g in games],
@@ -73,8 +75,10 @@ def edit_one(game_set, systems, keys_of):
                                             *(g["series"] for g in game_set["games"] if g.get("series"))]))
                 if known:
                     print(ui.dim(f"  Series: {', '.join(known)}"))
-                typed = ui.ask(f"🎮 Series for {games[j].get('title', 'it')} (empty for none): ").strip()
-                set_series(game_set["games"], games[j], next((n for n in known if n.casefold() == typed.casefold()), typed))
+                typed = ui.ask(f"🎮 Series for {games[j].get('title', 'it')} (empty for none): ", cancellable=True)
+                if typed is not None:
+                    typed = typed.strip()
+                    set_series(game_set["games"], games[j], next((n for n in known if n.casefold() == typed.casefold()), typed))
         else:
             name = ui.ask(f"Name [{game_set['name']}] (empty keeps it): ").strip()
             desc = ui.ask("Description (empty keeps it): ").strip()

@@ -257,6 +257,20 @@ class Session(unittest.TestCase):
         self.assertEqual(self.run_editor(editor, script), (True, True, False, False, "a bdec", "", "e", "s"))
         self.assertEqual(self.events, ["app closed"])
 
+    def test_esc_at_a_cancellable_ask_is_none_and_enter_on_nothing_is_empty(self):
+        def editor():
+            picker.filter_list("A", ["a0"])
+            return ui.ask("Name: ", cancellable=True), ui.ask("Again: ", cancellable=True)
+
+        async def script(app, pilot):
+            await wait_for(pilot, lambda: showing(app, "A"))
+            await pilot.press("enter")
+            await wait_for(pilot, lambda: prompting(app, "Name: "))
+            await pilot.press("x", "escape")
+            await wait_for(pilot, lambda: prompting(app, "Again: "))
+            await pilot.press("enter")
+        self.assertEqual(self.run_editor(editor, script), (None, ""))
+
     def test_ctrl_c_in_a_prompt_raises_in_the_editor(self):
         def editor():
             picker.filter_list("A", ["a0"])

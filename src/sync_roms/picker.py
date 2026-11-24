@@ -448,11 +448,11 @@ class _ListModel:
 class _PromptModel:
     """A question an editor session asks in its app (ui.in_app): the text the editor printed before it (above), the
     question, and what each key does. keys maps keys (y, enter, ...) to answers, others are ignored; with keys None
-    the answer is a line of text, given by Enter, or "" by Esc or ^G."""
+    the answer is a line of text, given by Enter, or "" by Esc or ^G (None when cancellable)."""
     poll = preview = help = note = None  # what the app asks of a list's model
 
-    def __init__(self, question, keys, above):
-        self.question, self.keys, self.above = question, keys, above
+    def __init__(self, question, keys, above, cancellable=False):
+        self.question, self.keys, self.above, self.cancellable = question, keys, above, cancellable
         self.typing = keys is None  # pasted text goes in
         self.text, self.pos = "", 0
 
@@ -462,7 +462,7 @@ class _PromptModel:
         if k == "enter":
             return self.text
         if k in ("escape", "ctrl+g"):
-            return ""
+            return None if self.cancellable else ""
         self.text, self.pos = line_key(self.text, self.pos, k) or (self.text, self.pos)
         return KEEP
 
@@ -1264,13 +1264,13 @@ class _Session:
                     return plain
         return None
 
-    def prompt(self, question, keys):
+    def prompt(self, question, keys, cancellable=False):
         """ui.prompter: on the worker, ask in the app (_PromptModel), under what it printed since its last request was
         answered, which then is not printed again; elsewhere ui.NOT_ASKED."""
         if threading.get_ident() != self.worker:
             return ui.NOT_ASKED
         above = [self.printed.pop() for _ in range(len(self.printed) - self.answered_at)][::-1]
-        return self.ask("prompt", _PromptModel(question, keys, above))
+        return self.ask("prompt", _PromptModel(question, keys, above, cancellable))
 
     def outside(self, fn, *args, **kwargs):
         """ui.terminal_runner: fn called on the worker runs on the main thread, on the normal screen."""

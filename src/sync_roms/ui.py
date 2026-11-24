@@ -201,15 +201,16 @@ def _input(prompt):
     return input(prompt)
 
 
-@in_app(lambda prompt: (prompt, None))
+@in_app(lambda prompt, cancellable=False: (prompt, None, cancellable))
 @uses_terminal
-def ask(prompt):
-    """input() that gives "" at end of input instead of raising, so a prompt with an empty answer means cancel."""
+def ask(prompt, cancellable=False):
+    """input() that gives "" at end of input instead of raising, so a prompt with an empty answer means cancel. With
+    cancellable, end of input (and Esc or ^G in the list app) gives None instead, so an empty line stays an answer."""
     try:
         return _input(prompt)
     except EOFError:
         print()
-        return ""
+        return None if cancellable else ""
 
 
 def _confirm_keys(question, default=True):

@@ -130,11 +130,15 @@ def series_keys(game_set, series):
     return {k for g in game_set["games"] if g.get("series") == series for k in [g["bucket"], *g.get("files", [])]}
 
 
-def ask_category(games, what):
+def ask_category(games, what, cancellable=False):
+    """The category typed for what, "" for none; None when cancellable and the question was cancelled."""
     cats = list(dict.fromkeys(g["category"] for g in games if g.get("category")))
     if cats:
         print(ui.dim(f"  Categories: {', '.join(cats)}"))
-    typed = ui.ask(f"🏷️  Category for {what} (empty for none): ").strip()
+    typed = ui.ask(f"🏷️  Category for {what} (empty for none): ", cancellable=cancellable)
+    if typed is None:
+        return None
+    typed = typed.strip()
     return next((c for c in cats if c.casefold() == typed.casefold()), typed)  # "cave" is the existing "Cave"
 
 
@@ -257,10 +261,6 @@ def diff_lists(before, after):
             lines += [f"- {game_line(old[k])}" for k in old if k not in new]
             lines += [f"~ {game_line(new[k])}: category {old[k].get('category') or 'none'} → {new[k].get('category') or 'none'}"
                       for k in new if k in old and (old[k].get("category") or "") != (new[k].get("category") or "")]
-            found.append(("changed", sid, lines or ["edited"]))
-    return found
-
-
             for k in new:
                 if k not in old:
                     continue
@@ -272,6 +272,10 @@ def diff_lists(before, after):
                     lines.append(f"~ {game_line(new[k])}: {', '.join(other)} changed")
             if not lines and [g["bucket"] for g in a["games"] if g.get("bucket")] != [g["bucket"] for g in b["games"] if g.get("bucket")]:
                 lines.append("order changed")
+            found.append(("changed", sid, lines or ["edited"]))
+    return found
+
+
 def print_changes(found):
     print(ui.bold("\n📝 Changes"))
     for kind, sid, lines in found:

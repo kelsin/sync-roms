@@ -362,9 +362,22 @@ class ManageCommandTest(helpers.Cmd):
     def test_prune_rejects_a_superscript_digit(self):
         self.stash()
         self.lists(("p", 0), None)
-        with mock.patch.object(ui, "ask", lambda *a: "\u00b2"):
+        with mock.patch.object(ui, "ask", lambda *a, **k: "\u00b2"):
             code, out, err = self.run_cmd("saves", "manage")
         self.assertEqual(code, 0, err)
+
+    def test_esc_at_the_keep_question_picks_nothing(self):
+        self.stash(day=1)
+        self.stash(day=2)
+
+        def after(labels):
+            self.assertEqual(self.calls[-1][2]["session"]["sel"], [False, False])  # keep-1 would pick the older one
+            return None
+        self.lists(("p", 0), after)
+        with mock.patch.object(ui, "ask", return_value=None) as asked:
+            code, out, err = self.run_cmd("saves", "manage")
+        self.assertEqual(code, 0, err)
+        self.assertTrue(asked.call_args.kwargs["cancellable"])
 
     def test_dry_run_move_counts_a_stash_once(self):
         self.stash()
@@ -395,7 +408,7 @@ class ManageCommandTest(helpers.Cmd):
             self.assertEqual(self.calls[-1][2]["session"]["sel"], [False, True, True])
             return ("d", 0)
         self.lists(("p", 0), picks, None)
-        with mock.patch.object(ui, "ask", lambda *a: "1"), mock.patch.object(ui, "confirm", lambda *a, **k: True):
+        with mock.patch.object(ui, "ask", lambda *a, **k: "1"), mock.patch.object(ui, "confirm", lambda *a, **k: True):
             code, out, err = self.run_cmd("saves", "manage")
         self.assertEqual(code, 0, err)
         self.assertEqual([os.path.exists(d) for d in (old, mid, new)], [False, False, True])

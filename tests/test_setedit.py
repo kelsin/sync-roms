@@ -436,6 +436,19 @@ class SeriesEditor(unittest.TestCase):
         self.assertEqual(list(game_set["games"][0]), ["title", "category", "series", "system", "bucket"])
 
 
+    def test_esc_at_the_series_question_keeps_the_series(self):
+        game_set, _ = self.run_editor([4, 0, None], [], ask=[None])
+        self.assertEqual(game_set["games"][0]["series"], "Alpha")
+
+    def test_esc_at_the_category_question_keeps_the_category(self):
+        game_set, _ = self.run_editor([3, 0, None], [], ask=[None])
+        self.assertEqual(game_set["games"][0]["category"], "Cave")
+
+    def test_empty_at_the_category_question_still_removes_it(self):
+        game_set, _ = self.run_editor([3, 0, None], [], ask=[""])
+        self.assertNotIn("category", game_set["games"][0])
+
+
 class Editor(unittest.TestCase):
     def setUp(self):
         self.note = self.enterContext(mock.patch.object(edit, "note"))  # what the editor says at its end
