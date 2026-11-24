@@ -1,5 +1,18 @@
 # Changelog
 
+## [3.30.0](https://github.com/kelsin/sync-roms/compare/v3.29.0...v3.30.0) (2026-11-24)
+
+
+### :video_game: Features
+
+* **cards:** show the guest emoji with the badges in cards list ([#550](https://github.com/kelsin/sync-roms/issues/550)) ([3f0afdf](https://github.com/kelsin/sync-roms/commit/3f0afdf9dc41ac6e093878a1c823c1dd2a3875e4))
+
+
+### :bug: Bug Fixes
+
+* **themes:** clear pyui's resized icon copies when a spruce theme updates ([#548](https://github.com/kelsin/sync-roms/issues/548)) ([792051c](https://github.com/kelsin/sync-roms/commit/792051c08c5abc96bcc038c506d068f0c730c1d6))
+* **upload:** default the upload confirm to yes ([#549](https://github.com/kelsin/sync-roms/issues/549)) ([fb48f42](https://github.com/kelsin/sync-roms/commit/fb48f42c663f62fafceaee85485ef0e96667125a))
+
 ## [3.29.0](https://github.com/kelsin/sync-roms/compare/v3.28.0...v3.29.0) (2026-11-23)
 
 
