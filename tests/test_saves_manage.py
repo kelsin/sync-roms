@@ -301,7 +301,17 @@ class ManageCommandTest(helpers.Cmd):
         self.lists(label)
         code, out, err = self.run_cmd("saves", "manage")
         self.assertEqual(code, 0, err)
-        self.assertEqual(seen, [("boss", "dim"), ("", "dim")])
+        self.assertEqual(seen, [("  boss", "dim"), ("  ", "dim")])
+
+    def test_columns_are_separated_and_the_hint_has_no_second_help(self):
+        self.stash()
+        self.lists(None)
+        code, out, err = self.run_cmd("saves", "manage")
+        self.assertEqual(code, 0, err)
+        kw = self.calls[0][2]
+        self.assertTrue(all(text.startswith("  ") for text, _ in kw["extras"][0]), kw["extras"][0])
+        self.assertNotIn("? help", kw["hint"])
+        self.assertEqual(kw["hint"], saves_manage.HINT)
 
     def test_delete_highlighted_after_confirm(self):
         d = self.stash()

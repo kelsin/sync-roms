@@ -203,6 +203,9 @@ KEY_HELP = [("Space/Tab", "pick the stash"), ("Enter", "list the stash's files")
             ("d", "delete the picked stashes (or this one)"), ("Esc", "done")]
 
 
+HINT = "Enter files · w label · m move · p prune · d delete · Esc done"  # fits 80 cells after the picker's "? help · "
+
+
 def _note(text):
     if not picker.queue_note(text):
         ui.warn(text)
@@ -216,6 +219,10 @@ def _label(row):
 
 
 def _extras(row, names):
+    return [("  " + text, color) for text, color in _columns(row, names)]  # two spaces between columns, as the card editor
+
+
+def _columns(row, names):
     if row["unreadable"]:
         return [("", "dim"), ("", ""), ("", "dim"), ("", ""), (ui.human_size(row["size"]), ""), ("", "cyan"),
                 ("unreadable", "red"), ("", "dim")]
@@ -283,7 +290,7 @@ def _manage(rows, systems, dry_run):
             "🗂️ Stashed saves", [_label(r) for r in rows], multi=True, initial=[False] * len(rows), esc_asks=False,
             extras=extras, session=session, hotkeys=("enter", "m", "p", "d"),
             on_note=on_note, note_text=lambda i: rows[i].get("note", ""),
-            hint="? help · Space toggle · Enter files · w label · m move · p prune · d delete · Esc done",
+            hint=HINT,
             key_help=KEY_HELP)
         if not isinstance(state, tuple):
             break
