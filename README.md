@@ -305,6 +305,7 @@ A card is a folder name (the card root's name) with a remembered device, layout 
 | `muos_storage` | `muos` cards: `"sd1"` (default, mounted at `/mnt/mmc`) or `"sd2"` (`/mnt/sdcard`), the storage muOS reads the ROMs from, which collection entries point at. Set it by hand; there is no editor for it |
 | `spruce_theme` | `spruce` cards: the current PyUI theme (a folder name from storage's `os/spruceos/themes/`), picked in the card editor's `S` menu; synced when storage has it and set as the card's selected theme |
 | `spruce_themes_installed` | written by sync: the theme folders it installed on a `spruce` card, the only ones it removes when they are no longer synced |
+| `spruce_os_kept` | written by sync: the spruceOS 7z files `--no-delete` kept at a `spruce` card's root, which the next sync without it removes |
 | `frontend_collections`, `drivers`, `pico8`, `surprise_app`, `raofflineproxy_app`, `spruce_os`, `spruce_emu` | written by sync: the collections, driver zips, PICO-8 zip, Surprise app, RAOfflineProxy file and spruceOS file it put on the card, so each is copied once and only sync's own files are replaced or removed |
 
 ## Editing a card's games (`edit`, `games`)

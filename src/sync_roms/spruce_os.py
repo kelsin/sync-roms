@@ -19,7 +19,18 @@ def install(card, layout_name, base, dry_run, wrote=None, keep=False):
     if not key:
         return 0
     name, size = key[len(runtime.SPRUCE_PREFIX):], listing[key]
-    old = store.saved_card(card).get("spruce_os")
+    saved = store.saved_card(card)
+    old = saved.get("spruce_os")
+    kept = {n for n in saved.get("spruce_os_kept") or [] if isinstance(n, str) and re.fullmatch(PATTERN, n)}  # kept by --no-delete
+    if kept and not keep:
+        if dry_run:
+            print(ui.dim(f"🧪 Dry run: would delete the spruceOS 7z kept by --no-delete: {', '.join(sorted(kept))}"))
+        else:
+            for n in kept - {name}:
+                with contextlib.suppress(OSError):
+                    os.remove(os.path.join(base, n))
+            store.drop_card_field(card, "spruce_os_kept")
+            kept = set()
     if old == name:
         return 0
     previous = os.path.join(base, old) if isinstance(old, str) and re.fullmatch(PATTERN, old) else None
@@ -43,6 +54,7 @@ def install(card, layout_name, base, dry_run, wrote=None, keep=False):
             return 1
     if previous and keep:
         print(ui.dim(f"🔒 --no-delete: keeping the previous spruceOS {old}"))
+        store.update_card(card, spruce_os_kept=sorted(kept | {old}))
     elif previous:
         with contextlib.suppress(OSError):
             os.remove(previous)

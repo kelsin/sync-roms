@@ -1016,7 +1016,7 @@ def check_data(list_keys=None, repo_systems=None):
             problems.append(f"cards.json: {name}: 'collections' must be a list of collection ids")
         else:
             problems.extend(f"cards.json: {name}: unknown collection {i!r}" for i in picked if i not in collection_ids)
-        for field in ("frontend_collections", "drivers", "boot_logos"):
+        for field in ("frontend_collections", "drivers", "boot_logos", "spruce_os_kept"):
             names = entry.get(field, [])
             if not isinstance(names, list) or not all(isinstance(i, str) for i in names):
                 problems.append(f"cards.json: {name}: '{field}' must be a list of names")

@@ -47,6 +47,11 @@
         "type": "array",
         "items": {"type": "string"}
       },
+      "spruce_os_kept": {
+        "description": "spruceOS 7z names that --no-delete kept at a spruce card's root; a later sync without it removes them",
+        "type": "array",
+        "items": {"type": "string"}
+      },
       "spruce_emu": {
         "description": "Per ROM folder, the BIOS zip names sync-roms added to the ignoreList of the folder's Spruce Emu config",
         "type": "object",
