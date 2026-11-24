@@ -9,7 +9,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from sync_roms import cli, clean, flash, picker, runtime, umount, usersettings  # noqa: E402
+from sync_roms import cli, clean, flash, picker, runtime, unmount, usersettings  # noqa: E402
 
 DISK4 = flash.Disk("disk4", 1, "SD", ("A",), ("/Volumes/A",))
 DISK5 = flash.Disk("disk5", 1, "SD", ("B",), ())
@@ -40,35 +40,35 @@ class Run(unittest.TestCase):
         self.eject_roots.append(clean._eject_root)
         return self.eject_result
 
-    def run_umount(self):
+    def run_unmount(self):
         out = io.StringIO()
         with contextlib.redirect_stdout(out):
-            code = umount.run(types.SimpleNamespace(dry_run=self.dry_run))
+            code = unmount.run(types.SimpleNamespace(dry_run=self.dry_run))
         return code, out.getvalue()
 
     def test_run_lists_only_mounted(self):
-        self.run_umount()
+        self.run_unmount()
         self.assertEqual(self.filter.call_args.args, (TITLE, [flash._disk_label(DISK4)]))
 
     def test_run_cleans_each_mount_then_unmounts(self):
         self.disks = [flash.Disk("disk4", 1, "SD", ("KNULLI", "SHARE"), ("/Volumes/KNULLI", "/Volumes/SHARE"))]
-        code, _ = self.run_umount()
+        code, _ = self.run_unmount()
         self.assertEqual(self.cleaned, ["/Volumes/KNULLI", "/Volumes/SHARE"])
         self.assertEqual(self.eject_roots, ["/Volumes/KNULLI"])
         self.assertEqual(code, 0)
 
     def test_run_returns_1_when_unmount_fails(self):
         self.eject_result = False
-        self.assertEqual(self.run_umount()[0], 1)
+        self.assertEqual(self.run_unmount()[0], 1)
 
     def test_run_esc_does_nothing(self):
         self.pick = None
-        self.assertEqual(self.run_umount()[0], 0)
+        self.assertEqual(self.run_unmount()[0], 0)
         self.assertEqual((self.cleaned, self.eject_roots), ([], []))
 
     def test_run_no_card(self):
         self.disks = [DISK5]
-        code, out = self.run_umount()
+        code, out = self.run_unmount()
         self.assertEqual(code, 1)
         self.filter.assert_not_called()
         self.assertIn("no mounted SD card", out)
@@ -76,28 +76,28 @@ class Run(unittest.TestCase):
     def test_run_excludes_storage_disk(self):
         runtime.ROOT = "/Volumes/roms"
         self.disks_of.return_value = {"disk7"}
-        self.run_umount()
+        self.run_unmount()
         self.external.assert_called_with({"disk7"})
         runtime.ROOT = None
-        self.run_umount()
+        self.run_unmount()
         self.external.assert_called_with(set())
 
     def test_run_resets_roots_on_both_paths(self):
         for result in (True, False):
             self.eject_result = result
-            self.run_umount()
+            self.run_unmount()
             self.assertEqual((clean._clean_root, clean._eject_root), (None, None))
 
     def test_run_dry_run_does_nothing(self):
         self.dry_run = True
-        code, out = self.run_umount()
+        code, out = self.run_unmount()
         self.assertEqual(code, 0)
         self.assertIn("Would tidy /Volumes/A and unmount disk4", out)
         self.assertEqual((self.cleaned, self.eject_roots), ([], []))
 
     def test_run_needs_macos(self):
         with mock.patch.object(sys, "platform", "linux"):
-            self.assertEqual(self.run_umount()[0], 1)
+            self.assertEqual(self.run_unmount()[0], 1)
 
 
 class Eject(unittest.TestCase):
@@ -133,7 +133,7 @@ class Main(unittest.TestCase):
         runtime.ROOT = None
         disk = flash.Disk("disk4", 1, "SD", ("A",), ("/Volumes/A",))
         r = subprocess.CompletedProcess([], 0, "", "")
-        with mock.patch.object(sys, "platform", "darwin"), mock.patch.object(sys, "argv", ["sync-roms", "umount"]), \
+        with mock.patch.object(sys, "platform", "darwin"), mock.patch.object(sys, "argv", ["sync-roms", "unmount"]), \
                 mock.patch.object(usersettings, "load_settings", lambda: {}), \
                 mock.patch.object(flash, "external_disks", return_value=[disk]), \
                 mock.patch.object(picker, "filter_list", return_value=0), \
