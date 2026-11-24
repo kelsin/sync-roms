@@ -174,6 +174,41 @@ class Install(helpers.CardDir):
         self.run_install()
         self.assertEqual((self.failures, os.listdir(self.card)), (0, []))
 
+    def put_app(self):
+        os.makedirs(self.cp("App", "Surprise", "res"))
+        os.makedirs(self.cp("Icons", "Default", "app"))
+        os.makedirs(self.cp("Roms"))
+        for rel in ("App/Surprise/config.json", "App/Surprise/surprise", "App/Surprise/res/font.ttf", ICON,
+                    "Roms/surprise.json", "Icons/Default/app/other.png"):
+            open(self.cp(*rel.split("/")), "w").close()
+        store.update_card("c", surprise_app=NAME)
+
+    def test_not_onion_removes_app(self):
+        self.put_app()
+        out = self.run_install("spruce")
+        self.assertEqual(self.failures, 0)
+        self.assertIn("Removed the Surprise app", out)
+        self.assertFalse(os.path.exists(self.cp("App", "Surprise")))
+        self.assertFalse(os.path.exists(self.cp(*ICON.split("/"))))
+        self.assertFalse(os.path.exists(self.cp("Roms", "surprise.json")))
+        self.assertTrue(os.path.isfile(self.cp("Icons", "Default", "app", "other.png")))
+        self.assertNotIn(self.FIELD, store.saved_card("c"))
+
+    def test_not_onion_dry_run_or_keep_leaves_app(self):
+        self.put_app()
+        before = self.snapshot()
+        self.assertIn("would remove", self.run_install("spruce", dry_run=True))
+        with contextlib.redirect_stdout(io.StringIO()):
+            onion_surprise.install("c", "spruce", self.card, False, keep=True)
+        self.assertEqual(self.snapshot(), before)
+        self.assertEqual(self.recorded(), NAME)
+
+    def test_not_onion_leaves_other_surprise_folder(self):
+        os.makedirs(self.cp("App", "Surprise"))
+        open(self.cp("App", "Surprise", "other"), "w").close()
+        self.run_install("spruce")
+        self.assertTrue(os.path.isfile(self.cp("App", "Surprise", "other")))
+
     def test_collections_off_installs_no_app(self):
         self.put(f"os/onion/{NAME}", app_zip(GOOD))
         store.update_card("c", custom_collections=False)

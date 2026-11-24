@@ -593,7 +593,7 @@ class SyncFlowTest(unittest.TestCase):
         code, out, _, root, _ = self.run_sync(
             manifest={**MANIFEST, "systems": [{**MANIFEST["systems"][0], "games": games}]}, dry_run=dry_run, plan=[], args=args,
             extra=[(cli.pico8, "run", pico8_run), (cli.spruce_os, "install", spruce_install), (cli.drivers, "prune", prune),
-                   (cli.onion_surprise, "install", lambda card, layout_name, base, dry_run: calls.append(("surprise app", dry_run)) or result),
+                   (cli.onion_surprise, "install", lambda card, layout_name, base, dry_run, keep=False: calls.append(("surprise app", dry_run)) or result),
                    (cli.raofflineproxy, "install", lambda card, layout_name, base, dry_run: calls.append(("raofflineproxy", dry_run)) or result),
                    (cli.onion_surprise, "write_list", lambda card, layout_name, base, roms_dir, systems, dry_run: calls.append(("surprise list", dry_run))),
                    (cli.cardfs, "flush", lambda: calls.append("flush"))])
