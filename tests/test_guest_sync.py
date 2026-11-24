@@ -159,6 +159,50 @@ class GuestSyncTest(DataDir):
         self.assertFalse(os.path.exists(game))
         self.assertTrue(os.path.exists(cover))
 
+    GAMELIST = ("<?xml version=\"1.0\"?>\n<gameList>\n\t<game>\n\t\t<path>./Game.zip</path>\n\t\t<name>Old</name>\n\t</game>\n"
+                "\t<game>\n\t\t<path>./Mine.zip</path>\n\t\t<name>Mine</name>\n\t</game>\n</gameList>\n")
+
+    def read(self, path):
+        with open(path, encoding="utf-8") as f:
+            return f.read()
+
+    def deselect(self, **kw):
+        def editor(card, *a, **k):
+            store.update_card(card, games={})
+        return self.sync(yes=False, editor=editor, **kw)
+
+    def test_guest_sync_removes_the_gamelist_entry_of_a_deleted_rom(self):
+        self.save(guest=True)
+        self.card_file("ROMs/gba/Game.zip")
+        self.card_file("ROMs/gba/Mine.zip")
+        gamelist = self.card_file("ES-DE/gamelists/gba/gamelist.xml", self.GAMELIST.encode())
+        self.deselect()
+        text = self.read(gamelist)
+        self.assertNotIn("Game.zip", text)
+        self.assertIn("<path>./Mine.zip</path>", text)
+        self.assertIn("<name>Mine</name>", text)
+
+    def test_guest_sync_keeps_the_gamelist_entry_of_a_rom_kept_at_the_prompt(self):
+        self.save(guest=True)
+        self.card_file("ROMs/gba/Game.zip")
+        gamelist = self.card_file("ES-DE/gamelists/gba/gamelist.xml", self.GAMELIST.encode())
+        self.deselect(patches=((ui, {"choose": lambda *a, **k: "n"}),))
+        self.assertIn("Game.zip", self.read(gamelist))
+
+    def test_guest_sync_with_no_delete_keeps_the_gamelist_entry(self):
+        self.save(guest=True)
+        self.card_file("ROMs/gba/Game.zip")
+        gamelist = self.card_file("ES-DE/gamelists/gba/gamelist.xml", self.GAMELIST.encode())
+        self.deselect(args=["--no-delete"])
+        self.assertIn("Game.zip", self.read(gamelist))
+
+    def test_guest_sync_leaves_a_gamelist_that_does_not_parse(self):
+        self.save(guest=True)
+        self.card_file("ROMs/gba/Game.zip")
+        gamelist = self.card_file("ES-DE/gamelists/gba/gamelist.xml", b"<gameList><game>")
+        self.deselect()
+        self.assertEqual(self.read(gamelist), "<gameList><game>")
+
     def test_x_skips_a_system(self):
         self.save(guest=True)
         game = self.card_file("ROMs/gba/Game.zip")

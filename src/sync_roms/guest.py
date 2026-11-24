@@ -95,3 +95,28 @@ def new_gamelist_entries(gamelists):
         if fresh:
             out[path] = fresh
     return out
+
+
+def remove_gamelist_entries(path, roms):
+    """Take the <game> of each ROM (rel paths) out of a gamelist file, leaving every other entry. Returns how many
+    there were. A file that doesn't parse is left as it is, with a warning."""
+    if not os.path.exists(path):
+        return 0
+    try:
+        with open(path, encoding="utf-8", newline="") as f:
+            text = f.read()
+        m = re.search(r"<gameList\b[^>]*/>", text) or re.search(r"<gameList\b.*</gameList>", text, re.S)
+        if not m:
+            raise ValueError("no <gameList>")
+        root = ET.fromstring(m.group(0))
+    except (ET.ParseError, OSError, UnicodeDecodeError, ValueError) as e:
+        ui.warn(f"{path} doesn't parse ({e}): left as it is")
+        return 0
+    gone = {downloads.name_key("./" + r) for r in roms}
+    stale = [g for g in root.findall("game") if downloads.name_key((g.findtext("path") or "").strip()) in gone]
+    if stale:
+        for g in stale:
+            root.remove(g)
+        ET.indent(root, space="\t")
+        store.replace_file(path, text[:m.start()] + ET.tostring(root, encoding="unicode") + text[m.end():], newline="")
+    return len(stale)
