@@ -64,7 +64,7 @@ class GuestTest(RealDataDirGuard):
                                     "surprises": [{"system": "nes"}], "guest": True}})
         guest.save_seed("card", {"gba": {"gba/Game.zip": "/p"}, "nes": {}})
         self.assertEqual(store.load_cards()["card"], {"device": "x", "layout": "esde",
-                                                       "games": {"gba": ["gba/Game.zip"]}, "guest": True})
+                                                       "games": {"gba": [{"bucket": "gba/Game.zip", "title": "Game"}]}, "guest": True})
 
     def test_guest_card_surprises_are_not_in_the_manifest(self):
         entry = {"device": "full", "layout": "esde",
