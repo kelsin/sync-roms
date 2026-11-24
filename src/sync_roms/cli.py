@@ -1440,8 +1440,14 @@ def sync_card(args):
 
             def present(path):
                 return found(moved_to.get(path, path))
+        hidden = {}
+        if layout_name in frontend.ESDE_LAYOUTS and not guest:  # ES-DE lists every disc beside its playlist, so hide the discs of games that have one
+            for s in chosen:
+                disc_set = {k for g in m3u.file_groups(available(s)).values() if g[0].lower().endswith(".m3u") for k in g[1:]}
+                if discs := [r for r in scraped["rels"][s["bucket"]] if f"{s['bucket']}/{r}" in disc_set]:
+                    hidden[s["bucket"]] = discs
         plan = scrape_plan.build_scrape_plan(layout_name, chosen, scraped["data"], scraped["rels"], dest_of, es_dir, present, base,
-                                             recheck=recheck)
+                                             recheck=recheck, **({"hidden": hidden} if hidden else {}))
         if esde_problem and plan["gamelists"]:
             skipped()
             plan["gamelists"] = {}

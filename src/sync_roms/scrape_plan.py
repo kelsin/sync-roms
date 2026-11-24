@@ -416,12 +416,13 @@ def gamelist_path(layout_name, system, es_dir, rom_dir):
     return os.path.join(gl, GAMELIST_FILES[layout_name])
 
 
-def build_scrape_plan(layout_name, systems, data, rom_rels, dest_of, es_dir, present, base, recheck=None, all_media=False):
+def build_scrape_plan(layout_name, systems, data, rom_rels, dest_of, es_dir, present, base, recheck=None, all_media=False, hidden=None):
     """Everything a sync installs from scrapes/: media jobs, gamelist entries per file, text files.
 
     es_dir: ES-DE's data folder, where esde and emudeck gamelists go (for emudeck, the one on this computer).
     recheck: the local paths of an earlier plan's media jobs; the media it found current are left out unchecked.
-    all_media: every media job and text file, those already on the card as storage has them too (where a ROM's media go)."""
+    all_media: every media job and text file, those already on the card as storage has them too (where a ROM's media go).
+    hidden: {system id: ROM paths} marked <hidden> in ES-DE's gamelist (the discs of multi-disc games, so only the playlist shows)."""
     plan = {"jobs": [], "gamelists": defaultdict(dict), "writes": []}
     for s in systems:
         listing, meta = data[s["bucket"]]
@@ -437,6 +438,10 @@ def build_scrape_plan(layout_name, systems, data, rom_rels, dest_of, es_dir, pre
                 if "/" not in rom and present(os.path.join(rom_dir, rom))
                 and (found := index.get(os.path.splitext(rom)[0], {}))
                 and SPRUCE_TYPES[0] not in found and set(ONION_ART) & set(found))  # what `scrape art` makes it from
+        if layout_name in frontend.ESDE_LAYOUTS:
+            for rom in (hidden or {}).get(s["bucket"], ()):
+                if present(os.path.join(rom_dir, rom)):
+                    entries.setdefault(rom, {})["hidden"] = "true"
         if carts:  # a cart without a scraped picture is its own picture
             index = scrape_index(listing)
             for rom in sorted(rom_rels.get(s["bucket"], ())):
