@@ -38,11 +38,12 @@ def _size(path):
 
 
 def unpacked_size(archive):
-    """The total unpacked bytes of a 7z, from its technical listing."""
+    """The total unpacked bytes of a 7z, from its technical listing; None when 7z can't list it."""
     done = subprocess.run([external.find_tool("7z"), "l", "-slt", "--", archive], stdin=subprocess.DEVNULL,
                           capture_output=True, text=True, errors="replace")
-    return sum(int(line[len("Size = "):]) for line in done.stdout.splitlines()
-               if line.startswith("Size = ") and line[len("Size = "):].strip().isdigit())
+    sizes = [int(line[len("Size = "):]) for line in done.stdout.splitlines()
+             if line.startswith("Size = ") and line[len("Size = "):].strip().isdigit()]
+    return sum(sizes) if done.returncode == 0 and sizes else None
 
 
 def unpack(archive, base, total):
@@ -104,7 +105,7 @@ def run(args):
     if not args.yes and not ui.has_terminal():
         ui.fail("Pass --yes to install without a terminal to confirm on", 2)
     if not external.find_tool("7z"):
-        ui.fail("7z isn't installed (brew install sevenzip)", 3)
+        ui.fail("7z isn't installed, so spruceOS can't be unpacked; run `sync-roms tools install`", 3)
     tmp = tempfile.mkdtemp(prefix="sync-roms-install-")
     try:
         if shutil.disk_usage(tmp).free < size + flash.SPARE:
@@ -116,6 +117,9 @@ def run(args):
             ui.failure(ui.red(f"❌ couldn't download spruceOS {release}: {failures[0][1] if failures else 'failed'}"))
             return 1
         total = unpacked_size(archive)
+        if total is None:
+            ui.failure(ui.red(f"❌ 7z can't read the downloaded {release}: nothing deleted"))
+            return 1
         free = downloads.free_space(base) + sum(sizes.values())
         if free < total + spruce_os.MARGIN:
             ui.failure(ui.red(f"❌ not enough room on {name}: spruceOS needs {ui.human_size(total + spruce_os.MARGIN)}, "
@@ -135,7 +139,8 @@ def run(args):
         print(f"🌲 Unpacking spruceOS {release} ({ui.human_size(total)})…")
         error = unpack(archive, base, total)
         if error:
-            ui.warn(f"could not unpack {release}: {error}")
+            ui.failure(ui.red(f"❌ could not unpack {release}: {error}. {name} has no spruceOS now: "
+                              "run `sync-roms cards install` again"))
             return 3
     finally:
         shutil.rmtree(tmp, ignore_errors=True)

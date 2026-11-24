@@ -45,6 +45,13 @@ class UnpackedSize(unittest.TestCase):
                 mock.patch.object(install.subprocess, "run", return_value=done):
             self.assertEqual(install.unpacked_size("x.7z"), 15)
 
+    def test_unpacked_size_is_none_when_7z_fails_or_lists_nothing(self):
+        for code, listing in ((2, "Path = a\nSize = 10\n"), (0, "")):
+            done = subprocess.CompletedProcess([], code, stdout=listing, stderr="")
+            with mock.patch.object(install.external, "find_tool", return_value="7z"), \
+                    mock.patch.object(install.subprocess, "run", return_value=done):
+                self.assertIsNone(install.unpacked_size("x.7z"))
+
 
 @unittest.skipIf(external.find_tool("7z") is None, "needs 7z")
 class Unpack(helpers.CardDir):
@@ -67,6 +74,7 @@ class Unpack(helpers.CardDir):
         helpers.touch(archive, b"not a 7z")
         with contextlib.redirect_stdout(io.StringIO()):
             self.assertIsNotNone(install.unpack(archive, self.card, 1))
+        self.assertIsNone(install.unpacked_size(archive))
 
 
 class Run(helpers.CardDir):
@@ -135,7 +143,6 @@ class Run(helpers.CardDir):
         self.assertTrue(os.path.isdir(self.cp("App")))
 
     def test_run_download_failure_deletes_nothing(self):
-        self.downloads.return_value = 1
         self.downloads.side_effect = lambda todo, label, icon, base, failures: failures.append((todo[0][0], "boom")) or 1
         self.assertEqual(self.run_cmd(), 1)
         self.assertIn("boom", self.out.getvalue())
@@ -175,10 +182,19 @@ class Run(helpers.CardDir):
         self.assertEqual(entry["layout"], "spruce")
         self.assertIn(f"spruceOS {V46} installed on card", self.out.getvalue())
 
+    def test_run_unreadable_archive_deletes_nothing(self):
+        install.unpacked_size.return_value = None
+        self.assertEqual(self.run_cmd(), 1)
+        self.assertIn("can't read", self.out.getvalue())
+        self.assertTrue(os.path.isdir(self.cp("App")))
+        self.assertFalse(os.path.exists(self.tmpdir))
+        self.unpack.assert_not_called()
+
     def test_run_unpack_failure_exits_3(self):
         self.unpack.return_value = "ERROR: broken"
         self.assertEqual(self.run_cmd(), 3)
-        self.assertIn("ERROR: broken", self.err.getvalue())
+        self.assertIn("ERROR: broken", self.out.getvalue())
+        self.assertIn("card has no spruceOS now", self.out.getvalue())
         self.assertNotIn("spruce_os", self.entry())
         self.assertFalse(os.path.exists(self.tmpdir))
 
