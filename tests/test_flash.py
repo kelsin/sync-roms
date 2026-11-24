@@ -333,6 +333,22 @@ class Run(helpers.StorageDir):
         self.assertEqual(self.flash(), 0)
         self.write_image.assert_called_once()
 
+    def test_dry_run_says_so_before_the_disk_picker_and_in_the_confirmation(self):
+        said, asked = [], []
+        self.filter_list.side_effect = lambda title, *a, **k: said.append((title, sys.stdout.getvalue())) or 0
+        with mock.patch.object(ui, "ask", lambda prompt: asked.append(prompt) or self.answer):
+            self.assertEqual(self.flash(dry_run=True), 0)
+            dry_out = self.out
+            dry_asked, asked[:] = list(asked), []
+            self.assertEqual(self.flash(), 0)
+        _, shown = next(s for s in said if "SD card" in s[0])
+        self.assertIn("🧪 Dry run", shown)
+        self.assertNotIn("will be erased", dry_out)
+        self.assertIn("nothing is written", dry_asked[0])
+        self.assertNotIn("to flash it", dry_asked[0])
+        self.assertNotIn("🧪", self.out)
+        self.assertIn("to flash it", asked[0])
+
     def test_dry_run_downloads_and_writes_nothing(self):
         with mock.patch.object(flash.s3, "download") as download:
             self.assertEqual(self.flash(dry_run=True), 0)
