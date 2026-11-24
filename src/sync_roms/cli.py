@@ -298,8 +298,8 @@ TOPICS = {
   sync-roms saves manage [--dry-run] [--yes]
       inspect, label, move, prune and delete stashes
 
-  CARD is a saved card's name or its mounted folder (default: the current directory); it needs a
-  layout (`sync-roms cards set NAME --layout`). An Android card (esde, not windows-pc) is reached
+  CARD is the card's mounted folder (default: the current directory); it needs a layout
+  (`sync-roms cards set NAME --layout`). An Android card (esde, not windows-pc) is reached
   over wireless adb instead: CARD is its name, or with no CARD (and the current folder isn't a card)
   a device is picked from those adb sees, the last row walking through pairing a new one (Wireless
   debugging). It needs adb (brew install android-platform-tools). The card's SD card is remembered
@@ -638,8 +638,9 @@ def help_text(topic=None):
                   (removes the originals), `clean scrapes`, `cards clean`, `cards convert` (the old
                   layout's media), `cards install` (the card's other files), `cards delete`,
                   `cards export` (overwrites FILE), `saves manage` (deletes the picked stashes),
-                  `themes publish` (stale theme files) and `download pico8` (old cart revisions);
-                  without a terminal they exit 2 unless --yes is given
+                  `themes publish` (stale theme files) and `download pico8` (old cart revisions).
+                  Without a terminal, `upload`, `convert`, `clean scrapes`, `cards install` and
+                  `themes publish` exit 2 unless --yes is given
   {ui.yellow('--quiet')}         print only errors, warnings and --json data (prompts go to stderr)
   {ui.yellow('--verbose')}       also print the effective settings
   {ui.yellow('--json')}          machine-readable output for devices, layouts, diff, games list, cards list and
