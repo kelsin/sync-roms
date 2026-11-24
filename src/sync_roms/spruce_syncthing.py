@@ -124,6 +124,10 @@ def merge_config(old, srv):
     for _, folder_id, label, path in srv["folders"]:
         found = next((f for f in root.findall("folder") if f.get("id") == folder_id), None)
         if found is None:
+            clash = next((f for f in root.findall("folder") if (f.get("path") or "").rstrip("/") == path.rstrip("/")), None)
+            if clash is not None:
+                warnings.append(f"Syncthing folder {clash.get('id')} is already at {path} in config.xml, so {folder_id} isn't added there; left as it is")
+                continue
             _insert(root, _new_folder(srv, folder_id, label, path), "folder")
             lines.append(f"   config.xml: folder {label} at {path}")
             continue
@@ -249,18 +253,25 @@ def _same(line, value):
 
 def _config_entries(base, srv):
     where = "/".join(CONFIG)
+    text = cardfs.text(os.path.join(base, *CONFIG)) or ""
     root = None
-    try:
-        root = ET.fromstring(cardfs.text(os.path.join(base, *CONFIG)) or "")
-    except ET.ParseError:
-        pass
-    if root is not None and root.tag != "configuration":
-        root = None
+    if text:
+        try:
+            root = ET.fromstring(text)
+        except ET.ParseError:
+            return []  # merge_config warns about it
+        if root.tag != "configuration":
+            return []
     found = root is not None and any(d.get("id") == srv["id"] for d in root.findall("device"))
     result = [applied.Entry(where, "server", srv["id"] if found else None, srv["id"], False)]
     for _, folder_id, label, path in srv["folders"]:
         folder = next((f for f in root.findall("folder") if f.get("id") == folder_id), None) if root is not None else None
-        result.append(applied.Entry(where, label, None if folder is None else folder.get("path"), path, False))
+        old_path = None if folder is None else (folder.get("path") or "").rstrip("/")
+        result.append(applied.Entry(where, label, old_path, path.rstrip("/"), False))
+        shared = None if folder is None else ("yes" if any(d.get("id") == srv["id"] for d in folder.findall("device")) else "no")
+        result.append(applied.Entry(where, f"{label} shared with server", shared, "yes", False))
+        window = None if folder is None else folder.findtext("modTimeWindowS")
+        result.append(applied.Entry(where, f"{label} modTimeWindowS", window, "2", False))
     return result
 
 
@@ -318,7 +329,7 @@ def run(card, layout_name, base, dry_run):
     if any(path == os.path.join(base, *CONFIG) for path, _ in writes):
         for _, _, _, path in srv["folders"]:
             os.makedirs(os.path.join(base, path[len(CARD_ROOT):], ".stfolder"), exist_ok=True)
-    print(ui.green(f"🔄 Syncthing: set {len(lines)} setting(s) so saves and states sync"))
+    print(ui.green(f"🔄 Syncthing: set {sum(1 for line in lines if not line.endswith(": new config"))} setting(s) so saves and states sync"))
     for line in lines:
         print(line)
     return 0

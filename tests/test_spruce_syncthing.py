@@ -162,6 +162,13 @@ class Config(helpers.DataDir):
         for part in ("jkx7j-mnlfo", "/mnt/SDCARD/Elsewhere", "/mnt/SDCARD/Saves/saves"):
             self.assertIn(part, warnings[0])
 
+    def test_merge_folder_path_clash_warns(self):
+        old = self.existing().replace("jkx7j-mnlfo", "other-id")
+        text, lines, warnings = spruce_syncthing.merge_config(old, self.server())
+        ids = [f.get("id") for f in ET.fromstring(text).findall("folder")]
+        self.assertNotIn("jkx7j-mnlfo", ids)
+        self.assertEqual(len([w for w in warnings if "other-id" in w and "jkx7j-mnlfo" in w and "/mnt/SDCARD/Saves/saves" in w]), 1)
+
     def test_merge_folder_path_trailing_slash_is_same(self):
         text, lines, warnings = spruce_syncthing.merge_config(self.existing(path="/mnt/SDCARD/Saves/saves/"), self.server())
         self.assertEqual(warnings, [])
@@ -428,8 +435,14 @@ class Card(helpers.CardDir):
         self.assertEqual((server.old, server.new), (None, SERVER))
         saves = found[(self.CONF, "RetroArch saves")]
         self.assertEqual((saves.old, saves.new), (None, "/mnt/SDCARD/Saves/saves"))
+        shared = found[(self.CONF, "RetroArch saves shared with server")]
+        self.assertEqual((shared.old, shared.new), (None, "yes"))
+        window = found[(self.CONF, "RetroArch saves modTimeWindowS")]
+        self.assertEqual((window.old, window.new), (None, "2"))
         self.run_sync()
         found = {(e.where, e.key): e for e in spruce_syncthing.entries("c", self.card)}
+        self.assertEqual(found[(self.CONF, "RetroArch saves shared with server")].old, "yes")
+        self.assertEqual(found[(self.CONF, "RetroArch saves modTimeWindowS")].old, "2")
         self.assertEqual(found[(self.CONF, "server")].old, SERVER)
         self.assertEqual(found[(self.CONF, "RetroArch saves")].old, "/mnt/SDCARD/Saves/saves")
 

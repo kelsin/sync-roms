@@ -999,7 +999,7 @@ const SECTIONS = [
         when: { layout: ["spruce"] },
         body: `
           <ol>
-            <li>Sync the card. Sync sets the cores in "RetroArch cores", RetroArch's save settings and auto save/load, turns Syncthing on (WiFi devices), and adds the WiFi networks in settings.json's <code>wifi_networks</code> and, with <code>syncthing_server</code> in settings.json, the server and the <code>ra-saves</code> and <code>ra-states</code> folders to the device's Syncthing config.</li>
+            <li>Sync the card. Sync sets the cores in "RetroArch cores", RetroArch's save settings and auto save/load, turns Syncthing on (WiFi devices), and adds the WiFi networks in settings.json's <code>wifi_networks</code> and, with <code>syncthing_server</code> in settings.json, the server and the saves and states folders to the device's Syncthing config. Without <code>syncthing_server</code>, add the server and the two folders (at <code>/mnt/SDCARD/Saves/saves</code> and <code>/mnt/SDCARD/Saves/states</code>, modTimeWindowS 2) in the device UI by hand.</li>
             <li>On the device: turn WiFi on, and turn on <span class="path">${path("Advanced Settings > Network > Sync Time/RTC with network")}</span>.</li>
             <li>Server UI: accept the new device, and on its <b>Sharing</b> tab tick <code class="copy">ra-saves</code> and <code class="copy">ra-states</code>. Save.</li>
           </ol>
