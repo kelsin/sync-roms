@@ -1100,6 +1100,8 @@ def sync_card(args):
     if layout_name == "nextui" and not guest:  # folders an earlier sync named differently from NextUI move rather than download again
         for old, new in nextui_folders.migrate(roms_dir, args.dry_run):
             print(ui.dim(f"  📦 {'would rename' if args.dry_run else 'Renamed'} {old} → {new}"))
+            if args.dry_run:  # plan the card as the real run will find it, with the folder already renamed
+                cardfs.alias(os.path.join(roms_dir, new), os.path.join(roms_dir, old))
         cardfs.clear()
     clean_card = not args.dry_run and not args.no_clean
 

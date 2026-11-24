@@ -13,6 +13,7 @@ def caching():
     """Keep the listings until the end (usable as a decorator); whoever changes the card in between calls clear()."""
     global _cache, _texts, _dirty
     _cache, _texts, _dirty = {}, {}, set()
+    _aliases.clear()
     try:
         yield
     finally:
@@ -20,6 +21,7 @@ def caching():
             flush()
         finally:
             _cache = _texts = _dirty = None
+            _aliases.clear()
 
 
 _texts = None  # {path: text} of the settings files while caching(); kept through clear(): it is their latest text
@@ -40,6 +42,23 @@ def clear():
         _cache.clear()
 
 
+_aliases = {}  # {folder: folder it is read from}: a dry run's renames, planned as if made (alias())
+
+
+def alias(new, old):
+    """Read the folder new, and everything in it, from old until the end of the run: a dry run's rename."""
+    _aliases[os.path.normpath(new)] = os.path.normpath(old)
+    clear()
+
+
+def _real(path):
+    path = os.path.normpath(path)
+    for new, old in _aliases.items():
+        if path == new or path.startswith(new + os.sep):
+            return old + path[len(new):]
+    return path
+
+
 def _fold(name):
     return unicodedata.normalize("NFC", name).casefold()
 
@@ -48,10 +67,13 @@ def _scan(folder):
     """({name: DirEntry}, {folded name: [names]}) of folder, empty when it can't be listed."""
     entries = {}
     try:
-        with os.scandir(folder) as it:
+        with os.scandir(_real(folder)) as it:
             entries = {e.name: e for e in it}
     except OSError:
         pass
+    for new, old in _aliases.items():  # the renamed folder shows under its new name only
+        if os.path.dirname(new) == folder and os.path.basename(old) in entries:
+            entries[os.path.basename(new)] = entries.pop(os.path.basename(old))
     folded = {}
     for name in entries:
         folded.setdefault(_fold(name), []).append(name)
@@ -98,7 +120,7 @@ def _entry(path):
     if name in entries:
         return entries[name]
     names = folded.get(_fold(name), ())
-    return entries[names[0]] if len(names) == 1 and os.path.lexists(path) else None
+    return entries[names[0]] if len(names) == 1 and os.path.lexists(_real(path)) else None
 
 
 def read(path):
@@ -106,7 +128,7 @@ def read(path):
     key = ("read", os.path.normpath(path))
     if _cache is not None and key in _cache:
         return _cache[key]
-    with open(path, "rb") as f:
+    with open(_real(path), "rb") as f:
         data = f.read()
     if _cache is not None:
         _cache[key] = data
@@ -118,7 +140,7 @@ def text(path):
     if _texts is not None and path in _texts:
         return _texts[path]
     try:
-        with open(path, encoding="utf-8") as f:
+        with open(_real(path), encoding="utf-8") as f:
             data = f.read()
     except FileNotFoundError:
         data = ""

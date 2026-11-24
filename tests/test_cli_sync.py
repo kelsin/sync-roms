@@ -115,6 +115,19 @@ class SyncSmokeTest(DataDir):
         self.assertEqual(self.run_sync(False, prepare=prepare, patches=patches), 0)
         return got[0]
 
+    def test_a_nextui_dry_run_plans_an_old_named_folder_as_renamed(self):
+        system = {**SYSTEM, "name": "Game Gear", "bucket": "gba", "folders": {"nextui": "Sega Game Gear (GG)"}}
+        layouts = {"nextui": {"label": "NextUI", "roms_dir": "Roms", "bios_dir": "Bios"}}
+
+        def prepare(card):
+            touch(os.path.join(card, "Roms", "Game Gear (GG)", "Game.zip"), b"x" * 5)
+        patches = ((store, {"load_manifest": lambda names=(): {**MANIFEST, "systems": [system], "layouts": layouts}}),
+                   (cli.picker, {"saved_setup": lambda *a: (None, "nextui")}),
+                   (cli.inventory, {"cached": lambda prefix: {"gba/Game.zip": 5}}))
+        self.assertEqual(self.run_sync(True, prepare=prepare, patches=patches, args=["--json"]), 0, self.err.getvalue())
+        plan = json.loads(self.out.getvalue())
+        self.assertEqual((plan["downloads"], plan["delete"]), ([], []))
+
     def test_a_disc_in_the_layouts_disc_folder_matches_its_key(self):
         discs = ["psx/Game (Disc 1).chd", "psx/Game (Disc 2).chd"]
         keys = discs + ["psx/Game.m3u", "psx/Other.chd"]
