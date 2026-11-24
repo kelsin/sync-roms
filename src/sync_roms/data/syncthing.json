@@ -12,5 +12,7 @@
                 "sort_savefiles_by_content_enable": "false", "sort_savestates_by_content_enable": "false",
                 "savefiles_in_content_dir": "false", "savestates_in_content_dir": "false"},
   "spruce": {"settings": {"Emulator Settings": {"raAutoSave": "True", "raAutoLoad": "True", "keepSavesBetweenCores": "Always"},
-                          "Network Settings": {"enableSyncthing": "True"}}}
+                          "Network Settings": {"enableSyncthing": "True"}},
+            "folders": {"saves": {"path": "Saves/saves", "label": "RetroArch saves"},
+                        "states": {"path": "Saves/states", "label": "RetroArch states"}}}
 }

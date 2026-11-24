@@ -3,10 +3,14 @@ import glob
 import json
 import os
 import re
+import xml.etree.ElementTree as ET
 
 from . import applied, cardfs, spruce_emu, store, ui, usersettings
 
 NO_WIFI_SKIPS = ("Network Settings", "enableSyncthing")
+CARD_ROOT = "/mnt/SDCARD/"
+DEVICE_ID = re.compile(r"^[A-Z2-7]{7}(-[A-Z2-7]{7}){7}$")
+GUI_PASSWORD = "$2a$10$Eycxnvj3BtN8fq7suC4.W.ZrDRyH6fgN/pFY.LrOJCG6xIBeDSxdO"  # bcrypt of spruce's public default
 
 
 def data():
@@ -30,6 +34,111 @@ def forced_settings(card):
     no_wifi = any(d.get("id") == device and d.get("network") is False for d in store.repo_json("devices"))
     return [(section, key, value) for section, keys in data()["spruce"]["settings"].items()
             for key, value in keys.items() if not (no_wifi and (section, key) == NO_WIFI_SKIPS)]
+
+
+def server():
+    """The validated `syncthing_server` setting, or None when unset or malformed (malformed warns once).
+
+    {"id": uppercased device ID, "address": str, "folders": [(role, folder id, label, card path)]}."""
+    setting = usersettings.load_settings().get("syncthing_server")
+    if setting is None:
+        return None
+    shared = data()["spruce"]["folders"]
+    problem = None
+    if not isinstance(setting, dict):
+        problem = "must be an object"
+    else:
+        ident = setting.get("id")
+        ids = setting.get("folders")
+        if not isinstance(ident, str) or not DEVICE_ID.match(ident.upper()):
+            problem = '"id" must be the server\'s Syncthing device ID'
+        elif "address" in setting and not (isinstance(setting["address"], str) and setting["address"]):
+            problem = '"address" must be a non-empty string'
+        elif not isinstance(ids, dict) or not all(isinstance(ids.get(role), str) and ids[role] for role in shared):
+            problem = '"folders" must give a folder id for ' + " and ".join(f'"{role}"' for role in shared)
+    if problem:
+        ui.warn(f"syncthing_server in settings.json is ignored: {problem}")
+        return None
+    return {"id": setting["id"].upper(), "address": setting.get("address", "dynamic"),
+            "folders": [(role, setting["folders"][role], folder["label"], CARD_ROOT + folder["path"])
+                        for role, folder in shared.items()]}
+
+
+def _insert(root, element, after):
+    """Put element after the last root child tagged `after` (or first when there is none)."""
+    children = list(root)
+    index = max((i for i, child in enumerate(children) if child.tag == after), default=-1)
+    root.insert(index + 1, element)
+
+
+def _server_device(srv):
+    device = ET.Element("device", {"id": srv["id"], "name": "server", "compression": "metadata", "introducer": "false"})
+    ET.SubElement(device, "address").text = srv["address"]
+    ET.SubElement(device, "paused").text = "false"
+    ET.SubElement(device, "autoAcceptFolders").text = "false"
+    return device
+
+
+def _new_folder(srv, folder_id, label, path):
+    folder = ET.Element("folder", {"id": folder_id, "label": label, "path": path, "type": "sendreceive"})
+    ET.SubElement(folder, "filesystemType").text = "basic"
+    ET.SubElement(folder, "device", {"id": srv["id"], "introducedBy": ""})
+    ET.SubElement(folder, "modTimeWindowS").text = "2"
+    return folder
+
+
+def _fresh_root():
+    root = ET.Element("configuration", {"version": "37"})
+    gui = ET.SubElement(root, "gui", {"enabled": "true", "tls": "false"})
+    ET.SubElement(gui, "address").text = "0.0.0.0:8384"
+    ET.SubElement(gui, "user").text = "spruce"
+    ET.SubElement(gui, "password").text = GUI_PASSWORD
+    ET.SubElement(ET.SubElement(root, "options"), "listenAddress").text = "default"
+    return root
+
+
+def merge_config(old, srv):
+    """(new text or None when unchanged, lines, warnings): the server device and shared folders merged into a Syncthing config.xml text.
+
+    `old` None builds a fresh config. Anything else in the config is kept."""
+    lines, warnings = [], []
+    if old is None:
+        root = _fresh_root()
+        lines.append("   config.xml: new config")
+    else:
+        try:
+            root = ET.fromstring(old)
+        except ET.ParseError:
+            return None, [], ["Saves/syncthing/config/config.xml can't be parsed; the Syncthing server and folders left as they are"]
+        if root.tag != "configuration":
+            return None, [], ["Saves/syncthing/config/config.xml isn't a Syncthing config; the Syncthing server and folders left as they are"]
+    before = ET.tostring(root, encoding="unicode")
+    if not any(d.get("id") == srv["id"] for d in root.findall("device")):
+        _insert(root, _server_device(srv), "device" if root.find("device") is not None else "folder")
+        lines.append("   config.xml: server device")
+    for _, folder_id, label, path in srv["folders"]:
+        found = next((f for f in root.findall("folder") if f.get("id") == folder_id), None)
+        if found is None:
+            _insert(root, _new_folder(srv, folder_id, label, path), "folder")
+            lines.append(f"   config.xml: folder {label} at {path}")
+            continue
+        if found.get("path") != path:
+            warnings.append(f"Syncthing folder {folder_id} is at {found.get('path')} in config.xml, not {path}; left as it is")
+            continue
+        if not any(d.get("id") == srv["id"] for d in found.findall("device")):
+            _insert(found, ET.Element("device", {"id": srv["id"], "introducedBy": ""}), "device")
+            lines.append(f"   config.xml: {label} shared with the server")
+        window = found.find("modTimeWindowS")
+        if window is None:
+            window = ET.SubElement(found, "modTimeWindowS")
+        if window.text != "2":
+            window.text = "2"
+            lines.append(f"   config.xml: {label} modTimeWindowS = 2")
+    if old is not None and ET.tostring(root, encoding="unicode") == before:
+        return None, [], warnings
+    if old is None:
+        ET.indent(root)
+    return ET.tostring(root, encoding="unicode") + "\n", lines, warnings
 
 
 def _cores(base, warnings):
