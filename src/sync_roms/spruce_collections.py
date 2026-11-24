@@ -32,9 +32,10 @@ def _read(base):
 def plan(base, wanted, owned):
     """What to write on the card for the wanted {name: [entries]}, given the names sync-roms owns. Collections sync-roms
     doesn't own (made on the device) are kept as they are."""
-    result = {"writes": [], "deletes": [], "enable": set(), "disable": set(), "owned": [], "warnings": []}
+    result = {"writes": [], "deletes": [], "enable": set(), "disable": set(), "owned": [], "warnings": [], "unreadable": False}
     current = _read(base)
     if current is None:
+        result["unreadable"] = True  # the collections stay on the device, so the art step leaves their pictures alone
         if wanted or owned:
             result["warnings"].append(f"{FILE.replace(os.sep, '/')} can't be read; Spruce collections skipped")
         result["owned"] = list(owned)

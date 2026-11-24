@@ -810,6 +810,29 @@ class SyncFlowTest(unittest.TestCase):
         plan = frontend.plan_collections("esde", card_dir, {"Favs": ["%ROMPATH%/gba/Game.zip"]}, [])
         frontend.apply_collections(plan, "esde", card_dir)
 
+    def test_an_unreadable_spruce_collections_file_keeps_the_collection_art(self):
+        layouts = {"spruce": {"label": "Spruce", "roms_dir": "Roms", "bios_dir": "BIOS"}}
+        manifest = {**MANIFEST, "layouts": layouts, "systems": [{**MANIFEST["systems"][0], "folders": {"spruce": "GBA"}}]}
+        pictures = [os.path.join("Collections", d, "Favs.png") for d in ("Imgs", "Imgs_med", "Imgs_small")]
+
+        def prepare(card_dir):
+            for rel in pictures:
+                os.makedirs(os.path.join(card_dir, os.path.dirname(rel)), exist_ok=True)
+                with open(os.path.join(card_dir, rel), "wb") as f:
+                    f.write(b"x")
+            with open(os.path.join(card_dir, "Collections", "collections.json"), "w") as f:
+                f.write("not json")
+
+        for dry_run in (False, True):
+            with self.subTest(dry_run=dry_run), contextlib.redirect_stderr(io.StringIO()) as err:
+                _, out, _, _, _ = self.run_sync(cards={"collections": ["favs"], "frontend_collections": ["Favs"]}, colls=[FAVS],
+                                                manifest=manifest, setup=(None, "spruce"), dry_run=dry_run, prepare=prepare,
+                                                after=lambda d: [os.path.exists(os.path.join(d, rel)) for rel in pictures])
+                self.assertEqual(self.after, [True] * 3)
+                self.assertNotIn("would remove the art", out)
+                if not dry_run:
+                    self.assertIn("can't be read", err.getvalue())
+
     def test_a_second_identical_sync_writes_no_collection_and_skips_card_cleaning(self):
         _, out, updates, root, _ = self.run_sync(cards={"collections": ["favs"], "frontend_collections": ["Favs"]},
                                                  colls=[FAVS], files=["ROMs/gba/Game.zip"], plan=[], prepare=self.put_favs)
