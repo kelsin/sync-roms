@@ -108,6 +108,8 @@ def art_command(args):
             if not any(plan.make.values()) and not any(plan.have.values()) and not plan.no_source:
                 continue
             if dry_run:
+                if not any(plan.make.values()) and not plan.no_source:
+                    continue
                 _show_plan(name, plan, targets)
                 total_bytes += sum(plan.estimate_bytes.values())
                 continue
@@ -139,7 +141,8 @@ def art_command(args):
                     made_here += len(jobs) - bad
                 finally:
                     shutil.rmtree(tmp, ignore_errors=True)
-            print(f"  {name}: {made_here} file(s) made" + (f", {failed_here} failed" if failed_here else ""))
+            if made_here or failed_here:
+                print(f"  {name}: {made_here} file(s) made" + (f", {failed_here} failed" if failed_here else ""))
             made += made_here
             made_here = 0
             failed += failed_here
@@ -148,8 +151,14 @@ def art_command(args):
         return 130
     except s3.ERRORS as e:
         ui.fail(f"{e}", 3)
+    if dry_run and not total_bytes:
+        print(ui.green("Nothing to make ✨"))
+        return 0
     if dry_run:
         print(f"Total: about {ui.human_size(total_bytes)} to make, an estimate from average sizes; nothing was read or written")
+        return 0
+    if not made and not failed:
+        print(ui.green("Nothing to make ✨"))
         return 0
     print(f"{made} file(s) made, {skipped} ROM(s) skipped (already have it), {failed} failed")
     return 1 if failed else 0
