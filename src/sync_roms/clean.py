@@ -20,9 +20,25 @@ def delete_appledouble(path):
     """Delete every ._* file under path in one walk, except in the folders macOS keeps for itself. Returns the ones it couldn't delete."""
     left = []
     stack = [path]
+    tty = sys.stdout.isatty()
+    folders = deleted = 0
+    drawn = False
+    last = time.monotonic()
     while stack:
+        folder = stack.pop()
+        now = time.monotonic()
+        if now - last >= (ui.POLL if tty else ui.PLAIN_INTERVAL):  # a big card takes minutes to walk: show it's moving
+            last = now
+            if tty:
+                line = f"  🧼 {folders:,} folders · {deleted:,} ._ deleted · {os.path.relpath(folder, path)}"
+                sys.stdout.write("\r\033[J" + ui.cut_cells(line, shutil.get_terminal_size().columns - 1))  # never wraps, so \r redraws it
+                sys.stdout.flush()
+                drawn = True
+            else:
+                print(f"progress: {folders} folders checked, {deleted} ._ file(s) deleted")
+        folders += 1
         try:
-            with os.scandir(stack.pop()) as it:
+            with os.scandir(folder) as it:
                 entries = list(it)
         except OSError:
             continue
@@ -33,8 +49,11 @@ def delete_appledouble(path):
             elif e.name.startswith("._"):
                 try:
                     os.remove(e.path)
+                    deleted += 1
                 except OSError:
                     left.append(e.path)
+    if drawn:
+        sys.stdout.write("\r\033[J")
     print(f"  {'❌' if left else '✅'} {path}" + (ui.dim(f" ({len(left)} ._ file(s) left)") if left else ""))
     return left
 

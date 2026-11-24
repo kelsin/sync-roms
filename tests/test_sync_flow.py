@@ -1,5 +1,6 @@
 import contextlib
 import io
+import itertools
 import os
 import plistlib
 import sys
@@ -113,6 +114,39 @@ class CleanDirsTest(unittest.TestCase):
             with mock.patch.object(clean.os, "remove", side_effect=PermissionError("busy")):
                 left, _ = captured(clean.delete_appledouble, root)
             self.assertEqual(left, [os.path.join(root, "._a")])
+
+    def walk_with_clock(self, out, step):
+        """Walk a card with a ._ file in Roms/PS and Roms/GBA, each clock reading step seconds after the last, printing to out."""
+        with tempfile.TemporaryDirectory() as root:
+            for d in ("Roms/PS", "Roms/GBA"):
+                os.makedirs(os.path.join(root, d))
+                open(os.path.join(root, d, "._a"), "w").close()
+            with mock.patch.object(clean.time, "monotonic", side_effect=itertools.count(0, step)), \
+                    mock.patch.object(clean.shutil, "get_terminal_size", return_value=os.terminal_size((80, 24))), \
+                    contextlib.redirect_stdout(out):
+                left = clean.delete_appledouble(root)
+            return left, out.getvalue(), root
+
+    def test_the_walk_redraws_its_progress_in_place_on_a_terminal(self):
+        class Tty(io.StringIO):
+            def isatty(self):
+                return True
+        left, out, root = self.walk_with_clock(Tty(), ui.POLL)
+        self.assertEqual(left, [])
+        self.assertIn("\r\033[J  🧼 ", out)
+        self.assertRegex(out, r"\d+ folders · \d+ ._ deleted · Roms")
+        self.assertTrue(out.endswith(f"\r\033[J  ✅ {root}\n"))
+
+    def test_the_walk_prints_a_plain_progress_line_off_a_terminal(self):
+        left, out, root = self.walk_with_clock(io.StringIO(), ui.PLAIN_INTERVAL)
+        self.assertRegex(out, r"progress: \d+ folders checked, \d+ ._ file\(s\) deleted")
+        self.assertNotIn("\033", out)
+        self.assertTrue(out.endswith(f"  ✅ {root}\n"))
+
+    def test_a_fast_walk_prints_no_progress(self):
+        with tempfile.TemporaryDirectory() as root:
+            _, out = captured(clean.delete_appledouble, root)
+            self.assertEqual(out, f"  ✅ {root}\n")
 
     def test_a_card_that_already_has_the_guard_files_is_not_written_to(self):
         with tempfile.TemporaryDirectory() as root:
