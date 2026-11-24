@@ -243,6 +243,14 @@ class Flow(DataDir):
         self.run_card(returns((cardedit.SETTINGS_KEY, 0)), returns(5), flip(0), returns(None))
         self.assertNotIn("surprise_excluded_systems", self.read("cards.json")["c"])
 
+    def test_u_card_systems_keeps_a_system_the_card_and_the_global_setting_both_exclude(self):
+        first = self.playable()[0]
+        self.card(size="1 GB", surprise_excluded_systems=[first["bucket"]])
+        self.write_json("settings.json", {"surprise_excluded_systems": [first["bucket"]]})
+        self.run_card(returns((cardedit.SETTINGS_KEY, 0)), returns(5),
+                      returns([True] * len(self.playable())), returns(None))
+        self.assertEqual(self.read("cards.json")["c"]["surprise_excluded_systems"], [first["bucket"]])
+
     def test_u_card_systems_shows_globally_excluded_ones_unchecked_and_keeps_them_global(self):
         first = self.playable()[0]
         self.card(size="1 GB")

@@ -501,7 +501,8 @@ def pick_card_surprise_systems(name, playable):
     if states is None:
         return
     shown = {s["bucket"] for s in playable}
-    off = sorted((excluded - shown) | {s["bucket"] for s, on in zip(playable, states) if not on and s["bucket"] not in everywhere})
+    off = sorted((excluded - shown) | (excluded & everywhere)
+                 | {s["bucket"] for s, on in zip(playable, states) if not on and s["bucket"] not in everywhere})
     if off:
         entry["surprise_excluded_systems"] = off
     else:
