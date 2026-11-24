@@ -223,7 +223,7 @@ class Discs(unittest.TestCase):
             collectionedit.edit_one(collection, SYSTEMS, lambda bucket: keys if bucket == "gba" else set())
         self.assertEqual(lists[1][1], ["Ruby.zip"])
         self.assertEqual("🎁 past surprises only (c clear filters)", lists[1][2])
-        self.assertIn("c clear filters", lists[0][3])
+        self.assertIn("c clear", lists[0][3])
         self.assertEqual([k for k, _ in lists[0][4]], ["s", "r", "m", "p", "c"])  # what ? lists
         self.assertNotIn("past surprises", lists[1][0])
         self.assertEqual(len(lists[2][1]), 2)

@@ -615,7 +615,7 @@ class TextualList(unittest.TestCase):
             await pilot.press("escape", "enter")
         pilot_list(script, "t", self.LABELS, multi=True, hint="Space toggle · Enter done · s set", hotkeys=("s",),
                    key_help=[("s", "narrow the list to a set's games")], on_note=lambda i, t: "")
-        for line in ("a               toggle all shown", "o               view: all / on / changed",
+        for line in ("a               toggle all shown (all off if all are on)", "o               view: all / on / changed",
                      "u               revert this list", "w               edit the row's note", "?               this help",
                      "s               narrow the list to a set's games"):
             self.assertIn(line, text[0])
@@ -631,6 +631,18 @@ class TextualList(unittest.TestCase):
 
     def test_without_key_help_the_help_lists_the_hint(self):
         self.assertIn("  d delete", picker.help_lines(False, "Enter open · d delete"))
+
+    def test_the_hint_leaves_out_keys_every_list_has(self):
+        lines = picker.help_lines(False, "/ filter · j/k move · Enter continue · d delete")
+        self.assertEqual(lines[lines.index("This screen:") + 1:], ["  Enter continue", "  d delete"])
+
+    def test_help_says_what_esc_asks_and_what_locked_rows_do(self):
+        lines = picker.help_lines(True, "", esc_asks=True, has_locked=True)
+        self.assertIn("Esc/q/^G        clear the filter, then go back (asks whether to keep changes)", lines)
+        self.assertTrue(any(l.startswith("🔒") for l in lines))
+        lines = picker.help_lines(True, "")
+        self.assertIn("Esc/q/^G        clear the filter, then go back", lines)
+        self.assertFalse(any(l.startswith("🔒") for l in lines))
 
     def test_every_hint_starts_with_help(self):
         hints = []
