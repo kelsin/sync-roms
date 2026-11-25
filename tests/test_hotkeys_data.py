@@ -32,6 +32,12 @@ class Shape(unittest.TestCase):
         self.assertEqual(len(clear), len(set(clear)))
         self.assertTrue(all(c.startswith("input_") for c in clear))
 
+    def test_knulli_remaps(self):
+        self.assertEqual(self.d["knulli"], {
+            "global.hotkey_b": "x", "global.hotkey_y": "pagedown", "global.hotkey_x": "pageup",
+            "global.hotkey_down": "left", "global.hotkey_up": "right", "global.hotkey_right": "r2",
+            "global.toggle_fast_forward": "1"})
+
 
 if __name__ == "__main__":
     unittest.main()

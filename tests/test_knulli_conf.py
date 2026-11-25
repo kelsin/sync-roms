@@ -86,8 +86,9 @@ class Install(helpers.CardDir):
         self.put(f"{RA}=1\r\n{RA}.hardcore=0\r\n", newline="")
         usersettings.save_settings({"ra_mode": "Casual"})
         found = knulli_conf.entries(self.card)
-        self.assertEqual(len(found), 2)
-        self.assertFalse(any(e.old != e.new for e in found))
+        ra = [e for e in found if e.key.startswith(RA)]
+        self.assertEqual(len(ra), 2)
+        self.assertFalse(any(e.old != e.new for e in ra))
 
     def test_missing_file_warns_and_creates_nothing(self):
         self.assertEqual(self.run_install(ra_mode="Hardcore"), "")
@@ -106,6 +107,14 @@ class Install(helpers.CardDir):
         out = self.run_install(dry_run=True, ra_mode="Hardcore")
         self.assertIn("would set", out)
         self.assertEqual(self.content(), "foo=1\n")
+
+    def test_hotkeys_written(self):
+        self.put("")
+        self.run_install()
+        self.assertEqual(self.content(), "\n".join(f"{k}={v}" for k, v in knulli_conf.hotkey_values().items()) + "\n")
+        self.assertEqual(self.content().split("\n")[:-1], [
+            "global.hotkey_b=x", "global.hotkey_y=pagedown", "global.hotkey_x=pageup", "global.hotkey_down=left",
+            "global.hotkey_up=right", "global.hotkey_right=r2", "global.toggle_fast_forward=1"])
 
     def test_wifi_fills_slots_in_order(self):
         self.put("foo=1\n")
@@ -130,7 +139,7 @@ class Install(helpers.CardDir):
     def test_wifi_same_ssid_takes_your_key(self):
         self.put("wifi.ssid=A\nwifi.key=oldoldold\n")
         self.run_install(wifi_networks=[{"ssid": "A", "psk": "new-password"}])
-        self.assertEqual(self.content(), "wifi.ssid=A\nwifi.key=new-password\n")
+        self.assertEqual(self.content().split("\n")[:2], ["wifi.ssid=A", "wifi.key=new-password"])
 
     def test_wifi_more_than_three_warns(self):
         self.put("wifi.ssid=Home\nwifi.key=hhhhhhhh\n")

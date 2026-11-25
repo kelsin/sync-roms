@@ -3,7 +3,7 @@ keys' lines change, everything else (other keys, comments, order) stays. The fil
 import os
 import re
 
-from . import applied, cardfs, spruce_wifi, ui, usersettings
+from . import applied, cardfs, spruce_wifi, store, ui, usersettings
 from .spruce_settings import API_KEY, MODES
 
 FILE = os.path.join("system", "knulli.conf")
@@ -87,9 +87,14 @@ def wifi_values(current):
     return result
 
 
+def hotkey_values():
+    """{key: value} of the shared hotkey scheme as Knulli remaps it."""
+    return dict(store.repo_json("hotkeys")["knulli"])
+
+
 def wanted(current):
     """{key: value} of every setting to write, given the file's current values."""
-    return {**ra_values(), **wifi_values(current)}
+    return {**ra_values(), **wifi_values(current), **hotkey_values()}
 
 
 def entries(base):
