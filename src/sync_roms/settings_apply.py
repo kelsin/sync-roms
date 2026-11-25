@@ -1,7 +1,7 @@
-"""`config apply [CARD]`: apply the saved settings to a mounted spruce card, or over adb to an Android device."""
+"""`config apply [CARD]`: apply the saved settings to a mounted spruce or Knulli card, or over adb to an Android device."""
 import os
 
-from . import adb, android, android_settings, applied, picker, spruce_hotkeys, spruce_retroarch, spruce_settings, spruce_syncthing, spruce_wifi, store, ui
+from . import adb, android, android_settings, applied, knulli_conf, picker, spruce_hotkeys, spruce_retroarch, spruce_settings, spruce_syncthing, spruce_wifi, store, ui
 
 
 VOLUMES = "/Volumes"
@@ -29,6 +29,13 @@ def _spruce(base, name, card, dry_run):
     return failed
 
 
+def _knulli(base, name, dry_run):
+    if dry_run:
+        applied.show(knulli_conf.entries(base), True)
+        return 0
+    return knulli_conf.install(name, "knulli", base, False)
+
+
 def run(card_arg, dry_run):
     cards = store.load_cards()
     if card_arg and (os.path.isdir(os.path.expanduser(card_arg)) or not android.is_android(store.saved_card(card_arg, cards))) or \
@@ -42,11 +49,11 @@ def run(card_arg, dry_run):
         layout = saved.get("layout")
         if not layout:
             ui.fail(f"{name!r} has no layout. Set it with `sync-roms cards set {name} --layout NAME`, or sync the card once", 2)
-        if layout != "spruce":
-            ui.fail(f"config apply supports spruce cards and Android devices, not {layout}", 2)
+        if layout not in ("spruce", "knulli"):
+            ui.fail(f"config apply supports spruce and Knulli cards and Android devices, not {layout}", 2)
         if not os.path.isdir(base):
             ui.fail(f"No folder {base}: give the card's mounted folder, e.g. `sync-roms config apply /Volumes/{name}`", 2)
-        return 1 if _spruce(base, name, name, dry_run) else 0
+        return 1 if (_spruce(base, name, name, dry_run) if layout == "spruce" else _knulli(base, name, dry_run)) else 0
     if not ui.has_terminal():
         ui.fail("`config apply` needs a terminal to pick the device from", 2)
     catalog = store.load_catalog()

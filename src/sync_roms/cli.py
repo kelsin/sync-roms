@@ -11,7 +11,7 @@ from concurrent.futures import ThreadPoolExecutor
 from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError
 
 from . import __version__, bezels, budget, cardedit, cardfs, clean, commands, downloads, drivers, frontend, inventory, m3u, mirroring, picker, runtime, s3, scrape_plan, store
-from . import muos_collections, nextui_folders, onion_surprise, pico8, raofflineproxy, rocknix_collections, saves, spruce_collections, spruce_bootlogo, spruce_emu, spruce_os, spruce_fixes, spruce_hotkeys, spruce_retroarch, spruce_settings, spruce_syncthing, spruce_themes, spruce_wifi, surprise, themeart, ui, usersettings, vita
+from . import knulli_conf, muos_collections, nextui_folders, onion_surprise, pico8, raofflineproxy, rocknix_collections, saves, spruce_collections, spruce_bootlogo, spruce_emu, spruce_os, spruce_fixes, spruce_hotkeys, spruce_retroarch, spruce_settings, spruce_syncthing, spruce_themes, spruce_wifi, surprise, themeart, ui, usersettings, vita
 from . import collections as colls
 from . import guest as guests
 
@@ -503,8 +503,8 @@ TOPICS = {
   sync-roms config unset NAME           remove it (back to its default)
   sync-roms config import [CARD]        save a card's own settings (spruceOS or Knulli
                                         preferences) in settings.json
-  sync-roms config apply [CARD] [--dry-run] [--yes]   apply the saved settings to a spruce card or
-                                                      an Android device
+  sync-roms config apply [CARD] [--dry-run] [--yes]   apply the saved settings to a spruce or Knulli
+                                                      card or an Android device
 
   NAME is bucket, root, endpoint, profile, write_profile, mirror, screenscraper_user or
   screenscraper_password (text), eject, storage_cache_declined or syncthing (true or false),
@@ -519,8 +519,8 @@ TOPICS = {
   from the card.
 
   config import takes CARD (a card name from cards.json, found at /Volumes/<name>, or the card's
-  folder; default the current folder) and picks what to import from the card's saved layout (only
-  spruce so far). For a spruce card it copies the current values of the spruceOS settings that are
+  folder; default the current folder) and picks what to import from the card's saved layout (spruce
+  or Knulli). For a spruce card it copies the current values of the spruceOS settings that are
   your preferences (emulator, in-game menu, button, boot and network options; not hardware, LED,
   battery, audio or proxy ones) from Saves/spruce/spruce-config.json into settings.json's
   spruce_settings, merged with what is there. It lists the settings identical to the saved ones and
@@ -535,7 +535,9 @@ TOPICS = {
   settings.json by hand ({"key": "value"}).
 
   config apply sets the saved settings without a sync. A mounted spruce card (CARD as for import)
-  gets the spruceOS settings, WiFi networks and Syncthing settings a sync writes. An Android device
+  gets the spruceOS settings, WiFi networks and Syncthing settings a sync writes. A mounted Knulli
+  card gets the RetroAchievements login, WiFi networks, hotkey scheme and knulli_settings in
+  system/knulli.conf. An Android device
   over adb (CARD naming an Android card, or none to pick the device) gets RetroArch's and ES-DE's
   settings (RetroArch Cloud Sync turned off, its overlay folder pointed at the card's
   Bezels/retroarch when storage has bezels for the device) and its APKs installed or upgraded,
@@ -1209,7 +1211,7 @@ def sync_card(args):
     spruce_staged = []  # the spruceOS 7z staged this sync, for the reminder at the end
 
     def stage_spruce(dry_run):
-        """Stage boot logos, the newest spruceOS, the saved settings and WiFi networks on a spruce card. The failure count."""
+        """Stage boot logos, the newest spruceOS, the saved settings and WiFi networks on a spruce card, and the knulli.conf settings on a Knulli card. The failure count."""
         wrote = []
         failed = spruce_bootlogo.install(card, layout_name, device, base, dry_run, wrote, keep=args.no_delete)
         failed += spruce_os.install(card, layout_name, base, dry_run, spruce_staged, keep=args.no_delete)
@@ -1219,6 +1221,7 @@ def sync_card(args):
         failed += spruce_syncthing.run(card, layout_name, base, dry_run)
         failed += spruce_hotkeys.install(card, layout_name, base, dry_run)
         failed += spruce_retroarch.install(card, layout_name, base, dry_run)
+        failed += knulli_conf.install(card, layout_name, base, dry_run)
         if clean_card and wrote:
             clean._clean_root = base
         return failed
@@ -1231,13 +1234,15 @@ def sync_card(args):
         deselected = guests.deletions(seed, picked, store.systems_off(store.saved_card(card)) | (set(seed) - set(picked)))
     if not chosen and not deselected:
         failed = 0
+        pico8_wrote = []
         if not guest:
-            failed = install_apps(args.dry_run)
+            failed = install_apps(args.dry_run, pico8_wrote)
             if onion_surprise.write_list(card, layout_name, base, roms_dir, systems, args.dry_run) and clean_card:
                 clean._clean_root = base
             failed += stage_spruce(args.dry_run)
         print(ui.yellow(f"👋 {card} has nothing to sync. Add games with `sync-roms edit`."))
         spruce_os.remind(spruce_staged)
+        pico8.remind(layout_name, pico8_wrote)
         return 1 if failed else 0
     print(ui.bold(f"\n🔎 Checking {len(chosen)} system(s) against storage..."))
 
@@ -1831,6 +1836,7 @@ def sync_card(args):
     else:
         print(ui.green(f"\n🎉 Done: {done}"))
     spruce_os.remind(spruce_staged)
+    pico8.remind(layout_name, pico8_wrote)
     return 1 if failed else 0
 
 

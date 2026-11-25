@@ -627,9 +627,9 @@ class SyncFlowTest(unittest.TestCase):
             for args, keep in (((), False), (("--no-delete",), True)):
                 with self.subTest(dry_run=dry_run, keep=keep):
                     code, calls, marked, out = self.install_steps([], dry_run, args)
-                    self.assertEqual(calls, [("pico8", dry_run, False), ("surprise app", dry_run), ("raofflineproxy", dry_run),
+                    self.assertEqual(calls, [("pico8", dry_run, True), ("surprise app", dry_run), ("raofflineproxy", dry_run),
                                              ("surprise list", dry_run), ("spruce", dry_run, keep)])
-                    self.assertEqual((code, marked), (0, False))  # PICO-8 isn't asked what it wrote: the card isn't marked
+                    self.assertEqual((code, marked), (0, False))  # what PICO-8 wrote only feeds the reminder: the card isn't marked
                     self.assertIn("has nothing to sync", out)
         self.assertEqual(self.install_steps([], False, result=1)[0], 1)
 
