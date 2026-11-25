@@ -44,6 +44,7 @@ class ReadmeCommands(unittest.TestCase):
         from sync_roms import cli
         found, names = {}, set()
         for cells in self.rows():
+            self.assertEqual(len(cells), 3, cells[0])
             word = re.findall(r"`([\w-]+)", cells[0])[0]
             names.add(word)
             for alias in re.findall(r"`([\w-]+)`", cells[-1]):

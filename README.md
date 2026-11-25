@@ -168,31 +168,31 @@ Every mode is a command (plain `sync-roms [CARD]` syncs a card). A command's ali
 | Command | Does | Aliases |
 | --- | --- | --- |
 | `sync [CARD]` | download ROMs, BIOS and scraped data to a card | |
-| `edit` | [interactive editor](#editing-a-cards-games-edit-games) |  |
-| `games list\|add\|remove\|full\|sets\|export\|import` | [edit a card's games from scripts](#editing-from-scripts-games) | | `game` |
-| `sets edit` | edit the [game sets](#sets-sets-edit) in storage by hand and save them there | | `set` |
-| `collections edit` | edit your [collections](#collections-collections-edit) of favourite games | | `collection` |
-| `themes update` | put the latest Art Book Next for ES-DE (for collections' [theme art](#theme-art)) and every [PyUI theme](#spruce) (needs `7z`) in storage | | `theme` |
+| `edit` | [interactive editor](#editing-a-cards-games-edit-games) | |
+| `games list\|add\|remove\|full\|sets\|export\|import` | [edit a card's games from scripts](#editing-from-scripts-games) | `game` |
+| `sets edit` | edit the [game sets](#sets-sets-edit) in storage by hand and save them there | `set` |
+| `collections edit` | edit your [collections](#collections-collections-edit) of favourite games | `collection` |
+| `themes update` | put the latest Art Book Next for ES-DE (for collections' [theme art](#theme-art)) and every [PyUI theme](#spruce) (needs `7z`) in storage | `theme` |
 | `themes build [STYLE...] [--palette NAME\|--all-palettes] [--out DIR]` | build the custom spruce theme styles (Pixel Consoles, Pixel Controllers, ToTK - James) in each chosen palette (without a flag: picked in a list, or the saved `custom_theme_palettes`; `ToTK - James` has no palette and is built once, from the ToTK theme in storage, so naming only it asks for none) from the SPRUCE base theme in storage into the cache, or into `DIR` with `--out`; writes nothing to storage | |
 | `themes publish [STYLE...] [--palette NAME\|--all-palettes]` | build the custom spruce themes in each chosen palette (chosen as for `themes build`) and make their `os/spruceos/themes/<theme>/` folders in storage match: upload what changed and delete what the build no longer makes, after one question (default yes; `--yes` answers it, without a terminal and `--yes` it exits 2; `--dry-run` only shows the plan) | |
 | `themes palettes` | write the overview image of all 28 palettes (a numbered mock list screen for each) and open it | |
 | `themes pick` | choose the PyUI themes every spruce card gets by default (`spruce_themes` setting) | |
-| `download pico8` | add the [PICO-8 BBS Featured carts](#pico-8-carts-from-the-bbs-download-pico8) storage doesn't have, and newer revisions of those it has | | `downloads` |
+| `download pico8` | add the [PICO-8 BBS Featured carts](#pico-8-carts-from-the-bbs-download-pico8) storage doesn't have, and newer revisions of those it has | `downloads` |
 | `flash` | [write a Knulli, BaseOS, muOS, ROCKNIX or OakMoss image](#flashing-an-sd-card-flash) from storage's `os/` to an SD card, macOS only | |
-| `unmount` | pick an SD card, remove macOS's junk from it as a sync does (`.metadata_never_index`, `.fseventsd`, `._` files) and unmount it, macOS only | | `umount` |
+| `unmount` | pick an SD card, remove macOS's junk from it as a sync does (`.metadata_never_index`, `.fseventsd`, `._` files) and unmount it, macOS only | `umount` |
 | `mount` | pick an SD card that was unmounted (by `unmount` or a sync) but not pulled out and mount it again with `diskutil mountDisk`, macOS only | |
-| `cards list\|new\|set\|rename\|layout\|install\|clean\|delete\|copy\|export\|import` | [manage cards](#cards-cards) | | `card` |
-| `saves stash\|apply [CARD]`, `saves manage` | [copy RetroArch saves and states](#moving-saves-between-cards-saves) off a card, or stashed ones onto a card (Android: over adb); inspect, label, move, prune and delete stashes | | `save` |
-| `devices [ID]` | list the supported devices with their chip and the number of systems each one gets, or one device's layouts, note and systems | | `device` |
-| `layouts [ID]` | list the layouts, or one layout's folders and the devices that run it | | `layout` |
-| `upload [DIR]` | [upload ROMs](#uploading-roms-upload) to storage |  |
-| `diff [DIR]` | list the ROMs in only `DIR` or only the storage folder of a system you pick (guessed from the folder name, as in `upload`). Same path and size is the same file; the rest are matched by content, as `upload --replace` does |  |
-| `scrape [SYSTEM \| match SYSTEM ROM GAME \| review [SYSTEM] \| missing [SYSTEM] \| art [SYSTEM]]` / `scrape --set-credentials` | [scrape ROMs](#scraping-from-screenscraper-scrape) with no metadata from ScreenScraper, review the non-game and unknown ones, list them all, or make Onion and Spruce art for what storage holds | | `scrapes` |
-| `scrape clean` | [remove scrapes](#cleaning-scraped-data-scrape-clean) of ROMs not in storage |  |
-| `playlist [DIR]` | [fix `.m3u` playlists](#fixing-playlists-playlist) | | `playlists` |
-| `prepare [DIR]` | [unzip and convert disc images](#preparing-disc-images-prepare) to CHD, xiso or zar |  |
-| `install` | `brew install` whichever of 7z (`sevenzip`), unar and chdman (`rom-tools`) are missing, and say how to build extract-xiso and iso2zar |  |
-| `mirror [DIR]` / `mirror use DIR` / `mirror clear` | [local mirror](#local-mirror-mirror) |  |
+| `cards list\|new\|set\|rename\|layout\|install\|clean\|delete\|copy\|export\|import` | [manage cards](#cards-cards) | `card` |
+| `saves stash\|apply [CARD]`, `saves manage` | [copy RetroArch saves and states](#moving-saves-between-cards-saves) off a card, or stashed ones onto a card (Android: over adb); inspect, label, move, prune and delete stashes | `save` |
+| `devices [ID]` | list the supported devices with their chip and the number of systems each one gets, or one device's layouts, note and systems | `device` |
+| `layouts [ID]` | list the layouts, or one layout's folders and the devices that run it | `layout` |
+| `upload [DIR]` | [upload ROMs](#uploading-roms-upload) to storage | |
+| `diff [DIR]` | list the ROMs in only `DIR` or only the storage folder of a system you pick (guessed from the folder name, as in `upload`). Same path and size is the same file; the rest are matched by content, as `upload --replace` does | |
+| `scrape [SYSTEM \| match SYSTEM ROM GAME \| review [SYSTEM] \| missing [SYSTEM] \| art [SYSTEM]]` / `scrape --set-credentials` | [scrape ROMs](#scraping-from-screenscraper-scrape) with no metadata from ScreenScraper, review the non-game and unknown ones, list them all, or make Onion and Spruce art for what storage holds | `scrapes` |
+| `scrape clean` | [remove scrapes](#cleaning-scraped-data-scrape-clean) of ROMs not in storage | |
+| `playlist [DIR]` | [fix `.m3u` playlists](#fixing-playlists-playlist) | `playlists` |
+| `prepare [DIR]` | [unzip and convert disc images](#preparing-disc-images-prepare) to CHD, xiso or zar | |
+| `install` | `brew install` whichever of 7z (`sevenzip`), unar and chdman (`rom-tools`) are missing, and say how to build extract-xiso and iso2zar | |
+| `mirror [DIR]` / `mirror use DIR` / `mirror clear` | [local mirror](#local-mirror-mirror) | |
 | `cache [update [--full]]` | show the [storage cache](#storage-cache-cache), or read all of storage into it | |
 | `config show\|path` / `config set NAME VALUE` / `config unset NAME` / `config apply [CARD]` | effective [settings](#settings-config) and where each came from, or the data folder's path; change or remove a setting; apply the saved settings to a spruce card or an Android device | |
 | `guide` | open the device setup guide in a browser | |
@@ -530,7 +530,7 @@ States only load in the core they were made with (`gpSP` states don't load in `m
 Run it on a downloaded rom pack, or one system folder of it, before you [upload](#uploading-roms-upload) it to storage:
 
 ```bash
-sync-roms install                  # once
+sync-roms install                       # once
 sync-roms prepare --dry-run ~/roms
 sync-roms prepare ~/roms/psx
 ```
