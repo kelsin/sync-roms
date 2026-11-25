@@ -598,6 +598,45 @@ def wario(p):  # cap with the W emblem, big nose and zigzag mustache
     p.o(0, 15, 10, opaque=True)
 
 
+def king_of_fighters(p):  # mai's folding fan with its tassel
+    px, py, R, r = 0, 30, 52, 20
+    fan = [(px, py)] + arc(px, py, R, R, 212, 328) + [(px, py)]
+    p.pg(fan[:-1], 1.5)
+    with p.inside(fan):
+        p.path(arc(px, py, r, r, 200, 340))
+        for a in range(232, 328, 19):
+            q = turn([(px + r, py), (px + R + 5, py)], a, px, py)
+            p.l(q)
+    p.o(px, py, 4.5, opaque=True)
+    p.c([(px, py + 4.5), (px - 3, py + 12), (px + 2, py + 18)])
+    p.pg([(px + 2, py + 18), (px + 8, py + 22), (px + 6, py + 34), (px - 3, py + 34), (px - 4, py + 22)], 1.5)
+
+
+def capcom_vs(p):  # character select grid and the player cursor
+    s, g = 12, 11
+    x0, y0 = -2 * s - 1.5 * g, -1.5 * s - g - 6
+    for row in range(3):
+        for col in range(4):
+            x, y = x0 + col * (s + g), y0 + row * (s + g)
+            p.rr(x, y, x + s, y + s, 3)
+    x, y = x0 + 2 * (s + g), y0 + 2 * (s + g)
+    p.rr(x - 5, y - 5, x + s + 5, y + s + 5, 5, opaque=True)
+    p.rr(x, y, x + s, y + s, 3)
+    p.pg([(x + s / 2 - 7, y + s + 17), (x + s / 2, y + s + 9), (x + s / 2 + 7, y + s + 17)], 1.2)
+
+
+def metal_gear(p):  # the bipedal metal gear walker, side on
+    leg = [(8, -6), (20, -4), (7, 15), (19, 33), (11, 38), (-5, 17)]
+    p.pg([(x + 22, y) for x, y in leg], 2)
+    p.rr(26, 36, 48, 44, 3, opaque=True)
+    p.rr(6, -42, 46, -31, 3)
+    p.pg(leg, 2, opaque=True)
+    p.rr(-6, 36, 20, 44, 3, opaque=True)
+    p.pg([(-4, -30), (22, -36), (36, -26), (32, -6), (-2, -4)], 3, opaque=True)
+    p.pg([(-44, -12), (-34, -26), (-6, -30), (2, -20), (0, -4), (-22, -2)], 2.5, opaque=True)
+    p.l([(-30, -16), (-12, -18)])
+
+
 def pac_man(p):  # pac-man eating a row of dots
     p.path(arc(-22, 0, 31, 31, 35, 325) + [(-22, 0)], True)
     for x in (13, 27, 41, 55):
@@ -1174,6 +1213,9 @@ ART = {
     "donkey-kong": (donkey_kong, (134, 84, 48), 10, 1.0, (-12, 0)),
     "yoshi": (yoshi, (90, 180, 70), 12, 1.0, (0, 0)),
     "wario": (wario, (214, 168, 28), -6, 1.0, (2, 0)),
+    "king-of-fighters": (king_of_fighters, (196, 40, 52), -6, 1.0, (-8, 0)),
+    "capcom-vs": (capcom_vs, (40, 96, 200), -6, 1.0, (-30, 0)),
+    "metal-gear": (metal_gear, (70, 84, 72), -4, 1.0, (-40, 0)),
     "fire-emblem": (fire_emblem, (182, 48, 44), -6, 1.0, (-10, 0)),
     "farming": (farming, (148, 170, 60), 6, 1.0, (0, 0)),
     "phantasy-star": (phantasy_star, (64, 88, 176), -5, 0.92, (-12, 0)),
