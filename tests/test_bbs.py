@@ -451,7 +451,7 @@ class Download(helpers.StorageDir):
     def test_failed_cart_keeps_the_ones_before_it(self):
         code, _, err, _ = self.run_download([PAGE1, EMPTY], errors={bbs.cart_url("x-2.p8.png")})
         self.assertEqual(code, 1)
-        self.assertIn("x-2.p8.png", err)
+        self.assertIn("Couldn't download x-2.p8.png from the BBS", err)
         self.assertEqual(self.stored(), {"pico8/molemole-1.p8.png", META})
         self.assertEqual(self.meta(), {"molemole-1.p8.png": {"name": "Mole Mole", "developer": "Adam Atomic"}})
 

@@ -250,11 +250,12 @@ def _download(cart, tmp):
     return path
 
 
-def add_carts(todo, fetch, tmp):
+def add_carts(todo, fetch, tmp, source=None):
     """Put carts in pico8/ and write their metadata: todo is [(old key or None, cart)], a cart {"file", "title",
     "author"} (a None title: a new cart gets no entry, an upgrade keeps the old one's). fetch(cart, tmp) returns the
-    cart's file, or None (skipped, already warned). (keys of the new carts added, upgrades done, exit code 0 or 1);
-    META is written every META_EVERY carts and at the end, and a stop or Ctrl-C still writes it."""
+    cart's file, or None (skipped, already warned); source: where fetch gets them, for its warning. (keys of the new
+    carts added, upgrades done, exit code 0 or 1); META is written every META_EVERY carts and at the end, and a stop or
+    Ctrl-C still writes it."""
     added, upgraded, code = [], 0, 0
     pending = []  # (old key or None, cart, key) of the carts put in storage since META was last written
 
@@ -320,7 +321,8 @@ def add_carts(todo, fetch, tmp):
             try:
                 path = fetch(c, tmp)
             except _HTTP_ERRORS as e:
-                ui.warn(f"Couldn't get {file} ({e}); stopping")
+                ui.warn(f"Couldn't download {file} from {source} ({e}); stopping" if source else
+                        f"Couldn't get {file} ({e}); stopping")
                 code = 1
                 break
             if path is None:
@@ -373,6 +375,6 @@ def download_pico8(args):
         ui.warn(f"Couldn't read {META} ({e})")
         return 1
     with tempfile.TemporaryDirectory() as tmp:
-        added, upgraded, code = add_carts(todo, _download, tmp)
+        added, upgraded, code = add_carts(todo, _download, tmp, "the BBS")
     print(ui.green(f"✅ Added {len(added)} and upgraded {upgraded} PICO-8 cart(s) in {s3.location()}"))
     return 1 if failed else code
