@@ -84,6 +84,7 @@ Only one storage layout is supported; don't add support for others. Repo data an
 - `spruce-settings.json`: `sections`, spruceOS's `menuOptions` sections to the keys of the user's preferences that are safe on any spruce device (per-device hardware, network and debug settings stay off), and a `note` saying why.
 - `android-apks.json`: `apks`, each a `prefix` (of the APK's file name in `os/android/APKs/`) plus `never`, `tier`, `systems` or `dualscreen`; one file-level `note` says why.
 - `syncthing.json`: `note`, `cores` ({system id: libretro core}), `retroarch` ({retroarch.cfg key: value}), `esde_labels` ({core: ES-DE label}) and `spruce.settings` ({section: {key: value}} for `spruce-config.json`), the settings that let Syncthing sync saves between devices, and `spruce.folders` ({`saves`, `states`}: the folder names under `Saves/` that `spruce_syncthing` shares with the server).
+- `hotkeys.json`: the hotkey scheme (spruceOS's defaults, quit on Start): `scheme` (action, button, RetroArch key), `android` (button to Android keycode) and `android_clear` (RetroArch hotkeys `config apply` unbinds on Android).
 - `cards.schema.json`, `games.schema.json`, `collections.schema.json`: JSON schemas.
 - `themes/fusion-pixel/`: the Fusion Pixel 12px font (proportional, Japanese variant, OFL) of the Pixel themes and the palette previews, with its licenses.
 
