@@ -1171,6 +1171,71 @@ def horses(p):  # horse's head in a bridle
     p.o(-33, 17, 3)
 
 
+def shin_megami_tensei(p):  # the demon summoning circle: a pentagram in a double ring
+    p.o(0, 0, 46)
+    p.o(0, 0, 38)
+    tips = [(38 * math.cos(math.radians(-90 + 72 * i)), 38 * math.sin(math.radians(-90 + 72 * i))) for i in range(5)]
+    p.path([tips[i * 2 % 5] for i in range(5)], True)
+    for i in range(5):
+        a = math.radians(-54 + 72 * i)
+        p.l([(38 * math.cos(a), 38 * math.sin(a)), (46 * math.cos(a), 46 * math.sin(a))], 0)
+    p.o(0, 0, 4)
+
+
+def kingdom_hearts(p):  # the kingdom key with its crown teeth and keychain
+    p.pg([(-38, -18), (-18, -18), (-18, 18), (-38, 18)], 8)
+    p.pg([(-22, -3), (44, -3), (44, 22), (38, 14), (32, 22), (26, 14), (20, 22), (20, 3), (-22, 3)], 1.2)
+    p.rr(-42, -5, -14, 5, 3, opaque=True)
+    for x in (-52, -36):
+        p.o(x, 28, 4)
+    p.o(-44, 35, 7, opaque=True)
+    p.dash([(-42, 5), (-46, 14), (-44, 28)], 4, 4)
+
+
+def mana(p):  # the mana tree
+    p.l([(-34, 48), (34, 48)], 0)
+    for s in (-1, 1):
+        p.c([(s * 7, 0), (s * 7, 26), (s * 10, 40), (s * 22, 48)])
+    base = arc(0, -16, 40, 30, 120, 420)
+    canopy = []
+    for a, b in zip(base[::8], base[8::8]):
+        mx, my = (a[0] + b[0]) / 2, (a[1] + b[1]) / 2
+        n = math.hypot(mx, my + 16)
+        cx, cy = mx + mx / n * 14, my + (my + 16) / n * 14
+        canopy += [((1 - t) ** 2 * a[0] + 2 * t * (1 - t) * cx + t * t * b[0],
+                    (1 - t) ** 2 * a[1] + 2 * t * (1 - t) * cy + t * t * b[1]) for t in (i / 10 for i in range(10))]
+    p.path(canopy, True, opaque=True)
+    p.sparkle(-46, 30, 6)
+    p.sparkle(48, 22, 5)
+
+
+def lunar(p):  # the blue star rising over the silver star's horizon
+    planet = arc(4, 2, 32, 32, 0, 360)
+    p.path(planet, True)
+    with p.inside(planet):
+        p.c([(-30, -20), (-14, -16), (-6, -24), (8, -18), (12, -34)])
+        p.c([(40, -4), (24, 0), (18, 14), (28, 22), (42, 20)])
+        p.c([(-34, 8), (-18, 12), (-8, 26), (-2, 44)])
+    ground = arc(0, 112, 80, 80, 230, 310)
+    p.path(ground, True, opaque=True)
+    p.o(-22, 46, 6, 2.4)
+    p.o(18, 44, 8, 2.8)
+    p.sparkle(-38, -26, 6)
+    p.sparkle(42, -34, 5)
+
+
+def ace_attorney(p):  # the attorney's badge: scales on a sunflower
+    p.pg(star(0, 0, 47, 37, 16), 1.5)
+    p.o(0, 0, 30)
+    p.o(0, -17, 3)
+    p.l([(0, -14), (0, 17)], 0)
+    p.pg([(-9, 22), (-5, 17), (5, 17), (9, 22)], 1)
+    p.l([(-16, -8), (16, -8)], 0)
+    for s in (-1, 1):
+        p.path(arc(s * 16, 5, 6, 5, 0, 180), True)
+        p.l([(s * 10, 5), (s * 16, -8), (s * 22, 5)], 0)
+
+
 # id: (drawing, band colour, rotation in degrees, scale, offset in px)
 ART = {
     "adventure": (adventure, (44, 146, 118), -6, 1.0, (0, 0)),
@@ -1221,6 +1286,11 @@ ART = {
     "phantasy-star": (phantasy_star, (64, 88, 176), -5, 0.92, (-12, 0)),
     "ys": (ys, (38, 112, 124), -6, 0.9, (-14, 0)),
     "horses": (horses, (150, 96, 60), -5, 0.95, (-34, 0)),
+    "shin-megami-tensei": (shin_megami_tensei, (150, 36, 48), -6, 1.0, (-10, 0)),
+    "kingdom-hearts": (kingdom_hearts, (60, 84, 170), -32, 0.88, (-30, -6)),
+    "mana": (mana, (60, 150, 96), -5, 1.0, (-8, 0)),
+    "lunar": (lunar, (70, 92, 160), -6, 0.95, (-18, 0)),
+    "ace-attorney": (ace_attorney, (34, 52, 110), -6, 1.0, (-16, 0)),
     "pac-man": (pac_man, (28, 36, 96), -6, 1.0, (-12, 0)),
     "tetris": (tetris, (40, 170, 200), -5, 1.0, (-36, 0)),
     "dragon-quest": (dragon_quest, (60, 130, 220), -5, 1.0, (-6, 0)),
