@@ -8,7 +8,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import helpers  # noqa: E402
-from sync_roms import themeart  # noqa: E402
+from sync_roms import store, themeart  # noqa: E402
 
 _spec = importlib.util.spec_from_file_location(
     "migrate_sets_to_tags", os.path.join(os.path.dirname(__file__), "..", "tools", "migrate_sets_to_tags.py"))
@@ -124,6 +124,60 @@ class ReadSetsTests(helpers.StorageFolder):
         self.assertEqual(sets[1]["art"], "shmups")
         self.assertEqual(sets[0]["art"], "favorites")
         self.assertEqual([g["bucket"] for g in sets[0]["games"]], ["y/g0.zip", "y/g1.zip"])
+
+
+class DeleteSetsTests(helpers.StorageFolder):
+    def setUp(self):
+        super().setUp()
+        self.sets = [make_set("a", "Aye", many("y", 2)), make_set("b", "Bee", [game("x/1.zip")], art="shmups")]
+        self.texts = {}
+        for s in self.sets:
+            self.texts[s["id"]] = json.dumps({k: v for k, v in s.items() if k != "id"})
+            helpers.touch(os.path.join(self.root.name, "sets", s["id"] + ".json"), self.texts[s["id"]])
+        helpers.touch(os.path.join(self.root.name, "sets", "notes.txt"), "keep")
+        self.archive = os.path.join(store.data_dir(), "sets-archive")
+
+    def put_tags(self, data):
+        helpers.storage_tags(self, data, self.root.name)
+
+    def set_exists(self, set_id):
+        return os.path.exists(os.path.join(self.root.name, "sets", set_id + ".json"))
+
+    def test_missing_game_refuses_and_deletes_nothing(self):
+        data, _ = migrate.build(migrate.read_sets())
+        del data["games"]["x/1.zip"]
+        self.put_tags(data)
+        with self.assertRaises(SystemExit) as cm:
+            migrate.delete_sets(False)
+        self.assertIn("x/1.zip", str(cm.exception))
+        self.assertTrue(self.set_exists("a") and self.set_exists("b"))
+        self.assertFalse(os.path.exists(self.archive))
+
+    def test_missing_tag_refuses(self):
+        data, _ = migrate.build(migrate.read_sets())
+        del data["tags"]["b"]
+        self.put_tags(data)
+        with self.assertRaises(SystemExit) as cm:
+            migrate.delete_sets(False)
+        self.assertIn("b", str(cm.exception))
+        self.assertTrue(self.set_exists("a") and self.set_exists("b"))
+
+    def test_complete_tags_delete_and_archive(self):
+        data, _ = migrate.build(migrate.read_sets())
+        self.put_tags(data)
+        self.assertEqual(migrate.delete_sets(False), ["sets/a.json", "sets/b.json"])
+        self.assertFalse(self.set_exists("a") or self.set_exists("b"))
+        self.assertTrue(os.path.exists(os.path.join(self.root.name, "sets", "notes.txt")))
+        for set_id, text in self.texts.items():
+            with open(os.path.join(self.archive, set_id + ".json"), encoding="utf-8") as f:
+                self.assertEqual(f.read(), text)
+
+    def test_dry_run_changes_nothing(self):
+        data, _ = migrate.build(migrate.read_sets())
+        self.put_tags(data)
+        self.assertEqual(migrate.delete_sets(True), ["sets/a.json", "sets/b.json"])
+        self.assertTrue(self.set_exists("a") and self.set_exists("b"))
+        self.assertFalse(os.path.exists(self.archive))
 
 
 if __name__ == "__main__":

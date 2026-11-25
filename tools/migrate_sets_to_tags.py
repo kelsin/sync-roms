@@ -2,11 +2,15 @@
 """One-off: turn the game sets in storage into tags.json.
 
     tools/migrate_sets_to_tags.py [--write [--force]]
+    tools/migrate_sets_to_tags.py --delete-sets [--write]
 
 Every set becomes a tag (its id, name, description, art and current emoji); series and categories of the sets' games
 become tags too, pruned by the rules below. A game's record is the union of the tags, files and variants from every
 set that lists it. Without --write it only prints what it would do; --write puts tags.json in storage (refused when
 it already holds games, unless --force). The set files are left untouched.
+
+--delete-sets deletes the set files from storage once tags.json holds every game and tag they gave (refused
+otherwise), after copying each to ~/.sync-roms/sets-archive/. Without --write it only lists them.
 """
 import argparse
 import collections
@@ -17,7 +21,7 @@ import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
 
-from sync_roms import inventory, runtime, s3, shared, tags, themeart, ui, usersettings  # noqa: E402
+from sync_roms import inventory, runtime, s3, shared, store, tags, themeart, ui, usersettings  # noqa: E402
 
 SERIES_MIN = 15
 NO_ART_EMOJI = "📦"  # a set's tag whose set had no art with an emoji
@@ -345,6 +349,35 @@ def read_sets():
     return out
 
 
+def delete_sets(dry_run):
+    """The sets/*.json keys deleted from storage (or that would be, when dry_run).
+
+    Exits with the reason, deleting nothing, unless tags.json has a record for every game in the set files and every
+    tag the sets make. Each file's text is first copied to sets-archive/ in the data folder (never in storage)."""
+    sets = read_sets()
+    data, _ = build(sets)
+    held = tags.load()
+    games = sorted(b for b in data["games"] if b not in held["games"])
+    missing = sorted(t for t in data["tags"] if t not in held["tags"])
+    if games or missing:
+        raise SystemExit(f"tags.json lacks {len(games)} games ({', '.join(games[:5])}) and {len(missing)} tags "
+                         f"({', '.join(missing[:5])}); nothing deleted")
+    keys = [f"sets/{s['id']}.json" for s in sets]
+    if dry_run:
+        return keys
+    archive = os.path.join(store.data_dir(), "sets-archive")
+    os.makedirs(archive, exist_ok=True)
+    for key in keys:
+        with open(os.path.join(archive, key[len("sets/"):]), "w", encoding="utf-8") as f:
+            f.write(shared.read(key))
+    try:
+        for key in keys:
+            shared.delete(key)
+    finally:
+        inventory.flush()
+    return keys
+
+
 def report_text(data, report):
     lines = [f"{len(data['tags'])} tags, {len(data['games'])} games"]
     for fate in ("pruned", "merged", "kept"):
@@ -367,10 +400,21 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("--write", action="store_true", help="write tags.json to storage (default: only print)")
     parser.add_argument("--force", action="store_true", help="write even when tags.json already has games")
+    parser.add_argument("--delete-sets", action="store_true",
+                        help="delete the set files from storage once tags.json holds them (default: only list them)")
     args = parser.parse_args(argv)
     usersettings.apply_settings()
     if runtime.ROOT and not os.path.isdir(runtime.ROOT):  # an unmounted share, not an empty storage
         ui.fail(f"{runtime.ROOT} is missing", 1)
+    if args.delete_sets:
+        try:
+            keys = delete_sets(not args.write)
+        except (*s3.ERRORS, OSError) as e:
+            ui.fail(str(e), 1)
+        print("\n".join(keys))
+        print(f"{len(keys)} set files " + ("deleted (copies in ~/.sync-roms/sets-archive/)." if args.write else
+              "would be deleted. Dry run: run again with --write (a permanent delete in storage)."))
+        return 0
     try:
         data, report = build(read_sets())
     except (ValueError, *s3.ERRORS) as e:
