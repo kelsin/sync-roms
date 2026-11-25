@@ -20,7 +20,8 @@ Constraints:
   So sync never creates the file: with no `system/knulli.conf` it warns ("boot the card once in Knulli Scarab first")
   and skips. That also covers Gladiator II and older (`batocera.conf`), which are not supported.
 - Merge in place: change only the lines of keys sync wants, keep every other line, comment and order; a key not in the
-  file is appended. Keep the file's line endings.
+  file is appended (a commented-out `#key=` line stays as it is). Written with LF line ends (Knulli's `dos2unix` on boot
+  makes any file LF anyway).
 
 ## Approaches
 
@@ -63,7 +64,7 @@ No hardware, audio, network, service or login keys. Keys outside the allowlist a
   each change with `applied.Entry`.
 - `config import CARD` gets a Knulli importer: reads the allowlisted keys from the card's `knulli.conf` into
   `knulli_settings`, with spruce's Yes/No/Pick prompt.
-- `config set` validates `knulli_settings` like `spruce_settings`.
+- `knulli_settings`, like `spruce_settings`, isn't a `config set` name: import it, or edit settings.json by hand.
 
 ## PICO-8
 
