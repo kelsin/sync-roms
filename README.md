@@ -43,7 +43,7 @@ Your settings and cards in the data folder are never touched by an install or up
 
 - **python3** (3.12+); boto3, textual and textual-image (which brings Pillow) are installed with the package
 - An AWS profile named **`roms-readonly`** with read access to storage (not needed with a storage folder; set `ROMS_PROFILE` to use a different profile name), defined in `~/.aws/config` and `~/.aws/credentials`
-- Only for `convert` (and `cards install`, which needs just the 7z): **7z** and **chdman**, and optionally **unar** (used for `.rar` when installed; `sync-roms tools install` installs all three with Homebrew), plus **extract-xiso** for Xbox (no Homebrew formula: build it from [XboxDev/extract-xiso](https://github.com/XboxDev/extract-xiso) with `cmake -B build && cmake --build build`) and **iso2zar** for Xbox 360 (no formula: build it from [iso2zar](https://codeberg.org/NeverAnswers/iso2zar) with `cargo build --release`)
+- Only for `prepare` (and `cards install`, which needs just the 7z): **7z** and **chdman**, and optionally **unar** (used for `.rar` when installed; `sync-roms install` installs all three with Homebrew), plus **extract-xiso** for Xbox (no Homebrew formula: build it from [XboxDev/extract-xiso](https://github.com/XboxDev/extract-xiso) with `cmake -B build && cmake --build build`) and **iso2zar** for Xbox 360 (no formula: build it from [iso2zar](https://codeberg.org/NeverAnswers/iso2zar) with `cargo build --release`)
 
 ### AWS profiles
 
@@ -163,44 +163,44 @@ While typing a filter (or a note, which `w` opens in the game list): `^A` `^E` s
 
 ## Commands
 
-Every mode is a command (plain `sync-roms [CARD]` syncs a card):
+Every mode is a command (plain `sync-roms [CARD]` syncs a card). A command's aliases run the same command; a bare word that is a command or an alias is that command, so name a card folder like one with a path (`./saves`):
 
-| Command | Does | Old flag |
+| Command | Does | Aliases |
 | --- | --- | --- |
-| `sync [CARD]` | download ROMs, BIOS and scraped data to a card | (default) |
-| `edit`, `games edit`, `cards edit` | [interactive editor](#editing-a-cards-games-edit-games) | `--edit` |
-| `games list\|add\|remove\|full\|sets\|export\|import` | [edit a card's games from scripts](#editing-from-scripts-games) | |
-| `sets edit` | edit the [game sets](#sets-sets-edit) in storage by hand and save them there | |
-| `collections edit` | edit your [collections](#collections-collections-edit) of favourite games | |
-| `themes update` | put the latest Art Book Next for ES-DE (for collections' [theme art](#theme-art)) and every [PyUI theme](#spruce) (needs `7z`) in storage | |
+| `sync [CARD]` | download ROMs, BIOS and scraped data to a card | |
+| `edit` | [interactive editor](#editing-a-cards-games-edit-games) |  |
+| `games list\|add\|remove\|full\|sets\|export\|import` | [edit a card's games from scripts](#editing-from-scripts-games) | | `game` |
+| `sets edit` | edit the [game sets](#sets-sets-edit) in storage by hand and save them there | | `set` |
+| `collections edit` | edit your [collections](#collections-collections-edit) of favourite games | | `collection` |
+| `themes update` | put the latest Art Book Next for ES-DE (for collections' [theme art](#theme-art)) and every [PyUI theme](#spruce) (needs `7z`) in storage | | `theme` |
 | `themes build [STYLE...] [--palette NAME\|--all-palettes] [--out DIR]` | build the custom spruce theme styles (Pixel Consoles, Pixel Controllers, ToTK - James) in each chosen palette (without a flag: picked in a list, or the saved `custom_theme_palettes`; `ToTK - James` has no palette and is built once, from the ToTK theme in storage, so naming only it asks for none) from the SPRUCE base theme in storage into the cache, or into `DIR` with `--out`; writes nothing to storage | |
 | `themes publish [STYLE...] [--palette NAME\|--all-palettes]` | build the custom spruce themes in each chosen palette (chosen as for `themes build`) and make their `os/spruceos/themes/<theme>/` folders in storage match: upload what changed and delete what the build no longer makes, after one question (default yes; `--yes` answers it, without a terminal and `--yes` it exits 2; `--dry-run` only shows the plan) | |
 | `themes palettes` | write the overview image of all 28 palettes (a numbered mock list screen for each) and open it | |
 | `themes pick` | choose the PyUI themes every spruce card gets by default (`spruce_themes` setting) | |
-| `download pico8` | add the [PICO-8 BBS Featured carts](#pico-8-carts-from-the-bbs-download-pico8) storage doesn't have, and newer revisions of those it has | |
+| `download pico8` | add the [PICO-8 BBS Featured carts](#pico-8-carts-from-the-bbs-download-pico8) storage doesn't have, and newer revisions of those it has | | `downloads` |
 | `flash` | [write a Knulli, BaseOS, muOS, ROCKNIX or OakMoss image](#flashing-an-sd-card-flash) from storage's `os/` to an SD card, macOS only | |
-| `unmount` | pick an SD card, remove macOS's junk from it as a sync does (`.metadata_never_index`, `.fseventsd`, `._` files) and unmount it, macOS only | |
+| `unmount` | pick an SD card, remove macOS's junk from it as a sync does (`.metadata_never_index`, `.fseventsd`, `._` files) and unmount it, macOS only | | `umount` |
 | `mount` | pick an SD card that was unmounted (by `unmount` or a sync) but not pulled out and mount it again with `diskutil mountDisk`, macOS only | |
-| `cards list\|new\|set\|rename\|convert\|install\|clean\|delete\|copy\|export\|import` | [manage cards](#cards-cards) | |
-| `saves stash\|apply [CARD]`, `saves manage` | [copy RetroArch saves and states](#moving-saves-between-cards-saves) off a card, or stashed ones onto a card (Android: over adb); inspect, label, move, prune and delete stashes | |
-| `devices [ID]` | list the supported devices with their chip and the number of systems each one gets, or one device's layouts, note and systems | `--devices` |
-| `layouts [ID]` | list the layouts, or one layout's folders and the devices that run it | |
-| `upload [DIR]` | [upload ROMs](#uploading-roms-upload) to storage | `--upload` |
-| `diff [DIR]` | list the ROMs in only `DIR` or only the storage folder of a system you pick (guessed from the folder name, as in `upload`). Same path and size is the same file; the rest are matched by content, as `upload --replace` does | `--diff` |
-| `scrape [SYSTEM \| match SYSTEM ROM GAME \| review [SYSTEM] \| missing [SYSTEM] \| art [SYSTEM]]` / `scrape --set-credentials` | [scrape ROMs](#scraping-from-screenscraper-scrape) with no metadata from ScreenScraper, review the non-game and unknown ones, list them all, or make Onion and Spruce art for what storage holds | `--scrape`, `--scrape-match`, `--scrape-review`, `--scrape-missing` |
-| `clean scrapes` | [remove scrapes](#cleaning-scraped-data-clean-scrapes) of ROMs not in storage | `--clean-scrapes` |
-| `playlist [DIR]` | [fix `.m3u` playlists](#fixing-playlists-playlist) | `--m3u` |
-| `convert [DIR]` | [convert disc images](#converting-disc-images-convert) to CHD, xiso or zar | `--cd`, `--chd` |
-| `tools install` | `brew install` whichever of 7z (`sevenzip`), unar and chdman (`rom-tools`) are missing, and say how to build extract-xiso and iso2zar | `--install-tools` |
-| `mirror [DIR]` / `mirror use DIR` / `mirror clear` | [local mirror](#local-mirror-mirror) | `--mirror`, `--use-mirror`, `--clear-mirror` |
+| `cards list\|new\|set\|rename\|layout\|install\|clean\|delete\|copy\|export\|import` | [manage cards](#cards-cards) | | `card` |
+| `saves stash\|apply [CARD]`, `saves manage` | [copy RetroArch saves and states](#moving-saves-between-cards-saves) off a card, or stashed ones onto a card (Android: over adb); inspect, label, move, prune and delete stashes | | `save` |
+| `devices [ID]` | list the supported devices with their chip and the number of systems each one gets, or one device's layouts, note and systems | | `device` |
+| `layouts [ID]` | list the layouts, or one layout's folders and the devices that run it | | `layout` |
+| `upload [DIR]` | [upload ROMs](#uploading-roms-upload) to storage |  |
+| `diff [DIR]` | list the ROMs in only `DIR` or only the storage folder of a system you pick (guessed from the folder name, as in `upload`). Same path and size is the same file; the rest are matched by content, as `upload --replace` does |  |
+| `scrape [SYSTEM \| match SYSTEM ROM GAME \| review [SYSTEM] \| missing [SYSTEM] \| art [SYSTEM]]` / `scrape --set-credentials` | [scrape ROMs](#scraping-from-screenscraper-scrape) with no metadata from ScreenScraper, review the non-game and unknown ones, list them all, or make Onion and Spruce art for what storage holds | | `scrapes` |
+| `scrape clean` | [remove scrapes](#cleaning-scraped-data-scrape-clean) of ROMs not in storage |  |
+| `playlist [DIR]` | [fix `.m3u` playlists](#fixing-playlists-playlist) | | `playlists` |
+| `prepare [DIR]` | [unzip and convert disc images](#preparing-disc-images-prepare) to CHD, xiso or zar |  |
+| `install` | `brew install` whichever of 7z (`sevenzip`), unar and chdman (`rom-tools`) are missing, and say how to build extract-xiso and iso2zar |  |
+| `mirror [DIR]` / `mirror use DIR` / `mirror clear` | [local mirror](#local-mirror-mirror) |  |
 | `cache [update [--full]]` | show the [storage cache](#storage-cache-cache), or read all of storage into it | |
 | `config show\|path` / `config set NAME VALUE` / `config unset NAME` / `config apply [CARD]` | effective [settings](#settings-config) and where each came from, or the data folder's path; change or remove a setting; apply the saved settings to a spruce card or an Android device | |
 | `guide` | open the device setup guide in a browser | |
-| `doctor` | check AWS profile, storage, tools and data files | |
+| `doctor [--fix]` | check AWS profile, storage, tools and data files; `--fix` runs `install` when tools are missing | |
 | `check` | validate your JSON data files (`cards.json`, `surprises.json`, the device overlay, the sets and your collections) | |
 | `completion bash\|zsh\|fish` | shell completion script | |
 
-The old flags keep working; each is its own mode and two can't be combined. Flags that make no sense for a command (`--dry-run` with `games edit`, `--replace` without `upload` or `scrape art`) are refused rather than ignored, and abbreviations like `--up` are not accepted. A card folder named like a command: write `./edit`.
+Flags that make no sense for a command (`--dry-run` with `edit`, `--replace` without `upload` or `scrape art`) are refused rather than ignored, and abbreviations like `--up` are not accepted. `games set` is `games sets`. A card folder named like a command or alias: write `./edit`.
 
 ### Options
 
@@ -209,7 +209,7 @@ For every command they make sense with:
 | Flag | Description |
 | --- | --- |
 | `-n`, `--dry-run` | Show what would be done (a sync: what would be downloaded, with total sizes; `mirror`: what it would download and delete) and change nothing. Commands that only read (`diff`, `check`, `doctor`, `guide`, `cache`, `config` (except `config apply`, which lists what it would set), `completion`, `themes pick`/`build`/`palettes`, `games list`/`export`/`sets list`) or can't honor it (`edit`, `scrape review`, `scrape missing`, ...) refuse it with exit 2 |
-| `-y`, `--yes` | Answer prompts with their default. It is the confirmation of `upload` (overwrites), `clean scrapes`, `convert` (removes the originals), `cards clean`, `cards convert`, `cards install` (deletes the card's other files), `cards delete`, `cards export` (overwrites FILE), `saves manage` (deletes the picked stashes), `themes publish` (stale theme files), `download pico8` and `scrape match` (`upload`, `convert`, `clean scrapes`, `cards install`, `cards export`, `themes publish`, `download pico8` and `scrape match` ask otherwise, `clean scrapes` with default no and the others with default yes, and exit 2 without a terminal) |
+| `-y`, `--yes` | Answer prompts with their default. It is the confirmation of `upload` (overwrites), `scrape clean`, `prepare` (removes the originals), `cards clean`, `cards layout`, `cards install` (deletes the card's other files), `cards delete`, `cards export` (overwrites FILE), `saves manage` (deletes the picked stashes), `themes publish` (stale theme files), `download pico8` and `scrape match` (`upload`, `prepare`, `scrape clean`, `cards install`, `cards export`, `themes publish`, `download pico8` and `scrape match` ask otherwise, `scrape clean` with default no and the others with default yes, and exit 2 without a terminal) |
 | `--json` | `devices`, `layouts`, `games list`, `cards list`, `diff` and `sync --dry-run`: one JSON document on stdout, nothing else (pass `--device`/`--layout` so no picker is needed; `diff` also needs `--system ID` unless the folder is named after a system) |
 | `--quiet` | Print only errors (failed files and a sync's failure count included, and `check`'s problems), warnings and `--json` data, all on stderr except the JSON; commands whose whole output is the answer (`doctor`, `config show`, `cache`, `cards list`, `games list`, `games sets list`, ...) still print it; prompts are asked on stderr |
 | `--verbose` | Also print the effective settings and where each came from, on stderr |
@@ -222,7 +222,7 @@ For one command:
 | Flag | Command | Description |
 | --- | --- | --- |
 | `-a`, `--ask` | `sync` | Confirm the saved device and layout instead of using them silently |
-| `--device ID\|full`, `--layout NAME` | `sync`, `cards new`, `cards set` | Choose the setup without the picker (it is saved for the card). `cards convert` takes `--layout` too |
+| `--device ID\|full`, `--layout NAME` | `sync`, `cards new`, `cards set` | Choose the setup without the picker (it is saved for the card). `cards layout` takes `--layout` too |
 | `--guest` | `sync` | Make the card a guest card (saved): each sync seeds its picks from the storage ROMs on it (name and size), copies only ROMs, BIOS and scrapes, never overwrites a file and deletes only the seeded ROMs you deselect, with their media |
 | `--no-delete`, `--no-clean`, `--no-eject` | `sync` | Never delete from the card (what would have been deleted is listed instead); skip the end-of-run card tidy; leave the card mounted |
 | `--size SIZE` | `cards new`, `cards set` | The card's size as people read it (`256`, `512GB`, `1TB`), shown by `cards list` and on sync |
@@ -251,7 +251,7 @@ For one command:
 | `ROMS_ROOT` | Folder (e.g. a mounted network share) used as storage. Overrides `root` in `settings.json`; wins over a bucket setting. Needs no AWS profile |
 | `ROMS_ENDPOINT` | Custom S3 endpoint URL. Overrides `endpoint` in `settings.json` (default: AWS) |
 | `ROMS_PROFILE` | AWS profile to use. Overrides `profile` in `settings.json` (default `roms-readonly`) |
-| `ROMS_WRITE_PROFILE` | AWS profile used to write to storage (`upload`, `clean scrapes`, `scrape` and the like). Overrides `write_profile` in `settings.json` (default `roms`) |
+| `ROMS_WRITE_PROFILE` | AWS profile used to write to storage (`upload`, `scrape clean`, `scrape` and the like). Overrides `write_profile` in `settings.json` (default `roms`) |
 | `XDG_DATA_HOME` | The data folder is `$XDG_DATA_HOME/sync-roms` when set (macOS and Linux) |
 | `ESDE_APPDATA_DIR` | ES-DE's folder on the machine, for `emudeck` cards (default `~/ES-DE`) |
 | `NO_COLOR` | Disable colors (so does `TERM=dumb`) |
@@ -274,10 +274,10 @@ A card is a folder name (the card root's name) with a remembered device, layout 
 - `cards list` (or just `cards`) shows the space each card's picks take (ROMs, scrapes and BIOS) against its size, how many full systems and games it syncs, and which of Surprise (🎁), theme art (🎨), collections (💖) and RAOfflineProxy (🏆) are on. Guest cards (a friend's card, marked 👤) are hidden unless you pass `--all`.
 - `cards new NAME --device ID|full --layout NAME [--size SIZE]` creates a card; `cards set NAME` changes one's device, layout or size.
 - `cards rename OLD NEW` and `cards delete NAME` rename and delete one.
-- `cards convert [CARD] --layout NAME` moves the mounted card's ROMs, BIOS and RetroArch saves and states to another layout's folders and saves the layout (the device stays). `--dry-run` previews, `--yes` skips the question. A progress bar counts the moves and deletions. Files already at a destination are left; the rest is for a sync to fill in. A convert to or from `muos` leaves saves and states where they are and lists them, since muOS uses Pickles' own, not RetroArch's. The old layout's scraped media (gamelists and media folders) is deleted from the old ROM folders; the new layout's own is installed by the next sync.
-- `cards install [CARD]` puts storage's newest `os/spruceos/spruceV<version>.7z` on a `spruce` card, for a new setup (for example after `cards convert --layout spruce`; run a sync after). It runs only on a mounted SD card's root, never on another folder named after the card. It downloads the release to a temporary folder and tests it, lists what is kept and what is deleted, and asks first (the answer defaults to yes). It is a clean install: everything at the card root is deleted except `Roms/` and the system folders macOS and Windows keep there (BIOS, saves, themes and the rest go; a sync afterwards puts BIOS, themes and the rest back); the release is then unpacked without replacing files already on the card. The download and the unpacking each show a progress bar (the download with its speed and time left). `--dry-run` downloads, deletes and writes nothing, `--yes` skips the question (without a terminal it is required, or the command exits 2). Only `spruce` cards for now. Needs the 7z (`sync-roms tools install`); a sync then doesn't stage that 7z again.
+- `cards layout [CARD] --layout NAME` moves the mounted card's ROMs, BIOS and RetroArch saves and states to another layout's folders and saves the layout (the device stays). `--dry-run` previews, `--yes` skips the question. A progress bar counts the moves and deletions. Files already at a destination are left; the rest is for a sync to fill in. A change to or from `muos` leaves saves and states where they are and lists them, since muOS uses Pickles' own, not RetroArch's. The old layout's scraped media (gamelists and media folders) is deleted from the old ROM folders; the new layout's own is installed by the next sync.
+- `cards install [CARD]` puts storage's newest `os/spruceos/spruceV<version>.7z` on a `spruce` card, for a new setup (for example after `cards layout --layout spruce`; run a sync after). It runs only on a mounted SD card's root, never on another folder named after the card. It downloads the release to a temporary folder and tests it, lists what is kept and what is deleted, and asks first (the answer defaults to yes). It is a clean install: everything at the card root is deleted except `Roms/` and the system folders macOS and Windows keep there (BIOS, saves, themes and the rest go; a sync afterwards puts BIOS, themes and the rest back); the release is then unpacked without replacing files already on the card. The download and the unpacking each show a progress bar (the download with its speed and time left). `--dry-run` downloads, deletes and writes nothing, `--yes` skips the question (without a terminal it is required, or the command exits 2). Only `spruce` cards for now. Needs the 7z (`sync-roms install`); a sync then doesn't stage that 7z again.
 - `cards clean [CARD]` deletes such media that other layouts left on a card (`--dry-run` previews).
-- For `cards convert`, `cards install` and `cards clean`, CARD is a saved card's name or its mounted folder (default: the current directory).
+- For `cards layout`, `cards install` and `cards clean`, CARD is a saved card's name or its mounted folder (default: the current directory).
 - `cards copy SRC DST` merges games, sets, excluded and collections (not surprises) into DST, skipping systems it can't play.
 - `cards export FILE` writes the cards you pick to a file, flattening surprises and collections into games; it asks before overwriting an existing FILE (default yes; `--yes` overwrites, and without a terminal it exits 2 unless `--yes`). `cards import FILE` adds the ones you pick from such a file, keeping size, device, layout, games and excluded and turning Surprise off (`r` renames a card, `p` prefixes all).
 
@@ -444,7 +444,7 @@ EmuDeck's ES-DE keeps its data on the machine, not the card. So the gamelists, t
 
 ### ROCKNIX
 
-BIOS files sit flat in `roms/bios`. RetroArch saves sit beside the ROMs: a sync never offers the saves, states and their thumbnails in ROM folders for deletion, `upload` and `diff` leave them out (anywhere), and `cards convert` moves them as saves.
+BIOS files sit flat in `roms/bios`. RetroArch saves sit beside the ROMs: a sync never offers the saves, states and their thumbnails in ROM folders for deletion, `upload` and `diff` leave them out (anywhere), and `cards layout` moves them as saves.
 
 - **Collections and Surprise**: ES reads collections only from the device's internal `/storage/.config/emulationstation/collections`, so a sync can't write them to the card. It stages them in `roms/.sync-roms-collections/` and writes `roms/ports/Install Collections.sh`. Launch **Install Collections** once from Ports on the device: it copies the collections to ES's folder, enables them and their art in `es_settings.cfg` (and turns off the settings of art a sync removed) and restarts ES. Its messages aren't visible on the device. Run it again after a sync changes collections.
 - **Art** goes to `roms/_userdata/theme-customizations/art-book-next/artwork/<Name>.png` and `logos/<Name>.svg`.
@@ -525,14 +525,14 @@ States only load in the core they were made with (`gpSP` states don't load in `m
 
 `sync-roms playlist [DIR]` creates or fixes the `.m3u` playlist of every multi-disc game (`Name (Disc 1) (Extra).chd`, `Name (Disc 2).chd`) in `DIR` and its subfolders (default: the current directory). The playlist is named after the title without `(Disc N)` or tags the discs don't share (`Name (Sega CD).m3u`). Playlists with the wrong discs are rewritten, ones with some missing files lose those lines, ones with no files left are deleted after asking, and ones listing exactly a game's discs under another name are renamed. Local only; `--dry-run` previews.
 
-## Converting disc images (`convert`)
+## Preparing disc images (`prepare`)
 
 Run it on a downloaded rom pack, or one system folder of it, before you [upload](#uploading-roms-upload) it to storage:
 
 ```bash
-sync-roms tools install                  # once
-sync-roms convert --dry-run ~/roms
-sync-roms convert ~/roms/psx
+sync-roms install                  # once
+sync-roms prepare --dry-run ~/roms
+sync-roms prepare ~/roms/psx
 ```
 
 `DIR` is one system folder or a folder of them (default: the current directory). What happens to a file is the `chd` setting in `src/sync_roms/data/systems.json` of the system whose folder it is in; systems without one are ignored:
@@ -552,7 +552,7 @@ sync-roms convert ~/roms/psx
 - **Progress**: in a terminal a bar shows the files done and the percent of the total size (each file counts by its size, its unpacked size for a `.zip`/`.7z`; an archive counts 20% once unpacked and its discs share the rest, from `chdman`'s own progress), the rate and the time left; each file's result prints as it finishes. Under `--quiet` only failed files and the closing line of a run with failures are shown (on stderr).
 - **`Ctrl-C`** stops `7z` and `chdman`, removes the partial files and exits (130) without starting anything else; a rerun picks up where it stopped, and also deletes the extraction folders (`.chd-*`) a hard kill left behind, beside the archives and in the system temp folder.
 
-It is local only, so storage holds the `.chd` and `.m3u` files and the card's games list those names. Running it on a card synced from a storage that still has the `.zip` files makes the next sync list the `.chd` files as files not in the card's games (it asks before deleting, default no) and download the zips again. Before it starts it asks `Convert N file(s) and remove the originals?` (default yes: `--yes` goes ahead, and without a terminal it exits 2 unless `--yes` is given; `--dry-run` only lists). So when a folder in `DIR`'s path is named after a saved card, convert warns and asks first (default no: with `--yes` or without a terminal it stops and exits 1; `--dry-run` only warns). When `DIR` is inside the storage folder and a file converted, it ends by saying to run `sync-roms cache update`.
+It is local only, so storage holds the `.chd` and `.m3u` files and the card's games list those names. Running it on a card synced from a storage that still has the `.zip` files makes the next sync list the `.chd` files as files not in the card's games (it asks before deleting, default no) and download the zips again. Before it starts it asks `Convert N file(s) and remove the originals?` (default yes: `--yes` goes ahead, and without a terminal it exits 2 unless `--yes` is given; `--dry-run` only lists). So when a folder in `DIR`'s path is named after a saved card, `prepare` warns and asks first (default no: with `--yes` or without a terminal it stops and exits 1; `--dry-run` only warns). When `DIR` is inside the storage folder and a file converted, it ends by saying to run `sync-roms cache update`.
 
 ## PICO-8 carts from the BBS (`download pico8`)
 
@@ -605,15 +605,15 @@ Ignores are written when the review ends, by `q`, Ctrl-C or the last ROM, to `ig
 
 **Shared state** in storage's `scrapes/`, so every machine sees it: per system `scrapes/<system>/matches.json` (your manual matches), `unknown.json` (the ROMs ScreenScraper didn't know), `nomedia.json` (the media types ScreenScraper didn't offer for each ROM) and `hashes.json` (file hashes), and `scrapes/notgames.json` (the non-games waiting for review, and the ROMs the review kept for later). Each is read through a copy in `storage/` in the data folder, and a write merges into the file in storage rather than replacing it.
 
-## Cleaning scraped data (`clean scrapes`)
+## Cleaning scraped data (`scrape clean`)
 
-`sync-roms clean scrapes` needs no folder. It compares storage's `scrapes/` media and `metadata.json` entries with every ROM file in storage's system folders (not only the games listed on your cards), lists what no longer matches (including whole systems with no folder in storage), and after you confirm (default no; `--yes` deletes without asking, and without a terminal it exits 2 unless `--yes`) deletes the media and rewrites the metadata files. `--dry-run` only lists.
+`sync-roms scrape clean` needs no folder. It compares storage's `scrapes/` media and `metadata.json` entries with every ROM file in storage's system folders (not only the games listed on your cards), lists what no longer matches (including whole systems with no folder in storage), and after you confirm (default no; `--yes` deletes without asking, and without a terminal it exits 2 unless `--yes`) deletes the media and rewrites the metadata files. `--dry-run` only lists.
 
 ## Local mirror (`mirror`)
 
 `sync-roms mirror DIR` keeps a local copy of just what your cards reference, with storage's own key layout: the ROMs a sync installs (every file of a full system), every system's BIOS files, and the `scrapes/<system>/` metadata and media for those ROMs. It also holds storage's Onion themes, ES-DE theme archives, GPU driver zips, PICO-8 zips and Android APKs, the newest Surprise app, RAOfflineProxy files and spruceOS 7z, and the PyUI themes of the default list and the cards' current themes. It compares file sizes (and the ES-DE theme's commit file, always the same size, by checksum), so a rerun with nothing changed lists storage and downloads nothing. Anything in the mirror that is no longer referenced (a game removed from a card's games or from storage) is deleted, after asking (default no) when that is more than 25 files or a tenth of the mirror. A non-empty folder that isn't already a mirror (it has no `.sync-roms-mirror` file) is refused, and so is any mirror command when storage is a folder (`root`): it is already local.
 
-`sync-roms mirror use DIR` does the same and saves `DIR` as `mirror` in `settings.json`. From then on every sync refreshes the mirror from storage first (if storage can't be reached it warns and uses what the mirror has), then copies its files from the mirror instead of downloading them. If `DIR` is missing (an unplugged drive) it uses storage. `upload` and `clean scrapes` always work on storage itself, and `edit` lists it; when `edit` or `clean scrapes` finishes successfully (not with `--dry-run`) the saved mirror is refreshed afterwards, so it picks up the change. `sync-roms mirror clear` removes the setting (the mirror's files stay); `sync-roms mirror` alone refreshes the saved mirror.
+`sync-roms mirror use DIR` does the same and saves `DIR` as `mirror` in `settings.json`. From then on every sync refreshes the mirror from storage first (if storage can't be reached it warns and uses what the mirror has), then copies its files from the mirror instead of downloading them. If `DIR` is missing (an unplugged drive) it uses storage. `upload` and `scrape clean` always work on storage itself, and `edit` lists it; when `edit` or `scrape clean` finishes successfully (not with `--dry-run`) the saved mirror is refreshed afterwards, so it picks up the change. `sync-roms mirror clear` removes the setting (the mirror's files stay); `sync-roms mirror` alone refreshes the saved mirror.
 
 ## Storage cache (`cache`)
 
@@ -623,7 +623,7 @@ Every command reads what storage holds (each file's name and size, and for a buc
 - `sync-roms cache update` reads storage again: one listing of a bucket, or a walk of a storage folder that lists only the folders whose modification time changed since the last update and stats only the files the cache doesn't have: new files are added, missing ones dropped, and every other file keeps its cached size. This relies on storage changing a folder's modification time whenever a file is added to, removed from or renamed in it. A folder changed in the last few minutes is listed again on the following update, so a change made just before an update is picked up by the next one at the latest.
 - `sync-roms cache update --full` lists every folder and stats every file in a storage folder. Use it for files replaced under the same name (the default keeps their cached size) and for anything a folder's modification time didn't show (say, a tool that sets it back). A bucket listing already has every size, so it's the same as `cache update` there.
 - With no cache for the storage in use (none yet, or built from another bucket or folder), the first command that reads storage offers to build it. Saying no is remembered (`storage_cache_declined` in `settings.json`), and commands then list storage on every run as before; `sync-roms cache update` builds it any time.
-- `scrape review` and `clean scrapes` check storage itself for a ROM the cache doesn't list before they remove its review marks or scraped metadata: one that another machine added since the cache was built is kept, with a note to run `sync-roms cache update`.
+- `scrape review` and `scrape clean` check storage itself for a ROM the cache doesn't list before they remove its review marks or scraped metadata: one that another machine added since the cache was built is kept, with a note to run `sync-roms cache update`.
 
 ## Flashing an SD card (`flash`)
 

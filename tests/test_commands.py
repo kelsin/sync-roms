@@ -1016,10 +1016,6 @@ class MirrorThemeUpdateTest(DataDir):
                 self.assertEqual(self.stored_commit(), self.OLD.decode().strip())
 
 
-if __name__ == "__main__":
-    unittest.main()
-
-
 class Aliases(unittest.TestCase):
     """Singular and plural names run the main command; `cards layout` replaced `cards convert`."""
 
@@ -1087,3 +1083,7 @@ class Aliases(unittest.TestCase):
         self.assertIn("sets", words["games"])
         self.assertNotIn("set", words["games"])
         self.assertEqual(set(words) & set(cli.ALIASES), set())
+
+
+if __name__ == "__main__":
+    unittest.main()

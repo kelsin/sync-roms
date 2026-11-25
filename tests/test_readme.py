@@ -35,6 +35,23 @@ class ReadmeOptions(unittest.TestCase):
         self.assertEqual(sorted(readme - parser), [], "README Options flags the parser doesn't accept")
 
 
+class ReadmeCommands(unittest.TestCase):
+    def rows(self):
+        table = readme().split("| Command | Does | Aliases |", 1)[1].split("\n\n", 1)[0]
+        return [[c.strip() for c in re.split(r"(?<!\\)\|", line.strip().strip("|"))] for line in table.splitlines()[2:]]
+
+    def test_commands_table_aliases_match(self):
+        from sync_roms import cli
+        found, names = {}, set()
+        for cells in self.rows():
+            word = re.findall(r"`([\w-]+)", cells[0])[0]
+            names.add(word)
+            for alias in re.findall(r"`([\w-]+)`", cells[-1]):
+                found[alias] = word
+        self.assertEqual(found, cli.ALIASES)
+        self.assertEqual(sorted(set(cli.SUBCOMMANDS) - names), [], "commands missing from the README Commands table")
+
+
 class ReadmeLayouts(unittest.TestCase):
     def test_layouts_table_and_saves_table_name_every_layout(self):
         with open(README, encoding="utf-8") as f:
