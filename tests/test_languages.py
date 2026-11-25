@@ -1,11 +1,12 @@
 import os
 import sys
+import types
 import unittest
 from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from sync_roms import languages  # noqa: E402
+from sync_roms import cardedit, edit, languages, setedit  # noqa: E402
 
 
 class LanguagesTest(unittest.TestCase):
@@ -47,6 +48,40 @@ class LanguagesTest(unittest.TestCase):
     def test_every_flag_mapped_region_is_a_region(self):
         self.assertLessEqual(set(languages.REGION_FLAGS), languages.REGIONS)
         self.assertEqual(set(languages.REGIONS) - set(languages.REGION_FLAGS) - languages.ENGLISH_REGIONS, {"Unknown"})
+
+
+class EditorColumnsTest(unittest.TestCase):
+    def test_row_extras_flag_column(self):
+        sp = types.SimpleNamespace(bucket="gba", groups={}, bundled={}, locked_from={}, surprise=set(), in_storage=set())
+        work = {"costs": {"gba": {}}}
+        out = cardedit._row_extras(sp, work, "gba/Mother 3 (Japan).zip", {}, False)
+        self.assertEqual(out[3], ("  \U0001F1EF\U0001F1F5", "dim"))
+        out = cardedit._row_extras(sp, work, "gba/VitaShell.vpk", {}, False)
+        self.assertEqual(out[3], ("", "dim"))
+        self.assertEqual(len(out), 5)
+
+    def test_toggle_games_flag_extras(self):
+        system = {"bucket": "gba", "games": [{"bucket": "gba/Mother 3 (Japan).zip"}]}
+        rows = [(system, "gba/Mother 3 (Japan).zip", "Mother 3", "Mother 3")]
+        seen = {}
+
+        def fake(title, labels, **kw):
+            seen.update(kw)
+            return kw["initial"]
+        with mock.patch.object(edit.picker, "filter_list", fake):
+            edit.toggle_games("t", rows)
+        self.assertEqual(seen["extras"], [[("  \U0001F1EF\U0001F1F5", "dim")]])
+
+    def test_pick_game_flag_extras(self):
+        games = [{"title": "Mother 3", "bucket": "gba/Mother 3 (Japan).zip"}]
+        seen = {}
+
+        def fake(title, labels, **kw):
+            seen.update(kw)
+            return 0
+        with mock.patch.object(setedit.picker, "filter_list", fake):
+            self.assertEqual(setedit.pick_game("t", games, {"gba": "GBA"}), 0)
+        self.assertEqual(seen["extras"], [[("  \U0001F1EF\U0001F1F5", "dim")]])
 
 
 if __name__ == "__main__":

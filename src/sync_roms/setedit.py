@@ -1,7 +1,7 @@
 """`sync-roms sets edit`: edit the game sets in storage by hand and save the changes there."""
 import copy
 
-from . import cardedit, edit, inventory, picker, previews, runtime, s3, store, themeart, ui
+from . import cardedit, edit, inventory, languages, picker, previews, runtime, s3, store, themeart, ui
 from .listedit import add_from_set, add_from_system, ask_category, diff_lists, edit_menu, folder_lister, game_label, insert_game, pick_name, recategorize, reconcile, series_keys, set_series, view
 
 
@@ -19,6 +19,13 @@ set_text = store.set_text  # the format of a set's file lives in store
 
 GAMES_HINT = "Space toggle · Enter done · w note · a all · o view · r series"
 GAMES_KEYS = [k for k in cardedit.SET_GAMES_KEYS if k[0] != cardedit.VARIANT_KEY]  # what ? lists in a set's games list
+
+
+def pick_game(title, games, names):
+    """Pick one of games from a list (its flag beside each); the index, or None on Esc."""
+    return picker.filter_list(title, [game_label(g, names) for g in games],
+                              extras=[[languages.column(g["bucket"])] for g in games],
+                              **previews.game_pane([g["bucket"] for g in games]))
 
 
 def edit_one(game_set, systems, keys_of):
@@ -63,8 +70,7 @@ def edit_one(game_set, systems, keys_of):
             add_from_set(game_set, [x for x in store.load_sets() if x["name"] != game_set["name"]], shown, keys_of, label)
         elif i == 3:
             games = [g for g in game_set["games"] if g.get("bucket")]
-            j = picker.filter_list("✏️  Change which game's category?", [game_label(g, names) for g in games],
-                                **previews.game_pane([g["bucket"] for g in games]))
+            j = pick_game("✏️  Change which game's category?", games, names)
             if j is not None:
                 cats = list(dict.fromkeys(g["category"] for g in game_set["games"] if g.get("category")))
                 picked = pick_name(f"🏷️  Category for {games[j].get('title', 'it')}", cats, games[j].get("category", ""),
@@ -73,8 +79,7 @@ def edit_one(game_set, systems, keys_of):
                     recategorize(game_set["games"], games[j], picked)
         elif i == 4:
             games = [g for g in game_set["games"] if g.get("bucket")]
-            j = picker.filter_list("✏️  Set which game's series?", [game_label(g, names) for g in games],
-                                **previews.game_pane([g["bucket"] for g in games]))
+            j = pick_game("✏️  Set which game's series?", games, names)
             if j is not None:
                 known = list(dict.fromkeys([*(n if isinstance(n, str) else n.get("name", "") for n in store.repo_json("series")),
                                             *(g["series"] for g in game_set["games"] if g.get("series"))]))

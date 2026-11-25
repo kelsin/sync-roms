@@ -4,7 +4,7 @@ import json
 import queue
 import threading
 
-from . import budget, cardpicks, collections as colls, edit, guest, inventory, listedit, metafilter, picker, previews, s3, scrape_plan, spruce_themes, store, surprise, themeart, ui, usersettings
+from . import budget, cardpicks, collections as colls, edit, guest, inventory, languages, listedit, metafilter, picker, previews, s3, scrape_plan, spruce_themes, store, surprise, themeart, ui, usersettings
 
 FULL_KEY = "f"
 OFF_KEY = "x"
@@ -790,8 +790,8 @@ def _status(work, now, capacity, to_fetch):
 
 
 def _row_extras(sp, work, key, notes, state):
-    """A game row's columns: files, set note, lock, size (blank where it has none)."""
-    out = [("", "dim"), ("", "dim"), ("", "cyan"), ("", "dim")]
+    """A game row's columns: files, set note, lock, language flag, size (blank where it has none)."""
+    out = [("", "dim"), ("", "dim"), ("", "cyan"), languages.column(key), ("", "dim")]
     costs = work["costs"][sp.bucket]
     if key in sp.groups:
         out[0] = (f"  🔗 {len(sp.groups[key])} files", "dim")
@@ -802,9 +802,9 @@ def _row_extras(sp, work, key, notes, state):
     if key in sp.locked_from:
         out[2] = (f"  {surprise.LABEL if key in sp.surprise else sp.locked_from[key]}", "cyan")
     if key in costs:
-        out[3] = (f"  {size_text(costs[key])}", "dim")
+        out[4] = (f"  {size_text(costs[key])}", "dim")
     elif key in sp.in_storage:
-        out[3] = (f"  {SIZING}", "dim")
+        out[4] = (f"  {SIZING}", "dim")
     return out
 
 
