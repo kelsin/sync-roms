@@ -2,6 +2,8 @@ import contextlib
 import io
 import json
 import os
+import signal
+import socket
 import subprocess
 import sys
 import unittest
@@ -13,7 +15,16 @@ from sync_roms import cli, collections_page, commands, store, tailshare  # noqa:
 
 LINK = "https://box.tail1.ts.net/collections/"
 STATUS = {"Self": {"DNSName": "box.tail1.ts.net."}}
-SERVING = {"Web": {"box.tail1.ts.net:443": {"Handlers": {"/collections": {"Path": "x"}}}}}
+PORT = tailshare.DEFAULT_PORT
+TARGET = f"http://127.0.0.1:{PORT}"
+SERVE = ["tailscale", "serve", "--bg", "--yes", "--https=443", "--set-path", "/collections", TARGET]
+
+
+def serving(mount="/collections", port=PORT, key="box.tail1.ts.net:443"):
+    return {"Web": {key: {"Handlers": {mount: {"Proxy": f"http://127.0.0.1:{port}"}}}}}
+
+
+SERVING = serving()
 
 
 def completed(out="", code=0, err=""):
@@ -30,6 +41,30 @@ class Tailscale(helpers.DataDir):
         self.enterContext(mock.patch.object(collections_page, "write_page", self.write_page))
         self.writes = []
         self.page = os.path.join(tailshare.SHARE_DIR(), "index.html")
+        self.alive, self.listening, self.killed, self.popens = set(), set(), [], []
+        self.enterContext(mock.patch.object(tailshare.subprocess, "Popen", self.popen))
+        self.enterContext(mock.patch.object(tailshare.os, "kill", self.kill))
+        self.enterContext(mock.patch.object(tailshare, "_accepts", lambda port, timeout=1: port in self.listening))
+        self.enterContext(mock.patch.object(tailshare, "_free_port", lambda: PORT))
+        self.enterContext(mock.patch.object(tailshare.time, "sleep", lambda s: None))
+
+    def popen(self, argv, **kw):
+        self.popens.append((argv, kw))
+        self.alive.add(4321)
+        self.listening.add(int(argv[-1]))
+        return mock.Mock(pid=4321, poll=lambda: None)
+
+    def kill(self, pid, sig):
+        if pid not in self.alive:
+            raise ProcessLookupError(pid)
+        if sig:
+            self.killed.append((pid, sig))
+
+    def running(self, pid=99, port=PORT):
+        """A server from an earlier share: its state file, pid and port."""
+        store.write_json(tailshare.STATE_FILE(), {"pid": pid, "port": port})
+        self.alive.add(pid)
+        self.listening.add(port)
 
     def write_page(self, path):
         self.writes.append(path)
@@ -54,27 +89,118 @@ class Share(Tailscale):
         self.assertEqual(tailshare.share(), (LINK, True, True))
         self.assertEqual(self.writes, [self.page])
         self.assertEqual(self.page, os.path.join(self.tmp.name, "share", "collections", "index.html"))
-        self.assertIn(["tailscale", "serve", "--bg", "--set-path", "/collections", tailshare.SHARE_DIR()], self.argvs())
+        self.assertIn(SERVE, self.argvs())
+        [(argv, kw)] = self.popens
+        self.assertEqual(argv, [sys.executable, "-m", "http.server", "--bind", "127.0.0.1", "--directory",
+                                tailshare.SHARE_DIR(), str(PORT)])
+        self.assertEqual(kw, {"stdin": subprocess.DEVNULL, "stdout": subprocess.DEVNULL,
+                              "stderr": subprocess.DEVNULL, "start_new_session": True})
+        self.assertEqual(self.read("share-server.json"), {"pid": 4321, "port": PORT})
 
-    def test_share_keeps_existing_page_and_serve(self):
+    def test_share_keeps_existing_page_server_and_serve(self):
         os.makedirs(tailshare.SHARE_DIR())
         open(self.page, "w").close()
+        self.running()
         self.serve_status = SERVING
         self.assertEqual(tailshare.share(), (LINK, False, False))
         self.assertEqual(self.writes, [])
+        self.assertEqual(self.popens, [])
+        self.assertFalse([a for a in self.argvs() if "--bg" in a or "off" in a])
+
+    def test_trailing_slash_mount_counts(self):
+        self.running()
+        self.serve_status = serving("/collections/")
+        self.assertEqual(tailshare.share()[2], False)
         self.assertFalse([a for a in self.argvs() if "--bg" in a])
+
+    def test_running_server_is_served(self):
+        self.running(port=9001)
+        self.assertEqual(tailshare.share()[2], True)
+        self.assertEqual(self.popens, [])
+        self.assertIn(SERVE[:-1] + ["http://127.0.0.1:9001"], self.argvs())
+
+    def test_dead_pid_restarts(self):
+        self.running()
+        self.alive.discard(99)
+        self.serve_status = SERVING
+        self.assertEqual(tailshare.share(), (LINK, True, True))
+        self.assertEqual(len(self.popens), 1)
+        self.assertEqual(self.read("share-server.json"), {"pid": 4321, "port": PORT})
+
+    def test_closed_port_restarts(self):
+        self.running()
+        self.listening.discard(PORT)
+        tailshare.share()
+        self.assertEqual(len(self.popens), 1)
+
+    def test_bad_state_file_restarts(self):
+        for text in ("not json", "[]", '{"pid": "1", "port": 2}', '{"pid": 1}'):
+            with self.subTest(text=text):
+                self.popens.clear()
+                with open(tailshare.STATE_FILE(), "w") as f:
+                    f.write(text)
+                tailshare.share()
+                self.assertEqual(len(self.popens), 1)
+
+    def test_taken_port_picks_another(self):
+        with mock.patch.object(tailshare, "_free_port", lambda: 50123):
+            tailshare.share()
+        self.assertEqual(self.popens[0][0][-1], "50123")
+        self.assertIn(SERVE[:-1] + ["http://127.0.0.1:50123"], self.argvs())
+        self.assertEqual(self.read("share-server.json")["port"], 50123)
+
+    def test_old_port_turned_off_then_served(self):
+        self.serve_status = serving("/collections/", port=9001)
+        tailshare.share()
+        argvs = [a for a in self.argvs() if a[:3] != ["tailscale", "serve", "status"] and a[1] == "serve"]
+        self.assertEqual(argvs, [["tailscale", "serve", "--https=443", "--set-path", "/collections/", "off"], SERVE])
+
+    def test_server_that_never_listens_fails(self):
+        def popen(argv, **kw):
+            return mock.Mock(pid=4321, poll=lambda: None)
+        clock = iter(range(0, 100))
+        err = io.StringIO()
+        with mock.patch.object(tailshare.subprocess, "Popen", popen), \
+                mock.patch.object(tailshare.time, "monotonic", lambda: next(clock)), \
+                contextlib.redirect_stderr(err), self.assertRaises(SystemExit) as cm:
+            tailshare.share()
+        self.assertEqual(cm.exception.code, 1)
+        self.assertIn("The local page server didn't start", err.getvalue())
 
     def test_serves_only_share_folder(self):
         tailshare.share()
-        served = [a[-1] for a in self.argvs() if "--bg" in a]
-        self.assertEqual(served, [tailshare.SHARE_DIR()])
-        self.assertNotEqual(served[0], store.data_dir())
+        argv = self.popens[0][0]
+        self.assertEqual(argv[argv.index("--directory") + 1], tailshare.SHARE_DIR())
+        self.assertNotEqual(tailshare.SHARE_DIR(), store.data_dir())
+
+    def test_state_file_outside_share_dir(self):
+        state, share = os.path.realpath(tailshare.STATE_FILE()), os.path.realpath(tailshare.SHARE_DIR())
+        self.assertEqual(state, os.path.join(os.path.realpath(store.data_dir()), "share-server.json"))
+        self.assertFalse(state.startswith(share + os.sep))
 
     def test_calls_have_no_stdin_and_a_timeout(self):
         tailshare.share()
-        for _, kw in self.calls:
+        for argv, kw in self.calls:
             self.assertEqual(kw["stdin"], subprocess.DEVNULL)
-            self.assertEqual(kw["timeout"], 60)
+            self.assertEqual(kw["timeout"], 30 if "--bg" in argv else 60)
+
+    def test_serve_not_enabled_fails_with_url(self):
+        url = "https://login.tailscale.com/f/serve?node=abc123"
+        out = f"Serve is not enabled on your tailnet.\nTo enable, visit:\n\n         {url}\n"
+        for result in (completed(out), completed(code=1, err=out), subprocess.TimeoutExpired(SERVE, 30, output=out)):
+            def run(argv, **kw):
+                if "--bg" not in argv:
+                    return self.run_cmd(argv, **kw)
+                if isinstance(result, Exception):
+                    raise result
+                return result
+            err = io.StringIO()
+            with self.subTest(result=result), mock.patch.object(tailshare.subprocess, "run", run), \
+                    contextlib.redirect_stderr(err), self.assertRaises(SystemExit) as cm:
+                tailshare.share()
+            self.assertEqual(cm.exception.code, 1)
+            self.assertIn(f"Tailscale Serve isn't enabled on your tailnet. Enable it at {url}, then run this again",
+                          err.getvalue())
 
     def test_missing_tailscale_fails(self):
         with mock.patch.object(tailshare.shutil, "which", lambda n: None), \
@@ -82,6 +208,7 @@ class Share(Tailscale):
             tailshare.share()
         self.assertEqual(cm.exception.code, 1)
         self.assertEqual(self.calls, [])
+        self.assertEqual(self.popens, [])
 
     def test_serve_error_surfaces(self):
         def run(argv, **kw):
@@ -128,9 +255,14 @@ class Robust(Tailscale):
         self.fails(run, text="couldn't run tailscale: boom")
 
     def test_serve_status_bad_json_is_not_serving(self):
-        for out in ("not json", "[]", '{"Web": null}', '{"Web": {"h:443": 5}}', '{"Web": {"h:443": {"Handlers": []}}}', '{"Web": []}'):
+        for out in ("not json", "[]", '{"Web": null}', '{"Web": {"h:443": 5}}', '{"Web": {"h:443": {"Handlers": []}}}', '{"Web": []}',
+                    json.dumps(serving(key="h:80")), json.dumps(serving(mount="/other"))):
             with self.subTest(out=out), mock.patch.object(tailshare.subprocess, "run", self.with_serve(out)):
-                self.assertFalse(tailshare.serving())
+                self.assertIsNone(tailshare.serving())
+
+    def test_serving_finds_handler(self):
+        with mock.patch.object(tailshare.subprocess, "run", self.with_serve(json.dumps(serving("/collections/")))):
+            self.assertEqual(tailshare.serving(), ("box.tail1.ts.net:443", "/collections/", TARGET))
 
     def test_status_bad_json_fails_cleanly(self):
         for out in ("not json", "[]", '{"Self": null}', '{"Self": 5}', '{"Self": {}}'):
@@ -146,15 +278,51 @@ class Robust(Tailscale):
 
 
 class Unshare(Tailscale):
-    def test_unshare_when_not_serving(self):
+    def test_unshare_when_nothing_running(self):
         self.assertFalse(tailshare.unshare())
         self.assertFalse([a for a in self.argvs() if "off" in a])
+        self.assertEqual(self.killed, [])
 
-    def test_unshare_only_turns_off_its_path(self):
-        self.serve_status = SERVING
+    def test_unshare_turns_off_found_mount_and_stops_server(self):
+        self.running()
+        self.serve_status = serving("/collections/")
         self.assertTrue(tailshare.unshare())
-        self.assertIn(["tailscale", "serve", "--https=443", "--set-path", "/collections", "off"], self.argvs())
+        self.assertIn(["tailscale", "serve", "--https=443", "--set-path", "/collections/", "off"], self.argvs())
         self.assertFalse([a for a in self.argvs() if "reset" in a])
+        self.assertEqual(self.killed, [(99, signal.SIGTERM)])
+        self.assertFalse(os.path.exists(tailshare.STATE_FILE()))
+
+    def test_unshare_server_only(self):
+        self.running()
+        self.assertTrue(tailshare.unshare())
+        self.assertFalse([a for a in self.argvs() if "off" in a])
+        self.assertEqual(self.killed, [(99, signal.SIGTERM)])
+
+    def test_unshare_stale_state_kills_nothing(self):
+        self.running()
+        self.alive.discard(99)
+        self.assertFalse(tailshare.unshare())
+        self.assertEqual(self.killed, [])
+        self.assertFalse(os.path.exists(tailshare.STATE_FILE()))
+
+    def test_unshare_recycled_pid_not_killed(self):
+        """A pid alive but not listening on the port (after a restart, another process) is never signalled."""
+        self.running()
+        self.listening.discard(PORT)
+        self.assertFalse(tailshare.unshare())
+        self.assertEqual(self.killed, [])
+
+
+class FreePort(unittest.TestCase):
+    def test_default_port_when_free_else_another(self):
+        with socket.socket() as held:
+            try:
+                held.bind(("127.0.0.1", tailshare.DEFAULT_PORT))
+            except OSError:
+                pass  # already taken by something else: the same case
+            port = tailshare._free_port()
+        self.assertNotEqual(port, tailshare.DEFAULT_PORT)
+        self.assertGreater(port, 0)
 
 
 class Clipboard(unittest.TestCase):

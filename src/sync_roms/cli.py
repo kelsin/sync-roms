@@ -152,7 +152,7 @@ TOPICS = {
     "collections": """
   sync-roms collections edit                  edit your collections of favourite games
   sync-roms collections page [--out FILE]     write an HTML page of your collections and open it
-  sync-roms collections share                 serve that page on your tailnet with tailscale serve
+  sync-roms collections share                 share that page on your tailnet with tailscale serve
   sync-roms collections unshare               stop serving it
 
   Your own lists of games, saved to ~/.sync-roms/collections/<id>.json
@@ -166,9 +166,11 @@ TOPICS = {
   network needed) to ~/.sync-roms/share/collections/index.html, or to FILE, and opens it. It holds
   your game lists and storage paths, so share it only if you're fine with that.
 
-  collections share builds the page when it isn't there yet, serves only its folder at /collections
-  with tailscale serve (HTTPS must be on for your tailnet), and prints and copies the link. Run
-  collections page to refresh the served page. unshare turns off just that path.
+  collections share builds the page when it isn't there yet, runs a small local server for only its
+  folder, and has tailscale serve forward https://<machine>.<tailnet>.ts.net/collections/ to it
+  (Serve and HTTPS must be on for your tailnet), then prints and copies the link. Run collections
+  page to refresh the served page. The server stops with unshare, which also turns off just that
+  path, or a restart: run share again after a restart.
 """,
     "themes": """
   sync-roms themes update [--dry-run]         put the latest Art Book Next for ES-DE and the PyUI

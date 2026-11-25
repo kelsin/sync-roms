@@ -112,10 +112,6 @@ class TemplateTest(unittest.TestCase):
             self.assertIn(needle, self.html)
 
 
-if __name__ == "__main__":
-    unittest.main()
-
-
 class CommandTest(helpers.Cmd):
     def setUp(self):
         super().setUp()
@@ -159,3 +155,7 @@ class CommandTest(helpers.Cmd):
 
     def test_dry_run_refused(self):
         self.assertEqual(self.page("--dry-run"), 2)
+
+
+if __name__ == "__main__":
+    unittest.main()

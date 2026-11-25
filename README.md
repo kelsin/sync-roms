@@ -173,7 +173,7 @@ Every mode is a command (plain `sync-roms [CARD]` syncs a card). A command's ali
 | `tags edit\|suggest` | edit the [tags](#tags-tags-edit-tags-suggest) in storage by hand, or add tags from scraped genres | `tag` |
 | `collections edit` | edit your [collections](#collections-collections-edit) of favourite games | `collection` |
 | `collections page` | write a shareable HTML page of your collections and open it | `collection` |
-| `collections share\|unshare` | serve that page on your tailnet with `tailscale serve`, or stop | `collection` |
+| `collections share\|unshare` | share that page on your tailnet through a local server and `tailscale serve`, or stop | `collection` |
 | `themes update` | put the latest Art Book Next for ES-DE (for collections' [theme art](#theme-art)) and every [PyUI theme](#spruce) (needs `7z`) in storage | `theme` |
 | `themes build [STYLE...] [--palette NAME\|--all-palettes] [--out DIR]` | build the custom spruce theme styles (Pixel Consoles, Pixel Controllers, ToTK - James) in each chosen palette (without a flag: picked in a list, or the saved `custom_theme_palettes`; `ToTK - James` has no palette and is built once, from the ToTK theme in storage, so naming only it asks for none) from the SPRUCE base theme in storage into the cache, or into `DIR` with `--out`; writes nothing to storage | |
 | `themes publish [STYLE...] [--palette NAME\|--all-palettes]` | build the custom spruce themes in each chosen palette (chosen as for `themes build`) and make their `os/spruceos/themes/<theme>/` folders in storage match: upload what changed and delete what the build no longer makes, after one question (default yes; `--yes` answers it, without a terminal and `--yes` it exits 2; `--dry-run` only shows the plan) | |
@@ -393,7 +393,7 @@ In the card editor, the collection editor and every other list of games, each ro
 
 `sync-roms collections page [--out FILE]` writes your collections as one self-contained HTML page (no network needed) to `share/collections/index.html` in the data folder, or to `FILE` (`~` and missing folders are fine), and opens it. The page holds your game lists and their storage paths, so share it only if you're fine with that.
 
-`sync-roms collections share` serves that page to your tailnet with `tailscale serve` (needs `tailscale` on PATH and HTTPS enabled for the tailnet): it builds the page if it isn't there yet, serves only the `share/collections/` folder at `/collections`, and prints the link, copying it to the clipboard when it can. `collections unshare` turns off just that path. To refresh a shared page, run `collections page`, which rewrites the served file.
+`sync-roms collections share` shares that page on your tailnet (needs `tailscale` on PATH, with Serve and HTTPS enabled for the tailnet): it builds the page if it isn't there yet, runs a small local server for only the `share/collections/` folder (on `127.0.0.1`, port 8737 or a free one), has Tailscale forward `https://<machine>.<tailnet>.ts.net/collections/` to it with `tailscale serve`, and prints the link, copying it to the clipboard when it can. The server stops with `collections unshare` (which also turns off just that path) or a restart; run `share` again after a restart. To refresh a shared page, run `collections page`, which rewrites the served file.
 
 Add one to a card with `l` in the card editor; a sync then writes it as a custom collection of the frontend, where the layout has them (see [What each layout gets](#what-each-layout-gets)).
 
