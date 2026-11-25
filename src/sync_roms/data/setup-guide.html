@@ -652,7 +652,8 @@ const HOTKEY_SCHEME = [
   ["Quit", "Start"],
 ];
 // Per layout: `auto` (what sets it, instead of steps), `steps` ([where, set]; set null for a step that is run, not set),
-// `differs` ({scheme button: what it does instead on this layout}), `extras` (other shortcuts the layout keeps).
+// `differs` ({scheme button: what it does instead on this layout}), `extras` (other shortcuts the layout keeps),
+// `unknown` (nothing recorded yet for this layout).
 const KNULLI_HOTKEYS = "Start > Game Settings > Per System Advanced Configuration > (system) > Controls > Hotkeys";
 const MUOS_HOTKEYS = "Pickles Menu > Settings > Input > Hotkeys > Hotkey Buttons";
 const HOTKEY_LAYOUT = {
@@ -695,18 +696,20 @@ const HOTKEY_LAYOUT = {
     differs: { Y: "no FPS hotkey on Knulli" },
     extras: [
       "Function + Start held 5 s: force-restart EmulationStation.",
-      "Function + L1: screenshot.",
+      "Function + L1: screenshot, Knulli's own shortcut on the same button as Quick Load.",
       "Per game instead of per system: hold the launch button on a game, Advanced Game Options > Controls > Hotkeys.",
     ],
   },
   muos: {
     steps: [
-      [`${MUOS_HOTKEYS} > Quick Save`, "R1"],
-      [`${MUOS_HOTKEYS} > Quick Load`, "L1"],
       [`${MUOS_HOTKEYS} > Fast Forward`, "R2, mode Press"],
-      [`${MUOS_HOTKEYS} > Slow Motion`, "L2"],
     ],
-    differs: {},
+    differs: {
+      R1: "not save state: Menu + R2 saves",
+      L1: "slow motion: Menu + L2 loads",
+      R2: "save state, and fast-forward too after the step below",
+      L2: "load state",
+    },
     extras: [
       "Tap Menu: Pickles Menu.",
       "R2 + Select + B: force quit.",
@@ -729,7 +732,7 @@ const HOTKEY_LAYOUT = {
     ],
   },
   allium: {
-    steps: [], differs: {},
+    unknown: true, steps: [], differs: {},
     extras: ["Menu: in-game menu (save, load, reset, RetroArch menu, quit)."],
   },
   spruce: {
@@ -742,7 +745,7 @@ const HOTKEY_LAYOUT = {
     ],
   },
   nextui: {
-    steps: [], differs: {},
+    unknown: true, steps: [], differs: {},
     extras: [
       "Menu: in-game options menu (save/load states, emulator options, shortcuts). There is no RetroArch menu.",
       "Menu + Select held: game switcher.",
@@ -945,6 +948,7 @@ const SECTIONS = [
         body: ctx => {
           const l = HOTKEY_LAYOUT[ctx.layout];
           if (l.auto) return `<p>${l.auto}</p>`;
+          if (l.unknown) return "<p>Not recorded for this layout yet.</p>";
           if (!l.steps.length) return `<p>${Object.keys(l.differs).length ? "These can't be changed on this layout." : "Nothing to change."}</p>`;
           return `<ol>${l.steps.map(([where, set]) => set == null
             ? `<li>Run <span class="path">${path(where)}</span>.</li>`
