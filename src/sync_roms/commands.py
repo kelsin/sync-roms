@@ -902,7 +902,9 @@ def check_tags(problems, systems):
         if not isinstance(g, dict) or not isinstance(g.get("tags"), list):
             problems.append(f"{where}: {key}: must be an object with a 'tags' list")
             continue
-        problems.extend(f"{where}: {key}: unknown tag {i!r}" for i in g["tags"] if i not in raw_tags)
+        problems.extend(f"{where}: {key}: tag ids must be strings, not {i!r}" if not isinstance(i, str)
+                        else f"{where}: {key}: unknown tag {i!r}" for i in g["tags"]
+                        if not isinstance(i, str) or i not in raw_tags)
         listed += check_keys(problems, where, system, {"bucket": key, "files": g.get("files", [])})
         variants = g.get("variants", [])
         if not isinstance(variants, list):

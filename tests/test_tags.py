@@ -169,6 +169,26 @@ class Writes(helpers.StorageFolder):
         tags.set_variants(B, [{"bucket": "nes/B2.zip", "note": "n"}])
         self.assertEqual(self.stored()["games"][B]["variants"][0]["bucket"], "nes/B2.zip")
 
+    def test_edit_variants_changes_the_fresh_file_in_one_write(self):
+        helpers.storage_tags(self, sample(), root=self.storage)
+        tags.load()
+        theirs = sample()  # another machine, after this run read the file: B gets a variant, A loses its record
+        theirs["games"][B]["variants"] = [{"bucket": "nes/B Theirs.zip", "note": "theirs"}]
+        del theirs["games"][A]
+        with open(os.path.join(self.storage, tags.KEY), "w", encoding="utf-8") as f:
+            f.write(tags.dump(theirs))
+        changed, missing = tags.edit_variants(
+            add=[{"game": B, "bucket": "nes/B2.zip", "note": "n", "files": ["nes/B2 (Disc 2).zip"]},
+                 {"game": A, "bucket": "nes/A2.zip", "note": "n"}],
+            remove=[{"game": B, "bucket": "nes/B Gone.zip"}])
+        self.assertEqual((changed, missing), ([B], [A]))
+        games = self.stored()["games"]
+        self.assertNotIn(A, games)  # not recreated
+        self.assertEqual(games[B]["variants"], [{"bucket": "nes/B Theirs.zip", "note": "theirs"},
+                                                {"bucket": "nes/B2.zip", "note": "n", "files": ["nes/B2 (Disc 2).zip"]}])
+        tags.edit_variants(add=[], remove=[{"game": B, "bucket": "nes/B Theirs.zip"}])
+        self.assertEqual([v["bucket"] for v in self.stored()["games"][B]["variants"]], ["nes/B2.zip"])
+
     def test_retarget(self):
         helpers.storage_tags(self, sample(), root=self.storage)
         tags.retarget(A, "nes/A2.zip")

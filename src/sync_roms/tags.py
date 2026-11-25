@@ -334,3 +334,35 @@ def set_variants(key, variants):
         else:
             rec.pop("variants", None)
     return _write(change)
+
+
+def edit_variants(add, remove):
+    """One write on a fresh copy of the file: each remove ({"game", "bucket"}) leaves the game's variants, each add
+    ({"game", "bucket", "note", "files"?}) joins them unless that bucket is there. A game with no record is skipped,
+    never created. Returns (the keys of the games changed, the keys skipped), both sorted."""
+    changed, missing = set(), set()
+
+    def change(data):
+        changed.clear()
+        missing.clear()
+        for key in sorted({x["game"] for x in [*add, *remove]}):
+            rec = data["games"].get(key)
+            if rec is None:
+                missing.add(key)
+                continue
+            gone = {r["bucket"] for r in remove if r["game"] == key}
+            variants = [v for v in rec.get("variants", ()) if v["bucket"] not in gone]
+            for a in add:
+                if a["game"] == key and all(v["bucket"] != a["bucket"] for v in variants):
+                    entry = {"bucket": a["bucket"], "note": a["note"]}
+                    if a.get("files"):
+                        entry["files"] = list(a["files"])
+                    variants.append(entry)
+            if variants != rec.get("variants", []):
+                changed.add(key)
+                if variants:
+                    rec["variants"] = variants
+                else:
+                    rec.pop("variants", None)
+    _write(change)
+    return sorted(changed), sorted(missing)

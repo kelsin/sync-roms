@@ -86,13 +86,30 @@ class ApplyVariantsToTags(CheckedInStorage):
         self.assertEqual(self.text(), before)
         self.assertIn("Games changed: none", out)
 
-    def test_a_game_with_no_record_changes_nothing(self):
+    def test_a_game_with_no_record_is_skipped_and_reported(self):
         before = self.text()
-        with self.assertRaises(SystemExit) as e:
-            self.run_apply({"add": [{"game": "gba/Z.zip", "bucket": "gba/Z DX.zip", "note": "x"}]})
-        self.assertIn("gba/Z.zip", str(e.exception))
+        out = self.run_apply({"add": [{"game": "gba/Z.zip", "bucket": "gba/Z DX.zip", "note": "x"}],
+                              "checked": {"gba/C.zip": "no"}})
+        self.assertIn("No tags.json record, skipped: gba/Z.zip", out)
         self.assertEqual(self.text(), before)
-        self.assertFalse(os.path.exists(os.path.join(self.root, "variants-checked.json")))
+        self.assertEqual(self.checked(), {"gba/C.zip": "no"})  # the skipped variant isn't recorded as judged
+
+    def test_another_machines_edits_made_while_it_ran_are_kept(self):
+        tags.load()  # this run's read
+        theirs = json.loads(json.dumps(self.DATA))
+        theirs["games"]["gba/B.zip"]["variants"].append({"bucket": "gba/B Theirs.zip", "note": "GBA: theirs"})
+        del theirs["games"]["gba/A.zip"]  # untagged on the other machine
+        with open(os.path.join(self.root, tags.KEY), "w", encoding="utf-8") as f:
+            f.write(tags.dump(theirs))
+        out = self.run_apply({"add": [{"game": "gba/A.zip", "bucket": "gba/A DX.zip", "note": "GBA: adds colour"},
+                                      {"game": "gba/B.zip", "bucket": "gba/B New.zip", "note": "GBA: new"}],
+                              "remove": [{"game": "gba/B.zip", "bucket": "gba/B Old.zip"}]})
+        games = tags.parse(self.text())["games"]
+        self.assertNotIn("gba/A.zip", games)  # not recreated
+        self.assertEqual([v["bucket"] for v in games["gba/B.zip"]["variants"]],
+                         ["gba/B DX.zip", "gba/B Theirs.zip", "gba/B New.zip"])
+        self.assertIn("Games changed: gba/B.zip", out)
+        self.assertIn("No tags.json record, skipped: gba/A.zip", out)
 
     def test_an_unmounted_storage_folder_writes_nothing(self):
         before = self.text()

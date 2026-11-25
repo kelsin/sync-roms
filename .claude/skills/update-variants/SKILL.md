@@ -78,11 +78,13 @@ uv run --frozen python .claude/skills/update-variants/scripts/apply_variants.py 
 uv run sync-roms check
 ```
 
-The apply script adds and removes the variants on each game's record in `tags.json` (each write applies to a fresh
-copy of the storage file, so other machines' edits are kept) and records every judged ROM as checked. It changes
-nothing when the storage folder isn't mounted or when a decision names a game with no record. Rejected candidates go
-in `checked` so later runs skip them; candidates the user wants to decide later are left out. There is nothing to
-commit: report the games it changed (the last line of its output) and any problems `sync-roms check` shows.
+The apply script adds and removes the variants on the games' records in `tags.json` in one write, made to a fresh
+copy of the storage file, so variants and records another machine changed meanwhile are kept. A game whose record is
+gone by then is skipped and listed ("No tags.json record, skipped"), never recreated, and its proposed variants aren't
+recorded as checked. It records every other judged ROM as checked, and changes nothing when the storage folder isn't
+mounted. Rejected candidates go in `checked` so later runs skip them; candidates the user wants to decide later are
+left out. There is nothing to commit: report the games it changed (the last line of its output), any skipped games
+and any problems `sync-roms check` shows.
 
 `find_candidates.py --baseline` marks every ROM no game record lists as checked without judging it. Use it only when the user
 asks to skip the backlog.

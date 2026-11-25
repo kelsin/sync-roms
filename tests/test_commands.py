@@ -59,6 +59,11 @@ class CheckTagsTest(StorageDir):
                                     "tags.json: nes/N.zip: unknown system 'nes'"])
         self.assertEqual(keys, {"tags.json": [("gba", "gba/A.zip"), ("gba", "gba/B.zip")]})
 
+    def test_a_tag_id_that_isnt_a_string_is_a_problem(self):
+        problems, _, _ = self.check(json.dumps({"tags": TAG_DEFS, "games": {"gba/A.zip": {"tags": ["rpg", ["x"], 3]}}}))
+        self.assertEqual(problems, ["tags.json: gba/A.zip: tag ids must be strings, not ['x']",
+                                    "tags.json: gba/A.zip: tag ids must be strings, not 3"])
+
     def test_a_tag_without_a_name_or_emoji_and_a_shared_emoji_are_problems(self):
         problems, _, _ = self.check({"tags": {"a": {"name": "A", "emoji": "🛸"}, "b": {"name": "B", "emoji": "🛸"},
                                               "c": {"name": "", "emoji": "🎲"}, "d": {"name": "D"}},
