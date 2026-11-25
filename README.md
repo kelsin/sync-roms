@@ -137,7 +137,7 @@ Exit codes: `0` done (or nothing to do, or you declined), `1` some files failed,
 
 `--dry-run` shows the same free space as a sync (counting the ROMs it would delete as freed) and says when the downloads would not fit. `sync --dry-run --json` prints `{downloads, delete, kept, theme_remove, rename, missing, stale_media, totals, free_space}`: `downloads` lists every file with its `kind` (scraped media as `scrape`, counted in `totals`), `kept` lists the card's ROMs outside the selection that `--no-delete` keeps (not the retired collections it keeps), `theme_remove` the PyUI theme folders a `spruce` card would lose, `rename` holds `{from, to}` pairs, `missing` has `roms` and `bios`, and `free_space` is in bytes.
 
-The other `--json` documents: `devices` is a list of `{id, name, soc, systems, firmwares}` (`systems` a count), or one device's entry with its `systems` and `system_names`; `layouts` is the `layouts.json` entries plus `id` and `devices`; `games list` is `{full_systems, sets, games}`, each game `{system, bucket, title}`; `cards list` is a list of `{name, device, layout, size, used, sized, full_systems, games, extras, guest, surprise, theme, collections, raofflineproxy}`; `diff` is `{system, only_local, only_bucket}`, the last two lists of `{path, size}`.
+The other `--json` documents: `devices` is a list of `{id, name, soc, systems, firmwares}` (`systems` a count), or one device's entry with its `systems` and `system_names`; `layouts` is the `layouts.json` entries plus `id` and `devices`; `games list` is `{full_systems, games}`, each game `{system, bucket, title}`; `cards list` is a list of `{name, device, layout, size, used, sized, full_systems, games, extras, guest, surprise, theme, collections, raofflineproxy}`; `diff` is `{system, only_local, only_bucket}`, the last two lists of `{path, size}`.
 
 ### List keys
 
@@ -202,7 +202,7 @@ Every mode is a command (plain `sync-roms [CARD]` syncs a card). A command's ali
 | `check` | validate your JSON data files (`cards.json`, `surprises.json`, the device overlay, storage's tags and your collections) | |
 | `completion bash\|zsh\|fish` | shell completion script | |
 
-Flags that make no sense for a command (`--dry-run` with `edit`, `--replace` without `upload` or `scrape art`) are refused rather than ignored, and abbreviations like `--up` are not accepted. `games set` is `games sets`. A card folder named like a command or alias: write `./edit`.
+Flags that make no sense for a command (`--dry-run` with `edit`, `--replace` without `upload` or `scrape art`) are refused rather than ignored, and abbreviations like `--up` are not accepted. A card folder named like a command or alias: write `./edit`.
 
 ### Options
 
@@ -210,10 +210,10 @@ For every command they make sense with:
 
 | Flag | Description |
 | --- | --- |
-| `-n`, `--dry-run` | Show what would be done (a sync: what would be downloaded, with total sizes; `mirror`: what it would download and delete) and change nothing. Commands that only read (`diff`, `check`, `doctor`, `guide`, `cache`, `refresh`, `config` (except `config apply`, which lists what it would set), `completion`, `themes pick`/`build`/`palettes`, `games list`/`export`/`sets list`) or can't honor it (`edit`, `scrape review`, `scrape missing`, ...) refuse it with exit 2 |
+| `-n`, `--dry-run` | Show what would be done (a sync: what would be downloaded, with total sizes; `mirror`: what it would download and delete) and change nothing. Commands that only read (`diff`, `check`, `doctor`, `guide`, `cache`, `refresh`, `config` (except `config apply`, which lists what it would set), `completion`, `themes pick`/`build`/`palettes`, `games list`/`export`) or can't honor it (`edit`, `scrape review`, `scrape missing`, ...) refuse it with exit 2 |
 | `-y`, `--yes` | Answer prompts with their default. It is the confirmation of `upload` (overwrites), `scrape clean`, `prepare` (removes the originals), `cards clean`, `cards layout`, `cards install` (deletes the card's other files), `cards delete`, `cards export` (overwrites FILE), `saves manage` (deletes the picked stashes), `themes publish` (stale theme files), `download pico8` and `scrape match` (`upload`, `prepare`, `scrape clean`, `cards install`, `cards export`, `themes publish`, `download pico8` and `scrape match` ask otherwise, `scrape clean` with default no and the others with default yes, and exit 2 without a terminal) |
 | `--json` | `devices`, `layouts`, `games list`, `cards list`, `diff` and `sync --dry-run`: one JSON document on stdout, nothing else (pass `--device`/`--layout` so no picker is needed; `diff` also needs `--system ID` unless the folder is named after a system) |
-| `--quiet` | Print only errors (failed files and a sync's failure count included, and `check`'s problems), warnings and `--json` data, all on stderr except the JSON; commands whose whole output is the answer (`doctor`, `config show`, `cache`, `cards list`, `games list`, `games sets list`, ...) still print it; prompts are asked on stderr |
+| `--quiet` | Print only errors (failed files and a sync's failure count included, and `check`'s problems), warnings and `--json` data, all on stderr except the JSON; commands whose whole output is the answer (`doctor`, `config show`, `cache`, `cards list`, `games list`, ...) still print it; prompts are asked on stderr |
 | `--verbose` | Also print the effective settings and where each came from, on stderr |
 | `--profile P`, `--write-profile P`, `--bucket B`, `--root DIR`, `--endpoint URL` | Override those settings for this run. Precedence: flag, then environment variable, then `settings.json`, then the default |
 | `--version` | Print the version |
@@ -265,7 +265,7 @@ For one command:
 
 ### Data folder
 
-Your own files live in the data folder: `$XDG_DATA_HOME/sync-roms` if that is set, otherwise `~/.sync-roms`, on macOS and Linux; `%APPDATA%\sync-roms` on Windows (`sync-roms config path` prints it). It holds `settings.json`, `cards.json`, `surprises.json`, `collections/`, `saves/`, `cache/` and `storage/` (local copies of the files shared through storage: `ignored.json`, the sets, scrape state). None of it is ever written to storage.
+Your own files live in the data folder: `$XDG_DATA_HOME/sync-roms` if that is set, otherwise `~/.sync-roms`, on macOS and Linux; `%APPDATA%\sync-roms` on Windows (`sync-roms config path` prints it). It holds `settings.json`, `cards.json`, `surprises.json`, `collections/`, `saves/`, `cache/` and `storage/` (local copies of the files shared through storage: `ignored.json`, `tags.json`, scrape state). None of it is ever written to storage.
 
 An optional `device-systems.json` there adjusts the systems a device can play: `{"miyoo-flip": {"add": ["psx"], "remove": ["gba"]}}` (system ids as in `systems.json`; the package's order is kept and notes always come from the package).
 
@@ -338,7 +338,7 @@ sync-roms edit
    - `w` writes a note on a picked game.
 4. **When you leave the menu**, device, layout and device-system changes are summarized, then **save**, **keep editing** (`Esc` too), **discard**, or **list every change**. Nothing is uploaded.
 
-While an editor is busy between two lists (the screen says `Working...`), `Ctrl-C` takes effect when that step ends: the editor then stops as it does for `Ctrl-C` in a list. Another `Ctrl-C` a second or more later, with the step still running, quits at once, and unsaved changes in the open editor are lost (the screen says when; a double press or a held key counts as one). The same goes for the set and collection editors.
+While an editor is busy between two lists (the screen says `Working...`), `Ctrl-C` takes effect when that step ends: the editor then stops as it does for `Ctrl-C` in a list. Another `Ctrl-C` a second or more later, with the step still running, quits at once, and unsaved changes in the open editor are lost (the screen says when; a double press or a held key counts as one). The same goes for the tag and collection editors.
 
 A full system has no game list to edit: opening it in the card editor only says so. Removing a game only drops it from the card's games; the file stays in storage.
 
@@ -389,7 +389,7 @@ In the collection editor, **Theme art** picks one of the pictures listed in `art
 
 ### Surprise
 
-Every card gets up to 10 surprises on top of the games you picked: random full English games, only those with one of the tags in `surprise_tags` when that is set (no BIOS, prototypes, betas, demos, hacks, re-releases or compilations; a multi-disc game counts as one) from every system the card's device supports, whether or not it has games picked. It is on by default on every layout but `allium`, which has nowhere to show them. Seven of the ten come from the systems recommended for the device and three from the others, spread evenly over the systems; a system with no candidates passes its slots on. Games never surprised come first, then games surprised before, then games another card currently holds. Full systems are used too, but any other game already on the card is left out. Systems listed in `surprise_excluded_systems` (in `settings.json` for every card, or on the card) are never used, and a card's current surprises on them are replaced at the next sync. `surprise_tags` (tag ids, picked in the card editor's `S` menu for every card or for one card; the card's wins) limits Surprise to games with any of those tags; with none it has no limit.
+Every card gets up to 10 surprises on top of the games you picked: random full English games (no BIOS, prototypes, betas, demos, hacks, re-releases or compilations; a multi-disc game counts as one) from every system the card's device supports, whether or not it has games picked. It is on by default on every layout but `allium`, which has nowhere to show them. Seven of the ten come from the systems recommended for the device and three from the others, spread evenly over the systems; a system with no candidates passes its slots on. Games never surprised come first, then games surprised before, then games another card currently holds. Full systems are used too, but any other game already on the card is left out. Systems listed in `surprise_excluded_systems` (in `settings.json` for every card, or on the card) are never used, and a card's current surprises on them are replaced at the next sync. `surprise_tags` (tag ids, picked in the card editor's `S` menu for every card or for one card; the card's wins) limits Surprise to games with any of those tags; with none it has no limit.
 
 - **In a sync** the surprises are handled in two steps. First, before anything downloads, it asks which of the card's current surprises to replace (`Esc` keeps them all, as in any picker) and keeps the others, then opens the card editor (also with Surprise off). Last, when the editor is done and the sync starts, the empty slots are filled at random. Without a terminal, with `--yes` or `--json` it replaces all of them. `--dry-run` changes no surprises: it only says whether it would ask or replace all, previews the picks for empty slots and saves nothing. The mirror is refreshed again only when the editor or the new picks changed the card's picks.
 - **Turning it off** in the card editor's `S` menu removes the card's surprises at the next sync.
@@ -575,7 +575,7 @@ It is local only, so storage holds the `.chd` and `.m3u` files and the card's ga
 `sync-roms download pico8 [--count N] [--dry-run] [--yes]` fills storage's `pico8/` folder from the [Lexaloffle BBS](https://www.lexaloffle.com/bbs/?cat=7&sub=2&orderby=featured) Featured listing, with the write profile. It reads every page of the listing, lists the carts storage doesn't have (`new:`) and those the BBS has a newer revision of (`upgrade: old → new`), and asks once (default yes; `--yes` adds them without asking, and without a terminal it exits 2 unless `--yes`); `--dry-run` lists them and writes nothing.
 
 - Each cart is checked to be a PNG and uploaded as `pico8/<BBS file name>` (`molemole-1.p8.png`), and its title and author go into `scrapes/pico8/metadata.json` right away, so the editors and frontends show the title. Other entries in that file are kept.
-- A cart's revision is its `-<number>` suffix (none is revision 0). An upgrade deletes the old revision, moves its metadata entry and its `scrapes/pico8/` media to the new name, and points your cards, Surprise history and collections at the new file. Sets that name the old file are listed as warnings to change by hand (`sync-roms sets edit`).
+- A cart's revision is its `-<number>` suffix (none is revision 0). An upgrade deletes the old revision, moves its metadata entry and its `scrapes/pico8/` media to the new name, and points your cards, Surprise history, collections and `tags.json` at the new file.
 - Carts in `ignored.json` are never downloaded.
 - Requests go one at a time. The first HTTP error stops the run with a warning; carts already added stay.
 
