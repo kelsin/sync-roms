@@ -101,6 +101,7 @@ def done_command(card, ports, undo):
     if card not in store.load_cards():
         ui.fail(f"No card named {card!r}. Cards: {', '.join(store.all_card_names()) or '(none yet)'}", 2)
     try:
+        s3.check_root()
         metadata = scrape_plan.load_metadata("ports")
     except (*s3.ERRORS, ValueError) as e:
         ui.warn(f"Couldn't read the ports' titles from storage ({e}); naming the ports by their folders")

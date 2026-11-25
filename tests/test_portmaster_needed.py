@@ -118,10 +118,21 @@ class DoneNeededTest(StorageDir):
         self.run_cmd(needed.done_command, "c", ["undertale"], True)
         self.assertNotIn("portmaster_data", store.load_cards()["c"])
 
-    def test_done_with_unreachable_storage_uses_the_names_given(self):
-        with mock.patch.object(runtime, "ROOT", os.path.join(self.root, "gone")):
-            self.run_cmd(needed.done_command, "c", ["celeste.zip"], False)
+    def check_fallback(self, err):
+        self.assertIn("Couldn't read the ports' titles from storage", err.getvalue())
         self.assertEqual(store.load_cards()["c"]["portmaster_data"], ["celeste"])
+
+    def test_done_with_unreachable_storage_uses_the_names_given(self):
+        err = io.StringIO()
+        with mock.patch.object(runtime, "ROOT", os.path.join(self.root, "gone")), contextlib.redirect_stderr(err):
+            self.assertEqual(needed.done_command("c", ["celeste.zip"], False), 0)
+        self.check_fallback(err)
+
+    def test_done_with_malformed_metadata_uses_the_names_given(self):
+        err = io.StringIO()
+        with mock.patch("sync_roms.scrape_plan.load_metadata", side_effect=ValueError("bad")), contextlib.redirect_stderr(err):
+            self.assertEqual(needed.done_command("c", ["celeste.zip"], False), 0)
+        self.check_fallback(err)
 
     def test_done_unknown_card_fails(self):
         with self.assertRaises(SystemExit) as e, contextlib.redirect_stderr(io.StringIO()):
