@@ -8,7 +8,7 @@ import posixpath
 import random
 import re
 
-from . import frontend, inventory, languages, m3u, mirroring, names, picker, previews, s3, store, ui, usersettings, vita
+from . import frontend, inventory, languages, m3u, mirroring, names, picker, previews, s3, store, tagui, ui, usersettings, vita
 
 SLOTS = 10
 RECOMMENDED_SHARE = 2 / 3
@@ -254,10 +254,22 @@ def run_surprise(card_name, setup, chosen_systems, interactive, dry_run, to_fetc
             print("\U0001F381 would ask which surprises to replace" if interactive
                   else f"\U0001F381 would replace all {len(current)} surprises")
     elif interactive and current:
-        states = picker.filter_list("\U0001F381 Surprises: keep ✅ or replace ⬜ (Enter to confirm)",
-                                    [f"{x.get('title') or x['bucket']}  ({names[x['system']]})" for x in current],
-                                    multi=True, initial=[True] * len(current), diff_marks=False,
-                                    **previews.game_pane([x["bucket"] for x in current]))
+        sel = [True] * len(current)
+        while True:  # t edits a game's tags, then the list opens again with the same picks
+            session = {"sel": list(sel)}
+            states = picker.filter_list("\U0001F381 Surprises: keep ✅ or replace ⬜ (Enter to confirm)",
+                                        [f"{x.get('title') or x['bucket']}  ({names[x['system']]})" for x in current],
+                                        multi=True, initial=[True] * len(current), diff_marks=False,
+                                        hotkeys=(tagui.TAG_KEY,), hint="Space toggle · Enter done · t tags",
+                                        key_help=[tagui.KEY_HELP], session=session,
+                                        extras=[[tag] for tag in tagui.column([x["bucket"] for x in current])],
+                                        **previews.game_pane([x["bucket"] for x in current]))
+            if not isinstance(states, tuple):
+                break
+            sel = session["sel"]
+            if states[1] is not None:
+                x = current[states[1]]
+                tagui.edit_game_tags(x["bucket"], x.get("title") or x["bucket"])
         kept = current if states is None else [x for x, keep in zip(current, states) if keep]
     else:
         kept = []

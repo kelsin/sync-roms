@@ -82,7 +82,7 @@ class EditorColumnsTest(unittest.TestCase):
                 mock.patch.object(cardedit.previews, "game_pane", return_value={}):
             cardedit._games_pass("t", [(system, key, "Parappa", "Parappa")], picks, {}, {}, {key: True}, {}, None,
                                  None, {})
-        self.assertEqual(seen["extras"], [[("", "dim")] * 3 + [("  \U0001F1EF\U0001F1F5", "dim")]])
+        self.assertEqual(seen["extras"], [[("", "dim")] * 3 + [("  \U0001F1EF\U0001F1F5", "dim"), ("", "")]])
 
     def test_variant_picker_flag_extras(self):
         picks = types.SimpleNamespace(
@@ -107,7 +107,7 @@ class EditorColumnsTest(unittest.TestCase):
             return kw["initial"]
         with mock.patch.object(edit.picker, "filter_list", fake):
             edit.toggle_games("t", rows)
-        self.assertEqual(seen["extras"], [[("  \U0001F1EF\U0001F1F5", "dim")]])
+        self.assertEqual(seen["extras"], [[("  \U0001F1EF\U0001F1F5", "dim"), ("", "")]])
 
     def test_pick_game_flag_extras(self):
         games = [{"title": "Mother 3", "bucket": "gba/Mother 3 (Japan).zip"}]

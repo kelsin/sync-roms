@@ -337,6 +337,26 @@ class Step(StorageCase):
         self.assertNotIn("psx", {g["system"] for g in got})
         self.assertIn(self.surprise("gba", 0), got)
 
+    def test_t_edits_a_surprises_tags_and_reopens_the_list_with_the_same_picks(self):
+        current = [self.surprise("gba", i) for i in range(5)] + [self.surprise("gb", i) for i in range(5)]
+        self.card(surprises=current)
+        lists, asked = [], []
+
+        def fake(title, labels, **kw):
+            lists.append(kw)
+            if len(lists) == 1:
+                kw["session"]["sel"] = [False] + [True] * 9
+                return ("t", 2)
+            return kw["session"]["sel"]
+        with self.patched(filter_list=fake, edit_card=lambda *a, **k: None), \
+                mock.patch.object(surprise.tagui, "edit_game_tags", side_effect=lambda *a: asked.append(a)):
+            got = self.both(True, False, 1)
+        self.assertEqual(asked[0][0], current[2]["bucket"])
+        self.assertEqual(len(lists), 2)
+        self.assertEqual(lists[1]["session"]["sel"], [False] + [True] * 9)
+        self.assertEqual(len(lists[0]["extras"]), 10)
+        self.assertNotIn(current[0], got)
+
     def test_excluded_systems_are_never_picked_and_their_surprises_are_replaced(self):
         usersettings.save_setting("surprise_excluded_systems", ["gb"])
         self.card(surprises=[self.surprise("gba", 0), self.surprise("gb", 0)])

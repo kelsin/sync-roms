@@ -3,7 +3,7 @@ import os
 import sys
 from collections import defaultdict
 
-from . import languages, names, picker, previews, runtime, s3, store, surprise, themeart, ui, vita
+from . import languages, names, picker, previews, runtime, s3, store, surprise, tagui, themeart, ui, vita
 
 
 def note(text):
@@ -63,7 +63,20 @@ FULL_SYSTEM_NOTE = "Full system: every file in its folder is synced, so it can't
 
 
 def toggle_games(title, rows, hotkeys=(), hint=None, place=None, filters="", key_help=None, select_all=True):
+    """_toggle_games, reopened in the same place after `t` edited a game's tags (the toggles made so far are applied
+    first); the other keys are returned as it does."""
+    place = {} if place is None else place
+    while True:
+        pressed, i = _toggle_games(title, rows, hotkeys, hint, place, filters, key_help, select_all)
+        if pressed != tagui.TAG_KEY:
+            return pressed
+        if i is not None:
+            tagui.edit_game_tags(rows[i][1], rows[i][2])
+
+
+def _toggle_games(title, rows, hotkeys, hint, place, filters, key_help, select_all):
     """Multi-select over rows of (system, bucket key, game title, label); adds/removes games in each system in place.
+    Returns (key pressed or None, its row's index).
 
     Rows of a full system are shown on and locked: its whole storage folder is synced.
     hotkeys/hint/key_help: extra keys the list offers (the hint line to show, and the (keys, what they do) pairs ?
@@ -72,6 +85,9 @@ def toggle_games(title, rows, hotkeys=(), hint=None, place=None, filters="", key
     select_all: False turns the list's `a` (toggle all shown) off.
     Ctrl-C applies the toggles made so far, then raises KeyboardInterrupt.
     """
+    hint = hint or GAMES_HINT
+    hint += "" if " t tags" in hint else " · t tags"
+    key_help = key_help if key_help is None or any(k == tagui.TAG_KEY for k, _ in key_help) else [*key_help, tagui.KEY_HELP]
     locked = [bool(s.get("full_system")) for s, *_ in rows]
     have = {}  # system bucket -> keys of its listed games, kept current as games are added and removed
 
@@ -84,21 +100,21 @@ def toggle_games(title, rows, hotkeys=(), hint=None, place=None, filters="", key
     variants, parents = store.variant_index(store.load_sets())
     system_names = {s["bucket"]: s["name"] for s in store.repo_json("systems")}
     session = {"sel": list(initial)}
-    if place is not None:
-        picker.carry_place(place, [key for _, key, _, _ in rows], session)
+    picker.carry_place(place, [key for _, key, _, _ in rows], session)
+    extras = [[languages.column(key), tag] for (_, key, _, _), tag in zip(rows, tagui.column([r[1] for r in rows]))]
     interrupted = False
     try:
         state = picker.filter_list(title, [label for *_, label in rows], multi=True, initial=initial, locked=locked,
-                                   locked_note=[FULL_SYSTEM_NOTE if lock else "" for lock in locked], hint=hint or GAMES_HINT, key_help=key_help,
+                                   locked_note=[FULL_SYSTEM_NOTE if lock else "" for lock in locked], hint=hint, key_help=key_help,
                                    note_text=lambda i: note_text(rows[i][0]["games"], rows[i][1]),
                                    on_note=lambda i, text: save_note(rows[i][0]["games"], rows[i][1], text),
-                                   hotkeys=hotkeys, session=session, filters=filters,
+                                   hotkeys=(*hotkeys, tagui.TAG_KEY), session=session, filters=filters,
                                    row_note=lambda i: variant_line(rows[i][1], variants, parents, system_names),
-                                   select_all=select_all, extras=[[languages.column(key)] for _, key, _, _ in rows],
+                                   select_all=select_all, extras=extras,
                                    **previews.game_pane([key for _, key, _, _ in rows]))
     except KeyboardInterrupt:  # Ctrl-C: the toggles made so far are applied, then the caller gets the Ctrl-C
         interrupted, state = True, session["sel"]
-    pressed = state[0] if isinstance(state, tuple) else None
+    pressed, at = state if isinstance(state, tuple) else (None, None)
     if pressed:
         state = session["sel"]
     removed = defaultdict(set)  # system bucket -> keys to drop from its games
@@ -117,7 +133,7 @@ def toggle_games(title, rows, hotkeys=(), hint=None, place=None, filters="", key
         systems[bucket]["games"] = [g for g in systems[bucket]["games"] if g.get("bucket") not in keys]
     if interrupted:
         raise KeyboardInterrupt
-    return pressed
+    return pressed, at
 
 
 def system_rows(s, in_bucket):
@@ -215,7 +231,7 @@ SETUP_KEY = "v"
 DELETE_KEY = "d"
 RENAME_KEY = "r"
 MENU_HINT = "Enter open · Esc back · v device · r rename · d delete"
-GAMES_HINT = "Space toggle · Enter done · / filter · w note · a all · o view"
+GAMES_HINT = "Space toggle · Enter done · / filter · w note · a all · o view · t tags"
 
 
 def new_target(label, raw, setup=None):

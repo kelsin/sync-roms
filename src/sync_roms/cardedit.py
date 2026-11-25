@@ -4,7 +4,7 @@ import json
 import queue
 import threading
 
-from . import budget, cardpicks, collections as colls, edit, guest, inventory, languages, listedit, metafilter, picker, previews, s3, scrape_plan, spruce_themes, store, surprise, themeart, ui, usersettings
+from . import budget, cardpicks, collections as colls, edit, guest, inventory, languages, listedit, metafilter, picker, previews, s3, scrape_plan, spruce_themes, store, surprise, tagui, themeart, ui, usersettings
 
 FULL_KEY = "f"
 OFF_KEY = "x"
@@ -21,14 +21,14 @@ VARIANT_KEY = "v"
 SERIES_KEY = "r"
 ALL_KEY = "a"
 LIST_HINT = "Enter · a all games · f full · s set · l colls · S settings"
-GAMES_HINT = "Space toggle · Enter done · a all · s set · m meta · p past · v variant"
+GAMES_HINT = "Space toggle · Enter done · a all · s set · m meta · v variant · t tags"
 META_HINT = "Enter list its values · Esc back"
 VALUES_HINT = "Enter narrow to it · Esc back · / filter"
 COLLECTIONS_HINT = "Enter show its games · Space/Tab toggle the collection · / filter"
 SETS_HINT = "Enter show its games · Space/Tab toggle its games here · / filter"
-SET_GAMES_HINT = "Space toggle · Enter done · a all · w note · v variant · r series"
+SET_GAMES_HINT = "Space toggle · Enter done · a all · v variant · t tags · r series"
 CARD_SETS_HINT = "Enter show its games · Space/Tab toggle its games · / filter"
-ALL_GAMES_HINT = "Space toggle · Enter done · w note · v variant · s set · c clear"
+ALL_GAMES_HINT = "Space toggle · Enter done · v variant · t tags · s set · c clear"
 LIST_KEYS = [("Enter", "the system's games"), ("f", "full system: every file in its folder (again to undo)"),
              ("x", "turn the system off on this card: nothing of it syncs, its picks stay (again to turn it back on)"),
              ("a", "every game across this card's systems"),
@@ -42,12 +42,12 @@ GAMES_KEYS = [("s", "sets on this system: narrow to one, or pick its games"),
               ("r", "narrow the set picked with s to one series of games"),
               ("m", "narrow by scraped metadata (developer, genre, year...)"),
               ("p", "only the games that were surprises lately"), ("v", "the game's variants on other systems"),
-              ("c", "clear the search, set, series, metadata and surprise filters")]
-SET_GAMES_KEYS = [("v", "the game's variants on other systems"), ("r", "narrow to one series of games"),
+              tagui.KEY_HELP, ("c", "clear the search, set, series, metadata and surprise filters")]
+SET_GAMES_KEYS = [("v", "the game's variants on other systems"), tagui.KEY_HELP, ("r", "narrow to one series of games"),
                   ("c", "clear the series filter")]
 COLLECTION_GAMES_HINT = SET_GAMES_HINT.removesuffix(" · r series")  # a collection has no series
-COLLECTION_GAMES_KEYS = [("v", "the game's variants on other systems")]
-ALL_GAMES_KEYS = [("v", "the game's variants on other systems"), ("s", "narrow to one set's games"),
+COLLECTION_GAMES_KEYS = [("v", "the game's variants on other systems"), tagui.KEY_HELP]
+ALL_GAMES_KEYS = [("v", "the game's variants on other systems"), tagui.KEY_HELP, ("s", "narrow to one set's games"),
                   ("c", "clear the search and set filters")]
 SIZING = "…"
 
@@ -904,9 +904,10 @@ def _games_pass(title, shown, picks, sps, files_of, start, work, capacity, to_fe
         """picks.on_card, from this pass's states where the key's system has them."""
         b = key.partition("/")[0]
         return bases[b].get(key, False) if b in bases else picks.on_card(key)
-    extras = [_row_extras(sp, work, k, notes, st) + [_variant_mark(picks, k, on_card)]
-              if sp else [("", "dim")] * 3 + [languages.column(k)]
-              for k, sp, st in zip(keys, sp_of, session["sel"])]
+    tag_marks = tagui.column(keys)
+    extras = [(_row_extras(sp, work, k, notes, st) + [_variant_mark(picks, k, on_card)]
+               if sp else [("", "dim")] * 3 + [languages.column(k)]) + [tag]
+              for k, sp, st, tag in zip(keys, sp_of, session["sel"], tag_marks)]
 
     def switched(state):
         """{system bucket: (keys, states)} of the rows this pass switched, each with its files."""
@@ -987,11 +988,14 @@ def edit_system(name, system, setup, to_fetch=None, card_usages=None):
             shown = [r for r in sp.rows if r[1] in kept and sp.playlist_of.get(r[1]) not in kept]  # a shown playlist hides its discs
             result = _games_pass(
                 f"✏️  {system['name']} on {name} — ✅ synced, ⬜ not, 📦 from a set{off_note}", shown, picks, {bucket: sp}, {},
-                start, work, capacity, to_fetch, place, hint=GAMES_HINT, hotkeys=(*GameFilters.KEYS, VARIANT_KEY),
+                start, work, capacity, to_fetch, place, hint=GAMES_HINT, hotkeys=(*GameFilters.KEYS, VARIANT_KEY, tagui.TAG_KEY),
                 key_help=GAMES_KEYS, filters=filters.describe())
             if not isinstance(result, tuple):
                 break
-            if result[0] == VARIANT_KEY:
+            if result[0] == tagui.TAG_KEY:
+                if result[1] is not None:
+                    tagui.edit_game_tags(*shown[result[1]][1:3])
+            elif result[0] == VARIANT_KEY:
                 variant = result[1] is not None and _toggle_variant(picks, *shown[result[1]][1:3])
                 if variant:
                     work = _work_out(picks, [sp], others, card_usages, to_fetch, variant)
@@ -1093,15 +1097,15 @@ def edit_set(name, game_set, setup, to_fetch=None, card_usages=None, narrow_sets
                 wanted = {g["bucket"] for g in store.set_games(chosen)}
             shown = [r for r in listed if wanted is None or r[1] in wanted]
             if narrow_sets:
-                emoji, hint, hotkeys, key_help = "🌐", ALL_GAMES_HINT, (VARIANT_KEY, SET_KEY, CLEAR_KEY), ALL_GAMES_KEYS
+                emoji, hint, hotkeys, key_help = "🌐", ALL_GAMES_HINT, (VARIANT_KEY, tagui.TAG_KEY, SET_KEY, CLEAR_KEY), ALL_GAMES_KEYS
                 filters = f"{themeart.set_emoji(chosen)} {chosen['name']} only (c clear filters)" if chosen else ""
             elif collection:
                 emoji, hint, hotkeys, key_help = (themeart.collection_emoji(game_set), COLLECTION_GAMES_HINT,
-                                                  (VARIANT_KEY,), COLLECTION_GAMES_KEYS)
+                                                  (VARIANT_KEY, tagui.TAG_KEY), COLLECTION_GAMES_KEYS)
                 filters = ""
             else:
                 emoji, hint, hotkeys, key_help = (themeart.set_emoji(game_set), SET_GAMES_HINT,
-                                                  (VARIANT_KEY, SERIES_KEY, CLEAR_KEY), SET_GAMES_KEYS)
+                                                  (VARIANT_KEY, tagui.TAG_KEY, SERIES_KEY, CLEAR_KEY), SET_GAMES_KEYS)
                 filters = f"{series_filter} (c clear filters)" if series_filter else ""
             origin = "💖 from a collection" if collection else "📦 from a set"
             result = _games_pass(
@@ -1110,7 +1114,10 @@ def edit_set(name, game_set, setup, to_fetch=None, card_usages=None, narrow_sets
                 select_all=not narrow_sets)
             if not isinstance(result, tuple):
                 break
-            if result[0] == CLEAR_KEY:
+            if result[0] == tagui.TAG_KEY:
+                if result[1] is not None:
+                    tagui.edit_game_tags(*shown[result[1]][1:3])
+            elif result[0] == CLEAR_KEY:
                 series_filter = chosen = None
                 if narrow_sets:
                     place.get("session", {}).pop("query", None)  # the / filter too

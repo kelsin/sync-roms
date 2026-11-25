@@ -8,9 +8,9 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from helpers import DataDir, feed_list, pilot_list, screen_lines  # noqa: E402
+from helpers import DataDir, feed_list, pilot_list, screen_lines, storage_tags  # noqa: E402
 from helpers import VITA_DLC as DLC, VITA_GAME as G, VITA_OTHER as H, VITA_UPDATE as NEW  # noqa: E402
-from sync_roms import budget, cardedit, collections, edit, inventory, picker, previews, s3, store, surprise, themeart, ui  # noqa: E402
+from sync_roms import budget, cardedit, collections, edit, inventory, picker, previews, s3, store, surprise, tags, themeart, ui  # noqa: E402
 
 U = budget.Usage
 
@@ -1022,7 +1022,28 @@ class Flow(DataDir):
             return kw["session"]["sel"]
         self.run_system(step)
         self.assertEqual(cardedit.GAMES_HINT,
-                         "Space toggle · Enter done · a all · s set · m meta · p past · v variant")
+                         "Space toggle · Enter done · a all · s set · m meta · v variant · t tags")
+
+    def test_the_tag_column_is_last_and_t_edits_the_rows_tags(self):
+        self.card()
+        storage_tags(self, {"tags": {"x": {"name": "X", "emoji": "🐝"}}, "games": {}, "declined": {}})
+        asked = []
+
+        def press_t(labels, kw):
+            self.assertEqual(kw["extras"][labels.index("Ruby.zip")][-1], ("", ""))
+            self.assertIn(cardedit.tagui.TAG_KEY, kw["hotkeys"])
+            self.assertIn("t tags", kw["hint"])
+            self.assertIn("t", [k for k, _ in kw["key_help"]])
+            return ("t", labels.index("Ruby.zip"))
+
+        def changed(labels, kw):
+            self.assertEqual(kw["extras"][labels.index("Ruby.zip")][-1], ("🐝", ""))
+            return kw["session"]["sel"]
+        with mock.patch.object(cardedit.tagui, "edit_game_tags",
+                               side_effect=lambda key, title: asked.append((key, title)) or tags.set_game_tags(
+                                   key, ["x"])):
+            self.run_system(press_t, changed)
+        self.assertEqual(asked, [("gba/Ruby.zip", "Ruby")])
 
     def test_a_game_with_its_variant_on_the_card_is_marked_in_the_list(self):
         self.with_variants(self.RED)
@@ -1030,12 +1051,12 @@ class Flow(DataDir):
                   excluded={"gba": ["gba/Ruby.zip"]})
 
         def press_v(labels, kw):
-            self.assertEqual(kw["extras"][labels.index("Ruby.zip")][-1][0], "")
+            self.assertEqual(kw["extras"][labels.index("Ruby.zip")][-2][0], "")
             return (cardedit.VARIANT_KEY, labels.index("Ruby.zip"))
 
         def marked(labels, kw):
-            self.assertIn("🔀", kw["extras"][labels.index("Ruby.zip")][-1][0])
-            self.assertEqual(kw["extras"][labels.index("Zelda.zip")][-1][0], "")
+            self.assertIn("🔀", kw["extras"][labels.index("Ruby.zip")][-2][0])
+            self.assertEqual(kw["extras"][labels.index("Zelda.zip")][-2][0], "")
             return kw["session"]["sel"]
         self.run_system(press_v, marked)
 
@@ -2016,7 +2037,7 @@ class SetFlow(Flow):
         self.card()
         game_set = {**SET, "games": [{**SET["games"][0], "series": "Gen 1"}, {**SET["games"][1], "series": "Gen 1"},
                                      {"system": "gb", "bucket": "gb/Blue.gb", "series": "Other"}]}
-        keys = (cardedit.VARIANT_KEY, cardedit.SERIES_KEY, cardedit.CLEAR_KEY)
+        keys = (cardedit.VARIANT_KEY, "t", cardedit.SERIES_KEY, cardedit.CLEAR_KEY)
         calls, lists = self.run_series(
             game_set, 0, returns((cardedit.SERIES_KEY, None)), returns((cardedit.CLEAR_KEY, None)), lambda labels, kw: kw["session"]["sel"])
         self.assertEqual(lists, [["Gen 1  (2 games)"]])  # "Other" has one game: left out
@@ -2294,8 +2315,16 @@ class SetFlow(Flow):
         title, labels, kw = calls[0]
         self.assertEqual(labels, self.ALL_LABELS)
         self.assertEqual(title, "🌐 All games on c — ✅ synced, ⬜ not, 📦 from a set")
-        self.assertEqual(kw["hotkeys"], (cardedit.VARIANT_KEY, cardedit.SET_KEY, cardedit.CLEAR_KEY))
+        self.assertEqual(kw["hotkeys"], (cardedit.VARIANT_KEY, "t", cardedit.SET_KEY, cardedit.CLEAR_KEY))
         self.assertIs(kw["select_all"], False)
+
+    def test_t_in_the_all_games_list_edits_that_rows_tags(self):
+        self.card()
+        asked = []
+        with mock.patch.object(cardedit.tagui, "edit_game_tags", side_effect=lambda *a: asked.append(a)):
+            self.run_all(lambda labels, kw: ("t", labels.index("Game Boy — Red.gb")),
+                         lambda labels, kw: kw["session"]["sel"])
+        self.assertEqual(asked, [("gb/Red.gb", "Red")])
 
     def test_edit_all_toggle_saves_picks_on_the_right_system(self):
         self.card()

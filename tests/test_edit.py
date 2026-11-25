@@ -960,3 +960,45 @@ class NarrowRows(unittest.TestCase):
             picker.filter_list("t", [str(i) for i in range(30)], multi=True, session=session)
         m = seen[0]
         self.assertEqual((m.view, len(m.vis), m.vis[m.cur], m.top), (20, 25, 22, 5))  # rows 5..24: no blank rows
+
+
+class TagColumn(DataDir):
+    """toggle_games shows the tag emoji of every row and t edits the highlighted row's tags."""
+    S = {"name": "NES", "bucket": "nes", "games": []}
+    ROWS = [(S, "nes/A (USA).zip", "A", "A"), (S, "nes/B (USA).zip", "B", "B")]
+
+    def setUp(self):
+        super().setUp()
+        from helpers import storage_tags
+        from sync_roms import tags
+        self.tags = tags
+        storage_tags(self, {"tags": {"x": {"name": "X", "emoji": "🐝"}}, "games": {"nes/B (USA).zip": {"tags": ["x"]}},
+                            "declined": {}})
+        self.enterContext(mock.patch.object(store, "load_sets", return_value=[]))
+
+    def test_rows_show_the_column_and_t_edits_then_reopens(self):
+        seen, asked = [], []
+
+        def fake(title, labels, **kw):
+            seen.append(kw)
+            return ("t", 1) if len(seen) == 1 else kw["session"]["sel"]
+        with mock.patch.object(picker, "filter_list", fake), \
+                mock.patch.object(edit.tagui, "edit_game_tags", side_effect=lambda *a: asked.append(a)):
+            self.assertIsNone(edit.toggle_games("t", self.ROWS))
+        self.assertEqual([e[-1] for e in seen[0]["extras"]], [("", ""), ("🐝", "")])
+        self.assertIn("t", seen[0]["hotkeys"])
+        self.assertIn("t tags", seen[0]["hint"])
+        self.assertEqual(asked, [("nes/B (USA).zip", "B")])
+        self.assertEqual(len(seen), 2)
+
+    def test_other_keys_are_still_returned(self):
+        with mock.patch.object(picker, "filter_list", return_value=("s", 0)):
+            self.assertEqual(edit.toggle_games("t", self.ROWS, hotkeys=("s",)), "s")
+
+    def test_unknown_key_row(self):
+        self.tags.set_game_tags("nes/Gone.zip", ["x"])
+        rows = [(self.S, "nes/Gone.zip", "Gone", "Gone")]
+        with mock.patch.object(picker, "filter_list", side_effect=lambda t, l, **kw: seen.append(kw) or kw["session"]["sel"]):
+            seen = []
+            edit.toggle_games("t", rows)
+        self.assertEqual(seen[0]["extras"][0][-1], ("🐝", ""))
