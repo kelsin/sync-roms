@@ -465,7 +465,7 @@ class Flow(DataDir):
                 mock.patch.dict(DEVICE, systems=["gba", "gb", "nds"]):
             calls = self.run_card(returns((cardedit.COLLECTIONS_KEY, 0)), returns((" ", 0)), returns(None), returns(None))
         self.assertEqual(calls[1][1], ["💖 Favs"])
-        self.assertEqual(calls[1][2]["extras"], [[("  ✅ on the card", "green"), ("  2/2 on the card", "cyan"), ("  2 playable, 2 not playable", "dim")]])
+        self.assertEqual(calls[1][2]["extras"], [[("  ✅ on the card", "green"), ("  ✅", "cyan"), ("  2 playable, 2 not playable", "dim")]])
         self.assertEqual(self.read("cards.json")["c"]["collections"], ["favs"])
 
     def test_collections_hotkey_skips_malformed_games(self):
@@ -536,7 +536,7 @@ class Flow(DataDir):
         self.card(games={"gba": [g("gba/Ruby.zip")]})
         calls = self.run_card(returns((cardedit.COLLECTIONS_KEY, 0)), returns((" ", 0)), returns(None), returns(None))
         script_extras = calls[1][2]["extras"]
-        self.assertEqual(script_extras[0][1], ("  2/2 on the card", "cyan"))  # after the toggle, the same list
+        self.assertEqual(script_extras[0][1], ("  ✅", "cyan"))  # after the toggle, the same list
         self.assertEqual(script_extras[0][0], ("  ✅ on the card", "green"))
 
     def test_collections_list_counts_before_the_whole_collection_is_on(self):
@@ -547,7 +547,7 @@ class Flow(DataDir):
                       lambda labels, kw: seen.append([list(e) for e in kw["extras"]]),
                       returns(None), returns(None))
         self.assertEqual(seen[0][0][0], ("", "green"))
-        self.assertEqual(seen[0][0][1], ("  1/2 on the card", "cyan"))
+        self.assertEqual(seen[0][0][1], ("  1/2", "cyan"))
 
     def test_collections_list_of_a_missing_or_malformed_card_entry_marks_none(self):
         self.favs()
@@ -1997,6 +1997,19 @@ class SetFlow(Flow):
         with mock.patch.object(picker, "filter_list", fake), contextlib.redirect_stdout(io.StringIO()):
             cardedit.edit_set("c", game_set, (DEVICE, "esde"))
         return script.calls, lists
+
+    def test_a_collection_view_has_its_emoji_and_no_series_key(self):
+        self.card()
+        script = Script(lambda labels, kw: kw["session"]["sel"])
+        collection = {**SET, "art": "rpg"}
+        with mock.patch.object(picker, "filter_list", script), contextlib.redirect_stdout(io.StringIO()):
+            cardedit.edit_set("c", collection, (DEVICE, "esde"), collection=True)
+        title, _labels, kw = script.calls[0]
+        self.assertTrue(title.startswith(cardedit.themeart.collection_emoji(collection)))
+        self.assertIn("💖 from a collection", title)
+        self.assertNotIn(cardedit.SERIES_KEY, kw["hotkeys"])
+        self.assertNotIn("series", kw["hint"])
+        self.assertNotIn(cardedit.SERIES_KEY, [k for k, _ in kw["key_help"]])
 
     def test_series_key_filters_the_rows_and_c_shows_all(self):
         self.files["gb/"]["gb/Blue.gb"] = 5

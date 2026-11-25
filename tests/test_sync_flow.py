@@ -21,6 +21,14 @@ from helpers import MANIFEST, list_sizes  # noqa: E402
 
 GAME = {"title": "Game", "system": "gba", "bucket": "gba/Game.zip"}
 FAVS = {"id": "favs", "name": "Favs", "games": [GAME]}
+
+
+def surprise_manifest(only_surprise):
+    """MANIFEST with gba/Game.zip as load_manifest merges it: a surprise's game carries its label, a direct pick none."""
+    game = {"bucket": "gba/Game.zip", **({"from": cli.surprise.LABEL} if only_surprise else {})}
+    return {**MANIFEST, "systems": [{**MANIFEST["systems"][0], "games": [game]}]}
+
+
 REAL_LOAD_COLLECTIONS = collections_mod.load_collections
 REAL_BUILD_SCRAPE_PLAN, REAL_APPLY_SCRAPE_PLAN = scrape_plan.build_scrape_plan, scrape_plan.apply_scrape_plan
 REAL_STALE_MEDIA = scrape_plan.stale_media
@@ -1095,6 +1103,22 @@ class SyncFlowTest(unittest.TestCase):
             after=lambda d: read_from(d, "ES-DE", "collections", "custom-Favs.cfg"))
         self.assertEqual(self.after, "%ROMPATH%/gba/Game.zip\n")
         self.assertTrue([u for u in updates if "Favs" in (u.get("frontend_collections") or ())])
+
+    def test_a_surprise_in_a_collection_does_not_write_the_collection(self):
+        _, _, updates, _, _ = self.run_sync(
+            cards={"surprise": True, "surprises": [{"system": "gba", "bucket": "gba/Game.zip", "title": "Game"}]},
+            colls=[FAVS], files=["ROMs/gba/Game.zip"], manifest=surprise_manifest(True),
+            after=lambda d: read_from(d, "ES-DE", "collections", "custom-Favs.cfg"))
+        self.assertIsNone(self.after)
+        self.assertFalse([u for u in updates if "Favs" in (u.get("frontend_collections") or ())])
+
+    def test_a_surprise_that_is_also_a_direct_pick_writes_the_collection(self):
+        self.run_sync(
+            cards={"games": {"gba": [GAME]}, "surprise": True,
+                   "surprises": [{"system": "gba", "bucket": "gba/Game.zip", "title": "Game"}]},
+            colls=[FAVS], files=["ROMs/gba/Game.zip"], manifest=surprise_manifest(False),
+            after=lambda d: read_from(d, "ES-DE", "collections", "custom-Favs.cfg"))
+        self.assertEqual(self.after, "%ROMPATH%/gba/Game.zip\n")
 
     def test_collections_off_writes_no_matched_collection(self):
         _, _, updates, _, _ = self.run_sync(

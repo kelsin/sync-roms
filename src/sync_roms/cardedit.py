@@ -45,6 +45,8 @@ GAMES_KEYS = [("s", "sets on this system: narrow to one, or pick its games"),
               ("c", "clear the search, set, series, metadata and surprise filters")]
 SET_GAMES_KEYS = [("v", "the game's variants on other systems"), ("r", "narrow to one series of games"),
                   ("c", "clear the series filter")]
+COLLECTION_GAMES_HINT = SET_GAMES_HINT.removesuffix(" · r series")  # a collection has no series
+COLLECTION_GAMES_KEYS = [("v", "the game's variants on other systems")]
 ALL_GAMES_KEYS = [("v", "the game's variants on other systems"), ("s", "narrow to one set's games"),
                   ("c", "clear the search and set filters")]
 SIZING = "…"
@@ -377,7 +379,7 @@ def edit_card(name, setup=None, to_fetch=None, card_match=None, on_guest=None):
                 chosen = pick_collections(name, {s["bucket"] for s in can_play(catalog["systems"], setup)},
                                           lambda: card_status(name, setup, systems, to_fetch), setup)
                 if chosen:
-                    edit_set(name, chosen, setup, to_fetch, usages)
+                    edit_set(name, chosen, setup, to_fetch, usages, collection=True)
                 changed = ALL
             elif key == SETTINGS_KEY:
                 settings_menu(name, catalog["systems"], playable)
@@ -578,9 +580,12 @@ def pick_collections(name, playable, card_status=None, setup=None):
 
     def mark():
         picks = cardpicks.CardPicks(name, setup) if setup else None  # fresh: a toggle changes what is locked
+
+        def have_text(games):
+            have = sum(1 for g in games if picks.on_card(g["bucket"]))
+            return "  ✅" if have == len(games) > 0 else f"  {have}/{len(games)}"
         extras[:] = [[("  ✅ on the card" if c["id"] in ids else "", "green"),
-                      *([(f"  {sum(1 for g in games if picks.on_card(g['bucket']))}/{len(games)} on the card", "cyan")]
-                        if picks else []), count]
+                      *([(have_text(games), "cyan")] if picks else []), count]
                      for c, count, games in zip(found, counts, playable_games)]
         shown["status"] = card_status() if card_status else None
 
@@ -1042,12 +1047,13 @@ def edit_all(name, setup, systems, to_fetch=None, card_usages=None):
     return edit_set(name, {"name": "All games", "games": games}, setup, to_fetch, card_usages, narrow_sets=True, picks=picks)
 
 
-def edit_set(name, game_set, setup, to_fetch=None, card_usages=None, narrow_sets=False, picks=None):
+def edit_set(name, game_set, setup, to_fetch=None, card_usages=None, narrow_sets=False, picks=None, collection=False):
     """A card's games of one set over every system it can play, in one list (category, then system and title), toggled
     as in edit_system; games not in storage are left out, a full system's are on and locked. Saves to cards.json when
     left; returns whether anything changed. to_fetch, card_usages: as for edit_system. narrow_sets: edit_all's list
     (its games carry their row label): by title then system, s narrows it to a set's games, no series. picks: the
-    CardPicks to edit, when the caller already made one."""
+    CardPicks to edit, when the caller already made one. collection: game_set is a collection (its emoji and
+    legend, no series)."""
     cards = store.load_cards()
     picks = picks or cardpicks.CardPicks(name, setup, cards)
     playable = can_play(store.repo_json("systems"), setup)
@@ -1089,12 +1095,17 @@ def edit_set(name, game_set, setup, to_fetch=None, card_usages=None, narrow_sets
             if narrow_sets:
                 emoji, hint, hotkeys, key_help = "🌐", ALL_GAMES_HINT, (VARIANT_KEY, SET_KEY, CLEAR_KEY), ALL_GAMES_KEYS
                 filters = f"{themeart.set_emoji(chosen)} {chosen['name']} only (c clear filters)" if chosen else ""
+            elif collection:
+                emoji, hint, hotkeys, key_help = (themeart.collection_emoji(game_set), COLLECTION_GAMES_HINT,
+                                                  (VARIANT_KEY,), COLLECTION_GAMES_KEYS)
+                filters = ""
             else:
                 emoji, hint, hotkeys, key_help = (themeart.set_emoji(game_set), SET_GAMES_HINT,
                                                   (VARIANT_KEY, SERIES_KEY, CLEAR_KEY), SET_GAMES_KEYS)
                 filters = f"{series_filter} (c clear filters)" if series_filter else ""
+            origin = "💖 from a collection" if collection else "📦 from a set"
             result = _games_pass(
-                f"{emoji} {game_set['name']} on {name} — ✅ synced, ⬜ not, 📦 from a set", shown, picks, sps, files_of,
+                f"{emoji} {game_set['name']} on {name} — ✅ synced, ⬜ not, {origin}", shown, picks, sps, files_of,
                 start, work, capacity, to_fetch, place, hint=hint, hotkeys=hotkeys, key_help=key_help, filters=filters,
                 select_all=not narrow_sets)
             if not isinstance(result, tuple):
