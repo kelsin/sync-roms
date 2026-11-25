@@ -30,7 +30,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "edit": ("", "interactive editor: cards, tags, collections, device systems"),
     "games": ("list|add|remove|full|export|import", "edit a card's games, interactively or from scripts"),
     "tags": ("edit|suggest", "edit the tags in storage by hand (games, names, emoji, art, merging, deleting), or add tags from scraped genres"),
-    "collections": ("edit|page", "edit your collections of favourite games (saved in ~/.sync-roms/collections/), or write a shareable HTML page of them"),
+    "collections": ("edit|page|share|unshare", "edit your collections of favourite games (saved in ~/.sync-roms/collections/), write a shareable HTML page of them, or share it on your tailnet"),
     "themes": ("update|pick|build|publish|palettes", "copy the latest Art Book Next for ES-DE and the PyUI themes for spruce from GitHub into storage; build and publish custom spruce themes"),
     "download": ("pico8", "add the PICO-8 BBS Featured carts storage doesn't have, and newer revisions of those it has"),
     "ports": ("search|download|done|needed", "put PortMaster ports and the runtimes they need in storage, from PortMaster's catalogue"),
@@ -152,6 +152,8 @@ TOPICS = {
     "collections": """
   sync-roms collections edit                  edit your collections of favourite games
   sync-roms collections page [--out FILE]     write an HTML page of your collections and open it
+  sync-roms collections share                 serve that page on your tailnet with tailscale serve
+  sync-roms collections unshare               stop serving it
 
   Your own lists of games, saved to ~/.sync-roms/collections/<id>.json
   after Done or Esc shows the changes; Quit discards. No git or gh needed, and nothing goes to
@@ -163,6 +165,10 @@ TOPICS = {
   collections page writes one self-contained HTML page (your games, tags and collection pictures, no
   network needed) to ~/.sync-roms/share/collections/index.html, or to FILE, and opens it. It holds
   your game lists and storage paths, so share it only if you're fine with that.
+
+  collections share builds the page when it isn't there yet, serves only its folder at /collections
+  with tailscale serve (HTTPS must be on for your tailnet), and prints and copies the link. Run
+  collections page to refresh the served page. unshare turns off just that path.
 """,
     "themes": """
   sync-roms themes update [--dry-run]         put the latest Art Book Next for ES-DE and the PyUI
