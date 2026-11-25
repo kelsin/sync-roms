@@ -59,11 +59,22 @@ def load_collections():
     return sorted(found, key=lambda c: store.sort_key(c["name"]))
 
 
+def _file_data(collection):
+    """A collection as it is written to its file: name, description and art (when it has them), games."""
+    data = {"name": collection["name"]}
+    if collection.get("description"):
+        data["description"] = collection["description"]
+    if collection.get("art"):
+        data["art"] = collection["art"]
+    data["games"] = collection["games"]
+    return data
+
+
 def save_collection(collection):
-    """Write collection (a dict with id, name, optional description and art, games) to its file, with a set file's
-    fields in a set file's order."""
+    """Write collection (a dict with id, name, optional description and art, games) to its file, its fields in that
+    order."""
     os.makedirs(collections_dir(), exist_ok=True)
-    store.write_json(os.path.join(collections_dir(), collection["id"] + ".json"), store.set_data(collection), **store.PRETTY)
+    store.write_json(os.path.join(collections_dir(), collection["id"] + ".json"), _file_data(collection), **store.PRETTY)
 
 
 def delete_collection(collection_id):

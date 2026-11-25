@@ -12,7 +12,7 @@ from unittest import mock
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import helpers  # noqa: E402
 
-from sync_roms import bbs, ignore, runtime, store, ui, usersettings  # noqa: E402
+from sync_roms import bbs, ignore, runtime, shared, tags, ui, usersettings  # noqa: E402
 
 FIXTURE = os.path.join(os.path.dirname(__file__), "fixtures", "bbs-featured.html")
 
@@ -112,10 +112,7 @@ class Retarget(helpers.StorageDir):
         untouched = self.write("collections", "other.json", data={"name": "Other", "games": [
             {"system": "pico8", "bucket": "pico8/other-1.p8.png", "title": "Other"}]})
         os.utime(untouched, (1, 1))
-        with mock.patch.object(store, "load_sets", return_value=[
-                {"id": "s1", "games": [{"bucket": "x"}, {"bucket": "y", "files": [OLD]}]},
-                {"id": "s2", "games": [{"bucket": "z"}]}]):
-            self.assertEqual(bbs.retarget(OLD, NEW, "Mole Mole 2"), ["s1"])
+        bbs.retarget(OLD, NEW, "Mole Mole 2")
         card = self.read("cards.json")["c"]
         self.assertEqual(card["games"]["pico8"], [
             {"title": "Mole Mole 2", "bucket": NEW, "files": [NEW, "pico8/x.p8.png"]}, other])
@@ -131,8 +128,7 @@ class Retarget(helpers.StorageDir):
         self.write("cards.json", data={
             "c": {"excluded": {"pico8": ["pico8/a.p8.png", OLD], "gba": ["gba/x.zip"]}},
             "d": {"excluded": {"pico8": [NEW, OLD]}}})
-        with mock.patch.object(store, "load_sets", return_value=[]):
-            bbs.retarget(OLD, NEW, "Mole Mole 2")
+        bbs.retarget(OLD, NEW, "Mole Mole 2")
         cards = self.read("cards.json")
         self.assertEqual(cards["c"]["excluded"], {"pico8": ["pico8/a.p8.png", NEW], "gba": ["gba/x.zip"]})
         self.assertEqual(cards["d"]["excluded"], {"pico8": [NEW]})
@@ -140,23 +136,39 @@ class Retarget(helpers.StorageDir):
     def test_rewrites_the_list_kept_under_a_full_system(self):
         self.write("cards.json", data={"c": {"games": {"pico8": {"full_system": True, "games": [
             {"title": "Mole Mole", "bucket": OLD}]}}}})
-        with mock.patch.object(store, "load_sets", return_value=[]):
-            bbs.retarget(OLD, NEW, "Mole Mole 2")
+        bbs.retarget(OLD, NEW, "Mole Mole 2")
         self.assertEqual(self.read("cards.json")["c"]["games"]["pico8"], {"full_system": True, "games": [
             {"title": "Mole Mole 2", "bucket": NEW}]})
 
-    def test_names_the_sets_whose_variants_name_the_old_cart(self):
-        with mock.patch.object(store, "load_sets", return_value=[
-                {"id": "s1", "games": [{"bucket": "x", "variants": [{"bucket": "y", "note": "n"}]}]},
-                {"id": "s2", "games": [{"bucket": "z", "variants": [{"bucket": OLD, "note": "n"}]}]}]):
-            self.assertEqual(bbs.retarget(OLD, NEW, "Mole Mole 2"), ["s2"])
+    def test_renames_the_old_cart_in_tags_json(self):
+        helpers.storage_tags(self, {"tags": {"p": {"name": "P", "emoji": "🎲"}}, "declined": {OLD: ["p"]}, "games": {
+            OLD: {"tags": ["p"]}, "pico8/x.p8.png": {"tags": ["p"], "variants": [{"bucket": OLD, "note": "n"}]}}},
+            self.root)
+        bbs.retarget(OLD, NEW, "Mole Mole 2")
+        with open(os.path.join(self.root, tags.KEY), encoding="utf-8") as f:
+            data = tags.parse(f.read())
+        self.assertEqual(data["games"], {NEW: {"tags": ["p"]}, "pico8/x.p8.png": {
+            "tags": ["p"], "variants": [{"bucket": NEW, "note": "n"}]}})
+        self.assertEqual(data["declined"], {NEW: ["p"]})
 
     def test_nothing_named_writes_nothing(self):
         path = self.write("cards.json", data={"c": {"games": {"pico8": [{"title": "T", "bucket": "pico8/o.p8.png"}]}}})
         os.utime(path, (1, 1))
-        with mock.patch.object(store, "load_sets", return_value=[]):
-            self.assertEqual(bbs.retarget(OLD, NEW, "T"), [])
+        helpers.storage_tags(self, {"tags": {"p": {"name": "P", "emoji": "🎲"}}, "declined": {},
+                                    "games": {"pico8/o.p8.png": {"tags": ["p"]}}}, self.root)
+        tags_path = os.path.join(self.root, tags.KEY)
+        os.utime(tags_path, (1, 1))
+        bbs.retarget(OLD, NEW, "T")
         self.assertEqual(os.stat(path).st_mtime, 1)
+        self.assertEqual(os.stat(tags_path).st_mtime, 1)
+
+    def test_renames_a_cart_tagged_elsewhere_after_this_run_read_tags_json(self):
+        helpers.storage_tags(self, {"tags": {"p": {"name": "P", "emoji": "🎲"}}, "declined": {}, "games": {}}, self.root)
+        tags.load()
+        with open(os.path.join(self.root, tags.KEY), "w", encoding="utf-8") as f:
+            f.write(tags.dump({"tags": {"p": {"name": "P", "emoji": "🎲"}}, "declined": {}, "games": {OLD: {"tags": ["p"]}}}))
+        bbs.retarget(OLD, NEW, "Mole Mole 2")
+        self.assertEqual(tags.load()["games"], {NEW: {"tags": ["p"]}})
 
 
 PNG = b"\x89PNG\r\n\x1a\n" + b"cart"
@@ -257,6 +269,14 @@ class Download(helpers.StorageDir):
         self.assertIn("disk full", err)
         self.assertEqual(self.stored(), {"pico8/x-1.p8.png", "pico8/x-2.p8.png", META})
 
+    def test_malformed_tags_json_keeps_the_old_revision(self):
+        self.put("pico8/x-1.p8.png")
+        with mock.patch.object(bbs, "retarget", side_effect=ValueError("bad JSON")):
+            code, _, err, _ = self.run_download([page(("x-2", "X Two", "Ex")), EMPTY])
+        self.assertEqual(code, 1)
+        self.assertIn("bad JSON", err)
+        self.assertEqual(self.stored(), {"pico8/x-1.p8.png", "pico8/x-2.p8.png", META})
+
     def test_dry_run_lists_and_writes_nothing(self):
         self.put("pico8/x-1.p8.png")
         self.put("pico8/pico8tetris.p8.png")
@@ -282,11 +302,10 @@ class Download(helpers.StorageDir):
         self.put("scrapes/pico8/covers/x-1.p8.png")
         self.put("scrapes/pico8/covers/x-10.p8.png")
         self.put(META, json.dumps({"x-1.p8.png": {"name": "X", "developer": "old", "genre": "g"}}).encode())
-        with mock.patch.object(bbs, "retarget", return_value=["s1"]) as retarget:
-            code, _, err, _ = self.run_download([page(("x-2", "X Two", "Ex")), EMPTY])
+        with mock.patch.object(bbs, "retarget") as retarget:
+            code, _, _, _ = self.run_download([page(("x-2", "X Two", "Ex")), EMPTY])
         self.assertEqual(code, 0)
         retarget.assert_called_once_with("pico8/x-1.p8.png", "pico8/x-2.p8.png", "X Two")
-        self.assertIn("s1", err)
         self.assertEqual(self.stored(), {"pico8/x-2.p8.png", "scrapes/pico8/covers/x-2.p8.png",
                                          "scrapes/pico8/covers/x-10.p8.png", META})
         self.assertEqual(self.meta(), {"x-2.p8.png": {"name": "X Two", "developer": "Ex", "genre": "g"}})
@@ -294,7 +313,7 @@ class Download(helpers.StorageDir):
     def test_upgrade_keeps_the_qualifier_in_the_name_and_the_retargeted_title(self):
         self.put("pico8/x-1.p8.png")
         self.put(META, json.dumps({"x-1.p8.png": {"name": "X (Hack)", "qualifier": "Hack", "developer": "old"}}).encode())
-        with mock.patch.object(bbs, "retarget", return_value=[]) as retarget:
+        with mock.patch.object(bbs, "retarget") as retarget:
             code, _, _, _ = self.run_download([page(("x-2", "X Two", "Ex")), EMPTY])
         self.assertEqual(code, 0)
         retarget.assert_called_once_with("pico8/x-1.p8.png", "pico8/x-2.p8.png", "X Two (Hack)")
@@ -316,7 +335,7 @@ class Download(helpers.StorageDir):
         self.put("pico8/x-1.p8.png")
         self.put("scrapes/pico8/extras/x-1.p8.png")  # not a media type
         self.put("scrapes/pico8/covers/sub/x-1.p8.jpg")
-        with mock.patch.object(bbs, "retarget", return_value=[]):
+        with mock.patch.object(bbs, "retarget"):
             code, _, _, _ = self.run_download([page(("x-2", "X Two", "Ex")), EMPTY])
         self.assertEqual(code, 0)
         self.assertEqual(self.stored(), {"pico8/x-2.p8.png", "scrapes/pico8/extras/x-2.p8.png",
@@ -332,7 +351,7 @@ class Download(helpers.StorageDir):
             self.put(f"scrapes/pico8/{name}.json", json.dumps(data).encode())
         self.put("scrapes/notgames.json", json.dumps({"pico8/x-1.p8.png": {"name": "X"}, "pico8/o.p8.png": {"name": "O"},
                                                       "kept": ["pico8/o.p8.png", "pico8/x-1.p8.png"]}).encode())
-        with mock.patch.object(bbs, "retarget", return_value=[]):
+        with mock.patch.object(bbs, "retarget"):
             code, _, err, _ = self.run_download([page(("x-2", "X Two", "Ex")), EMPTY])
         self.assertEqual((code, err), (0, ""))
 
@@ -377,7 +396,7 @@ class Download(helpers.StorageDir):
     def test_failed_delete_of_the_old_revision_keeps_the_new_one_whole(self):
         self.put("pico8/x-1.p8.png")
         self.put("scrapes/pico8/covers/x-1.p8.png")
-        with mock.patch.object(bbs, "retarget", return_value=[]) as retarget, \
+        with mock.patch.object(bbs, "retarget") as retarget, \
                 mock.patch.object(bbs.s3, "delete_keys", side_effect=OSError("denied")):
             code, _, err, _ = self.run_download([page(("x-2", "X Two", "Ex")), EMPTY])
         self.assertEqual(code, 1)
@@ -401,7 +420,7 @@ class Download(helpers.StorageDir):
     def test_failed_move_of_the_manual_match_keeps_it_on_the_old_revision(self):
         self.put("pico8/x-1.p8.png")
         self.put("scrapes/pico8/matches.json", json.dumps({"x-1.p8.png": 77}).encode())
-        with mock.patch.object(bbs, "retarget", return_value=[]), self.flaky_meta(2):
+        with mock.patch.object(bbs, "retarget"), self.flaky_meta(2):
             _, _, err, _ = self.run_download([page(("x-2", "X Two", "Ex")), EMPTY])
         self.assertEqual(self.writes, [META, "scrapes/pico8/matches.json"])
         self.assertIn("disk full", err)

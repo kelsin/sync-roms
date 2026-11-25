@@ -1,4 +1,4 @@
-"""Scriptable subcommands: sync, edit, devices, upload, diff, playlist, prepare, install, mirror, games, sets, collections, themes,
+"""Scriptable subcommands: sync, edit, devices, upload, diff, playlist, prepare, install, mirror, games, collections, themes,
 download, flash, format, unmount, mount, cards, saves, layouts, cache, config, doctor, guide, check, scrape and completion; plus helpers the
 sync flow uses."""
 import argparse
@@ -11,11 +11,11 @@ import sys
 import webbrowser
 
 from . import collections as colls
-from . import bezels, budget, cardedit, cardshare, collectionedit, external, guest, inventory, knulli_conf, m3u, names, picker, runtime, s3, setedit, spruce_settings, store, surprise, themeart, ui, usersettings
+from . import bezels, budget, cardedit, cardshare, collectionedit, external, guest, inventory, knulli_conf, m3u, names, picker, runtime, s3, shared, spruce_settings, store, surprise, tageditor, tags, tagsuggest, themeart, ui, usersettings
 
 
 UNKNOWN_SHOWN = 8  # device ids named in an "unknown device" error
-COMMANDS = {"sync", "edit", "devices", "upload", "diff", "playlist", "prepare", "install", "mirror", "games", "sets", "collections", "themes", "download", "ports", "flash", "format", "unmount", "mount", "cards", "saves", "layouts", "cache", "config", "doctor", "guide", "check", "scrape", "refresh", "completion"}
+COMMANDS = {"sync", "edit", "devices", "upload", "diff", "playlist", "prepare", "install", "mirror", "games", "tags", "collections", "themes", "download", "ports", "flash", "format", "unmount", "mount", "cards", "saves", "layouts", "cache", "config", "doctor", "guide", "check", "scrape", "refresh", "completion"}
 SCRAPE_ACTIONS = ("match", "review", "missing", "art", "clean")
 LITERAL = frozenset()  # the values after `scrape match` that start with a dash: values, never options
 
@@ -179,14 +179,11 @@ def game_entries(raw):
 def games_list(args):
     raw, _ = load_target(args.card)
     full = sorted(k for k, v in raw.items() if isinstance(v, dict) and v.get("full_system"))
-    sets = store.list_sets(raw)
     entries = game_entries(raw)
     if args.json:
-        ui.emit_json({"full_systems": full, "sets": sets,
-                      "games": [{"system": s, "bucket": k, "title": t} for s, k, t in entries]})
+        ui.emit_json({"full_systems": full, "games": [{"system": s, "bucket": k, "title": t} for s, k, t in entries]})
         return 0
-    ui.table([(s, "*", "(full system)") for s in full] + [("sets", i, "(whole set)") for i in sets]
-             + [(s, k, t) for s, k, t in entries])
+    ui.table([(s, "*", "(full system)") for s in full] + [(s, k, t) for s, k, t in entries])
     return 0
 
 
@@ -279,32 +276,6 @@ def games_full(args):
         else:
             del raw[args.system]
         return finish(args, raw, save, [("-", f"{args.system} (full system)")])
-    return finish(args, raw, save, [])
-
-
-def games_sets(args):
-    raw, save = load_target(args.card)
-    known = {x["id"]: x for x in store.load_sets()}
-    if args.verb == "list":
-        on = store.list_sets(raw)
-        ui.table([(f"{'✅' if set_id in on else '⬜'} {set_id}", f"{themeart.set_emoji(x)} {x['name']}") for set_id, x in known.items()])
-        return 0
-    if not args.set_id:
-        ui.fail(f"sets {args.verb} needs a set id. Known: {', '.join(known)}", 2)
-    on = list(store.list_sets(raw))
-    if args.set_id not in known and not (args.verb == "remove" and args.set_id in on):  # a card may name a gone set
-        ui.fail(f"Unknown set {args.set_id!r} (run `{inventory.UPDATE_HINT}` if another machine added it). "
-                f"Known: {', '.join(known)}", 2)
-    if args.verb == "add" and args.set_id not in on:
-        raw[store.SETS_KEY] = on + [args.set_id]
-        return finish(args, raw, save, [("+", f"set {args.set_id}")])
-    if args.verb == "remove" and args.set_id in on:
-        on.remove(args.set_id)
-        if on:
-            raw[store.SETS_KEY] = on
-        else:
-            raw.pop(store.SETS_KEY, None)
-        return finish(args, raw, save, [("-", f"set {args.set_id}")])
     return finish(args, raw, save, [])
 
 
@@ -611,7 +582,7 @@ def cards_copy(args):
     dst_synced = {s["bucket"]: set(store.listed(s)) for s in store.load_manifest([args.dst], keep_off=True)["systems"]}
     cards = store.load_cards()
     entry, counts, skipped = cardshare.copy_selections(cards[args.src], cards[args.dst], playable, dst_synced)
-    shown = f"{counts['games']} games, {counts['full']} full systems, {counts['sets']} sets, {counts['collections']} collections, {counts['excluded']} exclusions"
+    shown = f"{counts['games']} games, {counts['full']} full systems, {counts['collections']} collections, {counts['excluded']} exclusions"
     if args.dry_run:
         print(ui.yellow(f"🧪 Would copy from {args.src} to {args.dst}: {shown}"))
     else:
@@ -828,7 +799,7 @@ def cache_cmd(args):
 
 
 def check_game_file(problems, path, where, systems):
-    """Check one set or collection file; returns its [(system, key)] pairs, or None when the file is unusable.
+    """Check one collection file; returns its [(system, key)] pairs, or None when the file is unusable.
 
     where: the name problems are reported under. systems: the set of known system ids."""
     try:
@@ -861,8 +832,6 @@ def check_game_data(problems, data, where, systems):
             problems.append(f"{where}: {g['bucket']}: missing 'title'")
         if not isinstance(g.get("category", ""), str):
             problems.append(f"{where}: {g['bucket']}: 'category' must be a string")
-        if not isinstance(g.get("series", ""), str):
-            problems.append(f"{where}: {g['bucket']}: 'series' must be a string")
         listed += check_keys(problems, where, system, g)
     return listed
 
@@ -893,32 +862,95 @@ def check_folder(problems, folder, prefix, systems):
     return keys
 
 
-def check_sets(problems, systems):
-    """Check every set in storage and return the keys each one lists as {"sets/<id>.json": [(system, key)]}.
+def _raw_tags():
+    """tags.json as written, from its local copy (tags.load saves it when it reads storage), for what tags.load leaves
+    out as malformed; {} when there is none."""
+    try:
+        with open(shared.local_path(tags.KEY), encoding="utf-8") as f:
+            raw = json.load(f)
+    except (OSError, ValueError):
+        return {}
+    return raw if isinstance(raw, dict) else {}
+
+
+def check_tags(problems, systems):
+    """Check tags.json and return the keys it names as {"tags.json": [(system, key)]}.
 
     systems: the set of known system ids."""
-    sets = store.set_files()
-    problems.extend(f"{key}: isn't a set (a JSON object with a games list)" for key in store.skipped_sets())
-    art = themeart.art_choices()
-    keys = {}
-    for game_set in sets:
-        where = f"{store.SETS}{game_set['id']}.json"
-        keys[where] = check_game_data(problems, game_set, where, systems)
-        if game_set.get("art") and game_set["art"] not in art:
-            problems.append(f"{where}: unknown art {game_set['art']!r}")
-    return keys
+    data = tags.load()
+    raw = _raw_tags() or data
+    raw_tags = raw.get("tags") if isinstance(raw.get("tags"), dict) else {}
+    raw_games = raw.get("games") if isinstance(raw.get("games"), dict) else {}
+    where = tags.KEY
+    for tag_id, t in sorted(raw_tags.items()):
+        for field in ("name", "emoji"):
+            if not (isinstance(t, dict) and isinstance(t.get(field), str) and t[field]):
+                problems.append(f"{where}: tag {tag_id!r} has no {field}")
+    art, by_emoji = themeart.art_choices(), {}
+    for tag_id, t in sorted(data["tags"].items()):
+        by_emoji.setdefault(t["emoji"], []).append(tag_id)
+        if t.get("art") and t["art"] not in art:
+            problems.append(f"{where}: tag {tag_id!r}: unknown art {t['art']!r}")
+    problems.extend(f"{where}: tags {', '.join(map(repr, ids))} share the emoji {e}"
+                    for e, ids in by_emoji.items() if len(ids) > 1)
+    listed = []
+    for key in sorted(raw_games):
+        g, system = raw_games[key], key.partition("/")[0]
+        if system not in systems:
+            problems.append(f"{where}: {key}: unknown system {system!r}")
+            continue
+        if not isinstance(g, dict) or not isinstance(g.get("tags"), list):
+            problems.append(f"{where}: {key}: must be an object with a 'tags' list")
+            continue
+        problems.extend(f"{where}: {key}: tag ids must be strings, not {i!r}" if not isinstance(i, str)
+                        else f"{where}: {key}: unknown tag {i!r}" for i in g["tags"]
+                        if not isinstance(i, str) or i not in raw_tags)
+        listed += check_keys(problems, where, system, {"bucket": key, "files": g.get("files", [])})
+        variants = g.get("variants", [])
+        if not isinstance(variants, list):
+            problems.append(f"{where}: {key}: 'variants' must be a list")
+            continue
+        good = [v for v in variants if isinstance(v, dict) and isinstance(v.get("bucket"), str) and v["bucket"]]
+        if len(good) < len(variants):
+            problems.append(f"{where}: {key}: each variant needs a bucket key")
+        for v in good:  # a variant may be on another system than its game
+            v_system = v["bucket"].partition("/")[0]
+            if v_system not in systems:
+                problems.append(f"{where}: {key}: variant {v['bucket']!r}: unknown system {v_system!r}")
+            else:
+                listed += check_keys(problems, where, v_system, {"bucket": v["bucket"], "files": v.get("files", [])})
+    return {where: listed} if listed else {}
 
 
-def check_set_notices():
-    """Sets with no art of their own, or showing the same art as another set, as notices."""
-    art, by_art = themeart.art_choices(), {}
-    for game_set in store.set_files():
-        by_art.setdefault(game_set.get("art") or game_set["id"], []).append(game_set["id"])
-    bare = sorted(i for a, ids in by_art.items() if a not in art for i in ids)
-    out = [f"sets: {len(bare)} set(s) have no art in art.json, so they show {themeart.SET_EMOJI} and get no picture: "
-           + ", ".join(bare)] if bare else []
-    return out + [f"sets: {', '.join(sorted(ids))} share the art {a!r}"
-                  for a, ids in sorted(by_art.items()) if a in art and len(ids) > 1]
+def check_tag_notices(systems):
+    """Things worth knowing about the tags that don't make `check` fail, as strings: tags with no games, each
+    system's untagged games (tagsuggest.untagged), genre-tags.json and surprise_tags ids that aren't tags and cards'
+    leftover "sets". systems: systems.json loaded."""
+    data = tags.load()
+    bare = sorted(set(data["tags"]) - {i for rec in data["games"].values() for i in rec["tags"]})
+    out = [f"tags.json: {len(bare)} tag(s) have no games: {', '.join(bare)}"] if bare else []
+    try:
+        counts = [(s["bucket"], tagsuggest.untagged(s)) for s in systems]
+    except (*s3.ERRORS, SystemExit) as e:  # SystemExit: ui.fail, e.g. no storage set (its error is printed)
+        ui.warn(f"Couldn't count the untagged games ({'see the error above' if isinstance(e, SystemExit) else e})")
+        counts = []
+    out += [f"{system}: {n} untagged games" for system, n in counts if n]
+    unknown = sorted({i for ids in store.repo_json("genre-tags").values() for i in ids} - set(data["tags"]))
+    if unknown:
+        out.append(f"genre-tags.json: {len(unknown)} tag id(s) aren't tags in tags.json: {', '.join(unknown)}")
+
+    def surprise_unknown(where, ids):
+        gone = sorted({i for i in ids if isinstance(i, str)} - set(data["tags"])) if isinstance(ids, list) else []
+        if gone:
+            out.append(f"{where}: surprise_tags: {len(gone)} id(s) aren't tags in tags.json: {', '.join(gone)}")
+    surprise_unknown("settings.json", usersettings.load_settings().get("surprise_tags"))
+    for name, entry in store.load_cards().items():
+        games = entry.get("games") if isinstance(entry, dict) else None
+        if isinstance(games, dict) and store.LEGACY_SETS in games:
+            out.append(f"cards.json: {name}: 'sets' is ignored; dropped the next time the card's games are saved")
+        if isinstance(entry, dict):
+            surprise_unknown(f"cards.json: {name}", entry.get("surprise_tags"))
+    return out
 
 
 def check_collections(problems, systems):
@@ -935,7 +967,7 @@ def check_data(list_keys=None, repo_systems=None):
     """Problems found in the user's data files, as strings.
 
     list_keys: optional callable(system id) -> set of bucket keys in that system's folder; when given, every
-    key the lists and sets name must be among them.
+    key the lists and tags.json name must be among them.
     repo_systems: the repo's systems.json already loaded."""
     problems = []
     if repo_systems is None:
@@ -987,8 +1019,7 @@ def check_data(list_keys=None, repo_systems=None):
     )
     devices = {d["id"] for d in store.repo_json("devices")}
     layouts = set(store.repo_json("layouts"))
-    sets = {x["id"] for x in store.load_sets()}
-    wanted.update(check_sets(problems, systems))
+    wanted.update(check_tags(problems, systems))
     wanted.update(check_collections(problems, systems))
     collection_ids = {c["id"] for c in colls.load_collections()}
 
@@ -1007,13 +1038,9 @@ def check_data(list_keys=None, repo_systems=None):
             problems.append(f"{where}: must be an object")
             return
         for key, entry in raw.items():
-            if key == store.SETS_KEY:
-                if not isinstance(entry, list) or not all(isinstance(i, str) for i in entry):
-                    problems.append(f"{where}: 'sets' must be a list of set ids")
-                else:
-                    problems.extend(f"{where}: unknown set {i!r} (run `{inventory.UPDATE_HINT}` if another machine "
-                                    "added it)" for i in entry if i not in sets)
-            elif key not in systems:
+            if key == store.LEGACY_SETS:  # ignored: a notice (check_tag_notices)
+                continue
+            if key not in systems:
                 problems.append(f"{where}: unknown system {key!r}")
             elif isinstance(entry, list):
                 for g in entry:
@@ -1144,10 +1171,10 @@ def check_cmd(args):
     problems = check_data(bucket_lister() if args.bucket_keys else None, repo_systems)
     for p in problems:
         ui.failure(ui.red(f"❌ {p}"))
-    for n in check_notices(repo_systems) + check_set_notices():
+    for n in check_notices(repo_systems) + check_tag_notices(repo_systems):
         print(ui.yellow(f"⚠️  {n}"))
     if not problems:
-        print(ui.green("✅ cards.json, surprises.json, device-systems.json, the sets and your collections look fine"))
+        print(ui.green("✅ cards.json, surprises.json, device-systems.json, tags.json and your collections look fine"))
     return 1 if problems else 0
 
 
@@ -1213,7 +1240,7 @@ def doctor_cmd(args):
             boto3.Session(profile_name=runtime.WRITE_PROFILE)
             line(True, f"write profile {runtime.WRITE_PROFILE} exists")
         except ProfileNotFound:
-            line(None, f"write profile {runtime.WRITE_PROFILE} not found", "only needed for upload, clean, saving sets and saving scrape state")
+            line(None, f"write profile {runtime.WRITE_PROFILE} not found", "only needed for upload, clean, saving tags and saving scrape state")
     for tool in ("7z", "chdman", "extract-xiso", "iso2zar"):
         found = external.find_tool(tool)
         line(True if found else None, f"{tool}: {found or 'not installed'}",
@@ -1541,6 +1568,12 @@ def _skip_media(args):
         scrape_online._check_skip(args.skip_media)
 
 
+def tags_suggest(args):
+    from . import tagsuggest
+    prepare_storage(args)
+    return tagsuggest.suggest_command(args)
+
+
 def scrape_cmd(args):
     from . import scrape_online
     if args.set_credentials:
@@ -1661,6 +1694,9 @@ def completion_cmd(args):
   if [ "$COMP_CWORD" -eq 3 ] && [[ "$cmd" == game* ]]; then
     case "${{COMP_WORDS[2]}}" in add|remove|full) COMPREPLY=($(compgen -W "$(sync-roms completion list systems)" -- "$cur")); return;; esac
   fi
+  if [ "$COMP_CWORD" -ge 3 ] && [[ "$cmd" == tag* ]] && [ "${{COMP_WORDS[2]}}" = suggest ]; then
+    COMPREPLY=($(compgen -W "$(sync-roms completion list systems)" -- "$cur")); return
+  fi
   if [ "$COMP_CWORD" -eq 3 ] && [ "$cmd" = config ]; then
     case "${{COMP_WORDS[2]}}" in set|unset) COMPREPLY=($(compgen -W "{settings}" -- "$cur")); return;; esac
   fi
@@ -1676,6 +1712,8 @@ complete -o filenames -F _sync_roms sync-roms
         for name, w in second.items():
             lines.append(f'complete -c sync-roms -f -n "{first(spellings.get(name, name).replace("|", " "))}; and not __fish_seen_subcommand_from {" ".join(w)}" -a "{" ".join(w)}"')
         lines.append(f'complete -c sync-roms -f -n "{first("config")}; and __fish_seen_subcommand_from set unset" -a "{settings}"')
+        lines.append(f'complete -c sync-roms -f -n "{first(spellings["tags"].replace("|", " "))}; and __fish_seen_subcommand_from suggest" '
+                     '-a "(sync-roms completion list systems)"')
         values = {"card": "cards", "device": "devices", "layout": "layouts", "system": "systems"}
         for flag in (f for f in flag_list if f.startswith("--")):
             name = flag[2:]
@@ -1739,14 +1777,14 @@ def build_parser():
     p = gsub.add_parser("add", allow_abbrev=False); common(p); p.add_argument("system"); p.add_argument("keys", nargs="+"); p.set_defaults(fn=games_add)
     p = gsub.add_parser("remove", allow_abbrev=False); common(p); p.add_argument("system"); p.add_argument("keys", nargs="+"); p.set_defaults(fn=games_remove)
     p = gsub.add_parser("full", allow_abbrev=False); common(p); p.add_argument("system"); p.add_argument("state", choices=["on", "off"]); p.set_defaults(fn=games_full)
-    p = gsub.add_parser("sets", aliases=["set"], allow_abbrev=False); common(p); p.add_argument("verb", choices=["list", "add", "remove"])
-    p.add_argument("set_id", nargs="?"); p.set_defaults(fn=games_sets)
     p = gsub.add_parser("export", allow_abbrev=False); common(p); p.set_defaults(fn=games_export)
     p = gsub.add_parser("import", allow_abbrev=False); common(p); p.add_argument("file"); p.set_defaults(fn=games_import)
 
-    sets = sub.add_parser("sets", add_help=False, allow_abbrev=False)
-    ssub = sets.add_subparsers(dest="action", required=True)
-    p = ssub.add_parser("edit", allow_abbrev=False); p.set_defaults(fn=lambda a: setedit.edit_sets())
+    tags_cmd = sub.add_parser("tags", add_help=False, allow_abbrev=False)
+    tagsub = tags_cmd.add_subparsers(dest="action", required=True)
+    p = tagsub.add_parser("edit", allow_abbrev=False); p.set_defaults(fn=lambda a: tageditor.edit_tags())
+    p = tagsub.add_parser("suggest", allow_abbrev=False); p.add_argument("systems", nargs="*", metavar="SYSTEM")
+    p.set_defaults(fn=tags_suggest)
 
     collections = sub.add_parser("collections", add_help=False, allow_abbrev=False)
     colsub = collections.add_subparsers(dest="action", required=True)
@@ -1857,7 +1895,7 @@ def run(argv):
     args = ap.parse_args(argv)
     if getattr(args, "dry_run", False) and not (args.fn is config_cmd and args.action == "apply") and (args.fn in (games_list, games_export, layouts_cmd, config_cmd, cache_cmd, doctor_cmd, guide_cmd, check_cmd, completion_cmd, themes_pick, themes_build, themes_palettes,
                                                           edit_cmd, install_cmd, devices_cmd, diff_cmd, scrape_review_cmd, scrape_missing_cmd, refresh_cmd, ports_done, ports_needed)
-                                            or (args.fn is games_sets and args.verb == "list") or (args.fn is mirror_cmd and args.action == "clear")):
+                                            or (args.fn is mirror_cmd and args.action == "clear")):
         name = " ".join(w for w in (args.command, getattr(args, "action", None), getattr(args, "verb", None)) if w)
         if args.fn is config_cmd and args.action in ("set", "unset"):
             ui.fail(f"--dry-run can't preview `{name}`: run it without --dry-run to change settings.json", 2)

@@ -1,7 +1,8 @@
-"""Print, as JSON, the storage ROMs that may be variants of set games, and set variants whose ROM left storage.
+"""Print, as JSON, the storage ROMs that may be variants of tagged games, and variants whose ROM left storage.
 
 Run from the repo root: uv run --frozen python .claude/skills/update-variants/scripts/find_candidates.py [--baseline]
---baseline marks every ROM no set lists as checked, without judging it, so later runs only see new uploads.
+--baseline marks every ROM no tags.json game record lists as checked, without judging it, so later runs only see new
+uploads.
 Reads storage only through the storage cache (sync-roms cache update refreshes it).
 """
 import json
@@ -10,7 +11,7 @@ import re
 import sys
 from collections import defaultdict
 
-from sync_roms import inventory, m3u, names, scrape_plan, shared, store, usersettings, vita
+from sync_roms import inventory, m3u, names, scrape_plan, shared, store, tags, usersettings, vita
 
 CHECKED = "variants-checked.json"  # a storage key
 REISSUE = re.compile(r"^(classic nes series|famicom mini \d*|nes classics|sega ages( \d+)?)\s*[-:]\s*", re.I)
@@ -38,19 +39,12 @@ def main():
     checked = shared.load(CHECKED, json.loads, {})
 
     games, referenced = {}, set()
-    for game_set in store.set_files():
-        for g in game_set["games"]:
-            key = g.get("bucket")
-            if not key:
-                continue
-            referenced.update([key, *g.get("files", [])])
-            info = games.setdefault(key, {"game": key, "title": g.get("title") or names.title(key),
-                                          "system": g.get("system"), "sets": [], "variants": []})
-            info["sets"].append(game_set["id"])
-            for v in g.get("variants", []):
-                referenced.update([v["bucket"], *v.get("files", [])])
-                if all(v["bucket"] != x["bucket"] for x in info["variants"]):
-                    info["variants"].append(v)
+    for key, rec in tags.load()["games"].items():
+        referenced.update([key, *rec.get("files", [])])
+        games[key] = {"game": key, "title": names.title(key), "system": key.partition("/")[0],
+                      "tags": rec["tags"], "variants": rec.get("variants", [])}
+        for v in rec.get("variants", []):
+            referenced.update([v["bucket"], *v.get("files", [])])
 
     stored = set()
     for s in store.repo_json("systems"):

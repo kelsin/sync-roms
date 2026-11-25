@@ -5,7 +5,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from sync_roms import collectionedit, diff, edit, listedit, picker, previews, setedit, store, surprise, upload  # noqa: E402
+from sync_roms import collectionedit, diff, edit, listedit, picker, previews, store, surprise, upload  # noqa: E402
 
 SYSTEMS = [{"name": "Game Boy Advance", "bucket": "gba"}, {"name": "PlayStation", "bucket": "psx"}]
 
@@ -32,9 +32,7 @@ class ListPreviews(unittest.TestCase):
         def stop(title, labels, **kw):
             calls.append(kw)
             raise KeyboardInterrupt
-        for module, args, expect in (
-                (collectionedit, (), ["art-surprise", "art-None", None, None, None]),
-                (setedit, ({"review": False},), ["art-surprise", "art-b", None, None, None])):
+        for module, args, expect in ((collectionedit, (), ["art-surprise", "art-None", None, None, None]),):
             calls = []
             working = {"a": {"name": "A", "art": "surprise", "games": []}, "b": {"name": "B", "games": []}}
             with mock.patch.object(picker, "filter_list", stop):
@@ -55,15 +53,8 @@ class ListPreviews(unittest.TestCase):
                     diff.diff_command(mock.Mock(dir="/x", system=None, json=False))
             self.assertEqual(art(calls, 2), ["sys-gba", "sys-psx"], module.__name__)
 
-    def test_add_games_from_set_previews_the_set_by_id(self):
-        fake, calls = capture([None])
-        sets = [{"id": "pk", "name": "Pokemon", "games": []}]
-        with mock.patch.object(picker, "filter_list", fake):
-            listedit.add_from_set(None, sets, None, None, "x")
-        self.assertEqual(art(calls, 1), ["art-pk"])
-
     def test_add_games_from_which_system_previews_the_system(self):
-        for module, edit_one in ((setedit, setedit.edit_one), (collectionedit, collectionedit.edit_one)):
+        for module, edit_one in ((collectionedit, collectionedit.edit_one),):
             fake, calls = capture([1, None, None])  # "add games from a system", then Esc, then back
             thing = {"name": "X", "games": []}
             with mock.patch.object(picker, "filter_list", fake), mock.patch.object(listedit, "stocked", return_value=SYSTEMS):
@@ -87,18 +78,6 @@ class GamePreviews(unittest.TestCase):
         with mock.patch.object(picker, "filter_list", fake):
             edit.toggle_games("t", rows)
         self.assertEqual(self.games(calls, 3), ["img-gba/A.zip", "img-gba/B.zip", None])
-
-    def test_change_category_lists_preview_the_game_bucket_skipping_rows_without_one(self):
-        for module, edit_one in ((setedit, setedit.edit_one),):
-            fake, calls = capture([3, None, None])  # "change which game's category?", then Esc, then back
-            thing = {"name": "X", "games": [{"system": "gba", "bucket": "gba/A.zip"}, {"title": "no bucket"},
-                                            {"system": "psx", "bucket": "psx/B.bin"}]}
-            with mock.patch.object(picker, "filter_list", fake), mock.patch.object(listedit, "stocked", return_value=SYSTEMS):
-                try:
-                    edit_one(thing, SYSTEMS, lambda bucket: set())
-                except StopIteration:
-                    pass
-            self.assertEqual(self.games(calls, 3, 1), ["img-gba/A.zip", "img-psx/B.bin", None], module.__name__)
 
     def stop_after(self, calls):
         def stop(title, labels, **kw):

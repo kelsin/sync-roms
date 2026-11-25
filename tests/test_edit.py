@@ -16,7 +16,22 @@ from helpers import feed_list, pilot_list, screen_lines, screen_text, shown_prev
 from helpers import VITA_DLC as DLC, VITA_GAME as G, VITA_UPDATE as NEW  # noqa: E402
 from sync_roms import edit, names, picker, runtime, s3, store, ui  # noqa: E402
 
-SETS = {"s": {"id": "s", "name": "Mix", "games": [{"system": "gba", "bucket": "gba/A.zip", "files": ["gba/A2.zip"]}]}}
+def list_systems():
+    return {
+        "gba": {"name": "Game Boy Advance", "bucket": "gba", "full_system": False,
+                "games": [{"title": "A", "bucket": "gba/A.zip"}]},
+        "gen": {"name": "Genesis", "bucket": "gen", "full_system": False, "games": []},
+        "ful": {"name": "Full", "bucket": "ful", "full_system": True, "games": []},
+    }
+
+
+MIX = {"name": "Mix", "games": [
+    {"title": "Zed", "system": "gen", "bucket": "gen/Zed.zip"},
+    {"title": "A", "system": "gba", "bucket": "gba/A.zip"},
+    {"title": "Gone", "system": "gba", "bucket": "gba/Gone.zip"},
+    {"title": "Nope", "system": "nes", "bucket": "nes/Nope.zip"},
+    {"title": "Skip", "system": "ful", "bucket": "ful/Skip.zip"},
+]}
 
 
 class Helpers(unittest.TestCase):
@@ -63,22 +78,25 @@ class Helpers(unittest.TestCase):
         gba = edit.system_rows({"bucket": "gba", "games": [{"bucket": "gba/B.zip"}]}, {"gba/A.zip"})
         self.assertEqual([r[3] for r in gba], ["A.zip", "B.zip  ⚠️ not in storage"])
 
-    def test_set_rows_keep_saved_title(self):
+    def test_list_rows_keep_saved_title(self):
         s = {"bucket": "fbneo", "name": "FBNeo"}
         gs = {"games": [{"system": "fbneo", "bucket": "fbneo/1941j.zip", "title": "Mine"}]}
-        rows = edit.set_rows(gs, {"fbneo": s}, lambda _s: {"fbneo/1941j.zip"})
+        rows = edit.list_rows(gs, {"fbneo": s}, lambda _s: {"fbneo/1941j.zip"})
         self.assertEqual(rows[0][2], "Mine")
 
-    def test_cover_notes(self):
-        keys = edit.cover_notes(SETS, ["s"])
-        self.assertEqual(keys["gba/A.zip"], "Full set: 📦 Mix")
+    def test_list_rows_ignore_a_category(self):
+        games = {"games": [{"title": "Z", "system": "gba", "bucket": "gba/Z.zip", "category": "First"},
+                           {"title": "A", "system": "gba", "bucket": "gba/A.zip", "category": "Second"}]}
+        rows = edit.list_rows(games, list_systems(), lambda s: set())
+        self.assertEqual([r[1] for r in rows], ["gba/A.zip", "gba/Z.zip"])
+        self.assertTrue(rows[0][3].startswith("Game Boy Advance — A"))
 
 
 class Saving(DataDir):
     def test_save_lists_writes_card(self):
         store.update_card("c", device="x", layout="esde")
-        store.save_lists({"c": {"sets": ["s"]}})
-        self.assertEqual(self.read("cards.json")["c"], {"device": "x", "layout": "esde", "games": {"sets": ["s"]}})
+        store.save_lists({"c": {"gba": [{"bucket": "gba/A.zip"}]}})
+        self.assertEqual(self.read("cards.json")["c"], {"device": "x", "layout": "esde", "games": {"gba": [{"bucket": "gba/A.zip"}]}})
         self.assertFalse(os.path.exists(self.path("games.json")))
 
 
@@ -310,14 +328,14 @@ class MenuActions(EditBase):
             edit.edit_manifest()
         return seen
 
-    def test_top_menu_entries_are_exactly_cards_sets_collections_and_device_systems(self):
+    def test_top_menu_entries_are_exactly_cards_tags_collections_and_device_systems(self):
         top = self.top_titles([None])[0][1]
-        self.assertEqual(top, ["💳 Cards", "📦 Sets", "💖 Collections", "🧩 Device systems",
+        self.assertEqual(top, ["💳 Cards", "🏷️ Tags", "💖 Collections", "🧩 Device systems",
                                "✅ Done (review & save)", "🚪 Quit (card games are already saved)"])
 
-    def test_choosing_sets_calls_edit_sets_and_a_failure_returns_to_the_menu(self):
-        from sync_roms import setedit
-        with mock.patch.object(setedit, "edit_sets", side_effect=SystemExit(3)) as run:
+    def test_choosing_tags_calls_edit_tags_and_a_failure_returns_to_the_menu(self):
+        from sync_roms import tageditor
+        with mock.patch.object(tageditor, "edit_tags", side_effect=SystemExit(3)) as run:
             self.assertEqual(self.run_menu([1, 4]), 0)
         run.assert_called_once()
 
@@ -370,10 +388,103 @@ class MenuActions(EditBase):
         self.assertNotEqual(cm.exception.code, 0)
 
 
-class SetRefs(unittest.TestCase):
-    def test_toggle_set_ref(self):
-        self.assertEqual(edit.toggle_set_ref(["a"], "b"), ["a", "b"])
-        self.assertEqual(edit.toggle_set_ref(["a", "b"], "a"), ["b"])
+class ListRows(unittest.TestCase):
+    def test_rows_sorted_by_system_skip_unknown(self):
+        rows = edit.list_rows(MIX, list_systems(), lambda s: {"gba/A.zip", "gen/Zed.zip"})
+        self.assertEqual([r[1] for r in rows], ["ful/Skip.zip", "gba/A.zip", "gba/Gone.zip", "gen/Zed.zip"])
+        self.assertIn("not in storage", rows[2][3])
+        self.assertNotIn("not in storage", rows[1][3])
+
+    def test_toggle_adds_and_removes(self):
+        by = list_systems()
+        rows = edit.list_rows(MIX, by, lambda s: set())
+        with mock.patch.object(picker, "filter_list", return_value=[True, False, True, True]) as fl:
+            edit.toggle_games("t", rows)
+        self.assertEqual(fl.call_args.kwargs["initial"], [True, True, False, False])
+        self.assertEqual(fl.call_args.kwargs["locked"], [True, False, False, False])
+        self.assertEqual(fl.call_args.kwargs["locked_note"], [edit.FULL_SYSTEM_NOTE, "", "", ""])
+        self.assertIs(fl.call_args.kwargs["select_all"], True)  # on unless the caller turns it off
+        self.assertEqual(by["ful"]["games"], [])
+        self.assertEqual([g["bucket"] for g in by["gba"]["games"]], ["gba/Gone.zip"])
+        self.assertEqual([g["bucket"] for g in by["gen"]["games"]], ["gen/Zed.zip"])
+
+    def test_toggle_games_shows_variant_notes(self):
+        by = list_systems()
+        listing = {"name": "Mix", "games": [{"title": "A", "system": "gba", "bucket": "gba/A.zip"},
+                                            {"title": "Zed", "system": "gen", "bucket": "gen/Zed.zip"}]}
+        variants = {"gba/A.zip": [{"bucket": "gb/A.gb", "note": "GB: x"}]}
+        parents = {"gb/A.gb": {"bucket": "gba/A.zip", "system": "gba", "title": "A"}}
+        rows = edit.list_rows(listing, by, lambda s: set())
+        with mock.patch.object(edit.tags, "variant_index", return_value=(variants, parents)), \
+                mock.patch.object(store, "repo_json", return_value=list(by.values())), \
+                mock.patch.object(picker, "filter_list", return_value=[False, False]) as fl:
+            edit.toggle_games("t", rows)
+        row_note = fl.call_args.kwargs["row_note"]
+        a = [r[1] for r in rows].index("gba/A.zip")
+        z = [r[1] for r in rows].index("gen/Zed.zip")
+        self.assertEqual(row_note(a), "\u21b3 Variant: GB: x")
+        self.assertEqual(row_note(z), "")
+
+    def test_locked_rows_cannot_toggle(self):
+        keys = iter(["tab", "ctrl+a", "escape", "y"])
+        state = self.run_list(keys, locked=[True, False])
+        self.assertEqual(state, [False, True])
+
+    def test_multi_esc_keeps_state(self):
+        self.assertEqual(self.run_list(iter(["tab", "escape", "y"])), [True, False])
+
+    def test_multi_esc_without_changes_just_leaves(self):
+        self.assertEqual(self.run_list(iter(["escape"])), [False, False])
+
+    def test_multi_esc_can_revert(self):
+        self.assertEqual(self.run_list(iter(["tab", "escape", "u"])), [False, False])
+
+    def test_multi_esc_any_other_key_keeps_editing(self):
+        self.assertEqual(self.run_list(iter(["tab", "escape", "z", "enter"])), [True, False])
+
+    def test_ctrl_r_reverts_the_list(self):
+        self.assertEqual(self.run_list(iter(["tab", "u", "enter"])), [False, False])
+
+    def test_space_toggles_in_normal_mode_and_is_text_while_typing(self):
+        self.assertEqual(self.run_list(iter(["space", "enter"])), [True, False])
+        self.assertEqual(self.run_list(iter(["/", "y", "enter", "space", "enter"])), [False, True])
+        self.assertEqual(self.run_list(iter(["/", "x", "space", "y", "enter", "escape", "space", "enter"])), [True, False])  # "x y" matches nothing; Esc clears it
+
+    def test_view_cycle_shows_only_changed_rows(self):
+        # toggle row 0, then ^O twice: "changed only" lists just it, and Tab then toggles that row back
+        self.assertEqual(self.run_list(iter(["tab", "ctrl+o", "ctrl+o", "tab", "enter"])), [False, False])
+
+    def test_hotkey_returns_pair(self):
+        self.assertEqual(self.run_list(iter(["f"]), multi=False, hotkeys=("f",)), ("f", 0))
+        self.assertEqual(self.run_list(iter(["j", "f"]), multi=False, hotkeys=("f",)), ("f", 1))
+
+    def test_hotkey_ignored_without_rows(self):
+        self.assertIsNone(self.run_list(iter(["/", "z", "enter", "f", "escape", "escape"]), multi=False, hotkeys=("f",)))
+
+    def run_list(self, keys, locked=None, multi=True, hotkeys=()):
+        return feed_list(keys, "t", ["x", "y"], multi=multi, locked=locked, hotkeys=hotkeys)
+
+
+class VariantLine(unittest.TestCase):
+    def test_variant_line_texts(self):
+        variants = {"snes/CT.zip": [{"bucket": "nds/CT.zip", "note": "DS: adds the Lost Sanctum"},
+                                    {"bucket": "psx/CT.chd", "note": "PS1: anime scenes"}]}
+        parents = {"nds/CT.zip": {"bucket": "snes/CT.zip", "system": "snes", "title": "Chrono Trigger"},
+                   "psx/CT.chd": {"bucket": "snes/CT.zip", "system": "snes", "title": "Chrono Trigger"}}
+        names = {"snes": "SNES", "nds": "Nintendo DS"}
+        one = {"snes/CT.zip": variants["snes/CT.zip"][:1]}
+        line = lambda key, v=variants, on=None: edit.variant_line(key, v, parents, names, on)  # noqa: E731
+        self.assertEqual(line("snes/CT.zip", one), "↳ Variant: DS: adds the Lost Sanctum")
+        self.assertEqual(line("snes/CT.zip", one, lambda b: False), "↳ Variant: DS: adds the Lost Sanctum (v adds it)")
+        self.assertEqual(line("snes/CT.zip", one, lambda b: True),
+                         "↳ Variant: DS: adds the Lost Sanctum · ✅ on the card (v removes it)")
+        self.assertEqual(line("snes/CT.zip", on=lambda b: False),
+                         "↳ 2 variants (v picks): DS: adds the Lost Sanctum; PS1: anime scenes")
+        self.assertEqual(line("snes/CT.zip"), "↳ Variants: DS: adds the Lost Sanctum; PS1: anime scenes")
+        self.assertEqual(line("nds/CT.zip"), "Variant of SNES — Chrono Trigger")
+        self.assertEqual(line("gba/none.zip"), "")
+        both = {"nds/CT.zip": [{"bucket": "x/Y.zip", "note": "n"}]}
+        self.assertEqual(line("nds/CT.zip", both), "↳ Variant: n")
 
 
 if __name__ == "__main__":
@@ -960,3 +1071,55 @@ class NarrowRows(unittest.TestCase):
             picker.filter_list("t", [str(i) for i in range(30)], multi=True, session=session)
         m = seen[0]
         self.assertEqual((m.view, len(m.vis), m.vis[m.cur], m.top), (20, 25, 22, 5))  # rows 5..24: no blank rows
+
+
+class TagColumn(DataDir):
+    """toggle_games shows the tag emoji of every row and t edits the highlighted row's tags."""
+    S = {"name": "NES", "bucket": "nes", "games": []}
+    ROWS = [(S, "nes/A (USA).zip", "A", "A"), (S, "nes/B (USA).zip", "B", "B")]
+
+    def setUp(self):
+        super().setUp()
+        from helpers import storage_tags
+        from sync_roms import tags
+        self.tags = tags
+        storage_tags(self, {"tags": {"x": {"name": "X", "emoji": "🐝"}}, "games": {"nes/B (USA).zip": {"tags": ["x"]}},
+                            "declined": {}})
+
+    def test_rows_show_the_column_and_t_edits_then_reopens(self):
+        seen, asked = [], []
+
+        def fake(title, labels, **kw):
+            seen.append(kw)
+            return ("t", 1) if len(seen) == 1 else kw["session"]["sel"]
+        with mock.patch.object(picker, "filter_list", fake), \
+                mock.patch.object(edit.tagui, "edit_game_tags", side_effect=lambda *a: asked.append(a)):
+            self.assertIsNone(edit.toggle_games("t", self.ROWS))
+        self.assertEqual([e[-1] for e in seen[0]["extras"]], [("", ""), ("🐝", "")])
+        self.assertIn("t", seen[0]["hotkeys"])
+        self.assertIn("t tags", seen[0]["hint"])
+        self.assertEqual(asked, [("nes/B (USA).zip", "B")])
+        self.assertEqual(len(seen), 2)
+
+    def test_notes_off_drops_w(self):
+        seen = []
+        with mock.patch.object(picker, "filter_list", side_effect=lambda t, l, **kw: seen.append(kw) or kw["session"]["sel"]):
+            edit.toggle_games("t", self.ROWS, notes=False)
+            edit.toggle_games("t", self.ROWS)
+        self.assertIsNone(seen[0]["on_note"])
+        self.assertNotIn("w note", seen[0]["hint"])
+        self.assertIn("t tags", seen[0]["hint"])
+        self.assertIsNotNone(seen[1]["on_note"])
+        self.assertIn("w note", seen[1]["hint"])
+
+    def test_other_keys_are_still_returned(self):
+        with mock.patch.object(picker, "filter_list", return_value=("s", 0)):
+            self.assertEqual(edit.toggle_games("t", self.ROWS, hotkeys=("s",)), "s")
+
+    def test_unknown_key_row(self):
+        self.tags.change_game_tags("nes/Gone.zip", add=["x"])
+        rows = [(self.S, "nes/Gone.zip", "Gone", "Gone")]
+        with mock.patch.object(picker, "filter_list", side_effect=lambda t, l, **kw: seen.append(kw) or kw["session"]["sel"]):
+            seen = []
+            edit.toggle_games("t", rows)
+        self.assertEqual(seen[0]["extras"][0][-1], ("🐝", ""))

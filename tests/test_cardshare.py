@@ -250,13 +250,14 @@ class CopySelectionsTest(unittest.TestCase):
         out, _, _ = self.copy({"games": {"gba": [_g("B")]}}, {"games": {"gba": {"full_system": True}}})
         self.assertEqual(out["games"]["gba"], {"full_system": True, "games": [_g("B")]})
 
-    def test_sets_and_collections_union(self):
+    def test_collections_union_and_old_set_references_are_not_copied(self):
         src = {"games": {"sets": ["a", "b"]}, "collections": ["x", "y"]}
-        dst = {"games": {"sets": ["b"]}, "collections": ["y"]}
-        out, counts, _ = self.copy(src, dst)
-        self.assertEqual(out["games"]["sets"], ["a", "b"])
+        dst = {"games": {"gba": [_g("A")]}, "collections": ["y"]}
+        out, counts, skipped = self.copy(src, dst)
+        self.assertEqual(out["games"], {"gba": [_g("A")]})
         self.assertEqual(out["collections"], ["y", "x"])
-        self.assertEqual((counts["sets"], counts["collections"]), (1, 1))
+        self.assertEqual(counts, {"games": 0, "full": 0, "collections": 1, "excluded": 0})
+        self.assertEqual(skipped, [])
 
     def test_exclusion_not_copied_when_dst_syncs_it(self):
         src = {"games": {"gba": [_g("B")]}, "excluded": {"gba": ["gba/A.zip", "gba/C.zip"]}}
@@ -274,7 +275,7 @@ class CopySelectionsTest(unittest.TestCase):
         once, _, _ = self.copy(src, {"games": {"gba": [_g("A")]}})
         twice, counts, _ = self.copy(src, once)
         self.assertEqual(twice, once)
-        self.assertEqual(counts, {"games": 0, "full": 0, "sets": 0, "collections": 0, "excluded": 0})
+        self.assertEqual(counts, {"games": 0, "full": 0, "collections": 0, "excluded": 0})
 
     def test_inputs_not_mutated(self):
         src = {"games": {"gba": [_g("B")], "sets": ["a"]}, "collections": ["x"], "excluded": {"gba": ["gba/C.zip"]}}

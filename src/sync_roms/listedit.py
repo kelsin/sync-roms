@@ -1,5 +1,5 @@
-"""Games-list helpers shared by the set and collection editors."""
-from . import edit, inventory, m3u, picker, previews, s3, store, themeart, ui
+"""Games-list helpers shared by the tag and collection editors."""
+from . import edit, inventory, m3u, picker, previews, s3, store, tags, tagui, ui
 
 
 # --- Multi-disc games --------------------------------------------------------------------------------
@@ -64,14 +64,7 @@ def file_counts(systems):
     return out
 
 
-def insert_game(games, game):
-    """Add game after the last game of its category, or at the end when its category is new (or it has none)."""
-    cat = game.get("category")
-    last = max((i for i, x in enumerate(games) if cat and x.get("category") == cat), default=len(games) - 1)
-    games.insert(last + 1, game)
-
-
-def reconcile(games, shown, category=""):
+def reconcile(games, shown):
     """A games list's games after the toggler changed `shown` (a view): drop what was switched off, add what was switched on.
 
     Entries of systems that weren't shown, and untouched entries, are kept as they are."""
@@ -80,99 +73,21 @@ def reconcile(games, shown, category=""):
     have = {g.get("bucket") for g in out}
     for key, (system, g) in now.items():
         if key not in have:
-            insert_game(out, {"title": g["title"], **({"category": category} if category else {}),
-                              "system": system, "bucket": key,  # then the entry's other fields: a note, files
-                              **{k: v for k, v in g.items() if k not in ("title", "category", "system", "bucket")}})
+            out.append({"title": g["title"], "system": system, "bucket": key,  # then the entry's other fields: a note, files
+                        **{k: v for k, v in g.items() if k not in ("title", "system", "bucket")}})
     return out
-
-
-def recategorize(games, game, category):
-    """Give game a new category (empty removes it) and move it next to the games of that category."""
-    if (game.get("category") or "") == category:
-        return
-    moved = {}
-    for k, v in game.items():
-        if k != "category":
-            moved[k] = v
-        if k == "title" and category:
-            moved["category"] = category
-    if category:
-        moved.setdefault("category", category)
-    games[:] = [x for x in games if x is not game]
-    insert_game(games, moved)
-
-
-def set_series(games, game, series):
-    """Give game a series (empty removes it), keeping it after the title and category; returns game."""
-    moved = {}
-    for k, v in game.items():
-        if k != "series":
-            moved[k] = v
-        if series and k == ("category" if "category" in game else "title"):
-            moved["series"] = series
-    game.clear()
-    game.update(moved)
-    return game
-
-
-def series_of(game_set, min_games=2):
-    """[(series, game count)] of a set's games in file order of first appearance, leaving out series with fewer than
-    min_games games."""
-    counts = {}
-    for g in game_set["games"]:
-        if g.get("series"):
-            counts[g["series"]] = counts.get(g["series"], 0) + 1
-    return [(name, n) for name, n in counts.items() if n >= min_games]
-
-
-def series_keys(game_set, series):
-    """The bucket keys (with each game's files) of the set's games in series."""
-    return {k for g in game_set["games"] if g.get("series") == series for k in [g["bucket"], *g.get("files", [])]}
-
-
-def pick_name(title, names, current, noun, what):
-    """Pick a name from a list: "" for none (first row), a known name, or a new one typed (last row); None when
-    cancelled (an empty new name too). The cursor starts on current."""
-    i = picker.filter_list(title, ["(none)", *names, "new…"], hint="Enter pick · Esc cancel",
-                           cursor=next((n + 1 for n, x in enumerate(names) if x.casefold() == (current or "").casefold()), 0))
-    if i is None:
-        return None
-    if i == 0:
-        return ""
-    if i <= len(names):
-        return names[i - 1]
-    typed = ui.ask(f"🏷️  New {noun} for {what}: ", cancellable=True)
-    typed = (typed or "").strip()
-    if not typed:
-        return None
-    return next((n for n in names if n.casefold() == typed.casefold()), typed)  # "cave" is the existing "Cave"
-
-
-def ask_category(games, what):
-    """The category typed for what, "" for none."""
-    cats = list(dict.fromkeys(g["category"] for g in games if g.get("category")))
-    if cats:
-        print(ui.dim(f"  Categories: {', '.join(cats)}"))
-    typed = ui.ask(f"🏷️  Category for {what} (empty for none): ").strip()
-    return next((c for c in cats if c.casefold() == typed.casefold()), typed)  # "cave" is the existing "Cave"
-
-
-def game_label(game, names):
-    """A game's row label; names: {system bucket: system name}."""
-    return f"{game.get('category') + ' — ' if game.get('category') else ''}{names.get(game.get('system'), game.get('system'))}" \
-           f" — {game.get('title') or game['bucket']}"
 
 
 ALL_SYSTEMS = "🌐 All systems"
 
 
-def add_from_system(listing, systems, shown, keys_of, label, categories=True, toggle=None):
+def add_from_system(listing, systems, shown, keys_of, label, toggle=None):
     """Pick one of systems with files in storage and toggle its games in listing (via shown, a view of it).
     label is listing's name as shown, with its emoji.
 
     toggle(s, title, rows) shows the system's rows (s is its entry in shown) instead of a plain edit.toggle_games.
-    New games get the category asked for when categories is true (none after Ctrl-C, which keeps the toggles made and
-    is then raised again), and the discs of a multi-disc game whose playlist is in storage."""
+    New games get the discs of a multi-disc game whose playlist is in storage. Ctrl-C keeps the toggles made, then is
+    raised again."""
     options = stocked(systems)
     j = picker.filter_list("✏️  Add games from which system?", [ALL_SYSTEMS] + [s["name"] for s in options],
                            extras=[[]] + file_counts(options),
@@ -192,57 +107,53 @@ def add_from_system(listing, systems, shown, keys_of, label, categories=True, to
         picked = [options[j - 1]]
         rows = system_rows(s, keys_of(s["bucket"]))
         title = f"✏️  {s['name']} — ✅ in {label}, ⬜ in storage only"
-    had = {g["bucket"] for p in picked for g in shown[p["bucket"]]["games"]}
     interrupted = False
     try:
         if everywhere:
-            toggle_all(title, rows, store.load_sets())
+            toggle_all(title, rows)
         elif toggle:
             toggle(s, title, rows)
         else:
             edit.toggle_games(title, rows)
-    except KeyboardInterrupt:  # Ctrl-C in the list or a picker it opens: the toggles made are kept, with no category
+    except KeyboardInterrupt:  # Ctrl-C in the list or a picker it opens: the toggles made are kept
         interrupted = True
-    added = {g["bucket"] for p in picked for g in shown[p["bucket"]]["games"]} - had
-    try:
-        category = ask_category(listing["games"], f"{len(added)} new game(s)") if categories and added and not interrupted else ""
-    except KeyboardInterrupt:  # Ctrl-C at the question: no category
-        category, interrupted = "", True
-    listing["games"] = reconcile(listing["games"], shown, category)
+    listing["games"] = reconcile(listing["games"], shown)
     for p in picked:
         fold_discs(listing["games"], keys_of(p["bucket"]))
     if interrupted:
         raise KeyboardInterrupt
 
 
-def add_from_set(listing, sets, shown, keys_of, label, categories=True):
-    """Pick one of sets and toggle its games, across every system, in listing (via shown, a view of it).
-    label is listing's name as shown, with its emoji.
-
-    New games get the category asked for when categories is true (none after Ctrl-C, which keeps the toggles made and
-    is then raised again), and the set's extra files (the discs of a multi-disc game)."""
-    j = picker.filter_list("✏️  Add games from which set?", [f"{themeart.set_emoji(x)} {x['name']}  ({len(x['games'])} games)" for x in sets],
-                           preview=lambda k: previews.collection(themeart.set_art(sets[k])))
+def add_from_tag(listing, shown, keys_of, label):
+    """Pick one tag and toggle its games, across every system, in listing (via shown, a view of it).
+    label is listing's name as shown, with its emoji. New games get their record's extra files (the discs of a
+    multi-disc game). Ctrl-C keeps the toggles made, then is raised again."""
+    defs, records = tags.all_tags(), tags.load()["games"]
+    if not defs:
+        edit.note(ui.yellow("ℹ️  No tags yet."))
+        return
+    ids = sorted(defs, key=lambda i: defs[i]["name"].casefold())
+    games_of = {i: [k for k, rec in records.items() if i in rec["tags"]] for i in ids}
+    j = picker.filter_list("✏️  Add games from which tag?",
+                           [f"{defs[i]['emoji']} {defs[i]['name']}  ({len(games_of[i])} games)" for i in ids])
     if j is None:
         return
-    chosen = sets[j]
-    rows = edit.set_rows(chosen, shown, lambda s: keys_of(s["bucket"]))
+    tag = defs[ids[j]]
+    games = [{"system": k.partition("/")[0], "bucket": k, **({"files": records[k]["files"]} if "files" in records[k] else {})}
+             for k in games_of[ids[j]]]
+    rows = edit.list_rows({"games": games}, shown, lambda s: keys_of(s["bucket"]))
     if not rows:
-        edit.note(ui.yellow(f"ℹ️  {themeart.set_emoji(chosen)} {chosen['name']} has no games on known systems."))
+        edit.note(ui.yellow(f"ℹ️  {tag['emoji']} {tag['name']} has no games on known systems."))
         return
     had = {g["bucket"] for s in shown.values() for g in s["games"]}
     interrupted = False
     try:
-        edit.toggle_games(f"✏️  {themeart.set_emoji(chosen)} {chosen['name']} — ✅ in {label}, ⬜ not", rows)
+        edit.toggle_games(f"✏️  {tag['emoji']} {tag['name']} — ✅ in {label}, ⬜ not", rows)
     except KeyboardInterrupt:
         interrupted = True
     added = {g["bucket"] for s in shown.values() for g in s["games"]} - had
-    try:
-        category = ask_category(listing["games"], f"{len(added)} new game(s)") if categories and added and not interrupted else ""
-    except KeyboardInterrupt:  # Ctrl-C at the question: no category
-        category, interrupted = "", True
-    listing["games"] = reconcile(listing["games"], shown, category)
-    files = {g["bucket"]: g["files"] for g in chosen["games"] if g.get("bucket") and g.get("files")}
+    listing["games"] = reconcile(listing["games"], shown)
+    files = {g["bucket"]: g["files"] for g in games if g.get("files")}
     for g in listing["games"]:
         if g.get("bucket") in added and g["bucket"] in files and "files" not in g:
             g["files"] = list(files[g["bucket"]])
@@ -257,7 +168,7 @@ def game_line(game):
 
 
 def diff_lists(before, after):
-    """[(kind, id, [lines])] for every games list (set or collection) that was created, removed or changed; kind is new,
+    """[(kind, id, [lines])] for every games list (a collection) that was created, removed or changed; kind is new,
     removed or changed."""
     found = []
     for sid in sorted(set(before) | set(after)):
@@ -274,15 +185,10 @@ def diff_lists(before, after):
             new = {g["bucket"]: g for g in b["games"] if g.get("bucket")}
             lines += [f"+ {game_line(new[k])}" for k in new if k not in old]
             lines += [f"- {game_line(old[k])}" for k in old if k not in new]
-            lines += [f"~ {game_line(new[k])}: category {old[k].get('category') or 'none'} → {new[k].get('category') or 'none'}"
-                      for k in new if k in old and (old[k].get("category") or "") != (new[k].get("category") or "")]
             for k in new:
                 if k not in old:
                     continue
-                if (old[k].get("series") or "") != (new[k].get("series") or ""):
-                    lines.append(f"~ {game_line(new[k])}: series {old[k].get('series') or 'none'} → {new[k].get('series') or 'none'}")
-                other = sorted(f for f in set(old[k]) | set(new[k])
-                               if f not in ("category", "series") and old[k].get(f) != new[k].get(f))
+                other = sorted(f for f in set(old[k]) | set(new[k]) if old[k].get(f) != new[k].get(f))
                 if other:
                     lines.append(f"~ {game_line(new[k])}: {', '.join(other)} changed")
             if not lines and [g["bucket"] for g in a["games"] if g.get("bucket")] != [g["bucket"] for g in b["games"] if g.get("bucket")]:
@@ -299,10 +205,10 @@ def print_changes(found):
             print((ui.green if line.startswith("+") else ui.red if line.startswith("-") else str)(f"    {line}"))
 
 
-# --- The sets and collections menu -------------------------------------------------------------------
+# --- The collections menu -------------------------------------------------------------------
 
 def edit_menu(noun, before, working, state, emoji, art, delete_note, new_item, open_item, save, question, empty_ok=True):
-    """The menu of the games lists in working ({id: list}, before as loaded) for the set or collection editor (noun);
+    """The menu of the games lists in working ({id: list}, before as loaded) for the collection editor (noun);
     Done and Esc review the changes and ask question (save, keep editing or discard). state["review"] starts at that
     review and stays true until the user goes back to editing; when that review ends the editor, returns None.
     Returns the exit code.
@@ -381,34 +287,22 @@ def all_rows(shown, systems, keys_of):
     return sorted(rows, key=lambda r: (store.sort_key(r[2]), names[r[0]["bucket"]]))
 
 
-def pick_row_set(sets, row_keys, current=None):
-    """A set with a game among row_keys, picked from a list; None when none is picked or no set has one."""
-    shown = [(x, n) for x in sets for n in [sum(g["bucket"] in row_keys for g in store.set_games(x))] if n]
-    if not shown:
-        edit.note(ui.yellow("ℹ️  No set has games among these."))
-        return None
-    i = picker.filter_list("Narrow to a set", [f"{themeart.set_emoji(x)} {x['name']}  ({n} games)" for x, n in shown],
-                           cursor=next((j for j, (x, _) in enumerate(shown) if x["name"] == current), 0))
-    return None if i is None else shown[i][0]
-
-
-def toggle_all(title, rows, sets, place=None):
-    """edit.toggle_games over rows from all_rows, with s narrowing to a set and c clearing that and the / filter."""
+def toggle_all(title, rows, place=None):
+    """edit.toggle_games over rows from all_rows, with s narrowing by tags and c clearing that and the / filter."""
     from . import cardedit  # cardedit imports this module
-    chosen = None
+    tag_filter = tagui.TagFilter()
     place = {} if place is None else place
-    key_help = [(cardedit.SET_KEY, "narrow to a set"), (cardedit.CLEAR_KEY, "clear filters")]
+    key_help = [(cardedit.SET_KEY, "narrow by tags"), (cardedit.CLEAR_KEY, "clear filters")]
     while True:
-        keep = {g["bucket"] for g in store.set_games(chosen)} if chosen else None
         pressed = edit.toggle_games(
-            title, [r for r in rows if keep is None or r[1] in keep],
+            title, [r for r in rows if tag_filter.keep(r[1])],
             hotkeys=(cardedit.SET_KEY, cardedit.CLEAR_KEY),
-            hint="Space toggle · Enter done · s set · c clear filters", key_help=key_help, place=place, select_all=False,
-            filters=f"{themeart.set_emoji(chosen)} {chosen['name']} only (c clear filters)" if chosen else "")
+            hint="Space toggle · Enter done · s tag · c clear filters", key_help=key_help, place=place,
+            select_all=False, filters=f"{tag_filter.describe()} (c clear filters)" if tag_filter.describe() else "")
         if pressed == cardedit.CLEAR_KEY:
-            chosen = None
+            tag_filter.clear()
             place.get("session", {}).pop("query", None)
         elif pressed == cardedit.SET_KEY:
-            chosen = pick_row_set(sets, {r[1] for r in rows}, chosen and chosen["name"]) or chosen
+            tag_filter.pick({r[1] for r in rows})
         else:
             return

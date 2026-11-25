@@ -63,9 +63,9 @@ def game_costs(card, system, keys):
     return {k: roms[k] + known[k[len(bucket) + 1:]] for k in sized}, partial
 
 
-def _merged(card, systems, sets):
-    """{system bucket: its store.merge_lists entry} of the card's games and the sets they reference, expanded once."""
-    return {s["bucket"]: s for s in store.merge_lists([{"bucket": s["bucket"]} for s in systems], [card.get("games") or {}], sets)}
+def _merged(card, systems):
+    """{system bucket: its store.merge_lists entry} of the card's games."""
+    return {s["bucket"]: s for s in store.merge_lists([{"bucket": s["bucket"]} for s in systems], [card.get("games") or {}])}
 
 
 def _system_keys(card, system, games, collections_by_id):
@@ -101,16 +101,16 @@ def _collections_by_id():
 
 
 def system_usage(card, system):
-    """Usage of one system on a card: its direct picks, set references and full system, minus the card's exclusions
+    """Usage of one system on a card: its direct picks and full system, minus the card's exclusions
     (a full system ignores them, as sync does). Sizes not cached yet count as 0 and make the usage partial; a picked
     game not in storage (absent from a cached listing) counts as 0 and is not partial; a system with nothing picked is
     0 and not partial."""
-    return _system_usage(card, system, _merged(card, [system], store.load_sets())[system["bucket"]], _collections_by_id())
+    return _system_usage(card, system, _merged(card, [system])[system["bucket"]], _collections_by_id())
 
 
 def system_usages(card, systems):
-    """{system bucket: Usage} for each of the systems (the sets are read and expanded once)."""
-    merged, by_id = _merged(card, systems, store.load_sets()), _collections_by_id()
+    """{system bucket: Usage} for each of the systems."""
+    merged, by_id = _merged(card, systems), _collections_by_id()
     return {s["bucket"]: _system_usage(card, s, merged[s["bucket"]], by_id) for s in systems}
 
 
@@ -127,7 +127,7 @@ def fetch_bytes(system, keys, to_fetch):
 
 def card_fetch_bytes(card, systems, to_fetch):
     """fetch_bytes over every system the card syncs: how much of its ROMs a sync would download."""
-    merged, by_id = _merged(card, systems, store.load_sets()), _collections_by_id()
+    merged, by_id = _merged(card, systems), _collections_by_id()
     return sum(fetch_bytes(s, _system_keys(card, s, merged[s["bucket"]], by_id), to_fetch) for s in systems)
 
 

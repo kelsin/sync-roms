@@ -6,7 +6,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from sync_roms import cardedit, edit, languages, setedit  # noqa: E402
+from sync_roms import cardedit, edit, languages  # noqa: E402
 
 
 class LanguagesTest(unittest.TestCase):
@@ -62,17 +62,17 @@ class EditorColumnsTest(unittest.TestCase):
     def test_row_extras_flag_column(self):
         sp = types.SimpleNamespace(bucket="gba", groups={}, bundled={}, locked_from={}, surprise=set(), in_storage=set())
         work = {"costs": {"gba": {"gba/Mother 3 (Japan).zip": 2048}}}
-        out = cardedit._row_extras(sp, work, "gba/Mother 3 (Japan).zip", {}, False)
-        self.assertEqual(out[3], ("  \U0001F1EF\U0001F1F5", "dim"))
-        self.assertEqual(out[4], ("  " + cardedit.size_text(2048), "dim"))
-        out = cardedit._row_extras(sp, work, "gba/VitaShell.vpk", {}, False)
-        self.assertEqual(out[3], ("", "dim"))
-        self.assertEqual(len(out), 5)
+        out = cardedit._row_extras(sp, work, "gba/Mother 3 (Japan).zip")
+        self.assertEqual(out[2], ("  \U0001F1EF\U0001F1F5", "dim"))
+        self.assertEqual(out[3], ("  " + cardedit.size_text(2048), "dim"))
+        out = cardedit._row_extras(sp, work, "gba/VitaShell.vpk")
+        self.assertEqual(out[2], ("", "dim"))
+        self.assertEqual(len(out), 4)
 
     def test_full_system_row_flag_extras(self):
         key = "psx/Parappa (Japan).zip"
         system = {"bucket": "psx"}
-        picks = types.SimpleNamespace(cover=lambda: {})
+        picks = types.SimpleNamespace()
         seen = {}
 
         def fake(title, labels, **kw):
@@ -82,7 +82,7 @@ class EditorColumnsTest(unittest.TestCase):
                 mock.patch.object(cardedit.previews, "game_pane", return_value={}):
             cardedit._games_pass("t", [(system, key, "Parappa", "Parappa")], picks, {}, {}, {key: True}, {}, None,
                                  None, {})
-        self.assertEqual(seen["extras"], [[("", "dim")] * 3 + [("  \U0001F1EF\U0001F1F5", "dim")]])
+        self.assertEqual(seen["extras"], [[("", "dim")] * 2 + [("  \U0001F1EF\U0001F1F5", "dim"), ("", "")]])
 
     def test_variant_picker_flag_extras(self):
         picks = types.SimpleNamespace(
@@ -95,7 +95,7 @@ class EditorColumnsTest(unittest.TestCase):
             return None
         with mock.patch.object(cardedit.picker, "filter_list", fake):
             cardedit._toggle_variant(picks, "gba/A.zip", "A")
-        self.assertEqual(seen["extras"], [[("  \U0001F1EF\U0001F1F5", "dim")], [("  \U0001F1FA\U0001F1F8", "dim")]])
+        self.assertEqual(seen["extras"], [[("  \U0001F1EF\U0001F1F5", "dim"), ("", "")], [("  \U0001F1FA\U0001F1F8", "dim"), ("", "")]])
 
     def test_toggle_games_flag_extras(self):
         system = {"bucket": "gba", "games": [{"bucket": "gba/Mother 3 (Japan).zip"}]}
@@ -107,18 +107,7 @@ class EditorColumnsTest(unittest.TestCase):
             return kw["initial"]
         with mock.patch.object(edit.picker, "filter_list", fake):
             edit.toggle_games("t", rows)
-        self.assertEqual(seen["extras"], [[("  \U0001F1EF\U0001F1F5", "dim")]])
-
-    def test_pick_game_flag_extras(self):
-        games = [{"title": "Mother 3", "bucket": "gba/Mother 3 (Japan).zip"}]
-        seen = {}
-
-        def fake(title, labels, **kw):
-            seen.update(kw)
-            return 0
-        with mock.patch.object(setedit.picker, "filter_list", fake):
-            self.assertEqual(setedit.pick_game("t", games, {"gba": "GBA"}), 0)
-        self.assertEqual(seen["extras"], [[("  \U0001F1EF\U0001F1F5", "dim")]])
+        self.assertEqual(seen["extras"], [[("  \U0001F1EF\U0001F1F5", "dim"), ("", "")]])
 
 
 if __name__ == "__main__":

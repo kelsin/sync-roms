@@ -1,4 +1,4 @@
-"""Art Book Next artwork for custom collections (Surprise and the ones given art) and sets on ES-DE, Knulli, EmuDeck,
+"""Art Book Next artwork for custom collections (Surprise and the ones given art) on ES-DE, Knulli, EmuDeck,
 muOS, ROCKNIX and Spruce cards."""
 import contextlib
 import functools
@@ -18,7 +18,6 @@ from . import cardfs, downloads, frontend, github, rocknix_collections, runtime,
 THEME_DATA = os.path.join(store.REPO_DATA, "themes", "art-book-next")
 SURPRISE_ART = "surprise"
 DEFAULT_EMOJI = "💖"  # a collection with no art
-SET_EMOJI = "📦"  # a set with no emoji of its own yet
 # The Outline-style artwork a collection can use, by id: art/<id>.png; art.json has the labels the editor shows.
 # Logos are drawn from the outlines of the theme's logo font (logo-font.json, from Changa One: see OFL.txt).
 
@@ -77,16 +76,6 @@ def _emoji():
 def art_emoji(art_id, default=DEFAULT_EMOJI):
     """The emoji that stands for a piece of art in the editors: its own, or default when it has no art."""
     return _emoji().get(art_id, default) if art_id else default
-
-
-def set_art(game_set):
-    """The art id a set shows (its emoji and its preview): its "art", else its id."""
-    return game_set.get("art") or game_set.get("id")
-
-
-def set_emoji(game_set):
-    """A set's emoji: its art's in emoji.json (set_art), or SET_EMOJI when it has none. Display only, never stored."""
-    return art_emoji(set_art(game_set), SET_EMOJI)
 
 
 def collection_emoji(collection):

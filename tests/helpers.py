@@ -231,26 +231,28 @@ class ScriptDir(StorageDir):
         return code, out.getvalue()
 
 
-def storage_sets(test, sets, root=None):
-    """Put game sets in storage as sets/<id>.json and make store.load_sets() read them (once, as a run does).
+def storage_tags(test, data, root=None):
+    """Put tags in storage as tags.json and make tags.load() read them (once, as a run does).
 
-    sets: {id: set (written with store.set_text) or str (the file's exact text)}. root: the storage folder already
-    wired in as runtime.ROOT (a StorageDir's); without it a throwaway one is made and wired in, its local copies going
+    data: the tags data (written with tags.dump), a str (the file's exact text) or None (no file). root: the storage
+    folder already wired in as runtime.ROOT; without it a throwaway one is made and wired in, its local copies going
     to store.data_dir() (patch that first). Returns the storage folder."""
-    from sync_roms import inventory
+    from sync_roms import inventory, tags
     if root is None:
         root = test.enterContext(tempfile.TemporaryDirectory())
         for name, value in (("ROOT", root), ("BUCKET", None), ("ENDPOINT", None), ("_mirror_root", None)):
             test.enterContext(mock.patch.object(runtime, name, value))
-        inventory.reset()
-        test.addCleanup(inventory.reset)
-    os.makedirs(os.path.join(root, "sets"), exist_ok=True)
-    for set_id, game_set in sets.items():
-        with open(os.path.join(root, "sets", set_id + ".json"), "w", encoding="utf-8") as f:
-            f.write(game_set if isinstance(game_set, str) else store.set_text(game_set))
-    store.reset_sets()
-    test.addCleanup(setattr, store, "_sets", "[]")  # back to no sets, as isolate leaves it (last: cleanups run in reverse)
-    test.addCleanup(store.reset_sets)  # nothing of this read (its fallback flag, skipped files) outlives the test
+    path = os.path.join(root, tags.KEY)
+    if data is None:
+        if os.path.exists(path):
+            os.remove(path)
+    else:
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(data if isinstance(data, str) else tags.dump(data))
+    inventory.reset()
+    test.addCleanup(inventory.reset)
+    tags.reset()
+    test.addCleanup(tags._set, tags._empty())  # back to no tags, as isolate leaves it
     return root
 
 

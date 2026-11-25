@@ -487,7 +487,7 @@ class PortsLeftOutTest(DataDir):
     def test_surprise_never_picks_ports_on_spruce(self):
         store.update_card("SD", layout="spruce", surprises=[{"system": "ports", "bucket": PORT_KEY, "title": "Celeste"}])
         pools = []
-        with mock.patch.object(surprise, "_pools", lambda systems, taken: pools.append(systems) or {}), \
+        with mock.patch.object(surprise, "_pools", lambda systems, taken, tag_keys=None: pools.append(systems) or {}), \
                 contextlib.redirect_stdout(io.StringIO()):
             got = surprise.fill_surprises("SD", (device_of("anbernic-rg-35xxh"), "spruce"), [GBA_SPRUCE, PORTS], True)
         self.assertEqual(got, [])
@@ -553,7 +553,7 @@ class PortsLeftOutTest(DataDir):
         self.assertEqual(list(to_fetch(GBA_SPRUCE, ["gba/Game.zip"])), ["gba/Game.zip"])
         cache = {"gba/": {"gba/Game.zip": 5}, "ports/": {PORT_KEY: 3}, "scrapes/gba/": {}, "scrapes/ports/": {}}
         card = {"layout": "spruce", "games": {"gba": [{"bucket": "gba/Game.zip"}], "ports": [{"bucket": PORT_KEY}]}}
-        with mock.patch.object(budget.inventory, "cached", cache.get), mock.patch.object(store, "load_sets", lambda: []):
+        with mock.patch.object(budget.inventory, "cached", cache.get):
             self.assertEqual(tuple(budget.card_usage(card, [GBA_SPRUCE, PORTS])), tuple(budget.card_usage(card, [GBA_SPRUCE])))
             self.assertEqual(budget.system_usage(card, PORTS).bytes, 0)
             self.assertEqual(budget.card_fetch_bytes(card, [GBA_SPRUCE, PORTS], to_fetch), 5)

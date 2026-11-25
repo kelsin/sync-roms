@@ -14,7 +14,6 @@ SCRAPES = {"scrapes/gba/screenshots/A.png": 10, "scrapes/gba/onion/A.png": 3,
            "scrapes/gba/screenshots/B.png": 20}
 VITA = {"bucket": "psvita", "name": "Vita"}
 UPD = "psvita/G [PCSE00349] [USA] [PATCH] [v1.02] [NoNpDRM].zip"
-SET = {"id": "s", "name": "S", "games": [{"system": "gba", "bucket": "gba/A.zip"}, {"system": "gba", "bucket": "gba/B.zip"}]}
 
 
 def g(key):
@@ -27,7 +26,6 @@ class Budget(DataDir):
         self.cache = {"gba/": SIZES, "scrapes/gba/": SCRAPES}
         for target, new in (("cached", lambda p: self.cache.get(p)), ):
             self.enterContext(mock.patch.object(inventory, target, new))
-        self.enterContext(mock.patch("sync_roms.store.load_sets", lambda: [SET]))
 
     def usage(self, card, layout="onion"):
         return budget.system_usage({"layout": layout, **card}, GBA)
@@ -56,9 +54,9 @@ class Budget(DataDir):
         off = {"layout": "other", "games": {"gba": [g("gba/A.zip")]}, "systems_off": ["gba"]}
         self.assertEqual(budget.card_usage(off, [gba]).bytes, budget.card_usage({"layout": "other"}, [gba]).bytes)
 
-    def test_direct_and_set_count_once(self):
+    def test_old_set_references_count_nothing(self):
         u = self.usage({"games": {"gba": [g("gba/A.zip")], "sets": ["s"]}}, "other")
-        self.assertEqual((u.bytes, u.count), (300, 2))
+        self.assertEqual((u.bytes, u.count), (100, 1))
 
     def test_full_system(self):
         u = self.usage({"games": {"gba": {"full_system": True}}}, "other")
@@ -91,7 +89,9 @@ class Budget(DataDir):
         self.assertEqual(budget.fetch_bytes(VITA, None, lambda s, keys: set(keys)), 0)
 
     def test_excluded(self):
-        u = self.usage({"games": {"sets": ["s"]}, "excluded": {"gba": ["gba/A.zip"]}}, "other")
+        fav = {"id": "fav", "name": "Fav", "games": [{"system": "gba", "bucket": "gba/A.zip"}, {"system": "gba", "bucket": "gba/B.zip"}]}
+        with mock.patch("sync_roms.collections.load_collections", lambda: [fav]):
+            u = self.usage({"collections": ["fav"], "excluded": {"gba": ["gba/A.zip"]}}, "other")
         self.assertEqual((u.bytes, u.count), (200, 1))
 
     def test_full_usage_is_every_file_its_scrapes_and_the_system_bios(self):
@@ -160,10 +160,10 @@ class Budget(DataDir):
         self.cache.pop("scrapes/gba/")
         self.assertEqual(budget.game_costs({"layout": "esde"}, GBA, ["gba/A.zip"]), ({"gba/A.zip": 100}, True))
 
-    def test_system_usages_expands_the_sets_once(self):
+    def test_system_usages_merges_the_lists_once(self):
         gb = {"bucket": "gb", "name": "GB"}
         self.cache["gb/"] = {"gb/T.gb": 7}
-        card = {"layout": "onion", "games": {"gba": [g("gba/C.zip")], "gb": [g("gb/T.gb")], "sets": ["s"]}}
+        card = {"layout": "onion", "games": {"gba": [g("gba/C.zip"), g("gba/A.zip"), g("gba/B.zip")], "gb": [g("gb/T.gb")]}}
         real, calls = store.merge_lists, []
         with mock.patch.object(store, "merge_lists", lambda *a: calls.append(a) or real(*a)):
             usages = budget.system_usages(card, [GBA, gb])

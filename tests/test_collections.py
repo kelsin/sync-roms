@@ -6,7 +6,6 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-import helpers  # noqa: E402
 from helpers import DataDir  # noqa: E402
 from sync_roms import collections, commands, store, ui  # noqa: E402
 
@@ -175,12 +174,6 @@ class Selection(DataDir):
                                              "excluded": {"gba": ["gba/Ruby.zip"]}}})
         self.assertEqual([g["bucket"] for g in self.gba()["games"]], ["gba/A.zip", "gba/Zelda.zip"])
 
-    def test_a_key_from_a_set_and_a_collection_excluded_is_gone(self):
-        helpers.storage_sets(self, {"s": {"name": "S", "games": [{"title": "Ruby", "system": "gba", "bucket": "gba/Ruby.zip"}]}})
-        self.write_json("cards.json", {"c": {"device": "full", "layout": "esde", "collections": ["favs"],
-                                             "games": {"sets": ["s"]}, "excluded": {"gba": ["gba/Ruby.zip"]}}})
-        self.assertEqual(self.gba()["games"], [])
-
     def test_load_manifest_keeps_excluded_surprises(self):
         self.write_json("cards.json", {"c": {"device": "full", "layout": "esde", "surprise": True,
                                              "surprises": [{"system": "gba", "bucket": "gba/Surp.zip", "title": "Surp"}],
@@ -194,10 +187,8 @@ class Selection(DataDir):
         self.assertTrue(self.gba()["full_system"])
 
     def test_systems_off_blank_the_system_and_keep_the_card(self):
-        helpers.storage_sets(self, {"s": {"name": "S", "games": [{"title": "B", "system": "gba", "bucket": "gba/B.zip"},
-                                                                 {"title": "N", "system": "nes", "bucket": "nes/N.zip"}]}})
         card = {"device": "full", "layout": "esde", "collections": ["favs"], "excluded": {"gba": ["gba/X.zip"]},
-                "games": {"gba": [{"bucket": "gba/A.zip"}], "sets": ["s"]}, "systems_off": ["gba"]}
+                "games": {"gba": [{"bucket": "gba/A.zip"}], "nes": [{"bucket": "nes/N.zip"}]}, "systems_off": ["gba"]}
         self.write_json("cards.json", {"c": card})
         manifest = store.load_manifest(["c"])
         gba = next(s for s in manifest["systems"] if s["bucket"] == "gba")

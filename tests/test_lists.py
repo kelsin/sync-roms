@@ -20,17 +20,11 @@ def systems():
     return [{"bucket": "gba"}, {"bucket": "ps2"}]
 
 
-def merged(lists, sets=()):
+def merged(lists):
     err = io.StringIO()
     with contextlib.redirect_stderr(err):
-        out = store.merge_lists(systems(), lists, list(sets))
+        out = store.merge_lists(systems(), lists)
     return {s["bucket"]: s for s in out}, err.getvalue()
-
-
-MULTI = {"id": "multi", "name": "Multi", "games": [
-    {"title": "Multi", "system": "ps2", "bucket": "ps2/M.m3u", "files": ["ps2/M (Disc 1).chd", "ps2/M (Disc 2).chd"]},
-    {"title": "Other", "system": "nes", "bucket": "nes/O.zip"},
-]}
 
 
 class MergeLists(unittest.TestCase):
@@ -39,11 +33,10 @@ class MergeLists(unittest.TestCase):
         self.assertEqual([g["bucket"] for g in by["gba"]["games"]], ["gba/A.zip", "gba/B.zip"])
         self.assertEqual([g["bucket"] for g in by["ps2"]["games"]], ["ps2/C.iso"])
 
-    def test_set_ref_expands_with_files(self):
-        by, _ = merged([{"sets": ["multi"]}], [MULTI])
-        self.assertEqual([g["bucket"] for g in by["ps2"]["games"]],
-                         ["ps2/M.m3u", "ps2/M (Disc 1).chd", "ps2/M (Disc 2).chd"])
-        self.assertEqual(by["gba"]["games"], [])
+    def test_old_set_references_add_nothing(self):
+        by, err = merged([{"gba": [game("gba/A.zip")], "sets": ["multi"]}])
+        self.assertEqual([g["bucket"] for g in by["gba"]["games"]], ["gba/A.zip"])
+        self.assertEqual((by["ps2"]["games"], err), ([], ""))
 
     def test_full_system_from_either_list(self):
         by, _ = merged([{"gba": {"full_system": True}}, {"gba": [game("gba/X.zip")]}])
@@ -51,18 +44,12 @@ class MergeLists(unittest.TestCase):
         self.assertFalse(by["ps2"]["full_system"])
 
     def test_dedupe_by_bucket(self):
-        by, _ = merged([{"gba": [game("gba/A.zip")]}, {"gba": [game("gba/A.zip")]}, {"sets": ["s"]}],
-                       [{"id": "s", "games": [{"system": "gba", "bucket": "gba/A.zip"}]}])
+        by, _ = merged([{"gba": [game("gba/A.zip")]}, {"gba": [game("gba/A.zip")]}])
         self.assertEqual(len(by["gba"]["games"]), 1)
-
-    def test_unknown_set_is_skipped_quietly(self):  # load_manifest warns once per card (budget merges it often)
-        by, err = merged([{"sets": ["nope", "multi"]}], [MULTI])
-        self.assertEqual(err, "")
-        self.assertEqual(len(by["ps2"]["games"]), 3)
 
     def test_bad_shapes_ignored(self):
         for raw in ({"sets": "multi"}, {"sets": [1, None]}, {"gba": None}, {"gba": 5}):
-            by, _ = merged([raw], [MULTI])
+            by, _ = merged([raw])
             self.assertEqual(by["gba"]["games"], [])
             self.assertEqual(by["ps2"]["games"], [])
 
@@ -71,14 +58,6 @@ class OddEntries(unittest.TestCase):
     def test_apply_games_drops_non_dict_entries(self):
         out = store.apply_games([{"bucket": "gba"}], {"gba": ["x", None, game("gba/A.zip")]})
         self.assertEqual(out[0]["games"], [game("gba/A.zip")])
-
-    def test_bad_sets_warning_printed_once(self):
-        store._warned.clear()
-        err = io.StringIO()
-        with contextlib.redirect_stderr(err):
-            for _ in range(3):
-                self.assertEqual(store.list_sets({"sets": "mario"}), [])
-        self.assertEqual(err.getvalue().count("must be a list"), 1)
 
 
 class CardLists(DataDir):
@@ -129,6 +108,19 @@ class CardLists(DataDir):
         self.assertEqual([g["bucket"] for g in by["gba"]["games"]], ["gba/B.zip"])
         by = {s["bucket"]: s for s in store.load_manifest(["d"])["systems"]}
         self.assertEqual([g["bucket"] for g in by["gba"]["games"]], ["gba/A.zip", "gba/B.zip"])
+
+    def test_a_card_with_old_set_references_syncs_only_its_own_picks(self):
+        self.write_json("cards.json", {"c": {"games": {"gba": [game("gba/A.zip")], "sets": ["mix", "gone"]}}})
+        err = io.StringIO()
+        with contextlib.redirect_stderr(err):
+            by = {s["bucket"]: s for s in store.load_manifest(["c"])["systems"]}
+        self.assertEqual([g["bucket"] for g in by["gba"]["games"]], ["gba/A.zip"])
+        self.assertEqual(err.getvalue(), "")
+
+    def test_saving_a_list_drops_old_set_references(self):
+        self.write_json("cards.json", {"c": {"layout": "esde", "games": {"sets": ["mix"]}}})
+        store.save_lists({"c": {"gba": [game("gba/A.zip")], "sets": ["mix"]}})
+        self.assertEqual(self.read("cards.json")["c"], {"layout": "esde", "games": {"gba": [game("gba/A.zip")]}})
 
     def test_all_card_names(self):
         self.write_json("cards.json", {"b": {}, "a": {}})

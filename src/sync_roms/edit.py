@@ -1,9 +1,8 @@
 """The --edit game list editor."""
 import os
-import sys
 from collections import defaultdict
 
-from . import languages, names, picker, previews, runtime, s3, store, surprise, themeart, ui, vita
+from . import languages, names, picker, previews, runtime, s3, store, surprise, tags, tagui, ui, vita
 
 
 def note(text):
@@ -51,10 +50,10 @@ def note_text(games, key):
 
 def save_note(games, key, text, covered=False):
     """Save the note typed after `w` for the game listed under key in games; the message the list shows. covered: the
-    game is on only because a set or collection brings it, so it has no direct pick to hold a note."""
+    game is on only because a collection brings it, so it has no direct pick to hold a note."""
     if not set_note({"games": games}, key, text):
         if covered:
-            return "Notes go only on games picked directly; this one comes from a set or collection"
+            return "Notes go only on games picked directly; this one comes from a collection"
         return "Switch the game on and press Enter first, then add its note"
     return "Note saved" if text else "Note cleared"
 
@@ -62,16 +61,33 @@ def save_note(games, key, text, covered=False):
 FULL_SYSTEM_NOTE = "Full system: every file in its folder is synced, so it can't be toggled"
 
 
-def toggle_games(title, rows, hotkeys=(), hint=None, place=None, filters="", key_help=None, select_all=True):
+def toggle_games(title, rows, hotkeys=(), hint=None, place=None, filters="", key_help=None, select_all=True, notes=True):
+    """_toggle_games, reopened in the same place after `t` edited a game's tags (the toggles made so far are applied
+    first); the other keys are returned as it does."""
+    place = {} if place is None else place
+    while True:
+        pressed, i = _toggle_games(title, rows, hotkeys, hint, place, filters, key_help, select_all, notes)
+        if pressed != tagui.TAG_KEY:
+            return pressed
+        if i is not None:
+            tagui.edit_game_tags(rows[i][1], rows[i][2])
+
+
+def _toggle_games(title, rows, hotkeys, hint, place, filters, key_help, select_all, notes):
     """Multi-select over rows of (system, bucket key, game title, label); adds/removes games in each system in place.
+    Returns (key pressed or None, its row's index).
 
     Rows of a full system are shown on and locked: its whole storage folder is synced.
     hotkeys/hint/key_help: extra keys the list offers (the hint line to show, and the (keys, what they do) pairs ?
     lists). The toggles made so far are applied, and the key pressed is returned (None on Enter). place: a dict the caller keeps across calls, so a list of the same rows
     opens where the last one was left (picker.carry_place). filters: the caller's filters, for the filter line.
-    select_all: False turns the list's `a` (toggle all shown) off.
+    select_all: False turns the list's `a` (toggle all shown) off. notes: False turns `w` off, for lists whose rows
+    keep no notes.
     Ctrl-C applies the toggles made so far, then raises KeyboardInterrupt.
     """
+    hint = hint or (GAMES_HINT if notes else GAMES_HINT.replace(" · w note", ""))
+    hint += "" if " t tags" in hint else " · t tags"
+    key_help = key_help if key_help is None or any(k == tagui.TAG_KEY for k, _ in key_help) else [*key_help, tagui.KEY_HELP]
     locked = [bool(s.get("full_system")) for s, *_ in rows]
     have = {}  # system bucket -> keys of its listed games, kept current as games are added and removed
 
@@ -81,24 +97,24 @@ def toggle_games(title, rows, hotkeys=(), hint=None, place=None, filters="", key
         return have[s["bucket"]]
 
     initial = [lock or key in listed(s) for lock, (s, key, _, _) in zip(locked, rows)]
-    variants, parents = store.variant_index(store.load_sets())
+    variants, parents = tags.variant_index()
     system_names = {s["bucket"]: s["name"] for s in store.repo_json("systems")}
     session = {"sel": list(initial)}
-    if place is not None:
-        picker.carry_place(place, [key for _, key, _, _ in rows], session)
+    picker.carry_place(place, [key for _, key, _, _ in rows], session)
+    extras = [[languages.column(key), tag] for (_, key, _, _), tag in zip(rows, tagui.column([r[1] for r in rows]))]
     interrupted = False
     try:
         state = picker.filter_list(title, [label for *_, label in rows], multi=True, initial=initial, locked=locked,
-                                   locked_note=[FULL_SYSTEM_NOTE if lock else "" for lock in locked], hint=hint or GAMES_HINT, key_help=key_help,
-                                   note_text=lambda i: note_text(rows[i][0]["games"], rows[i][1]),
-                                   on_note=lambda i, text: save_note(rows[i][0]["games"], rows[i][1], text),
-                                   hotkeys=hotkeys, session=session, filters=filters,
+                                   locked_note=[FULL_SYSTEM_NOTE if lock else "" for lock in locked], hint=hint, key_help=key_help,
+                                   note_text=(lambda i: note_text(rows[i][0]["games"], rows[i][1])) if notes else None,
+                                   on_note=(lambda i, text: save_note(rows[i][0]["games"], rows[i][1], text)) if notes else None,
+                                   hotkeys=(*hotkeys, tagui.TAG_KEY), session=session, filters=filters,
                                    row_note=lambda i: variant_line(rows[i][1], variants, parents, system_names),
-                                   select_all=select_all, extras=[[languages.column(key)] for _, key, _, _ in rows],
+                                   select_all=select_all, extras=extras,
                                    **previews.game_pane([key for _, key, _, _ in rows]))
     except KeyboardInterrupt:  # Ctrl-C: the toggles made so far are applied, then the caller gets the Ctrl-C
         interrupted, state = True, session["sel"]
-    pressed = state[0] if isinstance(state, tuple) else None
+    pressed, at = state if isinstance(state, tuple) else (None, None)
     if pressed:
         state = session["sel"]
     removed = defaultdict(set)  # system bucket -> keys to drop from its games
@@ -117,7 +133,7 @@ def toggle_games(title, rows, hotkeys=(), hint=None, place=None, filters="", key
         systems[bucket]["games"] = [g for g in systems[bucket]["games"] if g.get("bucket") not in keys]
     if interrupted:
         raise KeyboardInterrupt
-    return pressed
+    return pressed, at
 
 
 def system_rows(s, in_bucket):
@@ -141,13 +157,12 @@ def edit_card_system(card, bucket, setup):
     return cardedit.edit_system(card, system, setup)
 
 
-def set_rows(game_set, by_bucket, bucket_keys):
-    """Rows for one set, grouped by category (in file order) then sorted by system and title.
+def list_rows(listing, by_bucket, bucket_keys):
+    """Rows for one games list (a collection, a tag's games), sorted by system and title.
 
     Entries for unknown systems are skipped."""
     rows, seen = [], set()
-    order = {}
-    for g in game_set["games"]:
+    for g in listing["games"]:
         s = by_bucket.get(g.get("system"))
         key = g.get("bucket")
         if not s or not key or key in seen:
@@ -157,10 +172,8 @@ def set_rows(game_set, by_bucket, bucket_keys):
         have = bucket_keys(s)
         warn = "" if s.get("full_system") or all(k in have for k in [key] + list(g.get("files", []))) \
             else "  ⚠️ not in storage"
-        cat = g.get("category") or ""
-        order.setdefault(cat, len(order))
-        rows.append((cat, (s, key, title, f"{cat + ' — ' if cat else ''}{s['name']} — {title}{warn}")))
-    return [r for _, r in sorted(rows, key=lambda c: (order[c[0]], c[1][0]["name"].lower(), store.sort_key(c[1][2])))]
+        rows.append((s, key, title, f"{s['name']} — {title}{warn}"))
+    return sorted(rows, key=lambda r: (r[0]["name"].lower(), store.sort_key(r[2])))
 
 
 def valid_card_name(name, existing):
@@ -174,20 +187,8 @@ def valid_card_name(name, existing):
     return None
 
 
-def cover_notes(sets_by_id, own_set_ids):
-    """Why games are synced without being in the list being edited.
-
-    Returns {bucket key: note}, from the list's own set references.
-    """
-    keys = {}
-    for sid in own_set_ids:
-        for g in store.set_games(sets_by_id[sid]) if sid in sets_by_id else []:
-            keys.setdefault(g["bucket"], f"Full set: {themeart.set_emoji(sets_by_id[sid])} {sets_by_id[sid]['name']}")
-    return keys
-
-
 def variant_line(key, variants, parents, system_names, on=None):
-    """The note under a set game row about its variants, or a variant row's canonical game; "" for neither.
+    """The note under a game row about its variants, or a variant row's canonical game; "" for neither.
 
     on is None for a read-only view, else a callable(variant bucket) -> bool saying whether it is on the card.
     """
@@ -206,25 +207,18 @@ def variant_line(key, variants, parents, system_names, on=None):
     return ""
 
 
-def toggle_set_ref(sets_on, set_id):
-    """The set ids with set_id switched on or off."""
-    return [i for i in sets_on if i != set_id] if set_id in sets_on else sets_on + [set_id]
-
-
 SETUP_KEY = "v"
 DELETE_KEY = "d"
 RENAME_KEY = "r"
 MENU_HINT = "Enter open · Esc back · v device · r rename · d delete"
-GAMES_HINT = "Space toggle · Enter done · / filter · w note · a all · o view"
+GAMES_HINT = "Space toggle · Enter done · / filter · w note · a all · o view · t tags"
 
 
 def new_target(label, raw, setup=None):
-    """The editing state of one games list: its systems, set references and what they were when opened."""
+    """The editing state of one games list: its systems and what they were when opened."""
     data = {"systems": store.apply_games(store.repo_json("systems"), raw)}
-    sets_on = store.list_sets(raw)
-    return {"label": label, "data": data, "raw": dict(raw), "sets_on": sets_on, "setup": setup, "was": snapshot(data),
-            "was_full": {s["bucket"]: s["full_system"] for s in data["systems"]}, "was_sets": list(sets_on),
-            "was_notes": notes_snapshot(data)}
+    return {"label": label, "data": data, "raw": dict(raw), "setup": setup, "was": snapshot(data),
+            "was_full": {s["bucket"]: s["full_system"] for s in data["systems"]}, "was_notes": notes_snapshot(data)}
 
 
 def drop_inapplicable(t, setup):
@@ -250,28 +244,18 @@ def target_changes(t):
             key = g.get("bucket")
             if key in t["was_notes"] and notes[key] != t["was_notes"][key]:
                 added.setdefault(s["bucket"], []).append(f"{key} (note)")
-    on, was = set(t["sets_on"]), set(t["was_sets"])
-    if on - was:
-        added[store.SETS_KEY] = sorted(on - was)
-    if was - on:
-        removed[store.SETS_KEY] = sorted(was - on)
     return added, removed
 
 
 @picker.one_app
 def edit_manifest():
-    """The editor's top menu: Cards (each opens the card editor, which saves games as they change), Sets (saved to storage at its review),
+    """The editor's top menu: Cards (each opens the card editor, which saves games as they change), Tags (each edit saved to storage),
     Collections (saved as you leave the collection editor), Device systems; device/firmware and device-system changes are reviewed and saved at the end."""
     print(ui.bold("✏️  Edit mode") + ui.dim(f"  {s3.access()}"))
     if not store.cards_readable():
         ui.fail(f"{os.path.join(store.data_dir(), 'cards.json')} isn't valid JSON, so nothing could be saved. "
                 "Fix or move it first.", 3)
     manifest = store.load_manifest()
-    names = {s["bucket"] for s in manifest["systems"]}
-    for game_set in store.load_sets():
-        for g in game_set["games"]:
-            if g.get("system") not in names:
-                print(ui.yellow(f"⚠️  Set {themeart.set_emoji(game_set)} {game_set['name']}: unknown system {g.get('system')!r}, skipped"), file=sys.stderr)
 
     targets = {}  # card name -> {"label", "setup"}: a device/firmware change saved with the review (games save at once)
 
@@ -424,11 +408,11 @@ def edit_manifest():
             else:
                 add_card()
 
-    def edit_sets():
-        """The sets in storage, saved there at the set editor's review; a failure (SystemExit) returns here instead of ending the editor."""
-        from . import setedit
+    def edit_tags():
+        """The tags in storage, saved as they are changed; a failure (SystemExit) returns here instead of ending the editor."""
+        from . import tageditor
         try:
-            setedit.edit_sets()
+            tageditor.edit_tags()
         except SystemExit:
             pass  # the reason is a note, on the menu
 
@@ -440,7 +424,7 @@ def edit_manifest():
         """The top menu. Returns True to review and save, False to quit without saving."""
         try:
             while True:
-                options = ["💳 Cards", "📦 Sets", "💖 Collections", "🧩 Device systems", "✅ Done (review & save)", "🚪 Quit (card games are already saved)"]
+                options = ["💳 Cards", "🏷️ Tags", "💖 Collections", "🧩 Device systems", "✅ Done (review & save)", "🚪 Quit (card games are already saved)"]
                 extras = [[("  " + str(len(targets)) + " pending", "cyan")] if targets else [],
                           [], [], [("  " + str(len(overlay_pending)) + " edited", "cyan")] if overlay_pending else [], [], []]
                 i = picker.filter_list("✏️  What do you want to edit?  (Esc = review & save)", options, extras=extras,
@@ -450,7 +434,7 @@ def edit_manifest():
                 if i == 0:
                     edit_cards()
                 elif i == 1:
-                    edit_sets()
+                    edit_tags()
                 elif i == 2:
                     edit_collections()
                 elif i == 3:
@@ -460,7 +444,7 @@ def edit_manifest():
                     if not changed_targets() and not overlay_pending or ui.confirm("Discard your pending changes and quit?", default=False):
                         return False
         except KeyboardInterrupt:
-            print(ui.yellow("\n🛑 Interrupted — card games are saved; collection and set changes, if any, were offered for saving or review; pending device and device-system changes are kept: review them below."))
+            print(ui.yellow("\n🛑 Interrupted — card games are saved; collection changes, if any, were offered for saving or review; pending device and device-system changes are kept: review them below."))
             return True
 
     def changed_targets():
