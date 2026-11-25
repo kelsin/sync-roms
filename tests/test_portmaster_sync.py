@@ -2,6 +2,7 @@ import contextlib
 import io
 import json
 import os
+import shutil
 import sys
 import tempfile
 import unittest
@@ -9,7 +10,8 @@ import unittest
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from helpers import MANIFEST, SYSTEM, CardDir, DataDir, touch  # noqa: E402  (imports isolate first)
 import test_cli_sync  # noqa: E402
-from sync_roms import cli, portmaster, scrape_plan, store  # noqa: E402
+from unittest import mock  # noqa: E402
+from sync_roms import cli, portmaster, portmaster_catalog, scrape_plan, store  # noqa: E402
 
 PORTS = {"name": "Ports", "bucket": "ports", "folders": {"spruce": "PORTS", "knulli": "ports"}, "bios": {"files": []}, "games": []}
 PORTMASTER_DEVICES = {
@@ -132,7 +134,7 @@ class StageTest(CardDir):
     def test_stage_warns_about_a_pick_without_facts(self):
         self.put("scrapes/ports/metadata.json", b"{}")
         self.stage()
-        self.assertEqual((self.result, self.waiting()), ((0, []), []))
+        self.assertEqual((self.result, self.waiting()), ((1, []), []))
         self.assertIn(f"run sync-roms ports download --update {ZIP}", self.err)
 
     def test_stage_without_control_folder_notes_and_writes_nothing(self):
@@ -197,6 +199,20 @@ class StageTest(CardDir):
             self.assertEqual(portmaster.stage("c", device, layout, self.card, [ZIP], False, False), (0, []))
         self.assertEqual(self.waiting(), [])
 
+    def test_pick_without_facts_keeps_what_was_staged_for_it(self):
+        self.stage()
+        self.put("scrapes/ports/metadata.json", b"{}")
+        self.stage()
+        self.assertEqual((self.result, self.waiting(), self.recorded()), ((1, []), [ZIP, MONO], [ZIP, MONO]))
+
+    def test_pick_missing_from_storage_keeps_what_was_staged_for_it(self):
+        self.stage()
+        os.remove(os.path.join(self.root, "ports", ZIP))
+        out = self.stage()
+        self.assertEqual((self.result, self.waiting(), self.recorded()), ((1, []), [ZIP, MONO], [ZIP, MONO]))
+        self.assertIn(f"ports/{ZIP} isn't in storage", self.err)
+        self.assertNotIn("Open PortMaster", out)
+
 
 class PortsStageSyncTest(DataDir):
     run_sync = test_cli_sync.SyncSmokeTest.run_sync
@@ -217,7 +233,7 @@ class PortsStageSyncTest(DataDir):
                    (cli, {"free_space": lambda path: 10**9}),
                    (cli.s3, {"list_sizes": list_sizes}),
                    (cli.downloads, {"run_downloads": lambda todo, *a, **k: jobs.extend(todo) or 0}),
-                   (cli.portmaster, {"stage": lambda *a: staged.append(a) or (0, [])}))
+                   (cli.portmaster, {"stage": lambda *a: staged.append(a) or (0, []), "pending": lambda *a: {}}))
         for dry_run in (False, True):
             self.assertEqual(self.run_sync(dry_run, patches=patches, args=args), 0)
         return jobs, staged
@@ -232,3 +248,157 @@ class PortsStageSyncTest(DataDir):
         jobs, staged = self.sync(("--guest",))
         self.assertEqual(staged, [])
         self.assertNotIn("ports/" + ZIP, [j[0] for j in jobs])
+
+
+UT = "undertale"
+UT_INST = "Copy the contents of your Steam or GOG installation to ports/undertale/assets."
+GAMEDATA = "os/portmaster/gamedata/"
+
+
+class GameDataTest(CardDir):
+    FIELD = "portmaster_data"
+
+    def setUp(self):
+        super().setUp()
+        store.update_card("c", layout="spruce")
+        self.install(UT, {"name": "undertale.zip", "attr": {"title": "Undertale", "rtr": False, "inst": UT_INST}})
+
+    def install(self, folder, port):
+        touch(self.cp(portmaster.CARD_PORTS, folder, "port.json"), json.dumps(port))
+
+    def run_data(self, picked=None, dry_run=False):
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(io.StringIO()):
+            self.result = portmaster.game_data("c", self.card, portmaster.installed(self.card), picked or {}, dry_run)
+            portmaster.summary("c", self.result[1])
+        return out.getvalue()
+
+    def needed_file(self):
+        path = os.path.join(self.data, "ports-needed.json")
+        if not os.path.exists(path):
+            return None
+        with open(path, encoding="utf-8") as f:
+            return json.load(f)
+
+    def test_copy_never_overwrites_and_records_portmaster_data(self):
+        self.put(GAMEDATA + "undertale/assets/data.win", b"data")
+        self.put(GAMEDATA + "undertale/assets/mus.ogg", b"theirs")
+        touch(self.cp(portmaster.CARD_PORTS, UT, "assets", "mus.ogg"), "mine")
+        out = self.run_data()
+        self.assertEqual(self.result, (0, []))
+        with open(self.cp(portmaster.CARD_PORTS, UT, "assets", "data.win"), "rb") as f:
+            self.assertEqual(f.read(), b"data")
+        with open(self.cp(portmaster.CARD_PORTS, UT, "assets", "mus.ogg")) as f:
+            self.assertEqual(f.read(), "mine")
+        self.assertEqual(self.recorded(), [UT])
+        self.assertEqual(store.load_cards()["c"]["portmaster_ports"], [UT])
+        self.assertNotIn("waiting for game data", out)
+        self.assertIsNone(self.needed_file())
+
+    def test_copied_port_is_not_copied_again_when_folder_empty(self):
+        self.put(GAMEDATA + "undertale/assets/data.win", b"data")
+        self.run_data()
+        shutil.rmtree(self.cp(portmaster.CARD_PORTS, UT, "assets"))
+        out = self.run_data()
+        self.assertFalse(os.path.exists(self.cp(portmaster.CARD_PORTS, UT, "assets")))
+        self.assertEqual((self.result, self.recorded()), ((0, []), [UT]))
+        self.assertNotIn("waiting for game data", out)
+
+    def test_waiting_port_added_to_needed_file_and_summary_printed(self):
+        picked = {ZIP: {"name": "Celeste", "portmaster": {**FACTS, "inst": 'Copy the game\'s data into "celeste/gamedata".'}}}
+        out = self.run_data(picked)
+        self.assertEqual(self.result[0], 0)
+        self.assertEqual([(f, later) for f, _, later in self.result[1]], [(UT, False), ("celeste", True)])
+        self.assertEqual(self.needed_file(), {
+            UT: {"title": "Undertale", "zip": "undertale.zip", "inst": UT_INST,
+                 "folder": GAMEDATA + "undertale/assets/", "cards": ["c"]},
+            "celeste": {"title": "Celeste", "zip": ZIP, "inst": 'Copy the game\'s data into "celeste/gamedata".',
+                        "folder": GAMEDATA + "celeste/gamedata/", "cards": ["c"]}})
+        self.assertIsNone(self.recorded())
+        self.assertEqual(store.load_cards()["c"]["portmaster_ports"], [UT])
+        self.assertIn("🧩 Ports waiting for game data\n"
+                      "Celeste (after PortMaster installs it)\n"
+                      "    Copy the game's data into \"celeste/gamedata\".\n"
+                      f"    Put the files in {self.root}/{GAMEDATA}celeste/gamedata/\n"
+                      "Undertale\n"
+                      f"    {UT_INST}\n"
+                      f"    Put the files in {self.root}/{GAMEDATA}undertale/assets/\n"
+                      "Already on the card? sync-roms ports done c <folder>\n"
+                      "All of them: sync-roms ports needed\n", out)
+        # storage gets Undertale's data: the next sync copies it and drops it from the needed list
+        self.put(GAMEDATA + "undertale/assets/data.win", b"data")
+        out = self.run_data(picked)
+        self.assertEqual(list(self.needed_file()), ["celeste"])
+        self.assertEqual(self.recorded(), [UT])
+        self.assertIn("Already on the card? sync-roms ports done c celeste\n", out)
+
+    def test_rtr_true_port_never_listed(self):
+        self.install(UT, {"name": "undertale.zip", "attr": {"title": "Undertale", "rtr": True, "inst": UT_INST}})
+        picked = {ZIP: {"name": "Celeste", "portmaster": {**FACTS, "rtr": True}}}
+        out = self.run_data(picked)
+        self.assertEqual(self.result, (0, []))
+        self.assertEqual(out, "")
+        self.assertIsNone(self.needed_file())
+        self.assertNotIn("portmaster_ports", store.load_cards()["c"])
+
+    def test_failed_copy_retried_next_sync(self):
+        self.put(GAMEDATA + "undertale/assets/data.win", b"data")
+
+        def fail(todo, label, icon, base, failures):
+            failures.extend((j[0], "boom") for j in todo)
+            return len(todo)
+
+        with mock.patch.object(portmaster.downloads, "run_downloads", fail):
+            self.run_data()
+        self.assertEqual((self.result, self.recorded()), ((1, []), None))
+        self.run_data()
+        self.assertEqual((self.result, self.recorded()), ((0, []), [UT]))
+        self.assertTrue(os.path.exists(self.cp(portmaster.CARD_PORTS, UT, "assets", "data.win")))
+
+    def test_dry_run_writes_no_needed_file_and_copies_nothing(self):
+        self.install("celeste", {"name": ZIP, "attr": {"title": "Celeste", "rtr": False, "inst": ""}})
+        self.put(GAMEDATA + "celeste/Content/a.xnb", b"abc")
+        out = self.run_data(dry_run=True)
+        self.assertIn("🧪 Dry run: would copy 1 game data file(s) (3 B) for Celeste", out)
+        self.assertIn("🧩 Ports waiting for game data\nUndertale\n", out)
+        self.assertEqual([f for f, _, _ in self.result[1]], [UT])
+        self.assertFalse(os.path.exists(self.cp(portmaster.CARD_PORTS, "celeste", "Content")))
+        self.assertIsNone(self.needed_file())
+        self.assertEqual(store.load_cards()["c"], {"layout": "spruce"})
+
+    def test_updates_note_uses_cached_catalogue_only(self):
+        self.install("celeste", {"name": ZIP, "attr": {"title": "Celeste"}, "status": {"md5": "same"}})
+        self.install(UT, {"name": "undertale.zip", "attr": {"title": "Undertale"}, "status": {"md5": "old"}})
+        catalog = {"ports": {ZIP: {"source": {"md5": "same"}}, "undertale.zip": {"source": {"md5": "new"}}}}
+        touch(portmaster_catalog.path(), json.dumps(catalog))
+        out = io.StringIO()
+        with mock.patch.object(portmaster_catalog.github, "get", side_effect=AssertionError("fetched")), \
+                contextlib.redirect_stdout(out):
+            portmaster.updates(self.card, portmaster.installed(self.card))
+            os.remove(portmaster_catalog.path())
+            portmaster.updates(self.card, portmaster.installed(self.card))
+        self.assertEqual(out.getvalue(), "🧩 Updates available in PortMaster on the device: Undertale\n")
+
+
+class PortsOnlySyncTest(DataDir):
+    run_sync = test_cli_sync.SyncSmokeTest.run_sync
+
+    def test_card_with_only_ports_picked_is_not_told_it_has_nothing(self):
+        layouts = {"spruce": {"label": "Spruce", "roms_dir": "Roms", "bios_dir": "BIOS"}}
+        device = {**device_of("anbernic-rg-35xxh"), "systems": ["ports"]}
+        manifest = {**MANIFEST, "layouts": layouts, "devices": [device],
+                    "systems": [{**PORTS, "games": [{"bucket": "ports/" + ZIP}]}]}
+        waiting = [("celeste", {"title": "Celeste", "inst": "", "folder": GAMEDATA + "celeste/"}, True)]
+        patches = ((store, {"load_manifest": lambda names=(), m=manifest: m, "load_cards": test_cli_sync.REAL_LOAD_CARDS}),
+                   (cli.picker, {"saved_setup": lambda *a: (device, "spruce")}),
+                   (cli, {"free_space": lambda path: 10**9}),
+                   (cli.s3, {"list_sizes": lambda prefix, sizes=True: {"ports/" + ZIP: 3} if prefix == "ports/" else {}}),
+                   (cli.portmaster, {"stage": lambda *a: print("🧩 Open PortMaster on the device to install: Celeste") or (0, ["Celeste"]),
+                                     "pending": lambda *a: {}, "game_data": lambda *a: (0, waiting)}))
+        for dry_run in (False, True):
+            with self.subTest(dry_run=dry_run):
+                self.assertEqual(self.run_sync(dry_run, patches=patches), 0)
+                out = self.out.getvalue()
+                self.assertIn("Open PortMaster on the device to install: Celeste", out)
+                self.assertNotIn("has nothing to sync", out)
+                self.assertIn("🧩 Ports waiting for game data\nCeleste (after PortMaster installs it)\n", out)

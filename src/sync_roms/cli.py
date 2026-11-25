@@ -1280,9 +1280,10 @@ def sync_card(args):
                 + raofflineproxy.install(card, layout_name, base, dry_run))
 
     spruce_staged = []  # the spruceOS 7z staged this sync, for the reminder at the end
+    port_waiting = []  # the ports waiting for game data, for the summary at the end
 
     def stage_spruce(dry_run):
-        """Stage boot logos, the newest spruceOS, the saved settings and WiFi networks on a spruce card, and the knulli.conf settings on a Knulli card. The failure count."""
+        """Stage boot logos, the newest spruceOS, the saved settings, WiFi networks and PortMaster ports and game data on a spruce card, and the knulli.conf settings on a Knulli card. The failure count."""
         wrote = []
         failed = spruce_bootlogo.install(card, layout_name, device, base, dry_run, wrote, keep=args.no_delete)
         failed += spruce_os.install(card, layout_name, base, dry_run, spruce_staged, keep=args.no_delete)
@@ -1295,6 +1296,12 @@ def sync_card(args):
         failed += knulli_conf.install(card, layout_name, base, dry_run)
         failed += spruce_splore.install(card, layout_name, base, dry_run)
         failed += portmaster.stage(card, device, layout_name, base, port_picks, dry_run, args.no_delete)[0]
+        if portmaster.enabled(device, layout_name):
+            ports_on_card = portmaster.installed(base)
+            pending = portmaster.pending(base, port_picks, ports_on_card) if port_picks else {}
+            got, port_waiting[:] = portmaster.game_data(card, base, ports_on_card, pending, dry_run)
+            failed += got
+            portmaster.updates(base, ports_on_card)
         if clean_card and wrote:
             clean._clean_root = base
         return failed
@@ -1317,8 +1324,10 @@ def sync_card(args):
             if onion_surprise.write_list(card, layout_name, base, roms_dir, systems, args.dry_run) and clean_card:
                 clean._clean_root = base
             failed += stage_spruce(args.dry_run)
-        print(ui.yellow(f"👋 {card} has nothing to sync. Add games with `sync-roms edit`."))
+        if guest or not port_picks:  # a card whose only picks are ports had them staged above
+            print(ui.yellow(f"👋 {card} has nothing to sync. Add games with `sync-roms edit`."))
         spruce_os.remind(spruce_staged)
+        portmaster.summary(card, port_waiting)
         pico8.remind(layout_name, pico8_wrote)
         return 1 if failed else 0
     print(ui.bold(f"\n🔎 Checking {len(chosen)} system(s) against storage..."))
@@ -1749,6 +1758,7 @@ def sync_card(args):
             ui.emit_json(plan_json)
         print(ui.bold(f"\n🧪 Would download {len(todo_all)} file(s) ({ui.human_size(total_bytes(todo_all))}), "
                       f"delete {len(extras)} local ROM(s) and {stale_count} media file(s); {len(missing)} listed ROM(s) not in storage"))
+        portmaster.summary(card, port_waiting)
         return 0
 
     move_failed = 0
@@ -1914,6 +1924,7 @@ def sync_card(args):
     else:
         print(ui.green(f"\n🎉 Done: {done}"))
     spruce_os.remind(spruce_staged)
+    portmaster.summary(card, port_waiting)
     pico8.remind(layout_name, pico8_wrote)
     return 1 if failed else 0
 
