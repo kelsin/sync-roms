@@ -1,7 +1,7 @@
 """`config apply [CARD]`: apply the saved settings to a mounted spruce card, or over adb to an Android device."""
 import os
 
-from . import adb, android, android_settings, applied, picker, spruce_settings, spruce_syncthing, spruce_wifi, store, ui
+from . import adb, android, android_settings, applied, picker, spruce_hotkeys, spruce_settings, spruce_syncthing, spruce_wifi, store, ui
 
 
 VOLUMES = "/Volumes"
@@ -18,11 +18,13 @@ def _mounted(card):
 
 def _spruce(base, name, card, dry_run):
     if dry_run:
-        applied.show(spruce_settings.entries(card, base) + spruce_wifi.entries(base) + spruce_syncthing.entries(card, base), True)
+        applied.show(spruce_settings.entries(card, base) + spruce_wifi.entries(base) + spruce_syncthing.entries(card, base)
+                     + spruce_hotkeys.entries(base), True)
         return 0
     failed = spruce_settings.install(name, "spruce", base, False)
     failed += spruce_wifi.install(name, "spruce", base, False)
     failed += spruce_syncthing.run(name, "spruce", base, False)
+    failed += spruce_hotkeys.install(name, "spruce", base, False)
     return failed
 
 

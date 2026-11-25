@@ -72,6 +72,18 @@ class Apply(helpers.Cmd):
         with open(cfg) as f:
             self.assertEqual(f.read(), before)
 
+    def test_apply_spruce_dry_run_lists_quit_hotkey(self):
+        base, _ = self.spruce(value="Casual")
+        for path, text in ((("spruce", "scripts", "platform", "tina-stock", "Brick.cfg"), 'RA_HOTKEY_LINE="input_enable_hotkey_btn"\nRA_START_VAL="6"\n'),
+                           (("Saves", "ra-configs", "retroarch-Brick.cfg"), 'input_exit_emulator_btn = "0"\n')):
+            full = os.path.join(base, *path)
+            os.makedirs(os.path.dirname(full), exist_ok=True)
+            with open(full, "w") as f:
+                f.write(text)
+        code, out, _ = self.run_cmd("config", "apply", base, "--dry-run")
+        self.assertEqual(code, 0)
+        self.assertIn("input_exit_emulator_btn", out)
+
     def test_apply_other_layout_cwd_refused(self):
         base = self.card("o", "onion")
         old = os.getcwd()
