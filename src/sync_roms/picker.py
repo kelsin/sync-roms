@@ -217,6 +217,9 @@ def move_key(k, cur, last, view):
 
 
 POLL_MS = 200  # how often filter_list calls its poll while it waits for a key
+SCROLL_MS = 125  # how often the one-line tag summary moves one cell
+SCROLL_HOLD = 16  # SCROLL_MS ticks (2 s) the one-line tag summary rests at each end
+TAG_MIN_ROWS = 8  # game rows the list keeps before the highlighted game's tag lines may take room
 PREVIEW_IDLE_MS = 150  # how long the highlighted row stays put before its picture loads (holding a key loads none)
 PREVIEW_SHARE = 34  # percent of the width a picture's pane may take (one with no preview_width)
 PREVIEW_PX = (800, 800)  # a loaded picture is cut down to this (more than the pane shows) so drawing it is cheap
@@ -228,12 +231,60 @@ KEEP = object()  # _ListModel.key: the list stays open
 HOTKEY_CHARS = {"space": " ", "tab": "\t"}  # keys callers name in hotkeys by their character
 
 
+def _fit(text, width):
+    """text cut with "…" to width cells."""
+    if ui.cell_width(text) <= width:
+        return text
+    return ui.cut_cells(text, max(0, width - 1)).rstrip() + "…" if width > 0 else ""
+
+
+def tag_lines(infos, width):
+    """One line per tag, (emoji, name, description) each: emoji, name and the description after the names' column,
+    cut to width cells with "…"."""
+    wide = max((ui.cell_width(name) for _, name, _ in infos), default=0)
+    return [_fit(f"{emoji} {name}" + (" " * (wide - ui.cell_width(name)) + "  " + desc if desc else ""), width)
+            for emoji, name, desc in infos]
+
+
+def tag_names(infos):
+    """The tags' emoji and names on one line."""
+    return " · ".join(f"{emoji} {name}" for emoji, name, _ in infos)
+
+
+def scroll_offset(step, text_width, width):
+    """How many cells a line text_width wide is scrolled left in a width-cell space after `step` ticks: 0 for
+    SCROLL_HOLD ticks, one cell more each tick until its end shows, there for SCROLL_HOLD ticks, then back to 0."""
+    over = text_width - width
+    if over <= 0:
+        return 0
+    return min(max(step % (over + 2 * SCROLL_HOLD) - SCROLL_HOLD, 0), over)
+
+
+def window(text, offset, width):
+    """The width cells of text from cell offset on, padded with blanks; a wide character the edge cuts is a blank."""
+    out, pos = [], 0
+    for c in text:
+        w = ui.cell_width(c)
+        if pos + w > offset + width:
+            break
+        if pos >= offset:
+            out.append(c)
+        elif pos + w > offset:
+            out.append(" " * (pos + w - offset))
+        pos += w
+    line = "".join(out)
+    return line + " " * (width - ui.cell_width(line))
+
+
 class _ListModel:
     """filter_list's state and what each key does to it, apart from drawing (the arguments are filter_list's)."""
 
     def __init__(self, title, labels, multi, initial, hint, cursor, extras, locked, locked_note, hotkeys, note_text,
                  on_note, esc_asks, hidden, status, diff_marks, session, poll, links, on_hotkey, preview=None, row_note=None,
-                 key_help=None, filters="", preview_width=None, select_all=True, outside=(0, 0), on_revert=None):
+                 key_help=None, filters="", preview_width=None, select_all=True, outside=(0, 0), on_revert=None,
+                 tag_info=None):
+        self.tag_info, self.width, self.scroll, self.scroll_row = tag_info, 80, 0, None
+        self.tag_block, self.tag_line = [], ""  # the highlighted game's tags: a line each, or all on one scrolling line
         self.preview, self.row_note, self.key_help, self.filters = preview, row_note, key_help, filters
         self.preview_width, self.select_all = preview_width, select_all
         self.outside, self.on_revert = outside, on_revert
@@ -279,7 +330,17 @@ class _ListModel:
         self.restore = None
         self.cur = max(0, min(self.cur, len(vis) - 1))
         self.vis = vis
-        self.view = max(1, self.height - 4)
+        self.tag_block, self.tag_line = [], ""
+        infos = self.tag_info(vis[self.cur]) if self.tag_info and vis else []
+        if vis and self.scroll_row != vis[self.cur]:
+            self.scroll, self.scroll_row = 0, vis[self.cur]
+        if infos:
+            lines = tag_lines(infos, self.width)
+            if self.height - 4 - len(lines) >= TAG_MIN_ROWS:
+                self.tag_block = lines
+            elif self.height - 5 >= 3:
+                self.tag_line = tag_names(infos)
+        self.view = max(1, self.height - 4 - (len(self.tag_block) or bool(self.tag_line)))
         self.top = max(0, min(self.top, len(vis) - self.view))  # a restored scroll leaves no blank rows below the list
         if self.cur < self.top:
             self.top = self.cur
@@ -355,9 +416,27 @@ class _ListModel:
             self.update()
         return KEEP
 
-    def resize(self, height):
-        """The screen is now height rows tall. Returns KEEP."""
+    def scroll_advance(self):
+        """Move the one-line tag summary on a cell, unless it fits or a prompt, note or notice has the screen. Whether
+        what shows changed."""
+        if (not self.tag_line or self.help or self.asking or self.reverting or self.note is not None or self.notice
+                or ui.cell_width(self.tag_line) <= self.width):
+            return False
+        before = scroll_offset(self.scroll, ui.cell_width(self.tag_line), self.width)
+        self.scroll += 1
+        return scroll_offset(self.scroll, ui.cell_width(self.tag_line), self.width) != before
+
+    def tag_area(self):
+        """The lines above the status row for the highlighted game's tags."""
+        if self.tag_line:
+            return [window(self.tag_line, scroll_offset(self.scroll, ui.cell_width(self.tag_line), self.width), self.width)]
+        return self.tag_block
+
+    def resize(self, height, width=None):
+        """The screen is now height rows and width cells (the list's, beside a picture) big. Returns KEEP."""
         self.height = height
+        if width:
+            self.width = width
         self.update()
         return KEEP
 
@@ -526,7 +605,7 @@ def _app_class():
         """The list screen: title, filter, hint, the shown rows, and the status on the bottom row."""
 
         def on_resize(self, event):
-            self.app.step(self.app.model.resize, event.size.height)
+            self.app.step(self.app.model.resize, event.size.height, event.size.width)
             if self.app.model.preview and self.screen is self.app.list_screen:
                 self.app.fit_preview()  # the terminal's size changed, or the picture's column came or went
 
@@ -578,7 +657,9 @@ def _app_class():
                 if position and status.cell_len + 2 + len(position) <= self.size.width:
                     status.append(" " * (self.size.width - status.cell_len - len(position)) + position, "bold")
                     break
-            lines += [Text()] * max(0, self.size.height - len(lines) - 1) + [status if at is None else _with_cursor(status, at)]
+            area = m.tag_area() if hasattr(m, "tag_area") else []
+            lines += [Text()] * max(0, self.size.height - len(lines) - 1 - len(area)) + [Text(a, "dim") for a in area]
+            lines += [status if at is None else _with_cursor(status, at)]
             return Text("\n").join(lines)
 
 
@@ -696,7 +777,7 @@ def _app_class():
             self.done = session is not None  # in a session no list is up until show
             self.interrupted = False
             self.error = None  # what a step (a caller's callback, say) raised: filter_list raises it
-            self.timer = None
+            self.timer = self.scroll_timer = None
             self.keys_from = 0  # in a session: keys stamped earlier were read as the app suspended for a prompt
             self.ended_at = 0  # in a session: when the last list ended (keys stamped earlier were typed for it)
             self.ready = False  # in a session: the list screen is up and composed
@@ -715,8 +796,16 @@ def _app_class():
         def on_mount(self):
             if self.session:
                 self.request("list", self.model, self.reply)
-            elif self.model.poll:
-                self.set_interval(POLL_MS / 1000, lambda: self.step(self.model.tick))
+            else:
+                if self.model.poll:
+                    self.set_interval(POLL_MS / 1000, lambda: self.step(self.model.tick))
+                if self.model.tag_info:
+                    self.set_interval(SCROLL_MS / 1000, self.scroll_step)
+
+        def scroll_step(self):
+            """Move the tag summary on, redrawing only when what it shows changed."""
+            if not self.done and getattr(self.model, "scroll_advance", lambda: False)():
+                self.step(lambda: KEEP)
 
         def show(self, model, reply):
             """Show the next list (or prompt: a _PromptModel) of the session; its (result, error) goes to reply when it
@@ -738,6 +827,8 @@ def _app_class():
             self.preview_row = None
             self.last_line("")
             self.timer = self.set_interval(POLL_MS / 1000, lambda: self.step(self.model.tick)) if model.poll else None
+            self.scroll_timer = (self.set_interval(SCROLL_MS / 1000, self.scroll_step)
+                                 if getattr(model, "tag_info", None) else None)
             self.ready = False
             if isinstance(model, _PromptModel):  # keys typed while the editor worked weren't typed for its question
                 self.typeahead = []
@@ -1019,6 +1110,8 @@ def _app_class():
                 return self.exit(result)
             if self.timer:
                 self.timer.stop()
+            if self.scroll_timer:
+                self.scroll_timer.stop()
             self.ended_at = get_time()
             while len(self.screen_stack) > 1:
                 self.pop_screen()
@@ -1411,7 +1504,7 @@ def _draws_images():
 def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, extras=None, locked=None, locked_note="",
                 hotkeys=(), note_text=None, on_note=None, esc_asks=True, hidden=None, status=None, diff_marks=True,
                 session=None, poll=None, links=None, on_hotkey=None, preview=None, row_note=None, key_help=None, filters="",
-                preview_width=None, select_all=True, outside=(0, 0), on_revert=None):
+                preview_width=None, select_all=True, outside=(0, 0), on_revert=None, tag_info=None):
     """Modal list: vim keys for moving and acting, Emacs keys for editing the filter.
 
     Normal mode: j/k ↑/↓ ^N/^P move · g/G top/bottom · ^D/^U half page · ^F/^B/PgUp/PgDn/^V page · / filter ·
@@ -1455,6 +1548,9 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
     outside: (on, off) pending changes the caller keeps in rows this list doesn't show (multi mode): Esc asks about
     them too, and counts them in its question; on_revert() is called whenever they are reverted: by u (which asks first
     when there is more than one change in all) or by u at the Esc question.
+    tag_info: optional callable(label index) -> [(emoji, name, description)], the tags of the highlighted row's game
+    (tagui.summary). They show above the status row: a line each when the list keeps TAG_MIN_ROWS rows, else one line
+    of emoji and names that scrolls a cell at a time when it is wider than the screen.
     """
     if preview and not _in_session():  # a session asks the terminal once, before its app starts
         _app_class()  # first: it sets up Textual's environment
@@ -1462,7 +1558,7 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
             preview = None
     return _run(_ListModel(title, labels, multi, initial, hint, cursor, extras, locked, locked_note, hotkeys, note_text,
                            on_note, esc_asks, hidden, status, diff_marks, session, poll, links, on_hotkey, preview, row_note,
-                           key_help, filters, preview_width, select_all, outside, on_revert))
+                           key_help, filters, preview_width, select_all, outside, on_revert, tag_info))
 
 
 PLACE = ("row", "query", "view_mode", "top")  # the session entries carry_place keeps
