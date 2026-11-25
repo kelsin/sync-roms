@@ -1,0 +1,5 @@
+{
+  "note": "The RetroArch preferences wanted on every device, independent of Syncthing: save states in numbered slots (10 kept), and netplay that stays off the public lobby and relay servers, on the default port.",
+  "settings": {"savestate_auto_index": "true", "savestate_max_keep": "10", "netplay_public_announce": "false",
+               "netplay_use_mitm_server": "false", "netplay_ip_port": "55435"}
+}

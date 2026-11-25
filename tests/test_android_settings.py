@@ -169,7 +169,7 @@ class EsdeWanted(helpers.DataDir):
 
 
 OLD_CFG = 'cloud_sync_enable = "true"\nsavefile_directory = "x"\n'
-RIGHT_CFG = "".join(f'{k} = "{v}"\n' for k, v in {**android_settings.hotkeys(), **android_settings.CLOUD_SYNC}.items())
+RIGHT_CFG = "".join(f'{k} = "{v}"\n' for k, v in {**store.repo_json("retroarch")["settings"], **android_settings.hotkeys(), **android_settings.CLOUD_SYNC}.items())
 ESDE_SYSTEMS = [{"bucket": "nes", "folders": {"esde": "nes"}}]
 TARGET = android.Target("S", "Pixel", "6AF3-53E9", "card")
 LAYOUT = {"roms_dir": "ROMs"}
