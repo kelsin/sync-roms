@@ -11,7 +11,7 @@ import sys
 import webbrowser
 
 from . import collections as colls
-from . import bezels, budget, cardedit, cardshare, collectionedit, external, guest, inventory, knulli_conf, m3u, names, picker, runtime, s3, spruce_settings, store, surprise, tageditor, themeart, ui, usersettings
+from . import bezels, budget, cardedit, cardshare, collectionedit, external, guest, inventory, knulli_conf, m3u, names, picker, runtime, s3, shared, spruce_settings, store, surprise, tageditor, tags, tagsuggest, themeart, ui, usersettings
 
 
 UNKNOWN_SHOWN = 8  # device ids named in an "unknown device" error
@@ -799,7 +799,7 @@ def cache_cmd(args):
 
 
 def check_game_file(problems, path, where, systems):
-    """Check one set or collection file; returns its [(system, key)] pairs, or None when the file is unusable.
+    """Check one collection file; returns its [(system, key)] pairs, or None when the file is unusable.
 
     where: the name problems are reported under. systems: the set of known system ids."""
     try:
@@ -862,32 +862,81 @@ def check_folder(problems, folder, prefix, systems):
     return keys
 
 
-def check_sets(problems, systems):
-    """Check every set in storage and return the keys each one lists as {"sets/<id>.json": [(system, key)]}.
+def _raw_tags():
+    """tags.json as written, from its local copy (tags.load saves it when it reads storage), for what tags.load leaves
+    out as malformed; {} when there is none."""
+    try:
+        with open(shared.local_path(tags.KEY), encoding="utf-8") as f:
+            raw = json.load(f)
+    except (OSError, ValueError):
+        return {}
+    return raw if isinstance(raw, dict) else {}
+
+
+def check_tags(problems, systems):
+    """Check tags.json and return the keys it names as {"tags.json": [(system, key)]}.
 
     systems: the set of known system ids."""
-    sets = store.set_files()
-    problems.extend(f"{key}: isn't a set (a JSON object with a games list)" for key in store.skipped_sets())
-    art = themeart.art_choices()
-    keys = {}
-    for game_set in sets:
-        where = f"{store.SETS}{game_set['id']}.json"
-        keys[where] = check_game_data(problems, game_set, where, systems)
-        if game_set.get("art") and game_set["art"] not in art:
-            problems.append(f"{where}: unknown art {game_set['art']!r}")
-    return keys
+    data = tags.load()
+    raw = _raw_tags() or data
+    raw_tags = raw.get("tags") if isinstance(raw.get("tags"), dict) else {}
+    raw_games = raw.get("games") if isinstance(raw.get("games"), dict) else {}
+    where = tags.KEY
+    for tag_id, t in sorted(raw_tags.items()):
+        for field in ("name", "emoji"):
+            if not (isinstance(t, dict) and isinstance(t.get(field), str) and t[field]):
+                problems.append(f"{where}: tag {tag_id!r} has no {field}")
+    art, by_emoji = themeart.art_choices(), {}
+    for tag_id, t in sorted(data["tags"].items()):
+        by_emoji.setdefault(t["emoji"], []).append(tag_id)
+        if t.get("art") and t["art"] not in art:
+            problems.append(f"{where}: tag {tag_id!r}: unknown art {t['art']!r}")
+    problems.extend(f"{where}: tags {', '.join(map(repr, ids))} share the emoji {e}"
+                    for e, ids in by_emoji.items() if len(ids) > 1)
+    listed = []
+    for key in sorted(raw_games):
+        g, system = raw_games[key], key.partition("/")[0]
+        if system not in systems:
+            problems.append(f"{where}: {key}: unknown system {system!r}")
+            continue
+        if not isinstance(g, dict) or not isinstance(g.get("tags"), list):
+            problems.append(f"{where}: {key}: must be an object with a 'tags' list")
+            continue
+        problems.extend(f"{where}: {key}: unknown tag {i!r}" for i in g["tags"] if i not in raw_tags)
+        listed += check_keys(problems, where, system, {"bucket": key, "files": g.get("files", [])})
+        variants = g.get("variants", [])
+        if not isinstance(variants, list):
+            problems.append(f"{where}: {key}: 'variants' must be a list")
+            continue
+        good = [v for v in variants if isinstance(v, dict) and isinstance(v.get("bucket"), str) and v["bucket"]]
+        if len(good) < len(variants):
+            problems.append(f"{where}: {key}: each variant needs a bucket key")
+        for v in good:
+            listed += check_keys(problems, where, system, {"bucket": v["bucket"], "files": v.get("files", [])})
+    return {where: listed} if listed else {}
 
 
-def check_set_notices():
-    """Sets with no art of their own, or showing the same art as another set, as notices."""
-    art, by_art = themeart.art_choices(), {}
-    for game_set in store.set_files():
-        by_art.setdefault(game_set.get("art") or game_set["id"], []).append(game_set["id"])
-    bare = sorted(i for a, ids in by_art.items() if a not in art for i in ids)
-    out = [f"sets: {len(bare)} set(s) have no art in art.json, so they show {themeart.SET_EMOJI} and get no picture: "
-           + ", ".join(bare)] if bare else []
-    return out + [f"sets: {', '.join(sorted(ids))} share the art {a!r}"
-                  for a, ids in sorted(by_art.items()) if a in art and len(ids) > 1]
+def check_tag_notices(systems):
+    """Things worth knowing about the tags that don't make `check` fail, as strings: tags with no games, each
+    system's untagged games (tagsuggest.untagged), genre-tags.json ids that aren't tags and cards' leftover "sets".
+    systems: systems.json loaded."""
+    data = tags.load()
+    bare = sorted(set(data["tags"]) - {i for rec in data["games"].values() for i in rec["tags"]})
+    out = [f"tags.json: {len(bare)} tag(s) have no games: {', '.join(bare)}"] if bare else []
+    try:
+        counts = [(s["bucket"], tagsuggest.untagged(s)) for s in systems]
+    except (*s3.ERRORS, SystemExit) as e:  # SystemExit: ui.fail, e.g. no storage set (its error is printed)
+        ui.warn(f"Couldn't count the untagged games ({'see the error above' if isinstance(e, SystemExit) else e})")
+        counts = []
+    out += [f"{system}: {n} untagged games" for system, n in counts if n]
+    unknown = sorted({i for ids in store.repo_json("genre-tags").values() for i in ids} - set(data["tags"]))
+    if unknown:
+        out.append(f"genre-tags.json: {len(unknown)} tag id(s) aren't tags in tags.json: {', '.join(unknown)}")
+    for name, entry in store.load_cards().items():
+        games = entry.get("games") if isinstance(entry, dict) else None
+        if isinstance(games, dict) and store.LEGACY_SETS in games:
+            out.append(f"cards.json: {name}: 'sets' is ignored; dropped the next time the card's games are saved")
+    return out
 
 
 def check_collections(problems, systems):
@@ -904,7 +953,7 @@ def check_data(list_keys=None, repo_systems=None):
     """Problems found in the user's data files, as strings.
 
     list_keys: optional callable(system id) -> set of bucket keys in that system's folder; when given, every
-    key the lists and sets name must be among them.
+    key the lists and tags.json name must be among them.
     repo_systems: the repo's systems.json already loaded."""
     problems = []
     if repo_systems is None:
@@ -956,8 +1005,7 @@ def check_data(list_keys=None, repo_systems=None):
     )
     devices = {d["id"] for d in store.repo_json("devices")}
     layouts = set(store.repo_json("layouts"))
-    sets = {x["id"] for x in store.load_sets()}
-    wanted.update(check_sets(problems, systems))
+    wanted.update(check_tags(problems, systems))
     wanted.update(check_collections(problems, systems))
     collection_ids = {c["id"] for c in colls.load_collections()}
 
@@ -976,13 +1024,9 @@ def check_data(list_keys=None, repo_systems=None):
             problems.append(f"{where}: must be an object")
             return
         for key, entry in raw.items():
-            if key == store.LEGACY_SETS:
-                if not isinstance(entry, list) or not all(isinstance(i, str) for i in entry):
-                    problems.append(f"{where}: 'sets' must be a list of set ids")
-                else:
-                    problems.extend(f"{where}: unknown set {i!r} (run `{inventory.UPDATE_HINT}` if another machine "
-                                    "added it)" for i in entry if i not in sets)
-            elif key not in systems:
+            if key == store.LEGACY_SETS:  # ignored: a notice (check_tag_notices)
+                continue
+            if key not in systems:
                 problems.append(f"{where}: unknown system {key!r}")
             elif isinstance(entry, list):
                 for g in entry:
@@ -1112,10 +1156,10 @@ def check_cmd(args):
     problems = check_data(bucket_lister() if args.bucket_keys else None, repo_systems)
     for p in problems:
         ui.failure(ui.red(f"❌ {p}"))
-    for n in check_notices(repo_systems) + check_set_notices():
+    for n in check_notices(repo_systems) + check_tag_notices(repo_systems):
         print(ui.yellow(f"⚠️  {n}"))
     if not problems:
-        print(ui.green("✅ cards.json, surprises.json, device-systems.json, the sets and your collections look fine"))
+        print(ui.green("✅ cards.json, surprises.json, device-systems.json, tags.json and your collections look fine"))
     return 1 if problems else 0
 
 
@@ -1181,7 +1225,7 @@ def doctor_cmd(args):
             boto3.Session(profile_name=runtime.WRITE_PROFILE)
             line(True, f"write profile {runtime.WRITE_PROFILE} exists")
         except ProfileNotFound:
-            line(None, f"write profile {runtime.WRITE_PROFILE} not found", "only needed for upload, clean, saving sets and saving scrape state")
+            line(None, f"write profile {runtime.WRITE_PROFILE} not found", "only needed for upload, clean, saving tags and saving scrape state")
     for tool in ("7z", "chdman", "extract-xiso", "iso2zar"):
         found = external.find_tool(tool)
         line(True if found else None, f"{tool}: {found or 'not installed'}",

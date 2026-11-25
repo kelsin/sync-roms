@@ -53,7 +53,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "config": ("show|path|set NAME VALUE|unset NAME|import [CARD]|apply [CARD]", "show the effective settings and where each comes from, or change one"),
     "guide": ("", "open the device setup guide (steps to finish a device by hand) in a browser"),
     "doctor": ("", "check the AWS profile, storage access, tools and your data files"),
-    "check": ("", "validate cards.json, surprises.json, the device overlay, the sets and your collections"),
+    "check": ("", "validate cards.json, surprises.json, the device overlay, tags.json and your collections"),
     "completion": ("bash|zsh|fish", "print a shell completion script"),
 }
 
@@ -614,10 +614,11 @@ TOPICS = {
     "check": """
   sync-roms check [--bucket-keys]
 
-  Validates cards.json, surprises.json, device-systems.json, the sets in storage and your
-  collections: bad JSON, unknown systems, devices, sets and art. Exits 1 if anything is wrong. Sets
-  with no art of their own, or sharing art, are noted without failing.
-  --bucket-keys also reports every game or set file storage doesn't have (read-only profile). It
+  Validates cards.json, surprises.json, device-systems.json, storage's tags.json and your
+  collections: bad JSON, unknown systems, devices, tags and art, tags without a name or emoji or
+  sharing one. Exits 1 if anything is wrong. Tags with no games, each system's untagged games,
+  genre-tags.json ids that aren't tags and a card's leftover "sets" are noted without failing.
+  --bucket-keys also reports every game, file or variant storage lacks (read-only profile). It
                 goes by the storage cache: run `sync-roms cache update` first, since a stale cache
                 reports files that are there.
 """,

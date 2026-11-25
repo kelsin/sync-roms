@@ -1,17 +1,18 @@
 ---
 name: update-variants
-description: Use when new ROMs were uploaded to storage and the sets' game variants need updating, or when asked to find, add or clean up variants of set games (enhanced ports, remasters, translations of games already in a set).
+description: Use when new ROMs were uploaded to storage and the tagged games' variants need updating, or when asked to find, add or clean up variants of tagged games (enhanced ports, remasters, translations of games already in tags.json).
 ---
 
 # Update variants
 
-A set game's `variants` (see "Data files" in CLAUDE.md) list other versions of the same game that add something.
-This skill finds new ROMs in storage that are variants of set games and adds them, after the user approves. The sets
-are storage's `sets/<id>.json`; the scripts read and write them there, never in the repo.
+Variants live on the game records of storage's `tags.json` (see "Data files" in CLAUDE.md): a record's `variants`
+list other versions of the same game that add something. This skill finds new ROMs in storage that are variants of
+tagged games (games with a record) and adds them, after the user approves. The scripts read and write `tags.json`
+in storage, never in the repo.
 
-**It only edits `variants`.** It never adds, removes or swaps set entries, and never changes which version a set
-uses: the user edits sets with `sync-roms sets edit`. When a new ROM looks like a better main version than the set's entry, say so in
-the report and leave the set alone.
+**It only edits `variants`.** It never adds, removes or retags game records, and never changes which version is the
+tagged one: the user edits tags with `sync-roms tags edit`. When a new ROM looks like a better main version than the
+tagged game, say so in the report and leave the record alone.
 
 Run every command from the repo root.
 
@@ -23,21 +24,21 @@ uv run --frozen python .claude/skills/update-variants/scripts/find_candidates.py
 ```
 
 The output has:
-- `matches`: set games (`game`, `title`, `system`, `sets`, existing `variants`) with `candidates`, ROMs no set lists
-  (as an entry, extra file or variant) whose title or arcade clone family matches. A multi-disc candidate's discs
+- `matches`: tagged games (`game`, `title`, `system`, `tags`, existing `variants`) with `candidates`, ROMs no game
+  record lists (as its key, an extra file or a variant) whose title or arcade clone family matches. A multi-disc candidate's discs
   are in its `files`.
 - `stale`: variants whose ROM is no longer in storage.
-- `unmatched`: how many new ROMs matched no set game. They are not judged or recorded; mention the count.
+- `unmatched`: how many new ROMs matched no tagged game. They are not judged or recorded; mention the count.
 - `checked_file`: storage's `variants-checked.json`, the ROMs already judged; they are never offered again.
 
 No matches and no stale variants: tell the user there is nothing to update and stop.
 
 ## 2. Judge each candidate
 
-Judge per ROM: one ROM often matches several set games (an arcade game and its many ports). Pick the set game it is
-the same game as; it is a variant of that one game at most, and gets one verdict. Count and report ROMs, not pairs.
+Judge per ROM: one ROM often matches several tagged games (an arcade game and its many ports). Pick the tagged game
+it is the same game as; it is a variant of that one game at most, and gets one verdict. Count and report ROMs, not pairs.
 
-A candidate is a **variant** only when it is the same game as the set entry and adds something: new content, modes
+A candidate is a **variant** only when it is the same game as the tagged game and adds something: new content, modes
 or characters, a remaster or HD version, an enhanced port, an English translation of a Japanese-only game. Anything
 else is **not a variant**, with a short reason:
 
@@ -57,7 +58,7 @@ and the CLAUDE.md rules; collect their verdicts as the decisions file below.
 
 ## 3. Show the proposal and wait
 
-Show the user one table of the proposed variants (set game, new variant, note), the stale variants to remove, the
+Show the user one table of the proposed variants (tagged game, new variant, note), the stale variants to remove, the
 number of ROMs judged not variants with a few examples, the ROMs you couldn't judge, and the unmatched count. Report
 any "better main version" findings separately. Write nothing until the user approves, even when no variant is
 proposed (approval then records the judged ROMs as checked); apply their corrections.
@@ -67,8 +68,8 @@ proposed (approval then records the judged ROMs as checked); apply their correct
 Write the approved decisions to `<scratchpad>/decisions.json`:
 
 ```json
-{"add": [{"game": "<set entry bucket>", "bucket": "<variant bucket>", "note": "...", "files": ["<disc>", "..."]}],
- "remove": [{"game": "<set entry bucket>", "bucket": "<stale variant bucket>"}],
+{"add": [{"game": "<tagged game bucket>", "bucket": "<variant bucket>", "note": "...", "files": ["<disc>", "..."]}],
+ "remove": [{"game": "<tagged game bucket>", "bucket": "<stale variant bucket>"}],
  "checked": {"<candidate bucket>": "<why it is not a variant>"}}
 ```
 
@@ -77,10 +78,11 @@ uv run --frozen python .claude/skills/update-variants/scripts/apply_variants.py 
 uv run sync-roms check
 ```
 
-The apply script adds each variant to the game in every set that lists it, writes the changed sets to storage and
-records every judged ROM as checked. It changes nothing when the storage folder isn't mounted, when the sets could only be read from their local copies, or when a set it would write changed in storage while it ran (run it again). Rejected candidates go
+The apply script adds and removes the variants on each game's record in `tags.json` (each write applies to a fresh
+copy of the storage file, so other machines' edits are kept) and records every judged ROM as checked. It changes
+nothing when the storage folder isn't mounted or when a decision names a game with no record. Rejected candidates go
 in `checked` so later runs skip them; candidates the user wants to decide later are left out. There is nothing to
-commit: report the sets it changed (the last line of its output) and any problems `sync-roms check` shows.
+commit: report the games it changed (the last line of its output) and any problems `sync-roms check` shows.
 
-`find_candidates.py --baseline` marks every ROM no set lists as checked without judging it. Use it only when the user
+`find_candidates.py --baseline` marks every ROM no game record lists as checked without judging it. Use it only when the user
 asks to skip the backlog.

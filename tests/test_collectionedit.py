@@ -305,7 +305,7 @@ class AddFromSystem(unittest.TestCase):
         keys = {"gba": {"gba/Ruby.zip"}, "psx": DISCS}
         with mock.patch.object(listedit, "stocked", lambda systems: systems), \
                 mock.patch.object(listedit, "file_counts", lambda systems: [[] for _ in systems]), \
-                mock.patch.object(picker, "filter_list", pick), mock.patch.object(store, "load_sets", return_value=[]), \
+                mock.patch.object(picker, "filter_list", pick), \
                 mock.patch.object(edit, "toggle_games", toggle_games), \
                 mock.patch.object(ui, "ask", side_effect=ask or [""]) as asked, mock.patch("builtins.print"):
             listedit.add_from_system(listing, SYSTEMS, shown, lambda bucket: keys.get(bucket, set()), "📦 Favs", **kw)

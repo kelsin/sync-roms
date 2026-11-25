@@ -70,14 +70,8 @@ class Assets(unittest.TestCase):
         self.assertEqual(themeart.art_emoji(None), themeart.DEFAULT_EMOJI)
         self.assertEqual(themeart.art_emoji("nope"), themeart.DEFAULT_EMOJI)
 
-    def test_a_set_has_the_emoji_of_its_art_else_of_its_id_else_the_set_default(self):
-        art = [i for i in themeart.art_choices() if i != "surprise"][:2]
-        self.assertEqual(themeart.set_emoji({"id": art[0]}), themeart.art_emoji(art[0]))
-        self.assertEqual(themeart.set_emoji({"id": art[0], "art": art[1]}), themeart.art_emoji(art[1]))
-        self.assertEqual(themeart.set_emoji({"id": "new-set", "art": art[1]}), themeart.art_emoji(art[1]))
-        self.assertEqual(themeart.set_emoji({"id": "new-set"}), themeart.SET_EMOJI)
-        self.assertEqual(themeart.set_emoji({"id": "new-set", "art": "nope"}), themeart.SET_EMOJI)
-        self.assertNotIn(themeart.SET_EMOJI, [themeart.art_emoji(i) for i in themeart.art_choices()])
+    def test_a_collection_has_the_emoji_of_its_art_else_the_default(self):
+        self.assertFalse(hasattr(themeart, "set_art"))
         self.assertEqual(themeart.collection_emoji({}), themeart.DEFAULT_EMOJI)
         self.assertEqual(themeart.collection_emoji({"art": "surprise"}), themeart.art_emoji("surprise"))
 

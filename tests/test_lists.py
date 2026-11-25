@@ -8,7 +8,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from helpers import DataDir, storage_sets  # noqa: E402
+from helpers import DataDir  # noqa: E402
 from sync_roms import mirroring, picker, runtime, store  # noqa: E402
 
 
@@ -110,7 +110,6 @@ class CardLists(DataDir):
         self.assertEqual([g["bucket"] for g in by["gba"]["games"]], ["gba/A.zip", "gba/B.zip"])
 
     def test_a_card_with_old_set_references_syncs_only_its_own_picks(self):
-        storage_sets(self, {"mix": {"name": "Mix", "games": [{"title": "B", "system": "gba", "bucket": "gba/B.zip"}]}})
         self.write_json("cards.json", {"c": {"games": {"gba": [game("gba/A.zip")], "sets": ["mix", "gone"]}}})
         err = io.StringIO()
         with contextlib.redirect_stderr(err):

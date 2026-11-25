@@ -45,7 +45,6 @@ from sync_roms import ignore, names, tags  # noqa: E402
 ignore._keys = frozenset()  # no test reads the ignore list from storage unless it calls ignore.reset()
 names._scraped = {s: {} for s in names.SYSTEMS}  # no test reads scraped names from storage unless it calls names.reset()
 tags._set(tags._empty())  # no tags: tests that need some put them in storage (helpers.storage_tags)
-store._sets = "[]"  # no game sets: tests that need some put them in storage (helpers.storage_sets) or mock load_sets
 
 TEST_HOME = os.environ[TEST_HOME_VAR]
 FORBIDDEN = [_norm(p) for p in os.environ[REAL_VAR].split(os.pathsep) if p]

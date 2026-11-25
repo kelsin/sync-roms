@@ -1,5 +1,6 @@
 import importlib.util
 import itertools
+import json
 import os
 import sys
 import unittest
@@ -39,7 +40,7 @@ def many(system, n, **kw):
 class BuildTests(unittest.TestCase):
     def test_set_becomes_tag(self):
         data, _ = migrate.build([make_set("shmups", "Shmups", many("snes", 2), art="shmups", description="Shoot")], {})
-        self.assertEqual(data["tags"]["shmups"], {"name": "Shmups", "emoji": themeart.art_emoji("shmups", themeart.SET_EMOJI),
+        self.assertEqual(data["tags"]["shmups"], {"name": "Shmups", "emoji": themeart.art_emoji("shmups", migrate.NO_ART_EMOJI),
                                                   "description": "Shoot", "art": "shmups"})
         self.assertEqual(data["games"]["snes/g0.zip"]["tags"], ["shmups"])
 
@@ -82,7 +83,7 @@ class BuildTests(unittest.TestCase):
 
     def test_emoji_unique_and_complete(self):
         self.assertEqual(len(set(migrate.EMOJI.values())), len(migrate.EMOJI))
-        self.assertNotIn(themeart.SET_EMOJI, migrate.EMOJI.values())
+        self.assertNotIn(migrate.NO_ART_EMOJI, migrate.EMOJI.values())
         self.assertTrue(set(themeart._emoji().values()).isdisjoint(migrate.EMOJI.values()))  # no set's or art's emoji
         sets = [make_set("a", "A", [game("x/1.zip", category=n) for n in migrate.EMOJI])]
         data, _ = migrate.build(sets)
@@ -94,8 +95,10 @@ class BuildTests(unittest.TestCase):
 
 class ReadSetsTests(helpers.StorageFolder):
     def test_read_sets(self):
-        helpers.storage_sets(self, root=self.root.name, sets={"b": make_set("b", "Bee", [game("x/1.zip")], art="shmups"),
-                                    "a": make_set("a", "Aye", many("y", 2))})
+        for set_id, game_set in (("b", make_set("b", "Bee", [game("x/1.zip")], art="shmups")),
+                                 ("a", make_set("a", "Aye", many("y", 2)))):
+            helpers.touch(os.path.join(self.root.name, "sets", set_id + ".json"),
+                          json.dumps({k: v for k, v in game_set.items() if k != "id"}))
         sets = migrate.read_sets()
         self.assertEqual([s["id"] for s in sets], ["a", "b"])
         self.assertEqual([s["name"] for s in sets], ["Aye", "Bee"])

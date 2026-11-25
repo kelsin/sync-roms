@@ -10,7 +10,7 @@ import threading
 from . import inventory, runtime, s3, store, ui
 
 _TAGS = ".tags.json"
-_tags_lock = threading.Lock()  # the sets are loaded on several threads, and each load may change the tags
+_tags_lock = threading.Lock()  # files may be loaded on several threads, and each load may change the tags
 
 
 def local_path(key):

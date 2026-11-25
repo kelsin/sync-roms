@@ -20,6 +20,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."
 from sync_roms import inventory, runtime, s3, shared, tags, themeart, ui, usersettings  # noqa: E402
 
 SERIES_MIN = 15
+NO_ART_EMOJI = "📦"  # a set's tag whose set had no art with an emoji
 
 # Names that mean the same thing: name -> the tag name it merges into (a set's name or a kept name).
 ALIAS = {"Super Mario": "Mario", "Zelda": "The Legend of Zelda", "Sonic": "Sonic the Hedgehog",
@@ -272,7 +273,7 @@ def build(sets, emoji=None):
     used = {}
     for name, t in tag_defs.items():
         s = t["set"]
-        em = themeart.art_emoji(themeart.set_art(s), themeart.SET_EMOJI) if s else emoji.get(name)
+        em = themeart.art_emoji(s.get("art") or s["id"], NO_ART_EMOJI) if s else emoji.get(name)
         if not em:
             raise ValueError(f"no emoji for the tag {name!r}")
         if em in used:

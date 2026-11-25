@@ -6,7 +6,7 @@ import os
 import re
 import tempfile
 
-from . import collections, drivers, github, ignore, inventory, runtime, s3, scrape_plan, scrape_state, screenscraper, store, surprise, ui, usersettings
+from . import collections, drivers, github, ignore, inventory, runtime, s3, scrape_plan, scrape_state, screenscraper, store, surprise, tags, ui, usersettings
 
 LISTING = "https://www.lexaloffle.com/bbs/?cat=7&sub=2&orderby=featured"
 _CARTS = "https://www.lexaloffle.com/bbs/cposts/"
@@ -160,9 +160,9 @@ def _move_key(keys, old, new):
 
 def retarget(old, new, title):
     """Move every personal reference to the cart key old onto new, retitled: cards' games (a full system's kept list
-    too), exclusions and surprises, the surprise history and collections, each file saved only when it changed.
-    Returns the ids of the sets that still name old (as a game, one of its files or a variant), for the caller to
-    warn about."""
+    too), exclusions and surprises, the surprise history and collections, each file saved only when it changed; and
+    old's key in tags.json (as a game, one of its files, a variant or a declined entry), written only when it is
+    there."""
     cards = store.load_cards()
     changed = False
     for card in cards.values():
@@ -188,8 +188,11 @@ def retarget(old, new, title):
     for collection in collections.load_collections():
         if _move_all(collection["games"], old, new, title):
             collections.save_collection(collection)
-    return [s["id"] for s in store.load_sets()
-            if any(_names(g, old) or any(_names(v, old) for v in g.get("variants") or ()) for g in s["games"])]
+    data = tags.load()
+    if old in data["declined"] or any(_names({**rec, "bucket": key}, old)
+                                      or any(_names(v, old) for v in rec.get("variants", ()))
+                                      for key, rec in data["games"].items()):
+        tags.retarget(old, new)
 
 
 # --- sync-roms download pico8 ---------------------------------------------------------------------------------------
@@ -298,14 +301,12 @@ def add_carts(todo, fetch, tmp, source=None):
                 code = 1
             _move_state(old_file, c["file"])
             try:
-                still = retarget(old, key, titles[key])
-            except OSError as e:  # the references still name the old revision, so it stays
-                ui.warn(f"Couldn't move cards and collections from {old} to {key} ({e}); keeping {old}")
+                retarget(old, key, titles[key])
+            except s3.ERRORS as e:  # the references still name the old revision, so it stays
+                ui.warn(f"Couldn't move cards, collections and tags from {old} to {key} ({e}); keeping {old}")
                 code = 1
                 upgraded += 1
                 continue
-            for set_id in still:
-                ui.warn(f"Set {set_id} still names {old}: change it to {key}")
             try:  # last, so a failure here leaves only a duplicate file: the new cart is complete
                 errors = s3.delete_keys([old])
             except s3.ERRORS as e:
