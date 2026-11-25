@@ -100,7 +100,11 @@ def done_command(card, ports, undo):
     from . import scrape_plan  # it imports portmaster, which imports this module
     if card not in store.load_cards():
         ui.fail(f"No card named {card!r}. Cards: {', '.join(store.all_card_names()) or '(none yet)'}", 2)
-    metadata = scrape_plan.load_metadata("ports")
+    try:
+        metadata = scrape_plan.load_metadata("ports")
+    except (*s3.ERRORS, ValueError) as e:
+        ui.warn(f"Couldn't read the ports' titles from storage ({e}); naming the ports by their folders")
+        metadata = {}
     folders = list(dict.fromkeys(_folder_of_port(p, metadata) for p in ports))
     have = [n for n in store.saved_card(card).get("portmaster_data") or [] if isinstance(n, str)]
     names = {f.casefold() for f in folders}

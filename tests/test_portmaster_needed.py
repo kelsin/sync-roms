@@ -118,6 +118,11 @@ class DoneNeededTest(StorageDir):
         self.run_cmd(needed.done_command, "c", ["undertale"], True)
         self.assertNotIn("portmaster_data", store.load_cards()["c"])
 
+    def test_done_with_unreachable_storage_uses_the_names_given(self):
+        with mock.patch.object(runtime, "ROOT", os.path.join(self.root, "gone")):
+            self.run_cmd(needed.done_command, "c", ["celeste.zip"], False)
+        self.assertEqual(store.load_cards()["c"]["portmaster_data"], ["celeste"])
+
     def test_done_unknown_card_fails(self):
         with self.assertRaises(SystemExit) as e, contextlib.redirect_stderr(io.StringIO()):
             needed.done_command("nope", ["celeste"], False)
