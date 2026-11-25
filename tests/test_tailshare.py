@@ -104,6 +104,47 @@ class Share(Tailscale):
         self.assertIn("tailnet name", err.getvalue())
 
 
+class Robust(Tailscale):
+    def fails(self, run, fn=tailshare.share, text=None):
+        err = io.StringIO()
+        with mock.patch.object(tailshare.subprocess, "run", run), contextlib.redirect_stderr(err), \
+                self.assertRaises(SystemExit) as cm:
+            fn()
+        self.assertEqual(cm.exception.code, 1)
+        if text:
+            self.assertIn(text, err.getvalue())
+
+    def with_serve(self, out):
+        return lambda argv, **kw: completed(out) if argv[:3] == ["tailscale", "serve", "status"] else self.run_cmd(argv, **kw)
+
+    def test_timeout(self):
+        def run(argv, **kw):
+            raise subprocess.TimeoutExpired(argv, 60)
+        self.fails(run, text="didn't answer within 60 s")
+
+    def test_oserror(self):
+        def run(argv, **kw):
+            raise OSError("boom")
+        self.fails(run, text="couldn't run tailscale: boom")
+
+    def test_serve_status_bad_json_is_not_serving(self):
+        for out in ("not json", "[]", '{"Web": null}', '{"Web": {"h:443": 5}}', '{"Web": {"h:443": {"Handlers": []}}}', '{"Web": []}'):
+            with self.subTest(out=out), mock.patch.object(tailshare.subprocess, "run", self.with_serve(out)):
+                self.assertFalse(tailshare.serving())
+
+    def test_status_bad_json_fails_cleanly(self):
+        for out in ("not json", "[]", '{"Self": null}', '{"Self": 5}', '{"Self": {}}'):
+            run = lambda argv, **kw: completed(out) if argv[:2] == ["tailscale", "status"] else self.run_cmd(argv, **kw)
+            with self.subTest(out=out):
+                self.fails(run, text="Couldn't read this machine's tailnet name")
+
+    def test_nonzero_exit_names_subcommand(self):
+        self.fails(lambda argv, **kw: completed(code=1, err="nope"), text="tailscale serve failed: nope")
+        def run(argv, **kw):
+            return completed(code=1, err="down") if argv[:2] == ["tailscale", "status"] else self.run_cmd(argv, **kw)
+        self.fails(run, text="tailscale status failed: down")
+
+
 class Unshare(Tailscale):
     def test_unshare_when_not_serving(self):
         self.assertFalse(tailshare.unshare())

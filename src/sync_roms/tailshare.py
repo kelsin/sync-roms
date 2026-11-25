@@ -18,17 +18,32 @@ def SHARE_DIR():
 def _tailscale(*args):
     if not shutil.which("tailscale"):
         ui.fail("tailscale isn't installed or not on PATH", 1)
-    done = subprocess.run(["tailscale", *args], capture_output=True, text=True, stdin=subprocess.DEVNULL, timeout=60)
+    try:
+        done = subprocess.run(["tailscale", *args], capture_output=True, text=True, stdin=subprocess.DEVNULL, timeout=60)
+    except subprocess.TimeoutExpired:
+        ui.fail("tailscale didn't answer within 60 s", 1)
+    except OSError as e:
+        ui.fail(f"couldn't run tailscale: {e}", 1)
     if done.returncode != 0:
-        ui.fail(f"tailscale serve failed: {done.stderr.strip()}", 1)
+        ui.fail(f"tailscale {args[0]} failed: {done.stderr.strip()}", 1)
     return done.stdout
 
 
 def serving():
-    """True when tailscale serve already has a handler at PATH."""
+    """True when tailscale serve already has a handler at PATH (unreadable or unexpected output: not serving)."""
     out = _tailscale("serve", "status", "--json").strip()
-    web = (json.loads(out) if out else {}).get("Web") or {}
-    return any(PATH in (site.get("Handlers") or {}) for site in web.values())
+    try:
+        web = (json.loads(out) if out else {}).get("Web") or {}
+        return any(PATH in (site.get("Handlers") or {}) for site in web.values())
+    except (ValueError, AttributeError, TypeError):
+        return False
+
+
+def _dns_name():
+    try:
+        return (json.loads(_tailscale("status", "--json") or "{}").get("Self") or {}).get("DNSName").rstrip(".")
+    except (ValueError, AttributeError, TypeError):
+        return ""
 
 
 def share():
@@ -40,7 +55,7 @@ def share():
     started = not serving()
     if started:
         _tailscale("serve", "--bg", "--set-path", PATH, SHARE_DIR())
-    name = ((json.loads(_tailscale("status", "--json") or "{}").get("Self") or {}).get("DNSName") or "").rstrip(".")
+    name = _dns_name()
     if not name:
         ui.fail("Couldn't read this machine's tailnet name from tailscale status", 1)
     return f"https://{name}{PATH}/", built, started
