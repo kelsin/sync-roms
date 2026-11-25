@@ -516,14 +516,17 @@ def warn_on_card(root, dry_run):
         ui.fail(f"Not converting on the card {card}", 1)
 
 
-def chd_command(args):
+def chd_command(args, from_upload=False):
+    """from_upload: `upload` runs it first, so a folder with nothing to prepare prints nothing."""
     root = os.path.abspath(os.path.expanduser(args.dir or os.getcwd()))
     if not os.path.isdir(root):
         ui.fail(f"{root} is not a folder", 2)
-    print(ui.bold("💿 prepare") + ui.dim(f"  {root}"))
     folders = chd_folders(store.repo_json("systems"))
     roots, skipped, stale = {}, [], []
     jobs = plan_chd(root, folders, skipped, roots, stale)
+    if from_upload and not jobs and not roots:
+        return 0
+    print(ui.bold("💿 prepare") + ui.dim(f"  {root}"))
     for sheet in skipped:
         print(ui.yellow(f"  ⚠️  skipped {os.path.relpath(sheet, root)}: it names tracks outside its own folder"))
     if not jobs:

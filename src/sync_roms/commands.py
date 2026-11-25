@@ -15,7 +15,7 @@ from . import bezels, budget, cardedit, cardshare, collectionedit, external, gue
 
 
 UNKNOWN_SHOWN = 8  # device ids named in an "unknown device" error
-COMMANDS = {"sync", "edit", "devices", "upload", "diff", "playlist", "prepare", "install", "mirror", "games", "sets", "collections", "themes", "download", "flash", "format", "unmount", "mount", "cards", "saves", "layouts", "cache", "config", "doctor", "guide", "check", "scrape", "completion"}
+COMMANDS = {"sync", "edit", "devices", "upload", "diff", "playlist", "prepare", "install", "mirror", "games", "sets", "collections", "themes", "download", "flash", "format", "unmount", "mount", "cards", "saves", "layouts", "cache", "config", "doctor", "guide", "check", "scrape", "refresh", "completion"}
 SCRAPE_ACTIONS = ("match", "review", "missing", "art", "clean")
 LITERAL = frozenset()  # the values after `scrape match` that start with a dash: values, never options
 
@@ -804,6 +804,19 @@ def config_cmd(args):
             rows.append((name, value, "settings.json"))
     for name, value, source in rows:
         print(f"  {name:<26} {(json.dumps(value) if isinstance(value, bool) else str(value)) if value is not None else ui.dim('(not set)'):<28} {ui.dim(source)}")
+    return 0
+
+
+REFRESH_STEPS = (["cache", "update"], ["scrape", "--all", "--yes"], ["scrape", "clean", "--yes"], ["scrape", "art", "--for", "both"])
+
+
+def refresh_cmd(args):
+    """Run the storage upkeep steps in order, stopping at the first one that fails."""
+    for step in REFRESH_STEPS:
+        print(ui.bold("▶ sync-roms " + " ".join(step)))
+        code = run(step)
+        if code:
+            return code
     return 0
 
 
@@ -1768,6 +1781,7 @@ def build_parser():
     p = sub.add_parser("config", allow_abbrev=False); common(p, card=False); p.add_argument("action", choices=["show", "path", "set", "unset", "import", "apply"], nargs="?", default="show")
     p.add_argument("name", nargs="?"); p.add_argument("value", nargs="?"); p.set_defaults(fn=config_cmd)
     p = sub.add_parser("cache", allow_abbrev=False); common(p, card=False); p.add_argument("action", choices=["update"], nargs="?"); p.add_argument("--full", action="store_true"); p.set_defaults(fn=cache_cmd)
+    p = sub.add_parser("refresh", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=refresh_cmd)
     p = sub.add_parser("doctor", allow_abbrev=False); common(p, card=False); p.add_argument("--fix", action="store_true"); p.set_defaults(fn=doctor_cmd)
     p = sub.add_parser("guide", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=guide_cmd)
     p = sub.add_parser("check", allow_abbrev=False); common(p, card=False); p.add_argument("--bucket-keys", action="store_true"); p.set_defaults(fn=check_cmd)
@@ -1808,7 +1822,7 @@ def run(argv):
     ap.prog = f"sync-roms {argv[0]}"  # its errors (unrecognized arguments) point at the command's help
     args = ap.parse_args(argv)
     if getattr(args, "dry_run", False) and not (args.fn is config_cmd and args.action == "apply") and (args.fn in (games_list, games_export, layouts_cmd, config_cmd, cache_cmd, doctor_cmd, guide_cmd, check_cmd, completion_cmd, themes_pick, themes_build, themes_palettes,
-                                                          edit_cmd, install_cmd, devices_cmd, diff_cmd, scrape_review_cmd, scrape_missing_cmd)
+                                                          edit_cmd, install_cmd, devices_cmd, diff_cmd, scrape_review_cmd, scrape_missing_cmd, refresh_cmd)
                                             or (args.fn is games_sets and args.verb == "list") or (args.fn is mirror_cmd and args.action == "clear")):
         name = " ".join(w for w in (args.command, getattr(args, "action", None), getattr(args, "verb", None)) if w)
         if args.fn is config_cmd and args.action in ("set", "unset"):

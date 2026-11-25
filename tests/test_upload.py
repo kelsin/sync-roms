@@ -327,7 +327,7 @@ class UploadConfirmTest(unittest.TestCase):
             with mock.patch.object(store, "load_manifest", lambda: {"systems": SYSTEMS}), \
                     mock.patch.object(upload.picker, "filter_list", lambda *a, **k: 0), \
                     mock.patch.object(inventory, "files", lambda prefix: {}), \
-                    mock.patch.object(upload, "run_uploads", ran), \
+                    mock.patch.object(upload, "run_uploads", ran), mock.patch.object(upload, "scrape_uploaded"), \
                     mock.patch.object(ui, "ASSUME_YES", assume_yes), mock.patch.object(ui, "has_terminal", return_value=terminal), \
                     mock.patch.object(ui, "_input", lambda prompt: answer), contextlib.redirect_stdout(io.StringIO()):
                 code = upload.upload_command(args)
@@ -1071,3 +1071,35 @@ class S3ClientPoolTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ScrapeUploadedTest(unittest.TestCase):
+    def test_scrapes_then_makes_art_for_the_system(self):
+        from sync_roms import commands
+        with mock.patch.object(commands, "run", return_value=0) as run, mock.patch.object(ui, "ASSUME_YES", True), \
+                contextlib.redirect_stdout(io.StringIO()):
+            upload.scrape_uploaded("gba")
+            self.assertTrue(ui.ASSUME_YES)
+        self.assertEqual([c.args[0] for c in run.call_args_list],
+                         [["scrape", "gba", "--all", "--yes"], ["scrape", "art", "gba", "--for", "both"]])
+
+    def test_a_failed_scrape_only_warns_and_skips_art(self):
+        from sync_roms import commands
+        with mock.patch.object(commands, "run", side_effect=SystemExit(3)) as run, contextlib.redirect_stdout(io.StringIO()) as out:
+            upload.scrape_uploaded("gba")
+        self.assertEqual(run.call_count, 1)
+        self.assertIn("refresh", out.getvalue())
+
+
+class UploadPreparesFirstTest(unittest.TestCase):
+    def test_prepare_runs_on_the_folder_before_the_system_is_asked(self):
+        from sync_roms import chd
+        order = []
+        with tempfile.TemporaryDirectory() as root:
+            args = argparse.Namespace(dir=root, replace=False, dry_run=True)
+            with mock.patch.object(chd, "chd_command", lambda a, from_upload=False: order.append(("prepare", a.dir, a.dry_run, from_upload))), \
+                    mock.patch.object(store, "load_manifest", lambda: {"systems": SYSTEMS}), \
+                    mock.patch.object(upload.picker, "filter_list", lambda *a, **k: order.append("pick") or None), \
+                    contextlib.redirect_stdout(io.StringIO()):
+                upload.upload_command(args)
+        self.assertEqual(order, [("prepare", os.path.abspath(root), True, True), "pick"])

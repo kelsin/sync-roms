@@ -1,4 +1,5 @@
 """Uploading ROMs to storage."""
+import argparse
 import functools
 import mimetypes
 import os
@@ -244,11 +245,32 @@ def run_uploads(todo, quiet=False):
     return failed
 
 
+def scrape_uploaded(bucket):
+    """Scrape the system's new ROMs and make their box art, so a `refresh` after an upload has nothing left to do.
+    A failure here is a warning: the upload itself is done."""
+    from . import commands
+    yes = ["--yes"] if ui.ASSUME_YES else []
+    try:
+        for step in (["scrape", bucket, "--all", *yes], ["scrape", "art", bucket, "--for", "both"]):
+            print(ui.bold("\n▶ sync-roms " + " ".join(step)))
+            code = commands.run(step)
+            if code:
+                print(ui.yellow(f"⚠️  `sync-roms {' '.join(step)}` exited {code}; run `sync-roms refresh` to finish"))
+                return
+    except SystemExit as e:
+        if e.code:
+            print(ui.yellow(f"⚠️  Scraping stopped (exit {e.code}); run `sync-roms refresh` to finish"))
+    finally:
+        ui.ASSUME_YES = bool(yes)
+
+
 def upload_command(args):
     """Upload the ROMs in one folder (default: the current directory) to storage folder of a system you pick."""
     folder = os.path.abspath(os.path.expanduser(args.dir or os.getcwd()))
     if not os.path.isdir(folder):
         ui.fail(f"{folder} is not a folder", 2)
+    from . import chd
+    chd.chd_command(argparse.Namespace(dir=folder, dry_run=args.dry_run), from_upload=True)  # unzip and convert first
     systems = sorted(store.load_manifest()["systems"], key=lambda s: s["name"].lower())
     guess = store.guess_system(systems, folder)
     i = picker.filter_list("☁️  Which system are you uploading?", [f"{s['name']}  ({s['bucket']}/)" for s in systems],
@@ -293,6 +315,8 @@ def upload_command(args):
             return 0
     failed = run_uploads(todo)
     print(ui.green("\n🎉 Done!") if not failed else ui.red(f"\n⚠️  Done with {failed} failure(s)"))
+    if len(todo) > failed:
+        scrape_uploaded(bucket)
     return 1 if failed else 0
 
 
@@ -370,4 +394,6 @@ def replace_command(args, folder, system):
         for e in errors:
             print(ui.red(f"  ❌ {e.get('Key')}: {e.get('Message')}"))
     print(ui.green("\n🎉 Done!") if not failed else ui.red(f"\n⚠️  Done with {failed} failure(s)"))
+    if uploads and failed < len(uploads):
+        scrape_uploaded(bucket)
     return 1 if failed else 0

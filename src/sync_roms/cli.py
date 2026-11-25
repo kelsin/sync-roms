@@ -44,6 +44,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "upload": ("[DIR]", "upload ROMs to the storage folder of a system you pick"),
     "diff": ("[DIR]", "list the ROMs in only DIR or only storage, ignoring renames"),
     "scrape": ("[SYSTEM | match SYSTEM ROM GAME | review [SYSTEM] | missing [SYSTEM] | art [SYSTEM] | clean]", "scrape the ROMs that have no metadata from ScreenScraper into storage's scrapes/ folder"),
+    "refresh": ("", "after changing storage: update the cache, scrape every missing ROM, clean the scrapes, make the box art"),
     "playlist": ("[DIR]", "create or fix the .m3u playlist of every multi-disc game"),
     "prepare": ("[DIR]", "unzip archives and convert disc images to verified .chd"),
     "install": ("", "brew install the 7z, unar and chdman that `prepare` needs"),
@@ -386,12 +387,16 @@ TOPICS = {
                                                     directory) to storage folder of a system you
                                                     pick
 
+  It first runs `prepare` on DIR (so archives are unzipped and disc images converted to .chd before
+  they go up; it prints nothing when no folder there converts).
   The system is guessed from the folder name; same-size files are skipped, a different size
   overwrites after you confirm.
   --replace makes the storage folder match DIR: renamed files are moved by content (big bucket files
   without an MD5 are compared on samples, and those renames are marked), and left-over storage files
   are listed so you tick which to delete (none are ticked at first). Uploads use the write profile
   (ROMS_WRITE_PROFILE, default 'roms').
+  After files were uploaded it runs `scrape SYSTEM --all` and `scrape art SYSTEM --for both` for the
+  system (a failure there only warns), so a following `refresh` has nothing to do.
 """,
     "diff": """
   sync-roms diff [DIR] [--system ID] [--json]
@@ -579,6 +584,15 @@ TOPICS = {
   With no cache for the storage in use, the first command that reads storage offers to build it.
   Saying no is remembered (storage_cache_declined in settings.json), and commands then list storage
   each run.
+""",
+    "refresh": """
+  sync-roms refresh
+
+  Runs, in order, stopping at the first that fails:
+    sync-roms cache update
+    sync-roms scrape --all --yes
+    sync-roms scrape clean --yes
+    sync-roms scrape art --for both
 """,
     "doctor": """
   sync-roms doctor
