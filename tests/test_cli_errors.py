@@ -91,18 +91,6 @@ class UnhonoredFlagsTest(Isolated):
     def test_cache_full_needs_update(self):
         self.refused(["cache", "--full"], "--full only applies to `cache update`")
 
-    def test_scrape_clean_takes_no_folder(self):
-        self.refused(["scrape", "clean", "/some/dir"], "unrecognized arguments: /some/dir\n   Try 'sync-roms scrape --help'.")
-
-    def test_clean_scrapes_is_no_longer_a_command(self):
-        with tempfile.TemporaryDirectory() as cwd:
-            old = os.getcwd()
-            os.chdir(cwd)
-            try:
-                self.refused(["clean", "scrapes"], "clean isn't a command or a folder")
-            finally:
-                os.chdir(old)
-
     def test_refusals_name_the_command_typed(self):
         self.refused(["devices", "--dry-run"], "--dry-run has no effect on `devices`")
         self.refused(["mirror", "clear", "-n"], "--dry-run has no effect on `mirror clear`")
@@ -140,14 +128,6 @@ class UsageHelpTest(Isolated):
                 code, out, err = self.sync(argv)
             self.assertEqual((code, err), (0, ""))
             self.assertIn(topic, out)
-
-    def test_legacy_parse_with_no_command_never_cleans(self):
-        args = cli.build_parser().parse_args(["-y", "x"])
-        with mock.patch.object(scrape_files, "clean_scrapes", side_effect=AssertionError("cleaned")), \
-                mock.patch.object(commands, "prepare_storage", side_effect=AssertionError("read storage")), \
-                contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as cm:
-            cli.dispatch_mode(args, None)
-        self.assertEqual(cm.exception.code, 2)
 
     def test_help_for_an_unknown_topic_exits_2(self):
         code, out, err = self.sync(["help", "bogus"])
@@ -191,6 +171,36 @@ class UsageHelpTest(Isolated):
             code, _, err = self.sync(["--use-mirror"])
         self.assertEqual(code, 2)
         self.assertIn("unrecognized arguments: --use-mirror", err)
+
+    def test_old_flags_are_usage_errors(self):
+        flags = ["--edit", "-e", "--upload", "-c", "--clean-scrapes", "--m3u", "--cd", "--chd", "--install-tools", "--mirror", "--use-mirror /x",
+                 "--clear-mirror", "--diff", "--devices", "--scrape", "--scrape-match a b c", "--scrape-review", "--scrape-missing", "--scrape-art"]
+        for flag in flags:
+            for tail in ([], ["/tmp"]):
+                argv = flag.split() + tail
+                with self.subTest(argv=argv), mock.patch.object(cli, "sync_card", side_effect=AssertionError("synced")), \
+                        mock.patch.object(commands, "prepare_storage", side_effect=AssertionError("read storage")), \
+                        mock.patch.object(usersettings, "ensure_bucket", side_effect=AssertionError("asked for storage")):
+                    code, out, err = self.sync(argv)
+                self.assertEqual((code, out), (2, ""))
+
+    def test_completion_has_no_old_flags(self):
+        old = {"--edit", "-e", "--upload", "-c", "--clean-scrapes", "--m3u", "--cd", "--chd", "--install-tools", "--mirror", "--use-mirror",
+               "--clear-mirror", "--diff", "--devices", "--scrape", "--scrape-match", "--scrape-review", "--scrape-missing", "--scrape-art"}
+        self.assertEqual(old & set(commands.all_flags()), set())
+
+    def test_abbreviated_flags_are_refused(self):
+        for argv in (["upload", "--dry"], ["sync", "--no-del"]):
+            with self.subTest(argv=argv), mock.patch.object(cli, "sync_card", side_effect=AssertionError("synced")):
+                code, out, err = self.sync(argv)
+            self.assertEqual((code, out), (2, ""))
+
+    def test_scrape_match_dash_values_do_not_leak_into_the_next_command(self):
+        with mock.patch.object(commands, "prepare_storage"), mock.patch("sync_roms.scrape_online.match_command", return_value=0):
+            self.assertEqual(self.sync(["scrape", "match", "gba", "-n", "-5"])[0], 0)
+        with mock.patch.object(commands, "upload_cmd", return_value=0) as upload_cmd:
+            self.assertEqual(self.sync(["upload", "-n"])[0], 0)  # -n is a flag again
+        self.assertTrue(upload_cmd.call_args.args[0].dry_run)
 
     def test_global_help_gives_quiet_and_verbose_a_line_each(self):
         lines = [line.strip() for line in cli.help_text().splitlines()]

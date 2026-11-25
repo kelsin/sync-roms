@@ -1,5 +1,4 @@
 """Download ROMs and BIOS files from your ROM storage."""
-import argparse
 import ast
 import contextlib
 import os
@@ -752,172 +751,7 @@ def list_devices(args=None):
     return commands.show_devices(catalog["devices"], catalog["systems"], getattr(args, "device_id", None), getattr(args, "json", False))
 
 
-class Parser(argparse.ArgumentParser):
-    literal = frozenset()  # the values after --scrape-match that start with a dash: values, never options
-
-    def error(self, message):
-        if TYPED:  # name the command the user typed, not the legacy flag translate() made of it
-            words, flag = TYPED
-            message = message if flag is None else re.sub(rf"argument {re.escape(flag)}(/\S+)?:", f"`{words}`:", message)
-            ui.fail(f"{message}\n   Try 'sync-roms {words.split()[0]} --help'.", 2)
-        ui.fail(f"{message}\n   Try 'sync-roms --help'.", 2)
-
-    def parse_known_args(self, args=None, namespace=None):
-        args = list(sys.argv[1:] if args is None else args)
-        if "--scrape-match" in args:
-            i = args.index("--scrape-match")
-            self.literal = frozenset(a for a in args[i + 1:i + 4] if a.startswith("-"))
-        return super().parse_known_args(args, namespace)
-
-    def _parse_optional(self, arg_string):
-        return None if arg_string in self.literal else super()._parse_optional(arg_string)
-
-
-# subcommand -> the legacy flags it stands for. {rest} are its remaining arguments.
-LEGACY = {}
-WORDS = {flags[0]: " ".join(words) for words, flags in LEGACY.items()}  # mode flag -> its command, for messages
-TYPED = None  # (command words, mode flag) of the command translate() last rewrote, for Parser.error
-BOOL_FLAGS = {"-n", "--dry-run", "-y", "--yes", "-a", "--ask"}
-PLAIN_FLAGS = BOOL_FLAGS | {"--replace", "--json", "--guest", "--no-clean", "--no-delete", "--no-eject", "--retry", "--all", "--fill-media", "--set-credentials",
-                            "--translated"}
-VALUE_FLAGS = {"--system", "--device", "--layout", "--skip-media", "--for", "--workers"}
-
-
-def translate(argv):
-    """Rewrite `sync-roms COMMAND ...` into the flag form the rest of the code reads. Global flags may come first."""
-    global TYPED
-    TYPED = None
-    i = 0
-    while i < len(argv) and argv[i] in BOOL_FLAGS | {"--json"}:
-        i += 1
-    if i >= len(argv) or argv[i] not in SUBCOMMANDS:
-        return argv
-    head, rest = argv[:i], argv[i + 1:]
-    name = argv[i]
-    for words in sorted(LEGACY, key=len, reverse=True):
-        if words[0] == name and tuple(rest[:len(words) - 1]) == words[1:]:
-            tail = rest[len(words) - 1:]
-            flags = LEGACY[words]
-            TYPED = (" ".join(words), flags[0])
-            if words == ("scrape", "match"):  # three values that must stay together, behind the flag
-                n = 0  # flags may come first; from the first value on, the next three words are the values
-                while n < len(tail) and tail[n].startswith("-"):
-                    n += 2 if tail[n] in VALUE_FLAGS else 1
-                return head + flags + tail[n:n + 3] + tail[:n] + tail[n + 3:]
-            n = 0  # flags (and the values of value flags) before the mode's value (`diff -n /x`) move behind it
-            while n < len(tail) and (tail[n] in PLAIN_FLAGS or tail[n] in VALUE_FLAGS):
-                n += 1 if tail[n] in PLAIN_FLAGS else 2
-            if n < len(tail) and not tail[n].startswith("-"):
-                return head + flags + [tail[n]] + tail[:n] + tail[n + 1:]
-            return head + flags + tail
-    if name == "clean":
-        ui.fail(f"'{name}' needs a subcommand: " + ", ".join(
-            f"{w[0]} {w[1]}" for w in LEGACY if w[0] == name and len(w) > 1), 2)
-    return argv
-
-
-def build_parser():
-    ap = Parser(add_help=False, allow_abbrev=False)
-    ap.add_argument("base_dir", nargs="?")
-    ap.add_argument("-n", "--dry-run", action="store_true")
-    ap.add_argument("-y", "--yes", action="store_true")
-    ap.add_argument("-a", "--ask", action="store_true")
-    ap.add_argument("-c", "--clean-scrapes", action="store_true")
-    ap.add_argument("--replace", action="store_true")
-    ap.add_argument("--scrape", action="store_true")
-    ap.add_argument("--scrape-match", nargs=3, metavar=("SYSTEM", "ROM", "GAME"))
-    ap.add_argument("--scrape-review", nargs="?", const="", metavar="SYSTEM")
-    ap.add_argument("--scrape-missing", nargs="?", const="", metavar="SYSTEM")
-    ap.add_argument("--scrape-art", nargs="?", const="", metavar="SYSTEM")
-    ap.add_argument("--for", dest="target")
-    ap.add_argument("--workers", type=commands._positive_int)
-    ap.add_argument("--retry", action="store_true")
-    ap.add_argument("--all", action="store_true")
-    ap.add_argument("--fill-media", action="store_true")
-    ap.add_argument("--skip-media")
-    ap.add_argument("--translated", action="store_true")
-    ap.add_argument("--set-credentials", action="store_true")
-    ap.add_argument("--json", action="store_true")
-    ap.add_argument("--system")
-    ap.add_argument("--device")
-    ap.add_argument("--layout")
-    ap.add_argument("--guest", action="store_true")
-    ap.add_argument("--no-clean", action="store_true")
-    ap.add_argument("--no-delete", action="store_true")
-    ap.add_argument("--no-eject", action="store_true")
-    ap.add_argument("--version", action="store_true")
-    ap.add_argument("-h", "--help", action="store_true")
-    return ap
-
-
-def check_modes(args):
-    """Refuse flag combinations that would silently do nothing. Returns the active mode's name (None for a plain sync)."""
-    modes = [name for name, on in (
-        ("--clean-scrapes", args.clean_scrapes),
-        ("--scrape", args.scrape), ("--scrape-match", args.scrape_match is not None),
-        ("--scrape-review", args.scrape_review is not None), ("--scrape-missing", args.scrape_missing is not None),
-        ("--scrape-art", args.scrape_art is not None)) if on]
-    if len(modes) > 1:
-        ui.fail(f"{' and '.join(modes[:2])} can't be combined: use one command at a time", 2)
-    mode = modes[0] if modes else None
-    name = WORDS.get(mode)
-    if args.replace and mode != "--scrape-art":
-        ui.fail("--replace only works with `upload` and `scrape art`", 2)
-    if args.dry_run and mode in ("--scrape-missing", "--scrape-review"):
-        ui.fail(f"--dry-run has no effect on `{name}`", 2)
-    if args.ask and mode:
-        ui.fail(f"--ask only applies to syncing a card, not `{name}`", 2)
-    if (args.device or args.layout or args.guest or args.no_clean or args.no_delete or args.no_eject) and mode:
-        ui.fail(f"--device, --layout, --guest, --no-clean, --no-delete and --no-eject only apply to syncing a card, not `{name}`", 2)
-    if args.base_dir and mode == "--clean-scrapes":
-        ui.fail(f"`clean scrapes` doesn't take a folder ({args.base_dir!r})", 2)
-    if mode == "--scrape" and args.base_dir:  # `scrape gba`, like `scrape missing gba`
-        if args.system:
-            ui.fail("`scrape` takes one system: `scrape SYSTEM` or `scrape --system SYSTEM`", 2)
-        args.system, args.base_dir = args.base_dir, None
-    if mode == "--scrape-missing" and args.system:
-        if args.scrape_missing:
-            ui.fail("`scrape missing` takes one system: `scrape missing SYSTEM` or `scrape missing --system SYSTEM`", 2)
-        args.scrape_missing, args.system = args.system, None
-    if mode == "--scrape-art" and args.system:
-        if args.scrape_art:
-            ui.fail("`scrape art` takes one system: `scrape art SYSTEM` or `scrape art --system SYSTEM`", 2)
-        args.scrape_art, args.system = args.system, None
-    given = {"--scrape": args.system, "--scrape-missing": args.scrape_missing, "--scrape-art": args.scrape_art, "--scrape-review": args.scrape_review,
-             "--scrape-match": (args.scrape_match or [None])[0]}.get(mode)
-    if given and any(sep and sep in given for sep in (os.sep, os.altsep)):
-        ui.fail(f"`{name}` expects a system id, not a path ({given!r})", 2)
-    if args.base_dir and mode is not None:
-        ui.fail(f"`{name}` doesn't take a card folder ({args.base_dir!r}); give the directory right after the command", 2)
-    if args.json:
-        ui.fail("--json only applies to `devices`, `layouts`, `diff`, `games list`, `cards list` and `sync --dry-run`", 2)
-    if args.system and mode != "--scrape":
-        ui.fail("--system only applies to `diff`, `scrape`, `scrape missing` and `scrape art`", 2)
-    if args.retry and mode != "--scrape":
-        ui.fail("--retry only applies to `scrape`", 2)
-    if args.all and mode not in ("--scrape", "--scrape-missing"):
-        ui.fail("--all only applies to `scrape` and `scrape missing`", 2)
-    if args.fill_media and mode != "--scrape":
-        ui.fail("--fill-media only applies to `scrape`", 2)
-    if args.set_credentials and (mode != "--scrape" or args.system or args.retry or args.all or args.fill_media or args.skip_media or args.dry_run):
-        ui.fail("--set-credentials only goes with `scrape`, on its own", 2)
-    if args.target is not None and mode != "--scrape-art":
-        ui.fail("--for only applies to `scrape art`", 2)
-    if args.workers is not None and mode != "--scrape-art":
-        ui.fail("--workers only applies to `scrape art`", 2)
-    if mode == "--scrape-art":
-        args.target = args.target or "both"
-        if args.target not in ("onion", "spruce", "both"):
-            ui.fail(f"--for takes onion, spruce or both, not {args.target!r}", 2)
-    if args.translated and mode != "--scrape-match":
-        ui.fail("--translated only applies to `scrape match`", 2)
-    if args.skip_media is not None:
-        if mode not in ("--scrape", "--scrape-match"):
-            ui.fail("--skip-media only applies to `scrape` and `scrape match`", 2)
-        args.skip_media = [t.strip() for t in args.skip_media.split(",") if t.strip()]
-        from . import scrape_online
-        scrape_online._check_skip(args.skip_media)
-    return mode
+LEAD_FLAGS = {"-n", "--dry-run", "-y", "--yes", "-a", "--ask", "--json"}  # flags that may come before the command
 
 
 GLOBAL_VALUE_FLAGS = {"--profile": "profile", "--write-profile": "write_profile", "--bucket": "bucket", "--root": "root", "--endpoint": "endpoint"}
@@ -974,7 +808,7 @@ def sync(reset=True):
 
 def run(argv):
     lead = 0
-    while lead < len(argv) and argv[lead] in BOOL_FLAGS | {"--json"}:
+    while lead < len(argv) and argv[lead] in LEAD_FLAGS:
         lead += 1
     word = argv[lead] if lead < len(argv) else None
     if word == "--version":
@@ -999,40 +833,6 @@ def run(argv):
         ui.fail(f"No help for {name!r}: it isn't a command. See `sync-roms help` for the commands.", 2)
     print(help_text(ALIASES.get(name, name) if name is not None else None))
     return 0
-
-
-def dispatch_mode(args, mode):
-    """Run the command a flag stands for and return its exit code.
-
-    The modules a command needs are imported here, so the other commands (and --help) don't pay for them."""
-    if mode is None:  # never fall through to a command that deletes
-        ui.fail("No command given: see `sync-roms help` for the commands.", 2)
-    if args.set_credentials:
-        from . import scrape_online
-        return scrape_online.set_credentials()
-    commands.prepare_storage(args)
-    if args.scrape:
-        from . import scrape_online
-        return scrape_online.scrape_command(args)
-    if args.scrape_match:
-        from . import scrape_online
-        args.system, args.rom, args.game = args.scrape_match
-        return scrape_online.match_command(args)
-    if args.scrape_review is not None:
-        from . import scrape_review
-        args.system = args.scrape_review or None
-        return scrape_review.review_command(args)
-    if args.scrape_missing is not None:
-        from . import scrape_online
-        args.system = args.scrape_missing or None
-        return scrape_online.missing_command(args)
-    if args.scrape_art is not None:
-        from . import scrape_art
-        args.system = args.scrape_art or None
-        return scrape_art.art_command(args)
-    assert args.clean_scrapes, mode
-    from . import scrape_files
-    return commands.refresh_mirror(scrape_files.clean_scrapes(args), args)
 
 
 def choose_card_setup(args, base, card, manifest, saved):

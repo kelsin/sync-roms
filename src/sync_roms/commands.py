@@ -1561,20 +1561,25 @@ def scrape_argv(argv):
 
 
 def second_words():
-    """{command: the words that can follow it} for the commands that have subcommands."""
-    words = {"scrape": list(SCRAPE_ACTIONS)}
-    words["mirror"] = ["use", "clear"]
-    words["games"] = ["add", "export", "full", "import", "list", "remove", "sets"]
-    words["sets"] = ["edit"]
-    words["collections"] = ["edit"]
-    words["themes"] = ["update", "pick", "build", "publish", "palettes"]
-    words["download"] = ["pico8"]
-    words["cards"] = ["list", "new", "set", "rename", "convert", "install", "clean", "delete", "copy", "export", "import"]
-    words["saves"] = ["stash", "apply", "manage"]
-    words["config"] = ["show", "path", "set", "unset", "import", "apply"]
-    words["cache"] = ["update"]
-    words["completion"] = ["bash", "zsh", "fish"]
+    """{command: the words that can follow it} for the commands that have subcommands, from the parser."""
+    words = {"mirror": ["use", "clear"]}  # its action is a free word, or a folder
+    for command, parser in _subparsers(build_parser()).items():
+        sub = _subparsers(parser)
+        if sub:
+            words[command] = [w for w in sub if w != command]  # `scrape`'s hidden action is named after it
+            continue
+        for action in parser._actions:
+            if action.dest in ("action", "shell") and action.choices:
+                words[command] = [w for w in action.choices if w != "list"]  # `completion list` is internal
     return words
+
+
+def _subparsers(parser):
+    """{name: parser} of a parser's subcommands, in the order they were added."""
+    for action in parser._actions:
+        if isinstance(action, argparse._SubParsersAction):
+            return dict(action.choices)
+    return {}
 
 
 def completion_cmd(args):
@@ -1769,6 +1774,8 @@ def build_parser():
 
 
 def run(argv):
+    global LITERAL
+    LITERAL = frozenset()  # scrape_argv sets it for this call only
     if argv[0] == "cards" and (len(argv) == 1 or argv[1].startswith("-")):  # bare `cards` is `cards list`
         argv = ["cards", "list", *argv[1:]]
     if argv[0] == "scrape":

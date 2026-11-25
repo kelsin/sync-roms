@@ -552,11 +552,6 @@ class CliTest(unittest.TestCase):
         self.assertEqual(commands.build_parser().parse_args(["upload", "--replace"]).replace, True)
         self.assertEqual(commands.build_parser().parse_args(["scrape", "art", "--replace"]).replace, True)
 
-    def test_abbreviations_are_refused(self):
-        with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as cm:
-            cli.build_parser().parse_args(["--up"])
-        self.assertEqual(cm.exception.code, 2)
-
 
 class PlainCommands(unittest.TestCase):
     """The plain commands (sync, edit, devices, upload, diff, playlist, prepare, install, mirror) as subcommands."""
