@@ -76,6 +76,29 @@ class SetupGuideTest(unittest.TestCase):
         cards = json.loads(re.search(r'id="cards-data">(.*?)</script>', html, re.S).group(1))
         self.assertEqual(cards, [{"name": "Main", "device": "trimui-brick-pro", "layout": "spruce"}])
 
+    def _guide_bezels(self, devices):
+        import contextlib
+        import io
+        import json
+        import re
+        from unittest import mock
+        from sync_roms import commands, store
+        with mock.patch("webbrowser.open", return_value=True), \
+                mock.patch("sync_roms.bezels.devices", **devices), contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(commands.run(["guide"]), 0)
+        with open(os.path.join(store.cache_dir(), "setup-guide.html")) as f:
+            return json.loads(re.search(r'id="bezels-data">(.*?)</script>', f.read(), re.S).group(1))
+
+    def test_guide_command_lists_devices_with_bezels(self):
+        self.assertEqual(self._guide_bezels({"return_value": ["magicx-zero40"]}), ["magicx-zero40"])
+
+    def test_guide_command_survives_unreadable_storage(self):
+        self.assertEqual(self._guide_bezels({"side_effect": OSError("unmounted")}), [])
+
+    def test_packaged_page_names_no_bezel_devices(self):
+        with open(update_setup_guide.GUIDE) as f:
+            self.assertIn('id="bezels-data">[]</script>', f.read())
+
     def test_packaged_page_holds_no_cards(self):
         with open(update_setup_guide.GUIDE) as f:
             self.assertIn('id="cards-data">[]</script>', f.read())

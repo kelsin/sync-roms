@@ -7,7 +7,7 @@ import tempfile
 import zipfile
 from xml.sax.saxutils import escape, unescape
 
-from . import adb, android, apk, applied, inventory, raofflineproxy, runtime, s3, spruce_syncthing, store, ui, usersettings
+from . import adb, android, apk, applied, bezels, inventory, raofflineproxy, runtime, s3, spruce_syncthing, store, ui, usersettings
 
 CFG = "retroarch.cfg"
 SECRETS = ("cheevos_password", "webdav_password", "cheevos_token")
@@ -20,8 +20,8 @@ XML_DECLARATION = '<?xml version="1.0"?>\n'
 BLOCK = re.compile(r"<alternativeEmulator>\s*<label>(.*?)</label>\s*</alternativeEmulator>[ \t]*\r?\n?", re.S)
 
 
-def cfg_wanted():
-    """{key: value} for retroarch.cfg: the Syncthing save settings (when on), RetroAchievements, then Cloud Sync cleared."""
+def cfg_wanted(overlay_dir=None):
+    """{key: value} for retroarch.cfg: the Syncthing save settings (when on), RetroAchievements, the overlay folder (when given), then Cloud Sync cleared."""
     wanted = {}
     if spruce_syncthing.enabled():
         wanted.update(spruce_syncthing.data()["retroarch"])
@@ -34,6 +34,8 @@ def cfg_wanted():
     for setting, key in (("ra_username", "cheevos_username"), ("ra_password", "cheevos_password")):
         if settings.get(setting):
             wanted[key] = settings[setting]
+    if overlay_dir:
+        wanted["overlay_directory"] = overlay_dir
     wanted.update(CLOUD_SYNC)
     return wanted
 
@@ -133,13 +135,13 @@ def _pull_cfg(serial, remote, tmp):
     return _read(local)
 
 
-def _retroarch_part(serial, pkg, tmp):
+def _retroarch_part(serial, pkg, tmp, overlay=None):
     """(entries, remote path) for retroarch.cfg; ([], path) with a warning when it can't be read."""
     remote = f"/storage/emulated/0/Android/data/{pkg}/files/{CFG}"
     if not adb.is_file(serial, remote):
         ui.warn(f"Can't read RetroArch's settings at {remote}: skipping them")
         return [], remote
-    return cfg_entries(_pull_cfg(serial, remote, tmp), cfg_wanted()), remote
+    return cfg_entries(_pull_cfg(serial, remote, tmp), cfg_wanted(overlay)), remote
 
 
 def _esde_part(serial, volume, roms_dir, systems, tmp):
@@ -163,11 +165,11 @@ def _esde_part(serial, volume, roms_dir, systems, tmp):
     return result
 
 
-def _write_retroarch(serial, pkg, remote, tmp, failed):
+def _write_retroarch(serial, pkg, remote, tmp, failed, overlay=None):
     """Wait for RetroArch to close (it rewrites its cfg on quit), then set what is still wrong in the fresh cfg."""
     android.wait_closed(serial, pkg)
     text = _pull_cfg(serial, remote, tmp)
-    entries = cfg_entries(text, cfg_wanted())
+    entries = cfg_entries(text, cfg_wanted(overlay))
     if not any(applied.changed(e) for e in entries):
         return
     local = os.path.join(tmp, "new-" + CFG)
@@ -368,14 +370,21 @@ def _apk_part(serial, target, tmp, dry_run, failed):
         failed.append("APKs")
 
 
-def apply(target, layout, systems, dry_run):
+def apply(target, layout, systems, dry_run, device_id=None):
     """Set the wanted RetroArch and ES-DE settings on the device; 0, or 1 when a write failed. adb errors propagate."""
     serial = target.serial
     pkg = android.retroarch_package(serial)
     tmp = tempfile.mkdtemp(prefix="sync-roms-apply-")
     failed = []
+    overlay = None
     try:
-        ra_entries, cfg_remote = _retroarch_part(serial, pkg, tmp)
+        folder = bezels.PREFIX + (device_id or "") + "/retroarch/"
+        if device_id and any(k.startswith(folder) for k in bezels.files(device_id)):
+            overlay = f"/storage/{target.volume}/Bezels/retroarch"
+    except s3.ERRORS as e:
+        ui.warn(f"Can't list the bezels in storage: {e}")
+    try:
+        ra_entries, cfg_remote = _retroarch_part(serial, pkg, tmp, overlay)
         gamelists = _esde_part(serial, target.volume, layout["roms_dir"], systems, tmp)
         esde_entries = [g[0] for g in gamelists]
         if dry_run:
@@ -383,7 +392,7 @@ def apply(target, layout, systems, dry_run):
             _apk_part(serial, target, tmp, True, failed)
             return 1 if failed else 0
         if any(applied.changed(e) for e in ra_entries):
-            _write_retroarch(serial, pkg, cfg_remote, tmp, failed)
+            _write_retroarch(serial, pkg, cfg_remote, tmp, failed, overlay)
         if any(applied.changed(e) for e in esde_entries):
             _write_esde(serial, target.volume, gamelists, tmp, failed)
         _apk_part(serial, target, tmp, False, failed)

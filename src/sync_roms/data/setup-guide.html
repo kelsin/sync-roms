@@ -272,6 +272,9 @@ code.copy.copied::after { content: "✓ copied"; color: var(--accent); }
 <!-- Your cards, filled in by `sync-roms guide` into the copy it opens; empty in the repo. -->
 <script type="application/json" id="cards-data">[]</script>
 
+<!-- The devices that have bezels in storage, filled in by `sync-roms guide` into the copy it opens; empty in the repo. -->
+<script type="application/json" id="bezels-data">[]</script>
+
 <!-- Copied from src/sync_roms/data/devices.json; tests/test_setup_guide.py keeps them in step. -->
 <script type="application/json" id="devices-data">
 [
@@ -485,10 +488,11 @@ const PLATFORMS = { android: "Android", windows: "Windows", steamos: "SteamOS", 
 
 /*
   Guide content. Each section and each item may have a `when`:
-    { platform: ["android", ...], layout: ["esde", ...], systems: ["psp", ...], tier: [...], power: ["low", "mid", "high", "desktop"], device: [...], dualscreen: [true], gpu: [true] }
+    { platform: ["android", ...], layout: ["esde", ...], systems: ["psp", ...], tier: [...], power: ["low", "mid", "high", "desktop"], device: [...], dualscreen: [true], gpu: [true], bezels: [true] }
   and is only shown when the picked device and layout match every key given. `systems` matches when the
   device supports ANY listed system (tiers in device-systems.json); `dualscreen` is true for devices with a second screen;
-  `gpu` is true for devices with an Adreno `gpu` id in devices.json.
+  `gpu` is true for devices with an Adreno `gpu` id in devices.json;
+  `bezels` is true for devices that have bezels in storage (the `bezels-data` block `sync-roms guide` fills in).
   Items:  { title, when?, body?: HTML or (ctx) => HTML, settings?: [[menu path, value, note?], ...] }
   Emulators (in the "emulators" section): { system, emulator, when?, install: HTML, settings?: [...], proxy?: true }
   (`proxy` marks the ones RAOfflineProxy supports.)
@@ -877,6 +881,33 @@ const SECTIONS = [
         when: { layout: ["esde"], gpu: [true] },
         body: `
           <p>When sync suggests drivers for the device's Adreno GPU, the card's <code>Drivers/</code> folder holds them as <code>Drivers/&lt;id&gt;-&lt;tag&gt;.zip</code>. Install them in each emulator's GPU driver manager.</p>`,
+      },
+    ],
+  },
+  {
+    id: "bezels",
+    title: "Bezels",
+    lede: "Bezels sync puts on the card for this device.",
+    when: { layout: ["esde"], bezels: [true] },
+    items: [
+      {
+        title: "RetroArch",
+        body: `
+          <p>Sync copies the bezels to <code>Bezels/retroarch/</code>, and <code>config apply</code> points RetroArch's overlay folder there. For each game:</p>
+          <ol>
+            <li>In the game, open <span class="path">${path("Quick Menu > On-Screen Display > On-Screen Overlay")}</span>: turn <b>Display Overlay</b> on, set <b>Overlay Preset</b> to the bezel's <code>.cfg</code> and <b>Overlay Opacity</b> to 1.00.</li>
+            <li>Open <span class="path">${path("Settings > Video > Scaling")}</span>: turn <b>Integer Scale</b> off, set <b>Aspect Ratio</b> to Custom, then set the <b>Custom Aspect Ratio</b> X, Y, width and height so the game fits the bezel's open area.</li>
+            <li>Save with <span class="path">${path("Quick Menu > Overrides > Save Core Overrides")}</span>, or <b>Save Game Overrides</b> when the bezel is only for some of the core's games (vertical arcade games).</li>
+          </ol>`,
+      },
+      {
+        title: "DraStic",
+        body: `
+          <ol>
+            <li>Copy <code>Bezels/drastic/*.png</code> into DraStic's <code>backgrounds/</code> folder, inside the folder DraStic keeps its data in.</li>
+            <li>In a game, open <span class="path">${path("Menu > Edit Screens and Virtual Pad")}</span>, pick the portrait layout and choose <b>Set background image</b>.</li>
+            <li>Place the two screens above and below the image's divider, then save.</li>
+          </ol>`,
       },
     ],
   },
@@ -1519,6 +1550,7 @@ function fillLayouts(device, wanted) {
 }
 
 // Saved cards: picking one sets the device and layout; changing either afterwards clears the pick.
+const BEZELS = JSON.parse(document.getElementById("bezels-data").textContent);
 const CARDS = JSON.parse(document.getElementById("cards-data").textContent)
   .filter(c => DEVICES.some(d => d.id === c.device));
 const $card = document.getElementById("card");
@@ -1542,6 +1574,7 @@ function render() {
   const ctx = {
     layout: $layout.value, platform: platformOf(device, $layout.value), device: device.id,
     tier: info.tier, power: powerOf(info.tier), systems: info.systems, dualscreen: !!device.screen2, gpu: !!device.gpu,
+    bezels: BEZELS.includes(device.id),
   };
   ctx.emus = SECTIONS.find(s => s.id === "emulators").items.filter(e => matches(e.when, ctx));
   history.replaceState(null, "", `#device=${device.id}&layout=${ctx.layout}`);

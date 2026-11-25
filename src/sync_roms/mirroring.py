@@ -4,7 +4,7 @@ import hashlib
 import os
 from concurrent.futures import ThreadPoolExecutor
 
-from . import downloads, drivers, inventory, onion_surprise, raofflineproxy, runtime, s3, scrape_plan, spruce_os, spruce_themes, store, themeart, ui, usersettings
+from . import bezels, downloads, drivers, inventory, onion_surprise, raofflineproxy, runtime, s3, scrape_plan, spruce_os, spruce_themes, store, themeart, ui, usersettings
 
 
 MIRROR_PRUNE_ASK = 25  # delete more unreferenced mirror files than this (or over a tenth of it) only after confirming
@@ -13,16 +13,16 @@ MIRROR_PRUNE_ASK = 25  # delete more unreferenced mirror files than this (or ove
 def mirror_wanted(manifest):
     """{bucket key: size} of everything the game lists and BIOS requirements reference that is in storage: the ROMs a sync
     installs, every system's BIOS files, the scraped data of those ROMs, storage's Onion themes, its ES-DE theme archives,
-    its GPU driver zips, its PICO-8 zips, its Android APKs folder, the newest Surprise app zip, the newest RAOfflineProxy
+    its GPU driver zips, its PICO-8 zips, its Android APKs folder, the bezels, the newest Surprise app zip, the newest RAOfflineProxy
     file of each layout, the newest spruceOS 7z, and the PyUI themes of the default list and the cards' current themes."""
     systems = manifest["systems"]
     todo = [s for s in systems if s.get("full_system") or store.listed(s)]
     with ThreadPoolExecutor(runtime.WORKERS) as ex:
-        others = [ex.submit(inventory.files, prefix) for prefix in ("BIOS/", runtime.THEMES_PREFIX, runtime.ESDE_THEMES_PREFIX, drivers.PREFIX, runtime.PICO8_PREFIX, runtime.APKS_PREFIX, runtime.ONION_PREFIX, runtime.SPRUCE_PREFIX, runtime.SPRUCE_THEMES_PREFIX)]
+        others = [ex.submit(inventory.files, prefix) for prefix in ("BIOS/", runtime.THEMES_PREFIX, runtime.ESDE_THEMES_PREFIX, drivers.PREFIX, runtime.PICO8_PREFIX, runtime.APKS_PREFIX, bezels.PREFIX, runtime.ONION_PREFIX, runtime.SPRUCE_PREFIX, runtime.SPRUCE_THEMES_PREFIX)]
         proxy_listings = {prefix: ex.submit(inventory.files, prefix) for prefix in raofflineproxy.prefixes()}
         roms = list(ex.map(store.list_system, todo))
         scrapes = list(ex.map(lambda s: scrape_plan.scrape_listing(s["bucket"]), todo))
-        bios, themes, esde_themes, driver_zips, pico8_zips, apks, onion, spruce, spruce_theme_files = (f.result() for f in others)
+        bios, themes, esde_themes, driver_zips, pico8_zips, apks, bezel_files, onion, spruce, spruce_theme_files = (f.result() for f in others)
     wanted = {}
     for s, have, scraped in zip(todo, roms, scrapes):
         keys = [k for k in store.available_keys(s, have) if k in have]
@@ -37,7 +37,7 @@ def mirror_wanted(manifest):
         for f in s["bios"]["files"] + s["bios"].get("rom_files", []):
             if "BIOS/" + f in bios:
                 wanted["BIOS/" + f] = bios["BIOS/" + f]
-    wanted.update((k, v) for k, v in {**themes, **esde_themes, **driver_zips, **pico8_zips, **apks}.items() if not k.endswith("/"))
+    wanted.update((k, v) for k, v in {**themes, **esde_themes, **driver_zips, **pico8_zips, **apks, **bezel_files}.items() if not k.endswith("/"))
     chosen = set(spruce_themes.default_list()) | {c["spruce_theme"] for c in store.load_cards().values()
                                                  if isinstance(c, dict) and isinstance(c.get("spruce_theme"), str)}
     prefix = runtime.SPRUCE_THEMES_PREFIX

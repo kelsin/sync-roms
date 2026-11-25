@@ -8,7 +8,7 @@ from unittest import mock
 
 import helpers
 from test_apk import manifest_bytes
-from sync_roms import adb, android, android_settings, applied, inventory, s3, store, ui, usersettings
+from sync_roms import adb, android, android_settings, applied, bezels, inventory, s3, store, ui, usersettings
 
 E = applied.Entry
 
@@ -18,6 +18,13 @@ def by_key(entries):
 
 
 class CfgWanted(helpers.DataDir):
+    def test_cfg_wanted_overlay(self):
+        d = "/storage/ABCD-1234/Bezels/retroarch"
+        self.assertEqual(android_settings.cfg_wanted(d)["overlay_directory"], d)
+
+    def test_cfg_wanted_no_overlay(self):
+        self.assertNotIn("overlay_directory", android_settings.cfg_wanted())
+
     def wanted(self, **settings):
         usersettings.save_settings(settings)
         return android_settings.cfg_wanted()
@@ -235,8 +242,8 @@ class Apply(helpers.DataDir):
     def names(self):
         return [c[0] if c[0] != "shell" else c[2] for c in self.calls]
 
-    def run_apply(self, dry_run=False):
-        return android_settings.apply(TARGET, LAYOUT, ESDE_SYSTEMS, dry_run)
+    def run_apply(self, dry_run=False, device_id=None):
+        return android_settings.apply(TARGET, LAYOUT, ESDE_SYSTEMS, dry_run, device_id)
 
     def apk_setup(self, name="app.apk", package="com.example.app", version=65, installed=None):
         self.files[self.cfg_path] = RIGHT_CFG
@@ -352,6 +359,23 @@ class Apply(helpers.DataDir):
         self.apks[APKS + "bad.apk"] = b"not a zip"
         self.assertEqual(self.run_apply(), 0)
         self.assertIn("Can't read bad.apk", self.err.getvalue())
+
+    def test_apply_dry_run_lists_overlay_only_with_bezels(self):
+        self.files[self.cfg_path] = RIGHT_CFG
+        with mock.patch.object(bezels, "files", lambda d: {"os/android/bezels/d/retroarch/a.cfg": 1}):
+            self.run_apply(dry_run=True, device_id="d")
+        self.assertIn("overlay_directory", self.out.getvalue())
+        self.assertIn("/storage/6AF3-53E9/Bezels/retroarch", self.out.getvalue())
+        self.out.truncate(0), self.out.seek(0)
+        with mock.patch.object(bezels, "files", lambda d: {}):
+            self.run_apply(dry_run=True, device_id="d")
+        self.assertNotIn("overlay_directory", self.out.getvalue())
+
+    def test_apply_no_overlay_for_drastic_only_bezels(self):
+        self.files[self.cfg_path] = RIGHT_CFG
+        with mock.patch.object(bezels, "files", lambda d: {"os/android/bezels/d/drastic/a.png": 1}):
+            self.run_apply(dry_run=True, device_id="d")
+        self.assertNotIn("overlay_directory", self.out.getvalue())
 
     def test_apply_dry_run_writes_nothing(self):
         self.files[self.cfg_path] = OLD_CFG
