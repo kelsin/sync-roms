@@ -1041,12 +1041,11 @@ const SECTIONS = [
         when: { platform: ["android"] },
         body: `
           <ol>
-            <li>Install <b>Syncthing-Fork</b> from F-Droid (the original Android app is discontinued).</li>
-            <li>With RetroArch closed and the device on Wireless debugging, run <code class="copy">sync-roms config apply</code>. It sets RetroArch's save and state folders and save settings, turns Cloud Sync off, and sets each system's ES-DE emulator to its core in "RetroArch cores" (it asks before restarting ES-DE; declining skips the ES-DE part).</li>
-            <li>Syncthing-Fork: <b>Add Remote Device</b> with the server's ID (server UI: Actions &gt; Show ID).</li>
+            <li>Install <b>Syncthing-Fork</b> from F-Droid (the original Android app is discontinued) and open it once.</li>
+            <li>Syncthing-Fork: <b>Settings &gt; Import and Export &gt; Export</b>, without a backup password. <code>config apply</code> reads its API key from the export, which also holds the device's keys.</li>
+            <li>With RetroArch closed and the device on Wireless debugging, run <code class="copy">sync-roms config apply</code>. It sets RetroArch's save and state folders and save settings, turns Cloud Sync off, and sets each system's ES-DE emulator to its core in "RetroArch cores" (it asks before restarting ES-DE; declining skips the ES-DE part). It also gives Syncthing-Fork All files access and exempts it from battery optimization, and with <code>syncthing_server</code> in settings.json adds the server and its two folders (at RetroArch's save and state folders).</li>
             <li>Server UI: accept the new device, and on its <b>Sharing</b> tab tick <code class="copy">ra-saves</code> and <code class="copy">ra-states</code>. Save.</li>
-            <li>Syncthing-Fork: accept <code class="copy">ra-saves</code> at RetroArch's save folder and <code class="copy">ra-states</code> at its state folder (<code class="copy">/storage/emulated/0/RetroArch/saves</code> and <code class="copy">/storage/emulated/0/RetroArch/states</code> unless RetroArch already had others).</li>
-            <li>Syncthing-Fork: set its run conditions so it runs when switching devices.</li>
+            <li>Syncthing-Fork: set its run conditions (Settings &gt; Run conditions) so it runs when switching devices.</li>
           </ol>`,
       },
       {
@@ -1318,7 +1317,7 @@ const SECTIONS = [
           <ol>
             <li>Install <b>RAOfflineProxy</b> from the card's <code>APKs/</code> folder: <code>RAOfflineProxy-*.apk</code>. It is only there when RAOfflineProxy is on for the card (the default; card editor's <b>S</b> menu).</li>
             <li>In every emulator you use, first log in to RetroAchievements with hardcore off (see its settings above).</li>
-            <li>Fully quit all emulators (${esc(list)}), open <b>RAOfflineProxy</b> and press <b>Start proxy</b>. On some devices, grant folder access when asked. Wait for patching to finish, then start the emulators. The app patches <code>retroarch.cfg</code> (backup: <code>retroarch.raofflineproxy.cfg</code>), turns hardcore off and imports your saved RetroAchievements login (it offers a username and password login if there is none).</li>
+            <li>Fully quit all emulators (${esc(list)}), open <b>RAOfflineProxy</b> and press <b>Start proxy</b>. <code>sync-roms config apply</code> gives it All files access and exempts it from battery optimization. Wait for patching to finish, then start the emulators. The app patches <code>retroarch.cfg</code> (backup: <code>retroarch.raofflineproxy.cfg</code>), turns hardcore off and imports your saved RetroAchievements login (it offers a username and password login if there is none).</li>
             <li>Cache games while online: <b>Cached Games &gt; Scan ROM folder</b> (up to 100 new games per 30 minutes, the rest queue), or keep the proxy running and open each game once.</li>
             <li>Play offline: fully quit the emulators, start the proxy, then load a cached game. Achievements queue and sync when you reconnect. Playtime is not tracked offline.</li>
             <li>Press <b>Stop proxy</b> when done: stopping restores the configs. Always stop sync before force-closing the app; if it crashed or was swiped away, reopen it once to restore.</li>

@@ -8,7 +8,7 @@ from unittest import mock
 
 import helpers
 from test_apk import manifest_bytes
-from sync_roms import adb, android, android_settings, applied, bezels, inventory, s3, store, ui, usersettings
+from sync_roms import adb, android, android_access, android_settings, android_syncthing, applied, bezels, inventory, raofflineproxy, s3, store, ui, usersettings
 
 E = applied.Entry
 
@@ -166,6 +166,7 @@ class Apply(helpers.DataDir):
         quiet.enter_context(contextlib.redirect_stderr(self.err))
         self.addCleanup(quiet.close)
         usersettings.save_settings({"syncthing": False})
+        store.write_cards({"card": {"raofflineproxy": False}})
         self.calls = []
         self.files = {}
         self.dirs = {"/storage/6AF3-53E9/ROMs/nes"}
@@ -250,6 +251,70 @@ class Apply(helpers.DataDir):
         self.apks[APKS + name] = apk_zip(package, version)
         if installed is not None:
             self.packages[package] = installed
+
+    def test_apply_runs_syncthing_after_apks(self):
+        self.files[self.cfg_path] = RIGHT_CFG
+        for dry_run in (True, False):
+            order = []
+            with mock.patch.object(android_settings, "_apk_part", lambda *a: order.append("apks")), \
+                    mock.patch.object(android_syncthing, "apply", lambda serial, dry, failed: order.append(("syncthing", serial, dry))):
+                self.assertEqual(self.run_apply(dry_run), 0)
+            self.assertEqual(order, ["apks", ("syncthing", TARGET.serial, dry_run)])
+
+    def proxy_setup(self, installed=True, on=True):
+        self.files[self.cfg_path] = RIGHT_CFG
+        if installed:
+            self.packages[raofflineproxy.ANDROID_PACKAGE] = 1
+        store.write_cards({"card": {"raofflineproxy": on}})
+        self.access = [(applied.Entry("RAOfflineProxy", "battery optimization", "on", "exempt", False), [["dumpsys", "x"]]),
+                       (applied.Entry("RAOfflineProxy", "all files access", "allow", "allow", False), [["appops", "x"]])]
+        self.enterContext(mock.patch.object(android_access, "entries", lambda serial, pkg, where: self.access))
+        self.enterContext(mock.patch.object(android_access, "apply", lambda serial, access: self.calls.append(("access", access))))
+
+    def test_proxy_access_dry_run_lists_without_setting(self):
+        self.proxy_setup()
+        self.assertEqual(self.run_apply(True), 0)
+        self.assertNotIn("access", self.names())
+        self.assertIn("battery optimization", self.out.getvalue())
+        self.assertIn("all files access", self.out.getvalue())
+
+    def test_proxy_access_real_run_sets_and_shows_changed(self):
+        self.proxy_setup()
+        self.assertEqual(self.run_apply(), 0)
+        self.assertIn(("access", self.access), self.calls)
+        self.assertIn("battery optimization = exempt", self.out.getvalue())
+        self.assertNotIn("all files access", self.out.getvalue())
+
+    def test_proxy_access_off_or_not_installed_does_nothing(self):
+        for kwargs in ({"on": False}, {"installed": False}):
+            self.calls.clear()
+            self.packages.clear()
+            self.proxy_setup(**kwargs)
+            for dry_run in (True, False):
+                self.assertEqual(self.run_apply(dry_run), 0)
+            self.assertNotIn("access", self.names())
+            self.assertNotIn("RAOfflineProxy", self.out.getvalue())
+
+    def test_proxy_access_adb_error_warns_and_fails(self):
+        self.proxy_setup()
+        def boom(serial, pkg, where):
+            raise adb.AdbError("no device")
+        for dry_run in (True, False):
+            self.err.seek(0)
+            self.err.truncate()
+            with mock.patch.object(android_access, "entries", boom):
+                self.assertEqual(self.run_apply(dry_run), 1)
+            self.assertIn("RAOfflineProxy: no device", self.err.getvalue())
+
+    def test_proxy_access_between_apks_and_syncthing(self):
+        self.proxy_setup()
+        for dry_run in (True, False):
+            order = []
+            with mock.patch.object(android_settings, "_apk_part", lambda *a: order.append("apks")), \
+                    mock.patch.object(android_access, "entries", lambda *a: order.append("proxy") or self.access), \
+                    mock.patch.object(android_syncthing, "apply", lambda serial, dry, failed: order.append("syncthing")):
+                self.run_apply(dry_run)
+            self.assertEqual(order, ["apks", "proxy", "syncthing"])
 
     def test_apply_installs_only_missing_packages(self):
         self.apk_setup()

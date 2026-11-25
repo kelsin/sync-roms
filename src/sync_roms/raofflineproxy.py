@@ -17,6 +17,7 @@ KINDS = {
     "rocknix": (runtime.ROCKNIX_PREFIX, r"RAOfflineProxy-Rocknix-v[^/]+-Install\.sh", None, "roms/ports/RAOfflineProxy Install.sh"),
 }
 LAUNCH = "launch.sh"
+ANDROID_PACKAGE = "com.raofflineproxy"
 APK_NAME = re.compile(r"RAOfflineProxy.*\.apk")  # the Android build, in os/android/APKs/
 
 

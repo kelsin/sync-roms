@@ -69,6 +69,16 @@ class AdbTest(unittest.TestCase):
         with mock.patch.object(adb, "run", return_value="123\n"):
             self.assertTrue(adb.shell_ok("S", "pidof", "x"))
 
+    def test_forward_returns_local_port(self):
+        with mock.patch.object(adb, "run", return_value="57983\n") as run:
+            self.assertEqual(adb.forward("S", 8384), 57983)
+        run.assert_called_once_with("forward", "tcp:0", "tcp:8384", serial="S")
+
+    def test_forward_remove(self):
+        with mock.patch.object(adb, "run", return_value="") as run:
+            adb.forward_remove("S", 57983)
+        run.assert_called_once_with("forward", "--remove", "tcp:57983", serial="S", check=False)
+
     def test_is_dir(self):
         with mock.patch.object(adb, "run", return_value="y\n") as run:
             self.assertTrue(adb.is_dir("S", "/x/A B"))
