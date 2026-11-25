@@ -3,7 +3,7 @@ keys' lines change, everything else (other keys, comments, order) stays. The fil
 import os
 import re
 
-from . import applied, cardfs, ui, usersettings
+from . import applied, cardfs, spruce_wifi, ui, usersettings
 from .spruce_settings import API_KEY, MODES
 
 FILE = os.path.join("system", "knulli.conf")
@@ -64,9 +64,32 @@ def ra_values():
     return result
 
 
+SLOTS = ("wifi", "wifi2", "wifi3")
+
+
+def wifi_values(current):
+    """{key: value} for the wifi slots: the saved networks first, then the ones already in the file, cut to three slots."""
+    mine = spruce_wifi.wanted()
+    if not mine:
+        return {}
+    ssids = {ssid for ssid, _ in mine}
+    device = [(current[f"{slot}.ssid"], current.get(f"{slot}.key", "")) for slot in SLOTS
+              if current.get(f"{slot}.ssid") and current[f"{slot}.ssid"] not in ssids]
+    final = mine + device
+    kept = final[:len(SLOTS)]
+    for label, lost in (("saved", [n for n in mine if n not in kept]), ("device", [n for n in device if n not in kept])):
+        if lost:
+            ui.warn(f"Only {len(SLOTS)} WiFi networks fit in {SHOWN}; not written ({label}): {', '.join(ssid for ssid, _ in lost)}")
+    result = {}
+    for slot, (ssid, psk) in zip(SLOTS, final):
+        result[f"{slot}.ssid"] = ssid
+        result[f"{slot}.key"] = psk
+    return result
+
+
 def wanted(current):
     """{key: value} of every setting to write, given the file's current values."""
-    return ra_values()
+    return {**ra_values(), **wifi_values(current)}
 
 
 def entries(base):

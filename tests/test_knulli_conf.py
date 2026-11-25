@@ -107,6 +107,48 @@ class Install(helpers.CardDir):
         self.assertIn("would set", out)
         self.assertEqual(self.content(), "foo=1\n")
 
+    def test_wifi_fills_slots_in_order(self):
+        self.put("foo=1\n")
+        self.run_install(wifi_networks=[{"ssid": "A", "psk": "password-a"}, {"ssid": "B"}])
+        lines = self.content().split("\n")
+        for line in ("wifi.ssid=A", "wifi.key=password-a", "wifi2.ssid=B", "wifi2.key="):
+            self.assertIn(line, lines)
+        self.assertNotIn("wifi3.ssid", self.content())
+
+    def test_wifi_unset_or_empty_writes_nothing(self):
+        for settings in ({}, {"wifi_networks": []}):
+            usersettings.save_settings(settings)
+            self.assertEqual(knulli_conf.wifi_values({"wifi.ssid": "Home"}), {})
+
+    def test_wifi_keeps_device_networks_after_yours(self):
+        self.put("wifi.ssid=Home\nwifi.key=hhhhhhhh\n")
+        self.run_install(wifi_networks=[{"ssid": "A", "psk": "password-a"}])
+        lines = self.content().split("\n")
+        for line in ("wifi.ssid=A", "wifi.key=password-a", "wifi2.ssid=Home", "wifi2.key=hhhhhhhh"):
+            self.assertIn(line, lines)
+
+    def test_wifi_same_ssid_takes_your_key(self):
+        self.put("wifi.ssid=A\nwifi.key=oldoldold\n")
+        self.run_install(wifi_networks=[{"ssid": "A", "psk": "new-password"}])
+        self.assertEqual(self.content(), "wifi.ssid=A\nwifi.key=new-password\n")
+
+    def test_wifi_more_than_three_warns(self):
+        self.put("wifi.ssid=Home\nwifi.key=hhhhhhhh\n")
+        self.run_install(wifi_networks=[{"ssid": s} for s in "ABCD"])
+        lines = self.content().split("\n")
+        self.assertIn("wifi3.ssid=C", lines)
+        self.assertNotIn("wifi4.ssid=D", lines)
+        self.assertNotIn("Home", self.content())
+        warning = self.err.getvalue()
+        self.assertIn("D", warning)
+        self.assertIn("Home", warning)
+
+    def test_wifi_keys_hidden(self):
+        self.put("foo=1\n")
+        out = self.run_install(wifi_networks=[{"ssid": "A", "psk": "secret-pass"}])
+        self.assertIn("(hidden)", out)
+        self.assertNotIn("secret-pass", out + self.err.getvalue())
+
 
 if __name__ == "__main__":
     unittest.main()
