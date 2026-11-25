@@ -207,7 +207,7 @@ The page:
   `xclip -selection clipboard` that `shutil.which` finds, feeding `text` on stdin. It returns True on exit 0, and
   False when none is found or the command fails (never an error).
 - The commands are `collections share` and `collections unshare`. `share` copies the link with
-  `copy_to_clipboard` and adds ` (copied to the clipboard)` to its `Sharing at`/`Already shared at` line when that
+  `copy_to_clipboard` and adds ` 📋` to the end of its `Sharing at`/`Already shared at` line when that
   worked. `share` prints `Built <path>` when it built the
   page, then `Sharing at <link>` (or `Already shared at <link>`). `unshare` prints
   `Stopped sharing the collections page.` or `The collections page isn't shared.`; both exit 0. To refresh a
@@ -222,7 +222,7 @@ The page:
   - `test_clipboard`: with `which` finding only `pbcopy`, it runs `["pbcopy"]` with `input=link` and returns True.
     With nothing found it returns False and makes no call.
   - `test_share_command_copies_link`: `cli.main(["collections", "share"])` prints a line ending
-    `(copied to the clipboard)` when `copy_to_clipboard` returns True.
+    ` 📋` when `copy_to_clipboard` returns True.
   - `test_unshare_when_not_serving`: status `{}` gives False and no `off` call. The returned link is `https://box.tail1.ts.net/collections/` for
     `DNSName "box.tail1.ts.net."`.
   - `test_unshare_only_turns_off_its_path`: while serving, the argv is as above, it returns True, and no call
