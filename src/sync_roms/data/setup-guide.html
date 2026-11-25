@@ -287,12 +287,12 @@ code.copy.copied::after { content: "✓ copied"; color: var(--accent); }
 {"id": "anbernic-rg-slide", "name": "Anbernic RG Slide", "soc": "UNISOC Tiger T820", "screen": "4:3", "firmwares": ["esde"]},
 {"id": "anbernic-rg-vita", "name": "Anbernic RG Vita", "soc": "UNISOC T618", "screen": "16:9", "firmwares": ["esde"]},
 {"id": "anbernic-rg-vita-pro", "name": "Anbernic RG Vita Pro", "soc": "Rockchip RK3576", "screen": "16:9", "firmwares": ["muos", "rocknix"]},
-{"id": "anbernic-rg-28xx", "name": "Anbernic RG28XX", "soc": "Allwinner H700", "screen": "4:3", "firmwares": ["knulli", "muos", "rocknix", "nextui", "spruce"]},
+{"id": "anbernic-rg-28xx", "name": "Anbernic RG28XX", "soc": "Allwinner H700", "screen": "4:3", "firmwares": ["knulli", "muos", "rocknix", "nextui", "spruce"], "network": false},
 {"id": "anbernic-rg-34xx", "name": "Anbernic RG34XX", "soc": "Allwinner H700", "screen": "3:2", "firmwares": ["knulli", "muos", "rocknix", "nextui", "spruce"]},
 {"id": "anbernic-rg-34xxsp", "name": "Anbernic RG34XX SP", "soc": "Allwinner H700", "screen": "3:2", "firmwares": ["nextui", "knulli", "muos", "rocknix", "spruce"]},
 {"id": "anbernic-rg-353ps", "name": "Anbernic RG353PS", "soc": "Rockchip RK3566", "screen": "4:3", "firmwares": ["knulli", "rocknix"]},
 {"id": "anbernic-rg-353vs", "name": "Anbernic RG353VS", "soc": "Rockchip RK3566", "screen": "4:3", "firmwares": ["knulli", "rocknix"]},
-{"id": "anbernic-rg-35xx-2024", "name": "Anbernic RG35XX 2024", "soc": "Allwinner H700", "screen": "4:3", "firmwares": ["knulli", "muos", "rocknix", "nextui", "spruce"]},
+{"id": "anbernic-rg-35xx-2024", "name": "Anbernic RG35XX 2024", "soc": "Allwinner H700", "screen": "4:3", "firmwares": ["knulli", "muos", "rocknix", "nextui", "spruce"], "network": false},
 {"id": "anbernic-rg-35xxh", "name": "Anbernic RG35XX H", "soc": "Allwinner H700", "screen": "4:3", "firmwares": ["knulli", "muos", "rocknix", "nextui", "spruce"]},
 {"id": "anbernic-rg-35xx-plus", "name": "Anbernic RG35XX Plus", "soc": "Allwinner H700", "screen": "4:3", "firmwares": ["knulli", "muos", "rocknix", "nextui", "spruce"]},
 {"id": "anbernic-rg-35xx-pro", "name": "Anbernic RG35XX Pro", "soc": "Allwinner H700", "screen": "4:3", "firmwares": ["knulli", "muos", "rocknix", "nextui", "spruce"]},
@@ -339,7 +339,7 @@ code.copy.copied::after { content: "✓ copied"; color: var(--accent); }
 {"id": "magicx-zero40", "name": "MagicX Zero 40", "soc": "Allwinner A133P", "screen": "3:5", "firmwares": ["esde", "spruce"]},
 {"id": "miyoo-a30", "name": "Miyoo A30", "soc": "Allwinner A33", "screen": "4:3", "firmwares": ["spruce"]},
 {"id": "miyoo-flip", "name": "Miyoo Flip", "soc": "Rockchip RK3566", "screen": "4:3", "firmwares": ["knulli", "spruce"]},
-{"id": "miyoo-mini", "name": "Miyoo Mini", "soc": "SigmaStar SSD202D", "screen": "4:3", "firmwares": ["onion", "allium", "spruce"]},
+{"id": "miyoo-mini", "name": "Miyoo Mini", "soc": "SigmaStar SSD202D", "screen": "4:3", "firmwares": ["onion", "allium", "spruce"], "network": false},
 {"id": "miyoo-mini-flip", "name": "Miyoo Mini Flip", "soc": "SigmaStar SSD202D", "screen": "4:3", "firmwares": ["onion", "allium", "spruce"]},
 {"id": "miyoo-mini-plus", "name": "Miyoo Mini Plus", "soc": "SigmaStar SSD202D", "screen": "4:3", "firmwares": ["onion", "allium", "spruce"]},
 {"id": "retroid-pocket-2s", "name": "Retroid Pocket 2S", "soc": "UNISOC T610", "screen": "4:3", "firmwares": ["esde"]},
@@ -488,10 +488,10 @@ const PLATFORMS = { android: "Android", windows: "Windows", steamos: "SteamOS", 
 
 /*
   Guide content. Each section and each item may have a `when`:
-    { platform: ["android", ...], layout: ["esde", ...], systems: ["psp", ...], tier: [...], power: ["low", "mid", "high", "desktop"], device: [...], dualscreen: [true], gpu: [true], bezels: [true] }
+    { platform: ["android", ...], layout: ["esde", ...], systems: ["psp", ...], tier: [...], power: ["low", "mid", "high", "desktop"], device: [...], dualscreen: [true], gpu: [true], bezels: [true], network: [true] }
   and is only shown when the picked device and layout match every key given. `systems` matches when the
   device supports ANY listed system (tiers in device-systems.json); `dualscreen` is true for devices with a second screen;
-  `gpu` is true for devices with an Adreno `gpu` id in devices.json;
+  `gpu` is true for devices with an Adreno `gpu` id in devices.json; `network` is true unless devices.json has `"network": false`;
   `bezels` is true for devices that have bezels in storage (the `bezels-data` block `sync-roms guide` fills in).
   Items:  { title, when?, body?: HTML or (ctx) => HTML, settings?: [[menu path, value, note?], ...] }
   Emulators (in the "emulators" section): { system, emulator, when?, install: HTML, settings?: [...], proxy?: true }
@@ -1181,6 +1181,124 @@ const SECTIONS = [
     ],
   },
   {
+    id: "netplay",
+    title: "Local network multiplayer",
+    lede: `Two players on two devices on the same WiFi, through RetroArch netplay (or the firmware's own netplay menu). No internet or relay server is needed. Both devices run the same game in the same core; one hosts, the other joins.`,
+    when: { network: [true] },
+    items: [
+      {
+        title: "What has to match",
+        body: `<ul>
+          <li><b>The core</b>: the same core on both (fceumm with fceumm, not with nestopia). RetroArch refuses a different core.</li>
+          <li><b>The core version and RetroArch version</b>: a different version only gives a warning and connects, but can desync. The core version is in <span class="path">${path("Main Menu > Information > Core Information")}</span>. Firmwares ship their own RetroArch (Onion 4.3 has 1.15, Android and EmuDeck the newest), so the same firmware and version on both devices is safest; ROCKNIX requires it.</li>
+          <li><b>The ROM</b>: the same file. The client finds it by CRC or file name, so a game synced from storage matches on both.</li>
+          <li><b>Core options</b>: the same on both, or the game desyncs.</li>
+          <li><b>Genesis Plus GX</b> (Genesis, Master System, Game Gear, Sega CD, SG-1000) only connects between the same kind of build: 32-bit ARM (Onion, Allium), 64-bit Linux and Android, or Windows. RetroArch says "This core does not support netplay between different platforms" otherwise, so a Windows PC can't play it with a handheld. PicoDrive connects across them, but 32-bit ARM builds use different CPU cores, so expect desyncs.</li>
+        </ul>
+        <p>Cores in "RetroArch cores" that support netplay: <code>fceumm</code>, <code>snes9x</code>, <code>genesis_plus_gx</code>, <code>picodrive</code>, <code>fbneo</code> (use it for arcade: RetroArch refuses <code>mame2003_plus</code>), <code>pcsx_rearmed</code>, <code>mednafen_pce_fast</code>. <code>gambatte</code> and <code>mgba</code> run netplay, but GB and GBA games are one-player and their link cable doesn't work over it (see "Game Boy link"). RetroArch refuses N64, PSP, Dreamcast and later systems' cores.</p>
+        <p>Both devices on the same network: a guest network or a router with AP/client isolation, or one device on 2.4 GHz and the other on 5 GHz under different names, can keep them from finding each other.</p>`,
+      },
+      {
+        title: "RetroArch",
+        when: { layout: ["esde", "emudeck", "allium", "spruce"] },
+        body: ctx => `
+          <ol>
+            <li>Both devices: same WiFi, and the settings below.</li>
+            <li>Host: start the game, open the RetroArch menu and go back to the Main Menu (Netplay isn't in the in-game Quick Menu), <span class="path">${path("Netplay > Host > Start Netplay Host")}</span>.</li>
+            <li>Client: start the same game, open the RetroArch menu, back to the Main Menu, <span class="path">${path("Netplay > Refresh Netplay LAN List")}</span> and pick the host. If it isn't listed, <span class="path">${path("Netplay > Connect to Netplay Host")}</span> and type the host's IP.</li>
+            <li>The host is player 1 and the client gets player 2; nothing to set.</li>
+          </ol>
+          ${ctx.layout === "spruce" ? `<p class="note">spruceOS 4.6.0 has no netplay menu of its own; use RetroArch's. The <a href="https://github.com/bmpriest/retro-netplay">Netplay app</a> (in the Development branch, or unzipped at the card root from its releases) adds one: host on the current WiFi, its own hotspot or a USB cable, then launch games as usual. It only talks to devices running the same app.</p>` : ""}
+          ${ctx.layout === "allium" ? `<p class="note">Allium has no netplay menu of its own; open RetroArch's menu from Allium's in-game menu.</p>` : ""}
+          ${ctx.platform === "windows" ? `<p class="note">The host must accept incoming TCP and UDP 55435 (UDP is what the LAN list finds): allow RetroArch through Windows Firewall on private networks.</p>` : ""}
+          ${ctx.platform === "android" ? `<p class="note">ES-DE has no netplay option: launch the game from ES-DE, then use RetroArch's menu. The Play Store RetroArch gets its cores from Google Play, so their versions can lag the other devices'; the APK from retroarch.com downloads the same cores as the others.</p>` : ""}`,
+        settings: [
+          ["Settings > User > Username", "a name per device", "Shown in the host list."],
+          ["Settings > Network > Publicly Announce Netplay", "off", "On by default: it lists the game in the internet lobby."],
+          ["Settings > Network > Use Relay Server", "off"],
+          ["Settings > Network > Netplay TCP Port", "55435", "The default; the same on both."],
+        ],
+      },
+      {
+        title: "Onion",
+        when: { layout: ["onion"] },
+        body: `
+          <ol>
+            <li>Host: on the game in Games, press <b>Y</b> and pick <span class="path">${path("Netplay > Host a session... > Standard Netplay (use current wifi)")}</span>.</li>
+            <li>Client: <b>Y</b> on the same game, <span class="path">${path("Netplay > Join a session... > Standard Netplay (use current wifi)")}</span>, then <b>Menu+Select</b> and <span class="path">${path("Netplay > Refresh Netplay Lan List")}</span>, and pick the host.</li>
+          </ol>
+          <p>Between two Miyoo Mini Plus, <b>Easy Netplay</b> in the same menu needs no WiFi: one device makes a hotspot and the other joins it. "No Netplay" in the menu means the system has no netplay core (GBA, for example).</p>
+          <p class="note">Onion 4.3 runs RetroArch 1.15 (its unreleased builds move to 1.22). It can connect to newer RetroArch, but an Onion 4.2 user reported it dropping on every system but NES; play Onion with Onion.</p>`,
+      },
+      {
+        title: "muOS",
+        when: { layout: ["muos"] },
+        body: `
+          <p>muOS's own player, Pickles, has netplay. Both devices need the same game, core and emulation options.</p>
+          <ol>
+            <li>Host: in the game, <span class="path">${path("Pickles Menu > Network Play > Host Network")}</span>, set Play Mode (Separate Players) and <b>Host Session</b>.</li>
+            <li>Client: <span class="path">${path("Pickles Menu > Network Play > Join Network > Find LAN Sessions")}</span> and <b>Join Found Session</b>, or <b>Join by Address</b> with the host's IP. Check the six-digit code matches the host's and pick <b>Confirm Pairing</b>.</li>
+          </ol>
+          <p class="note">Pickles uses its own protocol and doesn't play RetroArch hosts: play muOS with muOS. To play another firmware, switch the game to RetroArch (<span class="path">${path("Content Options > Core")}</span>) and use RetroArch's Netplay menu on both.</p>`,
+      },
+      {
+        title: "Knulli",
+        when: { layout: ["knulli"] },
+        body: `
+          <ol>
+            <li>Both devices: WiFi on, <span class="path">${path("Game Settings > Netplay Settings > Enable Netplay")}</span> on.</li>
+            <li>Host: in the gamelist, hold <b>East (A)</b> on the game and pick <span class="path">${path("Start a Netplay Game > Host a Netplay Game")}</span>.</li>
+            <li>Client: start the same game, press <b>Function+South</b> for the RetroArch menu, back to the Main Menu, <span class="path">${path("Netplay > Refresh Netplay LAN List")}</span> and pick the host.</li>
+          </ol>
+          <p class="note">Without a router, <b>Automatically Use Hotspot for Local Netplay</b> in Netplay Settings makes one device a hotspot.</p>`,
+      },
+      {
+        title: "ROCKNIX",
+        when: { layout: ["rocknix"] },
+        body: `
+          <ol>
+            <li>Both devices: WiFi on, <span class="path">${path("Game Settings > Netplay Settings > NetPlay Enabled")}</span> on, then <b>Index Games</b>. In <span class="path">${path("Network Settings")}</span>, Local Play Mode off.</li>
+            <li>Host: in Network Settings pick the <b>1 (Host)</b> role, press <b>Y</b> on the game and pick <span class="path">${path("Netplay Options > Host a Netplay Session")}</span>.</li>
+            <li>Client: in Network Settings pick <b>2-4 (Clients)</b>, press <b>Y</b> on the same game and pick <span class="path">${path("Netplay Options > Connect to a Netplay Session")}</span>.</li>
+          </ol>
+          <p>Without a router, turn Local Play Mode on on both and follow the same steps (no RetroAchievements, scraping or updates while it's on).</p>
+          <p class="note">Run the same ROCKNIX version on both; in Local Play Mode, devices on different versions don't connect.</p>`,
+      },
+      {
+        title: "NextUI",
+        when: { layout: ["nextui"] },
+        body: `
+          <p>NextUI has no netplay. The Pak Store's <b>Netplay</b> pak (<a href="https://github.com/bmpriest/retro-netplay">bmpriest/retro-netplay</a>, also spruceOS's app) adds it: host on the current WiFi, a hotspot or USB, then launch games as usual. It only talks to devices running it. <a href="https://github.com/mohammadsyuhada/nextui-netplay">nextui-netplay</a> is a set of drop-in NextUI patches instead (experimental, LAN only).</p>`,
+      },
+      {
+        title: "Game Boy link",
+        when: { systems: ["gb", "gbc", "gba"] },
+        body: ctx => `
+          <p>RetroArch netplay isn't a link cable: Gambatte and mGBA have no netplay. For trading and link battles:</p>
+          <ul>
+            <li><b>GB, GBC</b>: the <code>tgb_dual</code> core (core option <b>Link cable emulation</b>, then reload) runs two linked Game Boys and works over netplay. Gambatte has its own network link instead: <span class="path">${path("Core Options > Show Game Link Settings")}</span>, one device <b>Network Server</b> and the other <b>Network Client</b> with the server's IP, port 56400.</li>
+            <li><b>GBA</b>: the <code>gpsp</code> core's <b>Link Cable Connectivity</b> option (Pokémon Gen 3, Advance Wars, the Wireless Adapter) over netplay, RetroArch 1.16 or newer on both.</li>
+          </ul>
+          ${ctx.layout === "onion" ? `<p>Onion: <span class="path">${path("Netplay > Host a session... > Easy Netplay - Pokemon Trade/Battle")}</span> (Join a session... on the other) does GB/GBC trades between two Miyoo Mini Plus.</p>` : ""}
+          ${ctx.layout === "muos" ? `<p>muOS: <span class="path">${path("Pickles Menu > Game Link > Link Mode")}</span>, Host on one and Client on the other (Gambatte; gpSP for GBA).</p>` : ""}
+          ${ctx.layout === "rocknix" ? `<p>ROCKNIX: set the GB/GBC core to TGB Dual (or Gambatte) and use netplay as above.</p>` : ""}
+          <p class="note">Switching GB/GBC to tgb_dual or GBA to gpsp changes the core-named save folder, so those saves don't sync with the usual core.</p>`,
+      },
+      {
+        title: "PSP (PPSSPP)",
+        when: { platform: ["android", "windows"], systems: ["psp"] },
+        body: `<p>PSP games with ad hoc multiplayer, in PPSSPP on both devices. One device runs the ad hoc server.</p>`,
+        settings: [
+          ["Settings > Networking > Enable networking/WLAN", "on", "Both."],
+          ["Settings > Networking > Enable built-in ad hoc server", "on", "The host only."],
+          ["Settings > Networking > Ad hoc server address", "the host's IP", "The host too (its own IP). Add server, Relay server mode off."],
+          ["Settings > Networking > Try to use server-provided packet relay", "No", "LAN play."],
+          ["Settings > Networking > Port offset", "10000", "The default; the same on all."],
+        ],
+      },
+    ],
+  },
+  {
     id: "shaders",
     title: "Shaders",
     lede: "Starting picks for this device's power and systems; edit <code>SHADER_CATEGORIES</code> (and <code>ONION_SHADERS</code> for Onion) in the page's script as favourites are chosen.",
@@ -1572,7 +1690,7 @@ function render() {
   const info = DEVICE_SYSTEMS[device.id] || { tier: null, systems: [] };
   const ctx = {
     layout: $layout.value, platform: platformOf(device, $layout.value), device: device.id,
-    tier: info.tier, power: powerOf(info.tier), systems: info.systems, dualscreen: !!device.screen2, gpu: !!device.gpu,
+    tier: info.tier, power: powerOf(info.tier), systems: info.systems, dualscreen: !!device.screen2, gpu: !!device.gpu, network: device.network !== false,
     bezels: BEZELS.includes(device.id),
   };
   ctx.emus = SECTIONS.find(s => s.id === "emulators").items.filter(e => matches(e.when, ctx));
