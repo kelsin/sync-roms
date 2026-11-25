@@ -14,8 +14,124 @@ sys.path.insert(0, os.path.join(ROOT, "src"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from sync_roms import clean, cli, commands, downloads, inventory, mirroring, names, runtime, s3, store, themeart, ui, usersettings  # noqa: E402
-from helpers import Cmd, DataDir, storage_sets  # noqa: E402,F401
+from helpers import Cmd, DataDir, StorageDir, storage_tags  # noqa: E402
 
+
+SYSTEMS = [{"name": "Game Boy Advance", "bucket": "gba", "bios": {"files": []}},
+           {"name": "Genesis", "bucket": "gen", "bios": {"files": []}}]
+TAG_DEFS = {"rpg": {"name": "RPG", "emoji": "🗡️"}, "shmups": {"name": "Shmups", "emoji": "🛸"}}
+
+
+class CheckTagsTest(StorageDir):
+    def check(self, data, genres=None):
+        """(problems, wanted keys, notices) of check_tags and check_tag_notices over tags.json holding data."""
+        storage_tags(self, {"declined": {}, **data} if isinstance(data, dict) else data, self.root)
+        problems = []
+        with mock.patch.object(store, "repo_json", side_effect=lambda name: genres or {} if name == "genre-tags"
+                               else SYSTEMS), contextlib.redirect_stderr(io.StringIO()):
+            keys = commands.check_tags(problems, {"gba", "gen"})
+            notices = commands.check_tag_notices(SYSTEMS)
+        return problems, keys, notices
+
+    def test_a_missing_tags_json_has_no_problems_and_counts_untagged_games(self):
+        self.put("gba/A.zip")
+        self.put("gba/B.zip")
+        self.assertEqual(self.check(None), ([], {}, ["gba: 2 untagged games"]))
+
+    def test_good_tags_have_no_problems_and_list_their_keys(self):
+        self.put("gba/A.zip")
+        problems, keys, notices = self.check({"tags": TAG_DEFS, "games": {
+            "gba/A.zip": {"tags": ["rpg"], "files": ["gba/A2.zip"], "variants": [
+                {"bucket": "gba/A DX.zip", "note": "more", "files": ["gba/A DX2.zip"]}]},
+            "gen/B.zip": {"tags": ["shmups"]}}})
+        self.assertEqual(problems, [])
+        self.assertEqual(keys, {"tags.json": [("gba", "gba/A.zip"), ("gba", "gba/A2.zip"), ("gba", "gba/A DX.zip"),
+                                              ("gba", "gba/A DX2.zip"), ("gen", "gen/B.zip")]})
+        self.assertEqual(notices, [])
+
+    def test_unknown_tag_ids_and_systems_are_problems(self):
+        problems, keys, _ = self.check({"tags": TAG_DEFS, "games": {
+            "gba/A.zip": {"tags": ["rpg", "nope"]}, "nes/N.zip": {"tags": ["rpg"]},
+            "gba/B.zip": {"tags": ["shmups"], "files": ["gen/X.zip"], "variants": [{"bucket": "nes/V.zip", "note": ""}]}}})
+        self.assertEqual(problems, ["tags.json: gba/A.zip: unknown tag 'nope'",
+                                    "tags.json: 'gen/X.zip' isn't under gba/",
+                                    "tags.json: gba/B.zip: variant 'nes/V.zip': unknown system 'nes'",
+                                    "tags.json: nes/N.zip: unknown system 'nes'"])
+        self.assertEqual(keys, {"tags.json": [("gba", "gba/A.zip"), ("gba", "gba/B.zip")]})
+
+    def test_a_variant_on_another_known_system_is_fine(self):
+        problems, keys, _ = self.check({"tags": TAG_DEFS, "games": {"gba/A.zip": {"tags": ["rpg"], "variants": [
+            {"bucket": "gen/A Plus.zip", "note": "Genesis: more", "files": ["gen/A Plus 2.zip", "gba/W.zip"]}]}}})
+        self.assertEqual(problems, ["tags.json: 'gba/W.zip' isn't under gen/"])  # a variant's files are on its system
+        self.assertEqual(keys, {"tags.json": [("gba", "gba/A.zip"), ("gen", "gen/A Plus.zip"),
+                                              ("gen", "gen/A Plus 2.zip")]})
+
+    def test_a_variant_under_an_unknown_folder_is_a_problem(self):
+        problems, keys, _ = self.check({"tags": TAG_DEFS, "games": {"gba/A.zip": {"tags": ["rpg"], "variants": [
+            {"bucket": "nope/A.zip", "note": ""}]}}})
+        self.assertEqual(problems, ["tags.json: gba/A.zip: variant 'nope/A.zip': unknown system 'nope'"])
+        self.assertEqual(keys, {"tags.json": [("gba", "gba/A.zip")]})
+
+    def test_a_tag_id_that_isnt_a_string_is_a_problem(self):
+        problems, _, _ = self.check(json.dumps({"tags": TAG_DEFS, "games": {"gba/A.zip": {"tags": ["rpg", ["x"], 3]}}}))
+        self.assertEqual(problems, ["tags.json: gba/A.zip: tag ids must be strings, not ['x']",
+                                    "tags.json: gba/A.zip: tag ids must be strings, not 3"])
+
+    def test_a_tag_without_a_name_or_emoji_and_a_shared_emoji_are_problems(self):
+        problems, _, _ = self.check({"tags": {"a": {"name": "A", "emoji": "🛸"}, "b": {"name": "B", "emoji": "🛸"},
+                                              "c": {"name": "", "emoji": "🎲"}, "d": {"name": "D"}},
+                                     "games": {}})
+        self.assertEqual(problems, ["tags.json: tag 'c' has no name", "tags.json: tag 'd' has no emoji",
+                                    "tags.json: tags 'a', 'b' share the emoji 🛸"])
+
+    def test_bad_files_and_variants_are_problems(self):
+        problems, _, _ = self.check(json.dumps({"tags": TAG_DEFS, "games": {
+            "gba/A.zip": {"tags": ["rpg"], "files": "gba/A2.zip"},
+            "gba/B.zip": {"tags": ["rpg"], "variants": [{"note": "no bucket"}, "x"]}}}))
+        self.assertEqual(problems, ["tags.json: gba/A.zip: 'files' must be a list of bucket keys",
+                                    "tags.json: gba/B.zip: each variant needs a bucket key"])
+
+    def test_unknown_art_is_a_problem(self):
+        art = list(themeart.art_choices())[0]
+        problems, _, _ = self.check({"tags": {"a": {"name": "A", "emoji": "🛸", "art": "nope"},
+                                              "b": {"name": "B", "emoji": "🎲", "art": art}}, "games": {}})
+        self.assertEqual(problems, ["tags.json: tag 'a': unknown art 'nope'"])
+
+    def test_keys_not_in_storage_are_problems_with_bucket_keys(self):
+        storage_tags(self, {"tags": TAG_DEFS, "games": {"gba/A.zip": {"tags": ["rpg"], "variants": [
+            {"bucket": "gba/A DX.zip", "note": ""}]}}, "declined": {}}, self.root)
+        with contextlib.redirect_stderr(io.StringIO()):
+            problems = commands.check_data(lambda system: {"gba/A.zip"})
+        self.assertEqual(problems, ["tags.json: 'gba/A DX.zip' isn't in storage"])
+
+    def test_tags_with_no_games_and_untagged_games_are_noticed(self):
+        self.put("gba/A.zip")
+        self.put("gba/B.zip")
+        self.put("gen/C.zip")
+        _, _, notices = self.check({"tags": TAG_DEFS, "games": {"gba/A.zip": {"tags": ["rpg"]}}})
+        self.assertEqual(notices, ["tags.json: 1 tag(s) have no games: shmups",
+                                   "gba: 1 untagged games", "gen: 1 untagged games"])
+
+    def test_genre_tags_that_arent_tags_are_noticed(self):
+        _, _, notices = self.check({"tags": TAG_DEFS, "games": {"gba/A.zip": {"tags": ["rpg", "shmups"]}}},
+                                   genres={"RPG": ["rpg"], "Shooter": ["shmups", "shooters"], "X": ["rpgs"]})
+        self.assertEqual(notices, ["genre-tags.json: 2 tag id(s) aren't tags in tags.json: rpgs, shooters"])
+
+    def test_a_cards_leftover_sets_key_is_noticed(self):
+        os.makedirs(self.data)
+        with open(os.path.join(self.data, "cards.json"), "w") as f:
+            json.dump({"c": {"games": {"gba": [], "sets": ["mix"]}}, "d": {"games": {"gba": []}}}, f)
+        _, _, notices = self.check(None)
+        self.assertEqual(notices, ["cards.json: c: 'sets' is ignored; dropped the next time the card's games are saved"])
+
+    def test_surprise_tags_that_arent_tags_are_noticed(self):
+        os.makedirs(self.data)
+        with open(os.path.join(self.data, "cards.json"), "w") as f:
+            json.dump({"c": {"surprise_tags": ["rpg", "gone"]}, "d": {"surprise_tags": ["rpg"]}}, f)
+        usersettings.save_setting("surprise_tags", ["old", "shmups"])
+        _, _, notices = self.check({"tags": TAG_DEFS, "games": {"gba/A.zip": {"tags": ["rpg", "shmups"]}}})
+        self.assertEqual(notices, ["settings.json: surprise_tags: 1 id(s) aren't tags in tags.json: old",
+                                   "cards.json: c: surprise_tags: 1 id(s) aren't tags in tags.json: gone"])
 
 
 class ConfigSetTest(Cmd):
@@ -190,7 +306,7 @@ class GamesTest(CardCmd):
         self.assertEqual(self.run_cmd("games", "full", "gba", "on")[1].strip(), "Nothing to change.")
         self.assertEqual(self.games()["gba"], {"full_system": True, "games": listed})
         self.assertEqual(json.loads(self.run_cmd("games", "list", "--json")[1]),
-                         {"full_systems": ["gba"], "sets": [], "games": []})
+                         {"full_systems": ["gba"], "games": []})
         self.run_cmd("games", "full", "gba", "off", "--dry-run")
         self.assertEqual(self.games()["gba"], {"full_system": True, "games": listed})
         code, out, _ = self.run_cmd("games", "full", "gba", "off")
@@ -341,14 +457,16 @@ class GamesTest(CardCmd):
         self.assertEqual(self.read("cards.json")["SD"]["games"]["gba"][0]["bucket"], "gba/A.zip")
         self.assertEqual(self.read("cards.json")["SD"]["layout"], "esde")
 
-    def test_sets_add_remove(self):
-        storage_sets(self, {"mix": {"name": "Mix", "games": [{"title": "A", "system": "gba", "bucket": "gba/A.zip"}]}})
-        set_id = "mix"
-        self.run_cmd("games", "sets", "add", set_id)
-        self.assertEqual(self.games()["sets"], [set_id])
-        self.run_cmd("games", "sets", "remove", set_id)
-        self.assertNotIn("sets", self.games())
-        self.assertEqual(self.run_cmd("games", "sets", "add", "nope")[0], 2)
+    def test_games_sets_is_gone_and_list_shows_no_sets(self):
+        for argv in (("games", "sets", "list"), ("games", "set", "add", "mix")):
+            with self.subTest(argv=argv):
+                self.assertEqual(self.run_cmd(*argv)[0], 2)
+        raw = self.read("cards.json")
+        raw["SD"]["games"] = {"gba": [{"title": "A", "bucket": "gba/A.zip"}], "sets": ["mix"]}
+        self.write_json("cards.json", raw)
+        self.assertEqual(json.loads(self.run_cmd("games", "list", "--json")[1]),
+                         {"full_systems": [], "games": [{"system": "gba", "bucket": "gba/A.zip", "title": "A"}]})
+        self.assertNotIn("mix", self.run_cmd("games", "list")[1])
 
     def write_cards(self, cards):
         with open(self.path("cards.json"), "w") as f:
@@ -403,8 +521,7 @@ class CardsTest(Cmd):
     def test_copy_counts_what_dst_syncs_in_a_system_it_turned_off(self):
         cards = self._two_cards()
         cards["A"]["excluded"] = {"gba": ["gba/Y.zip"]}
-        storage_sets(self, {"mix": {"name": "Mix", "games": [{"title": "Y", "system": "gba", "bucket": "gba/Y.zip"}]}})
-        cards["B"]["games"] = {"sets": ["mix"]}
+        cards["B"]["games"] = {"gba": [{"title": "Y", "bucket": "gba/Y.zip"}]}
         cards["B"]["systems_off"] = ["gba"]
         with open(self.path("cards.json"), "w") as f:
             json.dump(cards, f)
@@ -462,7 +579,7 @@ class DataSafetyTest(Cmd):
             json.dump({"c": {"device": "full", "layout": "esde",
                              "games": {"nope": [], "gba": [{"title": "x", "bucket": "nes/x.zip"}], "sets": ["ghost"]}}}, f)
         problems = commands.check_data()
-        self.assertEqual(len(problems), 3)
+        self.assertEqual(len(problems), 2)  # a leftover "sets" is a notice, not a problem
 
     def test_check_flags_a_bad_pico8_or_spruce_os_name(self):
         for field in ("pico8", "spruce_os"):
@@ -1028,17 +1145,13 @@ class Aliases(unittest.TestCase):
 
     def test_every_alias_runs_main_command(self):
         parser = commands.build_parser()
-        for alias, argv in (("card", ["list"]), ("game", ["list", "--card", "X"]), ("set", ["edit"]), ("collection", ["edit"]),
+        for alias, argv in (("card", ["list"]), ("game", ["list", "--card", "X"]), ("tag", ["edit"]), ("collection", ["edit"]),
                             ("theme", ["pick"]), ("save", ["manage"]), ("device", []), ("layout", []), ("playlists", ["/x"]),
                             ("scrapes", ["missing"]), ("downloads", ["pico8"]), ("umount", [])):
             with self.subTest(alias=alias):
                 main = cli.ALIASES[alias]
                 self.assertIs(parser.parse_args([alias, *argv]).fn, parser.parse_args([main, *argv]).fn)
         self.assertEqual(set(cli.ALIASES.values()) - set(commands.COMMANDS), set())
-
-    def test_games_set_alias(self):
-        args = commands.build_parser().parse_args(["games", "set", "list", "--card", "X"])
-        self.assertIs(args.fn, commands.games_sets)
 
     def test_aliases_route_as_commands_not_cards(self):
         with mock.patch.object(commands, "cards_list", return_value=0) as listed, mock.patch.object(cli, "sync_card", side_effect=AssertionError("synced")):
@@ -1072,7 +1185,7 @@ class Aliases(unittest.TestCase):
         self.assertEqual(out("umount", "--help"), out("help", "unmount"))
 
     def test_quiet_keeps_alias_data_stdout(self):
-        for argv in (["device"], ["layout", "x"], ["card", "list"], ["game", "set", "list"]):
+        for argv in (["device"], ["layout", "x"], ["card", "list"]):
             with self.subTest(argv=argv):
                 self.assertTrue(cli.is_data_command(argv))
 
@@ -1080,7 +1193,7 @@ class Aliases(unittest.TestCase):
         words = commands.second_words()
         self.assertIn("layout", words["cards"])
         self.assertNotIn("convert", words["cards"])
-        self.assertIn("sets", words["games"])
+        self.assertNotIn("sets", words["games"])
         self.assertNotIn("set", words["games"])
         self.assertEqual(set(words) & set(cli.ALIASES), set())
 

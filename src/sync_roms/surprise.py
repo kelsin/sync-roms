@@ -8,7 +8,7 @@ import posixpath
 import random
 import re
 
-from . import frontend, inventory, languages, m3u, mirroring, names, picker, previews, s3, store, ui, usersettings, vita
+from . import frontend, inventory, languages, m3u, mirroring, names, picker, previews, s3, store, tagui, tags, ui, usersettings, vita
 
 SLOTS = 10
 RECOMMENDED_SHARE = 2 / 3
@@ -59,6 +59,18 @@ def card_excluded_systems(entry):
     """System ids Surprise never picks from on this card: the card's surprise_excluded_systems."""
     ids = entry.get("surprise_excluded_systems") if isinstance(entry, dict) else None
     return {i for i in ids if isinstance(i, str)} if isinstance(ids, list) else set()
+
+
+def chosen_tags(entry):
+    """The tag ids Surprise picks from on this card: its surprise_tags when that names a tag, else the surprise_tags
+    setting; None when neither limits it. Ids that aren't tags (deleted on another machine) are left out."""
+    defined = tags.all_tags()
+    for ids in (entry.get("surprise_tags") if isinstance(entry, dict) else None,
+                usersettings.load_settings().get("surprise_tags")):
+        found = {i for i in ids if isinstance(i, str) and i in defined} if isinstance(ids, list) else set()
+        if found:
+            return found
+    return None
 
 
 def _history_path():
@@ -197,9 +209,9 @@ def pick(pools, kept, need, recommended, recent, others_current, rng):
     return out
 
 
-def _pools(chosen_systems, taken):
+def _pools(chosen_systems, taken, tag_keys=None):
     """{system bucket: [units]} of the candidates in storage for the run's systems, past the mirror, full systems
-    included. Every unit sharing a key with taken is left out. None when storage couldn't be listed."""
+    included. Every unit sharing a key with taken is left out; with tag_keys, only units sharing a key with it stay. None when storage couldn't be listed."""
     with mirroring.storage_reads():
         try:
             folders = inventory.folders()
@@ -217,7 +229,8 @@ def _pools(chosen_systems, taken):
                 ui.warn(f"Couldn't list {bucket} for surprises: {e}")
                 continue
             found = units(s, keys, set(s["bios"]["files"]))
-            pools[bucket] = [u for u in found if not taken.intersection(u)]
+            pools[bucket] = [u for u in found if not taken.intersection(u)
+                             and (tag_keys is None or tag_keys.intersection(u))]
     return pools
 
 
@@ -254,10 +267,22 @@ def run_surprise(card_name, setup, chosen_systems, interactive, dry_run, to_fetc
             print("\U0001F381 would ask which surprises to replace" if interactive
                   else f"\U0001F381 would replace all {len(current)} surprises")
     elif interactive and current:
-        states = picker.filter_list("\U0001F381 Surprises: keep ✅ or replace ⬜ (Enter to confirm)",
-                                    [f"{x.get('title') or x['bucket']}  ({names[x['system']]})" for x in current],
-                                    multi=True, initial=[True] * len(current), diff_marks=False,
-                                    **previews.game_pane([x["bucket"] for x in current]))
+        sel = [True] * len(current)
+        while True:  # t edits a game's tags, then the list opens again with the same picks
+            session = {"sel": list(sel)}
+            states = picker.filter_list("\U0001F381 Surprises: keep ✅ or replace ⬜ (Enter to confirm)",
+                                        [f"{x.get('title') or x['bucket']}  ({names[x['system']]})" for x in current],
+                                        multi=True, initial=[True] * len(current), diff_marks=False,
+                                        hotkeys=(tagui.TAG_KEY,), hint="Space toggle · Enter done · t tags",
+                                        key_help=[tagui.KEY_HELP], session=session,
+                                        extras=[[tag] for tag in tagui.column([x["bucket"] for x in current])],
+                                        **previews.game_pane([x["bucket"] for x in current]))
+            if not isinstance(states, tuple):
+                break
+            sel = session["sel"]
+            if states[1] is not None:
+                x = current[states[1]]
+                tagui.edit_game_tags(x["bucket"], x.get("title") or x["bucket"])
         kept = current if states is None else [x for x, keep in zip(current, states) if keep]
     else:
         kept = []
@@ -291,9 +316,12 @@ def fill_surprises(card_name, setup, chosen_systems, dry_run, rng=None, today=No
     others_current = {x.get("bucket") for name, other in cards.items() if name != card_name and isinstance(other, dict)
                       and enabled(other) and isinstance(other.get("surprises"), list)
                       for x in other["surprises"] if isinstance(x, dict)}
-    pools = _pools(chosen_systems, taken)
+    limit = chosen_tags(entry)
+    pools = _pools(chosen_systems, taken, set().union(*(tags.games_with({t}, set()) for t in limit)) if limit else None)
     if pools is None:  # storage couldn't be listed: pick nothing
         return kept
+    if limit and not any(pools.values()):
+        ui.warn(f"No games have the tags Surprise is limited to ({', '.join(sorted(limit))}); nothing to pick.")
     new = pick(pools, kept, need, recommended, recent(load_history(), today, ttl_days()), others_current, rng)
     if new:
         print(f"\U0001F381 Surprise: {len(new)} new pick(s)" + (ui.dim(" (dry run: not saved)") if dry_run else ""))

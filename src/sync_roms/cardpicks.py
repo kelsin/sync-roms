@@ -1,6 +1,6 @@
 """A card's picks as the card editor edits them: the card loaded once, each system's games listed from storage when
 first shown, and every edit saved to cards.json together."""
-from . import collections as colls, edit, listedit, m3u, names, store, vita
+from . import collections as colls, edit, listedit, m3u, names, store, tags, vita
 
 
 class SystemPicks:
@@ -20,11 +20,11 @@ class SystemPicks:
         self.playlist_of = {k: g[0] for g in listedit.playlist_groups(in_storage).values() for k in g[1:]}
         self.bundled = vita.extras(in_storage, in_storage)  # a Vita game's DLC and update sync with it
 
-    def states(self, notes):
-        """{bucket key: synced} for every row, from the card as edited so far: a surprise, or picked directly, by a
-        referenced set or by a collection, and not excluded (as sync does)."""
+    def states(self):
+        """{bucket key: synced} for every row, from the card as edited so far: a surprise, or picked directly or by a
+        collection, and not excluded (as sync does)."""
         direct = {g.get("bucket") for g in self.games}
-        return {k: k in self.surprise or (k in notes or k in direct or k in self.collected) and k not in self.excluded
+        return {k: k in self.surprise or (k in direct or k in self.collected) and k not in self.excluded
                 for _, k, _, _ in self.rows}
 
     def changes(self, keys, base, state):
@@ -37,35 +37,35 @@ class SystemPicks:
                     out.setdefault(k, want)
         return out
 
-    def apply(self, keys, notes, base, state):
+    def apply(self, keys, base, state):
         """Fold one pass's on/off states into the card being edited. On: not excluded, and picked directly unless a
-        referenced set or a collection covers it. Off: not picked directly, and excluded only while a referenced set or
-        a collection covers it. Surprises stay as they are."""
+        collection covers it. Off: not picked directly, and excluded only while a collection covers it. Surprises stay
+        as they are."""
         direct, off = {g.get("bucket") for g in self.games}, set()
         for key, want in self.changes(keys, base, state).items():
             if want == base[key] or key in self.surprise:
                 continue
             if want:
                 self.excluded.discard(key)
-                if key not in notes and key not in direct and key not in self.collected:
+                if key not in direct and key not in self.collected:
                     self.games.append({"title": self.titles[key], "bucket": key})
                     direct.add(key)
             else:
                 off.add(key)
-                if key in notes or key in self.collected:
+                if key in self.collected:
                     self.excluded.add(key)
                 else:
                     self.excluded.discard(key)
         if off:
             self.games = [g for g in self.games if g.get("bucket") not in off]
 
-    def keep(self, keys, notes):
+    def keep(self, keys):
         """Switch each of keys on; how many were off before and are on now."""
-        base = self.states(notes)
+        base = self.states()
         keys = [k for k in keys if k in base]  # a key with no row (a Vita DLC or update) can't be picked here
         before = sum(base[k] for k in keys)
-        self.apply(keys, notes, base, [True] * len(keys))
-        return sum(self.states(notes)[k] for k in keys) - before
+        self.apply(keys, base, [True] * len(keys))
+        return sum(self.states()[k] for k in keys) - before
 
 
 class CardPicks:
@@ -76,11 +76,8 @@ class CardPicks:
         self.name, self.setup = name, setup
         self.cards = store.load_cards() if cards is None else cards
         self.raw = store.card_games(name, self.cards)
-        self.sets_on = list(store.list_sets(self.raw))
         self.before_excluded = store.card_excluded(name, self.cards)
-        sets = store.load_sets()
-        self.sets_by_id = {x["id"]: x for x in sets}
-        self.variants, self.parents = store.variant_index(sets)
+        self.variants, self.parents = tags.variant_index()
         self.system_names = {x["bucket"]: x["name"] for x in store.repo_json("systems")}
         locked = store.card_locked_games(self._entry(), {c["id"]: c for c in colls.load_collections()})
         self.locked_from = {b: {g["bucket"]: g["from"] for g in games} for b, games in locked.items()}
@@ -108,10 +105,6 @@ class CardPicks:
                                                 self.surprises.get(bucket, ()))
         return self._systems[bucket]
 
-    def cover(self):
-        """{bucket key: note} of the games the card's set references sync."""
-        return edit.cover_notes(self.sets_by_id, self.sets_on)
-
     def full(self, bucket):
         """Whether the card syncs that system whole."""
         entry = self.raw.get(bucket)
@@ -136,15 +129,15 @@ class CardPicks:
         """Whether a variant's bucket key is synced by the card as edited so far."""
         bucket = key.partition("/")[0]
         if bucket in self._systems:
-            return self._systems[bucket].states(self.cover()).get(key, False)
+            return self._systems[bucket].states().get(key, False)
         if key in self.surprises.get(bucket, ()):
             return True
-        return self.full(bucket) or ((any(g.get("bucket") == key for g in self.picks_of(bucket)) or key in self.cover()
+        return self.full(bucket) or ((any(g.get("bucket") == key for g in self.picks_of(bucket))
                                       or key in self.locked_from.get(bucket, {})) and key not in self.excluded_of(bucket))
 
     def toggle_variant(self, variant):
-        """Add or remove a variant (and its files) as a direct pick; one the card syncs whole or through a set or
-        collection stays as it is."""
+        """Add or remove a variant (and its files) as a direct pick; one the card syncs whole or through a collection
+        stays as it is."""
         key = variant["bucket"]
         bucket = key.partition("/")[0]
         own = [key, *variant.get("files", ())]
@@ -160,8 +153,8 @@ class CardPicks:
             self.excluded_of(bucket).difference_update(own)
 
     def _games(self):
-        """The card's games list as edited so far, without the set references."""
-        games = {k: v for k, v in self.raw.items() if k != store.SETS_KEY}
+        """The card's games list as edited so far, without old set references."""
+        games = {k: v for k, v in self.raw.items() if k != store.LEGACY_SETS}
         for bucket, picks in [*self._picks.items(), *((b, sp.games) for b, sp in self._systems.items())]:
             if picks:
                 games[bucket] = picks
@@ -181,17 +174,13 @@ class CardPicks:
         return {b: k for b, k in out.items() if k}
 
     def card(self):
-        """card_entry with the edits so far: games, set references and exclusions."""
+        """card_entry with the edits so far: games and exclusions."""
         entry = self._entry()
-        games = {**self._games(), store.SETS_KEY: list(self.sets_on)}
-        return {**entry, "games": {k: v for k, v in games.items() if v or k == store.SETS_KEY},
-                "excluded": self._excluded_now()}
+        return {**entry, "games": {k: v for k, v in self._games().items() if v}, "excluded": self._excluded_now()}
 
     def save(self):
         """Write every edit to cards.json; returns whether anything changed."""
         games = self._games()
-        if self.sets_on:
-            games[store.SETS_KEY] = self.sets_on
         excluded = self._excluded_now()
         changed = store.sorted_list(games) != store.sorted_list(self.raw) or excluded != self.before_excluded
         if changed:

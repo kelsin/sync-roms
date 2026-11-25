@@ -5,6 +5,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
+from helpers import storage_tags  # noqa: E402
 from test_cardedit import DEVICE, GBA, Flow, g  # noqa: E402
 from sync_roms import store  # noqa: E402
 from sync_roms.cardpicks import CardPicks  # noqa: E402
@@ -25,8 +26,7 @@ class Picks(Flow):
 
     def switch(self, p, key, on):
         sp = p.system(GBA)
-        notes = p.cover()
-        sp.apply([key], notes, sp.states(notes), [on])
+        sp.apply([key], sp.states(), [on])
 
     def test_apply_on_adds_a_direct_pick_and_save_writes_it(self):
         self.card()
@@ -35,21 +35,31 @@ class Picks(Flow):
         self.assertTrue(p.save())
         self.assertEqual(store.card_games("c"), {"gba": [g("gba/Zelda.zip")]})
 
-    def test_off_on_a_set_reference_game_is_excluded(self):
-        self.card(games={store.SETS_KEY: ["pk"]})
+    def test_old_set_references_cover_nothing_and_saving_drops_them(self):
+        self.card(games={"gba": [g("gba/Zelda.zip")], "sets": ["pk"]})
         p = self.picks()
-        self.switch(p, "gba/Ruby.zip", False)
+        self.assertFalse(p.system(GBA).states()["gba/Ruby.zip"])  # the set's games aren't on the card
+        self.switch(p, "gba/Emerald.zip", True)
         self.assertTrue(p.save())
-        self.assertEqual(store.card_excluded("c"), {"gba": ["gba/Ruby.zip"]})
+        self.assertEqual(store.card_games("c"), {"gba": [g("gba/Emerald.zip"), g("gba/Zelda.zip")]})
+        self.assertNotIn("sets", p.card()["games"])
+
+    def test_variants_come_from_the_tags(self):
+        storage_tags(self, {"tags": {"pk": {"name": "Pokemon", "emoji": "🔴"}}, "declined": {}, "games": {
+            "gba/Ruby.zip": {"tags": ["pk"], "variants": [{"bucket": "gba/Emerald.zip", "note": "more"}]}}})
+        self.card()
+        p = self.picks()
+        self.assertEqual(p.variants, {"gba/Ruby.zip": [{"bucket": "gba/Emerald.zip", "note": "more"}]})
+        self.assertEqual(p.parents["gba/Emerald.zip"]["bucket"], "gba/Ruby.zip")
 
     def test_one_pass_turning_several_games_on_and_off_keeps_the_card_order(self):
         self.card(games={"gba": [g("gba/Emerald.zip"), g("gba/Ruby.sav"), g("gba/Ruby.zip")]})
         p = self.picks()
-        sp, notes = p.system(GBA), p.cover()
+        sp = p.system(GBA)
         keys = ["gba/Emerald.zip", "gba/Ruby.zip", "gba/Zelda.zip"]
-        sp.apply(keys, notes, sp.states(notes), [False, False, True])
+        sp.apply(keys, sp.states(), [False, False, True])
         self.assertEqual([x["bucket"] for x in sp.games], ["gba/Ruby.sav", "gba/Zelda.zip"])
-        sp.apply(keys, notes, sp.states(notes), [True, False, True])
+        sp.apply(keys, sp.states(), [True, False, True])
         self.assertEqual([x["bucket"] for x in sp.games], ["gba/Ruby.sav", "gba/Zelda.zip", "gba/Emerald.zip"])
 
     def test_save_without_changes_returns_false(self):
@@ -60,7 +70,7 @@ class Picks(Flow):
 
     def keep(self, p, *keys):
         sp = p.system(GBA)
-        return sp, sp.keep(list(keys), p.cover())
+        return sp, sp.keep(list(keys))
 
     def test_keep_picks_unpicked_keys(self):
         self.card()
@@ -68,9 +78,9 @@ class Picks(Flow):
         self.assertEqual(n, 2)
         self.assertEqual(sp.games, [g("gba/Emerald.zip"), g("gba/Zelda.zip")])
 
-    def test_keep_skips_picked_and_set_covered(self):
-        self.card(games={"gba": [g("gba/Zelda.zip")], store.SETS_KEY: ["pk"]})
-        sp, n = self.keep(self.picks(), "gba/Zelda.zip", "gba/Ruby.zip")
+    def test_keep_skips_picked(self):
+        self.card(games={"gba": [g("gba/Zelda.zip")]})
+        sp, n = self.keep(self.picks(), "gba/Zelda.zip")
         self.assertEqual(n, 0)
         self.assertEqual(sp.games, [g("gba/Zelda.zip")])
 
@@ -78,12 +88,6 @@ class Picks(Flow):
         self.card()
         sp, n = self.keep(self.picks(), "gba/Emerald.zip", "gba/NoRow.zip")
         self.assertEqual((n, sp.games), (1, [g("gba/Emerald.zip")]))
-
-    def test_keep_unexcludes(self):
-        self.card(games={store.SETS_KEY: ["pk"]}, excluded={"gba": ["gba/Ruby.zip"]})
-        sp, n = self.keep(self.picks(), "gba/Ruby.zip")
-        self.assertEqual(n, 1)
-        self.assertEqual((sp.excluded, sp.games), (set(), []))
 
     def test_keep_skips_locked(self):
         self.favs()
@@ -114,7 +118,7 @@ class Picks(Flow):
         self.favs()
         self.card(collections=["favs"], excluded={"gba": ["gba/Ruby.zip"]})
         p = self.picks()
-        self.assertFalse(p.system(GBA).states(p.cover())["gba/Ruby.zip"])
+        self.assertFalse(p.system(GBA).states()["gba/Ruby.zip"])
         self.switch(p, "gba/Ruby.zip", True)
         self.assertTrue(p.save())
         self.assertEqual(store.card_excluded("c"), {})
@@ -139,7 +143,7 @@ class Picks(Flow):
         self.assertEqual(sp.surprise, {"gba/Zelda.zip"})
         self.switch(p, "gba/Zelda.zip", False)
         self.assertEqual((sp.games, sp.excluded), ([], set()))
-        self.assertTrue(sp.states(p.cover())["gba/Zelda.zip"])
+        self.assertTrue(sp.states()["gba/Zelda.zip"])
 
     def test_a_surprise_that_is_also_an_excluded_collection_game_stays_on(self):
         self.favs()
@@ -149,10 +153,10 @@ class Picks(Flow):
         sp = p.system(GBA)
         self.assertIn("gba/Ruby.zip", sp.surprise)
         self.assertNotIn("gba/Ruby.zip", sp.collected)
-        self.assertTrue(sp.states(p.cover())["gba/Ruby.zip"])
+        self.assertTrue(sp.states()["gba/Ruby.zip"])
         self.switch(p, "gba/Ruby.zip", False)
         self.assertEqual((sp.games, sp.excluded), ([], {"gba/Ruby.zip"}))
-        self.assertTrue(sp.states(p.cover())["gba/Ruby.zip"])
+        self.assertTrue(sp.states()["gba/Ruby.zip"])
 
     def test_on_card_of_a_surprise_that_is_also_an_excluded_collection_game_is_true(self):
         self.favs()

@@ -12,7 +12,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 
-from helpers import MANIFEST, SYSTEM, DataDir, list_sizes, storage_sets, touch  # noqa: E402
+from helpers import MANIFEST, SYSTEM, DataDir, list_sizes, storage_tags, touch  # noqa: E402
 from sync_roms import bbs, cli, commands, downloads, inventory, s3, scrape_plan, splore, store, usersettings  # noqa: E402
 
 REAL_LOAD_CARDS = store.load_cards
@@ -1359,7 +1359,7 @@ class SyncSmokeTest(DataDir):
                 self.assertEqual(self.splore_sync(layout, args)[1], [])
 
     def test_new_splore_cart_is_synced_to_the_card(self):
-        root = storage_sets(self, {})
+        root = storage_tags(self, None)
         touch(os.path.join(root, "pico8", "a-0.p8.png"), bbs._PNG + b"a")
         listed = [{"title": "A", "bucket": "pico8/a-0.p8.png"}]
         # a mirror (only the carts the cards pick, read in place of storage) is modelled over the storage folder
@@ -1402,7 +1402,7 @@ class SyncSmokeTest(DataDir):
                 self.assertFalse([line for line in out.splitlines() if "n-0" in line and "delete" in line.lower()])
 
     def test_held_splore_cart_on_the_card_is_kept(self):
-        root = storage_sets(self, {})
+        root = storage_tags(self, None)
         touch(os.path.join(root, "pico8", "a-0.p8.png"), bbs._PNG + b"a")
         touch(os.path.join(root, "pico8", "h-0.p8.png"), bbs._PNG + b"h")  # another card uploaded it
         inventory.reset()

@@ -74,20 +74,20 @@ def _ids(value):
 
 def copy_selections(src, dst, playable, dst_synced):
     """(new DST entry, counts, skipped) of copying SRC's picks into DST. Games of the `playable` systems are added by
-    bucket (DST's entry wins); either side full makes the system full, its list under "games". Set and collection ids
-    are unioned. SRC's exclusions for playable systems are added unless DST syncs the game (`dst_synced`, {system: bucket
+    bucket (DST's entry wins); either side full makes the system full, its list under "games". Collection ids are
+    unioned; old set references are dropped. SRC's exclusions for playable systems are added unless DST syncs the game (`dst_synced`, {system: bucket
     keys} before the copy, or its merged picks). A copied game is removed from DST's exclusions. counts: newly added "games" (not into a
-    full system, whose list sync ignores), "full" (systems made full by SRC), "sets", "collections", "excluded";
+    full system, whose list sync ignores), "full" (systems made full by SRC), "collections", "excluded";
     skipped: SRC's systems not in `playable`, or whose DST entry is malformed, sorted. Everything else of DST stays; neither input is changed."""
     out = copy.deepcopy(dst)
-    counts = dict.fromkeys(("games", "full", "sets", "collections", "excluded"), 0)
+    counts = dict.fromkeys(("games", "full", "collections", "excluded"), 0)
     src_games = src.get("games") if isinstance(src.get("games"), dict) else {}
     src_excluded = src.get("excluded") if isinstance(src.get("excluded"), dict) else {}
-    skipped = {s for s in (*src_games, *src_excluded) if s != store.SETS_KEY and s not in playable}
+    skipped = {s for s in (*src_games, *src_excluded) if s != store.LEGACY_SETS and s not in playable}
     excluded = dict(out["excluded"]) if isinstance(out.get("excluded"), dict) else {}
     games = out.get("games") if isinstance(out.get("games"), dict) else {}
     for system, entry in src_games.items():
-        if system == store.SETS_KEY or system not in playable:
+        if system == store.LEGACY_SETS or system not in playable:
             continue
         theirs = _system_games(entry)
         mine = _system_games(games.get(system, []))
@@ -115,11 +115,6 @@ def copy_selections(src, dst, playable, dst_synced):
             games[system] = {"full_system": True, **({"games": merged} if merged else {})}
         else:
             games[system] = merged
-    sets = _ids(games.get(store.SETS_KEY))
-    new_sets = list(dict.fromkeys(i for i in _ids(src_games.get(store.SETS_KEY)) if i not in sets))
-    if new_sets:
-        games[store.SETS_KEY] = sets + new_sets
-        counts["sets"] = len(new_sets)
     if games or "games" in out:
         out["games"] = store.sorted_list(games)
     collections = _ids(out.get("collections"))

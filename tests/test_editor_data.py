@@ -9,8 +9,8 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from sync_roms import cardedit, collectionedit, commands, edit, picker, saves_manage, setedit, store, ui  # noqa: E402
-from helpers import Cmd, DataDir, feed_list, storage_sets  # noqa: E402
+from sync_roms import cardedit, collectionedit, commands, edit, picker, saves_manage, store, ui  # noqa: E402
+from helpers import Cmd, DataDir, feed_list  # noqa: E402
 
 
 def target(games):
@@ -19,18 +19,6 @@ def target(games):
 
 
 class NoPersonalSets(DataDir):
-    def test_load_sets_ignores_the_data_folder_sets(self):
-        os.makedirs(self.path("sets"))
-        self.write_json("sets/mine.json", {"name": "Mine", "games": []})
-        self.write_json("sets/pinball.json", {"name": "Fake", "games": []})
-        storage_sets(self, {"pinball": {"name": "Pinball", "games": []}, "shmups": {"name": "Shmups", "games": []}})
-        err = io.StringIO()
-        with contextlib.redirect_stderr(err):
-            sets = store.load_sets()
-        self.assertEqual(sorted(x["id"] for x in sets), ["pinball", "shmups"])
-        self.assertEqual([x["name"] for x in sets if x["id"] == "pinball"], ["Pinball"])
-        self.assertEqual(err.getvalue(), "")
-
     def test_personal_set_helpers_are_gone(self):
         for name in ("personal_sets_dir", "save_personal_set", "personal_set_problem"):
             self.assertFalse(hasattr(store, name), name)
@@ -60,9 +48,8 @@ class Sorting(DataDir):
         store.save_lists({"c": {"snes": [{"bucket": "snes/2"}, {"bucket": "snes/1"}], "gba": [{"bucket": "gba/Z.zip"}, {"bucket": "gba/a.zip"}],
                                 "sets": ["z", "a"]}})
         card = self.read("cards.json")["c"]["games"]
-        self.assertEqual(list(card), ["gba", "sets", "snes"])
+        self.assertEqual(list(card), ["gba", "snes"])  # old set references dropped
         self.assertEqual([g["bucket"] for g in card["gba"]], ["gba/a.zip", "gba/Z.zip"])
-        self.assertEqual(card["sets"], ["a", "z"])
         self.assertEqual([g["bucket"] for g in card["snes"]], ["snes/1", "snes/2"])
 
 
@@ -73,7 +60,7 @@ class Schemas(unittest.TestCase):
 
     def test_schemas_exist_and_cover_what_cards_store(self):
         games, cards = self.load("games.schema.json"), self.load("cards.schema.json")
-        self.assertIn("sets", games["properties"])
+        self.assertNotIn("properties", games)  # no "sets": every key is a system
         card = cards["additionalProperties"]["properties"]
         for key in ("device", "layout", "systems", "games", "collections", "frontend_collections",
                     "surprise", "surprises", "guest"):
@@ -155,7 +142,7 @@ class CheckBucketKeys(Cmd):
 class Hints(unittest.TestCase):
     def test_hints_fit_a_narrow_terminal_and_lead_with_the_main_keys(self):
         hints = [picker.MULTI_HINT, picker.SINGLE_HINT,
-                 edit.MENU_HINT, edit.GAMES_HINT, cardedit.LIST_HINT, cardedit.GAMES_HINT, cardedit.SETS_HINT, cardedit.CARD_SETS_HINT,
+                 edit.MENU_HINT, edit.GAMES_HINT, cardedit.LIST_HINT, cardedit.GAMES_HINT,
                  cardedit.META_HINT, cardedit.VALUES_HINT, collectionedit.GAMES_HINT]
         for h in hints:
             self.assertLessEqual(ui.cell_width(picker.HELP_HINT + h), 80, h)  # the list adds "? help ·"
@@ -166,8 +153,8 @@ class Hints(unittest.TestCase):
 
     def test_every_hint_and_the_keep_question_fit_80_cells_with_the_help_prefix(self):
         hints = {"systems": cardedit.LIST_HINT, "systems from a sync": cardedit.LIST_HINT + cardedit.KEEP_HINT,
-                 "set games": cardedit.SET_GAMES_HINT, "all games": cardedit.ALL_GAMES_HINT,
-                 "card games": cardedit.GAMES_HINT, "sets": cardedit.SETS_HINT, "card sets": cardedit.CARD_SETS_HINT, "collections": cardedit.COLLECTIONS_HINT, "set editor games": setedit.GAMES_HINT,
+                 "collection games on a card": cardedit.COLLECTION_GAMES_HINT, "all games": cardedit.ALL_GAMES_HINT,
+                 "card games": cardedit.GAMES_HINT, "collections": cardedit.COLLECTIONS_HINT,
                  "collection games": collectionedit.GAMES_HINT, "card list": edit.MENU_HINT,
                  "multi": picker.MULTI_HINT, "single": picker.SINGLE_HINT, "saves manage": saves_manage.HINT}
         for name, hint in hints.items():
@@ -182,13 +169,10 @@ class Hints(unittest.TestCase):
         lines = picker.help_lines(False, cardedit.LIST_HINT, key_help=cardedit.LIST_KEYS + cardedit.KEEP_KEYS)
         for key in "fxasSFDK":
             self.assertTrue(any(line.startswith(key + " ") for line in lines), key)
-        lines = picker.help_lines(True, setedit.GAMES_HINT, key_help=setedit.GAMES_KEYS, has_note=True)
-        for key in ("r", "c", "w", "a", "o", "/"):
-            self.assertTrue(any(line.startswith(key + " ") for line in lines), key)
         lines = picker.help_lines(True, saves_manage.HINT, key_help=saves_manage.KEY_HELP)
         for key in ("Space/Tab", "Enter", "w", "m", "p", "d", "Esc"):
             self.assertTrue(any(line.startswith(key + " ") for line in lines), key)
-        for hint, keys, select_all in ((cardedit.SET_GAMES_HINT, cardedit.SET_GAMES_KEYS, True),
+        for hint, keys, select_all in ((cardedit.COLLECTION_GAMES_HINT, cardedit.COLLECTION_GAMES_KEYS, True),
                                        (cardedit.ALL_GAMES_HINT, cardedit.ALL_GAMES_KEYS, False)):
             lines = picker.help_lines(True, hint, key_help=keys, select_all=select_all, has_note=True)
             # a is dead in the all-games list: neither hint nor help offers it there
@@ -257,6 +241,21 @@ class RepoDataSurvivesRemoval(unittest.TestCase):
                 self.assertEqual(store.repo_json("systems"), {"mame": {}})
                 with self.assertRaises(FileNotFoundError):
                     store.repo_json("never-there")
+
+
+class GenreTags(unittest.TestCase):
+    def test_genre_tags_maps_genres_to_lists_of_tag_ids(self):
+        with open(os.path.join(store.REPO_DATA, "genre-tags.json"), encoding="utf-8") as f:
+            data = json.load(f)
+        self.assertIsInstance(data, dict)
+        self.assertTrue(data)
+        for genre, ids in data.items():
+            self.assertIsInstance(genre, str)
+            self.assertIsInstance(ids, list, genre)
+            self.assertTrue(ids, genre)
+            self.assertTrue(all(isinstance(i, str) and i == store.slug(i) for i in ids), genre)
+        self.assertEqual(data["Role Playing Game"], ["rpg"])
+        self.assertEqual(data["Simulation / Life"], ["life-sim", "simulation"])
 
 
 if __name__ == "__main__":

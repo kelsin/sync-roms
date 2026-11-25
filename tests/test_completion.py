@@ -65,16 +65,20 @@ class BashCompletion(unittest.TestCase):
     def test_completion_main_names_only(self):
         offered = self.complete("sync-roms", "")
         self.assertIn("cards", offered)
-        for alias in ("card", "game", "set", "scrapes", "umount"):
+        for alias in ("card", "game", "tag", "scrapes", "umount"):
             self.assertNotIn(alias, offered)
 
     def test_subcommands(self):
-        self.assertIn("sets", self.complete("sync-roms", "games", ""))
+        self.assertNotIn("sets", self.complete("sync-roms", "games", ""))
+        self.assertIn("add", self.complete("sync-roms", "games", ""))
         self.assertEqual(self.complete("sync-roms", "scrape", "c"), ["clean"])
         self.assertIn("art", self.complete("sync-roms", "scrape", ""))
         self.assertEqual(self.complete("sync-roms", "scrape", "art", "--fo"), ["--for"])
         self.assertEqual(self.complete("sync-roms", "scrape", "art", "--wor"), ["--workers"])
         self.assertEqual(self.complete("sync-roms", "games", "add", "gb"), ["gba", "gbc"])
+        self.assertEqual(self.complete("sync-roms", "tags", "sug"), ["suggest"])
+        self.assertEqual(self.complete("sync-roms", "tags", "suggest", "gb"), ["gba", "gbc"])
+        self.assertEqual(self.complete("sync-roms", "tag", "suggest", "gba", "s"), ["snes"])
         self.assertIn("layout", self.complete("sync-roms", "cards", "lay"))
         self.assertNotIn("convert", self.complete("sync-roms", "cards", ""))
         self.assertEqual(self.complete("sync-roms", "card", "lay"), ["layout"])
@@ -97,12 +101,14 @@ class OtherShells(unittest.TestCase):
                 self.assertIn(f"-l {flag[2:]}", text)
 
     def test_fish_second_words_are_tied_to_the_first_word(self):
-        # `set` is sets' alias and cards' and config's second word: a "seen anywhere" test offers `edit` after `cards set`
+        # `set` is cards' and config's second word: a "seen anywhere" test offers `edit` after `cards set`
         text = script_for("fish")
-        self.assertNotIn("__fish_seen_subcommand_from sets set", text)
+        self.assertNotIn("__fish_seen_subcommand_from tags tag", text)
         self.assertNotIn("__fish_seen_subcommand_from cards card", text)
-        self.assertIn("contains -- (commandline -opc)[2] sets set", text)
+        self.assertIn("contains -- (commandline -opc)[2] tags tag", text)
         self.assertIn("contains -- (commandline -opc)[2] cards card", text)
+        self.assertIn("contains -- (commandline -opc)[2] tags tag; and __fish_seen_subcommand_from suggest\" "
+                      "-a \"(sync-roms completion list systems)\"", text)
         self.assertIn("contains -- (commandline -opc)[2] config;", text)
 
 
