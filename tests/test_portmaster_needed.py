@@ -124,13 +124,13 @@ class DoneNeededTest(StorageDir):
 
     def test_done_with_unreachable_storage_uses_the_names_given(self):
         err = io.StringIO()
-        with mock.patch.object(runtime, "ROOT", os.path.join(self.root, "gone")), contextlib.redirect_stderr(err):
+        with mock.patch.object(runtime, "ROOT", os.path.join(self.root, "gone")), contextlib.redirect_stderr(err), contextlib.redirect_stdout(io.StringIO()):
             self.assertEqual(needed.done_command("c", ["celeste.zip"], False), 0)
         self.check_fallback(err)
 
     def test_done_with_malformed_metadata_uses_the_names_given(self):
         err = io.StringIO()
-        with mock.patch("sync_roms.scrape_plan.load_metadata", side_effect=ValueError("bad")), contextlib.redirect_stderr(err):
+        with mock.patch("sync_roms.scrape_plan.load_metadata", side_effect=ValueError("bad")), contextlib.redirect_stderr(err), contextlib.redirect_stdout(io.StringIO()):
             self.assertEqual(needed.done_command("c", ["celeste.zip"], False), 0)
         self.check_fallback(err)
 
