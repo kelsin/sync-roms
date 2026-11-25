@@ -143,16 +143,13 @@ class UsageHelpTest(Isolated):
                 self.assertEqual(code, 2)
                 self.assertIn(f"Try 'sync-roms {name} --help'.", err)
 
-    def test_translated_command_errors_name_the_words_typed(self):
-        for argv, words, flag in ((["scrape", "match", "gba"], "scrape match", "--scrape-match"),
-                                  (["scrape", "art", "--for", "x"], "scrape art", "--scrape-art"),
-                                  (["mirror", "use"], "mirror use", "--use-mirror"),
-                                  (["-n", "upload", "--bogus"], "upload", "--upload"), (["sync", "a", "b"], "sync", "--edit")):
+    def test_command_errors_point_at_the_command_help(self):
+        for argv, name in ((["scrape", "match", "gba"], "scrape"), (["scrape", "art", "--for", "x"], "scrape"),
+                           (["mirror", "use"], "mirror"), (["-n", "upload", "--bogus"], "upload"), (["sync", "a", "b"], "sync")):
             with self.subTest(argv=argv):
                 code, _, err = self.sync(argv)
                 self.assertEqual(code, 2)
-                self.assertNotIn(flag, err)
-                self.assertIn(f"Try 'sync-roms {words.split()[0]} --help'.", err)
+                self.assertIn(f"Try 'sync-roms {name} --help'.", err)
         _, _, err = self.sync(["scrape", "match", "gba"])
         self.assertIn("the following arguments are required: ROM, GAME", err)
 

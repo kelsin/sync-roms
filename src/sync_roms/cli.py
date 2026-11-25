@@ -16,7 +16,15 @@ from . import collections as colls
 from . import guest as guests
 
 
-ALIASES = {"umount": "unmount"}  # other names for a command, same help
+ALIASES = {"card": "cards", "game": "games", "set": "sets", "collection": "collections", "theme": "themes", "save": "saves",  # alias -> main name
+           "device": "devices", "layout": "layouts", "playlists": "playlist", "scrapes": "scrape", "downloads": "download",
+           "umount": "unmount"}
+
+
+def canonical(word):
+    """A command's main name: the word itself unless it's an alias."""
+    return ALIASES.get(word, word)
+
 SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "sync": ("[CARD]", "download the ROMs, BIOS and scraped data for a card (this is what plain `sync-roms CARD` does)"),
     "edit": ("", "interactive editor: cards, sets, collections, device systems"),
@@ -28,7 +36,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "flash": ("", "write a Knulli, BaseOS, muOS, ROCKNIX or OakMoss image from storage's os/ to an SD card"),
     "unmount": ("", "clean the macOS junk off an SD card and unmount it"),
     "mount": ("", "mount again an SD card that was unmounted but not pulled out"),
-    "cards": ("[list|new|set|rename|convert|install|clean|delete|copy|export|import]", "list and manage the cards you've synced"),
+    "cards": ("[list|new|set|rename|layout|install|clean|delete|copy|export|import]", "list and manage the cards you've synced"),
     "saves": ("stash|apply [CARD] [--retroarch DIR], manage", "copy RetroArch saves and states off a card, or onto one (Android: over adb), or tidy the stashes"),
     "devices": ("[ID]", "list the supported devices, or one device's systems"),
     "layouts": ("[ID]", "list the firmware card layouts, or one layout's folders and devices"),
@@ -265,7 +273,7 @@ TOPICS = {
   sync-roms cards new NAME --device ID|full --layout NAME [--size 512GB]
   sync-roms cards set NAME [--device ID|full] [--layout NAME] [--size 512GB]
   sync-roms cards rename OLD NEW
-  sync-roms cards convert [CARD] --layout NAME [--dry-run] [--yes]
+  sync-roms cards layout [CARD] --layout NAME [--dry-run] [--yes]
       move the card's ROMs, BIOS and saves to another layout's folders
   sync-roms cards install [CARD] [--dry-run] [--yes]
       put storage's newest spruceOS on a spruce card: a clean install: deletes all but Roms, then
@@ -281,7 +289,7 @@ TOPICS = {
   sync-roms cards import FILE                 keeps size, device, layout, games and excluded;
                                               Surprise off; r renames, p prefixes all
 
-  CARD (convert, install, clean) is a saved card's name or its mounted folder (default: the
+  CARD (layout, install, clean) is a saved card's name or its mounted folder (default: the
   current directory).
 
   A card is a folder name (the card root's basename) with a remembered device, firmware and games.
@@ -555,7 +563,7 @@ TOPICS = {
     "doctor": """
   sync-roms doctor
 
-  Checks the AWS profile and storage access, the tools `convert` needs, and that your data files
+  Checks the AWS profile and storage access, the tools `prepare` needs, and that your data files
   parse.
 """,
     "guide": """
@@ -630,12 +638,12 @@ def help_text(topic=None):
 {ui.bold('GLOBAL OPTIONS')}
   {ui.yellow('-n, --dry-run')}   show what would happen, change nothing (commands that can't honor it refuse it)
   {ui.yellow('-y, --yes')}       answer prompts with their default (deleting stays "no"). In these commands
-                  --yes is the confirmation, so they go ahead: `upload` (overwrites), `convert`
-                  (removes the originals), `scrape clean`, `cards clean`, `cards convert` (the old
+                  --yes is the confirmation, so they go ahead: `upload` (overwrites), `prepare`
+                  (removes the originals), `scrape clean`, `cards clean`, `cards layout` (the old
                   layout's media), `cards install` (the card's other files), `cards delete`,
                   `cards export` (overwrites FILE), `saves manage` (deletes the picked stashes),
                   `themes publish` (stale theme files), `download pico8` (old cart revisions) and
-                  `scrape match`. Without a terminal, `upload`, `convert`, `scrape clean`,
+                  `scrape match`. Without a terminal, `upload`, `prepare`, `scrape clean`,
                   `cards install`, `cards export` (over FILE), `themes publish`, `download pico8`
                   and `scrape match` exit 2 unless --yes is given
   {ui.yellow('--quiet')}         print only errors, warnings and --json data (prompts go to stderr)
@@ -787,6 +795,9 @@ def extract_globals(argv):
 def is_data_command(argv):
     """Whether the command's stdout is its result (so --quiet must not discard it)."""
     words = tuple(a for a in argv if not a.startswith("-"))
+    words = tuple(canonical(w) for w in words[:1]) + words[1:]
+    if words[:2] == ("games", "set"):
+        words = ("games", "sets", *words[2:])
     return words in (("cards",), ("cache",)) or any(words[:len(d)] == d for d in DATA_COMMANDS)
 
 
@@ -817,6 +828,9 @@ def run(argv):
     if word in ("-h", "--help"):
         print(help_text())
         return 0
+    if word is not None:
+        word = canonical(word)
+        argv = argv[:lead] + [word, *argv[lead + 1:]]
     if word not in commands.COMMANDS | {"help"}:  # a card, or nothing: sync it
         if word is not None and not word.startswith("-"):
             commands.check_card(word)
@@ -825,13 +839,15 @@ def run(argv):
     if word in commands.COMMANDS:
         cmd = argv[lead:] + argv[:lead]  # leading global flags go after the command, where its parser reads them
         if "-h" in cmd or "--help" in cmd:
-            print(help_text(ALIASES.get(cmd[0], cmd[0])))
+            print(help_text(cmd[0]))
             return 0
         return commands.run(cmd)
     name = argv[lead + 1] if lead + 1 < len(argv) else None  # `help [COMMAND]`
-    if name is not None and ALIASES.get(name, name) not in SUBCOMMANDS:
+    if name is not None:
+        name = canonical(name)
+    if name is not None and name not in SUBCOMMANDS:
         ui.fail(f"No help for {name!r}: it isn't a command. See `sync-roms help` for the commands.", 2)
-    print(help_text(ALIASES.get(name, name) if name is not None else None))
+    print(help_text(name))
     return 0
 
 

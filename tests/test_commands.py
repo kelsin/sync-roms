@@ -1018,3 +1018,72 @@ class MirrorThemeUpdateTest(DataDir):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class Aliases(unittest.TestCase):
+    """Singular and plural names run the main command; `cards layout` replaced `cards convert`."""
+
+    def setUp(self):
+        self.enterContext(mock.patch.object(commands, "prepare_storage"))
+        self.addCleanup(setattr, ui, "ASSUME_YES", False)
+
+    run_cli = PlainCommands.run_cli
+    fails = PlainCommands.fails
+
+    def test_every_alias_runs_main_command(self):
+        parser = commands.build_parser()
+        for alias, argv in (("card", ["list"]), ("game", ["list", "--card", "X"]), ("set", ["edit"]), ("collection", ["edit"]),
+                            ("theme", ["pick"]), ("save", ["manage"]), ("device", []), ("layout", []), ("playlists", ["/x"]),
+                            ("scrapes", ["missing"]), ("downloads", ["pico8"]), ("umount", [])):
+            with self.subTest(alias=alias):
+                main = cli.ALIASES[alias]
+                self.assertIs(parser.parse_args([alias, *argv]).fn, parser.parse_args([main, *argv]).fn)
+        self.assertEqual(set(cli.ALIASES.values()) - set(commands.COMMANDS), set())
+
+    def test_games_set_alias(self):
+        args = commands.build_parser().parse_args(["games", "set", "list", "--card", "X"])
+        self.assertIs(args.fn, commands.games_sets)
+
+    def test_aliases_route_as_commands_not_cards(self):
+        with mock.patch.object(commands, "cards_list", return_value=0) as listed, mock.patch.object(cli, "sync_card", side_effect=AssertionError("synced")):
+            self.run_cli("card")
+            self.run_cli("card", "list")
+        self.assertEqual(listed.call_count, 2)
+
+    def test_scrape_aliases_behave_like_scrape(self):
+        for argv, fn, word in (("scrapes", "scrape_cmd", None), ("scrapes gba", "scrape_cmd", "gba"), ("scrapes missing gba", "scrape_missing_cmd", "gba")):
+            with self.subTest(argv=argv), mock.patch.object(commands, fn, return_value=0) as called:
+                self.run_cli(*argv.split())
+            self.assertEqual(called.call_args.args[0].word, word)
+
+    def test_cards_layout(self):
+        from sync_roms import convert
+        with mock.patch.object(convert, "convert_command", return_value=0) as called:
+            self.run_cli("card", "layout", "C", "--layout", "onion")
+        self.assertEqual((called.call_args.args[0].card, called.call_args.args[0].layout), ("C", "onion"))
+        self.assertEqual(self.fails("cards", "convert", "C", "--layout", "onion")[0], 2)
+
+    def test_help_for_alias(self):
+        def out(*argv):
+            buf = io.StringIO()
+            with contextlib.redirect_stdout(buf):
+                cli.run(list(argv))
+            return buf.getvalue()
+        want = out("help", "cards")
+        self.assertIn("sync-roms cards", want)
+        self.assertEqual(out("help", "card"), want)
+        self.assertEqual(out("card", "--help"), want)
+        self.assertEqual(out("umount", "--help"), out("help", "unmount"))
+
+    def test_quiet_keeps_alias_data_stdout(self):
+        for argv in (["device"], ["layout", "x"], ["card", "list"], ["game", "set", "list"]):
+            with self.subTest(argv=argv):
+                self.assertTrue(cli.is_data_command(argv))
+
+    def test_second_words_list_main_names_only(self):
+        words = commands.second_words()
+        self.assertIn("layout", words["cards"])
+        self.assertNotIn("convert", words["cards"])
+        self.assertIn("sets", words["games"])
+        self.assertNotIn("set", words["games"])
+        self.assertEqual(set(words) & set(cli.ALIASES), set())

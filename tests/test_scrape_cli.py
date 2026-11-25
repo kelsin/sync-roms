@@ -326,7 +326,7 @@ class Completion(unittest.TestCase):
         text = script_for("bash")
         commands_line = re.search(r'-eq 1 \].*?compgen -W "([^"]*)"', text).group(1).split()
         self.assertIn("scrape", commands_line)
-        self.assertIn('scrape) COMPREPLY=($(compgen -W "match review missing art clean"', text)
+        self.assertIn('scrape|scrapes) COMPREPLY=($(compgen -W "match review missing art clean"', text)
         for word in ("--retry", "--all", "--skip-media", "--set-credentials", "--translated"):
             self.assertIn(word, text)
 

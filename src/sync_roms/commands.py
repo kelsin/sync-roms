@@ -15,7 +15,7 @@ from . import bezels, budget, cardedit, cardshare, collectionedit, external, gue
 
 
 UNKNOWN_SHOWN = 8  # device ids named in an "unknown device" error
-COMMANDS = {"sync", "edit", "devices", "upload", "diff", "playlist", "prepare", "install", "mirror", "games", "sets", "collections", "themes", "download", "flash", "unmount", "umount", "mount", "cards", "saves", "layouts", "cache", "config", "doctor", "guide", "check", "scrape", "completion"}
+COMMANDS = {"sync", "edit", "devices", "upload", "diff", "playlist", "prepare", "install", "mirror", "games", "sets", "collections", "themes", "download", "flash", "unmount", "mount", "cards", "saves", "layouts", "cache", "config", "doctor", "guide", "check", "scrape", "completion"}
 SCRAPE_ACTIONS = ("match", "review", "missing", "art", "clean")
 LITERAL = frozenset()  # the values after `scrape match` that start with a dash: values, never options
 
@@ -553,7 +553,7 @@ def cards_clean(args):
     return convert.clean_command(args)
 
 
-def cards_convert(args):
+def cards_layout(args):
     from . import convert
     return convert.convert_command(args)
 
@@ -1575,10 +1575,14 @@ def second_words():
 
 
 def _subparsers(parser):
-    """{name: parser} of a parser's subcommands, in the order they were added."""
+    """{name: parser} of a parser's subcommands by their main names (not aliases), in the order they were added."""
     for action in parser._actions:
         if isinstance(action, argparse._SubParsersAction):
-            return dict(action.choices)
+            main = {}
+            for name, p in action.choices.items():  # an alias is a second key for the same parser
+                if all(p is not q for q in main.values()):
+                    main[name] = p
+            return main
     return {}
 
 
@@ -1586,14 +1590,15 @@ def completion_cmd(args):
     if args.shell == "list":
         print("\n".join(completion_lists(args.what or "")))
         return 0
-    from .cli import SUBCOMMANDS
+    from .cli import ALIASES, SUBCOMMANDS
+    spellings = {name: "|".join([name, *(a for a, m in ALIASES.items() if m == name)]) for name in SUBCOMMANDS}  # a second word completes after an alias too
     subs = " ".join(SUBCOMMANDS)
     flag_list = all_flags()
     flags = " ".join(flag_list)
     second = second_words()
     settings = " ".join(CONFIG_KINDS)
     if args.shell in ("bash", "zsh"):
-        cases = "\n".join(f"      {name}) COMPREPLY=($(compgen -W \"{' '.join(w)}\" -- \"$cur\")); return;;" for name, w in second.items())
+        cases = "\n".join(f"      {spellings.get(name, name)}) COMPREPLY=($(compgen -W \"{' '.join(w)}\" -- \"$cur\")); return;;" for name, w in second.items())
         script = f'''_sync_roms() {{
   local cur="${{COMP_WORDS[COMP_CWORD]}}" prev="${{COMP_WORDS[COMP_CWORD-1]}}" cmd="${{COMP_WORDS[1]}}"
   case "$prev" in
@@ -1610,7 +1615,7 @@ def completion_cmd(args):
 {cases}
     esac
   fi
-  if [ "$COMP_CWORD" -eq 3 ] && [ "$cmd" = games ]; then
+  if [ "$COMP_CWORD" -eq 3 ] && [[ "$cmd" == game* ]]; then
     case "${{COMP_WORDS[2]}}" in add|remove|full) COMPREPLY=($(compgen -W "$(sync-roms completion list systems)" -- "$cur")); return;; esac
   fi
   if [ "$COMP_CWORD" -eq 3 ] && [ "$cmd" = config ]; then
@@ -1624,7 +1629,7 @@ complete -o filenames -F _sync_roms sync-roms
     else:
         lines = [f'complete -c sync-roms -f -n __fish_use_subcommand -a "{subs}"']
         for name, w in second.items():
-            lines.append(f'complete -c sync-roms -f -n "__fish_seen_subcommand_from {name}; and not __fish_seen_subcommand_from {" ".join(w)}" -a "{" ".join(w)}"')
+            lines.append(f'complete -c sync-roms -f -n "__fish_seen_subcommand_from {spellings.get(name, name).replace("|", " ")}; and not __fish_seen_subcommand_from {" ".join(w)}" -a "{" ".join(w)}"')
         lines.append(f'complete -c sync-roms -f -n "__fish_seen_subcommand_from config; and __fish_seen_subcommand_from set unset" -a "{settings}"')
         values = {"card": "cards", "device": "devices", "layout": "layouts", "system": "systems"}
         for flag in (f for f in flag_list if f.startswith("--")):
@@ -1650,8 +1655,14 @@ def _positive_int(text):
 
 
 def build_parser():
+    from .cli import ALIASES
     ap = Parser(prog="sync-roms", add_help=False, allow_abbrev=False)
     sub = ap.add_subparsers(dest="command")
+    add_parser = sub.add_parser
+
+    def named(name, **kw):
+        return add_parser(name, aliases=[a for a, m in ALIASES.items() if m == name], **kw)
+    sub.add_parser = named
 
     def common(p, card=True):
         p.add_argument("-n", "--dry-run", action="store_true")
@@ -1683,7 +1694,7 @@ def build_parser():
     p = gsub.add_parser("add", allow_abbrev=False); common(p); p.add_argument("system"); p.add_argument("keys", nargs="+"); p.set_defaults(fn=games_add)
     p = gsub.add_parser("remove", allow_abbrev=False); common(p); p.add_argument("system"); p.add_argument("keys", nargs="+"); p.set_defaults(fn=games_remove)
     p = gsub.add_parser("full", allow_abbrev=False); common(p); p.add_argument("system"); p.add_argument("state", choices=["on", "off"]); p.set_defaults(fn=games_full)
-    p = gsub.add_parser("sets", allow_abbrev=False); common(p); p.add_argument("verb", choices=["list", "add", "remove"])
+    p = gsub.add_parser("sets", aliases=["set"], allow_abbrev=False); common(p); p.add_argument("verb", choices=["list", "add", "remove"])
     p.add_argument("set_id", nargs="?"); p.set_defaults(fn=games_sets)
     p = gsub.add_parser("export", allow_abbrev=False); common(p); p.set_defaults(fn=games_export)
     p = gsub.add_parser("import", allow_abbrev=False); common(p); p.add_argument("file"); p.set_defaults(fn=games_import)
@@ -1716,7 +1727,7 @@ def build_parser():
     p.add_argument("--count", type=_positive_int, metavar="N"); p.set_defaults(fn=download_pico8)
 
     p = sub.add_parser("flash", add_help=False, allow_abbrev=False); common(p, card=False); p.set_defaults(fn=flash_cmd)
-    p = sub.add_parser("unmount", aliases=["umount"], add_help=False, allow_abbrev=False); common(p, card=False); p.set_defaults(fn=unmount_cmd)
+    p = sub.add_parser("unmount", add_help=False, allow_abbrev=False); common(p, card=False); p.set_defaults(fn=unmount_cmd)
     p = sub.add_parser("mount", add_help=False, allow_abbrev=False); common(p, card=False); p.set_defaults(fn=mount_cmd)
 
     cards = sub.add_parser("cards", add_help=False, allow_abbrev=False)
@@ -1726,8 +1737,8 @@ def build_parser():
         p = csub.add_parser(name, allow_abbrev=False); common(p, card=False); p.add_argument("name")
         p.add_argument("--device"); p.add_argument("--layout"); p.add_argument("--size", help="the card's size, e.g. 256, 512GB, 1TB"); p.set_defaults(fn=lambda a, c=create: cards_save_setup(a, c))
     p = csub.add_parser("rename", allow_abbrev=False); common(p, card=False); p.add_argument("old"); p.add_argument("new"); p.set_defaults(fn=cards_rename)
-    p = csub.add_parser("convert", allow_abbrev=False); common(p, card=False); p.add_argument("card", nargs="?")
-    p.add_argument("--layout", required=True); p.set_defaults(fn=cards_convert)
+    p = csub.add_parser("layout", allow_abbrev=False); common(p, card=False); p.add_argument("card", nargs="?")
+    p.add_argument("--layout", required=True); p.set_defaults(fn=cards_layout)
     p = csub.add_parser("install", allow_abbrev=False); common(p, card=False); p.add_argument("card", nargs="?"); p.set_defaults(fn=cards_install)
     p = csub.add_parser("clean", allow_abbrev=False); common(p, card=False); p.add_argument("card", nargs="?"); p.set_defaults(fn=cards_clean)
     p = csub.add_parser("delete", allow_abbrev=False); common(p, card=False); p.add_argument("name"); p.set_defaults(fn=cards_delete)
@@ -1776,6 +1787,8 @@ def build_parser():
 def run(argv):
     global LITERAL
     LITERAL = frozenset()  # scrape_argv sets it for this call only
+    from .cli import canonical
+    argv = [canonical(argv[0]), *argv[1:]]  # an alias runs as its main command
     if argv[0] == "cards" and (len(argv) == 1 or argv[1].startswith("-")):  # bare `cards` is `cards list`
         argv = ["cards", "list", *argv[1:]]
     if argv[0] == "scrape":
