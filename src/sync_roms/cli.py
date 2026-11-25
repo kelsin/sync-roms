@@ -11,7 +11,7 @@ from concurrent.futures import ThreadPoolExecutor
 from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError
 
 from . import __version__, bezels, budget, cardedit, cardfs, clean, commands, downloads, drivers, frontend, inventory, m3u, mirroring, picker, runtime, s3, scrape_plan, store
-from . import muos_collections, nextui_folders, onion_surprise, pico8, raofflineproxy, rocknix_collections, saves, spruce_collections, spruce_bootlogo, spruce_emu, spruce_os, spruce_fixes, spruce_hotkeys, spruce_settings, spruce_syncthing, spruce_themes, spruce_wifi, surprise, themeart, ui, usersettings, vita
+from . import muos_collections, nextui_folders, onion_surprise, pico8, raofflineproxy, rocknix_collections, saves, spruce_collections, spruce_bootlogo, spruce_emu, spruce_os, spruce_fixes, spruce_hotkeys, spruce_retroarch, spruce_settings, spruce_syncthing, spruce_themes, spruce_wifi, surprise, themeart, ui, usersettings, vita
 from . import collections as colls
 from . import guest as guests
 
@@ -1213,6 +1213,7 @@ def sync_card(args):
         failed += spruce_wifi.install(card, layout_name, base, dry_run)
         failed += spruce_syncthing.run(card, layout_name, base, dry_run)
         failed += spruce_hotkeys.install(card, layout_name, base, dry_run)
+        failed += spruce_retroarch.install(card, layout_name, base, dry_run)
         if clean_card and wrote:
             clean._clean_root = base
         return failed
