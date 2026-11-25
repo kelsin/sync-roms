@@ -19,7 +19,7 @@ CI tests on Python 3.12 to 3.15 (`requires-python`), so code must run on 3.12 to
 ## Tests
 
 - A test module that imports `sync_roms` must import `isolate` first, directly or through `helpers`: it redirects HOME, XDG and the AWS settings to a throwaway folder and fails any test touching the real data folder or `~/.aws`.
-- Tests start with no sets, ignore list or scraped names. Sets come from `helpers.storage_sets`.
+- Tests start with no tags, ignore list or scraped names. Tags come from `helpers.storage_tags`.
 
 ## Storage access
 
@@ -52,7 +52,7 @@ Only one storage layout is supported; don't add support for others. Repo data an
 | `<system>/` | ROMs, one lowercase folder per system (`gba/`, `mame/`, ...): the system's `bucket` | `upload`, `download pico8`, sync (spruce Splore carts) |
 | `BIOS/` | BIOS files, always `BIOS/<file>`: the path is derived, never stored, and whether a file exists comes from listing `BIOS/` | by hand |
 | `scrapes/` | Per system, `<system>/metadata.json`, media, and scrape state by ROM path: `matches.json` (manual matches, `{ROM path: ScreenScraper game id}`), `unknown.json` (ROMs ScreenScraper didn't know), `nomedia.json` (media types it didn't offer), `hashes.json` (file hashes). `notgames.json`: non-game scrape results waiting for review, and the ROMs the review kept for later, keyed `system/rom` | `scrape`, `scrape review`, `scrape clean`, `download pico8`, sync (spruce Splore carts), the `match-translations` and `dedup-names` skills |
-| `sets/<id>.json` | Game sets (the id is the file name) | the `update-variants` skill |
+| `tags.json` | Tags and the games that carry them (see Tags below) | `tags edit`, the editors' `t`, `tags suggest`, `download pico8` (renames), the `update-variants` skill |
 | `variants-checked.json` | The ROMs the `update-variants` skill already judged | the `update-variants` skill |
 | `ignored.json` | `{system folder: [ROM paths]}`: ROMs sync-roms never shows, syncs, uploads or scrapes | `scrape review` (`scrape match --translated` takes ROMs off) |
 | `os/` | Firmware images, apps, themes, drivers, PICO-8 zips | by hand; `os/android/bezels/<device id>/` (an Android device's bezels) by hand; `os/drivers/` by sync only, `os/esde/themes/` by `themes update`; `os/spruceos/themes/<folder>/` (every PyUI-Themes release theme, unpacked) and `os/spruceos/themes.json` (the folders `themes update` made, never touching others) by `themes update`, and the custom theme folders `os/spruceos/themes/<NAME>/` by `themes publish` |
@@ -64,7 +64,7 @@ Only one storage layout is supported; don't add support for others. Repo data an
 - Ask only `inventory.py` what storage holds (keys, sizes, a bucket's ETags); never call `s3.list_sizes`/`stat_sizes`/`list_with_etags`/`list_folders` from elsewhere. It answers from `cache/storage-cache.json` (built by `sync-roms cache update`, patched by sync-roms's own writes in `s3.py`) and, without a cache of the storage in use, lists storage itself. `inventory.tag` (a file's ETag, or `<mtime_ns>-<size>` in a folder) and `shared.read` always read storage itself; other file contents come from the local mirror during a sync that uses one (`s3.read_root`).
 - Before shared state is removed for a file the cache doesn't list (`scrape review`, `scrape clean`), `inventory.uncached` checks storage itself, so a file another machine added since the cache was built isn't taken for gone.
 - `inventory.py`'s reads and `store.listed` leave ignored ROMs out, so nothing above them sees them. Ignoring a ROM never deletes its file.
-- The shared JSON files (`ignored.json`, the scrape state in `scrape_state.py`, `variants-checked.json`, `sets/`) go through `shared.py`: downloaded only when the storage tag differs from the local copy's (the ignore list once per run), and written by re-reading the storage file and applying only the write's own changes, so machines merge.
+- The shared JSON files (`ignored.json`, the scrape state in `scrape_state.py`, `variants-checked.json`, `tags.json`) go through `shared.py`: downloaded only when the storage tag differs from the local copy's (the ignore list once per run), and written by re-reading the storage file and applying only the write's own changes, so machines merge.
 - "Mirror" means two things: the shared-file mirror, `~/.sync-roms/storage/` (those files at their storage path, their tags in `.tags.json`), and the local mirror, the `mirror` command's copy of what the cards reference (`mirroring.py`).
 - `store.py`, `inventory.py` and `s3.py` import some modules inside functions because those modules import them back: a top-level import there is a circular import.
 - Personal files are written with `store.write_json` (atomic): `cards.json` only through `store.write_cards` or `store.update_card`, and like `settings.json` and the overlay with `backup=True`. Write text files on a card with `cardfs.write_text` or `store.replace_file`.
@@ -79,7 +79,7 @@ Only one storage layout is supported; don't add support for others. Repo data an
 - `device-systems.json`: each device's recommended systems and a short note on why. `tiers` is an ordered chain: the first lists its `systems`, each later one only `add`s to the tier before it. A device names its `tier` and sets `note` only when it differs. Loaded lists come out in `systems.json` order. Read from the repo, never copied.
 - `ratio-systems.json`: per-ratio overrides and a `dual_screen` list. A device's highlighted systems are those matching its `screen` ratio (exact string), the overrides and, with `screen2`, the dual-screen list, limited to what it can play. The personal overlay never changes them.
 - `drivers.json`: suggested Adreno GPU drivers, refreshed with the `refresh-drivers` skill. `drivers` (each used by a GPU): `id`, `name`, GitHub `repo`, `asset` regex that must match exactly one asset of the chosen release, optional pinned `tag` (without it the newest non-draft release, prereleases as fallback). `gpus`: gpu id to `name` and driver ids.
-- `series.json`: the series names for a set game's `series`.
+- `genre-tags.json`: which tag id each ScreenScraper genre suggests (`tags suggest`), matched on the part of the genre before ` / `, or on the whole genre when that is listed.
 - `themes/totk-james/`: the art of the `ToTK - James` custom theme (`bg-title.png`, `cards/<character>-<f|n>.png`), made by `tools/gen_totk_james.py`.
 - `spruce-fixes.json`: per fix in `spruce_fixes/`, its `title` and full `upstream` PR URL (a test checks both match the registered fixes).
 - `spruce-settings.json`: `sections`, spruceOS's `menuOptions` sections to the keys of the user's preferences that are safe on any spruce device (per-device hardware, network and debug settings stay off), and a `note` saying why.
@@ -98,7 +98,7 @@ The tests check these shapes.
 
 The data folder is `store.data_dir()`: `$XDG_DATA_HOME/sync-roms`, `%APPDATA%\sync-roms`, by default `~/.sync-roms` (used here).
 
-- `settings.json` (kept mode 600): the storage settings, `mirror`, `eject`, `storage_cache_declined`, `surprise_ttl_days`, `surprise_excluded_systems`, `screenscraper_user`, `screenscraper_password`, `ra_mode`, `ra_username`, `ra_password`, `ra_api_key`, `ra_offline_proxy`, `ra_proxy_stats`, `spruce_themes` (theme folder names, set by `themes pick`), `custom_theme_palettes` (palette names, set by the palette picker of `themes build`/`publish`), `syncthing`, `spruce_settings` (`{section: {key: value}}`, written by `config import`), `syncthing_server` (hand-edited, see `spruce_syncthing.py` below).
+- `settings.json` (kept mode 600): the storage settings, `mirror`, `eject`, `storage_cache_declined`, `surprise_ttl_days`, `surprise_excluded_systems`, `surprise_tags` (tag ids, set in the card editor's S menu), `screenscraper_user`, `screenscraper_password`, `ra_mode`, `ra_username`, `ra_password`, `ra_api_key`, `ra_offline_proxy`, `ra_proxy_stats`, `spruce_themes` (theme folder names, set by `themes pick`), `custom_theme_palettes` (palette names, set by the palette picker of `themes build`/`publish`), `syncthing`, `spruce_settings` (`{section: {key: value}}`, written by `config import`), `syncthing_server` (hand-edited, see `spruce_syncthing.py` below).
 - `surprises.json`: history of Surprise picks: system, bucket, title, card, ISO date. Pruned past `surprise_ttl_days` (default 183) on write.
 - `device-systems.json`: optional overlay, `{device id: {"add": [...], "remove": [...]}}` of system ids, applied to the repo defaults. Notes always come from the defaults.
 - `collections/<id>.json`: one per collection (`collections.py`); never in the repo or storage.
@@ -106,7 +106,7 @@ The data folder is `store.data_dir()`: `$XDG_DATA_HOME/sync-roms`, `%APPDATA%\sy
 - `bootlogos/<W>x<H>/`: your own boot logos (`.png`, `.bmp`), one folder per device `resolution`; never in the repo or storage.
 - `cache/`: what can be rebuilt: `storage-cache.json`, `preview-cache/` (the editors' 300 px WebP game pictures, `<image key without extension>.<ETag or s<size>>.webp`), `previews/`, `theme-art/`, `themes/` (`base/<BASE>/`, a custom theme's base theme from storage; `build/<theme>/`, built custom themes; `palettes.png`, the `themes palettes` overview; `palette-previews/<palette>.png`, the palette picker's previews), `names.json`.
 
-Old personal sets in `sets/` are left on disk and never read; a sync reads an old `games.json` only to warn that it is no longer used.
+Old personal sets in `sets/` (and any `sets/` folder in storage) are left on disk and never read; a sync reads an old `games.json` only to warn that it is no longer used.
 
 ### Card fields
 
@@ -116,13 +116,14 @@ Old personal sets in `sets/` are left on disk and never read; a sync reads an ol
 |---|---|---|
 | `device`, `layout` | setup prompt, `cards` commands | Device id (or `full`) and layout. |
 | `size` | `cards new`/`set` | Readable card size (`512 GB`). |
-| `games` | the editors (`--edit`), `games` commands | Games per system, with their notes. A system's entry may be `{"full_system": true}` (its earlier list kept inside as `games`) to sync its whole storage folder. `"sets": [set ids]` syncs whole sets (live references). |
-| `excluded` | card editor | `{system: [keys]}` dropped from what the card's sets and collections bring. |
+| `games` | the editors (`--edit`), `games` commands | Games per system, with their notes. A system's entry may be `{"full_system": true}` (its earlier list kept inside as `games`) to sync its whole storage folder. A leftover `"sets"` key (old whole-set sync) is ignored and dropped the next time the card's games are saved. |
+| `excluded` | card editor | `{system: [keys]}` dropped from what the card's collections bring (and from its direct picks). |
 | `collections` | card editor | Collection ids synced whole; the card editor's `l` → Enter picks single games from one, as direct picks. |
-| `systems_off` | card editor's `x` | System ids nothing syncs for on this card; picks, sets and collections there stay saved. Surprise skips them. |
+| `systems_off` | card editor's `x` | System ids nothing syncs for on this card; picks and collections there stay saved. Surprise skips them. |
 | `surprise` | card editor's S menu | Stored only when it differs from `surprise.default_on`: on for a card with no layout yet, `frontend.FRONTEND_LAYOUTS`, `onion`, `muos` and `spruce`; off for `allium`. |
 | `surprises` | sync | `[{"system","bucket","title","files"?}]`. |
 | `surprise_excluded_systems` | S menu | System ids Surprise never picks from on this card, on top of the global setting. Absent when empty. |
+| `surprise_tags` | S menu | Tag ids Surprise picks only from on this card (any of them); overrides the global setting. Absent when empty. |
 | `theme`, `custom_collections`, `raofflineproxy` | S menu | On when absent, stored only as `false`: collection art and the theme copy, collections in the frontend (Surprise's too), the RAOfflineProxy app. |
 | `frontend_collections` | sync | The collection names sync wrote to the card's frontend, so only those are touched. |
 | `drivers` | sync | The `Drivers/` zip names sync put on the card; only those are removed when they go stale. |
@@ -137,23 +138,27 @@ Old personal sets in `sets/` are left on disk and never read; a sync reads an ol
 | `android_volume` | `saves stash`/`apply` | The SD card's Android volume id (`/storage/<id>`). |
 | `muos_storage` | by hand | `sd1` (default) or `sd2`: the mount (`/mnt/mmc` or `/mnt/sdcard`) written into a `muos` card's collection entries. |
 
-### Sets and collections
+### Tags and collections
 
-Sets come only from storage, through `store.load_sets` (`inventory.files` for the listing, `shared.load` for contents, once per run). A set another machine added appears after `sync-roms cache update`; a card naming a set storage doesn't have keeps the id and is warned about. `sync-roms check` validates the sets in storage.
+Tags come only from storage: `tags.json` at the storage root, read through `tags.py` (`shared.load`, once per run) and written only with `shared.update`, so machines merge; `~/.sync-roms/storage/` mirrors it. A tag put on a game by another machine appears after `sync-roms cache update`. `sync-roms check` validates the file.
 
-A set file is `{"name", "description"?, "art"?, "games"}`. Games have `title`, `system`, `bucket` and optional `files`, `category`, `series` and `variants`. `art` is an `art.json` id; without it a set uses the art under its own id.
+`tags.json` is `{"tags", "games", "declined"}`. `tags` maps a tag id (a lowercase slug) to `{"name", "emoji", "description"?, "art"?}`: name and emoji are required and an emoji belongs to one tag; `art` is an `art.json` id and without it a tag uses the art under its own id. `games` maps a bucket key (`<system>/<file>`) to `{"tags": [ids], "files"?, "variants"?}`: `files` are the other storage keys toggled with the game (a multi-disc game's discs), `variants` are `[{"bucket", "note"}]`. The system is the key's folder and titles come from `names.title`, so neither is stored. A record with no tags and no variants is removed. `declined` is `{key: [tag ids]}`: genre suggestions turned down. Tags only help find games: a tag never puts a game on a card.
 
-A collection file (see Personal data) has the same top-level keys (its games may carry a `note`) but its own loader and schema and no categories.
+A collection file (see Personal data) is `{"name", "description"?, "art"?, "games"}` (its games may carry a `note`) with its own loader and schema.
 
 While `custom_collections` is on, sync writes every collection with a game on the card (in `collections` or not), each with only its games on the card.
 
-Rules for sets:
+Rules for tagged games:
 
-- A game appears once across all sets: one version per game (arcade original over home ports; else the original lead platform, then the lighter one to emulate; English for text-heavy games), and every set that has the game uses that version.
-- A later version of the same game that adds something (extra content or modes, an HD or handheld remaster) goes in that game's `variants`, `[{"bucket", "note"}]`, the note saying in a few words what it adds. Variants aren't synced with the set; the editors show them on the game's highlighted row, and `v` in the card editor adds one to the card.
-- A version that plays substantially differently is its own game. A compilation is listed only when it holds a game no set lists on its own.
-- Retro Oddities, Handheld Greatest Hits and System Essentials keep their own versions and only lose straight re-releases.
-- The set editor groups rows by `category` (in file order). Prefer one set with categories over several related top-level sets (e.g. `shmups.json`: Touhou, Psikyo, Cave, Other).
+- A game is tagged once across all tags: one version per game (arcade original over home ports; else the original lead platform, then the lighter one to emulate; English for text-heavy games), and every tag that applies to the game goes on that version.
+- A later version of the same game that adds something (extra content or modes, an HD or handheld remaster) goes in that game's `variants`, `[{"bucket", "note"}]`, the note saying in a few words what it adds. Variants aren't synced with the game's tags; the editors show them on the game's highlighted row, and `v` in the card editor adds one to the card.
+- A version that plays substantially differently is its own game. A compilation is tagged only when it holds a game no tag covers on its own.
+- The Retro Oddities, Handheld Greatest Hits and System Essentials tags keep their own versions and only lose straight re-releases.
+- Tags are flat: no groups, categories or series. Make a group a tag of its own (`cave` and `shmups` are both tags).
+- Every game list shows a game's tag emoji as its last column. `t` edits the highlighted game's tags (`n` adds a tag), `s` opens the tag filter (`Enter` cycles a tag off, required ✅, excluded 🚫; `c` clears it), and the card editor's own `s` opens all games narrowed by tags first. They live in `tagui.py` and `cardedit.py`.
+- `sync-roms tags edit` (`tageditor.py`) edits tags and `sync-roms tags suggest [system ...]` (`tagsuggest.py`, `data/genre-tags.json`) suggests tags from scraped genres for one version per game, saving the unchecked ones to `declined`. `tools/migrate_sets_to_tags.py` is the one-time script that made `tags.json` from the old set files.
+- Surprise picks only games with any of the tags in the `surprise_tags` setting, or in a card's own `surprise_tags` (card editor S menu), which wins; with neither it has no limit.
+- `sync-roms check` notes tags with no games, each system's untagged games (the same one-version pool `tags suggest` uses), `genre-tags.json` ids that aren't tags and a card's leftover `"sets"` key.
 
 ### Scraped names and metadata
 
@@ -209,7 +214,7 @@ Rules for sets:
 
 `src/sync_roms/data/themes/art-book-next/` holds:
 
-- `art.json`: the art ids, one per set among them (`surprise` has art too).
+- `art.json`: the art ids, one per tag among them (`surprise` has art too).
 - `art/<id>.png`, drawn by `tools/gen_theme_art.py`, with a generated `art/README.md` gallery for GitHub that sync never copies.
 - `art-box/Imgs|Imgs_med|Imgs_small/<id>.png`: retro game boxes for SpruceOS, 336x480, 210x300 and 140x200, drawn by `tools/gen_box_art.py` from `sprites/<id>.txt` (32x32 pixel sprites, colours in `box-palette.json`) with the art's title in `box-font.json` and a badge picked by the id's hash. Run it after changing a sprite and commit both.
 - `../totk-james/collections/Imgs|Imgs_med|Imgs_small/<id>.png`: ToTK-style collection art (gold glowing outline drawings from `gen_theme_art.py` on the theme's swirl card, title in its HYLIA font), 336x480, 210x300 and 140x200 128-colour palette PNGs, drawn by `tools/gen_zelda_art.py` (reads HYLIA from the ToTK theme in storage). Sync uses it instead of `art-box/` on `spruce` cards whose `spruce_theme` is `ToTK` or `ToTK - James`. Run it after changing a drawing or a title and commit both.
@@ -241,7 +246,7 @@ Size and placement:
 
 Subject:
 
-- One picture per meaning. Before adding one, check `art.json` for an entry that already means the same thing (a genre and a set of the same genre, two kinds of fist). If two exist, ask which to keep; the kept picture goes under the set's id, and the other id is removed from `ART`, `art.json`, `emoji.json`, `art/`, `sprites/`, `art-box/` and the tests.
+- One picture per meaning. Before adding one, check `art.json` for an entry that already means the same thing (a genre and a tag of the same genre, two kinds of fist). If two exist, ask which to keep; the kept picture goes under the tag's id, and the other id is removed from `ART`, `art.json`, `emoji.json`, `art/`, `sprites/`, `art-box/` and the tests.
 - Draw the thing from the games, not a real-world lookalike: a console light gun (long thin barrel, boxy body, cable), not a pistol.
 - A series may get its character when asked. Get the proportions of the right form: Pikachu has long slim ears with a short tip band, a head smaller than its chubby body, small solid eyes and a large stepped tail; wide triangular ears on a big head is Pichu.
 - When asked to redo a picture without a subject, say which subject was chosen. When two concepts are equally plausible, show both and let the user pick.
@@ -256,7 +261,7 @@ Checking:
 
 - Never finish without looking at the result. Read the generated PNG (the drawing is in y 600..1050), and also crop that part and enlarge it 2x to check every join, line end and overlap.
 - Compare with the pictures next to it in a contact sheet of all of `art/`, and show the user that sheet or the changed pictures. Keep review images out of the commit.
-- The tests check that every `art.json` id has a PNG in `art/`, a sprite (and no sprite lacks an id), the three `art-box/` sizes (equal to what the sprite renders to), the three `totk-james/collections/` sizes and its own emoji; `sync-roms check` notes sets in storage that have no art or share one.
+- The tests check that every `art.json` id has a PNG in `art/`, a sprite (and no sprite lacks an id), the three `art-box/` sizes (equal to what the sprite renders to), the three `totk-james/collections/` sizes and its own emoji; `sync-roms check` notes tags that have no art or share one.
 
 ## Devices
 
