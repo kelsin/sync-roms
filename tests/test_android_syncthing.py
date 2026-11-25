@@ -139,10 +139,6 @@ class Plan(unittest.TestCase):
         self.assertTrue(all(not applied.changed(e) for e in entries))
 
 
-if __name__ == "__main__":
-    unittest.main()
-
-
 class Apply(unittest.TestCase):
     """android_syncthing.apply with adb and the REST API mocked."""
 
@@ -209,7 +205,8 @@ class Apply(unittest.TestCase):
     def test_not_installed_prints_hint(self):
         self.packages = "package:other"
         self.assertEqual(self.run_apply(), [])
-        self.assertIn("Syncthing-Fork isn't installed", self.out.getvalue())
+        self.assertIn("Syncthing-Fork isn't installed: put its APK in os/android/APKs/ (config apply installs it) "
+                      "or install it from F-Droid", self.out.getvalue())
         self.assertEqual(self.shells, [("pm", "list", "packages")])
 
     def test_access_entries_android_11(self):
@@ -261,7 +258,7 @@ class Apply(unittest.TestCase):
         self.assertEqual(self.run_apply(True), [])
         self.assertFalse([w for w in self.shells if w[0] == "monkey"])
         self.assertEqual(self.written(), [])
-        self.assertEqual(self.shells and [w for w in self.shells if w[:2] == ("appops", "set")], [])
+        self.assertEqual([w for w in self.shells if w[:2] == ("appops", "set")], [])
         self.assertIn("Syncthing-Fork isn't running", self.out.getvalue())
         self.assertEqual(self.removed, [5555])
 
@@ -279,6 +276,17 @@ class Apply(unittest.TestCase):
     def test_adb_error_fails(self):
         with mock.patch.object(adb, "exec_out", side_effect=adb.AdbError("lost")):
             self.assertEqual(self.run_apply(), ["Syncthing-Fork"])
+
+    def test_rest_failure_still_shows_access_changes(self):
+        self.config_error = urllib.error.URLError("boom")
+        self.assertEqual(self.run_apply(), ["Syncthing-Fork"])
+        self.assertIn("all files access = allow", self.out.getvalue())
+        self.assertEqual(self.out.getvalue().count("all files access"), 1)
+
+    def test_500_warns_and_fails(self):
+        self.config_error = urllib.error.HTTPError("u", 500, "Server Error", {}, None)
+        self.assertEqual(self.run_apply(), ["Syncthing-Fork"])
+        self.assertIn("Syncthing-Fork:", self.err.getvalue())
 
     def test_403_warns_without_failing(self):
         self.config_error = urllib.error.HTTPError("u", 403, "Forbidden", {}, None)
@@ -303,3 +311,7 @@ class Apply(unittest.TestCase):
         self.config = {"devices": [], "folders": [folder("ra-saves", "/elsewhere")]}
         self.run_apply()
         self.assertIn("ra-saves is at /elsewhere", self.err.getvalue())
+
+
+if __name__ == "__main__":
+    unittest.main()

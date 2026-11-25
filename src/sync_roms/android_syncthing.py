@@ -1,4 +1,4 @@
-"""Syncthing-Fork on an Android device: reading its config export and planning the server and folders to add."""
+"""Sets up Syncthing-Fork on an Android device over adb: its access, battery exemption, and the server and folders through its REST API."""
 import io
 import json
 import re
@@ -87,26 +87,22 @@ def plan(config, srv, defaults_device, defaults_folder):
 
 
 def _access_entries(serial):
-    """[(Entry, adb shell words that set it)]: battery exemption and storage access."""
+    """[(Entry, [adb shell words, ...] that set it)]: battery exemption and storage access."""
     whitelist = adb.shell(serial, "dumpsys", "deviceidle", "whitelist")
     result = [(applied.Entry(WHERE, "battery optimization", "exempt" if PACKAGE in whitelist else "on", "exempt", False),
-               ["dumpsys", "deviceidle", "whitelist", f"+{PACKAGE}"])]
+               [["dumpsys", "deviceidle", "whitelist", f"+{PACKAGE}"]])]
     if int(adb.shell(serial, "getprop", "ro.build.version.sdk").strip() or 0) >= 30:
         out = adb.shell(serial, "appops", "get", PACKAGE, "MANAGE_EXTERNAL_STORAGE")
         mode = re.search(r"MANAGE_EXTERNAL_STORAGE:\s*(\w+)", out)
         old = "allow" if "allow" in out else mode.group(1) if mode else "default"
         result.append((applied.Entry(WHERE, "all files access", old, "allow", False),
-                       ["appops", "set", PACKAGE, "MANAGE_EXTERNAL_STORAGE", "allow"]))
+                       [["appops", "set", PACKAGE, "MANAGE_EXTERNAL_STORAGE", "allow"]]))
     else:
         granted = "android.permission.WRITE_EXTERNAL_STORAGE: granted=true" in adb.shell(serial, "dumpsys", "package", PACKAGE)
         result.append((applied.Entry(WHERE, "storage permission", "granted" if granted else None, "granted", False),
-                       None))
+                       [["pm", "grant", PACKAGE, f"android.permission.{permission}"]
+                        for permission in ("READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE")]))
     return result
-
-
-def _grant(serial):
-    for permission in ("READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE"):
-        adb.shell(serial, "pm", "grant", PACKAGE, f"android.permission.{permission}")
 
 
 def _api(port, key, method, path, body=None):
@@ -181,20 +177,19 @@ def apply(serial, dry_run, failed):
         return
     try:
         if f"package:{PACKAGE}" not in adb.shell(serial, "pm", "list", "packages").split():
-            print(ui.dim("Syncthing-Fork isn't installed: install it to sync saves with the server"))
+            print(ui.dim("Syncthing-Fork isn't installed: put its APK in os/android/APKs/ (config apply installs it) "
+                           "or install it from F-Droid"))
             return
         access = _access_entries(serial)
         if not dry_run:
-            for entry, words in access:
-                if not applied.changed(entry):
-                    continue
-                if words is None:
-                    _grant(serial)
-                else:
-                    adb.shell(serial, *words)
+            for entry, commands in access:
+                if applied.changed(entry):
+                    for words in commands:
+                        adb.shell(serial, *words)
+            applied.show([e for e, _ in access], False)
         srv = spruce_syncthing.server()
         entries = _folder_part(serial, srv, dry_run) if srv else []
-        applied.show([e for e, _ in access] + entries, dry_run)
+        applied.show(([e for e, _ in access] if dry_run else []) + entries, dry_run)
     except (adb.AdbError, OSError, ValueError) as e:
         ui.warn(f"Syncthing-Fork: {e}")
         failed.append("Syncthing-Fork")
