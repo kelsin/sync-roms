@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.2.0](https://github.com/kelsin/sync-roms/compare/v4.1.0...v4.2.0) (2026-11-25)
+
+
+### :video_game: Features
+
+* **collections:** filter the collections page by tag with a typeahead ([#619](https://github.com/kelsin/sync-roms/issues/619)) ([19d815d](https://github.com/kelsin/sync-roms/commit/19d815d467d0ef65e9f7e5d0cf95b9e9f904e574))
+* **prepare:** show per-file progress under the bar ([#621](https://github.com/kelsin/sync-roms/issues/621)) ([3e6b803](https://github.com/kelsin/sync-roms/commit/3e6b803f110615674ff848532745a9f1191f76c0))
+
 ## [4.1.0](https://github.com/kelsin/sync-roms/compare/v4.0.0...v4.1.0) (2026-11-25)
 
 
