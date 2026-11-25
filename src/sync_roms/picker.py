@@ -336,11 +336,11 @@ class _ListModel:
             self.scroll, self.scroll_row = 0, vis[self.cur]
         if infos:
             lines = tag_lines(infos, self.width)
-            if self.height - 4 - len(lines) >= TAG_MIN_ROWS:
+            if self.height - 5 - len(lines) >= TAG_MIN_ROWS:
                 self.tag_block = lines
-            elif self.height - 5 >= 3:
+            elif self.height - 6 >= 3:
                 self.tag_line = tag_names(infos)
-        self.view = max(1, self.height - 4 - (len(self.tag_block) or bool(self.tag_line)))
+        self.view = max(1, self.height - 5 - (len(self.tag_block) or bool(self.tag_line)))
         self.top = max(0, min(self.top, len(vis) - self.view))  # a restored scroll leaves no blank rows below the list
         if self.cur < self.top:
             self.top = self.cur
@@ -658,7 +658,8 @@ def _app_class():
                     status.append(" " * (self.size.width - status.cell_len - len(position)) + position, "bold")
                     break
             area = m.tag_area() if hasattr(m, "tag_area") else []
-            lines += [Text()] * max(0, self.size.height - len(lines) - 1 - len(area)) + [Text(a, "dim") for a in area]
+            lines += [Text()] * max(0, self.size.height - len(lines) - 2 - len(area))
+            lines += [Text("─" * self.size.width, "dim")] + [Text(a, "dim") for a in area]  # the border, always: list above, info below
             lines += [status if at is None else _with_cursor(status, at)]
             return Text("\n").join(lines)
 
