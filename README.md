@@ -179,6 +179,7 @@ Every mode is a command (plain `sync-roms [CARD]` syncs a card). A command's ali
 | `themes pick` | choose the PyUI themes every spruce card gets by default (`spruce_themes` setting) | |
 | `download pico8` | add the [PICO-8 BBS Featured carts](#pico-8-carts-from-the-bbs-download-pico8) storage doesn't have, and newer revisions of those it has | `downloads` |
 | `flash` | [write a Knulli, BaseOS, muOS, ROCKNIX or OakMoss image](#flashing-an-sd-card-flash) from storage's `os/` to an SD card, macOS only | |
+| `format` | [erase an SD card as exFAT or FAT32](#formatting-an-sd-card-format) with a picked label, macOS only | |
 | `unmount` | pick an SD card, remove macOS's junk from it as a sync does (`.metadata_never_index`, `.fseventsd`, `._` files) and unmount it, macOS only | `umount` |
 | `mount` | pick an SD card that was unmounted (by `unmount` or a sync) but not pulled out and mount it again with `diskutil mountDisk`, macOS only | |
 | `cards list\|new\|set\|rename\|layout\|install\|clean\|delete\|copy\|export\|import` | [manage cards](#cards-cards) | `card` |
@@ -637,6 +638,16 @@ Every command reads what storage holds (each file's name and size, and for a buc
 - The image is copied to a local temp folder (free space is checked first). Right before writing, the card must still be the same disk (id, size and name).
 - `sudo dd` writes it decompressed (gz, xz or zip) on the fly with 4 MiB blocks. sudo may ask for your password before downloading and writing.
 - The temp folder is removed, writes are flushed and the card is ejected. After a failure the card is unmounted instead, so you can retry.
+
+## Formatting an SD card (`format`)
+
+`sync-roms format [--dry-run]` erases an SD card as exFAT or FAT32 with a label you pick. macOS only.
+
+- You pick an external SD card (shown with its volume names), then a filesystem, then a label: your card names, then the layout names uppercased, or type your own. FAT32 labels are uppercase, at most 11 characters; exFAT at most 15. Longer ones are left out of the list, and a typed one with characters the filesystem doesn't allow is asked again.
+- The boot disk and the disk holding storage are never offered.
+- You confirm by typing the disk id (`disk4`). `--yes` never skips this. `--dry-run` stops here and shows the command.
+- Right before erasing, the card must still be the same disk (id, size and name).
+- `sudo diskutil eraseDisk <FS> <LABEL> MBR <disk>` erases it. sudo may ask for your password. The card is left mounted.
 
 ## Claude Code skills
 

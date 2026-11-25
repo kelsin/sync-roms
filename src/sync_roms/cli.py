@@ -34,6 +34,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "themes": ("update|pick|build|publish|palettes", "copy the latest Art Book Next for ES-DE and the PyUI themes for spruce from GitHub into storage; build and publish custom spruce themes"),
     "download": ("pico8", "add the PICO-8 BBS Featured carts storage doesn't have, and newer revisions of those it has"),
     "flash": ("", "write a Knulli, BaseOS, muOS, ROCKNIX or OakMoss image from storage's os/ to an SD card"),
+    "format": ("", "erase an SD card as exFAT or FAT32 with a picked label"),
     "unmount": ("", "clean the macOS junk off an SD card and unmount it"),
     "mount": ("", "mount again an SD card that was unmounted but not pulled out"),
     "cards": ("[list|new|set|rename|layout|install|clean|delete|copy|export|import]", "list and manage the cards you've synced"),
@@ -236,6 +237,18 @@ TOPICS = {
   fly, with 4 MiB blocks (sudo may ask for your password before downloading and writing). Last, the
   temp folder is removed and the card is ejected; after a failure it is unmounted instead, so you
   can retry.
+""",
+    "format": """
+  sync-roms format [--dry-run]                erase an SD card as exFAT or FAT32 (macOS only)
+
+  Pick an external SD card (shown with its volume names; the boot disk and the disk holding storage
+  are never offered), a filesystem (exFAT or FAT32), then a label: your card names, then the layout
+  names uppercased, or type your own. FAT32 labels are uppercase, at most 11 characters; exFAT at
+  most 15; longer ones are left out of the list, and a typed one with characters the filesystem
+  doesn't allow is asked again. Type the disk id (disk4) to confirm: --yes never skips that.
+  --dry-run stops there and shows the command. Right before erasing, the card must still be the
+  same disk (id, size and name). Then `sudo diskutil eraseDisk <FS> <LABEL> MBR <disk>` erases it
+  (sudo may ask for your password). The card is left mounted.
 """,
     "unmount": """
   sync-roms unmount [--dry-run]                clean the macOS junk off an SD card and unmount it
