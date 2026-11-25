@@ -205,6 +205,34 @@ class StageTest(CardDir):
         self.stage()
         self.assertEqual((self.result, self.waiting(), self.recorded()), ((1, []), [ZIP, MONO], [ZIP, MONO]))
 
+    def test_runtime_without_suffix_is_staged_under_its_squashfs_name(self):
+        self.put(portmaster.RUNTIMES + "weston_pkg_0.2.squashfs", b"w")
+        facts = {**FACTS, "runtime": ["weston_pkg_0.2", 7]}
+        self.put("scrapes/ports/metadata.json", json.dumps({ZIP: {"name": "Celeste", "portmaster": facts}}).encode())
+        self.stage()
+        self.assertEqual((self.result, self.waiting()), ((0, ["Celeste"]), [ZIP, "weston_pkg_0.2.squashfs"]))
+        touch(self.cp(portmaster.LIBS, "weston_pkg_0.2.squashfs"))
+        os.remove(self.cp(portmaster.AUTOINSTALL, "weston_pkg_0.2.squashfs"))
+        self.stage()
+        self.assertEqual(self.waiting(), [ZIP])
+
+    def test_port_without_room_is_skipped_with_a_warning(self):
+        with mock.patch.object(portmaster.downloads, "free_space", return_value=portmaster.MARGIN + 7):
+            out = self.stage()
+        self.assertEqual((self.result, self.waiting(), self.recorded()), ((1, []), [], None))
+        self.assertIn(f"Not enough room to stage {ZIP} for PortMaster: it needs {portmaster.ui.human_size(8 + portmaster.MARGIN)}, "
+                      f"the card has {portmaster.ui.human_size(portmaster.MARGIN + 7)} free", self.err)
+        self.assertNotIn("Open PortMaster", out)
+        with mock.patch.object(portmaster.downloads, "free_space", return_value=portmaster.MARGIN + 8):
+            self.stage()
+        self.assertEqual((self.result, self.waiting()), ((0, ["Celeste"]), [ZIP, MONO]))
+
+    def test_storage_listing_error_warns_and_stages_nothing(self):
+        with mock.patch.object(portmaster.inventory, "files", side_effect=OSError("gone")):
+            self.stage()
+        self.assertEqual((self.result, self.waiting(), self.recorded()), ((1, []), [], None))
+        self.assertIn("gone", self.err)
+
     def test_pick_missing_from_storage_keeps_what_was_staged_for_it(self):
         self.stage()
         os.remove(os.path.join(self.root, "ports", ZIP))
@@ -328,7 +356,7 @@ class GameDataTest(CardDir):
                       "Undertale\n"
                       f"    {UT_INST}\n"
                       f"    Put the files in {self.root}/{GAMEDATA}undertale/assets/\n"
-                      "Already on the card? sync-roms ports done c <folder>\n"
+                      "Already on the card? sync-roms ports done c celeste undertale\n"
                       "All of them: sync-roms ports needed\n", out)
         # storage gets Undertale's data: the next sync copies it and drops it from the needed list
         self.put(GAMEDATA + "undertale/assets/data.win", b"data")
@@ -345,6 +373,41 @@ class GameDataTest(CardDir):
         self.assertEqual(out, "")
         self.assertIsNone(self.needed_file())
         self.assertNotIn("portmaster_ports", store.load_cards()["c"])
+
+    def test_absent_rtr_counts_as_needing_data(self):
+        self.install(UT, {"name": "undertale.zip", "attr": {"title": "Undertale", "inst": UT_INST}})
+        picked = {ZIP: {"name": "Celeste", "portmaster": {k: v for k, v in FACTS.items() if k != "rtr"}}}
+        self.run_data(picked)
+        self.assertEqual([(f, later) for f, _, later in self.result[1]], [(UT, False), ("celeste", True)])
+
+    def test_summary_quotes_folders(self):
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            portmaster.summary("my card", [("a b", {"title": "A"}, False), ("c", {"title": "C"}, False)])
+        self.assertIn("Already on the card? sync-roms ports done 'my card' 'a b' c\n", out.getvalue())
+
+    def test_port_without_room_is_skipped_and_retried(self):
+        self.put(GAMEDATA + "undertale/assets/data.win", b"data")
+        err = io.StringIO()
+        with mock.patch.object(portmaster.downloads, "free_space", return_value=portmaster.MARGIN + 3), \
+                contextlib.redirect_stderr(err):
+            self.result = portmaster.game_data("c", self.card, portmaster.installed(self.card), {}, False)
+        self.assertEqual((self.result, self.recorded()), ((1, []), None))
+        self.assertIn(f"Not enough room to copy the game data of Undertale: it needs {portmaster.ui.human_size(4 + portmaster.MARGIN)}", err.getvalue())
+        self.assertFalse(os.path.exists(self.cp(portmaster.CARD_PORTS, UT, "assets", "data.win")))
+        self.run_data()
+        self.assertEqual((self.result, self.recorded()), ((0, []), [UT]))
+
+    def test_unreadable_needed_file_is_never_overwritten(self):
+        path = os.path.join(self.data, "ports-needed.json")
+        touch(path, "{broken")
+        err = io.StringIO()
+        with contextlib.redirect_stderr(err), contextlib.redirect_stdout(io.StringIO()):
+            self.result = portmaster.game_data("c", self.card, portmaster.installed(self.card), {}, False)
+        self.assertEqual([f for f, _, _ in self.result[1]], [UT])
+        with open(path) as f:
+            self.assertEqual(f.read(), "{broken")
+        self.assertIn("Couldn't read", err.getvalue())
 
     def test_failed_copy_retried_next_sync(self):
         self.put(GAMEDATA + "undertale/assets/data.win", b"data")

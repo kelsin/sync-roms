@@ -69,6 +69,27 @@ class CatalogTests(helpers.DataDir):
         self.assertEqual(pc.runtime_source(CATALOG, "frt_3.5.2.armhf.squashfs")["md5"], "b")
         self.assertIsNone(pc.runtime_source(CATALOG, "nope"))
 
+    def test_runtime_names_end_in_squashfs(self):
+        self.assertEqual(pc.runtimes({"attr": {"runtime": ["python_3.11", "godot_4.armhf", "a.squashfs", 3]}}),
+                         ["python_3.11.squashfs", "a.squashfs"])
+        self.assertEqual(pc.runtimes({"attr": {"runtime": "weston_pkg_0.2"}}), ["weston_pkg_0.2.squashfs"])
+
+    def test_runtime_source_by_generic_name_and_arch(self):
+        catalog = {"utils": {
+            "python_3.11.squashfs": {"md5": "p"},
+            "frt_2.1.6.armhf.squashfs": {"md5": "arm", "runtime_name": "frt_2.1.6.squashfs", "runtime_arch": "armhf"},
+            "frt_2.1.6.aarch64.squashfs": {"md5": "a64", "runtime_name": "frt_2.1.6.squashfs", "runtime_arch": "aarch64"},
+            "x.squashfs": {"md5": "x86", "runtime_arch": "x86_64"}}}
+        self.assertEqual(pc.runtime_source(catalog, "python_3.11")["md5"], "p")
+        self.assertEqual(pc.runtime_source(catalog, "frt_2.1.6.squashfs")["md5"], "a64")
+        self.assertEqual(pc.runtime_source(catalog, "frt_2.1.6")["md5"], "a64")
+        self.assertIsNone(pc.runtime_source(catalog, "x.squashfs"))
+
+    def test_search_treats_absent_rtr_as_needing_data(self):
+        catalog = {"ports": {"a.zip": {"attr": {"title": "A"}}, "b.zip": {"attr": {"title": "B", "rtr": True}}}}
+        self.assertEqual([e["zip"] for e in pc.search(catalog, "", needs_data=True)], ["a.zip"])
+        self.assertEqual([e["zip"] for e in pc.search(catalog, "", needs_data=False)], ["b.zip"])
+
     def test_load_uses_fresh_cache_without_fetching(self):
         self.cache()
         with mock.patch.object(pc.github, "get", side_effect=AssertionError("fetched")):

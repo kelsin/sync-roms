@@ -1,6 +1,7 @@
 import contextlib
 import hashlib
 import io
+import json
 import os
 import unittest
 from unittest import mock
@@ -69,6 +70,23 @@ class Download(Base):
         self.assertEqual(self.read_json(META), {"celeste.zip": {"name": "Celeste", "portmaster": {
             "folder": "celeste", "items": ["Celeste.sh", "celeste/"], "rtr": False, "inst": "Copy your game files.",
             "runtime": ["mono-6.12.0.122-aarch64.squashfs"], "md5": md5(DATA["u-celeste"]), "size": len(DATA["u-celeste"])}}})
+
+    def test_runtime_names_are_normalized_and_found_by_generic_name(self):
+        DATA["u-frt"], DATA["u-weston"] = b"frt64", b"weston"
+        self.addCleanup(lambda: [DATA.pop(k) for k in ("u-frt", "u-weston")])
+        port = self.catalog["ports"]["celeste.zip"]
+        port["attr"]["runtime"] = ["frt_2.1.6", "weston_pkg_0.2"]
+        del port["attr"]["rtr"]
+        self.catalog["utils"] = {
+            "frt_2.1.6.armhf.squashfs": {"url": "u-mono", "md5": md5(DATA["u-mono"]), "runtime_name": "frt_2.1.6.squashfs", "runtime_arch": "armhf"},
+            "frt_2.1.6.aarch64.squashfs": {"url": "u-frt", "md5": md5(DATA["u-frt"]), "runtime_name": "frt_2.1.6.squashfs", "runtime_arch": "aarch64"},
+            "weston_pkg_0.2.squashfs": {"url": "u-weston", "md5": md5(DATA["u-weston"])}}
+        code, _, _ = self.run_download(["celeste"])
+        self.assertEqual(code, 0)
+        self.assertEqual(self.stored("os/portmaster/runtimes/frt_2.1.6.squashfs"), b"frt64")
+        self.assertEqual(self.stored("os/portmaster/runtimes/weston_pkg_0.2.squashfs"), b"weston")
+        facts = json.loads(self.stored(META))["celeste.zip"]["portmaster"]
+        self.assertEqual((facts["runtime"], facts["rtr"]), (["frt_2.1.6.squashfs", "weston_pkg_0.2.squashfs"], False))
 
     def test_runtime_already_in_storage_is_not_downloaded(self):
         self.put("os/portmaster/runtimes/mono-6.12.0.122-aarch64.squashfs", b"old")

@@ -13,6 +13,7 @@ AUTOINSTALL = CONTROL + "/autoinstall"
 LIBS = CONTROL + "/libs"
 CARD_PORTS = "Roms/PORTS"  # where PortMaster installs ports
 RUNTIMES = "os/portmaster/runtimes/"
+MARGIN = 64 * 1024 * 1024  # room left on the card after a port's copies
 
 
 def enabled(device, layout_name):
@@ -70,6 +71,26 @@ def is_installed(zip_name, facts, ports_on_card, base):
     return bool(items) and all(i.casefold() in on_card for i in items)
 
 
+class _Room:
+    """The card's free space, measured once, less what this run already plans to copy."""
+
+    def __init__(self, base):
+        self.base, self.free = base, None
+
+    def take(self, size, what):
+        """Reserve size for what; warn and return False when the card hasn't size plus MARGIN free."""
+        if not size:
+            return True
+        if self.free is None:
+            self.free = downloads.free_space(self.base)
+        if self.free < size + MARGIN:
+            ui.warn(f"Not enough room to {what}: it needs {ui.human_size(size + MARGIN)}, "
+                    f"the card has {ui.human_size(self.free)} free")
+            return False
+        self.free -= size
+        return True
+
+
 def stage(card, device, layout_name, base, picked, dry_run, keep):
     """Put the picked ports that aren't installed, and the runtimes they need, in PortMaster's autoinstall folder.
     (failure count, titles of the ports waiting there). keep (--no-delete): leave staged ports no longer picked."""
@@ -90,9 +111,14 @@ def stage(card, device, layout_name, base, picked, dry_run, keep):
     except (ValueError, *s3.ERRORS) as e:
         ui.warn(f"Couldn't read the ports' metadata: {e}")
         return 1, []
-    zips = inventory.files(PORTS + "/")
-    runtimes = inventory.files(RUNTIMES)
+    try:
+        zips = inventory.files(PORTS + "/")
+        runtimes = inventory.files(RUNTIMES)
+    except s3.ERRORS as e:
+        ui.warn(f"Couldn't list the ports and runtimes in storage: {e}")
+        return 1, []
     ports_on_card = installed(base)
+    room = _Room(base)
     jobs, waiting_ports, wanted = [], [], set()  # waiting_ports: (zip, title) of the picks to stage
     missed = 0  # picks that can't be staged: still picked, so what an earlier sync staged for them stays
     for zip_name in picked:
@@ -111,20 +137,29 @@ def stage(card, device, layout_name, base, picked, dry_run, keep):
             ui.warn(f"{key} isn't in storage")
             missed += 1
             continue
-        waiting_ports.append((zip_name, entry.get("name") or zip_name))
         target = os.path.join(autoinstall, zip_name)
+        port_jobs, port_rts = [], set()
         if not (os.path.isfile(target) and os.path.getsize(target) == zips[key]):
-            jobs.append((key, target, zips[key]))
+            port_jobs.append((key, target, zips[key]))
         for rt in facts.get("runtime") or []:
-            if not isinstance(rt, str) or rt.casefold() in in_libs or rt in wanted:
+            if not isinstance(rt, str) or not rt:
                 continue
-            wanted.add(rt)
+            rt = portmaster_catalog.runtime_name(rt)
+            if rt.casefold() in in_libs or rt in wanted or rt in port_rts:
+                continue
+            port_rts.add(rt)
             if rt.casefold() in waiting:
                 continue
             if RUNTIMES + rt not in runtimes:
                 ui.warn(f"{rt}, a runtime of {zip_name}, isn't in storage: run sync-roms ports download {zip_name}")
                 continue
-            jobs.append((RUNTIMES + rt, os.path.join(autoinstall, rt), runtimes[RUNTIMES + rt]))
+            port_jobs.append((RUNTIMES + rt, os.path.join(autoinstall, rt), runtimes[RUNTIMES + rt]))
+        if not room.take(sum(j[2] or 0 for j in port_jobs), f"stage {zip_name} for PortMaster"):
+            missed += 1
+            continue
+        waiting_ports.append((zip_name, entry.get("name") or zip_name))
+        wanted |= port_rts
+        jobs += port_jobs
     stale = sorted(n for n in staged if n.endswith(".zip") and n not in wanted and n.casefold() in waiting)
     if dry_run:
         for key, _, size in jobs:
@@ -186,7 +221,10 @@ def game_data(card, base, ports_on_card, picked_facts, dry_run):
     saved = store.saved_card(card)
     done = {n.casefold() for n in saved.get("portmaster_data") or [] if isinstance(n, str)}
     entries = portmaster_needed.load()
+    readable = entries is not None  # an unreadable needed list is never overwritten
+    entries = entries if readable else {}
     had_file = os.path.exists(portmaster_needed.path())
+    room = _Room(base)
     failed, jobs, copies, needing, waiting = 0, [], {}, [], []  # copies: {folder: (title, its jobs)}
 
     def stored(folder):
@@ -205,7 +243,7 @@ def game_data(card, base, ports_on_card, picked_facts, dry_run):
 
     for folder, port in ports_on_card.items():
         attr = port["attr"]
-        if attr.get("rtr") is not False:
+        if attr.get("rtr") is True:
             continue
         needing.append(folder)
         if folder.casefold() in done:
@@ -221,12 +259,15 @@ def game_data(card, base, ports_on_card, picked_facts, dry_run):
         prefix = f"{GAMEDATA}{folder}/"
         todo = [(k, os.path.join(base, CARD_PORTS, folder, *k[len(prefix):].split("/")), size) for k, size in sorted(files.items())]
         todo = [j for j in todo if not os.path.exists(j[1])]
+        if not room.take(sum(j[2] or 0 for j in todo), f"copy the game data of {title}"):
+            failed += 1
+            continue
         copies[folder] = (title, todo)
         jobs += todo
     for zip_name, entry in picked_facts.items():
         facts = entry["portmaster"]
         folder = _folder_of(facts)
-        if facts.get("rtr") is not False or not folder or folder.casefold() in done:
+        if facts.get("rtr") is True or not folder or folder.casefold() in done:
             continue
         files = stored(folder)
         if files is None:
@@ -255,7 +296,7 @@ def game_data(card, base, ports_on_card, picked_facts, dry_run):
     gone = portmaster_needed.prune(entries)
     if gone:
         print(ui.green(f"🧩 Storage now has the game data of: {', '.join(gone)}"))
-    if entries or had_file:
+    if readable and (entries or had_file):
         portmaster_needed.save(entries)
     return failed, waiting
 
@@ -265,14 +306,15 @@ def summary(card, waiting):
     if not waiting:
         return
     print(ui.bold("\n🧩 Ports waiting for game data"))
-    for folder, entry, later in sorted(waiting, key=lambda w: (w[1].get("title") or w[0]).casefold()):
+    waiting = sorted(waiting, key=lambda w: (w[1].get("title") or w[0]).casefold())
+    for folder, entry, later in waiting:
         text = portmaster_needed.block(entry, folder)
         if later:
             first, _, rest = text.partition("\n")
             text = f"{first} (after PortMaster installs it)\n{rest}"
         print(text)
-    folder = waiting[0][0] if len(waiting) == 1 else "<folder>"
-    print(f"Already on the card? sync-roms ports done {shlex.quote(card)} {folder}")
+    folders = " ".join(shlex.quote(w[0]) for w in waiting)
+    print(f"Already on the card? sync-roms ports done {shlex.quote(card)} {folders}")
     print("All of them: sync-roms ports needed")
 
 

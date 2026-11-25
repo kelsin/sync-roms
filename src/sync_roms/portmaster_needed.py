@@ -15,16 +15,20 @@ def path():
 
 
 def load():
-    """The entries ({} when the file is missing or isn't a JSON object, warned about)."""
+    """The entries ({} when the file is missing); None, warned about, when it can't be read or isn't a JSON object, so
+    the caller leaves it as it is."""
     try:
         with open(path(), encoding="utf-8") as f:
             data = json.load(f)
     except FileNotFoundError:
         return {}
     except (OSError, ValueError) as e:
-        ui.warn(f"Couldn't read {path()}: {e}")
-        return {}
-    return {k: v for k, v in data.items() if isinstance(v, dict)} if isinstance(data, dict) else {}
+        ui.warn(f"Couldn't read {path()}, leaving it as it is: {e}")
+        return None
+    if not isinstance(data, dict):
+        ui.warn(f"Couldn't read {path()}, leaving it as it is: not a JSON object")
+        return None
+    return {k: v for k, v in data.items() if isinstance(v, dict)}
 
 
 def save(entries):
@@ -117,8 +121,8 @@ def done_command(card, ports, undo):
         store.update_card(card, portmaster_data=sorted(have))
     else:
         store.drop_card_field(card, "portmaster_data")
-    if not undo:
-        entries = load()
+    entries = None if undo else load()
+    if entries is not None:
         for key in [k for k in entries if k.casefold() in names]:
             remove_card(entries, key, card)
         if entries or os.path.exists(path()):
@@ -129,7 +133,7 @@ def done_command(card, ports, undo):
 
 def needed_command():
     """Print every port waiting for game data, with the cards that want it."""
-    entries = load()
+    entries = load() or {}  # an unreadable file is left as it is: nothing is pruned from it or saved
     gone = prune(entries)
     if gone:
         print(ui.green(f"Game data now in storage: {', '.join(gone)}"))

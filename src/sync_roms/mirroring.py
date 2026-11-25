@@ -4,7 +4,7 @@ import hashlib
 import os
 from concurrent.futures import ThreadPoolExecutor
 
-from . import bezels, downloads, drivers, inventory, onion_surprise, portmaster, portmaster_needed, raofflineproxy, runtime, s3, scrape_plan, spruce_os, spruce_themes, store, themeart, ui, usersettings
+from . import bezels, downloads, drivers, inventory, onion_surprise, portmaster, portmaster_catalog, portmaster_needed, raofflineproxy, runtime, s3, scrape_plan, spruce_os, spruce_themes, store, themeart, ui, usersettings
 
 
 MIRROR_PRUNE_ASK = 25  # delete more unreferenced mirror files than this (or over a tenth of it) only after confirming
@@ -75,9 +75,10 @@ def _port_files(picked, runtimes, gamedata):
         if not isinstance(facts, dict):
             continue
         for rt in facts.get("runtime") or []:
-            if portmaster.RUNTIMES + rt in runtimes:
-                wanted[portmaster.RUNTIMES + rt] = runtimes[portmaster.RUNTIMES + rt]
-        if not facts.get("rtr") and isinstance(facts.get("folder"), str) and facts["folder"].strip("/"):
+            key = portmaster.RUNTIMES + portmaster_catalog.runtime_name(rt) if isinstance(rt, str) and rt else None
+            if key in runtimes:
+                wanted[key] = runtimes[key]
+        if facts.get("rtr") is not True and isinstance(facts.get("folder"), str) and facts["folder"].strip("/"):
             folders.add(facts["folder"].strip("/"))
     for card in store.load_cards().values():
         if isinstance(card, dict):

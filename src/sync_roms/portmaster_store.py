@@ -30,7 +30,7 @@ def _facts(entry):
     attr, source = entry.get("attr") or {}, entry.get("source") or {}
     items = list(entry.get("items") or [])
     folder = next((i.rstrip("/") for i in items if not i.endswith(".sh")), None)
-    return {"folder": folder, "items": items, "rtr": bool(attr.get("rtr")), "inst": attr.get("inst") or "",
+    return {"folder": folder, "items": items, "rtr": attr.get("rtr") is True, "inst": attr.get("inst") or "",
             "runtime": portmaster_catalog.runtimes(entry), "md5": source.get("md5"), "size": source.get("size")}
 
 
@@ -162,7 +162,7 @@ def download(names, update=False, refresh=False, dry_run=False):
 def _row(entry, stored):
     attr, source = entry.get("attr") or {}, entry.get("source") or {}
     row = f"{_title(entry['zip'], entry)}  {entry['zip']}  {', '.join(attr.get('genres') or [])}  {ui.human_size(source.get('size') or 0)}"
-    if not attr.get("rtr"):
+    if attr.get("rtr") is not True:
         row += " · needs game data"
     if PORTS + entry["zip"] in stored:
         row += " · in storage"

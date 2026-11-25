@@ -157,6 +157,21 @@ class DoneNeededTest(StorageDir):
         self.assertNotIn("Game data now", out)
         self.assertEqual(sorted(needed.load()), ["Celeste64", "undertale"])
 
+    def test_unreadable_needed_file_is_never_overwritten(self):
+        with open(needed.path(), "w") as f:
+            f.write("[1]")
+        err = io.StringIO()
+        with contextlib.redirect_stderr(err):
+            self.assertIsNone(needed.load())
+            self.put("os/portmaster/gamedata/Celeste64/x")
+            out = self.run_cmd(needed.needed_command)
+            self.run_cmd(needed.done_command, "c", ["celeste"], False)
+        self.assertEqual(out, "No ports are waiting for game data\n")
+        self.assertIn("Couldn't read", err.getvalue())
+        with open(needed.path()) as f:
+            self.assertEqual(f.read(), "[1]")
+        self.assertEqual(store.load_cards()["c"]["portmaster_data"], ["Celeste64"])
+
     def test_needed_empty_message(self):
         os.remove(needed.path())
         self.assertEqual(self.run_cmd(needed.needed_command), "No ports are waiting for game data\n")

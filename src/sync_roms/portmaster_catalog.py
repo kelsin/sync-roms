@@ -75,7 +75,7 @@ def search(catalog, text, needs_data=None):
     found = []
     for zip_, entry in ports(catalog).items():
         attr = entry.get("attr") or {}
-        if needs_data is not None and bool(attr.get("rtr")) == needs_data:
+        if needs_data is not None and (attr.get("rtr") is True) == needs_data:
             continue
         hay = " ".join([_title(zip_, entry), zip_, " ".join(attr.get("genres") or []), attr.get("desc") or ""]).casefold()
         if all(w in hay for w in words):
@@ -92,13 +92,26 @@ def resolve(catalog, name):
     return None
 
 
+def runtime_name(name):
+    """The runtime's file name: PortMaster adds .squashfs to a port's runtime name that lacks it."""
+    return name if name.endswith(".squashfs") else name + ".squashfs"
+
+
 def runtimes(entry):
-    """The aarch64 runtimes a port needs."""
+    """The aarch64 runtimes a port needs, by file name."""
     names = (entry.get("attr") or {}).get("runtime") or []
     if isinstance(names, str):
         names = [names]
+    names = [runtime_name(n) for n in names if isinstance(n, str) and n]
     return [n for n in names if ".armhf." not in n and ".x86_64." not in n]
 
 
 def runtime_source(catalog, name):
-    return (catalog.get("utils") or {}).get(name)
+    """The utils entry of the runtime: the one by that file name, else the aarch64 build whose runtime_name it is."""
+    name = runtime_name(name)
+    utils = catalog.get("utils") or {}
+    direct = utils.get(name)
+    if isinstance(direct, dict) and direct.get("runtime_arch") in (None, "aarch64"):
+        return direct
+    return next((e for e in utils.values() if isinstance(e, dict) and e.get("runtime_name") == name
+                 and e.get("runtime_arch") in (None, "aarch64")), None)

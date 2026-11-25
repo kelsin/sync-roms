@@ -485,7 +485,7 @@ class EsdeExtrasSyncTest(unittest.TestCase):
         self.assertEqual(wanted, {"os/spruceos/spruceV4.6.0.7z": 2})
 
     def test_mirror_keeps_runtimes_and_gamedata_for_cards_ports(self):
-        meta = {"a.zip": {"portmaster": {"folder": "a", "rtr": False, "runtime": ["rt1.squashfs"]}},
+        meta = {"a.zip": {"portmaster": {"folder": "a", "runtime": ["rt1", 5, None]}},
                 "b.zip": {"portmaster": {"folder": "b", "rtr": True, "runtime": []}}}
         listings = {"ports/": {"ports/a.zip": 1, "ports/b.zip": 2, "ports/c.zip": 3},
                     "os/portmaster/runtimes/": {"os/portmaster/runtimes/rt1.squashfs": 4, "os/portmaster/runtimes/rt2.squashfs": 5},
