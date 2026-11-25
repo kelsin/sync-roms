@@ -36,8 +36,8 @@ def hotkeys():
 
 
 def cfg_wanted(overlay_dir=None):
-    """{key: value} for retroarch.cfg: the Syncthing save settings (when on), RetroAchievements, the overlay folder (when given), the hotkeys, then Cloud Sync cleared."""
-    wanted = {}
+    """{key: value} for retroarch.cfg: the RetroArch preferences, the Syncthing save settings (when on), RetroAchievements, the overlay folder (when given), the hotkeys, then Cloud Sync cleared."""
+    wanted = dict(store.repo_json("retroarch")["settings"])
     if spruce_syncthing.enabled():
         wanted.update(spruce_syncthing.data()["retroarch"])
         wanted["savefile_directory"] = android.DEFAULT_SAVES
