@@ -1,5 +1,25 @@
 # Changelog
 
+## [4.0.0](https://github.com/kelsin/sync-roms/compare/v3.36.0...v4.0.0) (2026-11-25)
+
+
+### ⚠ BREAKING CHANGES
+
+* **cli:** one command parser, consistent names and aliases ([#606](https://github.com/kelsin/sync-roms/issues/606))
+
+### :video_game: Features
+
+* **art:** add fire emblem, farming, phantasy star, ys and horses art ([#604](https://github.com/kelsin/sync-roms/issues/604)) ([31c545b](https://github.com/kelsin/sync-roms/commit/31c545b66986e44462983e3c942d74f77f8625de))
+* **art:** add king of fighters, capcom vs. and metal gear art ([#603](https://github.com/kelsin/sync-roms/issues/603)) ([0a6162c](https://github.com/kelsin/sync-roms/commit/0a6162c01a385a14556511d6ca87a43d3ac70e60))
+* **art:** add wario collection art ([#600](https://github.com/kelsin/sync-roms/issues/600)) ([d503ab4](https://github.com/kelsin/sync-roms/commit/d503ab4a39159e13e66cfec14c2aff56796039d7))
+* pick single games from collections on a card ([#602](https://github.com/kelsin/sync-roms/issues/602)) ([30d5e28](https://github.com/kelsin/sync-roms/commit/30d5e289d83b190c595da13d0864a1f8c7768b93))
+* set retroarch save state and netplay settings on spruce and android ([#605](https://github.com/kelsin/sync-roms/issues/605)) ([c18aff0](https://github.com/kelsin/sync-roms/commit/c18aff01c2aba70acde771f6e7655ab812dc945e))
+
+
+### :hammer_and_wrench: Code Refactoring
+
+* **cli:** one command parser, consistent names and aliases ([#606](https://github.com/kelsin/sync-roms/issues/606)) ([39a7709](https://github.com/kelsin/sync-roms/commit/39a77098b688321181153d169743d08afa1a07af))
+
 ## [3.36.0](https://github.com/kelsin/sync-roms/compare/v3.35.0...v3.36.0) (2026-11-25)
 
 
