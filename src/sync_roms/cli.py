@@ -826,7 +826,8 @@ def run(argv):
         print(f"sync-roms {__version__}")
         return 0
     if word in ("-h", "--help"):
-        print(help_text())
+        topic = canonical(argv[lead + 1]) if lead + 1 < len(argv) else None
+        print(help_text(topic if topic in SUBCOMMANDS else None))
         return 0
     if word is not None:
         word = canonical(word)

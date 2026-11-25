@@ -1238,6 +1238,9 @@ def refresh_mirror(code, args):
 def check_card(path):
     """Exit 2 when path, the card a sync was given, isn't a folder: a mistyped command or a card that isn't mounted."""
     if not os.path.isdir(os.path.abspath(os.path.expanduser(path))):
+        from . import cli
+        if path in COMMANDS or path in cli.ALIASES:
+            ui.fail(f"{path} is a command: put flags after it (sync-roms {path} --flag), not before", 2)
         ui.fail(f"{path} isn't a command or a folder (is the card mounted?)\n   See `sync-roms help` for the commands.", 2)
 
 
@@ -1627,10 +1630,12 @@ complete -o filenames -F _sync_roms sync-roms
 '''
         print(("autoload -U +X bashcompinit && bashcompinit\n" if args.shell == "zsh" else "") + script, end="")
     else:
+        def first(words):  # the first word is one of these (`__fish_seen_subcommand_from` matches any word: `cards set` would count as `sets`)
+            return f"test (count (commandline -opc)) -ge 2; and contains -- (commandline -opc)[2] {words}"
         lines = [f'complete -c sync-roms -f -n __fish_use_subcommand -a "{subs}"']
         for name, w in second.items():
-            lines.append(f'complete -c sync-roms -f -n "__fish_seen_subcommand_from {spellings.get(name, name).replace("|", " ")}; and not __fish_seen_subcommand_from {" ".join(w)}" -a "{" ".join(w)}"')
-        lines.append(f'complete -c sync-roms -f -n "__fish_seen_subcommand_from config; and __fish_seen_subcommand_from set unset" -a "{settings}"')
+            lines.append(f'complete -c sync-roms -f -n "{first(spellings.get(name, name).replace("|", " "))}; and not __fish_seen_subcommand_from {" ".join(w)}" -a "{" ".join(w)}"')
+        lines.append(f'complete -c sync-roms -f -n "{first("config")}; and __fish_seen_subcommand_from set unset" -a "{settings}"')
         values = {"card": "cards", "device": "devices", "layout": "layouts", "system": "systems"}
         for flag in (f for f in flag_list if f.startswith("--")):
             name = flag[2:]

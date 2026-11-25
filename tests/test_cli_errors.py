@@ -98,6 +98,41 @@ class UnhonoredFlagsTest(Isolated):
 
 
 class UsageHelpTest(Isolated):
+    def test_help_flag_before_a_command_prints_that_commands_help(self):
+        for argv, topic in ((["-h", "upload"], "upload"), (["--help", "card"], "cards"), (["-h", "scrapes"], "scrape")):
+            with self.subTest(argv=argv):
+                code, out, err = self.sync(argv)
+                self.assertEqual((code, err), (0, ""))
+                self.assertEqual(out, self.sync(["help", topic])[1])
+                self.assertNotEqual(out, self.sync(["-h"])[1])
+        self.assertEqual(self.sync(["-h"])[1], self.sync(["help"])[1])
+
+    def test_a_sync_flag_before_a_command_says_flags_go_after_it(self):
+        with tempfile.TemporaryDirectory() as cwd, mock.patch.object(cli, "sync_card", side_effect=AssertionError("synced")):
+            old = os.getcwd()
+            os.chdir(cwd)
+            try:
+                code, out, err = self.sync(["--no-delete", "devices"])
+                self.assertEqual((code, out), (2, ""))
+                self.assertIn("devices is a command: put flags after it (sync-roms devices --flag)", err)
+                self.assertNotIn("isn't a command or a folder", err)
+                self.assertEqual(self.sync(["--no-delete", "card"])[0], 2)  # an alias too
+            finally:
+                os.chdir(old)
+
+    def test_a_folder_named_like_a_command_still_syncs(self):
+        with tempfile.TemporaryDirectory() as cwd, mock.patch.object(cli, "sync_card", return_value=0) as sync_card, \
+                mock.patch.object(commands, "prepare_storage"):
+            os.mkdir(os.path.join(cwd, "devices"))
+            old = os.getcwd()
+            os.chdir(cwd)
+            try:
+                code, out, err = self.sync(["--no-delete", "devices"])
+            finally:
+                os.chdir(old)
+        self.assertEqual(code, 0)
+        sync_card.assert_called_once()
+
     def test_help_for_commands_that_need_a_subcommand(self):
         for name in ("upload", "scrape", "install"):
             for flag in ("--help", "-h"):

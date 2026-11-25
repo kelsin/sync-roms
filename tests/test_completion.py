@@ -91,10 +91,19 @@ class OtherShells(unittest.TestCase):
         text = script_for("fish")
         self.assertIn('-l card -x -a "(sync-roms completion list cards)"', text)
         self.assertIn('-l system -x -a "(sync-roms completion list systems)"', text)
-        self.assertIn('"__fish_seen_subcommand_from config; and __fish_seen_subcommand_from set unset" -a "bucket ', text)
+        self.assertIn('(commandline -opc)[2] config; and __fish_seen_subcommand_from set unset" -a "bucket ', text)
         for flag in commands.all_flags():
             if flag.startswith("--"):
                 self.assertIn(f"-l {flag[2:]}", text)
+
+    def test_fish_second_words_are_tied_to_the_first_word(self):
+        # `set` is sets' alias and cards' and config's second word: a "seen anywhere" test offers `edit` after `cards set`
+        text = script_for("fish")
+        self.assertNotIn("__fish_seen_subcommand_from sets set", text)
+        self.assertNotIn("__fish_seen_subcommand_from cards card", text)
+        self.assertIn("contains -- (commandline -opc)[2] sets set", text)
+        self.assertIn("contains -- (commandline -opc)[2] cards card", text)
+        self.assertIn("contains -- (commandline -opc)[2] config;", text)
 
 
 if __name__ == "__main__":
