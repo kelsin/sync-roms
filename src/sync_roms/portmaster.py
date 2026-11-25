@@ -192,6 +192,8 @@ def game_data(card, base, ports_on_card, picked_facts, dry_run):
             return None
 
     def wait(folder, title, zip_name, inst, later):
+        if any(w[0].casefold() == folder.casefold() for w in waiting):
+            return
         portmaster_needed.add(entries, folder, title, zip_name, inst, card)
         waiting.append((folder, entries[folder], later))
 

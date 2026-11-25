@@ -304,6 +304,11 @@ class GameDataTest(CardDir):
         self.assertEqual((self.result, self.recorded()), ((0, []), [UT]))
         self.assertNotIn("waiting for game data", out)
 
+    def test_same_folder_picked_and_installed_is_listed_once(self):
+        picked = {"UNDERTALE.zip": {"name": "Undertale", "portmaster": {**FACTS, "folder": UT.upper(), "inst": UT_INST}}}
+        self.run_data(picked)
+        self.assertEqual([(f, later) for f, _, later in self.result[1]], [(UT, False)])
+
     def test_waiting_port_added_to_needed_file_and_summary_printed(self):
         picked = {ZIP: {"name": "Celeste", "portmaster": {**FACTS, "inst": 'Copy the game\'s data into "celeste/gamedata".'}}}
         out = self.run_data(picked)

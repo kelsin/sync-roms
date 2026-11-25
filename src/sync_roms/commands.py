@@ -1478,6 +1478,16 @@ def ports_download(args):
     return portmaster_store.download(args.names, update=args.update, refresh=args.refresh, dry_run=args.dry_run)
 
 
+def ports_done(args):
+    from . import portmaster_needed
+    return portmaster_needed.done_command(args.card_name, args.ports, args.undo)
+
+
+def ports_needed(args):
+    from . import portmaster_needed
+    return portmaster_needed.needed_command()
+
+
 def saves_stash(args):
     from . import saves
     return saves.stash_command(args)
@@ -1769,6 +1779,9 @@ def build_parser():
     group = p.add_mutually_exclusive_group()
     group.add_argument("--needs-data", action="store_true"); group.add_argument("--ready", action="store_true")
     p.add_argument("--refresh", action="store_true"); p.set_defaults(fn=ports_search)
+    p = psub.add_parser("done", allow_abbrev=False); common(p, card=False); p.add_argument("card_name", metavar="CARD")
+    p.add_argument("ports", nargs="+", metavar="PORT"); p.add_argument("--undo", action="store_true"); p.set_defaults(fn=ports_done)
+    p = psub.add_parser("needed", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=ports_needed)
 
     p = sub.add_parser("flash", add_help=False, allow_abbrev=False); common(p, card=False); p.set_defaults(fn=flash_cmd)
     p = sub.add_parser("format", add_help=False, allow_abbrev=False); common(p, card=False); p.set_defaults(fn=format_cmd)
@@ -1843,7 +1856,7 @@ def run(argv):
     ap.prog = f"sync-roms {argv[0]}"  # its errors (unrecognized arguments) point at the command's help
     args = ap.parse_args(argv)
     if getattr(args, "dry_run", False) and not (args.fn is config_cmd and args.action == "apply") and (args.fn in (games_list, games_export, layouts_cmd, config_cmd, cache_cmd, doctor_cmd, guide_cmd, check_cmd, completion_cmd, themes_pick, themes_build, themes_palettes,
-                                                          edit_cmd, install_cmd, devices_cmd, diff_cmd, scrape_review_cmd, scrape_missing_cmd, refresh_cmd)
+                                                          edit_cmd, install_cmd, devices_cmd, diff_cmd, scrape_review_cmd, scrape_missing_cmd, refresh_cmd, ports_done, ports_needed)
                                             or (args.fn is games_sets and args.verb == "list") or (args.fn is mirror_cmd and args.action == "clear")):
         name = " ".join(w for w in (args.command, getattr(args, "action", None), getattr(args, "verb", None)) if w)
         if args.fn is config_cmd and args.action in ("set", "unset"):

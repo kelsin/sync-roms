@@ -7,7 +7,7 @@ import re
 from . import inventory, s3, store, ui
 
 GAMEDATA = "os/portmaster/gamedata/"
-_NOT_SUBFOLDERS = {"port", "ports", "game", "games", "roms"}  # "the ports folder" names no folder inside the port's
+_DATA_FOLDERS = {"assets", "gamedata", "data", "content"}  # the words "the X folder" names a data folder by
 
 
 def path():
@@ -40,7 +40,7 @@ def subfolder(folder, inst):
     if m:
         return m.group(1)
     m = re.search(r"\bthe ([\w-]+) folder\b", inst, re.IGNORECASE)
-    if m and m.group(1).casefold() not in {folder.casefold()} | _NOT_SUBFOLDERS:
+    if m and m.group(1).casefold() in _DATA_FOLDERS:
         return m.group(1)
     return ""
 
@@ -81,3 +81,58 @@ def block(entry, folder):
     lines += ["    " + line for line in (entry.get("inst") or "").splitlines()]
     lines.append(f"    Put the files in {s3.location().rstrip('/')}/{entry.get('folder') or f'{GAMEDATA}{folder}/'}")
     return "\n".join(lines)
+
+
+def _folder_of_port(port, metadata):
+    """The port folder PORT names: a zip (with or without .zip) mapped through the metadata's portmaster folder, else
+    its stem; any other word is the folder itself."""
+    name = port[:-4] if port.lower().endswith(".zip") else port
+    for zip_name, entry in metadata.items():
+        if isinstance(entry, dict) and zip_name.casefold() in (name.casefold() + ".zip", port.casefold()):
+            facts = entry.get("portmaster")
+            folder = facts.get("folder") if isinstance(facts, dict) else None
+            return folder if isinstance(folder, str) and folder else name
+    return name
+
+
+def done_command(card, ports, undo):
+    """Record that the card already has the ports' game data (portmaster_data), or with undo that it doesn't."""
+    from . import scrape_plan  # it imports portmaster, which imports this module
+    if card not in store.load_cards():
+        ui.fail(f"No card named {card!r}. Cards: {', '.join(store.all_card_names()) or '(none yet)'}", 2)
+    metadata = scrape_plan.load_metadata("ports")
+    folders = list(dict.fromkeys(_folder_of_port(p, metadata) for p in ports))
+    have = [n for n in store.saved_card(card).get("portmaster_data") or [] if isinstance(n, str)]
+    names = {f.casefold() for f in folders}
+    if undo:
+        have = [n for n in have if n.casefold() not in names]
+    else:
+        have = sorted(set(have) | {f for f in folders if f.casefold() not in {n.casefold() for n in have}})
+    if have:
+        store.update_card(card, portmaster_data=sorted(have))
+    else:
+        store.drop_card_field(card, "portmaster_data")
+    if not undo:
+        entries = load()
+        for key in [k for k in entries if k.casefold() in names]:
+            remove_card(entries, key, card)
+        if entries or os.path.exists(path()):
+            save(entries)
+    print(f"{'Forgot' if undo else 'Marked'} the game data of {', '.join(folders)} {'on' if not undo else 'for'} {card}")
+    return 0
+
+
+def needed_command():
+    """Print every port waiting for game data, with the cards that want it."""
+    entries = load()
+    gone = prune(entries)
+    if gone:
+        print(ui.green(f"Game data now in storage: {', '.join(gone)}"))
+        save(entries)
+    if not entries:
+        print("No ports are waiting for game data")
+        return 0
+    for folder, entry in sorted(entries.items(), key=lambda kv: (kv[1].get("title") or kv[0]).casefold()):
+        print(block(entry, folder))
+        print(f"    Cards: {', '.join(c for c in entry.get('cards') or [] if isinstance(c, str))}")
+    return 0

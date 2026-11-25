@@ -33,7 +33,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "collections": ("edit", "edit your collections of favourite games (saved in ~/.sync-roms/collections/)"),
     "themes": ("update|pick|build|publish|palettes", "copy the latest Art Book Next for ES-DE and the PyUI themes for spruce from GitHub into storage; build and publish custom spruce themes"),
     "download": ("pico8", "add the PICO-8 BBS Featured carts storage doesn't have, and newer revisions of those it has"),
-    "ports": ("search|download", "put PortMaster ports and the runtimes they need in storage, from PortMaster's catalogue"),
+    "ports": ("search|download|done|needed", "put PortMaster ports and the runtimes they need in storage, from PortMaster's catalogue"),
     "flash": ("", "write a Knulli, BaseOS, muOS, ROCKNIX or OakMoss image from storage's os/ to an SD card"),
     "format": ("", "erase an SD card as exFAT or FAT32 with a picked label"),
     "unmount": ("", "clean the macOS junk off an SD card and unmount it"),
@@ -225,6 +225,10 @@ TOPICS = {
       find ports in PortMaster's catalogue and pick ones to download
   sync-roms ports download [ZIP...] [--update] [--refresh] [--dry-run]
       put PortMaster ports in storage's ports/
+  sync-roms ports done CARD PORT... [--undo]
+      say the card already has the ports' game data (--undo: it doesn't)
+  sync-roms ports needed
+      list the ports still waiting for game data
 
   search lists the aarch64 ports whose title, zip name, genres or description hold every word of
   TEXT, one row each (title, zip, genres, size; "needs game data" for a port you must add files
@@ -240,6 +244,11 @@ TOPICS = {
   when the catalogue has a newer version, and --update with no ZIP updates every such port. An
   unknown name, a failed download or an md5 mismatch is warned about and the rest go on (exit 1).
   The catalogue is cached for a day; --refresh fetches it again.
+
+  done records in cards.json that CARD's PORT (a folder name or zip name) already has its game data,
+  so a sync stops asking for it, and takes the card off the needed list; --undo forgets that.
+  needed lists every port waiting for game data (title, instructions, where in storage to put the
+  files, the cards), and drops the ones storage now has data for. Neither takes --dry-run.
 """,
     "flash": """
   sync-roms flash [--dry-run]                 write a Knulli, BaseOS, muOS, ROCKNIX or OakMoss image
