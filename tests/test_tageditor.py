@@ -190,7 +190,7 @@ class Wiring(unittest.TestCase):
         with mock.patch.object(tageditor, "edit_tags", return_value=0) as run:
             self.assertEqual(commands.run(["tags", "edit"]), 0)
         run.assert_called_once()
-        self.assertEqual(commands.second_words()["tags"], ["edit"])
+        self.assertEqual(commands.second_words()["tags"], ["edit", "suggest"])
         self.assertEqual(cli.canonical("tag"), "tags")
 
     def test_sets_edit_is_gone(self):

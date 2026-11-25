@@ -255,5 +255,18 @@ class RepoDataSurvivesRemoval(unittest.TestCase):
                     store.repo_json("never-there")
 
 
+class GenreTags(unittest.TestCase):
+    def test_genre_tags_maps_genres_to_lists_of_tag_ids(self):
+        with open(os.path.join(store.REPO_DATA, "genre-tags.json"), encoding="utf-8") as f:
+            data = json.load(f)
+        self.assertIsInstance(data, dict)
+        self.assertTrue(data)
+        for genre, ids in data.items():
+            self.assertIsInstance(genre, str)
+            self.assertIsInstance(ids, list, genre)
+            self.assertTrue(ids, genre)
+            self.assertTrue(all(isinstance(i, str) and i == store.slug(i) for i in ids), genre)
+
+
 if __name__ == "__main__":
     unittest.main()

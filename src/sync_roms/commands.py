@@ -1488,6 +1488,12 @@ def _skip_media(args):
         scrape_online._check_skip(args.skip_media)
 
 
+def tags_suggest(args):
+    from . import tagsuggest
+    prepare_storage(args)
+    return tagsuggest.suggest_command(args)
+
+
 def scrape_cmd(args):
     from . import scrape_online
     if args.set_credentials:
@@ -1608,6 +1614,9 @@ def completion_cmd(args):
   if [ "$COMP_CWORD" -eq 3 ] && [[ "$cmd" == game* ]]; then
     case "${{COMP_WORDS[2]}}" in add|remove|full) COMPREPLY=($(compgen -W "$(sync-roms completion list systems)" -- "$cur")); return;; esac
   fi
+  if [ "$COMP_CWORD" -ge 3 ] && [[ "$cmd" == tag* ]] && [ "${{COMP_WORDS[2]}}" = suggest ]; then
+    COMPREPLY=($(compgen -W "$(sync-roms completion list systems)" -- "$cur")); return
+  fi
   if [ "$COMP_CWORD" -eq 3 ] && [ "$cmd" = config ]; then
     case "${{COMP_WORDS[2]}}" in set|unset) COMPREPLY=($(compgen -W "{settings}" -- "$cur")); return;; esac
   fi
@@ -1623,6 +1632,8 @@ complete -o filenames -F _sync_roms sync-roms
         for name, w in second.items():
             lines.append(f'complete -c sync-roms -f -n "{first(spellings.get(name, name).replace("|", " "))}; and not __fish_seen_subcommand_from {" ".join(w)}" -a "{" ".join(w)}"')
         lines.append(f'complete -c sync-roms -f -n "{first("config")}; and __fish_seen_subcommand_from set unset" -a "{settings}"')
+        lines.append(f'complete -c sync-roms -f -n "{first(spellings["tags"].replace("|", " "))}; and __fish_seen_subcommand_from suggest" '
+                     '-a "(sync-roms completion list systems)"')
         values = {"card": "cards", "device": "devices", "layout": "layouts", "system": "systems"}
         for flag in (f for f in flag_list if f.startswith("--")):
             name = flag[2:]
@@ -1692,6 +1703,8 @@ def build_parser():
     tags_cmd = sub.add_parser("tags", add_help=False, allow_abbrev=False)
     tagsub = tags_cmd.add_subparsers(dest="action", required=True)
     p = tagsub.add_parser("edit", allow_abbrev=False); p.set_defaults(fn=lambda a: tageditor.edit_tags())
+    p = tagsub.add_parser("suggest", allow_abbrev=False); p.add_argument("systems", nargs="*", metavar="SYSTEM")
+    p.set_defaults(fn=tags_suggest)
 
     collections = sub.add_parser("collections", add_help=False, allow_abbrev=False)
     colsub = collections.add_subparsers(dest="action", required=True)

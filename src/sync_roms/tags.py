@@ -194,6 +194,15 @@ def set_game_tags(key, ids):
     return _write(change)
 
 
+def add_tags(pairs):
+    """One write: each game of {key: [tag ids]} gets the ids, on top of the tags it has."""
+    def change(data):
+        for key, ids in pairs.items():
+            rec = data["games"].setdefault(key, {"tags": []})
+            rec["tags"] = sorted({*rec["tags"], *ids})
+    return _write(change)
+
+
 def retag_games(tag_id, add=(), remove=(), files=None):
     """One write: the tag goes on the games in add (files: {key: the extra files its record gets}) and off those in
     remove."""

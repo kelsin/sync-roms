@@ -76,6 +76,9 @@ class BashCompletion(unittest.TestCase):
         self.assertEqual(self.complete("sync-roms", "scrape", "art", "--fo"), ["--for"])
         self.assertEqual(self.complete("sync-roms", "scrape", "art", "--wor"), ["--workers"])
         self.assertEqual(self.complete("sync-roms", "games", "add", "gb"), ["gba", "gbc"])
+        self.assertEqual(self.complete("sync-roms", "tags", "sug"), ["suggest"])
+        self.assertEqual(self.complete("sync-roms", "tags", "suggest", "gb"), ["gba", "gbc"])
+        self.assertEqual(self.complete("sync-roms", "tag", "suggest", "gba", "s"), ["snes"])
         self.assertIn("layout", self.complete("sync-roms", "cards", "lay"))
         self.assertNotIn("convert", self.complete("sync-roms", "cards", ""))
         self.assertEqual(self.complete("sync-roms", "card", "lay"), ["layout"])
@@ -104,6 +107,8 @@ class OtherShells(unittest.TestCase):
         self.assertNotIn("__fish_seen_subcommand_from cards card", text)
         self.assertIn("contains -- (commandline -opc)[2] tags tag", text)
         self.assertIn("contains -- (commandline -opc)[2] cards card", text)
+        self.assertIn("contains -- (commandline -opc)[2] tags tag; and __fish_seen_subcommand_from suggest\" "
+                      "-a \"(sync-roms completion list systems)\"", text)
         self.assertIn("contains -- (commandline -opc)[2] config;", text)
 
 
