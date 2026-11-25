@@ -124,6 +124,15 @@ class CheckTagsTest(StorageDir):
         _, _, notices = self.check(None)
         self.assertEqual(notices, ["cards.json: c: 'sets' is ignored; dropped the next time the card's games are saved"])
 
+    def test_surprise_tags_that_arent_tags_are_noticed(self):
+        os.makedirs(self.data)
+        with open(os.path.join(self.data, "cards.json"), "w") as f:
+            json.dump({"c": {"surprise_tags": ["rpg", "gone"]}, "d": {"surprise_tags": ["rpg"]}}, f)
+        usersettings.save_setting("surprise_tags", ["old", "shmups"])
+        _, _, notices = self.check({"tags": TAG_DEFS, "games": {"gba/A.zip": {"tags": ["rpg", "shmups"]}}})
+        self.assertEqual(notices, ["settings.json: surprise_tags: 1 id(s) aren't tags in tags.json: old",
+                                   "cards.json: c: surprise_tags: 1 id(s) aren't tags in tags.json: gone"])
+
 
 class ConfigSetTest(Cmd):
     def settings(self):

@@ -1041,8 +1041,8 @@ class Flow(DataDir):
             self.assertEqual(kw["extras"][labels.index("Ruby.zip")][-1], ("🐝", ""))
             return kw["session"]["sel"]
         with mock.patch.object(cardedit.tagui, "edit_game_tags",
-                               side_effect=lambda key, title: asked.append((key, title)) or tags.set_game_tags(
-                                   key, ["x"])):
+                               side_effect=lambda key, title: asked.append((key, title)) or tags.change_game_tags(
+                                   key, add=["x"])):
             self.run_system(press_t, changed)
         self.assertEqual(asked, [("gba/Ruby.zip", "Ruby")])
 

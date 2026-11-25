@@ -924,8 +924,8 @@ def check_tags(problems, systems):
 
 def check_tag_notices(systems):
     """Things worth knowing about the tags that don't make `check` fail, as strings: tags with no games, each
-    system's untagged games (tagsuggest.untagged), genre-tags.json ids that aren't tags and cards' leftover "sets".
-    systems: systems.json loaded."""
+    system's untagged games (tagsuggest.untagged), genre-tags.json and surprise_tags ids that aren't tags and cards'
+    leftover "sets". systems: systems.json loaded."""
     data = tags.load()
     bare = sorted(set(data["tags"]) - {i for rec in data["games"].values() for i in rec["tags"]})
     out = [f"tags.json: {len(bare)} tag(s) have no games: {', '.join(bare)}"] if bare else []
@@ -938,10 +938,18 @@ def check_tag_notices(systems):
     unknown = sorted({i for ids in store.repo_json("genre-tags").values() for i in ids} - set(data["tags"]))
     if unknown:
         out.append(f"genre-tags.json: {len(unknown)} tag id(s) aren't tags in tags.json: {', '.join(unknown)}")
+
+    def surprise_unknown(where, ids):
+        gone = sorted({i for i in ids if isinstance(i, str)} - set(data["tags"])) if isinstance(ids, list) else []
+        if gone:
+            out.append(f"{where}: surprise_tags: {len(gone)} id(s) aren't tags in tags.json: {', '.join(gone)}")
+    surprise_unknown("settings.json", usersettings.load_settings().get("surprise_tags"))
     for name, entry in store.load_cards().items():
         games = entry.get("games") if isinstance(entry, dict) else None
         if isinstance(games, dict) and store.LEGACY_SETS in games:
             out.append(f"cards.json: {name}: 'sets' is ignored; dropped the next time the card's games are saved")
+        if isinstance(entry, dict):
+            surprise_unknown(f"cards.json: {name}", entry.get("surprise_tags"))
     return out
 
 

@@ -67,7 +67,7 @@ class Suggest(unittest.TestCase):
         self.assertEqual(tagsuggest.suggestions(SYSTEMS), {HERO: ["platformers"], KICK: ["sports"]})
 
     def test_an_existing_tag_is_not_suggested(self):
-        tags.set_game_tags(SHMUP, ["shmups"])
+        tags.change_game_tags(SHMUP, add=["shmups"])
         self.assertNotIn(SHMUP, tagsuggest.suggestions(SYSTEMS))
 
     def run_review(self, uncheck, confirm=True):
@@ -97,9 +97,24 @@ class Suggest(unittest.TestCase):
         self.assertEqual(tags.load()["declined"], {SHMUP: ["shmups"]})
         self.assertIn("2", out)
 
+    def test_review_offers_no_notes(self):
+        with mock.patch.object(tagsuggest.edit, "toggle_games") as toggle, \
+                mock.patch.object(ui, "confirm", return_value=False), contextlib.redirect_stdout(io.StringIO()):
+            commands.run(["tags", "suggest", "nes"])
+        self.assertIs(toggle.call_args.kwargs["notes"], False)
+
     def test_review_not_confirmed_saves_nothing(self):
         code, _, writes, _ = self.run_review("Shmup", confirm=False)
         self.assertEqual((code, writes), (0, 0))
+
+    def test_a_storage_error_while_saving_fails_without_a_traceback(self):
+        for error in (OSError("share gone"), ValueError("bad JSON")):
+            err = io.StringIO()
+            with mock.patch.object(tags, "add_tags", side_effect=error), contextlib.redirect_stderr(err):
+                with self.assertRaises(SystemExit) as e:
+                    self.run_review("Shmup")
+            self.assertEqual(e.exception.code, 1)
+            self.assertIn(str(error), err.getvalue())
 
     def test_unknown_system_is_refused(self):
         with contextlib.redirect_stderr(io.StringIO()), contextlib.redirect_stdout(io.StringIO()):

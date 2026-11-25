@@ -156,10 +156,19 @@ class Retarget(helpers.StorageDir):
         os.utime(path, (1, 1))
         helpers.storage_tags(self, {"tags": {"p": {"name": "P", "emoji": "🎲"}}, "declined": {},
                                     "games": {"pico8/o.p8.png": {"tags": ["p"]}}}, self.root)
-        with mock.patch.object(shared, "update") as update:
-            bbs.retarget(OLD, NEW, "T")
-        update.assert_not_called()
+        tags_path = os.path.join(self.root, tags.KEY)
+        os.utime(tags_path, (1, 1))
+        bbs.retarget(OLD, NEW, "T")
         self.assertEqual(os.stat(path).st_mtime, 1)
+        self.assertEqual(os.stat(tags_path).st_mtime, 1)
+
+    def test_renames_a_cart_tagged_elsewhere_after_this_run_read_tags_json(self):
+        helpers.storage_tags(self, {"tags": {"p": {"name": "P", "emoji": "🎲"}}, "declined": {}, "games": {}}, self.root)
+        tags.load()
+        with open(os.path.join(self.root, tags.KEY), "w", encoding="utf-8") as f:
+            f.write(tags.dump({"tags": {"p": {"name": "P", "emoji": "🎲"}}, "declined": {}, "games": {OLD: {"tags": ["p"]}}}))
+        bbs.retarget(OLD, NEW, "Mole Mole 2")
+        self.assertEqual(tags.load()["games"], {NEW: {"tags": ["p"]}})
 
 
 PNG = b"\x89PNG\r\n\x1a\n" + b"cart"
@@ -258,6 +267,14 @@ class Download(helpers.StorageDir):
             code, _, err, _ = self.run_download([page(("x-2", "X Two", "Ex")), EMPTY])
         self.assertEqual(code, 1)
         self.assertIn("disk full", err)
+        self.assertEqual(self.stored(), {"pico8/x-1.p8.png", "pico8/x-2.p8.png", META})
+
+    def test_malformed_tags_json_keeps_the_old_revision(self):
+        self.put("pico8/x-1.p8.png")
+        with mock.patch.object(bbs, "retarget", side_effect=ValueError("bad JSON")):
+            code, _, err, _ = self.run_download([page(("x-2", "X Two", "Ex")), EMPTY])
+        self.assertEqual(code, 1)
+        self.assertIn("bad JSON", err)
         self.assertEqual(self.stored(), {"pico8/x-1.p8.png", "pico8/x-2.p8.png", META})
 
     def test_dry_run_lists_and_writes_nothing(self):

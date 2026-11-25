@@ -5,7 +5,7 @@ in full, else by its part before " / " ("Sports / Darts" is "Sports"). Suggestio
 tagged games, and the pool, which is every full English game in storage (surprise.is_candidate) that isn't a tagged
 game, one of its files or variants, or another version of it (the same scraped name, else names.title, on the same
 system), one key per name. A suggestion the user turned down is in tags.json's `declined` and isn't made again."""
-from . import edit, inventory, names, scrape_plan, store, surprise, tags, ui
+from . import edit, inventory, names, s3, scrape_plan, store, surprise, tags, ui
 
 _metadata = {}  # {system bucket: its parsed metadata.json}, read once per run
 
@@ -109,7 +109,8 @@ def suggest_command(args):
                          ({"bucket": str(len(rows)), "games": [{"bucket": key}]}, key, title,
                           f"{defs[i]['emoji']} {defs[i]['name']} — {s['name']} — {title}"), i))
     rows.sort(key=lambda r: r[0])  # each row has its own listing (named by its number, as the toggler keys them)
-    edit.toggle_games("🏷️  Suggested tags — ✅ add it, ⬜ don't suggest it again", [r[1] for r in rows])
+    edit.toggle_games("🏷️  Suggested tags — ✅ add it, ⬜ don't suggest it again", [r[1] for r in rows],
+                      notes=False)
     accepted, declined = {}, {}
     for _, (entry, key, _, _), i in rows:
         (accepted if entry["games"] else declined).setdefault(key, []).append(i)
@@ -117,9 +118,12 @@ def suggest_command(args):
     if not ui.confirm(f"🏷️  Add {n_add} tag(s) and turn down {n_decline}?", default=True):
         print("Nothing was saved.")
         return 0
-    if accepted:
-        tags.add_tags(accepted)
-    if declined:
-        tags.decline(declined)
+    try:
+        if accepted:
+            tags.add_tags(accepted)
+        if declined:
+            tags.decline(declined)
+    except (*s3.ERRORS, ValueError) as e:  # ValueError: tags.json in storage isn't valid JSON
+        ui.fail(f"Couldn't save the tags in storage: {e}", 1)
     print(f"🏷️  Added {n_add} tag(s) to {len(accepted)} game(s); turned down {n_decline}.")
     return 0

@@ -83,19 +83,19 @@ class Writes(helpers.StorageFolder):
 
     def test_last_tag_without_variants_removes_record(self):
         helpers.storage_tags(self, sample(), root=self.storage)
-        tags.set_game_tags(B, [])
+        tags.change_game_tags(B, remove={"shmups"})
         self.assertNotIn(B, self.stored()["games"])
 
     def test_last_tag_with_variants_keeps_empty_tags(self):
         helpers.storage_tags(self, sample(), root=self.storage)
-        tags.set_game_tags(A, [])
+        tags.change_game_tags(A, remove={"cave", "shmups"})
         self.assertEqual(self.stored()["games"][A]["tags"], [])
         self.assertTrue(self.stored()["games"][A]["variants"])
 
     def test_missing_file_is_empty(self):
         helpers.storage_tags(self, None, root=self.storage)
         self.assertEqual((tags.load()["tags"], tags.load()["games"]), ({}, {}))
-        tags.set_game_tags(A, ["x"])
+        tags.change_game_tags(A, add={"x"})
         self.assertEqual(self.stored()["games"], {A: {"tags": ["x"]}})
 
     def test_write_applies_to_fresh_copy(self):
@@ -105,7 +105,7 @@ class Writes(helpers.StorageFolder):
         data["games"][C] = {"tags": ["cave"]}
         with open(os.path.join(self.storage, tags.KEY), "w", encoding="utf-8") as f:
             f.write(tags.dump(data))
-        tags.set_game_tags("gb/D.zip", ["shmups"])
+        tags.change_game_tags("gb/D.zip", add={"shmups"})
         self.assertEqual(set(self.stored()["games"]), {A, B, C, "gb/D.zip"})
         self.assertIn(C, tags.load()["games"])
 
@@ -140,16 +140,39 @@ class Writes(helpers.StorageFolder):
         tags.delete_tag("shmups")
         self.assertNotIn("surprise_tags", usersettings.load_settings())
 
-    def test_merge_and_rename_replace_the_tag_in_the_surprise_limits(self):
+    def test_merge_replaces_the_tag_in_the_surprise_limits(self):
         helpers.storage_tags(self, sample(), root=self.storage)
         self.surprise_limits()
         tags.merge_tag("cave", "shmups")
         self.assertEqual(usersettings.load_settings()["surprise_tags"], ["shmups"])
         self.assertEqual(store.load_cards()["c"]["surprise_tags"], ["shmups"])
+
+    def test_merge_into_a_tag_storage_no_longer_has_raises(self):
         helpers.storage_tags(self, sample(), root=self.storage)
-        tags.rename_tag("shmups", "shoot")
-        self.assertEqual(usersettings.load_settings()["surprise_tags"], ["shoot"])
-        self.assertEqual(store.load_cards()["d"]["surprise_tags"], ["shoot"])
+        tags.load()
+        theirs = sample()  # another machine deleted shmups after this run read the file
+        del theirs["tags"]["shmups"]
+        with open(os.path.join(self.storage, tags.KEY), "w", encoding="utf-8") as f:
+            f.write(tags.dump(theirs))
+        with self.assertRaises(ValueError):
+            tags.merge_tag("cave", "shmups")
+        self.assertIn("cave", self.stored()["tags"])
+
+    def test_change_game_tags_keeps_tags_another_machine_added(self):
+        helpers.storage_tags(self, sample(), root=self.storage)
+        tags.load()
+        theirs = sample()  # another machine gave B the cave tag after this run read the file
+        theirs["games"][B]["tags"] = ["cave", "shmups"]
+        with open(os.path.join(self.storage, tags.KEY), "w", encoding="utf-8") as f:
+            f.write(tags.dump(theirs))
+        tags.change_game_tags(B, add={"new"}, remove={"shmups"})
+        self.assertEqual(self.stored()["games"][B]["tags"], ["cave", "new"])
+
+    def test_owner_is_the_record_a_file_belongs_to(self):
+        helpers.storage_tags(self, sample(), root=self.storage)
+        self.assertEqual(tags.owner("nes/A (Disc 2).zip"), A)
+        self.assertEqual(tags.owner(A), A)
+        self.assertEqual(tags.owner("nes/none.zip"), "nes/none.zip")
 
     def test_no_surprise_limits_writes_nothing(self):
         helpers.storage_tags(self, sample(), root=self.storage)
@@ -157,17 +180,12 @@ class Writes(helpers.StorageFolder):
         self.assertFalse(os.path.exists(self.path("cards.json")))
         self.assertFalse(os.path.exists(self.path("settings.json")))
 
-    def test_rename_define_decline_variants(self):
+    def test_define_decline(self):
         helpers.storage_tags(self, sample(), root=self.storage)
-        tags.rename_tag("cave", "bees")
-        self.assertEqual(self.stored()["games"][A]["tags"], ["bees", "shmups"])
-        self.assertEqual(self.stored()["declined"][C], ["bees"])
         tags.define_tag("bees", {"name": "Bees", "emoji": "🐝"})
         self.assertEqual(self.stored()["tags"]["bees"]["name"], "Bees")
         tags.decline({C: ["shmups"]})
-        self.assertEqual(self.stored()["declined"][C], ["bees", "shmups"])
-        tags.set_variants(B, [{"bucket": "nes/B2.zip", "note": "n"}])
-        self.assertEqual(self.stored()["games"][B]["variants"][0]["bucket"], "nes/B2.zip")
+        self.assertEqual(self.stored()["declined"][C], ["cave", "shmups"])
 
     def test_edit_variants_changes_the_fresh_file_in_one_write(self):
         helpers.storage_tags(self, sample(), root=self.storage)

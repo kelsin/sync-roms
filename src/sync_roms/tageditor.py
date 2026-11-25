@@ -17,7 +17,7 @@ def _save(write, *args, **kwargs):
     """write(*args, **kwargs) to storage; False, with a note, when storage refused it."""
     try:
         write(*args, **kwargs)
-    except (*s3.ERRORS, SystemExit) as e:  # ui.fail raises SystemExit: its error is printed
+    except (*s3.ERRORS, SystemExit, ValueError) as e:  # ui.fail exits, its error printed; ValueError: bad JSON, gone tag
         edit.note(ui.yellow(f"⚠️  Couldn't save the tags in storage: {e}"))
         return False
     return True
@@ -35,7 +35,7 @@ def switch_games_off(tag_id, label, system_names):
     rows = sorted(((entry, k, names.title(k), f"{system_names.get(k.partition('/')[0], k.partition('/')[0])} — {names.title(k)}")
                    for k in keys), key=lambda r: (store.sort_key(r[2]), r[1]))
     try:
-        edit.toggle_games(f"✏️  {label} — ✅ has the tag, ⬜ remove it", rows)
+        edit.toggle_games(f"✏️  {label} — ✅ has the tag, ⬜ remove it", rows, notes=False)
     finally:
         gone = set(keys) - {g["bucket"] for g in entry["games"]}
         if gone:
@@ -187,6 +187,6 @@ def _save_new():
     """tagui's new-tag questions, with a storage failure noted instead of raised."""
     try:
         return tagui._new_tag()
-    except (*s3.ERRORS, SystemExit) as e:
+    except (*s3.ERRORS, SystemExit, ValueError) as e:  # ValueError: tags.json in storage isn't valid JSON
         edit.note(ui.yellow(f"⚠️  Couldn't save the tags in storage: {e}"))
         return None

@@ -188,11 +188,7 @@ def retarget(old, new, title):
     for collection in collections.load_collections():
         if _move_all(collection["games"], old, new, title):
             collections.save_collection(collection)
-    data = tags.load()
-    if old in data["declined"] or any(_names({**rec, "bucket": key}, old)
-                                      or any(_names(v, old) for v in rec.get("variants", ()))
-                                      for key, rec in data["games"].items()):
-        tags.retarget(old, new)
+    tags.retarget(old, new)  # from storage's copy, not this run's: nothing is written when it doesn't name old
 
 
 # --- sync-roms download pico8 ---------------------------------------------------------------------------------------
@@ -302,7 +298,7 @@ def add_carts(todo, fetch, tmp, source=None):
             _move_state(old_file, c["file"])
             try:
                 retarget(old, key, titles[key])
-            except s3.ERRORS as e:  # the references still name the old revision, so it stays
+            except (*s3.ERRORS, ValueError) as e:  # the references still name the old revision, so it stays
                 ui.warn(f"Couldn't move cards, collections and tags from {old} to {key} ({e}); keeping {old}")
                 code = 1
                 upgraded += 1

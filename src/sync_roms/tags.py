@@ -188,9 +188,20 @@ def _replace(ids, old, new):
     return sorted({new if i == old else i for i in ids} - {None})
 
 
-def set_game_tags(key, ids):
+def owner(key):
+    """The key of the record the game's tags live in: the record's for one of its files, else key."""
+    load()
+    return _owner.get(key, key)
+
+
+def change_game_tags(key, add=(), remove=()):
+    """The game gets the tags in add and loses those in remove; the others it has in storage are kept."""
     def change(data):
-        data["games"].setdefault(key, {"tags": []})["tags"] = sorted(set(ids))
+        rec = data["games"].get(key)
+        if rec is None and not add:
+            return
+        rec = data["games"].setdefault(key, {"tags": []})
+        rec["tags"] = sorted((set(rec["tags"]) | set(add)) - set(remove))
     return _write(change)
 
 
@@ -257,21 +268,12 @@ def _retarget_limits(old, new):
         store.write_cards(cards)
 
 
-def rename_tag(old_id, new_id):
-    def change(data):
-        if new_id in data["tags"] and new_id != old_id:
-            raise ValueError(f"tag {new_id} exists")
-        if old_id in data["tags"]:
-            data["tags"][new_id] = data["tags"].pop(old_id)
-        _retag(data, old_id, new_id)
-    result = _write(change)
-    _retarget_limits(old_id, new_id)
-    return result
-
-
 def merge_tag(src_id, dst_id):
-    """Move src's games and declined suggestions to dst, then delete src."""
+    """Move src's games and declined suggestions to dst, then delete src. Raises ValueError when storage has no
+    tag dst."""
     def change(data):
+        if dst_id not in data["tags"]:
+            raise ValueError(f"there is no tag {dst_id} in storage any more")
         data["tags"].pop(src_id, None)
         _retag(data, src_id, dst_id)
     result = _write(change)
@@ -322,17 +324,6 @@ def decline(pairs):
     def change(data):
         for key, ids in pairs.items():
             data["declined"][key] = sorted(set(data["declined"].get(key, [])) | set(ids))
-    return _write(change)
-
-
-def set_variants(key, variants):
-    """The game's variants become the given list (none removes them)."""
-    def change(data):
-        rec = data["games"].setdefault(key, {"tags": []})
-        if variants:
-            rec["variants"] = [dict(v) for v in variants]
-        else:
-            rec.pop("variants", None)
     return _write(change)
 
 

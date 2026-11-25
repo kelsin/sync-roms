@@ -1101,12 +1101,23 @@ class TagColumn(DataDir):
         self.assertEqual(asked, [("nes/B (USA).zip", "B")])
         self.assertEqual(len(seen), 2)
 
+    def test_notes_off_drops_w(self):
+        seen = []
+        with mock.patch.object(picker, "filter_list", side_effect=lambda t, l, **kw: seen.append(kw) or kw["session"]["sel"]):
+            edit.toggle_games("t", self.ROWS, notes=False)
+            edit.toggle_games("t", self.ROWS)
+        self.assertIsNone(seen[0]["on_note"])
+        self.assertNotIn("w note", seen[0]["hint"])
+        self.assertIn("t tags", seen[0]["hint"])
+        self.assertIsNotNone(seen[1]["on_note"])
+        self.assertIn("w note", seen[1]["hint"])
+
     def test_other_keys_are_still_returned(self):
         with mock.patch.object(picker, "filter_list", return_value=("s", 0)):
             self.assertEqual(edit.toggle_games("t", self.ROWS, hotkeys=("s",)), "s")
 
     def test_unknown_key_row(self):
-        self.tags.set_game_tags("nes/Gone.zip", ["x"])
+        self.tags.change_game_tags("nes/Gone.zip", add=["x"])
         rows = [(self.S, "nes/Gone.zip", "Gone", "Gone")]
         with mock.patch.object(picker, "filter_list", side_effect=lambda t, l, **kw: seen.append(kw) or kw["session"]["sel"]):
             seen = []

@@ -61,19 +61,19 @@ def save_note(games, key, text, covered=False):
 FULL_SYSTEM_NOTE = "Full system: every file in its folder is synced, so it can't be toggled"
 
 
-def toggle_games(title, rows, hotkeys=(), hint=None, place=None, filters="", key_help=None, select_all=True):
+def toggle_games(title, rows, hotkeys=(), hint=None, place=None, filters="", key_help=None, select_all=True, notes=True):
     """_toggle_games, reopened in the same place after `t` edited a game's tags (the toggles made so far are applied
     first); the other keys are returned as it does."""
     place = {} if place is None else place
     while True:
-        pressed, i = _toggle_games(title, rows, hotkeys, hint, place, filters, key_help, select_all)
+        pressed, i = _toggle_games(title, rows, hotkeys, hint, place, filters, key_help, select_all, notes)
         if pressed != tagui.TAG_KEY:
             return pressed
         if i is not None:
             tagui.edit_game_tags(rows[i][1], rows[i][2])
 
 
-def _toggle_games(title, rows, hotkeys, hint, place, filters, key_help, select_all):
+def _toggle_games(title, rows, hotkeys, hint, place, filters, key_help, select_all, notes):
     """Multi-select over rows of (system, bucket key, game title, label); adds/removes games in each system in place.
     Returns (key pressed or None, its row's index).
 
@@ -81,10 +81,11 @@ def _toggle_games(title, rows, hotkeys, hint, place, filters, key_help, select_a
     hotkeys/hint/key_help: extra keys the list offers (the hint line to show, and the (keys, what they do) pairs ?
     lists). The toggles made so far are applied, and the key pressed is returned (None on Enter). place: a dict the caller keeps across calls, so a list of the same rows
     opens where the last one was left (picker.carry_place). filters: the caller's filters, for the filter line.
-    select_all: False turns the list's `a` (toggle all shown) off.
+    select_all: False turns the list's `a` (toggle all shown) off. notes: False turns `w` off, for lists whose rows
+    keep no notes.
     Ctrl-C applies the toggles made so far, then raises KeyboardInterrupt.
     """
-    hint = hint or GAMES_HINT
+    hint = hint or (GAMES_HINT if notes else GAMES_HINT.replace(" · w note", ""))
     hint += "" if " t tags" in hint else " · t tags"
     key_help = key_help if key_help is None or any(k == tagui.TAG_KEY for k, _ in key_help) else [*key_help, tagui.KEY_HELP]
     locked = [bool(s.get("full_system")) for s, *_ in rows]
@@ -105,8 +106,8 @@ def _toggle_games(title, rows, hotkeys, hint, place, filters, key_help, select_a
     try:
         state = picker.filter_list(title, [label for *_, label in rows], multi=True, initial=initial, locked=locked,
                                    locked_note=[FULL_SYSTEM_NOTE if lock else "" for lock in locked], hint=hint, key_help=key_help,
-                                   note_text=lambda i: note_text(rows[i][0]["games"], rows[i][1]),
-                                   on_note=lambda i, text: save_note(rows[i][0]["games"], rows[i][1], text),
+                                   note_text=(lambda i: note_text(rows[i][0]["games"], rows[i][1])) if notes else None,
+                                   on_note=(lambda i, text: save_note(rows[i][0]["games"], rows[i][1], text)) if notes else None,
                                    hotkeys=(*hotkeys, tagui.TAG_KEY), session=session, filters=filters,
                                    row_note=lambda i: variant_line(rows[i][1], variants, parents, system_names),
                                    select_all=select_all, extras=extras,

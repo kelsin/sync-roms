@@ -62,11 +62,12 @@ def card_excluded_systems(entry):
 
 
 def chosen_tags(entry):
-    """The tag ids Surprise picks from on this card: its surprise_tags when that is a non-empty list, else the
-    surprise_tags setting; None when neither limits it."""
+    """The tag ids Surprise picks from on this card: its surprise_tags when that names a tag, else the surprise_tags
+    setting; None when neither limits it. Ids that aren't tags (deleted on another machine) are left out."""
+    defined = tags.all_tags()
     for ids in (entry.get("surprise_tags") if isinstance(entry, dict) else None,
                 usersettings.load_settings().get("surprise_tags")):
-        found = {i for i in ids if isinstance(i, str)} if isinstance(ids, list) else set()
+        found = {i for i in ids if isinstance(i, str) and i in defined} if isinstance(ids, list) else set()
         if found:
             return found
     return None

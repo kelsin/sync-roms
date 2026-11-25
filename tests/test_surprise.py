@@ -442,11 +442,13 @@ class Step(StorageCase):
         self.assertEqual({g["system"] for g in got}, {"gba", "gb"})
 
     def tag_gb(self):
-        helpers.storage_tags(self, {"tags": {"pk": {"name": "Pk", "emoji": "🔴"}},
+        helpers.storage_tags(self, {"tags": {"pk": {"name": "Pk", "emoji": "🔴"}, "nothing": {"name": "N", "emoji": "⚫"}},
                                     "games": {f"gb/G{i} (USA).gb": {"tags": ["pk"]} for i in range(15)},
                                     "declined": {}}, root=self.root)
 
     def test_chosen_tags_card_over_setting_and_empty_means_no_limit(self):
+        helpers.storage_tags(self, {"tags": {"a": {"name": "A", "emoji": "🔴"}, "b": {"name": "B", "emoji": "🔵"}},
+                                    "games": {}, "declined": {}}, root=self.root)
         self.assertIsNone(surprise.chosen_tags({}))
         usersettings.save_setting("surprise_tags", ["a"])
         self.assertEqual(surprise.chosen_tags({}), {"a"})
@@ -455,6 +457,15 @@ class Step(StorageCase):
         self.assertEqual(surprise.chosen_tags(None), {"a"})
         usersettings.save_setting("surprise_tags", None)
         self.assertIsNone(surprise.chosen_tags({"surprise_tags": []}))
+
+    def test_chosen_tags_leave_out_ids_that_arent_tags(self):
+        helpers.storage_tags(self, {"tags": {"a": {"name": "A", "emoji": "🔴"}}, "games": {}, "declined": {}},
+                             root=self.root)
+        usersettings.save_setting("surprise_tags", ["a", "gone"])
+        self.assertEqual(surprise.chosen_tags({}), {"a"})
+        self.assertEqual(surprise.chosen_tags({"surprise_tags": ["gone"]}), {"a"})
+        usersettings.save_setting("surprise_tags", ["gone"])
+        self.assertIsNone(surprise.chosen_tags({"surprise_tags": ["gone"]}))
 
     def test_pools_keep_only_tagged_units_when_limited(self):
         self.tag_gb()

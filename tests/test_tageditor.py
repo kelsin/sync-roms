@@ -167,6 +167,24 @@ class Editor(unittest.TestCase):
         self.assertIn("unmounted", self.notes[-1])
         self.assertEqual(tags.all_tags()["shmups"]["emoji"], "🚀")
 
+    def test_switching_games_off_offers_no_notes(self):
+        with mock.patch.object(edit, "toggle_games") as toggle:
+            tageditor.switch_games_off("shmups", "🚀 Shmups", {})
+        self.assertIs(toggle.call_args.kwargs["notes"], False)
+
+    def test_malformed_tags_json_in_storage_is_noted(self):
+        with open(os.path.join(self.root, tags.KEY), "w", encoding="utf-8") as f:  # broken after this run read it
+            f.write("{nope")
+        self.assertFalse(tageditor._save(tags.define_tag, "shmups", {"emoji": "🛸"}))
+        self.assertEqual(len(self.notes), 1)
+
+    def test_merging_into_a_tag_deleted_elsewhere_is_noted(self):
+        with open(os.path.join(self.root, tags.KEY), "w", encoding="utf-8") as f:
+            f.write(tags.dump({"tags": {"cave": {"name": "Cave", "emoji": "🐝"}}, "games": {}, "declined": {}}))
+        self.assertFalse(tageditor._save(tags.merge_tag, "cave", "shmups"))
+        self.assertIn("shmups", self.notes[-1])
+        self.assertIn("cave", tags.all_tags())
+
 
 class Retag(unittest.TestCase):
     def setUp(self):

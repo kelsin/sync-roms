@@ -23,13 +23,13 @@ class TagUi(unittest.TestCase):
 
     def test_column_rows(self):
         self.assertEqual(tagui.column([A, B]), [("", ""), ("🚀", "")])
-        tags.set_game_tags(A, ["cave", "shmups"])
+        tags.change_game_tags(A, add=["cave", "shmups"])
         self.assertEqual(tagui.column([A, B]), [("🐝🚀", ""), ("🚀", "")])
         with mock.patch.object(tags, "emoji_of", return_value="12345678"):
             self.assertEqual(tagui.column([A]), [("12345678", "")])
 
     def test_unknown_key_row(self):
-        tags.set_game_tags("nes/Gone.zip", ["cave"])
+        tags.change_game_tags("nes/Gone.zip", add=["cave"])
         self.assertEqual(tagui.column(["nes/Gone.zip"]), [("🐝", "")])
 
     def test_edit_game_tags_saves(self):
@@ -86,7 +86,7 @@ class TagUi(unittest.TestCase):
     def test_unmounted_share_systemexit(self):
         before = tags.load()
         with mock.patch.object(picker, "filter_list", return_value=[True, True]), \
-                mock.patch.object(tags, "set_game_tags", side_effect=SystemExit("share not mounted")):
+                mock.patch.object(tags, "change_game_tags", side_effect=SystemExit("share not mounted")):
             self.assertFalse(tagui.edit_game_tags(B, "B"))
         self.assertEqual(len(self.notes), 1)
         self.assertIs(tags.load(), before)
@@ -94,11 +94,48 @@ class TagUi(unittest.TestCase):
     def test_edit_game_tags_storage_error(self):
         before = tags.load()
         with mock.patch.object(picker, "filter_list", return_value=[True, True]), \
-                mock.patch.object(tags, "set_game_tags", side_effect=OSError("down")):
+                mock.patch.object(tags, "change_game_tags", side_effect=OSError("down")):
             self.assertFalse(tagui.edit_game_tags(B, "B"))
         self.assertEqual(len(self.notes), 1)
         self.assertIs(tags.load(), before)
         self.assertEqual(tags.tags_of(B), ["shmups"])
+
+
+    def test_saving_keeps_tags_another_machine_added(self):
+        root = helpers.storage_tags(self, {
+            "tags": {"shmups": {"name": "Shmups", "emoji": "🚀"}, "cave": {"name": "Cave", "emoji": "🐝"},
+                     "rpg": {"name": "RPG", "emoji": "🐉"}},
+            "games": {B: {"tags": ["shmups"]}}, "declined": {}})
+        tags.load()
+        with open(os.path.join(root, tags.KEY), "w", encoding="utf-8") as f:  # another machine adds cave to B
+            f.write(tags.dump({"tags": tags.load()["tags"], "games": {B: {"tags": ["cave", "shmups"]}}, "declined": {}}))
+        with mock.patch.object(picker, "filter_list", return_value=[False, True, True]):  # rpg checked, cave unseen
+            self.assertTrue(tagui.edit_game_tags(B, "B"))
+        self.assertEqual(tags.tags_of(B), ["cave", "rpg", "shmups"])
+
+    def test_malformed_tags_json_in_storage_is_noted(self):
+        root = helpers.storage_tags(self, {"tags": {"shmups": {"name": "Shmups", "emoji": "🚀"}},
+                                           "games": {}, "declined": {}})
+        tags.load()
+        with open(os.path.join(root, tags.KEY), "w", encoding="utf-8") as f:  # broken after this run read it
+            f.write("{nope")
+        with mock.patch.object(picker, "filter_list", return_value=[True]):
+            self.assertFalse(tagui.edit_game_tags(B, "B"))
+        self.assertEqual(len(self.notes), 1)
+
+    def test_a_disc_row_edits_its_games_record(self):
+        helpers.storage_tags(self, {"tags": {"shmups": {"name": "Shmups", "emoji": "🚀"}, "cave": {"name": "Cave", "emoji": "🐝"}},
+                                    "games": {B: {"tags": ["shmups"], "files": ["nes/B (Disc 2).zip"]}}, "declined": {}})
+        seen = []
+
+        def fake(title, labels, **kw):
+            seen.append(kw["initial"])
+            return [True, True]
+        with mock.patch.object(picker, "filter_list", fake):
+            self.assertTrue(tagui.edit_game_tags("nes/B (Disc 2).zip", "B"))
+        self.assertEqual(seen, [[False, True]])
+        self.assertEqual(set(tags.load()["games"]), {B})
+        self.assertEqual(tags.tags_of(B), ["cave", "shmups"])
 
 
 class TagFilterTest(unittest.TestCase):
@@ -131,7 +168,7 @@ class TagFilterTest(unittest.TestCase):
         f = tagui.TagFilter()
         f.required = {"shmups"}
         self.assertFalse(f.keep(self.C))
-        tags.set_game_tags(self.C, ["shmups"])
+        tags.change_game_tags(self.C, add=["shmups"])
         self.assertTrue(f.keep(self.C))
 
     def test_describe(self):

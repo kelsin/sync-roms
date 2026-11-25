@@ -49,8 +49,10 @@ def _new_tag():
 
 
 def edit_game_tags(key, title):
-    """A list of every tag with the game's checked: Enter saves, n adds a new tag. Returns whether its tags changed."""
+    """A list of every tag with the game's checked: Enter saves, n adds a new tag. Returns whether its tags changed.
+    A file of a record (another disc) edits that record's tags."""
     try:
+        key = tags.owner(key)
         start = set(tags.tags_of(key))
         picked = set(start)
         while True:
@@ -74,9 +76,9 @@ def edit_game_tags(key, title):
             chosen = {i for i, on in zip(ids, result) if on}
             if chosen == start:
                 return False
-            tags.set_game_tags(key, sorted(chosen))
+            tags.change_game_tags(key, add=chosen - start, remove=start - chosen)
             return True
-    except (*s3.ERRORS, SystemExit) as e:
+    except (*s3.ERRORS, SystemExit, ValueError) as e:  # ValueError: tags.json in storage isn't valid JSON
         note(ui.yellow(f"⚠️  Couldn't save the tags in storage: {e}"))
         return False
 
