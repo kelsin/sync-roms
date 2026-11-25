@@ -24,7 +24,8 @@ copy it writes.
   or fonts. The data block is exactly `<script type="application/json" id="page-data">{}</script>` in the repo.
 - Data is embedded with `json.dumps(data).replace("<", "\\u003c")`, as `guide_cmd` does.
 - Pictures (art id = collection `art`, else its `id`):
-  - band: `themeart.art_png(art_id)`, shrunk to 150 px wide
+  - band: `themeart.art_png(art_id)`, cropped to `BAND_CROP = (50, 600, 343, 1050)` (the colour and drawing, no
+    slant) and then shrunk to 150 px wide (150x230)
   - box: `themeart.art_png(art_id, "art-box/Imgs_med")`
   - ToTK card: `os.path.join(themeart.ZELDA_ART, "Imgs_med", f"{art_id}.png")`
 

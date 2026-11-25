@@ -11,7 +11,8 @@ them. It can be shared as one file or hosted anywhere. It is for browsing only: 
   writes `share/collections/index.html` in the data folder, the folder `share` serves, so rerunning it refreshes a
   shared page.
 - One row per collection (from `collections.load_collections`) with its name, description, game count and its
-  three pictures: the ES-DE band (`art-book-next/art/<id>.png`), the box (`art-book-next/art-box/Imgs_med/<id>.png`)
+  three pictures: the ES-DE band (`art-book-next/art/<id>.png`, cropped to the colour and drawing without the
+  slant), the box (`art-book-next/art-box/Imgs_med/<id>.png`)
   and the ToTK card (`totk-james/collections/Imgs_med/<id>.png`). The art id is the collection's `art`, or else its
   own id. A picture that doesn't exist is left out.
 - Each collection expands to its game list. Each game row shows:
