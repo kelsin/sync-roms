@@ -94,7 +94,7 @@ def run_copies(todo, quiet=False):
     order = sorted(todo, key=lambda j: -j[2])
     moved = ui.ByteProgress([j[2] for j in order])
     names = [j[0] for j in order]
-    bar = ui.ProgressBar(len(todo), moved.fraction, moved.total, active=lambda: moved.active(names))
+    bar = ui.ProgressBar(len(todo), moved.fraction, moved.total, active=lambda: moved.active(names), glyph="↑")
 
     def copy(n):
         job = order[n]
@@ -187,7 +187,7 @@ def run_uploads(todo, quiet=False):
     order = sorted(todo, key=lambda j: -j[2])
     moved = ui.ByteProgress([j[2] for j in order])
     names = [j[0] for j in order]
-    bar = ui.ProgressBar(len(todo), moved.fraction, moved.total, active=lambda: moved.active(names))
+    bar = ui.ProgressBar(len(todo), moved.fraction, moved.total, active=lambda: moved.active(names), glyph="↑")
     try:
         with tempfile.TemporaryDirectory() as tmp, ThreadPoolExecutor(os.cpu_count() or 4) as shrinkers, \
                 ProcessPoolExecutor(os.cpu_count() or 4) as procs, create_transfer_manager(client, config) as manager:

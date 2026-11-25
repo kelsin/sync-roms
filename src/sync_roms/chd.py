@@ -573,6 +573,7 @@ def chd_command(args, from_upload=False):
     print(ui.dim(f"  {len(jobs)} to convert ({ui.human_size(total)}), {workers} at a time, {tools['np']} core(s) each" + (" (limited by free space)" if fit < min(cpus, len(jobs)) else "")))
 
     progress = [0.0] * len(jobs)  # each job's 0-1 progress; the bar weighs them by size
+    started = {}  # jobs a worker has picked up, in start order (a dict for its order)
 
     def convert(i):
         system, _, path, owned, *_ = jobs[i]
@@ -580,6 +581,7 @@ def chd_command(args, from_upload=False):
         def report(fraction):
             progress[i] = max(progress[i], fraction)
 
+        started[i] = None
         try:
             if owned:
                 return chd_image(tools, system["chd"], path, owned, report)
@@ -589,7 +591,10 @@ def chd_command(args, from_upload=False):
         finally:
             progress[i] = 1.0
 
-    bar = ui.ProgressBar(len(jobs), lambda: sum(p * w for p, w in zip(progress, weights)) / total, total)
+    def active():
+        return [(os.path.relpath(jobs[i][2], root), progress[i] * weights[i], weights[i]) for i in list(started) if progress[i] < 1]
+
+    bar = ui.ProgressBar(len(jobs), lambda: sum(p * w for p, w in zip(progress, weights)) / total, total, active=active, glyph="⚙")
     say = bar.say
 
     def draw_bar():
