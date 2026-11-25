@@ -1588,6 +1588,13 @@ def sync_card(args):
     theme_plan = None
     if layout_name == "spruce" and not guest:
         theme_names = spruce_themes.default_list()
+        if store.saved_card(card).get("one_theme") is True:  # only the card's own theme, not the default list
+            theme_names = []
+            if not spruce_themes.current(card) and interactive and not args.dry_run:
+                with mirroring.storage_reads():
+                    cardedit.pick_spruce_theme(card, None)
+            if not spruce_themes.current(card):
+                print(ui.dim("🎨 One theme only is on and the card has no theme: pick one in the card editor's S menu"))
         theme_plan = spruce_themes.plan(card, base, theme_names, args.no_delete)
         theme_jobs = downloads.with_sizes(theme_plan["jobs"])
 

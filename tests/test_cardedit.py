@@ -191,6 +191,18 @@ class Flow(DataDir):
         self.assertIn("🎁 Surprise on", calls[6][0])
         self.assertNotIn("surprise", self.read("cards.json")["c"])
 
+    def test_title_shows_the_one_theme_mode_only_on_a_spruce_card(self):
+        for entry, shown in (({"layout": "spruce"}, None),
+                             ({"layout": "spruce", "one_theme": True}, "🎨 one theme: none picked"),
+                             ({"layout": "spruce", "one_theme": True, "spruce_theme": "Mono"}, "🎨 Mono"),
+                             ({"layout": "esde", "one_theme": True, "spruce_theme": "Mono"}, None)):
+            self.card(size="1 GB", **entry)
+            title = self.run_card(returns(None))[0][0]
+            if shown:
+                self.assertTrue(title.endswith(f" · {shown}"), title)
+            else:
+                self.assertNotIn("🎨", title)
+
     def test_u_off_saves_false(self):
         self.card(size="1 GB")
         self.run_card(returns((cardedit.SETTINGS_KEY, 0)), returns(0), returns(None), returns(None))
@@ -391,27 +403,39 @@ class Flow(DataDir):
             with mock.patch.object(picker, "filter_list", lambda t, labels, **kw: seen.append(labels) or None):
                 cardedit.settings_menu("c", CATALOG["systems"], [])
             self.assertEqual(any("Spruce theme" in l for l in seen[-1]), shown)
-        self.assertEqual(seen[-1][-1], "🎨 Spruce theme: none")
+        self.assertEqual(seen[-1][-2:], ["🎨 One theme only: off", "🎨 Spruce theme: none"])
 
     def test_settings_menu_sets_and_clears_spruce_theme(self):
         self.card(layout="spruce")
-        with mock.patch.object(picker, "filter_list", side_effect=[6, None]), \
+        with mock.patch.object(picker, "filter_list", side_effect=[7, None]), \
                 mock.patch.object(cardedit.spruce_themes, "pick_one", return_value="Mono") as pick:
             cardedit.settings_menu("c", CATALOG["systems"], [])
         self.assertEqual(self.read("cards.json")["c"]["spruce_theme"], "Mono")
         self.assertEqual(pick.call_args.args[1], None)
         seen = []
-        picks = iter([6, None])
+        picks = iter([7, None])
         with mock.patch.object(picker, "filter_list", lambda t, labels, **kw: seen.append(labels) or next(picks)), \
                 mock.patch.object(cardedit.spruce_themes, "pick_one", return_value=False):
             cardedit.settings_menu("c", CATALOG["systems"], [])
         self.assertEqual(seen[0][-1], "🎨 Spruce theme: Mono")
         self.assertEqual(self.read("cards.json")["c"]["spruce_theme"], "Mono")
-        with mock.patch.object(picker, "filter_list", side_effect=[6, None]), \
+        with mock.patch.object(picker, "filter_list", side_effect=[7, None]), \
                 mock.patch.object(cardedit.spruce_themes, "pick_one", return_value=None) as pick:
             cardedit.settings_menu("c", CATALOG["systems"], [])
         self.assertEqual(pick.call_args.args[1], "Mono")
         self.assertNotIn("spruce_theme", self.read("cards.json")["c"])
+
+    def test_settings_menu_toggles_one_theme(self):
+        self.card(layout="spruce")
+        seen = []
+        picks = iter([6, 6, None])
+        with mock.patch.object(picker, "filter_list", lambda t, labels, **kw: seen.append(labels) or next(picks)):
+            cardedit.settings_menu("c", CATALOG["systems"], [])
+        self.assertEqual([l[-2] for l in seen], ["🎨 One theme only: off", "🎨 One theme only: on", "🎨 One theme only: off"])
+        self.assertNotIn("one_theme", self.read("cards.json")["c"])
+        with mock.patch.object(picker, "filter_list", side_effect=[6, None]):
+            cardedit.settings_menu("c", CATALOG["systems"], [])
+        self.assertIs(self.read("cards.json")["c"]["one_theme"], True)
 
     def test_surprise_rows_are_locked_in_the_game_list(self):
         self.card(surprises=[{"system": "gba", "bucket": "gba/Zelda.zip", "title": "Zelda"}])

@@ -276,6 +276,12 @@ def pick_one(title, current):
     return names[i - 1] if i else None
 
 
+def current(card):
+    """The card's current theme name, or None."""
+    name = store.saved_card(card).get("spruce_theme")
+    return name if isinstance(name, str) and name else None
+
+
 def wanted(card, names):
     """names plus the card's current theme, limited to the themes in storage. Prints a dim note for each one storage
     lacks, and a warning when that is the current theme."""

@@ -93,6 +93,31 @@ class SyncThemes(helpers.StorageDir):
         with open(system) as f:
             self.assertEqual(json.load(f), {"theme": "B", "vol": 5})
 
+    def test_one_theme_syncs_only_the_current_theme(self):
+        store.update_card("card", spruce_theme="B", one_theme=True, spruce_themes_installed=["A"])
+        self.card_theme("A")
+        self.assertEqual(self.sync(), 0, self.err.getvalue())
+        self.assertEqual(self.on_card(), ["B"])
+        self.assertEqual(self.saved().get("spruce_themes_installed"), ["B"])
+
+    def test_one_theme_without_a_theme_asks_and_saves(self):
+        store.update_card("card", one_theme=True)
+        picked = mock.Mock(return_value="C")
+        with mock.patch.object(spruce_themes, "pick_one", picked):
+            self.assertEqual(self.sync(yes=False), 0, self.err.getvalue())
+        picked.assert_called_once_with("🎨 Spruce theme (card)", None)
+        self.assertEqual(self.saved().get("spruce_theme"), "C")
+        self.assertEqual(self.on_card(), ["C"])
+
+    def test_one_theme_without_a_theme_and_yes_syncs_no_themes(self):
+        store.update_card("card", one_theme=True)
+        picked = mock.Mock()
+        with mock.patch.object(spruce_themes, "pick_one", picked):
+            self.assertEqual(self.sync(), 0, self.err.getvalue())
+        picked.assert_not_called()
+        self.assertEqual(self.on_card(), [])
+        self.assertIn("One theme only is on", self.out.getvalue())
+
     def test_t_override_not_saved(self):
         store.update_card("card", spruce_theme="B")
         self.choose.side_effect = ["t", "y"]
