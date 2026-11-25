@@ -277,6 +277,7 @@ def run_surprise(card_name, setup, chosen_systems, interactive, dry_run, to_fetc
                                         hotkeys=(tagui.TAG_KEY,), hint="Space toggle · Enter done · t tags",
                                         key_help=[tagui.KEY_HELP], session=session,
                                         extras=[[tag] for tag in tagui.column([x["bucket"] for x in current])],
+                                        tag_info=tagui.summary([x["bucket"] for x in current]),
                                         **previews.game_pane([x["bucket"] for x in current]))
             if not isinstance(states, tuple):
                 break

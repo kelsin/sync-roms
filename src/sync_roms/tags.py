@@ -133,10 +133,16 @@ def tags_of(key):
 def emoji_of(key):
     """The emoji of the game's tags, joined with no separator, in tag-name order; a file of a record counts as
     its game."""
+    return "".join(t["emoji"] for t in defs_of(key))
+
+
+def defs_of(key):
+    """The definitions ({"name", "emoji", "description"?, ...}) of the game's tags, in tag-name order; a file of a
+    record counts as its game."""
     data = load()
     rec = data["games"].get(key) or data["games"].get(_owner.get(key))
     defs = [data["tags"][i] for i in (rec["tags"] if rec else ()) if i in data["tags"]]
-    return "".join(t["emoji"] for t in sorted(defs, key=lambda t: t["name"].casefold()))
+    return sorted(defs, key=lambda t: t["name"].casefold())
 
 
 def games_with(required, excluded):

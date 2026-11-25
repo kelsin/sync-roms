@@ -16,6 +16,11 @@ def column(keys):
     return [(tags.emoji_of(key), "") for key in keys]
 
 
+def summary(keys):
+    """For filter_list's tag_info: a row's index to (emoji, name, description) of its game's tags."""
+    return lambda i: [(t["emoji"], t["name"], t.get("description", "")) for t in tags.defs_of(keys[i])]
+
+
 def _count():
     """{tag id: number of games that have it}."""
     out = {}
