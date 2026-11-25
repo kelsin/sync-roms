@@ -69,6 +69,15 @@ def is_file(serial, path):
     return shell(serial, "sh", "-c", 'test -f "$1" && echo y || echo n', "_", path).strip() == "y"
 
 
+def forward(serial, remote_port):
+    """Forward a free local port to the device's remote_port and return the local port."""
+    return int(run("forward", "tcp:0", f"tcp:{remote_port}", serial=serial).strip())
+
+
+def forward_remove(serial, local_port):
+    run("forward", "--remove", f"tcp:{local_port}", serial=serial, check=False)
+
+
 def mdns_services():
     """(name, kind, "host:port") of the services adb discovered."""
     out = []
