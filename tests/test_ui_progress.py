@@ -232,11 +232,11 @@ class BlockTest(unittest.TestCase):
         self.assertTrue(below[1].startswith("    ↓ ████░░░░░░ gba/b.zip"), below[1])
         self.assertTrue(below[2].startswith("    ↓ ██████████ gba/c.zip"), below[2])
 
-    def test_file_bar_is_cyan_and_the_rest_dim(self):
+    def test_file_bar_is_a_rainbow_and_the_rest_dim(self):
         with mock.patch.object(ui, "_COLOR", True):
             out = self.draw([("gba/b.zip", 42, 100), ("gba/c.zip", 0, 1)] + [("x", 0, 1)] * 30, rows=4)
         below = out.split("\n")[1:]
-        self.assertTrue(below[0].startswith("\x1b[2m    ↓ \x1b[0m\x1b[36m████\x1b[0m\x1b[2m░░░░░░ gba/b.zip"), below[0])
+        self.assertTrue(below[0].startswith("\x1b[2m    ↓ \x1b[0m" + "".join(f"\x1b[38;5;{ui.RAINBOW[i * len(ui.RAINBOW) // 10]}m█\x1b[0m" for i in range(4)) + "\x1b[2m░░░░░░ gba/b.zip"), below[0])
         self.assertTrue(below[-1].startswith("\x1b[2m    … and 31 more\x1b[0m"), below[-1])
 
     def test_long_names_leave_room_for_the_file_bar(self):
