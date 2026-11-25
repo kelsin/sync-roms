@@ -105,8 +105,9 @@ counts), `--write` to put `tags.json` in storage.
   "Platformer", "Puzzle" and "Racing" categories into the Platformers, Puzzle and Racing tags.
 - Every kept tag gets a unique emoji, drafted in the script's mapping table and reviewed by the user.
 - A game's record is the union of the tags, `files` and `variants` from every set that lists it.
-- Set files in storage are left as they are; the code stops reading them. Deleting `sets/` is the user's call
-  afterwards.
+- Once `tags.json` holds every set game and every kept tag, the set files are deleted from storage (the user
+  asked for it on 2026-11-25), after a local copy in `~/.sync-roms/sets-archive/` and the user's confirmation at
+  that step.
 
 ### What goes away
 
