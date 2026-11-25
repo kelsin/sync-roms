@@ -128,6 +128,13 @@ class Build(unittest.TestCase):
         with open(os.path.join(dest, "config.json")) as f:
             self.assertIs(json.load(f)["collectionsEnabled"], True)
 
+    def test_set_font_rounds_each_config_down_to_multiples_of_12(self):
+        config = {"list": {"size": 38, "font": "base.ttf"}, "grid": {"grid1x4": 28, "grid3x4": 18}, "title": {"size": 5},
+                  "hint": {"size": 30}}
+        self.assertEqual(pixel_build.set_font(config), {"base.ttf"})
+        self.assertEqual(config, {"list": {"size": 36, "font": pixel_build.FONT}, "grid": {"grid1x4": 24, "grid3x4": 12},
+                                  "title": {"size": 12}, "hint": {"size": 24}})
+
 
 class Fetch(helpers.StorageDir):
     def setUp(self):

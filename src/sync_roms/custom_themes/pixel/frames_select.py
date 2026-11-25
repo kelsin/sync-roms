@@ -1,10 +1,11 @@
 """The selection frames: list bars, the outlined short-list box and the grid tiles."""
+import json
 import os
 from functools import lru_cache
 
 from PIL import ImageFont
 
-from .frames import register
+from .frames import register, screen
 
 
 def bar(canvas, s):
@@ -26,19 +27,28 @@ def _font_height(size):
     return ascent + descent
 
 
+def _config(theme_dir, folder):
+    """The built config of a skin folder's screen: config_<W>x<H>.json for skin_<W>x<H>/, else config.json."""
+    path = os.path.join(theme_dir, folder.replace("skin", "config", 1) + ".json")
+    with open(path if os.path.exists(path) else os.path.join(theme_dir, "config.json")) as f:
+        return json.load(f)
+
+
 def row_height(descriptive):
-    """height(screen_w, screen_h) of a PyUI list row with the theme's fonts, as views/list_view.py works it out
-    (useTextForLineHeight, on by default): the list font's height plus padding, and for a descriptive row (settings: a
-    title and a description) the title offset, title and description. PyUI draws the selection bar from its top
-    cropped to the row (ZOOM to screen width x row, or crop_h), so a taller file loses its bottom rim."""
-    def height(w, h):
-        from .build import FONT_SIZES
+    """height(theme_dir, folder) of a PyUI list row with the fonts set_font wrote in that skin folder's config, as
+    views/list_view.py works it out (useTextForLineHeight, on by default): the list font's height plus padding, and for
+    a descriptive row (settings: a title and a description) the title offset, title and description. PyUI draws the
+    selection bar from its top cropped to the row (ZOOM to screen width x row, or crop_h), so a taller file loses its
+    bottom rim."""
+    def height(theme_dir, folder):
+        w, h = screen(folder)
+        config = _config(theme_dir, folder)
         padding = int(10 * h / 480)
-        title = _font_height(FONT_SIZES["list"]["size"])
+        title = _font_height(config["list"]["size"])
         if not descriptive:
             return title + padding
         offset = int(5 * min(w / 640, h / 480))  # descriptiveListTextOffsetY's default
-        return offset + title + _font_height(FONT_SIZES["grid"]["grid3x4"]) + padding  # descriptionFontSize's default
+        return offset + title + _font_height(config["grid"]["grid3x4"]) + padding  # descriptionFontSize's default
     return height
 
 
