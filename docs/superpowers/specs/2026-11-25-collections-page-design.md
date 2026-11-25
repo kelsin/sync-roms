@@ -32,7 +32,8 @@ them. It can be shared as one file or hosted anywhere. It is for browsing only: 
   isn't there yet (only
   that folder is served, never the data folder itself, which holds `settings.json` with passwords and keys). It
   serves that folder on the tailnet with `tailscale serve --bg --set-path /collections <folder>`, and prints the
-  link `https://<Self.DNSName without the trailing dot>/collections/` from `tailscale status --json`. It starts
+  link `https://<Self.DNSName without the trailing dot>/collections/` from `tailscale status --json`. It also copies the link to the clipboard (`pbcopy`, `clip`, `wl-copy` or `xclip`, whichever exists;
+  skipped quietly when none does). It starts
   serving only when `/collections` isn't served already (`tailscale serve status --json`).
 - `sync-roms collections unshare`, when `/collections` is served, runs `tailscale serve --https=443 --set-path /collections off`. That removes
   only this entry and leaves other serve entries alone (never `tailscale serve reset`). The page file stays.

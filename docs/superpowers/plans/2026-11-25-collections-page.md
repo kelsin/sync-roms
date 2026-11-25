@@ -203,7 +203,12 @@ The page:
   - Both run through `subprocess.run(..., capture_output=True, text=True, stdin=subprocess.DEVNULL, timeout=60)`.
     `shutil.which("tailscale")` being None calls `ui.fail("tailscale isn't installed or not on PATH", 1)`. A
     non-zero exit calls `ui.fail(f"tailscale serve failed: {stderr.strip()}", 1)`.
-- The commands are `collections share` and `collections unshare`. `share` prints `Built <path>` when it built the
+- Produces: `tailshare.copy_to_clipboard(text: str) -> bool`. It tries the first of `pbcopy`, `clip`, `wl-copy`,
+  `xclip -selection clipboard` that `shutil.which` finds, feeding `text` on stdin. It returns True on exit 0, and
+  False when none is found or the command fails (never an error).
+- The commands are `collections share` and `collections unshare`. `share` copies the link with
+  `copy_to_clipboard` and adds ` (copied to the clipboard)` to its `Sharing at`/`Already shared at` line when that
+  worked. `share` prints `Built <path>` when it built the
   page, then `Sharing at <link>` (or `Already shared at <link>`). `unshare` prints
   `Stopped sharing the collections page.` or `The collections page isn't shared.`; both exit 0. To refresh a
   shared page, run `collections page`, which rewrites the served file. They refuse `--dry-run` like `guide`. Never call `tailscale serve reset`.
@@ -214,6 +219,10 @@ The page:
   - `test_share_keeps_existing_page_and_serve`: with the page present and the status JSON
     `{"Web": {"box.tail1.ts.net:443": {"Handlers": {"/collections": {"Path": "x"}}}}}`, nothing is written or
     served, and it returns `(link, False, False)`.
+  - `test_clipboard`: with `which` finding only `pbcopy`, it runs `["pbcopy"]` with `input=link` and returns True.
+    With nothing found it returns False and makes no call.
+  - `test_share_command_copies_link`: `cli.main(["collections", "share"])` prints a line ending
+    `(copied to the clipboard)` when `copy_to_clipboard` returns True.
   - `test_unshare_when_not_serving`: status `{}` gives False and no `off` call. The returned link is `https://box.tail1.ts.net/collections/` for
     `DNSName "box.tail1.ts.net."`.
   - `test_unshare_only_turns_off_its_path`: while serving, the argv is as above, it returns True, and no call
