@@ -315,7 +315,7 @@ class DiffContentTest(unittest.TestCase):
                     mock.patch.object(picker, "filter_list", lambda *a, **k: 0), \
                     mock.patch.object(inventory, "etags", lambda prefix: {n: (len(d), "-") for n, d in remote.items()}), \
                     contextlib.redirect_stdout(out):
-                diff.diff_command(argparse.Namespace(diff=root, system=None, json=False))
+                diff.diff_command(argparse.Namespace(dir=root, system=None, json=False))
         return out.getvalue()
 
     def test_same_size_different_bytes_differ(self):
@@ -344,7 +344,7 @@ class IgnoredDiffTest(unittest.TestCase):
                     mock.patch.object(store, "load_manifest", lambda *a: {"systems": [{"name": "GBA", "bucket": "gba", "folders": {}}]}), \
                     mock.patch.object(picker, "filter_list", lambda *a, **k: 0), \
                     mock.patch.object(inventory, "etags", lambda prefix: {}), contextlib.redirect_stdout(out):
-                diff.diff_command(argparse.Namespace(diff=root, system=None, json=False))
+                diff.diff_command(argparse.Namespace(dir=root, system=None, json=False))
         self.assertIn("a.gba", out.getvalue())
         self.assertNotIn("b.gba", out.getvalue())
 
@@ -362,5 +362,5 @@ class SavesDiffTest(unittest.TestCase):
             emitted = []
             with mock.patch.object(store, "load_manifest", lambda *a: {"systems": [{"name": "GBA", "bucket": "gba", "folders": {}}]}), \
                     mock.patch.object(inventory, "etags", lambda prefix: {}), mock.patch.object(ui, "emit_json", emitted.append):
-                diff.diff_command(argparse.Namespace(diff=root, system="gba", json=True))
+                diff.diff_command(argparse.Namespace(dir=root, system="gba", json=True))
         self.assertEqual([p["path"] for p in emitted[0]["only_local"]], ["Game.gba"])

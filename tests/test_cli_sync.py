@@ -13,7 +13,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 
 from helpers import MANIFEST, SYSTEM, DataDir, list_sizes, touch  # noqa: E402
-from sync_roms import cli, downloads, inventory, s3, scrape_plan, store, usersettings  # noqa: E402
+from sync_roms import cli, commands, downloads, inventory, s3, scrape_plan, store, usersettings  # noqa: E402
 
 REAL_LOAD_CARDS = store.load_cards
 
@@ -366,7 +366,9 @@ class SyncSmokeTest(DataDir):
         self.assertIn("Old.zip", self.out.getvalue())
 
     def test_no_delete_rejects_other_commands(self):
-        self.assertNotEqual(self.run_sync(False, args=["--no-delete", "--devices"]), 0)
+        with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as cm:
+            commands.run(["devices", "--no-delete"])
+        self.assertEqual(cm.exception.code, 2)
 
     def test_roms_of_systems_with_nothing_to_sync_are_extras(self):
         """A system with no games listed keeps no ROMs on the card."""

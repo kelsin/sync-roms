@@ -153,7 +153,7 @@ class Themes(helpers.StorageDir):
     def test_no_7z_warns(self):
         with mock.patch.object(external, "find_tool", return_value=None):
             self.assertEqual(self.run_update([asset()]), 1)
-        self.assertIn("sync-roms tools install", self.warned[0])
+        self.assertIn("sync-roms install", self.warned[0])
         self.assertFalse(self.exists(runtime.SPRUCE_THEMES_STATE))
 
     def test_failed_upload_of_new_asset_completes_next_run(self):

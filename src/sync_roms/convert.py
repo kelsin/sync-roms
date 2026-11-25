@@ -1,4 +1,4 @@
-"""`cards convert`: plan and apply the renames that take a card's files from one layout to another on the same filesystem,
+"""`cards layout`: plan and apply the renames that take a card's files from one layout to another on the same filesystem,
 and delete the old layout's scraped media. `cards clean`: delete the media other layouts left in the card's ROM folders."""
 import os
 import shutil
@@ -381,7 +381,7 @@ def _progress(total):
 
 
 def convert_command(args):
-    """`cards convert [CARD] --layout ID [--dry-run] [--yes]`: move the card's ROMs, BIOS and RetroArch saves and
+    """`cards layout [CARD] --layout ID [--dry-run] [--yes]`: move the card's ROMs, BIOS and RetroArch saves and
     states to the folders of another layout, then save that layout for the card."""
     base, name, current, catalog = saves.card_setup(args)
     _, new_name = commands.setup_from_flags(catalog, current, None, args.layout)
@@ -408,7 +408,7 @@ def convert_command(args):
     if planned or media:
         if not args.yes:
             if not ui.has_terminal():
-                ui.fail("Pass --yes to convert without a terminal to confirm on", 2)
+                ui.fail("Pass --yes to change the layout without a terminal to confirm on", 2)
             if not ui.confirm(f"Move {len(planned)} files" + (f" and delete the old media in {folders} folders?" if media else "?"),
                               default=False):
                 print(ui.yellow("↩️  Kept everything as it was"))
@@ -427,7 +427,7 @@ def convert_command(args):
         if failures:
             for src, dst, err in failures:
                 ui.warn(f"could not move {src} → {dst}: {err}")
-            ui.fail(f"{len(failures)} move(s) failed; the layout is still {old_name}. Fix the cause and run convert again", 3)
+            ui.fail(f"{len(failures)} move(s) failed; the layout is still {old_name}. Fix the cause and run cards layout again", 3)
         for path, err in media_failures:
             ui.warn(f"could not delete {path}: {err}")
     if not store.update_card(name, layout=new_name):

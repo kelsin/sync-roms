@@ -50,9 +50,9 @@ class ListPreviews(unittest.TestCase):
                     mock.patch.object(picker, "filter_list", fake), mock.patch("builtins.print"), \
                     mock.patch.object(os.path, "isdir", return_value=True):
                 if module is upload:
-                    upload.upload_command(mock.Mock(upload="/x"))
+                    upload.upload_command(mock.Mock(dir="/x"))
                 else:
-                    diff.diff_command(mock.Mock(diff="/x", system=None, json=False))
+                    diff.diff_command(mock.Mock(dir="/x", system=None, json=False))
             self.assertEqual(art(calls, 2), ["sys-gba", "sys-psx"], module.__name__)
 
     def test_add_games_from_set_previews_the_set_by_id(self):

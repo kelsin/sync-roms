@@ -246,7 +246,7 @@ def run_uploads(todo, quiet=False):
 
 def upload_command(args):
     """Upload the ROMs in one folder (default: the current directory) to storage folder of a system you pick."""
-    folder = os.path.abspath(os.path.expanduser(args.upload or os.getcwd()))
+    folder = os.path.abspath(os.path.expanduser(args.dir or os.getcwd()))
     if not os.path.isdir(folder):
         ui.fail(f"{folder} is not a folder", 2)
     systems = sorted(store.load_manifest()["systems"], key=lambda s: s["name"].lower())

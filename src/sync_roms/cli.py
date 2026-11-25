@@ -1,5 +1,4 @@
 """Download ROMs and BIOS files from your ROM storage."""
-import argparse
 import ast
 import contextlib
 import os
@@ -11,17 +10,25 @@ from concurrent.futures import ThreadPoolExecutor
 
 from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError
 
-from . import __version__, bezels, budget, cardedit, cardfs, clean, commands, downloads, drivers, edit, external, frontend, inventory, m3u, mirroring, picker, runtime, s3, scrape_plan, store
+from . import __version__, bezels, budget, cardedit, cardfs, clean, commands, downloads, drivers, frontend, inventory, m3u, mirroring, picker, runtime, s3, scrape_plan, store
 from . import muos_collections, nextui_folders, onion_surprise, pico8, raofflineproxy, rocknix_collections, saves, spruce_collections, spruce_bootlogo, spruce_emu, spruce_os, spruce_fixes, spruce_hotkeys, spruce_retroarch, spruce_settings, spruce_syncthing, spruce_themes, spruce_wifi, surprise, themeart, ui, usersettings, vita
 from . import collections as colls
 from . import guest as guests
 
 
-ALIASES = {"umount": "unmount"}  # other names for a command, same help
+ALIASES = {"card": "cards", "game": "games", "set": "sets", "collection": "collections", "theme": "themes", "save": "saves",  # alias -> main name
+           "device": "devices", "layout": "layouts", "playlists": "playlist", "scrapes": "scrape", "downloads": "download",
+           "umount": "unmount"}
+
+
+def canonical(word):
+    """A command's main name: the word itself unless it's an alias."""
+    return ALIASES.get(word, word)
+
 SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "sync": ("[CARD]", "download the ROMs, BIOS and scraped data for a card (this is what plain `sync-roms CARD` does)"),
-    "edit": ("", "interactive editor: cards, sets, collections, device systems (same as `games edit`)"),
-    "games": ("edit|list|add|remove|full|sets|export|import", "edit a card's games, interactively or from scripts"),
+    "edit": ("", "interactive editor: cards, sets, collections, device systems"),
+    "games": ("list|add|remove|full|sets|export|import", "edit a card's games, interactively or from scripts"),
     "sets": ("edit", "edit the game sets in storage by hand and save the changes there"),
     "collections": ("edit", "edit your collections of favourite games (saved in ~/.sync-roms/collections/)"),
     "themes": ("update|pick|build|publish|palettes", "copy the latest Art Book Next for ES-DE and the PyUI themes for spruce from GitHub into storage; build and publish custom spruce themes"),
@@ -29,17 +36,16 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "flash": ("", "write a Knulli, BaseOS, muOS, ROCKNIX or OakMoss image from storage's os/ to an SD card"),
     "unmount": ("", "clean the macOS junk off an SD card and unmount it"),
     "mount": ("", "mount again an SD card that was unmounted but not pulled out"),
-    "cards": ("[edit|list|new|set|rename|convert|install|clean|delete|copy|export|import]", "list and manage the cards you've synced"),
+    "cards": ("[list|new|set|rename|layout|install|clean|delete|copy|export|import]", "list and manage the cards you've synced"),
     "saves": ("stash|apply [CARD] [--retroarch DIR], manage", "copy RetroArch saves and states off a card, or onto one (Android: over adb), or tidy the stashes"),
     "devices": ("[ID]", "list the supported devices, or one device's systems"),
     "layouts": ("[ID]", "list the firmware card layouts, or one layout's folders and devices"),
     "upload": ("[DIR]", "upload ROMs to the storage folder of a system you pick"),
     "diff": ("[DIR]", "list the ROMs in only DIR or only storage, ignoring renames"),
-    "scrape": ("[SYSTEM | match SYSTEM ROM GAME | review [SYSTEM] | missing [SYSTEM] | art [SYSTEM]]", "scrape the ROMs that have no metadata from ScreenScraper into storage's scrapes/ folder"),
-    "clean": ("scrapes", "remove scrapes/ media and metadata for ROMs that aren't in storage"),
+    "scrape": ("[SYSTEM | match SYSTEM ROM GAME | review [SYSTEM] | missing [SYSTEM] | art [SYSTEM] | clean]", "scrape the ROMs that have no metadata from ScreenScraper into storage's scrapes/ folder"),
     "playlist": ("[DIR]", "create or fix the .m3u playlist of every multi-disc game"),
-    "convert": ("[DIR]", "unzip archives and convert disc images to verified .chd"),
-    "tools": ("install", "brew install the 7z, unar and chdman that `convert` needs"),
+    "prepare": ("[DIR]", "unzip archives and convert disc images to verified .chd"),
+    "install": ("", "brew install the 7z, unar and chdman that `prepare` needs"),
     "mirror": ("[DIR] | use DIR | clear", "make or refresh a local copy of everything your lists reference"),
     "cache": ("[update [--full]]", "show the storage cache every command reads file lists and sizes from, or update it"),
     "config": ("show|path|set NAME VALUE|unset NAME|import [CARD]|apply [CARD]", "show the effective settings and where each comes from, or change one"),
@@ -101,8 +107,6 @@ TOPICS = {
   asks for your password).
 """,
     "games": """
-  sync-roms games edit                        interactive editor (cards, sets, collections, device
-                                              systems)
   sync-roms games list --card NAME [--json]
   sync-roms games add SYSTEM KEY... --card NAME [-n]
       KEY: file name, SYSTEM/file key, or a glob like 'Mario*'
@@ -254,7 +258,7 @@ TOPICS = {
 """,
     "edit": """
   sync-roms edit                              main menu: Cards, Sets (saved to storage),
-                                              Collections, Device systems; same as `games edit`
+                                              Collections, Device systems
 
   ? in any list shows all its keys. In a card's system list: Enter opens a system's games, f makes
   it a full system, l picks collections, S opens the settings menu (Surprise, theme, collections,
@@ -264,13 +268,12 @@ TOPICS = {
   step still running, quits at once, and unsaved changes in the open editor are lost.
 """,
     "cards": """
-  sync-roms cards edit                        same as `games edit`
   sync-roms cards [list] [--all] [--json]     list is the default; guest cards are hidden unless
                                               --all
   sync-roms cards new NAME --device ID|full --layout NAME [--size 512GB]
   sync-roms cards set NAME [--device ID|full] [--layout NAME] [--size 512GB]
   sync-roms cards rename OLD NEW
-  sync-roms cards convert [CARD] --layout NAME [--dry-run] [--yes]
+  sync-roms cards layout [CARD] --layout NAME [--dry-run] [--yes]
       move the card's ROMs, BIOS and saves to another layout's folders
   sync-roms cards install [CARD] [--dry-run] [--yes]
       put storage's newest spruceOS on a spruce card: a clean install: deletes all but Roms, then
@@ -286,7 +289,7 @@ TOPICS = {
   sync-roms cards import FILE                 keeps size, device, layout, games and excluded;
                                               Surprise off; r renames, p prefixes all
 
-  CARD (convert, install, clean) is a saved card's name or its mounted folder (default: the
+  CARD (layout, install, clean) is a saved card's name or its mounted folder (default: the
   current directory).
 
   A card is a folder name (the card root's basename) with a remembered device, firmware and games.
@@ -395,6 +398,7 @@ TOPICS = {
   sync-roms scrape missing [SYSTEM | --system ID] [--all]
   sync-roms scrape art [SYSTEM | --system ID] [--for onion|spruce|both] [--dry-run] [--replace]
       [--workers N]
+  sync-roms scrape clean [--dry-run]
   sync-roms scrape --set-credentials
 
   Looks up every available ROM with no entry in scrapes/<system>/metadata.json on ScreenScraper and
@@ -438,6 +442,8 @@ TOPICS = {
                      estimated size and reads no image; --replace remakes existing files; --workers
                      N bounds the parallel downloads (default: your CPU count). Spruce art needs
                      Pillow
+  clean              remove scrapes/ media and metadata for ROMs that aren't in storage at all (asks
+                     first; --yes deletes without asking)
   --set-credentials  ask for your ScreenScraper username and password (saved in settings.json,
                      readable only by you; blank keeps the current value), then check them with one
                      request and show today's quota and threads, or the error (exit 1 when
@@ -450,26 +456,20 @@ TOPICS = {
   says how many were saved and how many are left, and it exits 130 (a second Ctrl-C aborts at once).
   Writes use the write profile.
 """,
-    "clean": """
-  sync-roms clean scrapes [--dry-run]
-
-  Removes scrapes/ media and metadata for ROMs that aren't in storage at all (asks first; --yes
-  deletes without asking).
-""",
     "playlist": """
   sync-roms playlist [DIR] [--dry-run]
 
   Creates or fixes the .m3u of every multi-disc game ("Name (Disc 1).chd", "Name (Disc 2).chd") in
   DIR and its subfolders. Playlists whose files are all missing are deleted (asks first). Local
-  only. (Old name: --m3u)
+  only.
 """,
-    "convert": """
-  sync-roms convert [DIR] [--dry-run] [--yes]
+    "prepare": """
+  sync-roms prepare [DIR] [--dry-run] [--yes]
 
   Unzips (7z, or unar for .rar) every .zip/.7z/.rar, and the archives inside them, and converts each
   disc image (.cue, .gdi, .toc, .iso) to a verified .chd (Xbox .iso to xiso, Xbox 360 .iso to .zar),
   per the `chd` key in systems.json of the system whose folder it is in. Archives and images are
-  removed once their chd verifies, then the .m3u playlists are fixed. Archives that convert unpack
+  removed once their chd verifies, then the .m3u playlists are fixed. It unpacks archives
   in the system temp folder when it is on another drive with room, else beside themselves; as many
   files convert at once as there are CPU cores and free space for, biggest first. The progress bar
   goes by size, with the rate and time left, and each file's result shows as it finishes. Before it
@@ -477,13 +477,13 @@ TOPICS = {
   terminal exits 2). Inside a saved card's folder it first warns that the next sync downloads the
   archives again and asks (default no, so --yes or no terminal stops it). Inside the storage folder,
   once a file converts, it ends by saying to run `sync-roms cache update`. Needs 7z, chdman and, for
-  Xbox, extract-xiso and, for Xbox 360, iso2zar (see `tools install`). (Old names: --cd, --chd)
+  Xbox, extract-xiso and, for Xbox 360, iso2zar (see `install`).
 """,
-    "tools": """
-  sync-roms tools install
+    "install": """
+  sync-roms install
 
-  brew install the 7z (sevenzip), unar and chdman (rom-tools) that `convert` needs, and say how to
-  build extract-xiso and iso2zar.
+  brew install the 7z (sevenzip), unar and chdman (rom-tools) that `prepare` needs, and say how to
+  build extract-xiso and iso2zar. `doctor --fix` runs it when one of those three is missing.
 """,
     "mirror": """
   sync-roms mirror [DIR] [--dry-run]     make or refresh a local copy of everything the lists
@@ -563,7 +563,7 @@ TOPICS = {
     "doctor": """
   sync-roms doctor
 
-  Checks the AWS profile and storage access, the tools `convert` needs, and that your data files
+  Checks the AWS profile and storage access, the tools `prepare` needs, and that your data files
   parse.
 """,
     "guide": """
@@ -638,12 +638,12 @@ def help_text(topic=None):
 {ui.bold('GLOBAL OPTIONS')}
   {ui.yellow('-n, --dry-run')}   show what would happen, change nothing (commands that can't honor it refuse it)
   {ui.yellow('-y, --yes')}       answer prompts with their default (deleting stays "no"). In these commands
-                  --yes is the confirmation, so they go ahead: `upload` (overwrites), `convert`
-                  (removes the originals), `clean scrapes`, `cards clean`, `cards convert` (the old
+                  --yes is the confirmation, so they go ahead: `upload` (overwrites), `prepare`
+                  (removes the originals), `scrape clean`, `cards clean`, `cards layout` (the old
                   layout's media), `cards install` (the card's other files), `cards delete`,
                   `cards export` (overwrites FILE), `saves manage` (deletes the picked stashes),
                   `themes publish` (stale theme files), `download pico8` (old cart revisions) and
-                  `scrape match`. Without a terminal, `upload`, `convert`, `clean scrapes`,
+                  `scrape match`. Without a terminal, `upload`, `prepare`, `scrape clean`,
                   `cards install`, `cards export` (over FILE), `themes publish`, `download pico8`
                   and `scrape match` exit 2 unless --yes is given
   {ui.yellow('--quiet')}         print only errors, warnings and --json data (prompts go to stderr)
@@ -672,9 +672,6 @@ def help_text(topic=None):
   sync-roms games add gba 'Metroid*' --card SD   add games to a card
   sync-roms upload ~/roms/gba                    upload ROMs to storage
 
-  {ui.dim('The old flags (--edit/-e, --upload, --clean-scrapes/-c, --diff, --scrape, --scrape-match,')}
-  {ui.dim('--scrape-review, --scrape-missing, --m3u, --cd, --install-tools, --mirror, --use-mirror,')}
-  {ui.dim('--clear-mirror, --devices) still work.')}
   {ui.dim('A card folder named like a command: write ./edit.')}
 """
 
@@ -762,200 +759,7 @@ def list_devices(args=None):
     return commands.show_devices(catalog["devices"], catalog["systems"], getattr(args, "device_id", None), getattr(args, "json", False))
 
 
-class Parser(argparse.ArgumentParser):
-    literal = frozenset()  # the values after --scrape-match that start with a dash: values, never options
-
-    def error(self, message):
-        if TYPED:  # name the command the user typed, not the legacy flag translate() made of it
-            words, flag = TYPED
-            message = message if flag is None else re.sub(rf"argument {re.escape(flag)}(/\S+)?:", f"`{words}`:", message)
-            ui.fail(f"{message}\n   Try 'sync-roms {words.split()[0]} --help'.", 2)
-        ui.fail(f"{message}\n   Try 'sync-roms --help'.", 2)
-
-    def parse_known_args(self, args=None, namespace=None):
-        args = list(sys.argv[1:] if args is None else args)
-        if "--scrape-match" in args:
-            i = args.index("--scrape-match")
-            self.literal = frozenset(a for a in args[i + 1:i + 4] if a.startswith("-"))
-        return super().parse_known_args(args, namespace)
-
-    def _parse_optional(self, arg_string):
-        return None if arg_string in self.literal else super()._parse_optional(arg_string)
-
-
-# subcommand -> the legacy flags it stands for. {rest} are its remaining arguments.
-LEGACY = {
-    ("sync",): [], ("devices",): ["--devices"], ("diff",): ["--diff"], ("playlist",): ["--m3u"], ("convert",): ["--cd"],
-    ("tools", "install"): ["--install-tools"], ("clean", "scrapes"): ["--clean-scrapes"],
-    ("scrape", "match"): ["--scrape-match"], ("scrape", "review"): ["--scrape-review"],
-    ("scrape", "missing"): ["--scrape-missing"], ("scrape", "art"): ["--scrape-art"], ("scrape",): ["--scrape"],
-    ("upload",): ["--upload"],
-    ("mirror", "use"): ["--use-mirror"], ("mirror", "clear"): ["--clear-mirror"], ("mirror",): ["--mirror"],
-    ("games", "edit"): ["--edit"], ("cards", "edit"): ["--edit"], ("edit",): ["--edit"],
-}
-WORDS = {flags[0]: " ".join(words) for words, flags in LEGACY.items() if flags}  # mode flag -> its command, for messages
-TYPED = None  # (command words, mode flag) of the command translate() last rewrote, for Parser.error
-BOOL_FLAGS = {"-n", "--dry-run", "-y", "--yes", "-a", "--ask"}
-PLAIN_FLAGS = BOOL_FLAGS | {"--replace", "--json", "--guest", "--no-clean", "--no-delete", "--no-eject", "--retry", "--all", "--fill-media", "--set-credentials",
-                            "--translated"}
-VALUE_FLAGS = {"--system", "--device", "--layout", "--device-id", "--skip-media", "--for", "--workers"}
-
-
-def translate(argv):
-    """Rewrite `sync-roms COMMAND ...` into the flag form the rest of the code reads. Global flags may come first."""
-    global TYPED
-    TYPED = None
-    i = 0
-    while i < len(argv) and argv[i] in BOOL_FLAGS | {"--json"}:
-        i += 1
-    if i >= len(argv) or argv[i] not in SUBCOMMANDS:
-        return argv
-    head, rest = argv[:i], argv[i + 1:]
-    name = argv[i]
-    for words in sorted(LEGACY, key=len, reverse=True):
-        if words[0] == name and tuple(rest[:len(words) - 1]) == words[1:]:
-            tail = rest[len(words) - 1:]
-            flags = LEGACY[words]
-            TYPED = (" ".join(words), flags[0] if flags else None)
-            if not flags:
-                return head + tail
-            if words == ("scrape", "match"):  # three values that must stay together, behind the flag
-                n = 0  # flags may come first; from the first value on, the next three words are the values
-                while n < len(tail) and tail[n].startswith("-"):
-                    n += 2 if tail[n] in VALUE_FLAGS else 1
-                return head + flags + tail[n:n + 3] + tail[:n] + tail[n + 3:]
-            n = 0  # flags (and the values of value flags) before the mode's value (`diff -n /x`) move behind it
-            while n < len(tail) and (tail[n] in PLAIN_FLAGS or tail[n] in VALUE_FLAGS):
-                n += 1 if tail[n] in PLAIN_FLAGS else 2
-            if n < len(tail) and not tail[n].startswith("-"):
-                value = ["--device-id", tail[n]] if name == "devices" else [tail[n]]
-                return head + flags + value + tail[:n] + tail[n + 1:]
-            return head + flags + tail
-    if name == "clean" or name == "tools":
-        ui.fail(f"'{name}' needs a subcommand: " + ", ".join(
-            f"{w[0]} {w[1]}" for w in LEGACY if w[0] == name and len(w) > 1), 2)
-    return argv
-
-
-def build_parser():
-    ap = Parser(add_help=False, allow_abbrev=False)
-    ap.add_argument("base_dir", nargs="?")
-    ap.add_argument("-n", "--dry-run", action="store_true")
-    ap.add_argument("-y", "--yes", action="store_true")
-    ap.add_argument("-e", "--edit", action="store_true")
-    ap.add_argument("-a", "--ask", action="store_true")
-    ap.add_argument("-c", "--clean-scrapes", action="store_true")
-    ap.add_argument("--upload", nargs="?", const="")
-    ap.add_argument("--replace", action="store_true")
-    ap.add_argument("--scrape", action="store_true")
-    ap.add_argument("--scrape-match", nargs=3, metavar=("SYSTEM", "ROM", "GAME"))
-    ap.add_argument("--scrape-review", nargs="?", const="", metavar="SYSTEM")
-    ap.add_argument("--scrape-missing", nargs="?", const="", metavar="SYSTEM")
-    ap.add_argument("--scrape-art", nargs="?", const="", metavar="SYSTEM")
-    ap.add_argument("--for", dest="target")
-    ap.add_argument("--workers", type=commands._positive_int)
-    ap.add_argument("--retry", action="store_true")
-    ap.add_argument("--all", action="store_true")
-    ap.add_argument("--fill-media", action="store_true")
-    ap.add_argument("--skip-media")
-    ap.add_argument("--translated", action="store_true")
-    ap.add_argument("--set-credentials", action="store_true")
-    ap.add_argument("--diff", nargs="?", const="")
-    ap.add_argument("--m3u", nargs="?", const="")
-    ap.add_argument("--cd", "--chd", dest="chd", nargs="?", const="")
-    ap.add_argument("--install-tools", action="store_true")
-    ap.add_argument("--mirror", nargs="?", const="")
-    ap.add_argument("--use-mirror")
-    ap.add_argument("--clear-mirror", action="store_true")
-    ap.add_argument("--devices", action="store_true")
-    ap.add_argument("--device-id")
-    ap.add_argument("--json", action="store_true")
-    ap.add_argument("--system")
-    ap.add_argument("--device")
-    ap.add_argument("--layout")
-    ap.add_argument("--guest", action="store_true")
-    ap.add_argument("--no-clean", action="store_true")
-    ap.add_argument("--no-delete", action="store_true")
-    ap.add_argument("--no-eject", action="store_true")
-    ap.add_argument("--version", action="store_true")
-    ap.add_argument("-h", "--help", action="store_true")
-    return ap
-
-
-def check_modes(args):
-    """Refuse flag combinations that would silently do nothing. Returns the active mode's name (None for a plain sync)."""
-    modes = [name for name, on in (
-        ("--edit", args.edit), ("--upload", args.upload is not None), ("--diff", args.diff is not None),
-        ("--clean-scrapes", args.clean_scrapes),
-        ("--scrape", args.scrape), ("--scrape-match", args.scrape_match is not None),
-        ("--scrape-review", args.scrape_review is not None), ("--scrape-missing", args.scrape_missing is not None),
-        ("--scrape-art", args.scrape_art is not None),
-        ("--mirror", args.mirror is not None), ("--use-mirror", bool(args.use_mirror)), ("--clear-mirror", args.clear_mirror),
-        ("--m3u", args.m3u is not None), ("--cd", args.chd is not None), ("--install-tools", args.install_tools),
-        ("--devices", args.devices)) if on]
-    if len(modes) > 1:
-        ui.fail(f"{' and '.join(modes[:2])} can't be combined: use one command at a time", 2)
-    mode = modes[0] if modes else None
-    name = WORDS.get(mode)
-    if args.replace and mode not in ("--upload", "--scrape-art"):
-        ui.fail("--replace only works with `upload` and `scrape art`", 2)
-    if args.dry_run and mode in ("--edit", "--install-tools", "--clear-mirror", "--devices", "--scrape-missing", "--scrape-review", "--diff"):
-        ui.fail(f"--dry-run has no effect on `{name}`", 2)
-    if args.ask and mode:
-        ui.fail(f"--ask only applies to syncing a card, not `{name}`", 2)
-    if (args.device or args.layout or args.guest or args.no_clean or args.no_delete or args.no_eject) and mode:
-        ui.fail(f"--device, --layout, --guest, --no-clean, --no-delete and --no-eject only apply to syncing a card, not `{name}`", 2)
-    if args.base_dir and mode == "--clean-scrapes":
-        ui.fail(f"`clean scrapes` doesn't take a folder ({args.base_dir!r})", 2)
-    if mode == "--scrape" and args.base_dir:  # `scrape gba`, like `scrape missing gba`
-        if args.system:
-            ui.fail("`scrape` takes one system: `scrape SYSTEM` or `scrape --system SYSTEM`", 2)
-        args.system, args.base_dir = args.base_dir, None
-    if mode == "--scrape-missing" and args.system:
-        if args.scrape_missing:
-            ui.fail("`scrape missing` takes one system: `scrape missing SYSTEM` or `scrape missing --system SYSTEM`", 2)
-        args.scrape_missing, args.system = args.system, None
-    if mode == "--scrape-art" and args.system:
-        if args.scrape_art:
-            ui.fail("`scrape art` takes one system: `scrape art SYSTEM` or `scrape art --system SYSTEM`", 2)
-        args.scrape_art, args.system = args.system, None
-    given = {"--scrape": args.system, "--scrape-missing": args.scrape_missing, "--scrape-art": args.scrape_art, "--scrape-review": args.scrape_review,
-             "--scrape-match": (args.scrape_match or [None])[0]}.get(mode)
-    if given and any(sep and sep in given for sep in (os.sep, os.altsep)):
-        ui.fail(f"`{name}` expects a system id, not a path ({given!r})", 2)
-    if args.base_dir and mode is not None:
-        ui.fail(f"`{name}` doesn't take a card folder ({args.base_dir!r}); give the directory right after the command", 2)
-    if args.device_id and mode != "--devices":
-        ui.fail("a device id only applies to `devices`", 2)
-    if args.json and not (mode in ("--devices", "--diff") or (mode is None and args.dry_run)):
-        ui.fail("--json only applies to `devices`, `layouts`, `diff`, `games list`, `cards list` and `sync --dry-run`", 2)
-    if args.system and mode not in ("--diff", "--scrape"):
-        ui.fail("--system only applies to `diff`, `scrape`, `scrape missing` and `scrape art`", 2)
-    if args.retry and mode != "--scrape":
-        ui.fail("--retry only applies to `scrape`", 2)
-    if args.all and mode not in ("--scrape", "--scrape-missing"):
-        ui.fail("--all only applies to `scrape` and `scrape missing`", 2)
-    if args.fill_media and mode != "--scrape":
-        ui.fail("--fill-media only applies to `scrape`", 2)
-    if args.set_credentials and (mode != "--scrape" or args.system or args.retry or args.all or args.fill_media or args.skip_media or args.dry_run):
-        ui.fail("--set-credentials only goes with `scrape`, on its own", 2)
-    if args.target is not None and mode != "--scrape-art":
-        ui.fail("--for only applies to `scrape art`", 2)
-    if args.workers is not None and mode != "--scrape-art":
-        ui.fail("--workers only applies to `scrape art`", 2)
-    if mode == "--scrape-art":
-        args.target = args.target or "both"
-        if args.target not in ("onion", "spruce", "both"):
-            ui.fail(f"--for takes onion, spruce or both, not {args.target!r}", 2)
-    if args.translated and mode != "--scrape-match":
-        ui.fail("--translated only applies to `scrape match`", 2)
-    if args.skip_media is not None:
-        if mode not in ("--scrape", "--scrape-match"):
-            ui.fail("--skip-media only applies to `scrape` and `scrape match`", 2)
-        args.skip_media = [t.strip() for t in args.skip_media.split(",") if t.strip()]
-        from . import scrape_online
-        scrape_online._check_skip(args.skip_media)
-    return mode
+LEAD_FLAGS = {"-n", "--dry-run", "-y", "--yes", "-a", "--ask", "--json"}  # flags that may come before the command
 
 
 GLOBAL_VALUE_FLAGS = {"--profile": "profile", "--write-profile": "write_profile", "--bucket": "bucket", "--root": "root", "--endpoint": "endpoint"}
@@ -991,7 +795,10 @@ def extract_globals(argv):
 def is_data_command(argv):
     """Whether the command's stdout is its result (so --quiet must not discard it)."""
     words = tuple(a for a in argv if not a.startswith("-"))
-    return "--devices" in argv or words in (("cards",), ("cache",)) or any(words[:len(d)] == d for d in DATA_COMMANDS)
+    words = tuple(canonical(w) for w in words[:1]) + words[1:]
+    if words[:2] == ("games", "set"):
+        words = ("games", "sets", *words[2:])
+    return words in (("cards",), ("cache",)) or any(words[:len(d)] == d for d in DATA_COMMANDS)
 
 
 def sync(reset=True):
@@ -1012,103 +819,37 @@ def sync(reset=True):
 
 def run(argv):
     lead = 0
-    while lead < len(argv) and argv[lead] in BOOL_FLAGS | {"--json"}:
+    while lead < len(argv) and argv[lead] in LEAD_FLAGS:
         lead += 1
-    if lead < len(argv) and argv[lead] in commands.COMMANDS and argv[lead:lead + 2] not in (["games", "edit"], ["cards", "edit"]):
-        cmd = argv[lead:] + argv[:lead]  # leading global flags go after the command, where its parser reads them
-        if "-h" in cmd or "--help" in cmd:
-            print(help_text(ALIASES.get(cmd[0], cmd[0])))
-            return 0
-        return commands.run(cmd)
-    if argv and argv[0] == "help":
-        if len(argv) > 1 and ALIASES.get(argv[1], argv[1]) not in SUBCOMMANDS:
-            ui.fail(f"No help for {argv[1]!r}: it isn't a command. See `sync-roms help` for the commands.", 2)
-        print(help_text(ALIASES.get(argv[1], argv[1]) if len(argv) > 1 else None))
-        return 0
-    topic = next((ALIASES.get(a, a) for a in argv if a in SUBCOMMANDS or a in ALIASES), None) if ("-h" in argv or "--help" in argv) else None
-    if topic:  # before translate(), which refuses `upload` and the others without their subcommand
-        print(help_text(topic))
-        return 0
-    argv = translate(argv)
-    args = build_parser().parse_args(argv)
-    if args.version:
+    word = argv[lead] if lead < len(argv) else None
+    if word == "--version":
         print(f"sync-roms {__version__}")
         return 0
-    if args.help:
-        print(help_text(topic))
+    if word in ("-h", "--help"):
+        topic = canonical(argv[lead + 1]) if lead + 1 < len(argv) else None
+        print(help_text(topic if topic in SUBCOMMANDS else None))
         return 0
-    ui.ASSUME_YES = args.yes
-    mode = check_modes(args)
-    if args.json and mode in (None, "--diff"):  # the JSON document is all that reaches stdout
-        ui.set_output(True, ui.VERBOSE)
-    if mode is None and args.base_dir and not os.path.isdir(os.path.abspath(os.path.expanduser(args.base_dir))):
-        ui.fail(f"{args.base_dir} isn't a command or a folder (is the card mounted?)\n   See `sync-roms help` for the commands.", 2)
-    handled, code = dispatch_mode(args, mode)
-    return code if handled else sync_card(args)
-
-
-def dispatch_mode(args, mode):
-    """Run the command a flag stands for. Returns (True, its exit code), or (False, None) for a plain sync.
-
-    The modules a command needs are imported here, so the other commands (and --help) don't pay for them."""
-    if args.devices:
-        return True, list_devices(args)
-    if mode in ("--m3u", "--cd", "--install-tools"):
-        if args.install_tools:
-            return True, external.install_tools_command()
-        if args.chd is not None:
-            from . import chd
-            return True, chd.chd_command(args)
-        return True, m3u.m3u_command(args)
-    if args.set_credentials:
-        from . import scrape_online
-        return True, scrape_online.set_credentials()
-    usersettings.ensure_bucket()
-    if runtime.ROOT and not os.path.isdir(runtime.ROOT) and not args.edit:  # the editor goes by the cache alone
-        ui.fail(f"The storage folder {runtime.ROOT} isn't there (is the share mounted?)", 3)
-    if not args.json:  # the JSON document is all that reaches stdout: no question
-        inventory.prepare()
-    if args.scrape:
-        from . import scrape_online
-        return True, scrape_online.scrape_command(args)
-    if args.scrape_match:
-        from . import scrape_online
-        args.system, args.rom, args.game = args.scrape_match
-        return True, scrape_online.match_command(args)
-    if args.scrape_review is not None:
-        from . import scrape_review
-        args.system = args.scrape_review or None
-        return True, scrape_review.review_command(args)
-    if args.scrape_missing is not None:
-        from . import scrape_online
-        args.system = args.scrape_missing or None
-        return True, scrape_online.missing_command(args)
-    if args.scrape_art is not None:
-        from . import scrape_art
-        args.system = args.scrape_art or None
-        return True, scrape_art.art_command(args)
-    if args.upload is not None:
-        from . import upload
-        return True, upload.upload_command(args)
-    if args.diff is not None:
-        from . import diff
-        return True, diff.diff_command(args)
-    if args.mirror is not None or args.use_mirror or args.clear_mirror:
-        from . import mirroring
-        return True, mirroring.mirror_command(args)
-    if args.edit or args.clean_scrapes:
-        if args.edit:
-            code = edit.edit_manifest()
-        else:
-            from . import scrape_files
-            code = scrape_files.clean_scrapes(args)
-        mirror = usersettings.load_settings().get("mirror")
-        if mirror and not code and not args.dry_run:  # pick up the games just added
-            from . import mirroring
-            print()
-            mirroring.use_mirror(mirror, False)
-        return True, code
-    return False, None
+    if word is not None:
+        word = canonical(word)
+        argv = argv[:lead] + [word, *argv[lead + 1:]]
+    if word not in commands.COMMANDS | {"help"}:  # a card, or nothing: sync it
+        if word is not None and not word.startswith("-"):
+            commands.check_card(word)
+        argv = argv[:lead] + ["sync"] + argv[lead:]
+        word = "sync"
+    if word in commands.COMMANDS:
+        cmd = argv[lead:] + argv[:lead]  # leading global flags go after the command, where its parser reads them
+        if "-h" in cmd or "--help" in cmd:
+            print(help_text(cmd[0]))
+            return 0
+        return commands.run(cmd)
+    name = argv[lead + 1] if lead + 1 < len(argv) else None  # `help [COMMAND]`
+    if name is not None:
+        name = canonical(name)
+    if name is not None and name not in SUBCOMMANDS:
+        ui.fail(f"No help for {name!r}: it isn't a command. See `sync-roms help` for the commands.", 2)
+    print(help_text(name))
+    return 0
 
 
 def choose_card_setup(args, base, card, manifest, saved):

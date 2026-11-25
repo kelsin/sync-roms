@@ -217,7 +217,7 @@ def local_sizes(folder):
 
 def diff_command(args):
     """Show the ROMs that are in only one of a local folder (default: the current directory) and a storage folder."""
-    folder = os.path.abspath(os.path.expanduser(args.diff or os.getcwd()))
+    folder = os.path.abspath(os.path.expanduser(args.dir or os.getcwd()))
     if not os.path.isdir(folder):
         ui.fail(f"{folder} is not a folder", 2)
     systems = sorted(store.load_manifest()["systems"], key=lambda s: s["name"].lower())

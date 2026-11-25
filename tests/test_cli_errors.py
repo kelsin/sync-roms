@@ -36,15 +36,15 @@ class ErrorsTest(Isolated):
 
 
 class EditAliasTest(Isolated):
-    def test_every_edit_spelling_opens_the_main_menu(self):
-        for argv in (["edit"], ["games", "edit"], ["cards", "edit"], ["--edit"], ["-e"]):
+    def test_edit_opens_the_main_menu(self):
+        for argv in (["edit"], ["-y", "edit"]):
             with self.subTest(argv=argv), mock.patch.object(edit, "edit_manifest", return_value=0) as run:
                 code, _, err = self.sync(argv, {"bucket": "b"})
                 self.assertEqual((code, err), (0, ""))
             run.assert_called_once_with()
 
     def test_dry_run_with_edit_is_a_usage_error(self):
-        for argv in (["edit", "--dry-run"], ["--edit", "-n"]):
+        for argv in (["edit", "--dry-run"], ["-n", "edit"]):
             with self.subTest(argv=argv), mock.patch.object(edit, "edit_manifest") as run:
                 code, _, err = self.sync(argv)
             self.assertEqual(code, 2)
@@ -83,7 +83,7 @@ class UnhonoredFlagsTest(Isolated):
     def test_dry_run_is_refused_on_diff(self):
         from sync_roms import diff
         with tempfile.TemporaryDirectory() as tmp:
-            for argv in (["diff", tmp, "--dry-run"], ["-n", "diff", tmp], ["--diff", tmp, "-n"]):
+            for argv in (["diff", tmp, "--dry-run"], ["-n", "diff", tmp], ["diff", "-n", tmp]):
                 with self.subTest(argv=argv):
                     self.refused(argv, "--dry-run has no effect on `diff`",
                                  d=(diff, "diff_command", mock.Mock(side_effect=AssertionError("ran"))))
@@ -91,18 +91,50 @@ class UnhonoredFlagsTest(Isolated):
     def test_cache_full_needs_update(self):
         self.refused(["cache", "--full"], "--full only applies to `cache update`")
 
-    def test_clean_scrapes_takes_no_folder(self):
-        self.refused(["clean", "scrapes", "/some/dir"], "`clean scrapes` doesn't take a folder")
-
     def test_refusals_name_the_command_typed(self):
         self.refused(["devices", "--dry-run"], "--dry-run has no effect on `devices`")
         self.refused(["mirror", "clear", "-n"], "--dry-run has no effect on `mirror clear`")
-        self.refused(["playlist", "--ask"], "--ask only applies to syncing a card, not `playlist`")
+        self.refused(["playlist", "--ask"], "unrecognized arguments: --ask\n   Try 'sync-roms playlist --help'.")
 
 
 class UsageHelpTest(Isolated):
+    def test_help_flag_before_a_command_prints_that_commands_help(self):
+        for argv, topic in ((["-h", "upload"], "upload"), (["--help", "card"], "cards"), (["-h", "scrapes"], "scrape")):
+            with self.subTest(argv=argv):
+                code, out, err = self.sync(argv)
+                self.assertEqual((code, err), (0, ""))
+                self.assertEqual(out, self.sync(["help", topic])[1])
+                self.assertNotEqual(out, self.sync(["-h"])[1])
+        self.assertEqual(self.sync(["-h"])[1], self.sync(["help"])[1])
+
+    def test_a_sync_flag_before_a_command_says_flags_go_after_it(self):
+        with tempfile.TemporaryDirectory() as cwd, mock.patch.object(cli, "sync_card", side_effect=AssertionError("synced")):
+            old = os.getcwd()
+            os.chdir(cwd)
+            try:
+                code, out, err = self.sync(["--no-delete", "devices"])
+                self.assertEqual((code, out), (2, ""))
+                self.assertIn("devices is a command: put flags after it (sync-roms devices --flag)", err)
+                self.assertNotIn("isn't a command or a folder", err)
+                self.assertEqual(self.sync(["--no-delete", "card"])[0], 2)  # an alias too
+            finally:
+                os.chdir(old)
+
+    def test_a_folder_named_like_a_command_still_syncs(self):
+        with tempfile.TemporaryDirectory() as cwd, mock.patch.object(cli, "sync_card", return_value=0) as sync_card, \
+                mock.patch.object(commands, "prepare_storage"):
+            os.mkdir(os.path.join(cwd, "devices"))
+            old = os.getcwd()
+            os.chdir(cwd)
+            try:
+                code, out, err = self.sync(["--no-delete", "devices"])
+            finally:
+                os.chdir(old)
+        self.assertEqual(code, 0)
+        sync_card.assert_called_once()
+
     def test_help_for_commands_that_need_a_subcommand(self):
-        for name in ("upload", "clean", "tools"):
+        for name in ("upload", "scrape", "install"):
             for flag in ("--help", "-h"):
                 with self.subTest(name=name, flag=flag):
                     code, out, err = self.sync([name, flag])
@@ -124,6 +156,14 @@ class UsageHelpTest(Isolated):
         self.assertIn("is the card mounted?", err)
         self.assertIn("sync-roms help", err)
 
+    def test_help_after_leading_flags_prints_help_and_runs_nothing(self):
+        for argv, topic in ((["-y", "help"], "USAGE"), (["-n", "help"], "USAGE"), (["-y", "help", "upload"], "sync-roms upload")):
+            with self.subTest(argv=argv), mock.patch.object(scrape_files, "clean_scrapes", side_effect=AssertionError("cleaned")), \
+                    mock.patch.object(commands, "prepare_storage", side_effect=AssertionError("read storage")):
+                code, out, err = self.sync(argv)
+            self.assertEqual((code, err), (0, ""))
+            self.assertIn(topic, out)
+
     def test_help_for_an_unknown_topic_exits_2(self):
         code, out, err = self.sync(["help", "bogus"])
         self.assertEqual((code, out), (2, ""))
@@ -138,17 +178,15 @@ class UsageHelpTest(Isolated):
                 self.assertEqual(code, 2)
                 self.assertIn(f"Try 'sync-roms {name} --help'.", err)
 
-    def test_translated_command_errors_name_the_words_typed(self):
-        for argv, words, flag in ((["scrape", "match", "gba"], "scrape match", "--scrape-match"),
-                                  (["mirror", "use"], "mirror use", "--use-mirror"),
-                                  (["-n", "upload", "--bogus"], "upload", "--upload"), (["sync", "a", "b"], "sync", "--edit")):
+    def test_command_errors_point_at_the_command_help(self):
+        for argv, name in ((["scrape", "match", "gba"], "scrape"), (["scrape", "art", "--for", "x"], "scrape"),
+                           (["mirror", "use"], "mirror"), (["-n", "upload", "--bogus"], "upload"), (["sync", "a", "b"], "sync")):
             with self.subTest(argv=argv):
                 code, _, err = self.sync(argv)
                 self.assertEqual(code, 2)
-                self.assertNotIn(flag, err)
-                self.assertIn(f"Try 'sync-roms {words.split()[0]} --help'.", err)
+                self.assertIn(f"Try 'sync-roms {name} --help'.", err)
         _, _, err = self.sync(["scrape", "match", "gba"])
-        self.assertIn("`scrape match`: expected 3 arguments", err)
+        self.assertIn("the following arguments are required: ROM, GAME", err)
 
     def test_commands_without_their_action_name_the_actions(self):
         for argv, listed in ((["sets"], "sets edit"), (["collections"], "collections edit"), (["themes", "-n"], "themes update"),
@@ -160,11 +198,41 @@ class UsageHelpTest(Isolated):
                 self.assertIn(listed, err)
                 self.assertNotIn("required: action", err)
 
-    def test_legacy_flag_errors_keep_the_flag(self):
-        code, _, err = self.sync(["--use-mirror"])
+    def test_an_old_command_flag_is_a_usage_error(self):
+        with mock.patch.object(cli, "sync_card", side_effect=AssertionError("synced")):
+            code, _, err = self.sync(["--use-mirror"])
         self.assertEqual(code, 2)
-        self.assertIn("argument --use-mirror: expected one argument", err)
-        self.assertIn("Try 'sync-roms --help'.", err)
+        self.assertIn("unrecognized arguments: --use-mirror", err)
+
+    def test_old_flags_are_usage_errors(self):
+        flags = ["--edit", "-e", "--upload", "-c", "--clean-scrapes", "--m3u", "--cd", "--chd", "--install-tools", "--mirror", "--use-mirror /x",
+                 "--clear-mirror", "--diff", "--devices", "--scrape", "--scrape-match a b c", "--scrape-review", "--scrape-missing", "--scrape-art"]
+        for flag in flags:
+            for tail in ([], ["/tmp"]):
+                argv = flag.split() + tail
+                with self.subTest(argv=argv), mock.patch.object(cli, "sync_card", side_effect=AssertionError("synced")), \
+                        mock.patch.object(commands, "prepare_storage", side_effect=AssertionError("read storage")), \
+                        mock.patch.object(usersettings, "ensure_bucket", side_effect=AssertionError("asked for storage")):
+                    code, out, err = self.sync(argv)
+                self.assertEqual((code, out), (2, ""))
+
+    def test_completion_has_no_old_flags(self):
+        old = {"--edit", "-e", "--upload", "-c", "--clean-scrapes", "--m3u", "--cd", "--chd", "--install-tools", "--mirror", "--use-mirror",
+               "--clear-mirror", "--diff", "--devices", "--scrape", "--scrape-match", "--scrape-review", "--scrape-missing", "--scrape-art"}
+        self.assertEqual(old & set(commands.all_flags()), set())
+
+    def test_abbreviated_flags_are_refused(self):
+        for argv in (["upload", "--dry"], ["sync", "--no-del"]):
+            with self.subTest(argv=argv), mock.patch.object(cli, "sync_card", side_effect=AssertionError("synced")):
+                code, out, err = self.sync(argv)
+            self.assertEqual((code, out), (2, ""))
+
+    def test_scrape_match_dash_values_do_not_leak_into_the_next_command(self):
+        with mock.patch.object(commands, "prepare_storage"), mock.patch("sync_roms.scrape_online.match_command", return_value=0):
+            self.assertEqual(self.sync(["scrape", "match", "gba", "-n", "-5"])[0], 0)
+        with mock.patch.object(commands, "upload_cmd", return_value=0) as upload_cmd:
+            self.assertEqual(self.sync(["upload", "-n"])[0], 0)  # -n is a flag again
+        self.assertTrue(upload_cmd.call_args.args[0].dry_run)
 
     def test_global_help_gives_quiet_and_verbose_a_line_each(self):
         lines = [line.strip() for line in cli.help_text().splitlines()]
@@ -302,7 +370,7 @@ class ExitCodeTest(Isolated):
             self.assertEqual(self.code_of(picker.choose_setup, {"devices": [], "layouts": {"esde": {}}}), 0)
 
     def test_bad_folders_are_usage_errors(self):
-        args = mock.Mock(upload="/no/such/folder", diff="/no/such/folder", m3u="/no/such/folder", chd="/no/such/folder")
+        args = mock.Mock(dir="/no/such/folder")
         for fn in (upload.upload_command, diff.diff_command, m3u.m3u_command, chd.chd_command):
             with self.subTest(fn=fn.__name__):
                 self.assertEqual(self.code_of(fn, args), 2)
@@ -320,7 +388,7 @@ class ExitCodeTest(Isolated):
             with mock.patch.object(chd, "plan_chd", return_value=[({"chd": {"mode": "cd"}}, None, "x.cue", "o")]), \
                     mock.patch.object(chd.external, "find_tool", return_value=None), \
                     mock.patch.object(ui, "ASSUME_YES", True):
-                self.assertEqual(self.code_of(chd.chd_command, mock.Mock(chd=tmp, dry_run=False)), 3)
+                self.assertEqual(self.code_of(chd.chd_command, mock.Mock(dir=tmp, dry_run=False)), 3)
 
 
 class MissingStorageOrCardTest(Isolated):
@@ -345,11 +413,10 @@ class MissingStorageOrCardTest(Isolated):
         prepare.assert_not_called()
 
     def test_editor_still_opens_with_the_storage_folder_missing(self):
-        for argv in (["edit"], ["cards", "edit"], ["games", "edit"]):
-            with self.subTest(argv=argv), mock.patch.object(edit, "edit_manifest", return_value=0) as run:
-                code, _, err = self.sync(argv, {"root": os.path.join(self.tmp, "roms")})
-            self.assertEqual((code, err), (0, ""))
-            run.assert_called_once_with()
+        with mock.patch.object(edit, "edit_manifest", return_value=0) as run:
+            code, _, err = self.sync(["edit"], {"root": os.path.join(self.tmp, "roms")})
+        self.assertEqual((code, err), (0, ""))
+        run.assert_called_once_with()
 
     def test_os_error_mid_run_is_a_message_not_a_traceback(self):
         boom = FileNotFoundError(2, "No such file or directory", "/Volumes/roms/scrapes/gba/metadata.json")

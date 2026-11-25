@@ -5,6 +5,7 @@ import json
 import os
 import plistlib
 import sys
+import tempfile
 import unittest
 from unittest import mock
 
@@ -12,7 +13,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "src"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from sync_roms import clean, cli, commands, downloads, inventory, mirroring, names, runtime, s3, store, themeart, ui  # noqa: E402
+from sync_roms import clean, cli, commands, downloads, inventory, mirroring, names, runtime, s3, store, themeart, ui, usersettings  # noqa: E402
 from helpers import Cmd, DataDir, storage_sets  # noqa: E402,F401
 
 
@@ -521,37 +522,17 @@ class CardsInstallParserTest(unittest.TestCase):
 
 
 class CliTest(unittest.TestCase):
-    def test_translate_maps_subcommands_to_flags(self):
-        t = cli.translate
-        self.assertEqual(t(["upload", "x", "--replace"]), ["--upload", "x", "--replace"])
-        self.assertEqual(t(["upload"]), ["--upload"])
-        self.assertEqual(t(["-n", "mirror", "use", "d"]), ["-n", "--use-mirror", "d"])
-        self.assertEqual(t(["mirror", "d"]), ["--mirror", "d"])
-        self.assertEqual(t(["convert"]), ["--cd"])
-        self.assertEqual(t(["games", "edit"]), ["--edit"])
-        self.assertEqual(t(["cards", "edit"]), ["--edit"])
-        self.assertEqual(t(["edit"]), ["--edit"])
-        self.assertEqual(t(["devices", "steam-deck", "--json"]), ["--devices", "--device-id", "steam-deck", "--json"])
-        self.assertEqual(t(["/Volumes/SD", "-n"]), ["/Volumes/SD", "-n"])
-        self.assertEqual(t(["sync", "/x"]), ["/x"])
+    def test_flags_before_a_commands_folder(self):
+        parse = lambda *a: commands.build_parser().parse_args(list(a))  # noqa: E731
+        self.assertEqual((parse("diff", "-n", "/x").dir, parse("diff", "-n", "/x").dry_run), ("/x", True))
+        self.assertEqual(parse("playlist", "-y", "/Volumes/SD").dir, "/Volumes/SD")
+        self.assertEqual(parse("devices", "-y", "rg35xx").device_id, "rg35xx")
+        args = parse("diff", "--json", "--system", "gba", "/tmp")
+        self.assertEqual((args.dir, args.json, args.system), ("/tmp", True, "gba"))
 
-    def test_flag_between_a_mode_and_its_directory(self):
-        t = cli.translate
-        self.assertEqual(t(["diff", "-n", "/x"]), ["--diff", "/x", "-n"])
-        self.assertEqual(t(["playlist", "-y", "/Volumes/SD"]), ["--m3u", "/Volumes/SD", "-y"])
-        self.assertEqual(t(["mirror", "-y", "/new"]), ["--mirror", "/new", "-y"])
-        self.assertEqual(t(["devices", "-y", "rg35xx"]), ["--devices", "--device-id", "rg35xx", "-y"])
-
-    def test_value_flags_between_a_mode_and_its_directory(self):
-        t = cli.translate
-        self.assertEqual(t(["diff", "--system", "gba", "/tmp"]), ["--diff", "/tmp", "--system", "gba"])
-        self.assertEqual(t(["-n", "diff", "--json", "--system", "gba", "/tmp"]), ["-n", "--diff", "/tmp", "--json", "--system", "gba"])
-        self.assertEqual(t(["--json", "devices"]), ["--json", "--devices"])
-
-    def test_mode_with_a_stray_directory_exits_2(self):
-        args = cli.build_parser().parse_args(["--diff", "-n", "/x"])
+    def test_command_with_a_stray_directory_exits_2(self):
         with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as cm:
-            cli.check_modes(args)
+            commands.run(["diff", "-n", "/x", "/y"])
         self.assertEqual(cm.exception.code, 2)
 
     def test_commands_after_global_flags_route_to_commands_run(self):
@@ -563,17 +544,102 @@ class CliTest(unittest.TestCase):
             run.assert_called_once_with(expect)
 
     def test_conflicting_or_ignored_flags_exit_2(self):
-        parse = lambda *a: cli.check_modes(cli.build_parser().parse_args(list(a)))  # noqa: E731
-        for argv in (["--edit", "--upload"], ["--replace"], ["--edit", "-n"], ["--devices", "-a"], ["--m3u", "--systems", "gba"]):
+        for argv in (["edit", "-n"], ["devices", "-a"], ["playlist", "--system", "gba"], ["edit", "--replace"],
+                     ["scrape", "clean", "--replace"], ["scrape", "review", "-n"], ["scrape", "-a"]):
             with self.subTest(argv=argv), contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as cm:
-                parse(*argv)
+                commands.run(argv)
             self.assertEqual(cm.exception.code, 2)
-        self.assertEqual(parse("--upload", "--replace"), "--upload")
+        self.assertEqual(commands.build_parser().parse_args(["upload", "--replace"]).replace, True)
+        self.assertEqual(commands.build_parser().parse_args(["scrape", "art", "--replace"]).replace, True)
 
-    def test_abbreviations_are_refused(self):
-        with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as cm:
-            cli.build_parser().parse_args(["--up"])
-        self.assertEqual(cm.exception.code, 2)
+
+class PlainCommands(unittest.TestCase):
+    """The plain commands (sync, edit, devices, upload, diff, playlist, prepare, install, mirror) as subcommands."""
+
+    def setUp(self):
+        self.tmp = self.enterContext(tempfile.TemporaryDirectory())
+        os.makedirs(os.path.join(self.tmp, "card"))
+        os.makedirs(os.path.join(self.tmp, "saves"))
+        self.enterContext(contextlib.chdir(self.tmp))  # relative words ("convert", "./saves") resolve here
+        self.enterContext(mock.patch.object(commands, "prepare_storage"))
+        self.addCleanup(setattr, ui, "ASSUME_YES", False)
+
+    def run_cli(self, *argv):
+        with contextlib.redirect_stdout(io.StringIO()):
+            return cli.run(list(argv))
+
+    def fails(self, *argv):
+        err = io.StringIO()
+        with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(err), self.assertRaises(SystemExit) as cm:
+            cli.run(list(argv))
+        return cm.exception.code, err.getvalue()
+
+    def test_bare_card_is_sync(self):
+        card = os.path.join(self.tmp, "card")
+        with mock.patch.object(cli, "sync_card", return_value=0) as sync:
+            self.assertEqual(self.run_cli("-n", card), 0)
+            self.run_cli()
+        self.assertEqual((sync.call_args_list[0].args[0].base_dir, sync.call_args_list[0].args[0].dry_run), (card, True))
+        self.assertIsNone(sync.call_args_list[1].args[0].base_dir)
+
+    def test_path_named_like_command_is_sync(self):
+        with mock.patch.object(cli, "sync_card", return_value=0) as sync:
+            self.run_cli("./saves")
+        self.assertEqual(sync.call_args.args[0].base_dir, "./saves")
+
+    def test_prepare_and_install(self):
+        from sync_roms import chd, external
+        with mock.patch.object(chd, "chd_command", return_value=0) as prepare:
+            self.run_cli("prepare", "/x")
+        self.assertEqual(prepare.call_args.args[0].dir, "/x")
+        with mock.patch.object(external, "install_tools_command", return_value=0) as install:
+            self.run_cli("install")
+        install.assert_called_once_with()
+
+    def test_removed_names_fail(self):
+        with mock.patch.object(cli, "sync_card", side_effect=AssertionError("synced")):
+            code, err = self.fails("convert", "/x")
+            self.assertEqual(code, 2)
+            self.assertIn("convert isn't a command or a folder", err)
+            for argv in (["tools", "install"], ["games", "edit"], ["cards", "edit"]):
+                with self.subTest(argv=argv):
+                    self.assertEqual(self.fails(*argv)[0], 2)
+
+    def test_mirror_forms(self):
+        for argv, action, folder in ((["mirror"], None, None), (["mirror", "/m"], None, "/m"),
+                                     (["mirror", "use", "/m"], "use", "/m"), (["mirror", "clear"], "clear", None)):
+            with self.subTest(argv=argv), mock.patch.object(mirroring, "mirror_command", return_value=0) as mirror:
+                self.run_cli(*argv)
+                self.assertEqual((mirror.call_args.args[0].action, mirror.call_args.args[0].dir), (action, folder))
+
+    def test_doctor_fix_installs_missing_tools(self):
+        from sync_roms import external
+        for found, calls in ((None, 1), ("/bin/tool", 0)):
+            with self.subTest(found=found), mock.patch.object(runtime, "ROOT", self.tmp), \
+                    mock.patch.object(commands, "check_data", lambda: []), \
+                    mock.patch.object(external, "find_tool", lambda tool, f=found: f), \
+                    mock.patch.object(external, "install_tools_command", return_value=0) as install:
+                self.assertEqual(self.run_cli("doctor", "--fix"), 0)
+            self.assertEqual(install.call_count, calls)
+
+    def test_doctor_fix_keeps_doctors_own_failure(self):
+        from sync_roms import external
+        for problems, installed, expect in (([" bad"], 0, 1), ([], 3, 3), ([" bad"], 3, 3)):
+            with self.subTest(problems=problems, installed=installed), mock.patch.object(runtime, "ROOT", self.tmp), \
+                    mock.patch.object(commands, "check_data", lambda p=problems: p), \
+                    mock.patch.object(external, "find_tool", lambda tool: None), \
+                    mock.patch.object(external, "install_tools_command", return_value=installed):
+                self.assertEqual(self.run_cli("doctor", "--fix"), expect)
+
+    def test_global_flags_any_position(self):
+        from sync_roms import upload
+        for argv in (["upload", "/x", "--root", "/r"], ["--root", "/r", "upload", "/x"]):
+            with self.subTest(argv=argv), mock.patch.object(sys, "argv", ["sync-roms", *argv]), \
+                    mock.patch.object(usersettings, "apply_settings"), \
+                    mock.patch.object(upload, "upload_command", return_value=0) as up:
+                self.assertEqual(cli.sync(), 0)
+                self.assertEqual(runtime.OVERRIDES["root"], "/r")
+                self.assertEqual(up.call_args.args[0].dir, "/x")
 
 
 class UiTest(unittest.TestCase):
@@ -948,6 +1014,75 @@ class MirrorThemeUpdateTest(DataDir):
                     inventory.current().etags[themeart.ESDE_COMMIT] = tag
                 self.assertEqual(self.fetched(), [[themeart.ESDE_ARCHIVE], [themeart.ESDE_COMMIT]])
                 self.assertEqual(self.stored_commit(), self.OLD.decode().strip())
+
+
+class Aliases(unittest.TestCase):
+    """Singular and plural names run the main command; `cards layout` replaced `cards convert`."""
+
+    def setUp(self):
+        self.enterContext(mock.patch.object(commands, "prepare_storage"))
+        self.addCleanup(setattr, ui, "ASSUME_YES", False)
+
+    run_cli = PlainCommands.run_cli
+    fails = PlainCommands.fails
+
+    def test_every_alias_runs_main_command(self):
+        parser = commands.build_parser()
+        for alias, argv in (("card", ["list"]), ("game", ["list", "--card", "X"]), ("set", ["edit"]), ("collection", ["edit"]),
+                            ("theme", ["pick"]), ("save", ["manage"]), ("device", []), ("layout", []), ("playlists", ["/x"]),
+                            ("scrapes", ["missing"]), ("downloads", ["pico8"]), ("umount", [])):
+            with self.subTest(alias=alias):
+                main = cli.ALIASES[alias]
+                self.assertIs(parser.parse_args([alias, *argv]).fn, parser.parse_args([main, *argv]).fn)
+        self.assertEqual(set(cli.ALIASES.values()) - set(commands.COMMANDS), set())
+
+    def test_games_set_alias(self):
+        args = commands.build_parser().parse_args(["games", "set", "list", "--card", "X"])
+        self.assertIs(args.fn, commands.games_sets)
+
+    def test_aliases_route_as_commands_not_cards(self):
+        with mock.patch.object(commands, "cards_list", return_value=0) as listed, mock.patch.object(cli, "sync_card", side_effect=AssertionError("synced")):
+            self.run_cli("card")
+            self.run_cli("card", "list")
+        self.assertEqual(listed.call_count, 2)
+
+    def test_scrape_aliases_behave_like_scrape(self):
+        for argv, fn, word in (("scrapes", "scrape_cmd", None), ("scrapes gba", "scrape_cmd", "gba"), ("scrapes missing gba", "scrape_missing_cmd", "gba")):
+            with self.subTest(argv=argv), mock.patch.object(commands, fn, return_value=0) as called:
+                self.run_cli(*argv.split())
+            self.assertEqual(called.call_args.args[0].word, word)
+
+    def test_cards_layout(self):
+        from sync_roms import convert
+        with mock.patch.object(convert, "convert_command", return_value=0) as called:
+            self.run_cli("card", "layout", "C", "--layout", "onion")
+        self.assertEqual((called.call_args.args[0].card, called.call_args.args[0].layout), ("C", "onion"))
+        self.assertEqual(self.fails("cards", "convert", "C", "--layout", "onion")[0], 2)
+
+    def test_help_for_alias(self):
+        def out(*argv):
+            buf = io.StringIO()
+            with contextlib.redirect_stdout(buf):
+                cli.run(list(argv))
+            return buf.getvalue()
+        want = out("help", "cards")
+        self.assertIn("sync-roms cards", want)
+        self.assertEqual(out("help", "card"), want)
+        self.assertEqual(out("card", "--help"), want)
+        self.assertEqual(out("umount", "--help"), out("help", "unmount"))
+
+    def test_quiet_keeps_alias_data_stdout(self):
+        for argv in (["device"], ["layout", "x"], ["card", "list"], ["game", "set", "list"]):
+            with self.subTest(argv=argv):
+                self.assertTrue(cli.is_data_command(argv))
+
+    def test_second_words_list_main_names_only(self):
+        words = commands.second_words()
+        self.assertIn("layout", words["cards"])
+        self.assertNotIn("convert", words["cards"])
+        self.assertIn("sets", words["games"])
+        self.assertNotIn("set", words["games"])
+        self.assertEqual(set(words) & set(cli.ALIASES), set())
 
 
 if __name__ == "__main__":

@@ -136,7 +136,7 @@ class SettingsPermissionsTest(RealDataDirGuard):
         out = io.StringIO()
         with mock.patch.object(commands.runtime, "ROOT", self.tmp.name), mock.patch.object(commands, "check_data", lambda: []), \
                 mock.patch.object(commands.external, "find_tool", lambda tool: "/bin/" + tool), contextlib.redirect_stdout(out):
-            code = commands.doctor_cmd(SimpleNamespace())
+            code = commands.doctor_cmd(SimpleNamespace(fix=False))
         self.assertEqual(code, 1)
         self.assertIn(f"❌ {self.path} isn't valid JSON (line 1, column 2): fix or move it", out.getvalue())
 

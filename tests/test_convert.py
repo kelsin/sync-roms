@@ -669,7 +669,7 @@ class ConvertCommandTest(unittest.TestCase):
         with mock.patch("os.rename", rename):
             self.assertEqual(self.run_cmd(), 3)
         self.assertEqual(self.layout(), "knulli")
-        self.assertIn("run convert again", self.err.getvalue())
+        self.assertIn("run cards layout again", self.err.getvalue())
 
     def decline(self, command):
         with mock.patch("sync_roms.ui.has_terminal", return_value=True), mock.patch("sync_roms.ui.confirm", return_value=False), \

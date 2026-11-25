@@ -1,5 +1,6 @@
-"""Scriptable subcommands: games, sets, collections, themes, download, flash, unmount, mount, cards, saves, layouts, cache, config,
-doctor, guide, check and completion; plus helpers the sync flow uses."""
+"""Scriptable subcommands: sync, edit, devices, upload, diff, playlist, prepare, install, mirror, games, sets, collections, themes,
+download, flash, unmount, mount, cards, saves, layouts, cache, config, doctor, guide, check, scrape and completion; plus helpers the
+sync flow uses."""
 import argparse
 import datetime
 import json
@@ -14,7 +15,9 @@ from . import bezels, budget, cardedit, cardshare, collectionedit, external, gue
 
 
 UNKNOWN_SHOWN = 8  # device ids named in an "unknown device" error
-COMMANDS = {"games", "sets", "collections", "themes", "download", "flash", "unmount", "umount", "mount", "cards", "saves", "layouts", "cache", "config", "doctor", "guide", "check", "completion"}
+COMMANDS = {"sync", "edit", "devices", "upload", "diff", "playlist", "prepare", "install", "mirror", "games", "sets", "collections", "themes", "download", "flash", "unmount", "mount", "cards", "saves", "layouts", "cache", "config", "doctor", "guide", "check", "scrape", "completion"}
+SCRAPE_ACTIONS = ("match", "review", "missing", "art", "clean")
+LITERAL = frozenset()  # the values after `scrape match` that start with a dash: values, never options
 
 
 class Parser(argparse.ArgumentParser):
@@ -23,6 +26,9 @@ class Parser(argparse.ArgumentParser):
         if message == "the following arguments are required: action":  # a command typed without its subcommand
             ui.fail(f"'{name}' needs a subcommand: " + ", ".join(f"{name} {w}" for w in second_words()[name]), 2)
         ui.fail(f"{message}\n   Try 'sync-roms {name} --help'.", 2)
+
+    def _parse_optional(self, arg_string):
+        return None if arg_string in LITERAL else super()._parse_optional(arg_string)
 
 
 # --- Helpers the sync flow uses ----------------------------------------------------------------------
@@ -547,7 +553,7 @@ def cards_clean(args):
     return convert.clean_command(args)
 
 
-def cards_convert(args):
+def cards_layout(args):
     from . import convert
     return convert.convert_command(args)
 
@@ -1197,10 +1203,110 @@ def doctor_cmd(args):
     for tool in ("7z", "chdman", "extract-xiso", "iso2zar"):
         found = external.find_tool(tool)
         line(True if found else None, f"{tool}: {found or 'not installed'}",
-             "sync-roms tools install" if tool in external.TOOL_FORMULAE else external.MANUAL_TOOLS[tool])
+             "sync-roms install" if tool in external.TOOL_FORMULAE else external.MANUAL_TOOLS[tool])
     problems = check_data()
     line(not problems, f"data files in {store.data_dir()}" + ("" if not problems else f": {len(problems)} problem(s)"), "sync-roms check")
+    if args.fix and any(not external.find_tool(tool) for tool in external.TOOL_FORMULAE):
+        return max(external.install_tools_command(), 1 if bad else 0)
     return 1 if bad else 0
+
+
+# --- Storage and the plain commands ---------------------------------------------------------------------
+
+def prepare_storage(args, need_root=True):
+    """Get storage ready for a command that reads it: ask for it on a first run, fail (exit 3) when the storage folder
+    isn't there (need_root=False: the editor goes by the cache alone), and offer to build the storage cache (not with
+    --json, where the JSON document is all that reaches stdout)."""
+    usersettings.ensure_bucket()
+    if need_root and runtime.ROOT and not os.path.isdir(runtime.ROOT):
+        ui.fail(f"The storage folder {runtime.ROOT} isn't there (is the share mounted?)", 3)
+    if not getattr(args, "json", False):
+        inventory.prepare()
+
+
+def refresh_mirror(code, args):
+    """After a command that changed what the lists reference succeeded (not a dry run), refresh the saved mirror so it
+    has the games just added. Returns code."""
+    mirror = usersettings.load_settings().get("mirror")
+    if mirror and not code and not args.dry_run:
+        from . import mirroring
+        print()
+        mirroring.use_mirror(mirror, False)
+    return code
+
+
+def check_card(path):
+    """Exit 2 when path, the card a sync was given, isn't a folder: a mistyped command or a card that isn't mounted."""
+    if not os.path.isdir(os.path.abspath(os.path.expanduser(path))):
+        from . import cli
+        if path in COMMANDS or path in cli.ALIASES:
+            ui.fail(f"{path} is a command: put flags after it (sync-roms {path} --flag), not before", 2)
+        ui.fail(f"{path} isn't a command or a folder (is the card mounted?)\n   See `sync-roms help` for the commands.", 2)
+
+
+def sync_cmd(args):
+    if args.json and not args.dry_run:
+        ui.fail("--json only applies to `devices`, `layouts`, `diff`, `games list`, `cards list` and `sync --dry-run`", 2)
+    if args.base_dir:
+        check_card(args.base_dir)
+    if args.json:  # the JSON document is all that reaches stdout
+        ui.set_output(True, ui.VERBOSE)
+    prepare_storage(args)
+    from . import cli
+    return cli.sync_card(args)
+
+
+def edit_cmd(args):
+    from . import edit
+    prepare_storage(args, need_root=False)
+    return refresh_mirror(edit.edit_manifest(), args)
+
+
+def devices_cmd(args):
+    from . import cli
+    return cli.list_devices(args)
+
+
+def upload_cmd(args):
+    from . import upload
+    prepare_storage(args)
+    return upload.upload_command(args)
+
+
+def diff_cmd(args):
+    from . import diff
+    if args.json:  # the JSON document is all that reaches stdout
+        ui.set_output(True, ui.VERBOSE)
+    prepare_storage(args)
+    return diff.diff_command(args)
+
+
+def playlist_cmd(args):
+    return m3u.m3u_command(args)
+
+
+def prepare_cmd(args):
+    from . import chd
+    return chd.chd_command(args)
+
+
+def install_cmd(args):
+    return external.install_tools_command()
+
+
+def mirror_cmd(args):
+    """`mirror [DIR]`, `mirror use DIR` or `mirror clear`: a first word other than use and clear is the DIR."""
+    if args.action not in (None, "use", "clear"):
+        if args.dir is not None:
+            ui.fail(f"`mirror` takes one folder, not {args.action!r} and {args.dir!r}\n   Try 'sync-roms mirror --help'.", 2)
+        args.action, args.dir = None, args.action
+    if args.action == "use" and args.dir is None:
+        ui.fail("`mirror use` needs the folder to save: `mirror use DIR`\n   Try 'sync-roms mirror --help'.", 2)
+    if args.action == "clear" and args.dir is not None:
+        ui.fail(f"`mirror clear` doesn't take a folder ({args.dir!r})\n   Try 'sync-roms mirror --help'.", 2)
+    from . import mirroring
+    prepare_storage(args)
+    return mirroring.mirror_command(args)
 
 
 # --- Shell completion ----------------------------------------------------------------------------------
@@ -1218,9 +1324,9 @@ def completion_lists(what):
 
 
 def all_flags():
-    """Every option string the CLI accepts (flag parser, subcommand parsers and global flags), sorted."""
+    """Every option string the CLI accepts (the command parsers and global flags), sorted."""
     from . import cli
-    found = set(cli.GLOBAL_VALUE_FLAGS) | {"--quiet", "--verbose"}
+    found = set(cli.GLOBAL_VALUE_FLAGS) | {"--quiet", "--verbose", "--version", "-h", "--help"}
 
     def walk(parser):
         for action in parser._actions:
@@ -1228,9 +1334,8 @@ def all_flags():
             if isinstance(action, argparse._SubParsersAction):
                 for child in action.choices.values():
                     walk(child)
-    walk(cli.build_parser())
     walk(build_parser())
-    return sorted(found - {"--device-id"})  # --device-id is set by `devices ID`, not typed
+    return sorted(found)
 
 
 def collections_edit(args):
@@ -1378,38 +1483,125 @@ def flash_cmd(args):
     return flash.run(args)
 
 
+def _scrape_system(args, name):
+    """Set args.system from the SYSTEM word or --system (not both) of `name`; a path is refused."""
+    word, flag = getattr(args, "word", None), getattr(args, "system", None)
+    if word and flag:
+        ui.fail(f"`{name}` takes one system: `{name} SYSTEM` or `{name} --system SYSTEM`", 2)
+    args.system = word or flag
+    if args.system and any(sep and sep in args.system for sep in (os.sep, os.altsep)):
+        ui.fail(f"`{name}` expects a system id, not a path ({args.system!r})", 2)
+
+
+def _skip_media(args):
+    """Turn --skip-media's comma-separated value into a list of known media types."""
+    if args.skip_media is not None:
+        from . import scrape_online
+        args.skip_media = [t.strip() for t in args.skip_media.split(",") if t.strip()]
+        scrape_online._check_skip(args.skip_media)
+
+
+def scrape_cmd(args):
+    from . import scrape_online
+    if args.set_credentials:
+        if args.word or args.system or args.retry or args.all or args.fill_media or args.skip_media is not None or args.dry_run:
+            ui.fail("--set-credentials only goes with `scrape`, on its own", 2)
+        return scrape_online.set_credentials()
+    _scrape_system(args, "scrape")
+    _skip_media(args)
+    prepare_storage(args)
+    return scrape_online.scrape_command(args)
+
+
+def scrape_match_cmd(args):
+    from . import scrape_online
+    _scrape_system(args, "scrape match")
+    _skip_media(args)
+    prepare_storage(args)
+    return scrape_online.match_command(args)
+
+
+def scrape_review_cmd(args):
+    from . import scrape_review
+    _scrape_system(args, "scrape review")
+    prepare_storage(args)
+    return scrape_review.review_command(args)
+
+
+def scrape_missing_cmd(args):
+    from . import scrape_online
+    _scrape_system(args, "scrape missing")
+    prepare_storage(args)
+    return scrape_online.missing_command(args)
+
+
+def scrape_art_cmd(args):
+    from . import scrape_art
+    _scrape_system(args, "scrape art")
+    prepare_storage(args)
+    return scrape_art.art_command(args)
+
+
+def scrape_clean_cmd(args):
+    from . import scrape_files
+    prepare_storage(args)
+    return refresh_mirror(scrape_files.clean_scrapes(args), args)
+
+
+def scrape_argv(argv):
+    """`scrape` with its action named (bare `scrape [SYSTEM]` gets the parser's own hidden `scrape` action), and LITERAL set
+    to the values after `scrape match` that start with a dash: flags may come first, then the next three words are values."""
+    global LITERAL
+    LITERAL = frozenset()
+    if len(argv) < 2 or argv[1] not in SCRAPE_ACTIONS:
+        return ["scrape", "scrape", *argv[1:]]
+    if argv[1] == "match":
+        tail, n = argv[2:], 0
+        while n < len(tail) and tail[n].startswith("-"):
+            n += 2 if tail[n] == "--skip-media" else 1
+        LITERAL = frozenset(a for a in tail[n:n + 3] if a.startswith("-"))
+    return argv
+
+
 def second_words():
-    """{command: the words that can follow it} for the commands that have subcommands."""
-    from . import cli
-    words = {}
-    for key in cli.LEGACY:
-        if len(key) > 1:
-            words.setdefault(key[0], []).append(key[1])
-    words["games"] = sorted(set(words.get("games", [])) | {"list", "add", "remove", "full", "sets", "export", "import"})
-    words["sets"] = ["edit"]
-    words["collections"] = ["edit"]
-    words["themes"] = ["update", "pick", "build", "publish", "palettes"]
-    words["download"] = ["pico8"]
-    words["cards"] = ["edit", "list", "new", "set", "rename", "convert", "install", "clean", "delete", "copy", "export", "import"]
-    words["saves"] = ["stash", "apply", "manage"]
-    words["config"] = ["show", "path", "set", "unset", "import", "apply"]
-    words["cache"] = ["update"]
-    words["completion"] = ["bash", "zsh", "fish"]
+    """{command: the words that can follow it} for the commands that have subcommands, from the parser."""
+    words = {"mirror": ["use", "clear"]}  # its action is a free word, or a folder
+    for command, parser in _subparsers(build_parser()).items():
+        sub = _subparsers(parser)
+        if sub:
+            words[command] = [w for w in sub if w != command]  # `scrape`'s hidden action is named after it
+            continue
+        for action in parser._actions:
+            if action.dest in ("action", "shell") and action.choices:
+                words[command] = [w for w in action.choices if w != "list"]  # `completion list` is internal
     return words
+
+
+def _subparsers(parser):
+    """{name: parser} of a parser's subcommands by their main names (not aliases), in the order they were added."""
+    for action in parser._actions:
+        if isinstance(action, argparse._SubParsersAction):
+            main = {}
+            for name, p in action.choices.items():  # an alias is a second key for the same parser
+                if all(p is not q for q in main.values()):
+                    main[name] = p
+            return main
+    return {}
 
 
 def completion_cmd(args):
     if args.shell == "list":
         print("\n".join(completion_lists(args.what or "")))
         return 0
-    from .cli import SUBCOMMANDS
+    from .cli import ALIASES, SUBCOMMANDS
+    spellings = {name: "|".join([name, *(a for a, m in ALIASES.items() if m == name)]) for name in SUBCOMMANDS}  # a second word completes after an alias too
     subs = " ".join(SUBCOMMANDS)
     flag_list = all_flags()
     flags = " ".join(flag_list)
     second = second_words()
     settings = " ".join(CONFIG_KINDS)
     if args.shell in ("bash", "zsh"):
-        cases = "\n".join(f"      {name}) COMPREPLY=($(compgen -W \"{' '.join(w)}\" -- \"$cur\")); return;;" for name, w in second.items())
+        cases = "\n".join(f"      {spellings.get(name, name)}) COMPREPLY=($(compgen -W \"{' '.join(w)}\" -- \"$cur\")); return;;" for name, w in second.items())
         script = f'''_sync_roms() {{
   local cur="${{COMP_WORDS[COMP_CWORD]}}" prev="${{COMP_WORDS[COMP_CWORD-1]}}" cmd="${{COMP_WORDS[1]}}"
   case "$prev" in
@@ -1426,7 +1618,7 @@ def completion_cmd(args):
 {cases}
     esac
   fi
-  if [ "$COMP_CWORD" -eq 3 ] && [ "$cmd" = games ]; then
+  if [ "$COMP_CWORD" -eq 3 ] && [[ "$cmd" == game* ]]; then
     case "${{COMP_WORDS[2]}}" in add|remove|full) COMPREPLY=($(compgen -W "$(sync-roms completion list systems)" -- "$cur")); return;; esac
   fi
   if [ "$COMP_CWORD" -eq 3 ] && [ "$cmd" = config ]; then
@@ -1438,10 +1630,12 @@ complete -o filenames -F _sync_roms sync-roms
 '''
         print(("autoload -U +X bashcompinit && bashcompinit\n" if args.shell == "zsh" else "") + script, end="")
     else:
+        def first(words):  # the first word is one of these (`__fish_seen_subcommand_from` matches any word: `cards set` would count as `sets`)
+            return f"test (count (commandline -opc)) -ge 2; and contains -- (commandline -opc)[2] {words}"
         lines = [f'complete -c sync-roms -f -n __fish_use_subcommand -a "{subs}"']
         for name, w in second.items():
-            lines.append(f'complete -c sync-roms -f -n "__fish_seen_subcommand_from {name}; and not __fish_seen_subcommand_from {" ".join(w)}" -a "{" ".join(w)}"')
-        lines.append(f'complete -c sync-roms -f -n "__fish_seen_subcommand_from config; and __fish_seen_subcommand_from set unset" -a "{settings}"')
+            lines.append(f'complete -c sync-roms -f -n "{first(spellings.get(name, name).replace("|", " "))}; and not __fish_seen_subcommand_from {" ".join(w)}" -a "{" ".join(w)}"')
+        lines.append(f'complete -c sync-roms -f -n "{first("config")}; and __fish_seen_subcommand_from set unset" -a "{settings}"')
         values = {"card": "cards", "device": "devices", "layout": "layouts", "system": "systems"}
         for flag in (f for f in flag_list if f.startswith("--")):
             name = flag[2:]
@@ -1466,8 +1660,14 @@ def _positive_int(text):
 
 
 def build_parser():
+    from .cli import ALIASES
     ap = Parser(prog="sync-roms", add_help=False, allow_abbrev=False)
     sub = ap.add_subparsers(dest="command")
+    add_parser = sub.add_parser
+
+    def named(name, **kw):
+        return add_parser(name, aliases=[a for a, m in ALIASES.items() if m == name], **kw)
+    sub.add_parser = named
 
     def common(p, card=True):
         p.add_argument("-n", "--dry-run", action="store_true")
@@ -1475,13 +1675,31 @@ def build_parser():
         if card:
             p.add_argument("--card")
 
+    p = sub.add_parser("sync", allow_abbrev=False); common(p, card=False); p.add_argument("base_dir", nargs="?")
+    p.add_argument("-a", "--ask", action="store_true"); p.add_argument("--json", action="store_true"); p.add_argument("--device"); p.add_argument("--layout")
+    for flag in ("--guest", "--no-clean", "--no-delete", "--no-eject"):
+        p.add_argument(flag, action="store_true")
+    p.set_defaults(fn=sync_cmd)
+    p = sub.add_parser("edit", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=edit_cmd)
+    p = sub.add_parser("devices", allow_abbrev=False); common(p, card=False); p.add_argument("device_id", nargs="?"); p.add_argument("--json", action="store_true")
+    p.set_defaults(fn=devices_cmd)
+    p = sub.add_parser("upload", allow_abbrev=False); common(p, card=False); p.add_argument("dir", nargs="?"); p.add_argument("--replace", action="store_true")
+    p.set_defaults(fn=upload_cmd)
+    p = sub.add_parser("diff", allow_abbrev=False); common(p, card=False); p.add_argument("dir", nargs="?"); p.add_argument("--system"); p.add_argument("--json", action="store_true")
+    p.set_defaults(fn=diff_cmd)
+    for name, fn in (("playlist", playlist_cmd), ("prepare", prepare_cmd)):
+        p = sub.add_parser(name, allow_abbrev=False); common(p, card=False); p.add_argument("dir", nargs="?"); p.set_defaults(fn=fn)
+    p = sub.add_parser("install", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=install_cmd)
+    p = sub.add_parser("mirror", allow_abbrev=False); common(p, card=False); p.add_argument("action", nargs="?", metavar="use|clear|DIR"); p.add_argument("dir", nargs="?")
+    p.set_defaults(fn=mirror_cmd)
+
     games = sub.add_parser("games", add_help=False, allow_abbrev=False)
     gsub = games.add_subparsers(dest="action", required=True)
     p = gsub.add_parser("list", allow_abbrev=False); common(p); p.add_argument("--json", action="store_true"); p.set_defaults(fn=games_list)
     p = gsub.add_parser("add", allow_abbrev=False); common(p); p.add_argument("system"); p.add_argument("keys", nargs="+"); p.set_defaults(fn=games_add)
     p = gsub.add_parser("remove", allow_abbrev=False); common(p); p.add_argument("system"); p.add_argument("keys", nargs="+"); p.set_defaults(fn=games_remove)
     p = gsub.add_parser("full", allow_abbrev=False); common(p); p.add_argument("system"); p.add_argument("state", choices=["on", "off"]); p.set_defaults(fn=games_full)
-    p = gsub.add_parser("sets", allow_abbrev=False); common(p); p.add_argument("verb", choices=["list", "add", "remove"])
+    p = gsub.add_parser("sets", aliases=["set"], allow_abbrev=False); common(p); p.add_argument("verb", choices=["list", "add", "remove"])
     p.add_argument("set_id", nargs="?"); p.set_defaults(fn=games_sets)
     p = gsub.add_parser("export", allow_abbrev=False); common(p); p.set_defaults(fn=games_export)
     p = gsub.add_parser("import", allow_abbrev=False); common(p); p.add_argument("file"); p.set_defaults(fn=games_import)
@@ -1514,7 +1732,7 @@ def build_parser():
     p.add_argument("--count", type=_positive_int, metavar="N"); p.set_defaults(fn=download_pico8)
 
     p = sub.add_parser("flash", add_help=False, allow_abbrev=False); common(p, card=False); p.set_defaults(fn=flash_cmd)
-    p = sub.add_parser("unmount", aliases=["umount"], add_help=False, allow_abbrev=False); common(p, card=False); p.set_defaults(fn=unmount_cmd)
+    p = sub.add_parser("unmount", add_help=False, allow_abbrev=False); common(p, card=False); p.set_defaults(fn=unmount_cmd)
     p = sub.add_parser("mount", add_help=False, allow_abbrev=False); common(p, card=False); p.set_defaults(fn=mount_cmd)
 
     cards = sub.add_parser("cards", add_help=False, allow_abbrev=False)
@@ -1524,8 +1742,8 @@ def build_parser():
         p = csub.add_parser(name, allow_abbrev=False); common(p, card=False); p.add_argument("name")
         p.add_argument("--device"); p.add_argument("--layout"); p.add_argument("--size", help="the card's size, e.g. 256, 512GB, 1TB"); p.set_defaults(fn=lambda a, c=create: cards_save_setup(a, c))
     p = csub.add_parser("rename", allow_abbrev=False); common(p, card=False); p.add_argument("old"); p.add_argument("new"); p.set_defaults(fn=cards_rename)
-    p = csub.add_parser("convert", allow_abbrev=False); common(p, card=False); p.add_argument("card", nargs="?")
-    p.add_argument("--layout", required=True); p.set_defaults(fn=cards_convert)
+    p = csub.add_parser("layout", allow_abbrev=False); common(p, card=False); p.add_argument("card", nargs="?")
+    p.add_argument("--layout", required=True); p.set_defaults(fn=cards_layout)
     p = csub.add_parser("install", allow_abbrev=False); common(p, card=False); p.add_argument("card", nargs="?"); p.set_defaults(fn=cards_install)
     p = csub.add_parser("clean", allow_abbrev=False); common(p, card=False); p.add_argument("card", nargs="?"); p.set_defaults(fn=cards_clean)
     p = csub.add_parser("delete", allow_abbrev=False); common(p, card=False); p.add_argument("name"); p.set_defaults(fn=cards_delete)
@@ -1544,22 +1762,48 @@ def build_parser():
     p = sub.add_parser("config", allow_abbrev=False); common(p, card=False); p.add_argument("action", choices=["show", "path", "set", "unset", "import", "apply"], nargs="?", default="show")
     p.add_argument("name", nargs="?"); p.add_argument("value", nargs="?"); p.set_defaults(fn=config_cmd)
     p = sub.add_parser("cache", allow_abbrev=False); common(p, card=False); p.add_argument("action", choices=["update"], nargs="?"); p.add_argument("--full", action="store_true"); p.set_defaults(fn=cache_cmd)
-    p = sub.add_parser("doctor", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=doctor_cmd)
+    p = sub.add_parser("doctor", allow_abbrev=False); common(p, card=False); p.add_argument("--fix", action="store_true"); p.set_defaults(fn=doctor_cmd)
     p = sub.add_parser("guide", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=guide_cmd)
     p = sub.add_parser("check", allow_abbrev=False); common(p, card=False); p.add_argument("--bucket-keys", action="store_true"); p.set_defaults(fn=check_cmd)
     p = sub.add_parser("completion", allow_abbrev=False); common(p, card=False); p.add_argument("shell", choices=["bash", "zsh", "fish", "list"])
     p.add_argument("what", nargs="?"); p.set_defaults(fn=completion_cmd)
+
+    scrape = sub.add_parser("scrape", add_help=False, allow_abbrev=False)
+    scsub = scrape.add_subparsers(dest="action", required=True)
+    p = scsub.add_parser("scrape", allow_abbrev=False); common(p, card=False)  # bare `scrape`, named by scrape_argv
+    p.add_argument("word", nargs="?", metavar="SYSTEM"); p.add_argument("--system")
+    for flag in ("--retry", "--all", "--fill-media", "--set-credentials"):
+        p.add_argument(flag, action="store_true")
+    p.add_argument("--skip-media"); p.set_defaults(fn=scrape_cmd, action=None)
+    p = scsub.add_parser("match", allow_abbrev=False); common(p, card=False)
+    p.add_argument("system", metavar="SYSTEM"); p.add_argument("rom", metavar="ROM"); p.add_argument("game", metavar="GAME")
+    p.add_argument("--translated", action="store_true"); p.add_argument("--skip-media"); p.set_defaults(fn=scrape_match_cmd)
+    p = scsub.add_parser("review", allow_abbrev=False); common(p, card=False); p.add_argument("word", nargs="?", metavar="SYSTEM")
+    p.set_defaults(fn=scrape_review_cmd)
+    p = scsub.add_parser("missing", allow_abbrev=False); common(p, card=False); p.add_argument("word", nargs="?", metavar="SYSTEM")
+    p.add_argument("--system"); p.add_argument("--all", action="store_true"); p.set_defaults(fn=scrape_missing_cmd)
+    p = scsub.add_parser("art", allow_abbrev=False); common(p, card=False); p.add_argument("word", nargs="?", metavar="SYSTEM")
+    p.add_argument("--system"); p.add_argument("--for", dest="target", choices=["onion", "spruce", "both"], default="both")
+    p.add_argument("--workers", type=_positive_int, metavar="N"); p.add_argument("--replace", action="store_true"); p.set_defaults(fn=scrape_art_cmd)
+    p = scsub.add_parser("clean", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=scrape_clean_cmd)
     return ap
 
 
 def run(argv):
+    global LITERAL
+    LITERAL = frozenset()  # scrape_argv sets it for this call only
+    from .cli import canonical
+    argv = [canonical(argv[0]), *argv[1:]]  # an alias runs as its main command
     if argv[0] == "cards" and (len(argv) == 1 or argv[1].startswith("-")):  # bare `cards` is `cards list`
         argv = ["cards", "list", *argv[1:]]
+    if argv[0] == "scrape":
+        argv = scrape_argv(argv)
     ap = build_parser()
     ap.prog = f"sync-roms {argv[0]}"  # its errors (unrecognized arguments) point at the command's help
     args = ap.parse_args(argv)
-    if getattr(args, "dry_run", False) and not (args.fn is config_cmd and args.action == "apply") and (args.fn in (games_list, games_export, layouts_cmd, config_cmd, cache_cmd, doctor_cmd, guide_cmd, check_cmd, completion_cmd, themes_pick, themes_build, themes_palettes)
-                                            or (args.fn is games_sets and args.verb == "list")):
+    if getattr(args, "dry_run", False) and not (args.fn is config_cmd and args.action == "apply") and (args.fn in (games_list, games_export, layouts_cmd, config_cmd, cache_cmd, doctor_cmd, guide_cmd, check_cmd, completion_cmd, themes_pick, themes_build, themes_palettes,
+                                                          edit_cmd, install_cmd, devices_cmd, diff_cmd, scrape_review_cmd, scrape_missing_cmd)
+                                            or (args.fn is games_sets and args.verb == "list") or (args.fn is mirror_cmd and args.action == "clear")):
         name = " ".join(w for w in (args.command, getattr(args, "action", None), getattr(args, "verb", None)) if w)
         if args.fn is config_cmd and args.action in ("set", "unset"):
             ui.fail(f"--dry-run can't preview `{name}`: run it without --dry-run to change settings.json", 2)

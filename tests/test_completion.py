@@ -62,14 +62,22 @@ class BashCompletion(unittest.TestCase):
         self.assertIn("--profile", self.complete("sync-roms", "--pro"))
         self.assertEqual(self.complete("sync-roms", "check", "--bucket-"), ["--bucket-keys"])
 
+    def test_completion_main_names_only(self):
+        offered = self.complete("sync-roms", "")
+        self.assertIn("cards", offered)
+        for alias in ("card", "game", "set", "scrapes", "umount"):
+            self.assertNotIn(alias, offered)
+
     def test_subcommands(self):
         self.assertIn("sets", self.complete("sync-roms", "games", ""))
-        self.assertEqual(self.complete("sync-roms", "clean", "s"), ["scrapes"])
+        self.assertEqual(self.complete("sync-roms", "scrape", "c"), ["clean"])
         self.assertIn("art", self.complete("sync-roms", "scrape", ""))
         self.assertEqual(self.complete("sync-roms", "scrape", "art", "--fo"), ["--for"])
         self.assertEqual(self.complete("sync-roms", "scrape", "art", "--wor"), ["--workers"])
         self.assertEqual(self.complete("sync-roms", "games", "add", "gb"), ["gba", "gbc"])
-        self.assertIn("convert", self.complete("sync-roms", "cards", "con"))
+        self.assertIn("layout", self.complete("sync-roms", "cards", "lay"))
+        self.assertNotIn("convert", self.complete("sync-roms", "cards", ""))
+        self.assertEqual(self.complete("sync-roms", "card", "lay"), ["layout"])
         self.assertEqual(self.complete("sync-roms", "config", "s"), ["show", "set"])
         self.assertEqual(self.complete("sync-roms", "config", "im"), ["import"])
         self.assertEqual(self.complete("sync-roms", "config", "unset", "surprise_t"), ["surprise_ttl_days"])
@@ -83,10 +91,19 @@ class OtherShells(unittest.TestCase):
         text = script_for("fish")
         self.assertIn('-l card -x -a "(sync-roms completion list cards)"', text)
         self.assertIn('-l system -x -a "(sync-roms completion list systems)"', text)
-        self.assertIn('"__fish_seen_subcommand_from config; and __fish_seen_subcommand_from set unset" -a "bucket ', text)
+        self.assertIn('(commandline -opc)[2] config; and __fish_seen_subcommand_from set unset" -a "bucket ', text)
         for flag in commands.all_flags():
             if flag.startswith("--"):
                 self.assertIn(f"-l {flag[2:]}", text)
+
+    def test_fish_second_words_are_tied_to_the_first_word(self):
+        # `set` is sets' alias and cards' and config's second word: a "seen anywhere" test offers `edit` after `cards set`
+        text = script_for("fish")
+        self.assertNotIn("__fish_seen_subcommand_from sets set", text)
+        self.assertNotIn("__fish_seen_subcommand_from cards card", text)
+        self.assertIn("contains -- (commandline -opc)[2] sets set", text)
+        self.assertIn("contains -- (commandline -opc)[2] cards card", text)
+        self.assertIn("contains -- (commandline -opc)[2] config;", text)
 
 
 if __name__ == "__main__":

@@ -1,3 +1,4 @@
+import contextlib
 import getpass
 import io
 import json
@@ -14,209 +15,191 @@ sys.path.insert(0, os.path.dirname(__file__))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from realdir_guard import RealDataDirGuard  # noqa: E402
-from sync_roms import cli, scrape_online, screenscraper, store, usersettings  # noqa: E402
+from sync_roms import cli, commands, scrape_online, screenscraper, store, usersettings  # noqa: E402
 from helpers import DataDir, Isolated, script_for  # noqa: E402
 
 
-class Translate(unittest.TestCase):
-    def test_scrape(self):
-        self.assertEqual(cli.translate(["scrape"]), ["--scrape"])
-        self.assertEqual(cli.translate(["scrape", "--system", "gba", "--retry", "--skip-media", "manuals,covers", "-n"]),
-                         ["--scrape", "--system", "gba", "--retry", "--skip-media", "manuals,covers", "-n"])
-        self.assertEqual(cli.translate(["scrape", "--set-credentials"]), ["--scrape", "--set-credentials"])
+class ScrapeRun(Isolated):
+    """Runs `sync-roms scrape ...` with storage and every scrape command mocked, recording which ran and with what."""
 
-    def test_match(self):
-        self.assertEqual(cli.translate(["scrape", "match", "gba", "a.zip", "123"]), ["--scrape-match", "gba", "a.zip", "123"])
-        self.assertEqual(cli.translate(["scrape", "match", "-n", "gba", "a b.zip", "Metroid Fusion"]),
-                         ["--scrape-match", "gba", "a b.zip", "Metroid Fusion", "-n"])
+    def run_scrape(self, *argv):
+        from sync_roms import scrape_art, scrape_files, scrape_review
+        seen = {}
 
-    def test_scrape_review_subcommand_translates(self):
-        self.assertEqual(cli.translate(["scrape", "review", "nds"]), ["--scrape-review", "nds"])
-        self.assertEqual(cli.translate(["scrape", "review"]), ["--scrape-review"])
-        self.assertEqual(cli.build_parser().parse_args(cli.translate(["scrape", "review"])).scrape_review, "")
+        def record(name, code=0):
+            return lambda args=None: seen.update(fn=name, args=args) or code
+        code, out, err = self.sync(list(argv), {"bucket": "b"},
+                                   p=(commands, "prepare_storage", mock.Mock()),
+                                   s=(scrape_online, "scrape_command", record("scrape")),
+                                   m=(scrape_online, "match_command", record("match")),
+                                   mi=(scrape_online, "missing_command", record("missing")),
+                                   c=(scrape_online, "set_credentials", record("set_credentials")),
+                                   r=(scrape_review, "review_command", record("review")),
+                                   a=(scrape_art, "art_command", record("art")),
+                                   cl=(scrape_files, "clean_scrapes", record("clean")))
+        return code, seen.get("fn"), seen.get("args"), err
 
-    def test_scrape_missing_subcommand_translates(self):
-        self.assertEqual(cli.translate(["scrape", "missing", "gb"]), ["--scrape-missing", "gb"])
-        self.assertEqual(cli.translate(["scrape", "missing", "--all"]), ["--scrape-missing", "--all"])
-        self.assertEqual(cli.build_parser().parse_args(cli.translate(["scrape", "missing"])).scrape_missing, "")
+    def ran(self, *argv):
+        code, fn, args, err = self.run_scrape(*argv)
+        self.assertEqual((code, err), (0, ""))
+        return fn, args
 
-    def test_scrape_art_subcommand_translates(self):
-        self.assertEqual(cli.translate(["scrape", "art"]), ["--scrape-art"])
-        self.assertEqual(cli.translate(["scrape", "art", "gba", "--for", "spruce", "-n"]),
-                         ["--scrape-art", "gba", "--for", "spruce", "-n"])
-        self.assertEqual(cli.translate(["scrape", "art", "--for", "spruce", "gba"]), ["--scrape-art", "gba", "--for", "spruce"])
-        self.assertEqual(cli.build_parser().parse_args(cli.translate(["scrape", "art"])).scrape_art, "")
+    def refused(self, *argv, message=None):
+        code, fn, _, err = self.run_scrape(*argv)
+        self.assertEqual(code, 2, err)
+        self.assertIsNone(fn, f"{argv} ran {fn}")
+        if message:
+            self.assertIn(message, err)
+        return err
 
-    def test_scrape_art_flags(self):
-        args = cli.build_parser().parse_args(cli.translate(["scrape", "art", "gba", "--for", "spruce", "--dry-run"]))
-        self.assertEqual(cli.check_modes(args), "--scrape-art")
-        self.assertEqual((args.scrape_art, args.target, args.dry_run), ("gba", "spruce", True))
-        args = cli.build_parser().parse_args(cli.translate(["scrape", "art", "--system", "gba"]))
-        self.assertEqual(cli.check_modes(args), "--scrape-art")
-        self.assertEqual(args.scrape_art, "gba")
-        args = cli.build_parser().parse_args(cli.translate(["scrape", "art", "--replace", "--workers", "4"]))
-        self.assertEqual(cli.check_modes(args), "--scrape-art")
-        self.assertEqual((args.replace, args.workers, args.target), (True, 4, "both"))
 
-    def test_for_and_workers_only_apply_to_scrape_art(self):
-        for argv in (["scrape", "--for", "onion"], ["scrape", "missing", "--workers", "2"]):
-            with self.subTest(argv=argv), self.assertRaises(SystemExit) as e:
-                cli.check_modes(cli.build_parser().parse_args(cli.translate(argv)))
-            self.assertEqual(e.exception.code, 2)
-
-    def test_bad_for_and_workers_values_are_refused(self):
-        for argv in (["scrape", "art", "--for", "bogus"], ["scrape", "art", "--workers", "0"]):
-            with self.subTest(argv=argv), self.assertRaises(SystemExit) as e:
-                cli.check_modes(cli.build_parser().parse_args(cli.translate(argv)))
-            self.assertEqual(e.exception.code, 2)
-
-    def test_match_values_starting_with_a_dash(self):
-        self.assertEqual(cli.translate(["scrape", "match", "gba", "a.zip", "-1"]), ["--scrape-match", "gba", "a.zip", "-1"])
-        self.assertEqual(cli.translate(["scrape", "match", "gba", "-x.zip", "-Foo", "-n"]),
-                         ["--scrape-match", "gba", "-x.zip", "-Foo", "-n"])
-        self.assertEqual(cli.translate(["scrape", "match", "gba", "-x.zip", "Foo"]), ["--scrape-match", "gba", "-x.zip", "Foo"])
-        for argv, want in ((["scrape", "match", "gba", "a.zip", "-1"], ["gba", "a.zip", "-1"]),
-                           (["scrape", "match", "-n", "gba", "-x.zip", "-Foo"], ["gba", "-x.zip", "-Foo"])):
+class Forms(ScrapeRun):
+    def test_scrape_forms(self):
+        for argv, fn, system in ((["scrape"], "scrape", None), (["scrape", "gba"], "scrape", "gba"),
+                                 (["scrape", "--system", "gba"], "scrape", "gba"), (["scrape", "missing", "gba"], "missing", "gba"),
+                                 (["scrape", "missing", "--system", "gba"], "missing", "gba"), (["scrape", "missing"], "missing", None),
+                                 (["scrape", "review", "nds"], "review", "nds"), (["scrape", "review"], "review", None),
+                                 (["scrape", "art", "--system", "gba"], "art", "gba"), (["scrape", "art", "gba"], "art", "gba")):
             with self.subTest(argv=argv):
-                args = cli.build_parser().parse_args(cli.translate(argv))
-                self.assertEqual(args.scrape_match, want)
-                self.assertEqual(cli.check_modes(args), "--scrape-match")
+                ran, args = self.ran(*argv)
+                self.assertEqual((ran, args.system), (fn, system))
+        self.assertEqual(self.ran("scrape", "art", "gba", "--for", "spruce")[1].target, "spruce")
+        self.assertEqual(self.ran("scrape", "art", "--for", "spruce", "gba")[1].system, "gba")
+        self.assertEqual(self.ran("scrape", "art")[1].target, "both")
 
-    def test_parses(self):
-        args = cli.build_parser().parse_args(cli.translate(["scrape", "match", "-n", "gba", "a.zip", "123"]))
-        self.assertEqual(args.scrape_match, ["gba", "a.zip", "123"])
+    def test_scrape_flags(self):
+        _, args = self.ran("scrape", "--system", "gba", "--retry", "-n", "--skip-media", "covers, manuals", "--all", "--fill-media")
+        self.assertEqual((args.system, args.retry, args.dry_run, args.skip_media, args.all, args.fill_media),
+                         ("gba", True, True, ["covers", "manuals"], True, True))
+        _, args = self.ran("scrape", "art", "gba", "--for", "spruce", "--dry-run")
+        self.assertEqual((args.system, args.target, args.dry_run), ("gba", "spruce", True))
+        _, args = self.ran("scrape", "art", "--replace", "--workers", "4")
+        self.assertEqual((args.replace, args.workers, args.target), (True, 4, "both"))
+        _, args = self.ran("scrape", "missing", "gb", "--all")
+        self.assertTrue(args.all)
+        _, args = self.ran("-n", "scrape", "art")
         self.assertTrue(args.dry_run)
 
+    def test_scrape_two_systems_fails(self):
+        for argv, name in ((["scrape", "gba", "--system", "nes"], "scrape"), (["scrape", "missing", "gb", "--system", "nes"], "scrape missing"),
+                           (["scrape", "art", "gb", "--system", "nes"], "scrape art")):
+            with self.subTest(argv=argv):
+                self.refused(*argv, message=f"`{name}` takes one system: `{name} SYSTEM` or `{name} --system SYSTEM`")
 
-class Modes(unittest.TestCase):
-    def modes(self, *argv):
-        return cli.check_modes(cli.build_parser().parse_args(cli.translate(list(argv))))
+    def test_scrape_match(self):
+        fn, args = self.ran("scrape", "match", "gba", "a.zip", "Metroid")
+        self.assertEqual((fn, args.system, args.rom, args.game, args.translated), ("match", "gba", "a.zip", "Metroid", False))
+        _, args = self.ran("scrape", "match", "-n", "gba", "a b.zip", "Metroid Fusion")
+        self.assertEqual((args.system, args.rom, args.game, args.dry_run), ("gba", "a b.zip", "Metroid Fusion", True))
+        for argv in (["scrape", "match", "gba", "a.zip", "7", "--translated"], ["scrape", "match", "--translated", "gba", "a.zip", "7"]):
+            with self.subTest(argv=argv):
+                _, args = self.ran(*argv)
+                self.assertEqual((args.system, args.rom, args.game, args.translated), ("gba", "a.zip", "7", True))
+        _, args = self.ran("scrape", "match", "gba", "a.zip", "7", "--skip-media", "covers")
+        self.assertEqual(args.skip_media, ["covers"])
+        self.assertEqual(self.ran("scrape", "match", "gba", "Disc 1/a.cue", "1")[1].rom, "Disc 1/a.cue")  # a ROM may be in a subfolder
 
-    def refused(self, *argv):
-        with self.assertRaises(SystemExit) as cm, mock.patch("sys.stderr", io.StringIO()):
-            self.modes(*argv)
-        self.assertEqual(cm.exception.code, 2)
+    def test_scrape_match_dash_values(self):
+        for argv, want in ((["scrape", "match", "gba", "-odd.zip", "-5"], ("gba", "-odd.zip", "-5")),
+                           (["scrape", "match", "gba", "a.zip", "-1"], ("gba", "a.zip", "-1")),
+                           (["scrape", "match", "gba", "-x.zip", "-Foo", "-n"], ("gba", "-x.zip", "-Foo")),
+                           (["scrape", "match", "-n", "gba", "-x.zip", "-Foo"], ("gba", "-x.zip", "-Foo"))):
+            with self.subTest(argv=argv):
+                _, args = self.ran(*argv)
+                self.assertEqual((args.system, args.rom, args.game), want)
 
-    def test_valid(self):
-        self.assertEqual(self.modes("scrape", "--system", "gba", "--retry", "--skip-media", "covers,manuals"), "--scrape")
-        self.assertEqual(self.modes("scrape", "match", "gba", "a.zip", "1"), "--scrape-match")
-        self.assertEqual(self.modes("scrape", "--set-credentials"), "--scrape")
-        self.assertEqual(self.modes("scrape", "--all", "--system", "gba"), "--scrape")
-        self.assertEqual(self.modes("diff", "--system", "gba"), "--diff")
-        self.assertEqual(self.modes("scrape", "review", "gb"), "--scrape-review")
-        self.assertEqual(self.modes("scrape", "missing", "gb", "--all"), "--scrape-missing")
+    def test_scrape_match_needs_three_values(self):
+        err = self.refused("scrape", "match", "gba")
+        self.assertIn("the following arguments are required: ROM, GAME", err)
+        self.assertIn("Try 'sync-roms scrape --help'.", err)
+
+    def test_scrape_clean(self):
+        fn, args = self.ran("scrape", "clean", "-n")
+        self.assertEqual((fn, args.dry_run), ("clean", True))
+        self.assertEqual(self.ran("scrape", "clean", "-y")[0], "clean")
+        self.refused("scrape", "clean", "/some/dir", message="unrecognized arguments: /some/dir")
+        self.enterContext(contextlib.chdir(self.enterContext(tempfile.TemporaryDirectory())))  # no `clean` folder to sync
+        self.refused("clean", "scrapes", message="clean isn't a command or a folder")
+        self.refused("clean", "scrapes", "-n")
+
+    def test_set_credentials_alone(self):
+        self.assertEqual(self.ran("scrape", "--set-credentials")[0], "set_credentials")
+        for argv in (["scrape", "--set-credentials", "--retry"], ["scrape", "--set-credentials", "--all"],
+                     ["scrape", "--set-credentials", "--dry-run"], ["scrape", "gba", "--set-credentials"],
+                     ["scrape", "--set-credentials", "--system", "gba"], ["scrape", "--set-credentials", "--skip-media", "covers"]):
+            with self.subTest(argv=argv):
+                self.refused(*argv, message="--set-credentials only goes with `scrape`, on its own")
+
+    def test_set_credentials_needs_no_storage(self):
+        prepare = mock.Mock()
+        ran = mock.Mock(return_value=0)
+        code, _, _ = self.sync(["scrape", "--set-credentials"], p=(commands, "prepare_storage", prepare),
+                               c=(scrape_online, "set_credentials", ran))
+        self.assertEqual(code, 0)
+        ran.assert_called_once()
+        prepare.assert_not_called()
+
+    def test_scrape_reads_storage_first(self):
+        prepare = mock.Mock()
+        code, _, _ = self.sync(["scrape", "gba"], p=(commands, "prepare_storage", prepare), s=(scrape_online, "scrape_command", lambda a: 0))
+        self.assertEqual(code, 0)
+        prepare.assert_called_once()
 
     def test_refusals(self):
-        self.refused("--retry")
-        self.refused("--skip-media", "covers")
-        self.refused("--set-credentials")
-        self.refused("--all")
-        self.refused("scrape", "--set-credentials", "--all")
-        self.refused("--system", "gba")
-        self.refused("diff", "--retry")
-        self.refused("--scrape", "--upload")
-        self.refused("--scrape", "--scrape-review")
-        self.refused("scrape", "review", "--retry")
-        self.refused("scrape", "missing", "--retry")
-        self.refused("scrape", "missing", "--dry-run")
-        self.refused("scrape", "missing", "gb", "--system", "nes")
-        self.refused("--scrape", "--scrape-match", "gba", "a", "1")
-        self.refused("scrape", "match", "--retry", "gba", "a.zip", "1")
-        self.refused("scrape", "match", "--system", "gba", "gba", "a.zip", "1")
-        self.refused("scrape", "--set-credentials", "--retry")
-        self.refused("scrape", "--set-credentials", "--dry-run")
-        self.refused("scrape", "gba", "--system", "nes")
+        for argv in (["scrape", "review", "--retry"], ["scrape", "missing", "--retry"], ["scrape", "match", "--retry", "gba", "a.zip", "1"],
+                     ["scrape", "match", "--system", "gba", "gba", "a.zip", "1"], ["scrape", "--for", "onion"],
+                     ["scrape", "missing", "--workers", "2"], ["scrape", "art", "--for", "bogus"], ["scrape", "art", "--workers", "0"],
+                     ["scrape", "review", "--system", "gb"], ["scrape", "--replace"], ["scrape", "-a"], ["scrape", "--json"],
+                     ["--retry"], ["--skip-media", "covers"], ["--set-credentials"], ["--all"], ["--system", "gba"]):
+            with self.subTest(argv=argv):
+                self.refused(*argv)
+        with self.assertRaises(SystemExit) as cm, mock.patch("sys.stderr", io.StringIO()):
+            commands.run(["diff", "--retry"])
+        self.assertEqual(cm.exception.code, 2)
+
+    def test_dry_run_has_no_effect_on_missing_and_review(self):
+        for argv, name in ((["scrape", "missing", "--dry-run"], "scrape missing"), (["scrape", "review", "-n"], "scrape review"),
+                           (["-n", "scrape", "review", "gba"], "scrape review")):
+            with self.subTest(argv=argv):
+                self.refused(*argv, message=f"--dry-run has no effect on `{name}`")
 
     def test_translated_only_applies_to_scrape_match(self):
-        self.assertEqual(self.modes("scrape", "match", "gba", "a.zip", "7", "--translated"), "--scrape-match")
-        self.assertEqual(self.modes("scrape", "match", "--translated", "gba", "a.zip", "7"), "--scrape-match")
         for argv in (["--translated"], ["scrape", "--translated"], ["scrape", "review", "--translated"],
-                     ["scrape", "missing", "--translated"], ["upload", "roms", "--translated"]):
-            err = io.StringIO()
-            with self.assertRaises(SystemExit) as cm, mock.patch("sys.stderr", err):
-                self.modes(*argv)
-            self.assertEqual(cm.exception.code, 2)
-            self.assertIn("--translated only applies to `scrape match`", err.getvalue())
+                     ["scrape", "missing", "--translated"]):
+            with self.subTest(argv=argv):
+                self.refused(*argv, message="unrecognized arguments: --translated")
+        with self.assertRaises(SystemExit) as cm, mock.patch("sys.stderr", io.StringIO()) as err:
+            commands.run(["upload", "roms", "--translated"])
+        self.assertEqual(cm.exception.code, 2)
+        self.assertIn("unrecognized arguments: --translated", err.getvalue())
 
     def test_a_path_given_as_the_system_is_refused(self):
-        for argv in (["/Volumes/SD", "--scrape"], ["scrape", "--system", "a/b"], ["scrape", "missing", "/Volumes/SD"],
-                     ["--scrape-missing", "/Volumes/SD"], ["--scrape-review", "/Volumes/SD"],
-                     ["scrape", "match", "/Volumes/SD", "a.zip", "1"]):
-            with self.subTest(argv=argv), mock.patch("sys.stderr", io.StringIO()) as err, self.assertRaises(SystemExit) as cm:
-                self.modes(*argv)
-            self.assertEqual(cm.exception.code, 2)
-            self.assertIn("expects a system id", err.getvalue())
-        self.assertEqual(self.modes("scrape", "match", "gba", "Disc 1/a.cue", "1"), "--scrape-match")  # a ROM may be in a subfolder
+        for argv in (["scrape", "/Volumes/SD"], ["scrape", "--system", "a/b"], ["scrape", "missing", "/Volumes/SD"],
+                     ["scrape", "missing", "--system", "/Volumes/SD"], ["scrape", "review", "/Volumes/SD"],
+                     ["scrape", "art", "/Volumes/SD"], ["scrape", "match", "/Volumes/SD", "a.zip", "1"]):
+            with self.subTest(argv=argv):
+                self.refused(*argv, message="expects a system id")
 
     def test_skip_media_validated(self):
-        with mock.patch("sys.stderr", io.StringIO()) as err, self.assertRaises(SystemExit):
-            self.modes("scrape", "--skip-media", "covers,bogus")
-        self.assertIn("bogus", err.getvalue())
-        self.assertIn("manuals", err.getvalue())
-
-    def test_skip_media_only_scraper_types(self):
-        with mock.patch("sys.stderr", io.StringIO()) as err, self.assertRaises(SystemExit):
-            self.modes("scrape", "--skip-media", "custom")
-        self.assertIn("custom", err.getvalue())
+        err = self.refused("scrape", "--skip-media", "covers,bogus")
+        self.assertIn("bogus", err)
+        self.assertIn("manuals", err)
+        self.assertIn("custom", self.refused("scrape", "--skip-media", "custom"))
+        self.assertIn("bogus", self.refused("scrape", "match", "gba", "a.zip", "1", "--skip-media", "bogus"))
 
     def test_help_explains_dry_run_and_replace(self):
         text = cli.help_text("scrape")
         self.assertNotIn("custom", text)
         self.assertIn("--dry-run", text)
         self.assertIn("replacing", text)
+        self.assertIn("sync-roms scrape clean", text)
 
-    def test_skip_media_becomes_a_list(self):
-        args = cli.build_parser().parse_args(cli.translate(["scrape", "--skip-media", "covers, manuals"]))
-        cli.check_modes(args)
-        self.assertEqual(args.skip_media, ["covers", "manuals"])
-
-
-class Dispatch(Isolated):
-    def test_scrape_runs_with_args(self):
-        seen = {}
-        ensure = mock.Mock()
-        code, _, _ = self.sync(["scrape", "--system", "gba", "--retry", "-n", "--skip-media", "covers"],
-                               cmd=(scrape_online, "scrape_command", lambda a: seen.update(vars(a)) or 0),
-                               ens=(usersettings, "ensure_bucket", ensure))
-        self.assertEqual(code, 0)
-        ensure.assert_called_once()
-        self.assertEqual((seen["system"], seen["retry"], seen["dry_run"], seen["skip_media"]), ("gba", True, True, ["covers"]))
-
-    def test_match_runs_with_args(self):
-        seen = {}
-        code, _, _ = self.sync(["scrape", "match", "gba", "a.zip", "Metroid"],
-                               cmd=(scrape_online, "match_command", lambda a: seen.update(vars(a)) or 0),
-                               ens=(usersettings, "ensure_bucket", mock.Mock()))
-        self.assertEqual(code, 0)
-        self.assertEqual((seen["system"], seen["rom"], seen["game"]), ("gba", "a.zip", "Metroid"))
-        self.assertFalse(seen["translated"])
-
-    def test_match_runs_with_translated(self):
-        seen = {}
-        code, _, _ = self.sync(["scrape", "match", "gba", "a.zip", "7", "--translated"],
-                               cmd=(scrape_online, "match_command", lambda a: seen.update(vars(a)) or 0),
-                               ens=(usersettings, "ensure_bucket", mock.Mock()))
-        self.assertEqual(code, 0)
-        self.assertEqual((seen["system"], seen["rom"], seen["game"], seen["translated"]), ("gba", "a.zip", "7", True))
-
-    def test_scrape_and_scrape_missing_take_the_system_either_way(self):
-        for argv, fn in ((["scrape", "gba"], "scrape_command"), (["scrape", "--system", "gba"], "scrape_command"),
-                         (["scrape", "missing", "gba"], "missing_command"), (["scrape", "missing", "--system", "gba"], "missing_command")):
+    def test_help_for_scrape_subcommands_is_the_scrape_topic(self):
+        for argv in (["scrape", "--help"], ["scrape", "art", "-h"], ["scrape", "clean", "--help"], ["help", "scrape"]):
             with self.subTest(argv=argv):
-                seen = {}
-                code, _, err = self.sync(argv, cmd=(scrape_online, fn, lambda a: seen.update(vars(a)) or 0),
-                                         ens=(usersettings, "ensure_bucket", mock.Mock()))
+                code, out, err = self.sync(argv)
                 self.assertEqual((code, err), (0, ""))
-                self.assertEqual(seen["system"], "gba")
-
-    def test_set_credentials_needs_no_bucket(self):
-        ensure = mock.Mock()
-        ran = mock.Mock(return_value=0)
-        code, _, _ = self.sync(["scrape", "--set-credentials"], cmd=(scrape_online, "set_credentials", ran),
-                               ens=(usersettings, "ensure_bucket", ensure))
-        self.assertEqual(code, 0)
-        ran.assert_called_once()
-        ensure.assert_not_called()
+                self.assertIn("sync-roms scrape clean", out)
 
 
 class SetCredentials(RealDataDirGuard):
@@ -343,7 +326,7 @@ class Completion(unittest.TestCase):
         text = script_for("bash")
         commands_line = re.search(r'-eq 1 \].*?compgen -W "([^"]*)"', text).group(1).split()
         self.assertIn("scrape", commands_line)
-        self.assertIn('scrape) COMPREPLY=($(compgen -W "match review missing art"', text)
+        self.assertIn('scrape|scrapes) COMPREPLY=($(compgen -W "match review missing art clean"', text)
         for word in ("--retry", "--all", "--skip-media", "--set-credentials", "--translated"):
             self.assertIn(word, text)
 

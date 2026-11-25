@@ -176,7 +176,7 @@ def plan_m3u(root):
 
 
 def m3u_command(args):
-    root = os.path.abspath(os.path.expanduser(args.m3u or os.getcwd()))
+    root = os.path.abspath(os.path.expanduser(args.dir or os.getcwd()))
     if not os.path.isdir(root):
         ui.fail(f"{root} is not a folder", 2)
     print(ui.bold("💿 m3u playlists") + ui.dim(f"  {root}"))
