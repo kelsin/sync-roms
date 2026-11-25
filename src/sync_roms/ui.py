@@ -121,6 +121,14 @@ def yellow(t): return c("33", t)
 def cyan(t): return c("36", t)
 
 
+RAINBOW = (196, 202, 208, 214, 220, 226, 190, 154, 118, 82, 46, 48, 51, 45, 39, 33, 27, 57, 93, 129, 165, 201)  # 256-color hues, red to magenta
+
+
+def rainbow_bar(filled, width):
+    """filled cells of a width-cell progress bar, each in its hue of a rainbow spread over the whole width."""
+    return "".join(c(f"38;5;{RAINBOW[i * len(RAINBOW) // width]}", "█") for i in range(filled))
+
+
 class _Discard:
     def write(self, text):
         return len(text)
@@ -358,7 +366,7 @@ class ProgressBar:
             head = f"{done}/{self.count} files done  {fraction:4.0%}{self.of}"
             room = shutil.get_terminal_size().columns - 1 - 2 - 24 - 1 - len(head)  # one column spare so the line never wraps
             speed = next((t for t in tiers if len(t) <= room), "")
-            sys.stdout.write(f"\r\033[J  {cyan('█' * filled)}{dim('░' * (24 - filled))} {head}{speed}")
+            sys.stdout.write(f"\r\033[J  {rainbow_bar(filled, 24)}{dim('░' * (24 - filled))} {head}{speed}")
             block = self.block()
             for line in block:
                 sys.stdout.write("\n" + line)
@@ -382,7 +390,7 @@ class ProgressBar:
             if cell_width(name) > fit:
                 name = cut_cells(name, max(0, fit - 1)) + "…"
             line = cut_cells(f"    ↓ {'█' * filled}{'░' * (10 - filled)} {name}{tail}", width)  # cut plain, then colored
-            lines.append(dim(line[:6]) + cyan(line[6:6 + filled]) + dim(line[6 + filled:]))
+            lines.append(dim(line[:6]) + rainbow_bar(filled, 10) + dim(line[6 + filled:]))
         if len(shown) < len(active):
             lines.append(dim(f"    … and {len(active) - len(shown)} more"))
         return lines

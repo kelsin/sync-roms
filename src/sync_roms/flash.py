@@ -294,7 +294,7 @@ def _progress(emoji, label):
     def draw(fraction):
         if shown:
             filled = round(min(max(fraction, 0.0), 1.0) * 24)
-            sys.stdout.write(f"\r\033[K{emoji}\033[4G{label:<{LABEL_WIDTH}} {ui.cyan('█' * filled)}{ui.dim('░' * (24 - filled))} {fraction:4.0%}")
+            sys.stdout.write(f"\r\033[K{emoji}\033[4G{label:<{LABEL_WIDTH}} {ui.rainbow_bar(filled, 24)}{ui.dim('░' * (24 - filled))} {fraction:4.0%}")
             sys.stdout.flush()
 
     def done():
