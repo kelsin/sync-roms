@@ -140,14 +140,21 @@ ZELDA_THEMES = ("ToTK", "ToTK - James")  # the spruce themes whose cards get the
 ZELDA_ART = os.path.join(os.path.dirname(THEME_DATA), "totk-james", "collections")
 
 
+def card_art_png(art_id, layout_name, spruce_theme=None):
+    """The art file for art_id that a card with layout_name gets (Spruce: the box art, or the Zelda art for a ToTK
+    spruce_theme; else the outline art), or None when there is none."""
+    png = art_png(art_id, "art-box/Imgs" if layout_name == "spruce" else "art")
+    if png and layout_name == "spruce" and spruce_theme in ZELDA_THEMES:
+        png = os.path.join(ZELDA_ART, "Imgs", f"{art_id}.png")
+    return png
+
+
 def usable(layout_name, arts, spruce_theme=None):
     """The {collection name: art png} of arts ({name: art id}) that can be installed, warning about the rest.
     spruce_theme (Spruce only): the card's theme; a ToTK one gets the Zelda art instead of the box art."""
     out, taken = {}, set()
     for name, art_id in sorted(arts.items()):
-        png = art_png(art_id, "art-box/Imgs" if layout_name == "spruce" else "art")
-        if png and layout_name == "spruce" and spruce_theme in ZELDA_THEMES:
-            png = os.path.join(ZELDA_ART, "Imgs", f"{art_id}.png")
+        png = card_art_png(art_id, layout_name, spruce_theme)
         if not png:
             ui.warn(f"{name}: there is no theme art called {art_id!r}; skipped")
         elif layout_name != "spruce" and (name.lower() in _reserved(layout_name) or name.lower().startswith("auto-")):

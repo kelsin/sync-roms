@@ -542,7 +542,8 @@ def pick_collections(name, playable, card_status=None):
         edit.note(ui.yellow("ℹ️  No collections yet: make one in sync-roms collections edit "
                             "(or 💖 Collections in sync-roms edit)."))
         return
-    saved = store.saved_card(name).get("collections")
+    entry = store.saved_card(name)
+    saved = entry.get("collections")
     ids = [i for i in saved if isinstance(i, str)] if isinstance(saved, list) else []
     labels, counts = [], []
     for c in found:
@@ -571,7 +572,7 @@ def pick_collections(name, playable, card_status=None):
                        hotkeys=(" ", "\t"), on_hotkey=on_hotkey, hint=COLLECTIONS_HINT,
                        key_help=[("Space/Tab", "put the collection on the card or take it off")],
                        status=(lambda _state: shown["status"]) if card_status else None,
-                       preview=lambda i: previews.collection(found[i].get("art")) if i < len(found) else None)
+                       preview=lambda i: previews.card_collection(found[i].get("art"), entry) if i < len(found) else None)
 
 
 def pick_card_set(name, setup, systems, current=None):
@@ -629,23 +630,25 @@ def pick_card_set(name, setup, systems, current=None):
 
     mark()
     cursor = next((n for n, (x, _) in enumerate(shown) if x["name"] == current), 0)
+    entry = card_entry(name, setup)
     try:
         i = picker.filter_list(f"📦 Sets on {name}'s systems", labels, extras=extras, cursor=cursor,
                                hotkeys=(" ", "\t"), hint=CARD_SETS_HINT, on_hotkey=on_hotkey,
                                key_help=[("Space/Tab", "switch the set's games on (or off when all are on)")],
-                               preview=lambda i: previews.collection(themeart.set_art(shown[i][0])) if i < len(shown) else None)
+                               preview=lambda i: previews.card_collection(themeart.set_art(shown[i][0]), entry) if i < len(shown) else None)
     finally:  # Ctrl-C too: the toggles are kept
         picks.save()
     return None if i is None else shown[i][0]
 
 
-def pick_set(system, sets, games, titles, catalog, current=None, synced=lambda: set(), switch=None):
+def pick_set(system, sets, games, titles, catalog, current=None, synced=lambda: set(), switch=None, card=None):
     """The set to filter a system's games to, or None: sets with games in catalog (the system's bucket keys) are
     offered, starting on the one named current, each with how many of its games are synced out of those in storage
     (synced() gives the synced bucket keys). Space/Tab adds that set's games on this system to games (in place) as
     direct picks, or removes them when all are already picked; other systems are untouched. With switch (the card
     editor, where a game can also be on through a set or off by an exclusion), Space/Tab calls switch(keys, on)
-    instead: on unless every one of them is synced already."""
+    instead: on unless every one of them is synced already. card: the card's entry, whose frontend's art is shown
+    (None: the outline art)."""
     shown = [(x, set_filter(x, system)) for x in sets]
     shown = [(x, keys) for x, keys in shown if keys & catalog]
     if not shown:
@@ -685,7 +688,8 @@ def pick_set(system, sets, games, titles, catalog, current=None, synced=lambda: 
     cursor = next((n for n, (x, _) in enumerate(shown) if x["name"] == current), 0)
     i = picker.filter_list(f"📦 Sets with games on {system['name']}", labels, extras=extras, cursor=cursor,
                            hotkeys=(" ", "\t"), hint=SETS_HINT, on_hotkey=on_hotkey,
-                           preview=lambda i: previews.collection(themeart.set_art(shown[i][0])) if i < len(shown) else None)
+                           preview=lambda i: (previews.collection(themeart.set_art(shown[i][0])) if card is None
+                                              else previews.card_collection(themeart.set_art(shown[i][0]), card)) if i < len(shown) else None)
     if i is None:
         return None
     return shown[i][0]
@@ -960,7 +964,8 @@ def edit_system(name, system, setup, to_fetch=None, card_usages=None):
                 filters.handle(result[0], [r[1] for r in sp.rows], place, lambda current: pick_set(
                     system, list(picks.sets_by_id.values()), sp.games, sp.titles, {r[1] for r in sp.rows}, current,
                     lambda: {k for k, v in sp.states(picks.cover()).items() if v},
-                    lambda keys, on: sp.apply(keys, picks.cover(), sp.states(picks.cover()), [on] * len(keys))))
+                    lambda keys, on: sp.apply(keys, picks.cover(), sp.states(picks.cover()), [on] * len(keys)),
+                    card=card_entry(name, setup, cards)))
     except KeyboardInterrupt:  # Ctrl-C: the pass on screen kept its toggles
         picks.save()
         raise

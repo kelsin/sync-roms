@@ -546,7 +546,7 @@ class Flow(DataDir):
 
     def test_collections_list_previews_each_collection_art(self):
         favs = {"id": "favs", "name": "Favs", "art": "surprise", "games": []}
-        self.card()
+        self.card(layout="spruce", spruce_theme="ToTK")
         calls = []
 
         def look(labels, kw):
@@ -555,8 +555,8 @@ class Flow(DataDir):
         with mock.patch.object(collections, "load_collections", lambda: [favs]), \
                 mock.patch.object(picker, "filter_list", Script(look)), contextlib.redirect_stdout(io.StringIO()):
             cardedit.pick_collections("c", {"gba"})
-        with mock.patch.object(previews, "collection", side_effect=lambda a: "art-" + str(a)):
-            self.assertEqual([calls[0](0), calls[0](1)], ["art-surprise", None])
+        with mock.patch.object(previews, "card_collection", side_effect=lambda a, e: f"art-{a}-{e['layout']}-{e['spruce_theme']}"):
+            self.assertEqual([calls[0](0), calls[0](1)], ["art-surprise-spruce-ToTK", None])
 
     def test_sets_list_previews_each_set_by_its_id(self):
         kw = {}
@@ -568,6 +568,17 @@ class Flow(DataDir):
             cardedit.pick_set(GBA, [SET], [], {}, {"gba/Ruby.zip"})
         with mock.patch.object(previews, "collection", side_effect=lambda a: "art-" + a):
             self.assertEqual([kw["preview"](0), kw["preview"](1)], ["art-pk", None])
+
+    def test_sets_list_previews_the_cards_art_with_a_card(self):
+        kw = {}
+
+        def look(title, labels, **k):
+            kw.update(k)
+            return None
+        with mock.patch.object(picker, "filter_list", look):
+            cardedit.pick_set(GBA, [SET], [], {}, {"gba/Ruby.zip"}, card={"layout": "spruce"})
+        with mock.patch.object(previews, "card_collection", side_effect=lambda a, e: f"art-{a}-{e['layout']}"):
+            self.assertEqual([kw["preview"](0), kw["preview"](1)], ["art-pk-spruce", None])
 
     def test_sets_list_counts_games_not_their_extra_files(self):
         seen = []
@@ -1982,6 +1993,12 @@ class SetFlow(Flow):
         self.run_sets_list(look, lambda labels, kw: counts.append(kw["extras"][0][0][0].strip()))
         self.assertEqual(counts, ["1/2", "✅", "0/2"])
         self.assertEqual(store.card_games("c"), {})
+
+    def test_sets_list_previews_the_art_the_cards_frontend_gets(self):
+        self.card()
+        _, calls = self.run_sets_list(returns(None))
+        with mock.patch.object(previews, "card_collection", side_effect=lambda a, e: f"art-{a}-{e['layout']}"):
+            self.assertEqual(calls[0][2]["preview"](0), "art-pk-esde")
 
     def test_tab_in_the_sets_list_excludes_games_a_referenced_set_syncs(self):
         self.card(games={store.SETS_KEY: ["pk"]})

@@ -24,6 +24,14 @@ def collection(art_id):
     return themeart.art_png(art_id) if art_id else None
 
 
+def card_collection(art_id, entry):
+    """A collection's art file as the card with entry (its cards.json entry) gets it, or None when it has none."""
+    if not art_id:
+        return None
+    layout, theme = entry.get("layout"), entry.get("spruce_theme")
+    return themeart.card_art_png(art_id, layout, theme if layout == "spruce" and isinstance(theme, str) and theme else None)
+
+
 def _index(system):
     if system not in _indexes:
         _indexes[system] = scrape_plan.scrape_index(scrape_plan.scrape_listing(system, sizes=False))
