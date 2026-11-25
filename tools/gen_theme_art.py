@@ -585,6 +585,19 @@ def yoshi(p):  # spotted egg
         p.o(-28, 24, 9)
 
 
+def wario(p):  # cap with the W emblem, big nose and zigzag mustache
+    half = [(0, 17), (-16, 14), (-30, 13), (-40, 8), (-36, 19), (-30, 27), (-26, 21), (-19, 34), (-13, 25), (-6, 35), (0, 29)]
+    p.pg(half + mirror(half[::-1])[1:-1], 1.2)
+    cap = (spline([(-41, -4), (-37, -30), (-17, -47), (17, -47), (37, -30), (41, -4)])
+           + spline([(41, -4), (21, 4), (0, 6), (-21, 4), (-41, -4)])[1:])
+    p.path(cap, True, opaque=True)
+    with p.inside(cap):
+        p.c([(-46, -14), (-20, -5), (0, -3), (20, -5), (46, -14)])
+    p.o(0, -25, 13)
+    p.l([(-8, -30), (-4, -18), (0, -26), (4, -18), (8, -30)], 1)
+    p.o(0, 15, 10, opaque=True)
+
+
 def pac_man(p):  # pac-man eating a row of dots
     p.path(arc(-22, 0, 31, 31, 35, 325) + [(-22, 0)], True)
     for x in (13, 27, 41, 55):
@@ -1089,6 +1102,7 @@ ART = {
     "wrestling": (wrestling, (160, 40, 56), -8, 0.9, (-14, 0)),
     "donkey-kong": (donkey_kong, (134, 84, 48), 10, 1.0, (-12, 0)),
     "yoshi": (yoshi, (90, 180, 70), 12, 1.0, (0, 0)),
+    "wario": (wario, (214, 168, 28), -6, 1.0, (2, 0)),
     "pac-man": (pac_man, (28, 36, 96), -6, 1.0, (-12, 0)),
     "tetris": (tetris, (40, 170, 200), -5, 1.0, (-36, 0)),
     "dragon-quest": (dragon_quest, (60, 130, 220), -5, 1.0, (-6, 0)),
