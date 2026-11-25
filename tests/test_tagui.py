@@ -101,5 +101,83 @@ class TagUi(unittest.TestCase):
         self.assertEqual(tags.tags_of(B), ["shmups"])
 
 
+class TagFilterTest(unittest.TestCase):
+    C = "nes/C (USA).zip"
+
+    def setUp(self):
+        data_dir = self.enterContext(tempfile.TemporaryDirectory())
+        self.enterContext(mock.patch.object(store, "data_dir", return_value=data_dir))
+        helpers.storage_tags(self, {
+            "tags": {"shmups": {"name": "Shmups", "emoji": "🚀"}, "cave": {"name": "Cave", "emoji": "🐝"},
+                     "rpg": {"name": "RPG", "emoji": "🐉"}},
+            "games": {A: {"tags": ["shmups"], "files": ["nes/A.sav"]}, B: {"tags": ["cave", "shmups"]}},
+            "declined": {}})
+        self.notes = []
+        self.enterContext(mock.patch.object(edit, "note", self.notes.append))
+
+    def test_keep_needs_every_required_tag_and_none_of_the_excluded(self):
+        f = tagui.TagFilter()
+        self.assertTrue(all(f.keep(k) for k in (A, B, self.C)))
+        f.required, f.excluded = {"shmups"}, {"cave"}
+        self.assertEqual([k for k in (A, B, self.C) if f.keep(k)], [A])
+        self.assertTrue(f.keep("nes/A.sav"))  # a file of a record counts as its game
+        f.required = set()
+        self.assertEqual([k for k in (A, B, self.C) if f.keep(k)], [A, self.C])  # untagged games aren't excluded
+        f.clear()
+        self.assertEqual((f.required, f.excluded), (set(), set()))
+        self.assertTrue(all(f.keep(k) for k in (A, B, self.C)))
+
+    def test_keep_follows_a_tag_change(self):
+        f = tagui.TagFilter()
+        f.required = {"shmups"}
+        self.assertFalse(f.keep(self.C))
+        tags.set_game_tags(self.C, ["shmups"])
+        self.assertTrue(f.keep(self.C))
+
+    def test_describe(self):
+        f = tagui.TagFilter()
+        self.assertEqual(f.describe(), "")
+        f.required, f.excluded = {"shmups"}, {"cave"}
+        self.assertEqual(f.describe(), "✅ 🚀 Shmups · 🚫 🐝 Cave")
+
+    def test_pick_cycles_a_tag_off_required_excluded_off_on_the_same_row(self):
+        f, seen = tagui.TagFilter(), []
+        answers = iter([1, 1, 1, None])
+
+        def fake(title, labels, **kw):
+            seen.append((labels, kw.get("cursor"), set(f.required), set(f.excluded)))
+            return next(answers)
+        with mock.patch.object(picker, "filter_list", fake):
+            self.assertIsNone(f.pick({A, B, self.C}))
+        self.assertEqual(seen[0][0], ["⬜ 🐝 Cave (1)", "⬜ 🚀 Shmups (2)"])  # RPG has no game among the rows
+        self.assertEqual(seen[1][0], ["⬜ 🐝 Cave (1)", "✅ 🚀 Shmups (2)"])
+        self.assertEqual(seen[2][0], ["⬜ 🐝 Cave (1)", "🚫 🚀 Shmups (2)"])
+        self.assertEqual(seen[3][0], ["⬜ 🐝 Cave (1)", "⬜ 🚀 Shmups (2)"])
+        self.assertEqual([s[1] for s in seen[1:]], [1, 1, 1])
+        self.assertEqual([(s[2], s[3]) for s in seen[1:]], [({"shmups"}, set()), (set(), {"shmups"}), (set(), set())])
+        self.assertEqual((f.required, f.excluded), (set(), set()))
+
+    def test_pick_c_clears_and_reopens(self):
+        f, calls = tagui.TagFilter(), []
+        f.required, f.excluded = {"shmups"}, {"cave"}
+        answers = iter([("c", 0), None])
+
+        def fake(title, labels, **kw):
+            calls.append(labels)
+            self.assertIn("c", kw["hotkeys"])
+            return next(answers)
+        with mock.patch.object(picker, "filter_list", fake):
+            f.pick({A, B})
+        self.assertEqual(calls[1], ["⬜ 🐝 Cave (1)", "⬜ 🚀 Shmups (2)"])
+        self.assertEqual((f.required, f.excluded), (set(), set()))
+
+    def test_pick_with_no_tag_among_the_rows_notes_it(self):
+        f = tagui.TagFilter()
+        with mock.patch.object(picker, "filter_list") as fl:
+            f.pick({self.C})
+        fl.assert_not_called()
+        self.assertEqual(self.notes, ["ℹ️  No tag has games among these."])
+
+
 if __name__ == "__main__":
     unittest.main()

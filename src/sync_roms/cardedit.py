@@ -1,5 +1,5 @@
 """The card editor: every system a card's device can play (recommended ones marked) with its picks and space used,
-and each system's games with set and scraped-metadata filters. Changes are saved to cards.json as they are made."""
+and each system's games with tag and scraped-metadata filters. Changes are saved to cards.json as they are made."""
 import json
 import queue
 import threading
@@ -18,37 +18,30 @@ GUEST_KEY = "F"
 PAST_SURPRISE_KEY = "p"
 META_KEY = "m"
 VARIANT_KEY = "v"
-SERIES_KEY = "r"
 ALL_KEY = "a"
-LIST_HINT = "Enter · a all games · f full · s set · l colls · S settings"
-GAMES_HINT = "Space toggle · Enter done · a all · s set · m meta · v variant · t tags"
+LIST_HINT = "Enter · a all games · f full · s tag · l colls · S settings"
+GAMES_HINT = "Space toggle · Enter done · a all · s tag · m meta · v variant · t tags"
 META_HINT = "Enter list its values · Esc back"
 VALUES_HINT = "Enter narrow to it · Esc back · / filter"
 COLLECTIONS_HINT = "Enter show its games · Space/Tab toggle the collection · / filter"
-SETS_HINT = "Enter show its games · Space/Tab toggle its games here · / filter"
-SET_GAMES_HINT = "Space toggle · Enter done · a all · v variant · t tags · r series"
-CARD_SETS_HINT = "Enter show its games · Space/Tab toggle its games · / filter"
-ALL_GAMES_HINT = "Space toggle · Enter done · v variant · t tags · s set · c clear"
+ALL_GAMES_HINT = "Space toggle · Enter done · v variant · t tags · s tag · c clear"
 LIST_KEYS = [("Enter", "the system's games"), ("f", "full system: every file in its folder (again to undo)"),
              ("x", "turn the system off on this card: nothing of it syncs, its picks stay (again to turn it back on)"),
              ("a", "every game across this card's systems"),
-             ("s", "a set's games across this card's systems"), ("l", "collections on this card"),
+             ("s", "every game across this card's systems with the tags picked first"), ("l", "collections on this card"),
              ("S", "settings menu: Surprise, theme, collections and RAOfflineProxy on or off, and the systems Surprise may use"),
              ("F", "guest card: a friend's card; syncs only copy ROMs, BIOS and scrapes (again to undo)"),
              ("D", "clear every pick, full system and set from the card")]
 KEEP_HINT = " · K keep"
 KEEP_KEYS = [("K", "pick every card file that matches a storage game")]
-GAMES_KEYS = [("s", "sets on this system: narrow to one, or pick its games"),
-              ("r", "narrow the set picked with s to one series of games"),
-              ("m", "narrow by scraped metadata (developer, genre, year...)"),
+TAGS_HELP = ("s", "narrow by tags: games with every ✅ tag and no 🚫 one")
+GAMES_KEYS = [TAGS_HELP, ("m", "narrow by scraped metadata (developer, genre, year...)"),
               ("p", "only the games that were surprises lately"), ("v", "the game's variants on other systems"),
-              tagui.KEY_HELP, ("c", "clear the search, set, series, metadata and surprise filters")]
-SET_GAMES_KEYS = [("v", "the game's variants on other systems"), tagui.KEY_HELP, ("r", "narrow to one series of games"),
-                  ("c", "clear the series filter")]
-COLLECTION_GAMES_HINT = SET_GAMES_HINT.removesuffix(" · r series")  # a collection has no series
+              tagui.KEY_HELP, ("c", "clear the search, tag, metadata and surprise filters")]
+COLLECTION_GAMES_HINT = "Space toggle · Enter done · a all · v variant · t tags"
 COLLECTION_GAMES_KEYS = [("v", "the game's variants on other systems"), tagui.KEY_HELP]
-ALL_GAMES_KEYS = [("v", "the game's variants on other systems"), tagui.KEY_HELP, ("s", "narrow to one set's games"),
-                  ("c", "clear the search and set filters")]
+ALL_GAMES_KEYS = [("v", "the game's variants on other systems"), tagui.KEY_HELP, TAGS_HELP,
+                  ("c", "clear the search and tag filters")]
 SIZING = "…"
 
 
@@ -124,11 +117,6 @@ def system_labels(card, systems, recommended, usages, full_sizes):
                 row[2] = (f"  🗂️  {SIZING if unknown else size_text(f.bytes)} full", "dim")
         extras.append(row)
     return labels, extras
-
-
-def set_filter(game_set, system):
-    """Bucket keys of a set's games (and their extra files) on one system."""
-    return {g["bucket"] for g in store.set_games(game_set) if g.get("system") == system["bucket"]}
 
 
 def can_play(systems, setup):
@@ -311,7 +299,7 @@ def edit_card(name, setup=None, to_fetch=None, card_match=None, on_guest=None):
     systems = [s for s in systems  # a missing or empty folder has nothing to pick, unless it already has picks
                if budget.picked(usages[s["bucket"]]) or s["bucket"] in stocked]
     full = FullSizes({"layout": setup[1]}, systems)  # each system's size as a full system, kept for the session
-    pos, set_pos = 0, None  # set_pos: the name of the set last opened
+    pos = 0
     changed = None  # what the last pass changed: one system, ALL (any system may have) or None
     while True:
         card = card_entry(name, setup)
@@ -370,16 +358,13 @@ def edit_card(name, setup=None, to_fetch=None, card_match=None, on_guest=None):
                 edit_all(name, setup, systems, to_fetch, usages)
                 changed = ALL
             elif key == SET_KEY:
-                chosen = pick_card_set(name, setup, systems, set_pos)
-                if chosen:
-                    set_pos = chosen["name"]
-                    edit_set(name, chosen, setup, to_fetch, usages)
-                changed = ALL  # Space/Tab in the list may have switched games
+                edit_all(name, setup, systems, to_fetch, usages, pick_tags=True)
+                changed = ALL
             elif key == COLLECTIONS_KEY:
                 chosen = pick_collections(name, {s["bucket"] for s in can_play(catalog["systems"], setup)},
                                           lambda: card_status(name, setup, systems, to_fetch), setup)
                 if chosen:
-                    edit_set(name, chosen, setup, to_fetch, usages, collection=True)
+                    edit_set(name, chosen, setup, to_fetch, usages)
                 changed = ALL
             elif key == SETTINGS_KEY:
                 settings_menu(name, catalog["systems"], playable)
@@ -608,182 +593,48 @@ def pick_collections(name, playable, card_status=None, setup=None):
     return found[i] if isinstance(i, int) and i < len(found) else None
 
 
-def pick_card_set(name, setup, systems, current=None):
-    """The set to open as a card's set view, or None: single-select, the sets with a game in storage on systems (the
-    card editor's list), starting on the one named current, each with how many of those games the card syncs.
-    Space/Tab switches a set's games in storage on, or off when all are synced already, on every system but the full
-    ones (as toggling each in its set view would), saved to cards.json when the list is left."""
-    picks = cardpicks.CardPicks(name, setup)
-    views = [(x, set_view_keys(x, systems)) for x in store.load_sets()]
-    in_storage = {}  # {system bucket: its keys, or True for a full system} of the systems with set games
-    try:
-        for s in {s["bucket"]: s for _, view in views for s, _, _ in view}.values():
-            if picks.full(s["bucket"]):
-                in_storage[s["bucket"]] = True
-                continue
-            in_storage[s["bucket"]] = picks.system(s).in_storage  # listed now, not while the list is on screen
-    except s3.ERRORS as e:
-        edit.note(ui.yellow(f"⚠️  Couldn't list storage: {e}"))
-        return None
-    shown = []  # (set, [(system, bucket key, files)] of its games in storage)
-    for x, view in views:
-        rows = [r for r in view if in_storage[r[0]["bucket"]] is True or r[1] in in_storage[r[0]["bucket"]]]
-        if rows:
-            shown.append((x, rows))
-    if not shown:
-        edit.note("ℹ️  No set has games in storage for this card's systems.")
-        return None
-    labels = [f"{themeart.set_emoji(x)} {x['name']}  ({len(rows)} games)" for x, rows in shown]
-    extras = []
-
-    def mark():
-        def count(rows):
-            have = sum(1 for _, k, _ in rows if picks.on_card(k))
-            return f"  {'✅' if have == len(rows) else f'{have}/{len(rows)}'}"
-        extras[:] = [[(count(rows), "cyan")] for _, rows in shown]
-
-    def on_hotkey(_key, idx):
-        """Toggles in place, so the screen isn't torn down and redrawn."""
-        if idx is None:
-            return False
-        rows = shown[idx][1]
-        on = not all(picks.on_card(k) for _, k, _ in rows)
-        by_system = {}
-        for s, k, files in rows:
-            if not picks.full(s["bucket"]):
-                by_system.setdefault(s["bucket"], (s, []))[1].extend((k, *files))
-        for s, keys in by_system.values():
-            sp = picks.system(s)  # listed before the list opened
-            cover = picks.cover()
-            base = sp.states(cover)
-            keys = [k for k in keys if k in base]  # a key with no row (a Vita DLC or update) can't be picked here
-            sp.apply(keys, cover, base, [on] * len(keys))
-        mark()
-        return True
-
-    mark()
-    cursor = next((n for n, (x, _) in enumerate(shown) if x["name"] == current), 0)
-    entry = card_entry(name, setup)
-    try:
-        i = picker.filter_list(f"📦 Sets on {name}'s systems", labels, extras=extras, cursor=cursor,
-                               hotkeys=(" ", "\t"), hint=CARD_SETS_HINT, on_hotkey=on_hotkey,
-                               key_help=[("Space/Tab", "switch the set's games on (or off when all are on)")],
-                               preview=lambda i: previews.card_collection(themeart.set_art(shown[i][0]), entry) if i < len(shown) else None)
-    finally:  # Ctrl-C too: the toggles are kept
-        picks.save()
-    return None if i is None else shown[i][0]
-
-
-def pick_set(system, sets, games, titles, catalog, current=None, synced=lambda: set(), switch=None, card=None):
-    """The set to filter a system's games to, or None: sets with games in catalog (the system's bucket keys) are
-    offered, starting on the one named current, each with how many of its games are synced out of those in storage
-    (synced() gives the synced bucket keys). Space/Tab adds that set's games on this system to games (in place) as
-    direct picks, or removes them when all are already picked; other systems are untouched. With switch (the card
-    editor, where a game can also be on through a set or off by an exclusion), Space/Tab calls switch(keys, on)
-    instead: on unless every one of them is synced already. card: the card's entry, whose frontend's art is shown
-    (None: the outline art)."""
-    shown = [(x, set_filter(x, system)) for x in sets]
-    shown = [(x, keys) for x, keys in shown if keys & catalog]
-    if not shown:
-        edit.note(ui.yellow(f"ℹ️  No set has games in storage for {system['name']}."))
-        return None
-    mains = [{g["bucket"] for g in x["games"] if g.get("system") == system["bucket"] and g.get("bucket")}
-             for x, _ in shown]  # each game once, without its extra files (the other discs of a multi-disc game)
-    labels = [f"{themeart.set_emoji(x)} {x['name']}  ({len(m & catalog)} on {system['name']}"
-              + (f", {len(m - catalog)} not in storage)" if m - catalog else ")") for (x, _), m in zip(shown, mains)]
-    extras = [[]] * len(shown)
-
-    def mark():
-        done = synced()
-        def count(keys):
-            have, total = len(keys & catalog & done), len(keys & catalog)
-            return "➖" if total == 0 else "✅" if have == total else f"{have}/{total}"
-
-        extras[:] = [[(f"  {count(m)}", "cyan")] for m in mains]
-
-    def on_hotkey(_key, idx):
-        """Toggles in place, so the screen isn't torn down and redrawn."""
-        if idx is None:
-            return False
-        have = {g.get("bucket") for g in games}
-        mine = shown[idx][1] & catalog
-        if switch:
-            switch(sorted(mine), not mine <= synced())
-        elif mine <= have:
-            games[:] = [g for g in games if g.get("bucket") not in mine]
-        else:
-            for key in sorted(mine - have):
-                games.append({"title": titles[key], "bucket": key})
-        mark()
-        return True
-
-    mark()
-    cursor = next((n for n, (x, _) in enumerate(shown) if x["name"] == current), 0)
-    i = picker.filter_list(f"📦 Sets with games on {system['name']}", labels, extras=extras, cursor=cursor,
-                           hotkeys=(" ", "\t"), hint=SETS_HINT, on_hotkey=on_hotkey,
-                           preview=lambda i: (previews.collection(themeart.set_art(shown[i][0])) if card is None
-                                              else previews.card_collection(themeart.set_art(shown[i][0]), card)) if i < len(shown) else None)
-    if i is None:
-        return None
-    return shown[i][0]
-
-
 class GameFilters:
-    """What a system's games list is narrowed to (a set's games and one of its series, past surprises, scraped metadata)
-    and the hotkeys that change it, for the card and collection editors. system is a systems.json entry or its view in a games list."""
-    KEYS = (SET_KEY, SERIES_KEY, META_KEY, PAST_SURPRISE_KEY, CLEAR_KEY)
+    """What a system's games list is narrowed to (tags, past surprises, scraped metadata) and the hotkeys that change
+    it, for the card and collection editors. system is a systems.json entry or its view in a games list."""
+    KEYS = (SET_KEY, META_KEY, PAST_SURPRISE_KEY, CLEAR_KEY)
 
     def __init__(self, system):
         self.system = system
         self.meta = Metadata(system["bucket"])
-        self.set = None  # (set name, bucket keys, set emoji) the list is narrowed to
-        self.set_games = None  # the set self.set narrows to, its games on this system only
-        self.series = None  # the series of set_games the list is narrowed to as well
+        self.tags = tagui.TagFilter()  # the tags the list is narrowed to
         self.meta_filt = {}  # {metadata field: value} the list is narrowed to as well
         self.past = None  # bucket keys of the past surprises the list is narrowed to
 
     def keep(self, key, skip=None):
         """Whether the filters (all but the skip field's metadata one) show a row."""
         wanted = {f: v for f, v in self.meta_filt.items() if f != skip}
-        return ((self.set is None or key in self.set[1])
-                and (self.series is None or key in listedit.series_keys(self.set_games, self.series))
+        return (self.tags.keep(key)
                 and (self.past is None or key in self.past)
                 and (not wanted or metafilter.matches(self.meta.get().get(key, {}), wanted)))
 
     def describe(self):
         """The filters line of the list: what it is narrowed to, or empty."""
-        parts = ([f"{self.set[2]} {self.set[0]} only"] if self.set else []) \
-            + ([f"🎮 {self.series}"] if self.series else []) \
+        parts = ([self.tags.describe()] if self.tags.describe() else []) \
             + (["🎁 past surprises only"] if self.past is not None else []) \
             + ([metafilter.describe(self.meta_filt)] if self.meta_filt else [])
         return f"{' · '.join(parts)} (c clear filters)" if parts else ""
 
-    def handle(self, pressed, keys, place, choose_set):
+    def handle(self, pressed, keys, place):
         """Apply a filter hotkey; returns whether pressed was one. keys: every row's bucket key; place: the list's
-        picker.carry_place (c clears its / filter too); choose_set(current set name): pick_set's chosen set, or None."""
+        picker.carry_place (c clears its / filter too)."""
         if pressed == CLEAR_KEY:
-            self.set = self.set_games = self.series = self.past = None
+            self.tags.clear()
+            self.past = None
             self.meta_filt.clear()
             place.get("session", {}).pop("query", None)  # the / filter too
         elif pressed == PAST_SURPRISE_KEY:
             self.past = surprise.past_keys(self.system["bucket"]) or None
             if self.past is None:
                 edit.note(ui.yellow(f"ℹ️  No past surprises on {self.system['name']}."))
-        elif pressed == SERIES_KEY:
-            if self.set_games is None:
-                edit.note(ui.yellow(f"ℹ️  Narrow {self.system['name']} to a set with s first, then pick one of its series."))
-            else:
-                self.series = pick_series(self.set_games, self.series) or self.series
         elif pressed == META_KEY:
             pick_meta(self.system, self.meta, self.meta_filt, lambda field: [k for k in keys if self.keep(k, field)])
         elif pressed == SET_KEY:
-            chosen = choose_set(self.set and self.set[0])
-            if chosen:
-                if chosen["name"] != (self.set and self.set[0]):
-                    self.series = None
-                self.set = (chosen["name"], set_filter(chosen, self.system), themeart.set_emoji(chosen))
-                self.set_games = {"name": chosen["name"],
-                                  "games": [g for g in chosen["games"] if g.get("system") == self.system["bucket"]]}
+            self.tags.pick(keys)
         else:
             return False
         return True
@@ -966,7 +817,7 @@ def _games_pass(title, shown, picks, sps, files_of, start, work, capacity, to_fe
 
 
 def edit_system(name, system, setup, to_fetch=None, card_usages=None):
-    """A card's games of one system: the whole storage folder, searchable, filterable to a set's games and by scraped
+    """A card's games of one system: the whole storage folder, searchable, filterable by tags and by scraped
     metadata. Saves to cards.json when left; returns whether anything changed. to_fetch: as for edit_card.
     card_usages: budget.system_usages of the card as saved, over every system it can play (edit_card keeps them), so
     the other systems aren't counted again; v brings the usage of its variant's system up to date in it."""
@@ -1008,44 +859,17 @@ def edit_system(name, system, setup, to_fetch=None, card_usages=None):
                 if variant:
                     work = _work_out(picks, [sp], others, card_usages, to_fetch, variant)
             else:
-                filters.handle(result[0], [r[1] for r in sp.rows], place, lambda current: pick_set(
-                    system, list(picks.sets_by_id.values()), sp.games, sp.titles, {r[1] for r in sp.rows}, current,
-                    lambda: {k for k, v in sp.states(picks.cover()).items() if v},
-                    lambda keys, on: sp.apply(keys, picks.cover(), sp.states(picks.cover()), [on] * len(keys)),
-                    card=card_entry(name, setup, cards)))
+                filters.handle(result[0], [r[1] for r in sp.rows], place)
     except KeyboardInterrupt:  # Ctrl-C: the pass on screen kept its toggles
         picks.save()
         raise
     return picks.save()
 
 
-def set_view_keys(game_set, systems):
-    """[(system, bucket key, files)] of a set's games on the systems, in file order, each key once."""
-    by_bucket = {s["bucket"]: s for s in systems}
-    out, seen = [], set()
-    for g in game_set["games"]:
-        s, key = by_bucket.get(g.get("system")), g.get("bucket")
-        if s and key and key not in seen:
-            seen.add(key)
-            out.append((s, key, list(g.get("files", []))))
-    return out
-
-
-def pick_series(game_set, current=None):
-    """The series of the set's games picked from a list (with its game count), or None; notes when the set has none."""
-    found = listedit.series_of(game_set)
-    if not found:
-        edit.note(ui.yellow(f"ℹ️  {game_set['name']} has no series."))
-        return None
-    labels = [f"{n}  ({c} games)" for n, c in found]
-    i = picker.filter_list(f"🎮 Series in {game_set['name']}", labels,
-                           cursor=next((j for j, (n, _) in enumerate(found) if n == current), 0))
-    return None if i is None else found[i][0]
-
-
-def edit_all(name, setup, systems, to_fetch=None, card_usages=None):
+def edit_all(name, setup, systems, to_fetch=None, card_usages=None, pick_tags=False):
     """Every file of the systems' storage folders (from the storage cache) in one list, by title then system, toggled
-    as in edit_set (a full system's on and locked) and narrowed to a set with s. Returns whether anything changed."""
+    as in edit_set (a full system's on and locked) and narrowed by tags with s. pick_tags: the tags are picked before
+    the list opens, which then doesn't open when none is. Returns whether anything changed."""
     picks = cardpicks.CardPicks(name, setup)  # handed to edit_set, so each folder is listed once
     games = []
     for s in systems:
@@ -1056,20 +880,25 @@ def edit_all(name, setup, systems, to_fetch=None, card_usages=None):
             return False
         games += [{"system": s["bucket"], "bucket": key, "title": title, "label": label}
                   for _, key, title, label in listedit.system_rows({**s, "games": []}, in_storage)]
-    return edit_set(name, {"name": "All games", "games": games}, setup, to_fetch, card_usages, narrow_sets=True, picks=picks)
+    return edit_set(name, {"name": "All games", "games": games}, setup, to_fetch, card_usages, all_games=True, picks=picks,
+                    pick_tags=pick_tags)
 
 
-def edit_set(name, game_set, setup, to_fetch=None, card_usages=None, narrow_sets=False, picks=None, collection=False):
-    """A card's games of one set over every system it can play, in one list (category, then system and title), toggled
-    as in edit_system; games not in storage are left out, a full system's are on and locked. Saves to cards.json when
-    left; returns whether anything changed. to_fetch, card_usages: as for edit_system. narrow_sets: edit_all's list
-    (its games carry their row label): by title then system, s narrows it to a set's games, no series. picks: the
-    CardPicks to edit, when the caller already made one. collection: game_set is a collection (its emoji and
-    legend, no series)."""
+def edit_set(name, game_set, setup, to_fetch=None, card_usages=None, all_games=False, picks=None, pick_tags=False):
+    """A card's games of one collection over every system it can play, in one list (system, then title), toggled as in
+    edit_system; games not in storage are left out, a full system's are on and locked. Saves to cards.json when left;
+    returns whether anything changed. to_fetch, card_usages: as for edit_system. all_games: edit_all's list (its games
+    carry their row label): by title then system, s narrows it by tags (pick_tags: picked before it opens; with none
+    picked it doesn't). picks: the CardPicks to edit, when the caller already made one."""
     cards = store.load_cards()
     picks = picks or cardpicks.CardPicks(name, setup, cards)
-    playable = can_play(store.repo_json("systems"), setup)
-    found = set_view_keys(game_set, playable)
+    playable = {s["bucket"]: s for s in can_play(store.repo_json("systems"), setup)}
+    found, seen = [], set()  # [(system, bucket key, files)] of the playable games, in file order, each key once
+    for g in game_set["games"]:
+        s, key = playable.get(g.get("system")), g.get("bucket")
+        if s and key and key not in seen:
+            seen.add(key)
+            found.append((s, key, list(g.get("files", []))))
     sps = {}  # {system bucket: SystemPicks} of the systems with set games, but full ones
     for s in {s["bucket"]: s for s, _, _ in found if not picks.full(s["bucket"])}.values():
         try:
@@ -1082,16 +911,19 @@ def edit_set(name, game_set, setup, to_fetch=None, card_usages=None, narrow_sets
     files_of = {key: files for _, key, files in kept}
     present = {k for key, files in files_of.items() for k in (key, *files)}  # the rest are left out: no warning
     rows = edit.set_rows({"games": [g for g in game_set["games"] if g.get("bucket") in files_of]},
-                         {s["bucket"]: s for s in playable}, lambda _s: present)
-    if narrow_sets:
+                         playable, lambda _s: present)
+    if all_games:
         label_of = {g["bucket"]: g["label"] for g in game_set["games"]}
         rows = sorted(((s, key, title, f"{s['name']} — {label_of[key]}") for s, key, title, _ in rows),
                       key=lambda r: (store.sort_key(r[2]), r[0]["name"].lower()))
     listed = [r for r in rows if r[0]["bucket"] not in sps  # a shown playlist hides its discs
               or sps[r[0]["bucket"]].playlist_of.get(r[1]) not in files_of]
-    series_filter = None  # the series the list is narrowed to
-    chosen = None  # narrow_sets: the set the list is narrowed to
-    others = [x for x in playable if x["bucket"] not in sps]
+    tag_filter = tagui.TagFilter()  # all_games: the tags the list is narrowed to
+    if pick_tags:
+        tag_filter.pick({r[1] for r in listed})
+        if not tag_filter.required and not tag_filter.excluded:
+            return False
+    others = [x for x in playable.values() if x["bucket"] not in sps]
     capacity = budget.card_capacity(card_entry(name, setup, cards))
     work = _work_out(picks, list(sps.values()), others, card_usages, to_fetch)
 
@@ -1100,40 +932,29 @@ def edit_set(name, game_set, setup, to_fetch=None, card_usages=None, narrow_sets
     place = {}  # picker.carry_place's: the last pass's row, filter text, view and scroll
     try:
         while True:
-            wanted = listedit.series_keys(game_set, series_filter) if series_filter else None
-            if chosen:
-                wanted = {g["bucket"] for g in store.set_games(chosen)}
-            shown = [r for r in listed if wanted is None or r[1] in wanted]
-            if narrow_sets:
+            shown = [r for r in listed if tag_filter.keep(r[1])]
+            if all_games:
                 emoji, hint, hotkeys, key_help = "🌐", ALL_GAMES_HINT, (VARIANT_KEY, tagui.TAG_KEY, SET_KEY, CLEAR_KEY), ALL_GAMES_KEYS
-                filters = f"{themeart.set_emoji(chosen)} {chosen['name']} only (c clear filters)" if chosen else ""
-            elif collection:
+                filters = f"{tag_filter.describe()} (c clear filters)" if tag_filter.describe() else ""
+                origin = "📦 from a set"
+            else:
                 emoji, hint, hotkeys, key_help = (themeart.collection_emoji(game_set), COLLECTION_GAMES_HINT,
                                                   (VARIANT_KEY, tagui.TAG_KEY), COLLECTION_GAMES_KEYS)
-                filters = ""
-            else:
-                emoji, hint, hotkeys, key_help = (themeart.set_emoji(game_set), SET_GAMES_HINT,
-                                                  (VARIANT_KEY, tagui.TAG_KEY, SERIES_KEY, CLEAR_KEY), SET_GAMES_KEYS)
-                filters = f"{series_filter} (c clear filters)" if series_filter else ""
-            origin = "💖 from a collection" if collection else "📦 from a set"
+                filters, origin = "", "💖 from a collection"
             result = _games_pass(
                 f"{emoji} {game_set['name']} on {name} — ✅ synced, ⬜ not, {origin}", shown, picks, sps, files_of,
                 start, work, capacity, to_fetch, place, hint=hint, hotkeys=hotkeys, key_help=key_help, filters=filters,
-                select_all=not narrow_sets)
+                select_all=not all_games)
             if not isinstance(result, tuple):
                 break
             if result[0] == tagui.TAG_KEY:
                 if result[1] is not None:
                     tagui.edit_game_tags(*shown[result[1]][1:3])
             elif result[0] == CLEAR_KEY:
-                series_filter = chosen = None
-                if narrow_sets:
-                    place.get("session", {}).pop("query", None)  # the / filter too
+                tag_filter.clear()
+                place.get("session", {}).pop("query", None)  # the / filter too
             elif result[0] == SET_KEY:
-                chosen = listedit.pick_row_set(list(picks.sets_by_id.values()), set(files_of),
-                                               chosen and chosen["name"]) or chosen
-            elif result[0] == SERIES_KEY:
-                series_filter = pick_series(game_set, series_filter) or series_filter
+                tag_filter.pick({r[1] for r in listed})
             elif result[1] is not None:
                 variant = _toggle_variant(picks, *shown[result[1]][1:3])
                 if variant:

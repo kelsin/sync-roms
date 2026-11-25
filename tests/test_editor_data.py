@@ -155,7 +155,7 @@ class CheckBucketKeys(Cmd):
 class Hints(unittest.TestCase):
     def test_hints_fit_a_narrow_terminal_and_lead_with_the_main_keys(self):
         hints = [picker.MULTI_HINT, picker.SINGLE_HINT,
-                 edit.MENU_HINT, edit.GAMES_HINT, cardedit.LIST_HINT, cardedit.GAMES_HINT, cardedit.SETS_HINT, cardedit.CARD_SETS_HINT,
+                 edit.MENU_HINT, edit.GAMES_HINT, cardedit.LIST_HINT, cardedit.GAMES_HINT,
                  cardedit.META_HINT, cardedit.VALUES_HINT, collectionedit.GAMES_HINT]
         for h in hints:
             self.assertLessEqual(ui.cell_width(picker.HELP_HINT + h), 80, h)  # the list adds "? help ·"
@@ -166,8 +166,8 @@ class Hints(unittest.TestCase):
 
     def test_every_hint_and_the_keep_question_fit_80_cells_with_the_help_prefix(self):
         hints = {"systems": cardedit.LIST_HINT, "systems from a sync": cardedit.LIST_HINT + cardedit.KEEP_HINT,
-                 "set games": cardedit.SET_GAMES_HINT, "all games": cardedit.ALL_GAMES_HINT,
-                 "card games": cardedit.GAMES_HINT, "sets": cardedit.SETS_HINT, "card sets": cardedit.CARD_SETS_HINT, "collections": cardedit.COLLECTIONS_HINT, "set editor games": setedit.GAMES_HINT,
+                 "collection games on a card": cardedit.COLLECTION_GAMES_HINT, "all games": cardedit.ALL_GAMES_HINT,
+                 "card games": cardedit.GAMES_HINT, "collections": cardedit.COLLECTIONS_HINT, "set editor games": setedit.GAMES_HINT,
                  "collection games": collectionedit.GAMES_HINT, "card list": edit.MENU_HINT,
                  "multi": picker.MULTI_HINT, "single": picker.SINGLE_HINT, "saves manage": saves_manage.HINT}
         for name, hint in hints.items():
@@ -188,7 +188,7 @@ class Hints(unittest.TestCase):
         lines = picker.help_lines(True, saves_manage.HINT, key_help=saves_manage.KEY_HELP)
         for key in ("Space/Tab", "Enter", "w", "m", "p", "d", "Esc"):
             self.assertTrue(any(line.startswith(key + " ") for line in lines), key)
-        for hint, keys, select_all in ((cardedit.SET_GAMES_HINT, cardedit.SET_GAMES_KEYS, True),
+        for hint, keys, select_all in ((cardedit.COLLECTION_GAMES_HINT, cardedit.COLLECTION_GAMES_KEYS, True),
                                        (cardedit.ALL_GAMES_HINT, cardedit.ALL_GAMES_KEYS, False)):
             lines = picker.help_lines(True, hint, key_help=keys, select_all=select_all, has_note=True)
             # a is dead in the all-games list: neither hint nor help offers it there

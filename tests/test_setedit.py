@@ -424,22 +424,28 @@ class SeriesEditor(unittest.TestCase):
         with mock.patch.object(picker, "filter_list", fake), mock.patch.object(edit, "note"), \
                 mock.patch.object(store, "repo_json", side_effect=lambda n: [] if n == "series" else SYSTEMS), \
                 mock.patch.object(ui, "ask", side_effect=list(ask)), mock.patch("builtins.print"), \
-                mock.patch.object(setedit.cardedit, "pick_series", return_value="Alpha"):
+                mock.patch.object(setedit, "pick_series", return_value="Alpha"):
             try:
                 setedit.edit_one(game_set, SYSTEMS, lambda b: keys[b])
             except StopIteration:
                 pass
         return game_set, seen
 
+    def test_pick_series_is_a_filterable_list(self):
+        game_set = {"name": "S", "games": [{"series": "Alpha"}, {"series": "Alpha"}, {"series": "Beta"}]}
+        with mock.patch.object(picker, "filter_list", return_value=0) as fl:
+            self.assertEqual(setedit.pick_series(game_set), "Alpha")
+        self.assertEqual(fl.call_args[0][1], ["Alpha  (2 games)"])
+
     def test_r_narrows_to_the_series_c_clears_and_hidden_games_are_kept(self):
-        game_set, seen = self.run_editor([0, None], [(set(), setedit.cardedit.SERIES_KEY), ({"Game Boy Advance — B"}, setedit.cardedit.CLEAR_KEY),
+        game_set, seen = self.run_editor([0, None], [(set(), setedit.SERIES_KEY), ({"Game Boy Advance — B"}, setedit.cardedit.CLEAR_KEY),
                                                      (set(), None)])
         self.assertEqual(len(seen[0][0]), 3)
         self.assertEqual(len(seen[1][0]), 2)  # narrowed to Alpha
         self.assertIn("Alpha", seen[1][1])
         self.assertEqual(len(seen[2][0]), 3)  # cleared
         self.assertEqual(seen[2][1], "")
-        self.assertEqual(seen[0][2], (setedit.cardedit.SERIES_KEY, setedit.cardedit.CLEAR_KEY, "t"))
+        self.assertEqual(seen[0][2], (setedit.SERIES_KEY, setedit.cardedit.CLEAR_KEY, "t"))
         self.assertIn("series", seen[0][3])
         self.assertNotIn("c clear", seen[0][3])  # c is in the ? help and on the filter line below
         self.assertEqual(seen[1][1], "Alpha (c clear filters)")

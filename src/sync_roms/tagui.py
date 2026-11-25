@@ -79,3 +79,74 @@ def edit_game_tags(key, title):
     except (*s3.ERRORS, SystemExit) as e:
         note(ui.yellow(f"⚠️  Couldn't save the tags in storage: {e}"))
         return False
+
+
+STATES = ("⬜", "✅", "🚫")  # off, required, excluded
+CLEAR_KEY = "c"
+
+
+class TagFilter:
+    """What a games list is narrowed to by tags: the games with every required tag and none of the excluded (a file
+    of a record counts as its game)."""
+
+    def __init__(self):
+        self.required, self.excluded = set(), set()
+        self._worked = None  # (tags data, required, excluded, keys with every required tag or None, keys to leave out)
+
+    def clear(self):
+        self.required.clear()
+        self.excluded.clear()
+
+    def keep(self, key):
+        """Whether the filter shows the game."""
+        if not self.required and not self.excluded:
+            return True
+        data, required, excluded = tags.load(), frozenset(self.required), frozenset(self.excluded)
+        w = self._worked
+        if w is None or w[0] is not data or w[1:3] != (required, excluded):  # worked out again after a tag change
+            allowed = tags.games_with(required, excluded) if required else None
+            left_out = set().union(*(tags.games_with({i}, ()) for i in excluded))
+            w = self._worked = (data, required, excluded, allowed, left_out)
+        return (w[3] is None or key in w[3]) and key not in w[4]
+
+    def describe(self):
+        """The filter line's part: "✅ 🚀 Shmups · 🚫 🐝 Cave", required tags first, or "" with no filter."""
+        defs = tags.all_tags()
+        parts = []
+        for mark, ids in (("✅", self.required), ("🚫", self.excluded)):
+            for i in sorted((i for i in ids if i in defs), key=lambda i: defs[i]["name"].casefold()):
+                parts.append(f"{mark} {defs[i]['emoji']} {defs[i]['name']}")
+        return " · ".join(parts)
+
+    def pick(self, row_keys):
+        """A list of the tags with games among row_keys: Enter cycles a tag off → required → excluded → off, c clears,
+        Esc returns. Notes when no tag has a game there."""
+        row_keys = set(row_keys)
+        defs = tags.all_tags()
+        counts = {i: len(row_keys & tags.games_with({i}, ())) for i in defs}
+        ids = sorted((i for i, n in counts.items() if n), key=lambda i: defs[i]["name"].casefold())
+        if not ids:
+            note(ui.yellow("ℹ️  No tag has games among these."))
+            return
+        cursor = 0
+        while True:
+            labels = [f"{STATES[(i in self.required) + 2 * (i in self.excluded)]} {defs[i]['emoji']} {defs[i]['name']}"
+                      f" ({counts[i]})" for i in ids]
+            result = picker.filter_list("🏷️  Narrow to games with ✅ tags and without 🚫 ones", labels, cursor=cursor,
+                                        hotkeys=(CLEAR_KEY,), hint="Enter ⬜ → ✅ → 🚫 → ⬜ · c clear · Esc done",
+                                        key_help=[("Enter", "cycle the tag: ⬜ off, ✅ needed, 🚫 left out"),
+                                                  (CLEAR_KEY, "clear every tag")])
+            if result is None:
+                return
+            if isinstance(result, tuple):
+                self.clear()
+                cursor = result[1] or 0
+                continue
+            i, cursor = ids[result], result
+            if i in self.required:
+                self.required.discard(i)
+                self.excluded.add(i)
+            elif i in self.excluded:
+                self.excluded.discard(i)
+            else:
+                self.required.add(i)

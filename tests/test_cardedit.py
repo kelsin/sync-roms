@@ -3,6 +3,7 @@ import io
 import json
 import os
 import sys
+import tempfile
 import unittest
 from unittest import mock
 
@@ -33,12 +34,6 @@ def g(key):
 
 
 class Pure(unittest.TestCase):
-    def test_pick_series_is_a_filterable_list(self):
-        game_set = {"name": "S", "games": [{"series": "Alpha"}, {"series": "Alpha"}, {"series": "Beta"}]}
-        with mock.patch.object(picker, "filter_list", return_value=0) as fl:
-            self.assertEqual(cardedit.pick_series(game_set), "Alpha")
-        self.assertEqual(fl.call_args[0][1], ["Alpha  (2 games)"])
-
     def test_size_text_is_decimal(self):
         self.assertEqual(cardedit.size_text(512 * 10 ** 9), "512 GB")
         self.assertEqual(cardedit.size_text(1_500_000_000), "1.5 GB")
@@ -109,12 +104,6 @@ class Pure(unittest.TestCase):
         extras = cardedit.system_labels({}, [GB], set(), {"gb": U(0, 0, False)}, {"gb": U(16, 0, False)})[1]
         self.assertEqual(extras, [[("  ⚪", "dim"), ("", "dim"), ("", "dim")]])
 
-    def test_set_filter_is_one_system(self):
-        self.assertEqual(cardedit.set_filter(SET, GBA), {"gba/Ruby.zip", "gba/Ruby.sav"})
-        self.assertEqual(cardedit.set_filter(SET, GB), {"gb/Red.gb"})
-        self.assertEqual(cardedit.set_filter(SET, PSX), set())
-
-
 class Script:
     """A fake picker.filter_list: each call runs the next step(labels, kwargs) for its return value."""
 
@@ -179,6 +168,12 @@ class Flow(DataDir):
 
     def card(self, **entry):
         self.write_json("cards.json", {"c": {"device": "d", "layout": "esde", **entry}})
+
+    def tag_pokemon(self, games=("gba/Ruby.zip", "gb/Red.gb")):
+        """A Pokemon tag (🔴) on games, Ruby with its save as a file of its record."""
+        storage_tags(self, {"tags": {"pk": {"name": "Pokemon", "emoji": "🔴"}},
+                            "games": {k: {"tags": ["pk"], **({"files": ["gba/Ruby.sav"]} if k == "gba/Ruby.zip" else {})}
+                                      for k in games}, "declined": {}})
 
     def test_u_toggles_surprise_and_the_title_shows_it(self):
         self.card(size="1 GB")
@@ -333,10 +328,11 @@ class Flow(DataDir):
         def look(labels, kw):
             seen.append({k: kw["session"].get(k) for k in place})
             return kw["session"]["sel"]
+        self.tag_pokemon()
         with mock.patch.object(surprise, "past_keys", return_value=set()):
             self.run_system(move(cardedit.META_KEY), returns(None), look)  # m, then Esc in the field list
             self.run_system(move(cardedit.PAST_SURPRISE_KEY), look)  # p with no past surprises
-            self.run_system(move(cardedit.SET_KEY), returns(None), look)  # s, then Esc in the set list
+            self.run_system(move(cardedit.SET_KEY), returns(None), look)  # s, then Esc in the tag list
         self.assertEqual(seen, [place] * 3)
 
     def test_the_game_list_starts_over_when_a_key_changes_what_it_lists(self):
@@ -640,42 +636,9 @@ class Flow(DataDir):
         with mock.patch.object(previews, "card_collection", side_effect=lambda a, e: f"art-{a}-{e['layout']}-{e['spruce_theme']}"):
             self.assertEqual([calls[0](0), calls[0](1)], ["art-surprise-spruce-ToTK", None])
 
-    def test_sets_list_previews_each_set_by_its_id(self):
-        kw = {}
-
-        def look(title, labels, **k):
-            kw.update(k)
-            return None
-        with mock.patch.object(picker, "filter_list", look):
-            cardedit.pick_set(GBA, [SET], [], {}, {"gba/Ruby.zip"})
-        with mock.patch.object(previews, "collection", side_effect=lambda a: "art-" + a):
-            self.assertEqual([kw["preview"](0), kw["preview"](1)], ["art-pk", None])
-
-    def test_sets_list_previews_the_cards_art_with_a_card(self):
-        kw = {}
-
-        def look(title, labels, **k):
-            kw.update(k)
-            return None
-        with mock.patch.object(picker, "filter_list", look):
-            cardedit.pick_set(GBA, [SET], [], {}, {"gba/Ruby.zip"}, card={"layout": "spruce"})
-        with mock.patch.object(previews, "card_collection", side_effect=lambda a, e: f"art-{a}-{e['layout']}"):
-            self.assertEqual([kw["preview"](0), kw["preview"](1)], ["art-pk-spruce", None])
-
-    def test_sets_list_counts_games_not_their_extra_files(self):
-        seen = []
-
-        def look(title, labels, extras=None, **k):
-            seen.append((labels, [list(e) for e in extras]))
-            return None
-        with mock.patch.object(picker, "filter_list", look):
-            cardedit.pick_set(GBA, [SET], [], {}, {"gba/Ruby.zip", "gba/Ruby.sav"}, synced=lambda: {"gba/Ruby.zip", "gba/Ruby.sav"})
-            cardedit.pick_set(GBA, [SET], [], {}, {"gba/Ruby.sav"})
-        self.assertEqual(seen[0], ([themeart.set_emoji(SET) + " Pokemon  (1 on Game Boy Advance)"], [[("  ✅", "cyan")]]))
-        self.assertEqual(seen[1][0], [themeart.set_emoji(SET) + " Pokemon  (0 on Game Boy Advance, 1 not in storage)"])
-
-    def test_games_list_previews_each_game_by_key_with_and_without_a_set_filter(self):
+    def test_games_list_previews_each_game_by_key_with_and_without_a_tag_filter(self):
         self.card()
+        self.tag_pokemon()
         seen = []
 
         def look(labels, kw):
@@ -687,8 +650,8 @@ class Flow(DataDir):
         def filtered(labels, kw):
             look(labels, kw)
             return (cardedit.CLEAR_KEY, 1)
-        self.run_system(returns((cardedit.SET_KEY, 0)), returns(0), filtered, look)
-        self.assertEqual(seen[0], ["img-gba/Ruby.sav", "img-gba/Ruby.zip", None])  # the set's rows, not all of them
+        self.run_system(returns((cardedit.SET_KEY, 0)), returns(0), returns(None), filtered, look)
+        self.assertEqual(seen[0], ["img-gba/Ruby.sav", "img-gba/Ruby.zip", None])  # the tag's rows, not all of them
         self.assertEqual(seen[1], ["img-gba/Emerald.zip", "img-gba/Ruby.sav", "img-gba/Ruby.zip", "img-gba/Zelda.zip", None])
 
     def test_opening_a_system_without_a_storage_cache_says_it_is_listing(self):
@@ -702,21 +665,22 @@ class Flow(DataDir):
                 edit.edit_card_system("c", "gba", (DEVICE, "esde"))
             self.assertEqual("📡 Listing" in out.getvalue(), said, out.getvalue())
 
-    def test_a_takes_every_game_the_set_filter_shows(self):
+    def test_a_takes_every_game_the_tag_filter_shows(self):
         self.card()
+        self.tag_pokemon()
         filter_list = picker.filter_list  # the real list, driven by keys without a screen
 
         def take_all(labels, kw):
-            self.assertEqual(kw["filters"], "📦 Pokemon only (c clear filters)")
+            self.assertEqual(kw["filters"], "✅ 🔴 Pokemon (c clear filters)")
             self.assertNotIn("Pokemon", calls[-1][0])
             with mock.patch.object(picker, "_run", lambda model: [model.key(k) for k in ("a", "enter")][-1]), \
                     mock.patch.object(picker, "_draws_images", return_value=False):
                 return filter_list("t", labels, **kw)
-        script = Script(returns((cardedit.SET_KEY, 0)), returns(0), take_all)
+        script = Script(returns((cardedit.SET_KEY, 0)), returns(0), returns(None), take_all)
         calls = script.calls
         with mock.patch.object(picker, "filter_list", script), contextlib.redirect_stdout(io.StringIO()):
             edit.edit_card_system("c", "gba", (DEVICE, "esde"))
-        self.assertEqual(calls[2][1], ["Ruby.sav", "Ruby.zip"])  # the set's games here, not Emerald or Zelda
+        self.assertEqual(calls[3][1], ["Ruby.sav", "Ruby.zip"])  # the tag's games here, not Emerald or Zelda
         self.assertEqual(store.card_games("c"), {"gba": [g("gba/Ruby.sav"), g("gba/Ruby.zip")]})
 
     def run_card(self, *steps, **kw):
@@ -762,34 +726,34 @@ class Flow(DataDir):
         self.assertIn("👤 guest", calls[0][0])
         self.assertIn(cardedit.GUEST_KEY, calls[0][2]["hotkeys"])
 
-    def test_s_opens_a_set_then_its_games(self):
+    def test_s_picks_tags_then_opens_every_game_narrowed_to_them(self):
         self.card()
-        calls = self.run_card(returns((cardedit.SET_KEY, 0)), returns(0), toggle("Game Boy — Red"), returns(None))
-        self.assertTrue(calls[1][1][0].startswith(f"{themeart.set_emoji(SET)} Pokemon"))
-        self.assertEqual({x["bucket"] for x in store.card_games("c")["gb"]}, {"gb/Red.gb"})
+        self.tag_pokemon()
+        calls = self.run_card(returns((cardedit.SET_KEY, 0)), returns(0), returns(None),
+                              toggle("Game Boy — Red.gb"), returns(None))
+        self.assertEqual(calls[1][1], ["⬜ 🔴 Pokemon (3)"])
+        self.assertEqual(calls[2][1], ["✅ 🔴 Pokemon (3)"])
+        self.assertTrue(calls[3][0].startswith("🌐 All games on c"))
+        self.assertEqual(calls[3][1], ["Game Boy — Red.gb", "Game Boy Advance — Ruby.sav", "Game Boy Advance — Ruby.zip"])
+        self.assertEqual(calls[3][2]["filters"], "✅ 🔴 Pokemon (c clear filters)")
+        self.assertEqual(store.card_games("c"), {"gb": [g("gb/Red.gb")]})
 
-    def test_s_says_when_no_set_has_games_here(self):
+    def test_s_says_when_no_tag_has_games_here(self):
         self.card()
+        self.tag_pokemon(["psx/X.chd"])
         notes = []
-        only_psx = {"id": "x", "name": "X", "description": "", "games": [{"system": "psx", "bucket": "psx/X.chd"}]}
-        with mock.patch.object(store, "load_sets", return_value=[only_psx]), \
-                mock.patch.object(edit, "note", notes.append):
+        with mock.patch.object(edit, "note", notes.append):
             calls = self.run_card(returns((cardedit.SET_KEY, 0)), returns(None))
-        self.assertEqual(len(calls), 2)  # the system list twice, no set list
-        self.assertEqual(notes, ["ℹ️  No set has games in storage for this card's systems."])
-
-    def test_set_list_counts_synced_games(self):
-        self.card(games={"gb": [g("gb/Red.gb")]})
-        calls = self.run_card(returns((cardedit.SET_KEY, 0)), returns(None), returns(None))
-        self.assertEqual(calls[1][2]["extras"], [[("  1/2", "cyan")]])
-        self.assertEqual(calls[1][1], [f"{themeart.set_emoji(SET)} Pokemon  (2 games)"])
+        self.assertEqual(len(calls), 2)  # the system list twice, no tag list
+        self.assertEqual(notes, ["ℹ️  No tag has games among these."])
 
     def test_s_is_in_the_hint_and_help(self):
-        self.assertIn("s set", cardedit.LIST_HINT)
+        self.assertIn("s tag", cardedit.LIST_HINT)
         self.assertIn(cardedit.SET_KEY, [k for k, _ in cardedit.LIST_KEYS])
 
-    def test_esc_on_the_set_list_returns_to_systems(self):
+    def test_esc_on_the_tag_list_with_no_tag_picked_returns_to_systems(self):
         self.card()
+        self.tag_pokemon()
         calls = self.run_card(returns((cardedit.SET_KEY, 0)), returns(None), returns(None))
         self.assertEqual(len(calls), 3)
         self.assertIn("its systems", calls[2][0])
@@ -819,30 +783,35 @@ class Flow(DataDir):
             edit_fn()
         return rows
 
-    def test_esc_in_a_narrowed_list_asks_about_a_toggle_the_set_hides(self):
-        self.card()  # Emerald on, s, the Pokemon set (no Emerald), Esc: asked; u reverts Emerald too
+    def test_esc_in_a_narrowed_list_asks_about_a_toggle_the_tag_filter_hides(self):
+        self.card()  # Emerald on, s, the Pokemon tag (not Emerald), Esc: asked; u reverts Emerald too
+        self.tag_pokemon()
         rows = self.keyed(lambda: edit.edit_card_system("c", "gba", (DEVICE, "esde")),
-                          ["space", "s"], ["enter"], ["escape", "u"])
-        self.assertTrue(rows[2][0].startswith("Keep +1 −0 pending change(s)?"))
+                          ["space", "s"], ["enter"], ["escape"], ["escape", "u"])
+        self.assertTrue(rows[3][0].startswith("Keep +1 −0 pending change(s)?"))
         self.assertEqual(store.card_games("c"), {})
 
-    def test_u_in_a_narrowed_list_reverts_a_toggle_the_set_hides_and_counts_it(self):
-        self.card()  # Emerald on, s, the Pokemon set (no Emerald): the counter shows it, u reverts it
+    def test_u_in_a_narrowed_list_reverts_a_toggle_the_tag_filter_hides_and_counts_it(self):
+        self.card()  # Emerald on, s, the Pokemon tag (not Emerald): the counter shows it, u reverts it
+        self.tag_pokemon()
         rows = self.keyed(lambda: edit.edit_card_system("c", "gba", (DEVICE, "esde")),
-                          ["space", "s"], ["enter"], ["j", "u", "j", "enter"])
-        self.assertTrue(rows[2][0].startswith("+1 −0"))
-        self.assertTrue(rows[2][2].startswith("+0 −0"))
+                          ["space", "s"], ["enter"], ["escape"], ["j", "u", "j", "enter"])
+        self.assertTrue(rows[3][0].startswith("+1 −0"))
+        self.assertTrue(rows[3][2].startswith("+0 −0"))
         self.assertEqual(store.card_games("c"), {})
 
-    def test_keep_at_esc_in_a_narrowed_list_saves_a_toggle_the_set_hides(self):
+    def test_keep_at_esc_in_a_narrowed_list_saves_a_toggle_the_tag_filter_hides(self):
         self.card()
-        self.keyed(lambda: edit.edit_card_system("c", "gba", (DEVICE, "esde")), ["space", "s"], ["enter"], ["escape", "y"])
+        self.tag_pokemon()
+        self.keyed(lambda: edit.edit_card_system("c", "gba", (DEVICE, "esde")), ["space", "s"], ["enter"], ["escape"],
+                   ["escape", "y"])
         self.assertEqual(store.card_games("c"), {"gba": [g("gba/Emerald.zip")]})
 
     def test_esc_in_a_narrowed_list_with_nothing_pending_just_leaves(self):
         self.card()  # Emerald on and off again: the list returns on Esc
+        self.tag_pokemon()
         self.keyed(lambda: edit.edit_card_system("c", "gba", (DEVICE, "esde")),
-                   ["space", "space", "s"], ["enter"], ["escape"])
+                   ["space", "space", "s"], ["enter"], ["escape"], ["escape"])
         self.assertEqual(store.card_games("c"), {})
 
     def test_system_list_hides_systems_cached_as_empty_unless_picked(self):
@@ -1022,7 +991,7 @@ class Flow(DataDir):
             return kw["session"]["sel"]
         self.run_system(step)
         self.assertEqual(cardedit.GAMES_HINT,
-                         "Space toggle · Enter done · a all · s set · m meta · v variant · t tags")
+                         "Space toggle · Enter done · a all · s tag · m meta · v variant · t tags")
 
     def test_the_tag_column_is_last_and_t_edits_the_rows_tags(self):
         self.card()
@@ -1200,11 +1169,12 @@ class Flow(DataDir):
                                      returns(None), lambda labels, kw: kw["session"]["sel"])
         self.assertFalse(changed)
 
-    def test_set_filter_narrows_to_that_set_on_this_system_and_clears(self):
+    def test_tag_filter_narrows_to_that_tag_on_this_system_and_clears(self):
         self.card()
+        self.tag_pokemon()
 
-        def pick_first_set(labels, kw):
-            self.assertEqual(labels, [themeart.set_emoji(SET) + " Pokemon  (1 on Game Boy Advance)"])
+        def pick_first_tag(labels, kw):
+            self.assertEqual(labels, ["⬜ 🔴 Pokemon (2)"])  # Ruby and its save, on this system only
             return 0
 
         def filtered(labels, kw):
@@ -1218,137 +1188,19 @@ class Flow(DataDir):
             self.assertEqual(labels, ["Emerald.zip", "Ruby.sav", "Ruby.zip", "Zelda.zip"])
             self.assertEqual(kw["session"]["sel"], [False, False, True, False])  # kept across the filter
             return kw["session"]["sel"]
-        _, calls = self.run_system(returns((cardedit.SET_KEY, 0)), pick_first_set, filtered, everything)
-        self.assertIn("Pokemon only", calls[2][2]["filters"])
+        _, calls = self.run_system(returns((cardedit.SET_KEY, 0)), pick_first_tag, returns(None), filtered, everything)
+        self.assertEqual(calls[3][2]["filters"], "✅ 🔴 Pokemon (c clear filters)")
         self.assertEqual(store.card_games("c"), {"gba": [g("gba/Ruby.zip")]})
 
-    def series_set(self):
-        """SET with Ruby and Emerald in series A on gba, and Red in A on gb (not counted on gba)."""
-        return {**SET, "games": [{**SET["games"][0], "series": "A"}, {"system": "gba", "bucket": "gba/Emerald.zip", "series": "A"},
-                                 {"system": "gba", "bucket": "gba/Zelda.zip", "series": "B"}, {**SET["games"][1], "series": "B"}]}
-
-    def run_system_series(self, game_set, *steps):
-        """Drives edit_system with store's sets as [game_set]; the series list (no multi mode, no hotkeys) answers 0."""
-        script, lists = Script(*steps), []
-
-        def fake(title, labels, **kw):
-            if "multi" in kw or "hotkeys" in kw:
-                return script(title, labels, **kw)
-            lists.append(list(labels))
-            return 0
-        with mock.patch.object(store, "load_sets", return_value=[game_set]), \
-                mock.patch.object(picker, "filter_list", fake), contextlib.redirect_stdout(io.StringIO()):
-            edit.edit_card_system("c", "gba", (DEVICE, "esde"))
-        return script.calls, lists
-
-    def test_r_after_a_set_narrows_to_one_of_its_series_on_this_system(self):
+    def test_r_is_not_a_key_of_any_games_list(self):
         self.card()
-        calls, lists = self.run_system_series(
-            self.series_set(), returns((cardedit.SET_KEY, 0)), returns(0), returns((cardedit.SERIES_KEY, 0)),
-            returns((cardedit.CLEAR_KEY, 0)), lambda labels, kw: kw["session"]["sel"])
-        self.assertIn(cardedit.SERIES_KEY, calls[0][2]["hotkeys"])
-        self.assertEqual(lists, [["A  (2 games)"]])  # Ruby and Emerald; B has one game on gba
-        self.assertEqual(calls[3][1], ["Emerald.zip", "Ruby.sav", "Ruby.zip"])
-        self.assertIn("🎮 A", calls[3][2]["filters"])
-        self.assertEqual(len(calls[4][1]), 4)  # c clears the series with the set
-
-    def test_r_without_a_set_notes_and_lists_again(self):
-        self.card()
-        with mock.patch.object(edit, "note") as note:
-            calls, lists = self.run_system_series(
-                self.series_set(), returns((cardedit.SERIES_KEY, 0)), lambda labels, kw: kw["session"]["sel"])
-        self.assertIn("to a set with s first", note.call_args[0][0])
-        self.assertEqual(lists, [])
-        self.assertEqual(calls[1][1], calls[0][1])
-
-    def test_picking_another_set_drops_the_series(self):
-        self.card()
-        other = {"id": "o", "name": "Other", "description": "", "games": [{"system": "gba", "bucket": "gba/Zelda.zip"}]}
-        script, calls = Script(returns((cardedit.SET_KEY, 0)), returns(0), returns((cardedit.SERIES_KEY, 0)),
-                               returns((cardedit.SET_KEY, 0)), returns(1), lambda labels, kw: kw["session"]["sel"]), []
-
-        def fake(title, labels, **kw):
-            if "multi" in kw or "hotkeys" in kw:
-                return script(title, labels, **kw)
-            return 0
-        with mock.patch.object(store, "load_sets", return_value=[self.series_set(), other]), \
-                mock.patch.object(picker, "filter_list", fake), contextlib.redirect_stdout(io.StringIO()):
-            edit.edit_card_system("c", "gba", (DEVICE, "esde"))
-        self.assertEqual(script.calls[-1][1], ["Zelda.zip"])
-        self.assertNotIn("🎮", script.calls[-1][2]["filters"])
-
-    def test_set_list_counts_what_is_in_storage(self):
-        self.card()
-        self.files["gba/"].pop("gba/Ruby.sav")
-        other = {"id": "gone", "name": "Gone", "description": "", "games": [{"system": "gba", "bucket": "gba/X.zip"}]}
-
-        def offered(labels, kw):
-            self.assertEqual(labels, [themeart.set_emoji(SET) + " Pokemon  (1 on Game Boy Advance)"])  # its extra file missing is not a missing game; Gone: nothing to show
-            return None
-        with mock.patch.object(store, "load_sets", return_value=[SET, other]):
-            self.run_system(returns((cardedit.SET_KEY, 0)), offered, lambda labels, kw: kw["session"]["sel"])
-        self.assertNotIn("excluded", self.read("cards.json")["c"])
-
-    def test_set_list_toggle_adds_only_this_systems_games(self):
-        self.card()
-
-        def added(labels, kw):
-            self.assertEqual(kw["extras"], [[("  ✅", "cyan")]])
-            return None
-        self.run_system(returns((cardedit.SET_KEY, 0)), returns((" ", 0)), added,
-                        lambda labels, kw: kw["session"]["sel"])
-        games = store.card_games("c")
-        self.assertNotIn("sets", games)
-        self.assertEqual({x["bucket"] for x in games["gba"]}, {"gba/Ruby.sav", "gba/Ruby.zip"})
-
-    def test_set_list_toggle_again_removes_them(self):
-        self.card()
-
-        def removed(labels, kw):
-            self.assertEqual(kw["extras"], [[("  0/1", "cyan")]])
-            return None
-        self.run_system(returns((cardedit.SET_KEY, 0)), returns((" ", 0)), returns((" ", 0)), removed,
-                        lambda labels, kw: kw["session"]["sel"])
-        self.assertEqual(store.card_games("c"), {})
-
-    def set_list_shows(self, count):
-        """A set list step that checks the first set's count and leaves the list."""
-        def step(labels, kw):
-            self.assertEqual(kw["extras"], [[(f"  {count}", "cyan")]])
-            return None
-        return step
-
-    def test_set_list_toggle_switches_on_a_game_excluded_from_a_referenced_set(self):
-        self.card(games={"sets": ["pk"]}, excluded={"gba": ["gba/Ruby.zip"]})
-        self.run_system(returns((cardedit.SET_KEY, 0)), returns((" ", 0)), self.set_list_shows("✅"),
-                        lambda labels, kw: kw["session"]["sel"])
-        entry = self.read("cards.json")["c"]
-        self.assertEqual(entry["games"], {"sets": ["pk"]})  # the set syncs it: no direct pick
-        self.assertNotIn("gba", entry.get("excluded", {}))
-
-    def test_set_list_toggle_switches_on_an_excluded_direct_pick(self):
-        self.card(games={"gba": [g("gba/Ruby.sav"), g("gba/Ruby.zip")]}, excluded={"gba": ["gba/Ruby.zip"]})
-        self.run_system(returns((cardedit.SET_KEY, 0)), returns((" ", 0)), self.set_list_shows("✅"),
-                        lambda labels, kw: kw["session"]["sel"])
-        entry = self.read("cards.json")["c"]
-        self.assertEqual(entry["games"], {"gba": [g("gba/Ruby.sav"), g("gba/Ruby.zip")]})  # still one pick each
-        self.assertNotIn("gba", entry.get("excluded", {}))
-
-    def test_set_list_toggle_on_a_referenced_set_excludes_its_games(self):
-        self.card(games={"sets": ["pk"]})
-        self.run_system(returns((cardedit.SET_KEY, 0)), returns((" ", 0)), self.set_list_shows("0/1"),
-                        lambda labels, kw: kw["session"]["sel"])
-        entry = self.read("cards.json")["c"]
-        self.assertEqual(entry["games"], {"sets": ["pk"]})  # the set syncs them: no direct picks to add or remove
-        self.assertEqual(entry["excluded"], {"gba": ["gba/Ruby.sav", "gba/Ruby.zip"]})
-
-    def test_set_list_toggle_again_on_a_referenced_set_brings_its_games_back(self):
-        self.card(games={"sets": ["pk"]})
-        before = self.read("cards.json")
-        changed, _ = self.run_system(returns((cardedit.SET_KEY, 0)), returns((" ", 0)), returns((" ", 0)),
-                                     self.set_list_shows("✅"), lambda labels, kw: kw["session"]["sel"])
-        self.assertFalse(changed)
-        self.assertEqual(self.read("cards.json"), before)
+        _, calls = self.run_system(lambda labels, kw: kw["session"]["sel"])
+        self.assertNotIn("r", calls[0][2]["hotkeys"])
+        self.assertNotIn("r", [k for k, _ in calls[0][2]["key_help"]])
+        self.assertNotIn("r", cardedit.GameFilters.KEYS)
+        for keys in (cardedit.GAMES_KEYS, cardedit.ALL_GAMES_KEYS, cardedit.COLLECTION_GAMES_KEYS):
+            self.assertNotIn("r", [k for k, _ in keys])
+        self.assertFalse(hasattr(cardedit, "SERIES_KEY"))
 
     def test_game_view_status_counts_pending_picks(self):
         self.card(size="1 GB")
@@ -1500,31 +1352,35 @@ class Flow(DataDir):
     def test_ctrl_c_saves_what_was_toggled(self):
         self.card(games={"gba": [g("gba/Ruby.zip")]})
 
-        def filtered_pass(labels, kw):  # Zelda on, then the set list
+        self.tag_pokemon()
+
+        def filtered_pass(labels, kw):  # Zelda on, then the tag list
             kw["session"]["sel"][labels.index("Zelda.zip")] = True
             return (cardedit.SET_KEY, 0)
 
-        def interrupted(labels, kw):  # Ruby off, then Ctrl-C mid-list
+        def interrupted(labels, kw):  # Ruby off and its save on, then Ctrl-C mid-list
             kw["session"]["sel"][labels.index("Ruby.zip")] = False
+            kw["session"]["sel"][labels.index("Ruby.sav")] = True
             raise KeyboardInterrupt
         with self.assertRaises(KeyboardInterrupt):
-            self.run_system(filtered_pass, returns((" ", 0)), returns(None), interrupted)
-        entry = self.read("cards.json")["c"]  # the first pass, the set's games and the interrupted pass
+            self.run_system(filtered_pass, returns(0), returns(None), interrupted)
+        entry = self.read("cards.json")["c"]  # the first pass and the interrupted pass
         self.assertEqual({x["bucket"] for x in entry["games"]["gba"]}, {"gba/Zelda.zip", "gba/Ruby.sav"})
         self.assertNotIn("sets", entry["games"])
 
-    def test_ctrl_c_in_the_set_list_only_saves(self):
+    def test_ctrl_c_in_the_tag_list_saves_what_was_toggled(self):
         self.card()
+        self.tag_pokemon()
 
-        def ruby_on_then_sets(labels, kw):
+        def ruby_on_then_tags(labels, kw):
             kw["session"]["sel"][labels.index("Ruby.zip")] = True
             return (cardedit.SET_KEY, 0)
 
         def interrupted(labels, kw):
             raise KeyboardInterrupt
-        with self.assertRaises(KeyboardInterrupt):  # Space twice in the set list: its games on, then off again
-            self.run_system(ruby_on_then_sets, returns((" ", 0)), returns((" ", 0)), interrupted)
-        self.assertEqual(store.card_games("c"), {})  # the pass before the set list isn't applied a second time
+        with self.assertRaises(KeyboardInterrupt):
+            self.run_system(ruby_on_then_tags, interrupted)
+        self.assertEqual(store.card_games("c"), {"gba": [g("gba/Ruby.zip")]})
 
     def test_ctrl_c_in_the_variant_list_saves_what_was_toggled(self):
         self.with_variants(self.RED, {"bucket": "psx/x.chd", "note": "PS1: x"})
@@ -1629,16 +1485,11 @@ class Flow(DataDir):
                 self.assertEqual(kept.count, full.count)
                 return step(labels, kw)
             return check
-        keep = lambda labels, kw: kw["session"]["sel"]  # noqa: E731
         cases = {
             "toggle a game": ({"games": {"gba": [g("gba/Ruby.zip")], "gb": [g("gb/Red.gb")]}},
                               [returns(1), game_view_is_fresh(toggle("Zelda.zip", "Ruby.sav"))]),
             "f on": ({"games": {"gba": [g("gba/Ruby.zip")]}}, [returns((cardedit.FULL_KEY, 1))]),
             "f off": ({"games": {"gba": {"full_system": True}}}, [returns((cardedit.FULL_KEY, 1))]),
-            "add a set's games": ({"games": {"gb": [g("gb/Red.gb")]}},
-                                  [returns(1), returns((cardedit.SET_KEY, 0)), returns((" ", 0)), returns(None), keep]),
-            "remove a set's games": ({"games": {"gba": [g("gba/Ruby.zip"), g("gba/Ruby.sav")]}},
-                                     [returns(1), returns((cardedit.SET_KEY, 0)), returns((" ", 0)), returns(None), keep]),
             "toggle a collection on": ({}, [returns((cardedit.COLLECTIONS_KEY, 0)), returns((" ", 0)), returns(None)]),
             "toggle a collection off": ({"collections": ["favs"], "games": {"gba": [g("gba/Zelda.zip")]}},
                                         [returns((cardedit.COLLECTIONS_KEY, 0)), returns((" ", 0)), returns(None)]),
@@ -1788,15 +1639,14 @@ class DiscFlow(Flow):
         self.psx(toggle("A (USA).m3u"))  # the playlist on: the whole game is on
         self.assertEqual(sorted(x["bucket"] for x in store.card_games("c")["psx"]), sorted(DISCS))
 
-    def test_a_set_filter_showing_one_disc_still_switches_the_whole_game(self):
+    def test_a_tag_filter_showing_one_disc_still_switches_the_whole_game(self):
         self.card()
-        one = {"id": "one", "name": "One", "description": "", "games": [{"system": "psx", "bucket": DISCS[1]}]}
+        self.tag_pokemon([DISCS[1]])
 
         def filtered(labels, kw):
             self.assertEqual(labels, ["A (USA) (Disc 1).chd"])
             return [True]
-        with mock.patch.object(store, "load_sets", lambda: [one]):
-            self.psx(returns((cardedit.SET_KEY, 0)), returns(0), filtered)
+        self.psx(returns((cardedit.SET_KEY, 0)), returns(0), returns(None), filtered)
         self.assertEqual(sorted(x["bucket"] for x in store.card_games("c")["psx"]), sorted(DISCS))
         self.assertEqual(sorted(x["bucket"] for x in self.read("cards.json")["c"]["games"]["psx"]), sorted(DISCS))
 
@@ -1847,8 +1697,9 @@ class MetaFlow(Flow):
         self.load()
         return (cardedit.META_KEY, 0)
 
-    def test_filters_narrow_combine_with_the_set_filter_and_clear(self):
+    def test_filters_narrow_combine_with_the_tag_filter_and_clear(self):
         self.card()
+        self.tag_pokemon()
 
         def fields(labels, kw):
             self.assertEqual(labels, ["Developer", "Publisher", "Genre", "Year"])
@@ -1878,7 +1729,7 @@ class MetaFlow(Flow):
             self.assertEqual(kw["session"]["sel"], [True])
             return (cardedit.SET_KEY, 0)
 
-        def with_set(labels, kw):
+        def with_tag(labels, kw):
             self.assertEqual(labels, [])  # Pokemon's GBA games aren't Platform games
             return (cardedit.CLEAR_KEY, None)
 
@@ -1886,13 +1737,13 @@ class MetaFlow(Flow):
             self.assertEqual(labels, ["Emerald.zip", "Ruby.sav", "Ruby.zip", "Zelda.zip"])
             return kw["session"]["sel"]
         _, calls = self.run_system(self.opens_meta, fields, genres, platform, fields_again, years, both, returns(0),
-                                   with_set, everything)
+                                   returns(None), with_tag, everything)
         filters = [c[2].get("filters", "") for c in calls]
         self.assertEqual("genre: Platform (c clear filters)", filters[3])
         self.assertEqual("genre: Platform · year: 2001 (c clear filters)", filters[6])
-        self.assertEqual("📦 Pokemon only · genre: Platform · year: 2001 (c clear filters)", filters[8])
-        self.assertEqual("", filters[9])
-        self.assertNotIn("genre", calls[8][0])
+        self.assertEqual("✅ 🔴 Pokemon · genre: Platform · year: 2001 (c clear filters)", filters[9])
+        self.assertEqual("", filters[10])
+        self.assertNotIn("genre", calls[9][0])
         self.assertEqual(store.card_games("c"), {"gba": [g("gba/Zelda.zip")]})
         self.assertEqual(self.fetched, ["scrapes/gba/metadata.json"])
 
@@ -1946,17 +1797,12 @@ class SetFlow(Flow):
             changed = cardedit.edit_set("c", game_set, (device, "esde"), to_fetch)
         return changed, script.calls
 
-    def test_set_view_keys_are_the_playable_games_once_in_file_order(self):
-        game_set = {"games": [*SET["games"], {"system": "psx", "bucket": "psx/X.chd"}, {"system": "gb", "bucket": "gb/Red.gb"}]}
-        self.assertEqual(cardedit.set_view_keys(game_set, [GB, GBA]),
-                         [(GBA, "gba/Ruby.zip", ["gba/Ruby.sav"]), (GB, "gb/Red.gb", [])])
-
     def test_lists_the_sets_games_from_every_system(self):
         self.card()
         _, calls = self.run_set(returns([False, False]))
         title, labels, kw = calls[0]
         self.assertEqual(labels, ["Game Boy — Red", "Game Boy Advance — Ruby"])
-        self.assertEqual(title, "📦 Pokemon on c — ✅ synced, ⬜ not, 📦 from a set")
+        self.assertEqual(title, f"{themeart.collection_emoji(SET)} Pokemon on c — ✅ synced, ⬜ not, 💖 from a collection")
         self.assertEqual(kw["initial"], [False, False])
 
     def test_toggling_a_game_with_files_picks_its_files_too(self):
@@ -2004,89 +1850,17 @@ class SetFlow(Flow):
             self.run_set(interrupted)
         self.assertIn("gba/Ruby.zip", {x["bucket"] for x in self.read("cards.json")["c"]["games"]["gba"]})
 
-    def test_ctrl_c_in_the_series_list_saves_what_was_toggled(self):
-        self.card()
-        game_set = {**SET, "games": [{**x, "series": "A"} for x in SET["games"]]}
-
-        def red_on_then_series(labels, kw):
-            kw["session"]["sel"][labels.index("Game Boy — Red")] = True
-            return (cardedit.SERIES_KEY, None)
-
-        def interrupted(labels, kw):
-            self.assertEqual(labels, ["A  (2 games)"])
-            raise KeyboardInterrupt
-        with self.assertRaises(KeyboardInterrupt):
-            self.run_set(red_on_then_series, interrupted, game_set=game_set)
-        self.assertEqual(store.card_games("c"), {"gb": [g("gb/Red.gb")]})
-
-    def run_series(self, game_set, pick, *steps):
-        """Drives edit_set; the series list (no multi mode) answers with the index pick, and its labels are kept."""
-        script, lists = Script(*steps), []
-
-        def fake(title, labels, **kw):
-            if "multi" in kw:
-                return script(title, labels, **kw)
-            lists.append(list(labels))
-            return pick
-        with mock.patch.object(picker, "filter_list", fake), contextlib.redirect_stdout(io.StringIO()):
-            cardedit.edit_set("c", game_set, (DEVICE, "esde"))
-        return script.calls, lists
-
-    def test_a_collection_view_has_its_emoji_and_no_series_key(self):
+    def test_a_collection_view_has_its_emoji_and_no_filter_keys(self):
         self.card()
         script = Script(lambda labels, kw: kw["session"]["sel"])
         collection = {**SET, "art": "rpg"}
         with mock.patch.object(picker, "filter_list", script), contextlib.redirect_stdout(io.StringIO()):
-            cardedit.edit_set("c", collection, (DEVICE, "esde"), collection=True)
+            cardedit.edit_set("c", collection, (DEVICE, "esde"))
         title, _labels, kw = script.calls[0]
         self.assertTrue(title.startswith(cardedit.themeart.collection_emoji(collection)))
         self.assertIn("💖 from a collection", title)
-        self.assertNotIn(cardedit.SERIES_KEY, kw["hotkeys"])
-        self.assertNotIn("series", kw["hint"])
-        self.assertNotIn(cardedit.SERIES_KEY, [k for k, _ in kw["key_help"]])
-
-    def test_series_key_filters_the_rows_and_c_shows_all(self):
-        self.files["gb/"]["gb/Blue.gb"] = 5
-        self.card()
-        game_set = {**SET, "games": [{**SET["games"][0], "series": "Gen 1"}, {**SET["games"][1], "series": "Gen 1"},
-                                     {"system": "gb", "bucket": "gb/Blue.gb", "series": "Other"}]}
-        keys = (cardedit.VARIANT_KEY, "t", cardedit.SERIES_KEY, cardedit.CLEAR_KEY)
-        calls, lists = self.run_series(
-            game_set, 0, returns((cardedit.SERIES_KEY, None)), returns((cardedit.CLEAR_KEY, None)), lambda labels, kw: kw["session"]["sel"])
-        self.assertEqual(lists, [["Gen 1  (2 games)"]])  # "Other" has one game: left out
-        self.assertEqual(calls[0][2]["hotkeys"], keys)
-        self.assertEqual(calls[0][2]["filters"], "")
-        self.assertEqual(calls[1][2]["filters"], "Gen 1 (c clear filters)")
-        self.assertEqual(calls[1][1], ["Game Boy — Red", "Game Boy Advance — Ruby"])
-        self.assertEqual(calls[2][2]["filters"], "")
-
-    def test_series_key_filters_to_the_picked_series(self):
-        self.files["gb/"]["gb/Blue.gb"] = 5
-        self.card()
-        game_set = {**SET, "games": [{**SET["games"][0], "series": "A"}, {**SET["games"][1], "series": "B"},
-                                     {"system": "gb", "bucket": "gb/Blue.gb", "series": "B"}]}
-        calls, _ = self.run_series(game_set, 0, returns((cardedit.SERIES_KEY, None)), lambda labels, kw: kw["session"]["sel"])
-        self.assertEqual(calls[1][1], ["Game Boy — Blue", "Game Boy — Red"])
-        self.assertEqual(len(calls[1][2]["initial"]), 2)
-
-    def test_series_key_applies_toggles_made_before_it(self):
-        self.card()
-        game_set = {**SET, "games": [{**SET["games"][0], "series": "A"}, {**SET["games"][1], "series": "A"}]}
-
-        def toggles_then_series(labels, kw):
-            kw["session"]["sel"][labels.index("Game Boy Advance — Ruby")] = True
-            return (cardedit.SERIES_KEY, None)
-        self.run_series(game_set, 0, toggles_then_series, lambda labels, kw: kw["session"]["sel"])
-        self.assertIn("gba/Ruby.zip", {x["bucket"] for x in store.card_games("c")["gba"]})
-
-    def test_series_key_without_series_notes_and_lists_again(self):
-        self.card()
-        notes = []
-        with mock.patch.object(edit, "note", notes.append):
-            calls, lists = self.run_series(SET, 0, returns((cardedit.SERIES_KEY, None)), lambda labels, kw: kw["session"]["sel"])
-        self.assertEqual(lists, [])
-        self.assertEqual(len(notes), 1)
-        self.assertEqual(calls[1][1], calls[0][1])
+        self.assertEqual(kw["hotkeys"], (cardedit.VARIANT_KEY, "t"))
+        self.assertEqual(kw["hint"], cardedit.COLLECTION_GAMES_HINT)
 
     def test_select_all(self):
         self.card()
@@ -2099,56 +1873,6 @@ class SetFlow(Flow):
         games = store.card_games("c")
         self.assertEqual({x["bucket"] for x in games["gba"]}, {"gba/Ruby.zip", "gba/Ruby.sav"})
         self.assertEqual(games["gb"], [g("gb/Red.gb")])
-
-    def run_sets_list(self, *steps):
-        script = Script(*steps)
-        with mock.patch.object(picker, "filter_list", script), contextlib.redirect_stdout(io.StringIO()):
-            chosen = cardedit.pick_card_set("c", (DEVICE, "esde"), [GBA, GB])
-        return chosen, script.calls
-
-    def test_space_in_the_sets_list_switches_the_sets_games_on_then_off(self):
-        self.card(games={"gb": [g("gb/Red.gb")]})
-        counts = []
-
-        def look(labels, kw):
-            counts.append(kw["extras"][0][0][0].strip())
-            return (" ", 0)
-        chosen, calls = self.run_sets_list(look, lambda labels, kw: None)
-        self.assertIsNone(chosen)
-        self.assertEqual(calls[0][2]["hotkeys"], (" ", "\t"))
-        games = store.card_games("c")
-        self.assertEqual({x["bucket"] for x in games["gba"]}, {"gba/Ruby.zip", "gba/Ruby.sav"})
-        self.assertEqual(games["gb"], [g("gb/Red.gb")])
-        self.run_sets_list(look, lambda labels, kw: counts.append(kw["extras"][0][0][0].strip()))
-        self.assertEqual(counts, ["1/2", "✅", "0/2"])
-        self.assertEqual(store.card_games("c"), {})
-
-    def test_sets_list_previews_the_art_the_cards_frontend_gets(self):
-        self.card()
-        _, calls = self.run_sets_list(returns(None))
-        with mock.patch.object(previews, "card_collection", side_effect=lambda a, e: f"art-{a}-{e['layout']}"):
-            self.assertEqual(calls[0][2]["preview"](0), "art-pk-esde")
-
-    def test_tab_in_the_sets_list_excludes_games_a_referenced_set_syncs(self):
-        self.card(games={store.SETS_KEY: ["pk"]})
-        self.run_sets_list(returns(("\t", 0)), returns(None))
-        self.assertEqual(store.card_games("c"), {store.SETS_KEY: ["pk"]})
-        self.assertEqual(store.card_excluded("c"), {"gb": ["gb/Red.gb"], "gba": ["gba/Ruby.sav", "gba/Ruby.zip"]})
-
-    def test_the_sets_list_keeps_its_toggles_on_ctrl_c(self):
-        self.card()
-
-        def interrupt(labels, kw):
-            raise KeyboardInterrupt
-        with self.assertRaises(KeyboardInterrupt):
-            self.run_sets_list(returns((" ", 0)), interrupt)
-        self.assertEqual(store.card_games("c")["gb"], [g("gb/Red.gb")])
-
-    def test_enter_in_the_sets_list_opens_the_set(self):
-        self.card()
-        chosen, _ = self.run_sets_list(returns(0))
-        self.assertEqual(chosen["id"], "pk")
-        self.assertEqual(store.card_games("c"), {})
 
     def test_status_counts_picked_games_and_their_bios(self):
         self.card()
@@ -2244,7 +1968,7 @@ class SetFlow(Flow):
         self.assertTrue(changed)
         self.assertEqual(store.card_games("c"), {"gba": [g("gba/Emerald.zip")]})
 
-    def test_v_counts_a_variant_on_a_system_the_set_has_no_games_of(self):
+    def test_v_counts_a_variant_on_a_system_the_collection_has_no_games_of(self):
         self.with_variants(self.RED)
         self.card(size="1 GB", games={"gba": [g("gba/Zelda.zip")]})
         self.sized()
@@ -2253,9 +1977,10 @@ class SetFlow(Flow):
         def look(labels, kw):
             seen.append(kw["status"](kw["session"]["sel"]))
             return kw["session"]["sel"]
+        collections.save_collection({"id": "ruby", "name": "Ruby", "games": [
+            {"title": "Ruby", "system": "gba", "bucket": "gba/Ruby.zip"}]})
         with self.workers_run_at_once():
-            self.run_card(returns((cardedit.SET_KEY, 0)),
-                          lambda labels, kw: next(i for i, l in enumerate(labels) if "Variants" in l),
+            self.run_card(returns((cardedit.COLLECTIONS_KEY, 0)), returns(0),
                           lambda labels, kw: (cardedit.VARIANT_KEY, labels.index("Game Boy Advance — Ruby")), look,
                           self.same_as_fresh)
         self.assertEqual(store.card_games("c"), {"gba": [g("gba/Zelda.zip")], "gb": [g("gb/Red.gb")]})
@@ -2283,20 +2008,6 @@ class SetFlow(Flow):
         self.assertEqual(calls[0][1], ["Sony PlayStation Vita — G [PCSE00349] [USA] [NoNpDRM]"])
         self.assertEqual(store.card_games("c"), {"psvita": [g(G)]})
 
-    def test_the_set_list_lists_only_systems_with_set_games(self):
-        self.card()
-        listed = []
-
-        def files(prefix, sizes=True):
-            listed.append(prefix)
-            return self.files.get(prefix, {})
-        out = io.StringIO()
-        with mock.patch.object(inventory, "current", return_value=None), mock.patch.object(inventory, "files", files), \
-                mock.patch.object(picker, "filter_list", Script(returns(None))), contextlib.redirect_stdout(out):
-            cardedit.pick_card_set("c", (DEVICE, "esde"), [GBA, GB, PSX])
-        self.assertEqual(sorted(listed), ["gb/", "gba/"])  # no Pokemon game on PSX
-        self.assertEqual(out.getvalue().count("📡 Listing"), 2, out.getvalue())
-
     def run_all(self, *steps, systems=(GBA, GB)):
         script = Script(*steps)
         with mock.patch.object(picker, "filter_list", script), contextlib.redirect_stdout(io.StringIO()):
@@ -2306,20 +2017,13 @@ class SetFlow(Flow):
     ALL_LABELS = ["Game Boy Advance — Emerald.zip", "Game Boy — Red.gb", "Game Boy Advance — Ruby.sav",
                   "Game Boy Advance — Ruby.zip", "Game Boy Advance — Zelda.zip"]
 
-    def test_esc_in_the_all_games_list_narrowed_to_a_set_asks_about_a_toggle_it_hides(self):
+    def test_esc_in_the_all_games_list_narrowed_to_a_tag_asks_about_a_toggle_it_hides(self):
+        self.tag_pokemon()
         for answer, games in (("u", {}), ("y", {"gba": [g("gba/Emerald.zip")]})):
-            self.card()  # Emerald on, s, the Pokemon set (no Emerald), Esc
+            self.card()  # Emerald on, s, the Pokemon tag (not Emerald), Esc
             rows = self.keyed(lambda: cardedit.edit_all("c", (DEVICE, "esde"), [GBA, GB]),
-                              ["space", "s"], ["enter"], ["escape", answer])
-            self.assertTrue(rows[2][0].startswith("Keep +1 −0 pending change(s)?"))
-            self.assertEqual(store.card_games("c"), games)
-
-    def test_esc_in_the_set_list_narrowed_to_a_series_asks_about_a_toggle_it_hides(self):
-        for answer, games in (("u", {}), ("y", {"gb": [g("gb/Red.gb")]})):
-            self.card()  # Red (series B) on, r, series A, Esc
-            rows = self.keyed(lambda: cardedit.edit_set("c", self.series_set(), (DEVICE, "esde")),
-                              ["space", "r"], ["enter"], ["escape", answer])
-            self.assertTrue(rows[2][0].startswith("Keep +1 −0 pending change(s)?"))
+                              ["space", "s"], ["enter"], ["escape"], ["escape", answer])
+            self.assertTrue(rows[3][0].startswith("Keep +1 −0 pending change(s)?"))
             self.assertEqual(store.card_games("c"), games)
 
     def test_edit_all_lists_every_file_of_every_system_with_system_names(self):
@@ -2366,15 +2070,18 @@ class SetFlow(Flow):
         self.assertEqual(calls[0][1], ["Game Boy Advance — Emerald.zip", "Game Boy — Red.gb", "Game Boy Advance — Ruby.sav",
                                        "Game Boy Advance — Ruby.zip", "Game Boy — Zelda.gb", "Game Boy Advance — Zelda.zip"])
 
-    def test_edit_all_set_key_narrows_to_a_set_then_c_clears(self):
+    def test_edit_all_s_narrows_by_tags_then_c_clears(self):
         self.card()
-        _, calls = self.run_all(returns((cardedit.SET_KEY, None)), returns(0), returns((cardedit.CLEAR_KEY, None)),
+        self.tag_pokemon()
+        _, calls = self.run_all(returns((cardedit.SET_KEY, None)), returns(0), returns(None),
+                                lambda labels, kw: kw["session"].update(query="red") or (cardedit.CLEAR_KEY, None),
                                 lambda labels, kw: kw["session"]["sel"])
-        self.assertEqual(calls[1][1], [f"{themeart.set_emoji(SET)} Pokemon  (3 games)"])  # the set list
-        self.assertEqual(calls[2][1], ["Game Boy — Red.gb", "Game Boy Advance — Ruby.sav", "Game Boy Advance — Ruby.zip"])
-        self.assertEqual(calls[2][2]["filters"], f"{themeart.set_emoji(SET)} Pokemon only (c clear filters)")
-        self.assertEqual(calls[3][1], self.ALL_LABELS)
-        self.assertEqual(calls[3][2]["filters"], "")
+        self.assertEqual(calls[1][1], ["⬜ 🔴 Pokemon (3)"])  # the tag list
+        self.assertEqual(calls[3][1], ["Game Boy — Red.gb", "Game Boy Advance — Ruby.sav", "Game Boy Advance — Ruby.zip"])
+        self.assertEqual(calls[3][2]["filters"], "✅ 🔴 Pokemon (c clear filters)")
+        self.assertEqual(calls[4][1], self.ALL_LABELS)
+        self.assertEqual(calls[4][2]["filters"], "")
+        self.assertNotIn("query", calls[4][2]["session"])  # c clears the / filter too
 
     def test_edit_all_notes_a_storage_error_and_changes_nothing(self):
         self.card()
@@ -2505,31 +2212,44 @@ class GameFiltersTest(unittest.TestCase):
         self.assertTrue(all(f.keep(k) for k in self.KEYS))
         self.assertEqual(f.describe(), "")
 
-    def test_a_set_narrows_the_list_and_c_clears_every_filter(self):
+    def test_s_narrows_the_list_by_tags_and_c_clears_every_filter(self):
         f = self.filters()
-        game_set = {"name": "Picks", "games": [{"system": "gba", "bucket": "gba/A.zip"}]}
-        current = []
-        self.assertTrue(f.handle(cardedit.SET_KEY, self.KEYS, {}, lambda name: current.append(name) or game_set))
+        self.assertIsInstance(f.tags, cardedit.tagui.TagFilter)
+        self.enterContext(mock.patch.object(store, "data_dir", return_value=self.enterContext(tempfile.TemporaryDirectory())))
+        storage_tags(self, {"tags": {"pk": {"name": "Picks", "emoji": "🔴"}}, "games": {"gba/A.zip": {"tags": ["pk"]}},
+                            "declined": {}})
+        offered = []
+
+        def pick(row_keys):
+            offered.append(row_keys)
+            f.tags.required.add("pk")
+        with mock.patch.object(f.tags, "pick", pick):
+            self.assertTrue(f.handle(cardedit.SET_KEY, self.KEYS, {}))
+        self.assertEqual(offered, [self.KEYS])
         self.assertEqual([k for k in self.KEYS if f.keep(k)], ["gba/A.zip"])
-        self.assertIn("Picks only", f.describe())
-        self.assertTrue(f.describe().endswith("(c clear filters)"))
-        f.handle(cardedit.SET_KEY, self.KEYS, {}, lambda name: current.append(name))  # cancelled: the set stays
-        self.assertEqual(current, [None, "Picks"])
-        self.assertEqual([k for k in self.KEYS if f.keep(k)], ["gba/A.zip"])
+        self.assertEqual(f.describe(), "✅ 🔴 Picks (c clear filters)")
         with mock.patch.object(surprise, "past_keys", return_value={"gba/B.zip"}):
-            f.handle(cardedit.PAST_SURPRISE_KEY, self.KEYS, {}, None)
+            f.handle(cardedit.PAST_SURPRISE_KEY, self.KEYS, {})
+        f.meta_filt["genre"] = "RPG"
         self.assertEqual([k for k in self.KEYS if f.keep(k)], [])
         self.assertIn("past surprises only", f.describe())
         place = {"session": {"query": "zel"}}
-        self.assertTrue(f.handle(cardedit.CLEAR_KEY, self.KEYS, place, None))
+        self.assertTrue(f.handle(cardedit.CLEAR_KEY, self.KEYS, place))
         self.assertEqual(place, {"session": {}})  # the / filter too
+        self.assertEqual((f.tags.required, f.past, f.meta_filt), (set(), None, {}))
         self.assertTrue(all(f.keep(k) for k in self.KEYS))
         self.assertEqual(f.describe(), "")
+
+    def test_r_is_not_a_filter_key(self):
+        f = self.filters()
+        self.assertEqual(cardedit.GameFilters.KEYS,
+                         (cardedit.SET_KEY, cardedit.META_KEY, cardedit.PAST_SURPRISE_KEY, cardedit.CLEAR_KEY))
+        self.assertFalse(f.handle("r", self.KEYS, {}))
 
     def test_no_past_surprises_leaves_the_list_and_says_so(self):
         f, notes = self.filters(), []
         with mock.patch.object(surprise, "past_keys", return_value=set()), mock.patch.object(edit, "note", notes.append):
-            self.assertTrue(f.handle(cardedit.PAST_SURPRISE_KEY, self.KEYS, {}, None))
+            self.assertTrue(f.handle(cardedit.PAST_SURPRISE_KEY, self.KEYS, {}))
         self.assertIsNone(f.past)
         self.assertIn("No past surprises on Game Boy Advance", notes[0])
 
@@ -2540,17 +2260,17 @@ class GameFiltersTest(unittest.TestCase):
         def pick_meta(system, meta, meta_filt, keys):
             offered.append(keys("genre"))
         with mock.patch.object(cardedit, "pick_meta", pick_meta):
-            self.assertTrue(f.handle(cardedit.META_KEY, self.KEYS, {}, None))
+            self.assertTrue(f.handle(cardedit.META_KEY, self.KEYS, {}))
         self.assertEqual(offered, [["gba/B.zip", "gba/C.zip"]])
 
     def test_other_keys_are_not_filter_keys(self):
         f = self.filters()
         for pressed in (None, cardedit.VARIANT_KEY):
-            self.assertFalse(f.handle(pressed, self.KEYS, {}, None))
+            self.assertFalse(f.handle(pressed, self.KEYS, {}))
 
 
 class DeadHints(unittest.TestCase):
     def test_the_lists_that_turn_a_off_do_not_hint_at_it_and_the_systems_hint_says_all_games(self):
         self.assertNotIn("a all", cardedit.ALL_GAMES_HINT)
-        self.assertIn("a all", cardedit.SET_GAMES_HINT)
+        self.assertIn("a all", cardedit.COLLECTION_GAMES_HINT)
         self.assertIn("a all games", cardedit.LIST_HINT)

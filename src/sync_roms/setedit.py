@@ -1,8 +1,8 @@
 """`sync-roms sets edit`: edit the game sets in storage by hand and save the changes there."""
 import copy
 
-from . import cardedit, edit, inventory, languages, picker, previews, runtime, s3, store, themeart, ui
-from .listedit import add_from_set, add_from_system, ask_category, diff_lists, edit_menu, folder_lister, game_label, insert_game, pick_name, recategorize, reconcile, series_keys, set_series, view
+from . import cardedit, edit, inventory, languages, picker, previews, runtime, s3, store, tagui, themeart, ui
+from .listedit import add_from_set, add_from_system, ask_category, diff_lists, edit_menu, folder_lister, game_label, insert_game, pick_name, recategorize, reconcile, series_keys, series_of, set_series, view
 
 
 # --- Set files ---------------------------------------------------------------------------------------
@@ -17,8 +17,21 @@ set_text = store.set_text  # the format of a set's file lives in store
 
 # --- Editing the games of one set --------------------------------------------------------------------
 
+SERIES_KEY = "r"
 GAMES_HINT = "Space toggle · Enter done · w note · a all · o view · r series"
-GAMES_KEYS = [k for k in cardedit.SET_GAMES_KEYS if k[0] != cardedit.VARIANT_KEY]  # what ? lists in a set's games list
+GAMES_KEYS = [tagui.KEY_HELP, (SERIES_KEY, "narrow to one series of games"), ("c", "clear the series filter")]  # what ? lists
+
+
+def pick_series(game_set, current=None):
+    """The series of the set's games picked from a list (with its game count), or None; notes when the set has none."""
+    found = series_of(game_set)
+    if not found:
+        edit.note(ui.yellow(f"ℹ️  {game_set['name']} has no series."))
+        return None
+    labels = [f"{n}  ({c} games)" for n, c in found]
+    i = picker.filter_list(f"🎮 Series in {game_set['name']}", labels,
+                           cursor=next((j for j, (n, _) in enumerate(found) if n == current), 0))
+    return None if i is None else found[i][0]
 
 
 def pick_game(title, games, names):
@@ -54,12 +67,12 @@ def edit_one(game_set, systems, keys_of):
                     narrowed = [r for r in rows if r[1] in series_keys(game_set, series_filter)] if series_filter else rows
                     pressed = edit.toggle_games(
                         f"✏️  {label} — ✅ in the set, ⬜ remove it", narrowed,
-                        hotkeys=(cardedit.SERIES_KEY, cardedit.CLEAR_KEY), hint=GAMES_HINT,
+                        hotkeys=(SERIES_KEY, cardedit.CLEAR_KEY), hint=GAMES_HINT,
                         key_help=GAMES_KEYS, filters=f"{series_filter} (c clear filters)" if series_filter else "")
                     if pressed == cardedit.CLEAR_KEY:
                         series_filter = None
-                    elif pressed == cardedit.SERIES_KEY:
-                        series_filter = cardedit.pick_series(game_set, series_filter) or series_filter
+                    elif pressed == SERIES_KEY:
+                        series_filter = pick_series(game_set, series_filter) or series_filter
                     else:
                         break
             finally:  # Ctrl-C too: the toggles made are kept (rows hidden by the series stay as they were)

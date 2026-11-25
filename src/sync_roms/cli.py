@@ -129,8 +129,8 @@ TOPICS = {
   --card NAME is required: a card's games are saved in ~/.sync-roms/cards.json with the previous
   version kept as .bak. Removing only drops a game from the list. In the editor: / filters, Space
   toggles a row, a all/none shown, u reverts the list, o cycles all/on/changed, f toggles a full
-  system, S opens the settings menu (Surprise, theme, collections, RAOfflineProxy); in a system's
-  games, s lists its sets and Space there picks (or unpicks) a set's games. ? in any list shows all
+  system, S opens the settings menu (Surprise, theme, collections, RAOfflineProxy); in a games
+  list, s narrows it by tags (Enter cycles a tag: needed, left out, off). ? in any list shows all
   its keys.
 """,
     "sets": """
