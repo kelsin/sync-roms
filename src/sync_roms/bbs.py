@@ -250,6 +250,97 @@ def _download(cart, tmp):
     return path
 
 
+def add_carts(todo, fetch, tmp, source=None):
+    """Put carts in pico8/ and write their metadata: todo is [(old key or None, cart)], a cart {"file", "title",
+    "author"} (a None title: a new cart gets no entry, an upgrade keeps the old one's). fetch(cart, tmp) returns the
+    cart's file, or None (skipped, already warned); source: where fetch gets them, for its warning. (keys of the new
+    carts added, upgrades done, exit code 0 or 1); META is written every META_EVERY carts and at the end, and a stop or
+    Ctrl-C still writes it."""
+    added, upgraded, code = [], 0, 0
+    pending = []  # (old key or None, cart, key) of the carts put in storage since META was last written
+
+    def finish():
+        """Write META with the pending carts, then move the upgrades off their old revisions. False, with the pending
+        carts taken back out (so the next run adds them again with their titles), when META couldn't be written."""
+        nonlocal upgraded, code
+        if not pending:
+            return True
+        done = pending[:]
+        pending.clear()
+        titles = {}
+        try:  # re-read, so entries another machine wrote since are kept; only this run's changes are applied
+            meta = scrape_plan.load_metadata("pico8", fresh=True)
+            for old, c, key in done:
+                entry = {} if c["title"] is None else {"name": c["title"], "developer": c["author"]}
+                previous = {}
+                if old is not None:
+                    previous = meta.pop(old[len("pico8/"):], {})
+                    entry = screenscraper.qualify({**previous, **entry}) if previous.get("qualifier") and entry \
+                        else {**previous, **entry}
+                titles[key] = entry.get("name") or previous.get("name") or c["file"].removesuffix(".p8.png")
+                if entry:
+                    meta = scrape_plan.merge_metadata(meta, {c["file"]: entry})
+            s3.put_text(META, scrape_plan.dump_json(meta))
+        except (*s3.ERRORS, ValueError) as e:
+            keys = [key for _, _, key in done]
+            ui.warn(f"Couldn't write {META} ({e}); removing {', '.join(keys)} again and stopping")
+            with contextlib.suppress(*s3.ERRORS):
+                s3.delete_keys(keys)
+            code = 1
+            return False
+        for old, c, key in done:
+            if old is None:
+                added.append(key)
+                continue
+            old_file = old[len("pico8/"):]
+            moves = _media_moves(old_file, c["file"])
+            if moves and s3.move_keys(moves):
+                code = 1
+            _move_state(old_file, c["file"])
+            try:
+                still = retarget(old, key, titles[key])
+            except OSError as e:  # the references still name the old revision, so it stays
+                ui.warn(f"Couldn't move cards and collections from {old} to {key} ({e}); keeping {old}")
+                code = 1
+                upgraded += 1
+                continue
+            for set_id in still:
+                ui.warn(f"Set {set_id} still names {old}: change it to {key}")
+            try:  # last, so a failure here leaves only a duplicate file: the new cart is complete
+                errors = s3.delete_keys([old])
+            except s3.ERRORS as e:
+                errors = [e]
+            if errors:
+                ui.warn(f"Couldn't delete {old} from storage ({errors[0]}); delete it by hand")
+                code = 1
+            upgraded += 1
+        return True
+    try:  # a stop (or Ctrl-C) still writes META for the carts already put in storage
+        for old, c in todo:
+            file, key = c["file"], f"pico8/{c['file']}"
+            try:
+                path = fetch(c, tmp)
+            except _HTTP_ERRORS as e:
+                ui.warn(f"Couldn't download {file} from {source} ({e}); stopping" if source else
+                        f"Couldn't get {file} ({e}); stopping")
+                code = 1
+                break
+            if path is None:
+                continue
+            try:
+                s3.put_file(key, path)
+            except s3.ERRORS as e:
+                ui.warn(f"Couldn't write {file} to {s3.location()} ({e}); stopping")
+                code = 1
+                break
+            pending.append((old, c, key))
+            if len(pending) >= META_EVERY and not finish():
+                break
+    finally:
+        finish()
+    return added, upgraded, code
+
+
 def download_pico8(args):
     """Add the BBS Featured carts storage doesn't have to pico8/, and newer revisions of those it has. Exit code."""
     usersettings.ensure_bucket()
@@ -283,85 +374,7 @@ def download_pico8(args):
     except (*s3.ERRORS, ValueError) as e:
         ui.warn(f"Couldn't read {META} ({e})")
         return 1
-    added = upgraded = 0
-    code = 1 if failed else 0
-    pending = []  # (old key or None, cart, key) of the carts put in storage since META was last written
-
-    def finish():
-        """Write META with the pending carts, then move the upgrades off their old revisions. False, with the pending
-        carts taken back out (so the next run adds them again with their titles), when META couldn't be written."""
-        nonlocal added, upgraded, code
-        if not pending:
-            return True
-        done = pending[:]
-        pending.clear()
-        titles = {}
-        try:  # re-read, so entries another machine wrote since are kept; only this run's changes are applied
-            meta = scrape_plan.load_metadata("pico8", fresh=True)
-            for old, c, key in done:
-                entry = {"name": c["title"], "developer": c["author"]}
-                if old is not None:
-                    previous = meta.pop(old[len("pico8/"):], {})
-                    entry = screenscraper.qualify({**previous, **entry}) if previous.get("qualifier") else {**previous, **entry}
-                titles[key] = entry["name"]
-                meta = scrape_plan.merge_metadata(meta, {c["file"]: entry})
-            s3.put_text(META, scrape_plan.dump_json(meta))
-        except (*s3.ERRORS, ValueError) as e:
-            keys = [key for _, _, key in done]
-            ui.warn(f"Couldn't write {META} ({e}); removing {', '.join(keys)} again and stopping")
-            with contextlib.suppress(*s3.ERRORS):
-                s3.delete_keys(keys)
-            code = 1
-            return False
-        for old, c, key in done:
-            if old is None:
-                added += 1
-                continue
-            old_file = old[len("pico8/"):]
-            moves = _media_moves(old_file, c["file"])
-            if moves and s3.move_keys(moves):
-                code = 1
-            _move_state(old_file, c["file"])
-            try:
-                still = retarget(old, key, titles[key])
-            except OSError as e:  # the references still name the old revision, so it stays
-                ui.warn(f"Couldn't move cards and collections from {old} to {key} ({e}); keeping {old}")
-                code = 1
-                upgraded += 1
-                continue
-            for set_id in still:
-                ui.warn(f"Set {set_id} still names {old}: change it to {key}")
-            try:  # last, so a failure here leaves only a duplicate file: the new cart is complete
-                errors = s3.delete_keys([old])
-            except s3.ERRORS as e:
-                errors = [e]
-            if errors:
-                ui.warn(f"Couldn't delete {old} from storage ({errors[0]}); delete it by hand")
-                code = 1
-            upgraded += 1
-        return True
     with tempfile.TemporaryDirectory() as tmp:
-        try:  # a stop (or Ctrl-C) still writes META for the carts already put in storage
-            for old, c in todo:
-                file, key = c["file"], f"pico8/{c['file']}"
-                try:
-                    path = _download(c, tmp)
-                except _HTTP_ERRORS as e:
-                    ui.warn(f"Couldn't download {file} from the BBS ({e}); stopping")
-                    code = 1
-                    break
-                if path is None:
-                    continue
-                try:
-                    s3.put_file(key, path)
-                except s3.ERRORS as e:
-                    ui.warn(f"Couldn't write {file} to {s3.location()} ({e}); stopping")
-                    code = 1
-                    break
-                pending.append((old, c, key))
-                if len(pending) >= META_EVERY and not finish():
-                    break
-        finally:
-            finish()
-    print(ui.green(f"✅ Added {added} and upgraded {upgraded} PICO-8 cart(s) in {s3.location()}"))
-    return code
+        added, upgraded, code = add_carts(todo, _download, tmp, "the BBS")
+    print(ui.green(f"✅ Added {len(added)} and upgraded {upgraded} PICO-8 cart(s) in {s3.location()}"))
+    return 1 if failed else code
