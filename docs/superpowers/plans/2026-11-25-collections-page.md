@@ -174,3 +174,41 @@ The page:
 - [ ] **Step 4: Run the full suite** `uv run python -m unittest discover -s tests < /dev/null`. Expected: all
   pass, `test_readme` and completion included.
 - [ ] **Step 5: Commit** `feat(collections): add collections page command`.
+
+### Task 4: Share over Tailscale
+
+**Files:**
+- Create: `src/sync_roms/tailshare.py`
+- Modify: `src/sync_roms/commands.py` (`collections share`, `collections unshare`), `src/sync_roms/cli.py`
+  (help and second words), `README.md` (two Commands rows plus a paragraph under Collections), `CLAUDE.md`
+  (Personal data: `share/collections/index.html`, written by `collections share`, the only folder it serves)
+- Test: `tests/test_tailshare.py`
+
+**Interfaces:**
+- Consumes: `collections_page.write_page(path)` from Task 3.
+- Produces:
+  - `tailshare.SHARE_DIR() -> str`, which is `os.path.join(store.data_dir(), "share", "collections")`
+  - `tailshare.PATH = "/collections"`
+  - `tailshare.share() -> str`: writes the page to `<SHARE_DIR>/index.html` and runs
+    `["tailscale", "serve", "--bg", "--set-path", PATH, SHARE_DIR()]`. Then it reads
+    `["tailscale", "status", "--json"]` and returns `f"https://{Self.DNSName.rstrip('.')}{PATH}/"`.
+  - `tailshare.unshare() -> None`: runs `["tailscale", "serve", "--https=443", "--set-path", PATH, "off"]`.
+  - Both run through `subprocess.run(..., capture_output=True, text=True, stdin=subprocess.DEVNULL, timeout=60)`.
+    `shutil.which("tailscale")` being None calls `ui.fail("tailscale isn't installed or not on PATH", 1)`. A
+    non-zero exit calls `ui.fail(f"tailscale serve failed: {stderr.strip()}", 1)`.
+- The commands are `collections share` (prints the link) and `collections unshare` (prints
+  `Stopped sharing the collections page.`). They refuse `--dry-run` like `guide`. Never call `tailscale serve reset`.
+
+- [ ] **Step 1: Write failing tests** with `subprocess.run` and `shutil.which` patched:
+  - `test_share_writes_and_serves`: the file exists under the data folder's `share/collections/index.html`. The
+    serve argv is as above. The returned link is `https://box.tail1.ts.net/collections/` for
+    `DNSName "box.tail1.ts.net."`.
+  - `test_unshare_only_turns_off_its_path`: the argv is as above, and no call contains `"reset"`.
+  - `test_missing_tailscale_fails`: `which` returns None, so `SystemExit` with code 1 and no `subprocess.run` call.
+  - `test_serve_error_surfaces`: returncode 1 with stderr `"HTTPS not enabled"` gives exit 1 with that text on
+    stderr.
+  - `test_serves_only_share_folder`: the served path is `SHARE_DIR()`, never `store.data_dir()`.
+- [ ] **Step 2: Run them.** Expected: FAIL.
+- [ ] **Step 3: Implement** `tailshare.py`, the commands, help, README and CLAUDE.md.
+- [ ] **Step 4: Run the full suite.** Expected: all pass.
+- [ ] **Step 5: Commit** `feat(collections): share the collections page over tailscale`.

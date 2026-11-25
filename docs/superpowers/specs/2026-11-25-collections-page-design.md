@@ -27,6 +27,14 @@ them. It can be shared as one file or hosted anywhere. It is for browsing only: 
   Collections with no matching games are hidden, and while a filter is active the matching collections open
   automatically.
 
+- `sync-roms collections share` builds the page into `share/collections/index.html` in the data folder (only
+  that folder is served, never the data folder itself, which holds `settings.json` with passwords and keys). It
+  serves that folder on the tailnet with `tailscale serve --bg --set-path /collections <folder>`, and prints the
+  link `https://<Self.DNSName without the trailing dot>/collections/` from `tailscale status --json`. Running it
+  again rebuilds the page; the serve entry stays.
+- `sync-roms collections unshare` runs `tailscale serve --https=443 --set-path /collections off`. That removes
+  only this entry and leaves other serve entries alone (never `tailscale serve reset`). The page file stays.
+
 ## Non-goals
 
 - Editing anything, or links to download ROMs.
@@ -45,6 +53,10 @@ them. It can be shared as one file or hosted anywhere. It is for browsing only: 
   text, since `file://` and plain-`http` hosts can lack clipboard access.
 - New command wiring per CLAUDE.md: the subparser goes under `collections` and in `cli.TOPICS`/`cli.SUBCOMMANDS`.
   Add a README row if the Commands table lists second words.
+
+- Sharing needs the `tailscale` CLI on PATH. Without it, `share`/`unshare` exit 1 saying so. A failing
+  `tailscale` command exits 1 with its stderr; the first run may need HTTPS certificates turned on in the admin
+  console, and Tailscale's own message says so.
 
 ## Approaches
 
