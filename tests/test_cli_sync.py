@@ -1212,8 +1212,9 @@ class SyncSmokeTest(DataDir):
         found = []
         code = self.run_sync(False, patches=patches,
                              prepare=lambda card: os.makedirs(os.path.join(card, "App", "BootLogo", "Imgs")),
-                             after=lambda card: found.append(os.path.isfile(os.path.join(card, "App", "BootLogo", "Imgs", "K.png"))))
-        self.assertEqual((code, found), (0, [True]))
+                             after=lambda card: found.append((os.path.isfile(os.path.join(card, "App", "BootLogo", "Imgs", "K.png")),
+                                                              os.path.getsize(os.path.join(card, "Roms", "PICO8", downloads.SPRUCE_FILES["pico8"][0])))))
+        self.assertEqual((code, found), (0, [(True, 0)]))  # and the Splore launcher, empty
 
     def test_spruce_samples_are_deleted_without_asking_and_its_own_files_kept(self):
         """spruceOS's sample files go without a question, BootMenu.nds and the PICO-8 files stay, other files are asked about."""
@@ -1398,7 +1399,7 @@ class SyncSmokeTest(DataDir):
 
         def after(card):
             games.append(store.card_games(os.path.basename(card))["pico8"])
-            self.assertEqual(sorted(os.listdir(os.path.join(card, "Roms", "PICO8"))), ["a-0.p8.png", "h-0.p8.png"])
+            self.assertEqual(sorted(os.listdir(os.path.join(card, "Roms", "PICO8"))), sorted([downloads.SPRUCE_FILES["pico8"][0], "a-0.p8.png", "h-0.p8.png"]))
         patches = ((store, {"load_manifest": REAL_LOAD_MANIFEST, "load_cards": REAL_LOAD_CARDS, "save_card": REAL_SAVE_CARD}),
                    (s3, {"list_sizes": REAL_LIST_SIZES}),
                    (usersettings, {"apply_settings": lambda: None}),
