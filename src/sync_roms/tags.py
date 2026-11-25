@@ -11,7 +11,7 @@ import copy
 import json
 import threading
 
-from . import names, shared, store
+from . import names, shared, store, usersettings
 
 KEY = "tags.json"
 _lock = threading.RLock()
@@ -230,7 +230,6 @@ def _retag(data, old, new):
 def _retarget_limits(old, new):
     """The surprise_tags setting and every card's surprise_tags with old swapped for new (dropped when new is None);
     written only where something changed."""
-    from . import usersettings
     ids = usersettings.load_settings().get("surprise_tags")
     if isinstance(ids, list) and old in ids:
         usersettings.save_setting("surprise_tags", _replace(ids, old, new) or None)

@@ -472,6 +472,27 @@ class Step(StorageCase):
         self.assertEqual(len(got), 10)
         self.assertEqual({g["system"] for g in got}, {"gb"})
 
+    def test_a_game_with_any_of_the_chosen_tags_is_picked(self):
+        helpers.storage_tags(self, {"tags": {"a": {"name": "A", "emoji": "🔴"}, "b": {"name": "B", "emoji": "🔵"}},
+                                    "games": {**{f"gb/G{i} (USA).gb": {"tags": ["a"]} for i in range(5)},
+                                              **{f"gba/G{i} (USA).zip": {"tags": ["b"]} for i in range(5)}},
+                                    "declined": {}}, root=self.root)
+        self.card(surprise_tags=["a", "b"])
+        with self.patched(filter_list=self.fail_call, edit_card=self.fail_call):
+            got = self.both(False, False, 3)
+        self.assertEqual({g["system"] for g in got}, {"gb", "gba"})
+        self.assertEqual(len(got), 10)
+
+    def test_tags_matching_no_games_warn_and_pick_nothing(self):
+        self.tag_gb()
+        self.card(surprise_tags=["nothing"])
+        out = io.StringIO()
+        with self.patched(filter_list=self.fail_call, edit_card=self.fail_call), \
+                mock.patch.object(surprise.ui, "warn", lambda t: out.write(t)):
+            got = self.both(False, False, 3)
+        self.assertEqual(got, [])
+        self.assertIn("nothing", out.getvalue())
+
     def test_fill_uses_the_global_setting_when_the_card_has_none(self):
         self.tag_gb()
         usersettings.save_setting("surprise_tags", ["pk"])

@@ -316,9 +316,11 @@ def fill_surprises(card_name, setup, chosen_systems, dry_run, rng=None, today=No
                       and enabled(other) and isinstance(other.get("surprises"), list)
                       for x in other["surprises"] if isinstance(x, dict)}
     limit = chosen_tags(entry)
-    pools = _pools(chosen_systems, taken, tags.games_with(limit, set()) if limit else None)
+    pools = _pools(chosen_systems, taken, set().union(*(tags.games_with({t}, set()) for t in limit)) if limit else None)
     if pools is None:  # storage couldn't be listed: pick nothing
         return kept
+    if limit and not any(pools.values()):
+        ui.warn(f"No games have the tags Surprise is limited to ({', '.join(sorted(limit))}); nothing to pick.")
     new = pick(pools, kept, need, recommended, recent(load_history(), today, ttl_days()), others_current, rng)
     if new:
         print(f"\U0001F381 Surprise: {len(new)} new pick(s)" + (ui.dim(" (dry run: not saved)") if dry_run else ""))
