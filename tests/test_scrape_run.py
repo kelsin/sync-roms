@@ -620,6 +620,18 @@ class FinalReviewTest(RunBase):
             self.assertEqual(self.run_scrape(), 0)
         self.assertIn("sync-roms scrape review", self.out.getvalue())
 
+    def test_run_scrape_without_review_never_offers_it(self):
+        self.put("gba/a.zip")
+        self.client.games["a.zip"] = dict(game(1, "ZZZ(notgame):Test Cart"), id=1)
+        real = scrape_online.run_scrape
+        with mock.patch.object(sys.stdin, "isatty", lambda: True), \
+                mock.patch.object(scrape_online, "run_scrape", lambda *a, **k: real(*a, **k, ask=False, review=False)), \
+                mock.patch.object(ui, "confirm", side_effect=AssertionError("asked")), \
+                mock.patch.object(scrape_review, "review", side_effect=AssertionError("reviewed")):
+            self.assertEqual(self.run_scrape(), 0)
+        self.assertIn("1 ROM(s) came back as non-games", self.out.getvalue())
+        self.assertIn("sync-roms scrape review gba", self.out.getvalue())
+
     def test_game_with_no_data_fails_and_writes_no_empty_entry(self):
         self.put("gba/a.zip")
         self.put("gba/b.zip")
