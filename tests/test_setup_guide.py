@@ -77,12 +77,14 @@ class SetupGuideTest(unittest.TestCase):
         self.assertEqual(cards, [{"name": "Main", "device": "trimui-brick-pro", "layout": "spruce"}])
 
     def _guide_bezels(self, devices):
+        import contextlib
+        import io
         import json
         import re
         from unittest import mock
         from sync_roms import commands, store
         with mock.patch("webbrowser.open", return_value=True), \
-                mock.patch("sync_roms.bezels.devices", **devices):
+                mock.patch("sync_roms.bezels.devices", **devices), contextlib.redirect_stdout(io.StringIO()):
             self.assertEqual(commands.run(["guide"]), 0)
         with open(os.path.join(store.cache_dir(), "setup-guide.html")) as f:
             return json.loads(re.search(r'id="bezels-data">(.*?)</script>', f.read(), re.S).group(1))
