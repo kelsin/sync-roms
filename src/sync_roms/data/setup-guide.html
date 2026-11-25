@@ -670,7 +670,6 @@ const RETROARCH_STEPS = [
   ["Settings > Input > Hotkeys > Quit RetroArch", "Start"],
   ["Main Menu > Configuration File > Save Current Configuration", null],
 ];
-const KNULLI_HOTKEYS = "Start > Game Settings > Per System Advanced Configuration > (system) > Controls > Hotkeys";
 // Per layout: `auto` (what sets it, instead of steps), `steps` ([where, set]; set null for a step that is run, not set),
 // `differs` ({scheme button: what it does instead on this layout}), `extras` (other shortcuts the layout keeps),
 // `unknown` (nothing recorded yet for this layout), `note` (what to do when there are no steps, instead of the default text),
@@ -695,16 +694,9 @@ const HOTKEY_LAYOUT = {
     ],
   },
   knulli: {
-    steps: [
-      [`${KNULLI_HOTKEYS} > Quick Save`, "R1"],
-      [`${KNULLI_HOTKEYS} > Quick Load`, "L1"],
-      [`${KNULLI_HOTKEYS} > Previous Slot`, "D-pad Left"],
-      [`${KNULLI_HOTKEYS} > Next Slot`, "D-pad Right"],
-      [`${KNULLI_HOTKEYS} > Fast Forward`, "R2"],
-      [`${KNULLI_HOTKEYS} > Rewind`, "D-pad Up"],
-      [`${KNULLI_HOTKEYS} > Emulator Menu`, "X"],
-    ],
-    differs: { R2: "fast-forward; toggle or hold not recorded", L2: "not recorded on Knulli", Y: "no FPS hotkey on Knulli" },
+    note: "Sync writes the scheme into the card's system/knulli.conf as hotkey remaps (Function + X: RetroArch menu, + R1: save state, + L1: load state, + D-pad Left/Right: previous/next slot, + R2: fast-forward toggle, + Start: quit); nothing to change by hand. A stays reset and L2 stays previous shader.",
+    steps: [],
+    differs: { L2: "no slow motion on Knulli", Y: "no Show FPS hotkey on Knulli" },
     extras: [
       "Function + Start held 5 s: force-restart EmulationStation.",
       "Function + L1: screenshot, Knulli's own shortcut on the same button as Quick Load.",
@@ -1021,7 +1013,7 @@ const SECTIONS = [
         when: { layout: ["knulli"] },
         body: `
           <p class="path">${path("Start > Game Settings > RetroAchievement Settings")}</p>
-          <p>Turn on RetroAchievements, enter the username and password. For the API key, copy the <b>full</b> Web API key from retroachievements.org Settings > Keys (the shortened one doesn't work). The key is optional but needed for the achievements summary menu.</p>`,
+          <p>Sync writes the login, mode and Web API key into the card's <code>system/knulli.conf</code> from your settings (<code class="copy">sync-roms config set ra_username …</code>, <code>ra_password</code>, <code>ra_mode</code>, <code>ra_api_key</code>); nothing to enter here once they are set and Knulli has made the file (it does on first boot). For the API key, use the <b>full</b> Web API key from retroachievements.org Settings > Keys (the shortened one doesn't work). The key is optional but needed for the achievements summary menu.</p>`,
         settings: [
           ["Game Settings > RetroAchievement Settings > Unlock Sound", "on"],
           ["Game Settings > RetroAchievement Settings > Automatic Screenshot", "on"],
@@ -1588,7 +1580,7 @@ const SECTIONS = [
     when: { layout: ["esde", "knulli", "onion", "allium", "spruce", "rocknix", "nextui"] },
     items: [
       { title: "ES-DE", when: { layout: ["esde"] }, body: `<p>The zip goes in <code>PICO-8/</code>; a newer zip replaces it.</p>` },
-      { title: "Knulli", when: { layout: ["knulli"] }, body: `<p>The zip goes in <code>roms/pico8/</code>; a newer zip replaces it.</p>` },
+      { title: "Knulli", when: { layout: ["knulli"] }, body: `<p>The zip goes in <code>roms/pico8/</code>; a newer zip replaces it. Sync reminds you to run <span class="path">${path("Device Settings > Install Pico-8")}</span> on the device.</p>` },
       { title: "Onion", when: { layout: ["onion"] }, body: `<p>Sync extracts <code>pico8_dyn</code> and <code>pico8.dat</code> into <code>RApp/PICO-8/bin/</code> (again if one is missing).</p>` },
       { title: "Allium", when: { layout: ["allium"] }, body: `<p>Sync extracts <code>pico8_dyn</code> and <code>pico8.dat</code> into <code>Apps/pico.pak/bin/</code> (again if one is missing).</p>` },
       { title: "spruceOS", when: { layout: ["spruce"] }, body: `<p>Sync extracts <code>pico8_dyn</code>, <code>pico8.dat</code> and <code>pico8_64</code> into <code>BIOS/</code> (again if one is missing).</p>` },
