@@ -245,11 +245,23 @@ IGNORED_ROOT_FILES = {
 ROCKNIX_PORTS_FILES = (os.path.basename(rocknix_collections.SCRIPT), os.path.basename(raofflineproxy.KINDS["rocknix"][3]))
 PICO8_FILES = tuple(os.path.basename(m) for m in pico8.members("rocknix"))  # the PICO-8 runtime pico8.py extracts into ROCKNIX's pico8 ROM folder
 OWN_ROOT_FILES = {"ports": ROCKNIX_PORTS_FILES, "pico8": PICO8_FILES}
+# files a new spruceOS card has in its ROM folders: these are kept, and SPRUCE_SAMPLES (paths under Roms/) are deleted
+# without asking
+SPRUCE_FILES = {"nds": ("BootMenu.nds",), "pico8": ("-=☆ Launch Splore ☆=-.splore", "READ ME.txt")}
+SPRUCE_SAMPLES = ("DOOM/PLACE WAD FILES HERE.txt", "FC/Squatch Quest (Demo).nes", "FC/licenses/Squatch Quest (Demo).txt",
+                  "MSX/supermodio64 recommends Metal Gear.txt", "QUAKE/PLACE PAK FILES HERE.txt")
 
 
 def layout_files(layout_name, system):
-    """Names at the top of the system's ROM folder that sync-roms put there for this layout: never offered for deletion."""
+    """Names at the top of the system's ROM folder that sync-roms or the layout's OS put there: never offered for deletion."""
+    if layout_name == "spruce":
+        return SPRUCE_FILES.get(system["bucket"], ())
     return OWN_ROOT_FILES.get(system["bucket"], ()) if layout_name == "rocknix" else ()
+
+
+def spruce_sample(roms_dir, path):
+    """Whether path, a file under a spruce card's Roms/ folder, is one of spruceOS's sample files."""
+    return name_key(os.path.relpath(path, roms_dir)) in {name_key(p) for p in SPRUCE_SAMPLES}
 
 
 def never_uploaded(bucket, rel):

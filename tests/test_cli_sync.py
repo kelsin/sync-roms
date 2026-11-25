@@ -1191,6 +1191,31 @@ class SyncSmokeTest(DataDir):
                              after=lambda card: found.append(os.path.isfile(os.path.join(card, "App", "BootLogo", "Imgs", "K.png"))))
         self.assertEqual((code, found), (0, [True]))
 
+    def test_spruce_samples_are_deleted_without_asking_and_its_own_files_kept(self):
+        """spruceOS's sample files go without a question, BootMenu.nds and the PICO-8 files stay, other files are asked about."""
+        layouts = {"spruce": {"label": "Spruce", "roms_dir": "Roms", "bios_dir": "BIOS"}}
+        empty = [{"name": b, "bucket": b, "folders": {"spruce": f}, "bios": {"files": []}, "games": []}
+                 for b, f in (("nes", "FC"), ("nds", "NDS"), ("pico8", "PICO8"), ("doom", "DOOM"), ("msx", "MSX"))]
+        manifest = {**MANIFEST, "layouts": layouts, "systems": [{**SYSTEM, "folders": {"spruce": "GBA"}}, *empty]}
+        samples = ["DOOM/PLACE WAD FILES HERE.txt", "FC/Squatch Quest (Demo).nes", "FC/licenses/Squatch Quest (Demo).txt",
+                   "MSX/supermodio64 recommends Metal Gear.txt"]
+        kept = ["NDS/BootMenu.nds", "PICO8/-=☆ Launch Splore ☆=-.splore", "PICO8/READ ME.txt"]
+
+        def prepare(card):
+            for rel in samples + kept + ["FC/Mine.nes"]:
+                touch(os.path.join(card, "Roms", rel))
+        found, asked = {}, []
+
+        def after(card):
+            found.update({rel: os.path.exists(os.path.join(card, "Roms", rel)) for rel in samples + kept + ["FC/Mine.nes", "FC/licenses"]})
+        patches = ((store, {"load_manifest": lambda names=(), m=manifest: m}),
+                   (cli.picker, {"saved_setup": lambda *a: (None, "spruce")}),
+                   (cli, {"free_space": lambda path: 10**9}),
+                   (cli.ui, {"choose": lambda q, *a, **k: asked.append(q) or "n"}))
+        self.run_sync(False, prepare=prepare, patches=patches, after=after)
+        self.assertEqual([q for q in asked if q.startswith("Delete these")], ["Delete these 1 local file(s) (1 B)?"])
+        self.assertEqual(found, {**{rel: False for rel in samples}, **{rel: True for rel in kept}, "FC/Mine.nes": True, "FC/licenses": False})
+
     def test_spruce_sync_hides_fbneo_bios_zips_and_clears_the_old_folder(self):
         layouts = {"spruce": {"label": "Spruce", "roms_dir": "Roms", "bios_dir": "BIOS"}}
         fbneo = {**SYSTEM, "name": "FinalBurn Neo", "bucket": "fbneo", "folders": {"spruce": "ARCADE"},

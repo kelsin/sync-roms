@@ -1165,6 +1165,24 @@ def delete_extras(extras):
         print(ui.yellow("  ↩️  Keeping them"))
 
 
+def remove_samples(paths):
+    """Delete spruceOS's sample files from the card, and a folder that held only them."""
+    for path in paths:
+        try:
+            os.remove(path)
+        except FileNotFoundError:
+            pass
+        except OSError as e:
+            ui.failure(ui.red(f"  ❌ {path}: {e}"))
+        try:
+            if os.path.basename(os.path.dirname(path)) == "licenses":
+                os.rmdir(os.path.dirname(path))
+        except OSError:  # not empty
+            pass
+    if paths:
+        print(ui.dim(f"  🧹 Removed {len(paths)} spruceOS sample file(s)"))
+
+
 def list_kept(paths, what):
     """With --no-delete: list the files a sync would have deleted and says they stay."""
     if paths:
@@ -1588,6 +1606,10 @@ def sync_card(args):
     moved_jobs, moved_from = {j for _, j in card_moves}, {p for p, _ in card_moves}
     bios_moves = moved_jobs.intersection(bios_todo)
     extras = [p for p in extras if p not in moved_from]
+    samples = [p for p in extras if layout_name == "spruce" and downloads.spruce_sample(roms_dir, p)]  # deleted without asking
+    extras = [p for p in extras if p not in samples]
+    if args.no_delete:
+        samples = []
     kept_extras = []  # --no-delete: the ROMs that would have been deleted
     if args.no_delete:
         kept_extras, extras = list(dict.fromkeys(extras)), []
@@ -1821,7 +1843,7 @@ def sync_card(args):
 
     if args.dry_run:
         print(ui.yellow("\n🧪 Dry run — nothing downloaded or deleted"))
-        free = free_space(base) + sum(cardfs.size(p) or 0 for p in extras)  # the real run deletes these first
+        free = free_space(base) + sum(cardfs.size(p) or 0 for p in extras + samples)  # the real run deletes these first
         if theme_plan:
             free += spruce_themes.freed(base, theme_plan["remove"])
         plan_json = {
@@ -1829,7 +1851,7 @@ def sync_card(args):
                           for kind, todo in (("rom", rom_todo), ("bios", bios_todo), ("android", apk_todo), ("driver", driver_todo),
                                           ("theme", theme_todo), ("scrape", scrape_todo))
                           for key, path, size in todo],
-            "delete": list(extras), "kept": kept_extras, "theme_remove": theme_plan["remove"] if theme_plan else [], "rename": [{"from": a, "to": b} for a, b in renames + [(p, j[1]) for p, j in card_moves]],
+            "delete": list(extras) + samples, "kept": kept_extras, "theme_remove": theme_plan["remove"] if theme_plan else [], "rename": [{"from": a, "to": b} for a, b in renames + [(p, j[1]) for p, j in card_moves]],
             "missing": {"roms": missing, "bios": [k for k in bios_keys if k not in bios_have]},
             "free_space": free}
         for key, path, _ in todo_all:
@@ -1841,7 +1863,7 @@ def sync_card(args):
             print(f"  {ui.yellow('would rename')} {path} {ui.dim('→')} {new}")
         for path, job in card_moves:
             print(f"  {ui.yellow('would move')} {path} {ui.dim('→')} {job[1]}")
-        for path in extras:
+        for path in extras + samples:
             print(f"  {ui.red('would delete')} {path}")
         if theme_plan:
             spruce_themes.remove(base, theme_plan["remove"], True)
@@ -1892,6 +1914,7 @@ def sync_card(args):
     if clean_card and (renames or card_moves):
         clean._clean_root = base
 
+    remove_samples(samples)
     if extras:  # cleared first so the free space shown below is what the downloads really get
         delete_extras(extras)
     cardfs.clear()
