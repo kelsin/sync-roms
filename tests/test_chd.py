@@ -352,7 +352,7 @@ class ChdTest(unittest.TestCase):
         with mock.patch.object(external, "run_tool", fake_run), mock.patch.object(external, "find_tool", lambda t: t), \
                 mock.patch.object(external, "tool_output", info), contextlib.redirect_stdout(io.StringIO()) as out, \
                 contextlib.redirect_stderr(io.StringIO()) as err:
-            self.assertEqual(chd.chd_command(SimpleNamespace(chd=self.dir, dry_run=False)), 1)
+            self.assertEqual(chd.chd_command(SimpleNamespace(dir=self.dir, dry_run=False)), 1)
         kept = [n for n in os.listdir(psx) if n.endswith(".zip")]  # the jobs run in parallel: either archive may come second
         self.assertEqual(len(kept), 1)
         self.assertEqual(sorted(os.listdir(psx)), sorted(kept + ["Game (USA).chd"]))
@@ -723,7 +723,7 @@ class ChdTest(unittest.TestCase):
                 return None
             return fake(cmd, progress)
 
-        args = SimpleNamespace(chd=os.path.join(self.dir, "psx"), dry_run=False)
+        args = SimpleNamespace(dir=os.path.join(self.dir, "psx"), dry_run=False)
         with mock.patch.object(external, "run_tool", fake_run), mock.patch.object(external, "find_tool", lambda t: t):
             self.assertEqual(chd.chd_command(args), 0)
         self.assertEqual(sorted(os.listdir(os.path.join(self.dir, "psx"))), ["Game (Disc 1).chd", "Game (Disc 2).chd", "Game.m3u"])
@@ -740,7 +740,7 @@ class ChdTest(unittest.TestCase):
             elif cmd[1].startswith("create"):
                 open(cmd[cmd.index("-o") + 1], "w").close()
 
-        args = SimpleNamespace(chd=self.dir, dry_run=False)
+        args = SimpleNamespace(dir=self.dir, dry_run=False)
         with mock.patch.object(external, "run_tool", fake_run), mock.patch.object(external, "find_tool", lambda t: t), \
                 mock.patch.object(os, "cpu_count", return_value=6):
             self.assertEqual(chd.chd_command(args), 0)
@@ -749,7 +749,7 @@ class ChdTest(unittest.TestCase):
 
     def test_playlists_are_fixed_even_when_nothing_converts(self):
         self.touch("psx/Game (Disc 1).chd", "psx/Game (Disc 2).chd", "gc/Wii.rvz")
-        args = SimpleNamespace(chd=self.dir, dry_run=False)
+        args = SimpleNamespace(dir=self.dir, dry_run=False)
         self.assertEqual(chd.chd_command(args), 0)
         self.assertEqual(sorted(os.listdir(os.path.join(self.dir, "psx"))), ["Game (Disc 1).chd", "Game (Disc 2).chd", "Game.m3u"])
 
@@ -757,13 +757,13 @@ class ChdTest(unittest.TestCase):
         self.touch("psx/Game (Disc 1).chd", "psx/Game (Disc 2).chd")
         out = io.StringIO()
         with contextlib.redirect_stdout(out):
-            self.assertEqual(chd.chd_command(SimpleNamespace(chd=self.dir, dry_run=True)), 0)
+            self.assertEqual(chd.chd_command(SimpleNamespace(dir=self.dir, dry_run=True)), 0)
         self.assertIn("create Game.m3u", out.getvalue())
         self.assertEqual(len(os.listdir(os.path.join(self.dir, "psx"))), 2)
 
     def test_no_playlists_for_3do_or_extract_only_systems(self):
         self.touch("3do/Game (Disc 1).chd", "3do/Game (Disc 2).chd")
-        self.assertEqual(chd.chd_command(SimpleNamespace(chd=self.dir, dry_run=False)), 0)
+        self.assertEqual(chd.chd_command(SimpleNamespace(dir=self.dir, dry_run=False)), 0)
         self.assertEqual(len(os.listdir(os.path.join(self.dir, "3do"))), 2)
 
     def test_run_tool_reports_chdman_percentages_and_the_error_line(self):
@@ -846,7 +846,7 @@ class ChdTest(unittest.TestCase):
 
         with mock.patch.object(external, "run_tool", fake_run), mock.patch.object(external, "find_tool", lambda t: t), \
                 mock.patch.object(os, "cpu_count", return_value=cpus), contextlib.redirect_stdout(io.StringIO()) as out:
-            code = chd.chd_command(SimpleNamespace(chd=root, dry_run=False))
+            code = chd.chd_command(SimpleNamespace(dir=root, dry_run=False))
         return code, calls, out.getvalue()
 
     def test_archive_unpacks_to_local_temp_on_another_device_with_room(self):
@@ -996,7 +996,7 @@ class ChdTest(unittest.TestCase):
 
     def test_dry_run_changes_nothing_and_needs_no_tools(self):
         self.touch("psx/Game.zip")
-        args = SimpleNamespace(chd=self.dir, dry_run=True)
+        args = SimpleNamespace(dir=self.dir, dry_run=True)
         with mock.patch.object(external, "find_tool", lambda t: None):
             self.assertEqual(chd.chd_command(args), 0)
         self.assertEqual(os.listdir(os.path.join(self.dir, "psx")), ["Game.zip"])
@@ -1032,7 +1032,7 @@ class ChdTest(unittest.TestCase):
 
         with patch, mock.patch.object(external, "run_tool", fake_run), mock.patch.object(external, "find_tool", lambda t: t), \
                 mock.patch.object(os, "cpu_count", return_value=1), contextlib.redirect_stdout(io.StringIO()) as out:
-            self.assertEqual(chd.chd_command(SimpleNamespace(chd=self.dir, dry_run=False)), 0)
+            self.assertEqual(chd.chd_command(SimpleNamespace(dir=self.dir, dry_run=False)), 0)
         self.assertEqual(list(seen), ["B.iso", "A.iso"])
         self.assertAlmostEqual(seen["A.iso"], 0.75)  # B, three quarters of the bytes, is done
         self.assertEqual(made[0].total, 400)
@@ -1051,7 +1051,7 @@ class ChdTest(unittest.TestCase):
         made, patch = self.bars(lambda line: b_said.set() if "B.iso" in line else None)
         with patch, mock.patch.object(external, "run_tool", fake_run), mock.patch.object(external, "find_tool", lambda t: t), \
                 mock.patch.object(os, "cpu_count", return_value=2), contextlib.redirect_stdout(io.StringIO()) as out:
-            self.assertEqual(chd.chd_command(SimpleNamespace(chd=self.dir, dry_run=False)), 0)
+            self.assertEqual(chd.chd_command(SimpleNamespace(dir=self.dir, dry_run=False)), 0)
         self.assertEqual([l.strip() for l in made[0].lines], ["✅ psx/B.iso", "✅ psx/A.iso"])
         self.assertTrue(b_said.is_set())
 
@@ -1088,7 +1088,7 @@ class ChdTest(unittest.TestCase):
                 contextlib.redirect_stdout(io.StringIO()) as out, contextlib.redirect_stderr(io.StringIO()) as err:
             ui.set_output(quiet, False)
             try:
-                code = chd.chd_command(SimpleNamespace(chd=root, dry_run=dry_run))
+                code = chd.chd_command(SimpleNamespace(dir=root, dry_run=dry_run))
             except SystemExit as e:
                 code = e.code
             finally:
@@ -1149,16 +1149,16 @@ class ChdTest(unittest.TestCase):
     def test_messages_name_the_current_commands(self):
         self.touch("psx/Game.iso")
         code, out, err = self.run_on_card(os.path.join(self.dir, "psx"), dry_run=True)
-        self.assertIn("convert  ", out)
+        self.assertIn("prepare  ", out)
         self.assertNotIn("💿 cd", out)
         self.touch("x/Other.iso")
         code, out, err = self.run_on_card(os.path.join(self.dir, "x"))
-        self.assertIn("`convert` only looks inside folders named", out)
+        self.assertIn("`prepare` only looks inside folders named", out)
         with mock.patch.object(external, "find_tool", lambda t: None), mock.patch.object(chd, "plan_chd", return_value=[
                 ({"chd": {"mode": "cd"}}, None, "x.cue", "o")]), self.assertRaises(SystemExit), \
                 contextlib.redirect_stderr(io.StringIO()) as err:
-            chd.chd_command(SimpleNamespace(chd=os.path.join(self.dir, "psx"), dry_run=False))
-        self.assertIn("run sync-roms tools install", err.getvalue())
+            chd.chd_command(SimpleNamespace(dir=os.path.join(self.dir, "psx"), dry_run=False))
+        self.assertIn("run sync-roms install", err.getvalue())
 
     def test_folder_outside_any_card_is_not_guarded(self):
         self.touch("psx/Game.iso")

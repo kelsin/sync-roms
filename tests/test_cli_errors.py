@@ -36,15 +36,15 @@ class ErrorsTest(Isolated):
 
 
 class EditAliasTest(Isolated):
-    def test_every_edit_spelling_opens_the_main_menu(self):
-        for argv in (["edit"], ["games", "edit"], ["cards", "edit"], ["--edit"], ["-e"]):
+    def test_edit_opens_the_main_menu(self):
+        for argv in (["edit"], ["-y", "edit"]):
             with self.subTest(argv=argv), mock.patch.object(edit, "edit_manifest", return_value=0) as run:
                 code, _, err = self.sync(argv, {"bucket": "b"})
                 self.assertEqual((code, err), (0, ""))
             run.assert_called_once_with()
 
     def test_dry_run_with_edit_is_a_usage_error(self):
-        for argv in (["edit", "--dry-run"], ["--edit", "-n"]):
+        for argv in (["edit", "--dry-run"], ["-n", "edit"]):
             with self.subTest(argv=argv), mock.patch.object(edit, "edit_manifest") as run:
                 code, _, err = self.sync(argv)
             self.assertEqual(code, 2)
@@ -83,7 +83,7 @@ class UnhonoredFlagsTest(Isolated):
     def test_dry_run_is_refused_on_diff(self):
         from sync_roms import diff
         with tempfile.TemporaryDirectory() as tmp:
-            for argv in (["diff", tmp, "--dry-run"], ["-n", "diff", tmp], ["--diff", tmp, "-n"]):
+            for argv in (["diff", tmp, "--dry-run"], ["-n", "diff", tmp], ["diff", "-n", tmp]):
                 with self.subTest(argv=argv):
                     self.refused(argv, "--dry-run has no effect on `diff`",
                                  d=(diff, "diff_command", mock.Mock(side_effect=AssertionError("ran"))))
@@ -97,12 +97,12 @@ class UnhonoredFlagsTest(Isolated):
     def test_refusals_name_the_command_typed(self):
         self.refused(["devices", "--dry-run"], "--dry-run has no effect on `devices`")
         self.refused(["mirror", "clear", "-n"], "--dry-run has no effect on `mirror clear`")
-        self.refused(["playlist", "--ask"], "--ask only applies to syncing a card, not `playlist`")
+        self.refused(["playlist", "--ask"], "unrecognized arguments: --ask\n   Try 'sync-roms playlist --help'.")
 
 
 class UsageHelpTest(Isolated):
     def test_help_for_commands_that_need_a_subcommand(self):
-        for name in ("upload", "clean", "tools"):
+        for name in ("upload", "clean", "install"):
             for flag in ("--help", "-h"):
                 with self.subTest(name=name, flag=flag):
                     code, out, err = self.sync([name, flag])
@@ -160,11 +160,11 @@ class UsageHelpTest(Isolated):
                 self.assertIn(listed, err)
                 self.assertNotIn("required: action", err)
 
-    def test_legacy_flag_errors_keep_the_flag(self):
-        code, _, err = self.sync(["--use-mirror"])
+    def test_an_old_command_flag_is_a_usage_error(self):
+        with mock.patch.object(cli, "sync_card", side_effect=AssertionError("synced")):
+            code, _, err = self.sync(["--use-mirror"])
         self.assertEqual(code, 2)
-        self.assertIn("argument --use-mirror: expected one argument", err)
-        self.assertIn("Try 'sync-roms --help'.", err)
+        self.assertIn("unrecognized arguments: --use-mirror", err)
 
     def test_global_help_gives_quiet_and_verbose_a_line_each(self):
         lines = [line.strip() for line in cli.help_text().splitlines()]
@@ -302,7 +302,7 @@ class ExitCodeTest(Isolated):
             self.assertEqual(self.code_of(picker.choose_setup, {"devices": [], "layouts": {"esde": {}}}), 0)
 
     def test_bad_folders_are_usage_errors(self):
-        args = mock.Mock(upload="/no/such/folder", diff="/no/such/folder", m3u="/no/such/folder", chd="/no/such/folder")
+        args = mock.Mock(dir="/no/such/folder")
         for fn in (upload.upload_command, diff.diff_command, m3u.m3u_command, chd.chd_command):
             with self.subTest(fn=fn.__name__):
                 self.assertEqual(self.code_of(fn, args), 2)
@@ -320,7 +320,7 @@ class ExitCodeTest(Isolated):
             with mock.patch.object(chd, "plan_chd", return_value=[({"chd": {"mode": "cd"}}, None, "x.cue", "o")]), \
                     mock.patch.object(chd.external, "find_tool", return_value=None), \
                     mock.patch.object(ui, "ASSUME_YES", True):
-                self.assertEqual(self.code_of(chd.chd_command, mock.Mock(chd=tmp, dry_run=False)), 3)
+                self.assertEqual(self.code_of(chd.chd_command, mock.Mock(dir=tmp, dry_run=False)), 3)
 
 
 class MissingStorageOrCardTest(Isolated):
@@ -345,11 +345,10 @@ class MissingStorageOrCardTest(Isolated):
         prepare.assert_not_called()
 
     def test_editor_still_opens_with_the_storage_folder_missing(self):
-        for argv in (["edit"], ["cards", "edit"], ["games", "edit"]):
-            with self.subTest(argv=argv), mock.patch.object(edit, "edit_manifest", return_value=0) as run:
-                code, _, err = self.sync(argv, {"root": os.path.join(self.tmp, "roms")})
-            self.assertEqual((code, err), (0, ""))
-            run.assert_called_once_with()
+        with mock.patch.object(edit, "edit_manifest", return_value=0) as run:
+            code, _, err = self.sync(["edit"], {"root": os.path.join(self.tmp, "roms")})
+        self.assertEqual((code, err), (0, ""))
+        run.assert_called_once_with()
 
     def test_os_error_mid_run_is_a_message_not_a_traceback(self):
         boom = FileNotFoundError(2, "No such file or directory", "/Volumes/roms/scrapes/gba/metadata.json")

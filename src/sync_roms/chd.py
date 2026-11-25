@@ -498,10 +498,10 @@ def remove_stale_chd_temp(folders):
 
 
 def fix_playlists(roots, dry_run):
-    """Run the --m3u pass on each system folder that has playlists."""
+    """Run the playlist pass on each system folder that has playlists."""
     for sysroot, system in roots.items():
         if system["chd"].get("m3u", True):
-            m3u.m3u_command(SimpleNamespace(m3u=sysroot, dry_run=dry_run))
+            m3u.m3u_command(SimpleNamespace(dir=sysroot, dry_run=dry_run))
 
 
 def warn_on_card(root, dry_run):
@@ -517,10 +517,10 @@ def warn_on_card(root, dry_run):
 
 
 def chd_command(args):
-    root = os.path.abspath(os.path.expanduser(args.chd or os.getcwd()))
+    root = os.path.abspath(os.path.expanduser(args.dir or os.getcwd()))
     if not os.path.isdir(root):
         ui.fail(f"{root} is not a folder", 2)
-    print(ui.bold("💿 convert") + ui.dim(f"  {root}"))
+    print(ui.bold("💿 prepare") + ui.dim(f"  {root}"))
     folders = chd_folders(store.repo_json("systems"))
     roots, skipped, stale = {}, [], []
     jobs = plan_chd(root, folders, skipped, roots, stale)
@@ -530,7 +530,7 @@ def chd_command(args):
         print(ui.green("✅ Nothing to convert"))
         if not roots:
             print(ui.yellow("⚠️  No folder here is named after a system that converts to CHD, so every file was skipped."))
-            print(ui.dim(f"   `convert` only looks inside folders named: {', '.join(sorted(folders))}"))
+            print(ui.dim(f"   `prepare` only looks inside folders named: {', '.join(sorted(folders))}"))
     for system, _, path, owned, *_ in jobs:
         what = "extract" if system["chd"]["mode"] == "extract" else "convert"
         print(f"  {'📦' if owned is None else '💿'} {what} {os.path.relpath(path, root)}")
@@ -559,7 +559,7 @@ def chd_command(args):
                          ("extract-xiso", "xiso" in modes), ("iso2zar", "zar" in modes)):
         tools[tool] = external.find_tool(tool)
         if needed and not tools[tool]:
-            ui.fail(f"{tool} not found; " + (f"{external.MANUAL_TOOLS[tool]}" if tool in external.MANUAL_TOOLS else "run sync-roms tools install"), 3)
+            ui.fail(f"{tool} not found; " + (f"{external.MANUAL_TOOLS[tool]}" if tool in external.MANUAL_TOOLS else "run sync-roms install"), 3)
     remove_stale_chd_temp(stale + stale_local_scratch())
     cpus = os.cpu_count() or 1
     scratch, fit, sizes = job_scratch(tools, jobs)
@@ -625,7 +625,7 @@ def chd_command(args):
             except KeyboardInterrupt:
                 pass
         converted = sum(1 for f in futures if not f.cancelled() and f.exception() is None and not f.result())  # with the jobs that ended meanwhile
-        print(ui.yellow(f"  {converted} done, nothing half-converted; run sync-roms convert again to continue"))
+        print(ui.yellow(f"  {converted} done, nothing half-converted; run sync-roms prepare again to continue"))
         hint_cache_update(root, converted)
         return 130
     pool.shutdown()

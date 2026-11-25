@@ -30,7 +30,7 @@ class M3uTest(unittest.TestCase):
     def run_cmd(self, dry_run=False, answer=False):
         out = io.StringIO()
         with contextlib.redirect_stdout(out), mock.patch.object(ui, "confirm", return_value=answer):
-            m3u.m3u_command(SimpleNamespace(m3u=self.dir, dry_run=dry_run))
+            m3u.m3u_command(SimpleNamespace(dir=self.dir, dry_run=dry_run))
         return out.getvalue()
 
     def test_groups(self):

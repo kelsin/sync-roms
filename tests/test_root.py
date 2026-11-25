@@ -69,13 +69,13 @@ class FolderStorageTest(unittest.TestCase):
         with mock.patch.object(mirroring, "refresh_mirror", side_effect=AssertionError("refreshed")):
             mirroring.use_mirror(mirror, False)
             with self.assertRaises(SystemExit), contextlib.redirect_stderr(io.StringIO()):
-                mirroring.mirror_command(mock.Mock(clear_mirror=False, use_mirror=mirror, mirror=None))
+                mirroring.mirror_command(mock.Mock(action="use", dir=mirror))
         self.assertIsNone(runtime._mirror_root)
 
     def test_mirror_dry_run_is_labelled_and_saves_nothing(self):
         mirror = os.path.join(self.root, "mirror")
         for use, saved in ((mirror, "wasn't saved"), (None, None)):
-            args = mock.Mock(clear_mirror=False, use_mirror=use, mirror=None if use else mirror, dry_run=True)
+            args = mock.Mock(action="use" if use else None, dir=use or mirror, dry_run=True)
             out = io.StringIO()
             with mock.patch.object(runtime, "ROOT", None), mock.patch.object(s3, "access", return_value="bucket"), \
                     mock.patch.object(mirroring, "refresh_mirror", return_value=0), \

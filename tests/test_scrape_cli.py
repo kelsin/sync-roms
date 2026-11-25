@@ -14,7 +14,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from realdir_guard import RealDataDirGuard  # noqa: E402
-from sync_roms import cli, scrape_online, screenscraper, store, usersettings  # noqa: E402
+from sync_roms import cli, commands, scrape_online, screenscraper, store, usersettings  # noqa: E402
 from helpers import DataDir, Isolated, script_for  # noqa: E402
 
 
@@ -102,7 +102,6 @@ class Modes(unittest.TestCase):
         self.assertEqual(self.modes("scrape", "match", "gba", "a.zip", "1"), "--scrape-match")
         self.assertEqual(self.modes("scrape", "--set-credentials"), "--scrape")
         self.assertEqual(self.modes("scrape", "--all", "--system", "gba"), "--scrape")
-        self.assertEqual(self.modes("diff", "--system", "gba"), "--diff")
         self.assertEqual(self.modes("scrape", "review", "gb"), "--scrape-review")
         self.assertEqual(self.modes("scrape", "missing", "gb", "--all"), "--scrape-missing")
 
@@ -113,8 +112,7 @@ class Modes(unittest.TestCase):
         self.refused("--all")
         self.refused("scrape", "--set-credentials", "--all")
         self.refused("--system", "gba")
-        self.refused("diff", "--retry")
-        self.refused("--scrape", "--upload")
+        self.refused("--scrape", "--clean-scrapes")
         self.refused("--scrape", "--scrape-review")
         self.refused("scrape", "review", "--retry")
         self.refused("scrape", "missing", "--retry")
@@ -126,17 +124,24 @@ class Modes(unittest.TestCase):
         self.refused("scrape", "--set-credentials", "--retry")
         self.refused("scrape", "--set-credentials", "--dry-run")
         self.refused("scrape", "gba", "--system", "nes")
+        with self.assertRaises(SystemExit) as cm, mock.patch("sys.stderr", io.StringIO()):
+            commands.run(["diff", "--retry"])
+        self.assertEqual(cm.exception.code, 2)
 
     def test_translated_only_applies_to_scrape_match(self):
         self.assertEqual(self.modes("scrape", "match", "gba", "a.zip", "7", "--translated"), "--scrape-match")
         self.assertEqual(self.modes("scrape", "match", "--translated", "gba", "a.zip", "7"), "--scrape-match")
         for argv in (["--translated"], ["scrape", "--translated"], ["scrape", "review", "--translated"],
-                     ["scrape", "missing", "--translated"], ["upload", "roms", "--translated"]):
+                     ["scrape", "missing", "--translated"]):
             err = io.StringIO()
             with self.assertRaises(SystemExit) as cm, mock.patch("sys.stderr", err):
                 self.modes(*argv)
             self.assertEqual(cm.exception.code, 2)
             self.assertIn("--translated only applies to `scrape match`", err.getvalue())
+        with self.assertRaises(SystemExit) as cm, mock.patch("sys.stderr", io.StringIO()) as err:
+            commands.run(["upload", "roms", "--translated"])
+        self.assertEqual(cm.exception.code, 2)
+        self.assertIn("unrecognized arguments: --translated", err.getvalue())
 
     def test_a_path_given_as_the_system_is_refused(self):
         for argv in (["/Volumes/SD", "--scrape"], ["scrape", "--system", "a/b"], ["scrape", "missing", "/Volumes/SD"],

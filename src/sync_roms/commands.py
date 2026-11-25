@@ -1,5 +1,6 @@
-"""Scriptable subcommands: games, sets, collections, themes, download, flash, unmount, mount, cards, saves, layouts, cache, config,
-doctor, guide, check and completion; plus helpers the sync flow uses."""
+"""Scriptable subcommands: sync, edit, devices, upload, diff, playlist, prepare, install, mirror, games, sets, collections, themes,
+download, flash, unmount, mount, cards, saves, layouts, cache, config, doctor, guide, check and completion; plus helpers the sync
+flow uses."""
 import argparse
 import datetime
 import json
@@ -14,7 +15,7 @@ from . import bezels, budget, cardedit, cardshare, collectionedit, external, gue
 
 
 UNKNOWN_SHOWN = 8  # device ids named in an "unknown device" error
-COMMANDS = {"games", "sets", "collections", "themes", "download", "flash", "unmount", "umount", "mount", "cards", "saves", "layouts", "cache", "config", "doctor", "guide", "check", "completion"}
+COMMANDS = {"sync", "edit", "devices", "upload", "diff", "playlist", "prepare", "install", "mirror", "games", "sets", "collections", "themes", "download", "flash", "unmount", "umount", "mount", "cards", "saves", "layouts", "cache", "config", "doctor", "guide", "check", "completion"}
 
 
 class Parser(argparse.ArgumentParser):
@@ -1197,10 +1198,107 @@ def doctor_cmd(args):
     for tool in ("7z", "chdman", "extract-xiso", "iso2zar"):
         found = external.find_tool(tool)
         line(True if found else None, f"{tool}: {found or 'not installed'}",
-             "sync-roms tools install" if tool in external.TOOL_FORMULAE else external.MANUAL_TOOLS[tool])
+             "sync-roms install" if tool in external.TOOL_FORMULAE else external.MANUAL_TOOLS[tool])
     problems = check_data()
     line(not problems, f"data files in {store.data_dir()}" + ("" if not problems else f": {len(problems)} problem(s)"), "sync-roms check")
+    if args.fix and any(not external.find_tool(tool) for tool in external.TOOL_FORMULAE):
+        return external.install_tools_command()
     return 1 if bad else 0
+
+
+# --- Storage and the plain commands ---------------------------------------------------------------------
+
+def prepare_storage(args, need_root=True):
+    """Get storage ready for a command that reads it: ask for it on a first run, fail (exit 3) when the storage folder
+    isn't there (need_root=False: the editor goes by the cache alone), and offer to build the storage cache (not with
+    --json, where the JSON document is all that reaches stdout)."""
+    usersettings.ensure_bucket()
+    if need_root and runtime.ROOT and not os.path.isdir(runtime.ROOT):
+        ui.fail(f"The storage folder {runtime.ROOT} isn't there (is the share mounted?)", 3)
+    if not getattr(args, "json", False):
+        inventory.prepare()
+
+
+def refresh_mirror(code, args):
+    """After a command that changed what the lists reference succeeded (not a dry run), refresh the saved mirror so it
+    has the games just added. Returns code."""
+    mirror = usersettings.load_settings().get("mirror")
+    if mirror and not code and not args.dry_run:
+        from . import mirroring
+        print()
+        mirroring.use_mirror(mirror, False)
+    return code
+
+
+def check_card(path):
+    """Exit 2 when path, the card a sync was given, isn't a folder: a mistyped command or a card that isn't mounted."""
+    if not os.path.isdir(os.path.abspath(os.path.expanduser(path))):
+        ui.fail(f"{path} isn't a command or a folder (is the card mounted?)\n   See `sync-roms help` for the commands.", 2)
+
+
+def sync_cmd(args):
+    if args.json and not args.dry_run:
+        ui.fail("--json only applies to `devices`, `layouts`, `diff`, `games list`, `cards list` and `sync --dry-run`", 2)
+    if args.base_dir:
+        check_card(args.base_dir)
+    if args.json:  # the JSON document is all that reaches stdout
+        ui.set_output(True, ui.VERBOSE)
+    prepare_storage(args)
+    from . import cli
+    return cli.sync_card(args)
+
+
+def edit_cmd(args):
+    from . import edit
+    prepare_storage(args, need_root=False)
+    return refresh_mirror(edit.edit_manifest(), args)
+
+
+def devices_cmd(args):
+    from . import cli
+    return cli.list_devices(args)
+
+
+def upload_cmd(args):
+    from . import upload
+    prepare_storage(args)
+    return upload.upload_command(args)
+
+
+def diff_cmd(args):
+    from . import diff
+    if args.json:  # the JSON document is all that reaches stdout
+        ui.set_output(True, ui.VERBOSE)
+    prepare_storage(args)
+    return diff.diff_command(args)
+
+
+def playlist_cmd(args):
+    return m3u.m3u_command(args)
+
+
+def prepare_cmd(args):
+    from . import chd
+    return chd.chd_command(args)
+
+
+def install_cmd(args):
+    return external.install_tools_command()
+
+
+def mirror_cmd(args):
+    """`mirror [DIR]`, `mirror use DIR` or `mirror clear`: a first word other than use and clear is the DIR."""
+    if args.action not in (None, "use", "clear"):
+        if args.dir is not None:
+            ui.fail(f"`mirror` takes one folder, not {args.action!r} and {args.dir!r}\n   Try 'sync-roms mirror --help'.", 2)
+        args.action, args.dir = None, args.action
+    if args.action == "use" and args.dir is None:
+        ui.fail("`mirror use` needs the folder to save: `mirror use DIR`\n   Try 'sync-roms mirror --help'.", 2)
+    if args.action == "clear" and args.dir is not None:
+        ui.fail(f"`mirror clear` doesn't take a folder ({args.dir!r})\n   Try 'sync-roms mirror --help'.", 2)
+    from . import mirroring
+    prepare_storage(args)
+    return mirroring.mirror_command(args)
 
 
 # --- Shell completion ----------------------------------------------------------------------------------
@@ -1230,7 +1328,7 @@ def all_flags():
                     walk(child)
     walk(cli.build_parser())
     walk(build_parser())
-    return sorted(found - {"--device-id"})  # --device-id is set by `devices ID`, not typed
+    return sorted(found)
 
 
 def collections_edit(args):
@@ -1385,12 +1483,13 @@ def second_words():
     for key in cli.LEGACY:
         if len(key) > 1:
             words.setdefault(key[0], []).append(key[1])
-    words["games"] = sorted(set(words.get("games", [])) | {"list", "add", "remove", "full", "sets", "export", "import"})
+    words["mirror"] = ["use", "clear"]
+    words["games"] = ["add", "export", "full", "import", "list", "remove", "sets"]
     words["sets"] = ["edit"]
     words["collections"] = ["edit"]
     words["themes"] = ["update", "pick", "build", "publish", "palettes"]
     words["download"] = ["pico8"]
-    words["cards"] = ["edit", "list", "new", "set", "rename", "convert", "install", "clean", "delete", "copy", "export", "import"]
+    words["cards"] = ["list", "new", "set", "rename", "convert", "install", "clean", "delete", "copy", "export", "import"]
     words["saves"] = ["stash", "apply", "manage"]
     words["config"] = ["show", "path", "set", "unset", "import", "apply"]
     words["cache"] = ["update"]
@@ -1475,6 +1574,24 @@ def build_parser():
         if card:
             p.add_argument("--card")
 
+    p = sub.add_parser("sync", allow_abbrev=False); common(p, card=False); p.add_argument("base_dir", nargs="?")
+    p.add_argument("-a", "--ask", action="store_true"); p.add_argument("--json", action="store_true"); p.add_argument("--device"); p.add_argument("--layout")
+    for flag in ("--guest", "--no-clean", "--no-delete", "--no-eject"):
+        p.add_argument(flag, action="store_true")
+    p.set_defaults(fn=sync_cmd)
+    p = sub.add_parser("edit", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=edit_cmd)
+    p = sub.add_parser("devices", allow_abbrev=False); common(p, card=False); p.add_argument("device_id", nargs="?"); p.add_argument("--json", action="store_true")
+    p.set_defaults(fn=devices_cmd)
+    p = sub.add_parser("upload", allow_abbrev=False); common(p, card=False); p.add_argument("dir", nargs="?"); p.add_argument("--replace", action="store_true")
+    p.set_defaults(fn=upload_cmd)
+    p = sub.add_parser("diff", allow_abbrev=False); common(p, card=False); p.add_argument("dir", nargs="?"); p.add_argument("--system"); p.add_argument("--json", action="store_true")
+    p.set_defaults(fn=diff_cmd)
+    for name, fn in (("playlist", playlist_cmd), ("prepare", prepare_cmd)):
+        p = sub.add_parser(name, allow_abbrev=False); common(p, card=False); p.add_argument("dir", nargs="?"); p.set_defaults(fn=fn)
+    p = sub.add_parser("install", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=install_cmd)
+    p = sub.add_parser("mirror", allow_abbrev=False); common(p, card=False); p.add_argument("action", nargs="?", metavar="use|clear|DIR"); p.add_argument("dir", nargs="?")
+    p.set_defaults(fn=mirror_cmd)
+
     games = sub.add_parser("games", add_help=False, allow_abbrev=False)
     gsub = games.add_subparsers(dest="action", required=True)
     p = gsub.add_parser("list", allow_abbrev=False); common(p); p.add_argument("--json", action="store_true"); p.set_defaults(fn=games_list)
@@ -1544,7 +1661,7 @@ def build_parser():
     p = sub.add_parser("config", allow_abbrev=False); common(p, card=False); p.add_argument("action", choices=["show", "path", "set", "unset", "import", "apply"], nargs="?", default="show")
     p.add_argument("name", nargs="?"); p.add_argument("value", nargs="?"); p.set_defaults(fn=config_cmd)
     p = sub.add_parser("cache", allow_abbrev=False); common(p, card=False); p.add_argument("action", choices=["update"], nargs="?"); p.add_argument("--full", action="store_true"); p.set_defaults(fn=cache_cmd)
-    p = sub.add_parser("doctor", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=doctor_cmd)
+    p = sub.add_parser("doctor", allow_abbrev=False); common(p, card=False); p.add_argument("--fix", action="store_true"); p.set_defaults(fn=doctor_cmd)
     p = sub.add_parser("guide", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=guide_cmd)
     p = sub.add_parser("check", allow_abbrev=False); common(p, card=False); p.add_argument("--bucket-keys", action="store_true"); p.set_defaults(fn=check_cmd)
     p = sub.add_parser("completion", allow_abbrev=False); common(p, card=False); p.add_argument("shell", choices=["bash", "zsh", "fish", "list"])
@@ -1558,8 +1675,9 @@ def run(argv):
     ap = build_parser()
     ap.prog = f"sync-roms {argv[0]}"  # its errors (unrecognized arguments) point at the command's help
     args = ap.parse_args(argv)
-    if getattr(args, "dry_run", False) and not (args.fn is config_cmd and args.action == "apply") and (args.fn in (games_list, games_export, layouts_cmd, config_cmd, cache_cmd, doctor_cmd, guide_cmd, check_cmd, completion_cmd, themes_pick, themes_build, themes_palettes)
-                                            or (args.fn is games_sets and args.verb == "list")):
+    if getattr(args, "dry_run", False) and not (args.fn is config_cmd and args.action == "apply") and (args.fn in (games_list, games_export, layouts_cmd, config_cmd, cache_cmd, doctor_cmd, guide_cmd, check_cmd, completion_cmd, themes_pick, themes_build, themes_palettes,
+                                                          edit_cmd, install_cmd, devices_cmd, diff_cmd)
+                                            or (args.fn is games_sets and args.verb == "list") or (args.fn is mirror_cmd and args.action == "clear")):
         name = " ".join(w for w in (args.command, getattr(args, "action", None), getattr(args, "verb", None)) if w)
         if args.fn is config_cmd and args.action in ("set", "unset"):
             ui.fail(f"--dry-run can't preview `{name}`: run it without --dry-run to change settings.json", 2)

@@ -134,7 +134,7 @@ def update_storage(dry_run=False):
         print(ui.dim(f"🧪 Dry run: would change {len(todo) + len(gone)} theme(s) in {prefix}"))
         return 0
     if todo and not external.find_tool("7z"):
-        ui.warn("7z isn't installed, so the PyUI themes can't be unpacked; run `sync-roms tools install`")
+        ui.warn("7z isn't installed, so the PyUI themes can't be unpacked; run `sync-roms install`")
         return 1
     failed = done = 0
     try:

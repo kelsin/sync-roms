@@ -117,7 +117,7 @@ def run(args):
     if not args.yes and not ui.has_terminal():
         ui.fail("Pass --yes to install without a terminal to confirm on", 2)
     if not external.find_tool("7z"):
-        ui.fail("7z isn't installed, so spruceOS can't be unpacked; run `sync-roms tools install`", 3)
+        ui.fail("7z isn't installed, so spruceOS can't be unpacked; run `sync-roms install`", 3)
     tmp = tempfile.mkdtemp(prefix="sync-roms-install-")
     try:
         if shutil.disk_usage(tmp).free < size + flash.SPARE:

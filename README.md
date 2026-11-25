@@ -243,7 +243,8 @@ For one command:
 | `--palette NAME`, `--all-palettes` | `themes build`, `themes publish` | The palettes to build each style in (`--palette` repeatable, duplicates ignored), or all 28. Without either, a terminal (without `--yes`) shows the palette picker; otherwise the saved `custom_theme_palettes` are built (none saved: exit 2). The flags never change the saved palettes |
 | `--count N` | `download pico8` | Stop after N carts to add or upgrade |
 | `--bucket-keys` | `check` | Also verify with the read-only profile that every game key in your cards and sets exists in storage |
-| `-e`, `--edit`, `--upload [DIR]`, `-c`, `--clean-scrapes`, `--m3u [DIR]`, `--cd [DIR]`, `--chd [DIR]`, `--install-tools`, `--mirror [DIR]`, `--use-mirror DIR`, `--clear-mirror`, `--diff [DIR]`, `--devices`, `--scrape`, `--scrape-match SYSTEM ROM GAME`, `--scrape-review [SYSTEM]`, `--scrape-missing [SYSTEM]`, `--scrape-art [SYSTEM]` | (old flags) | Use the command beside each in the Commands table (`--chd` is the older name of `--cd`) |
+| `--fix` | `doctor` | After the checks, run `install` when 7z, unar or chdman is missing |
+| `-c`, `--clean-scrapes`, `--scrape`, `--scrape-match SYSTEM ROM GAME`, `--scrape-review [SYSTEM]`, `--scrape-missing [SYSTEM]`, `--scrape-art [SYSTEM]` | (old flags) | Use the command beside each in the Commands table |
 
 | Environment variable | Description |
 | --- | --- |

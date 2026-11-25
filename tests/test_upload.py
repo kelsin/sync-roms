@@ -285,7 +285,7 @@ class OverwriteListTest(unittest.TestCase):
             for name in names:
                 touch(root, name, 10)
                 touch(self.storage, f"gba/{name}", 20)
-            args = argparse.Namespace(upload=root, replace=replace, dry_run=True)
+            args = argparse.Namespace(dir=root, replace=replace, dry_run=True)
             with mock.patch.object(store, "load_manifest", lambda: {"systems": SYSTEMS}), \
                     mock.patch.object(upload.picker, "filter_list", lambda *a, **k: 0), \
                     mock.patch.object(inventory, "files", lambda prefix: {f"gba/{n}": 20 for n in names}), \
@@ -305,7 +305,7 @@ class OverwriteListTest(unittest.TestCase):
             with self.subTest(replace=replace), tempfile.TemporaryDirectory() as root:
                 touch(root, "new.gba", 10)
                 ask = mock.Mock(return_value=False)
-                args = argparse.Namespace(upload=root, replace=replace, dry_run=False)
+                args = argparse.Namespace(dir=root, replace=replace, dry_run=False)
                 with mock.patch.object(store, "load_manifest", lambda: {"systems": SYSTEMS}), \
                         mock.patch.object(upload.picker, "filter_list", lambda *a, **k: 0), \
                         mock.patch.object(inventory, "files", lambda prefix: {}), \
@@ -322,7 +322,7 @@ class UploadConfirmTest(unittest.TestCase):
     def run_upload(self, assume_yes, terminal, answer=""):
         with tempfile.TemporaryDirectory() as root:
             touch(root, "new.gba", 10)
-            args = argparse.Namespace(upload=root, replace=False, dry_run=False)
+            args = argparse.Namespace(dir=root, replace=False, dry_run=False)
             ran = mock.Mock(return_value=0)
             with mock.patch.object(store, "load_manifest", lambda: {"systems": SYSTEMS}), \
                     mock.patch.object(upload.picker, "filter_list", lambda *a, **k: 0), \

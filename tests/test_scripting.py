@@ -32,7 +32,7 @@ class ResolveTest(Isolated):
             self.assertEqual(usersettings.resolve_settings()["write_profile"], ("roms", "default"))
 
     def test_global_flags_set_the_runtime(self):
-        code, _, _ = self.sync(["--devices", "--profile", "p1", "--write-profile=p2", "--bucket", "b", "--endpoint", "http://x"])
+        code, _, _ = self.sync(["devices", "--profile", "p1", "--write-profile=p2", "--bucket", "b", "--endpoint", "http://x"])
         self.assertEqual(code, 0)
         self.assertEqual((runtime.PROFILE, runtime.WRITE_PROFILE, runtime.BUCKET, runtime.ENDPOINT), ("p1", "p2", "b", "http://x"))
 
@@ -43,9 +43,9 @@ class ResolveTest(Isolated):
         code, out, _ = self.sync(["config", "show", "--profile", "flag"], {"profile": "saved"})
         self.assertRegex(out, r"profile\s+flag\s+--profile")
 
-    def test_devices_m3u_and_cd_honor_the_profile_setting(self):
+    def test_devices_playlist_and_prepare_honor_the_profile_setting(self):
         with tempfile.TemporaryDirectory() as tmp:
-            for argv in (["--devices"], ["--m3u", tmp], ["--cd", tmp], ["devices"]):
+            for argv in (["devices"], ["playlist", tmp], ["prepare", tmp]):
                 with self.subTest(argv=argv):
                     runtime.PROFILE = "unset"
                     self.sync(argv, {"profile": "saved-profile", "bucket": "saved-bucket"})
@@ -53,21 +53,21 @@ class ResolveTest(Isolated):
 
     def test_devices_does_not_ask_for_a_bucket(self):
         with mock.patch("builtins.input", side_effect=AssertionError("asked")):
-            self.assertEqual(self.sync(["--devices"], {})[0], 0)
+            self.assertEqual(self.sync(["devices"], {})[0], 0)
 
     def test_a_flag_without_a_value_is_a_usage_error(self):
-        self.assertEqual(self.sync(["--devices", "--profile"])[0], 2)
+        self.assertEqual(self.sync(["devices", "--profile"])[0], 2)
 
 
 class QuietVerboseTest(Isolated):
     def test_quiet_silences_stdout(self):
         with tempfile.TemporaryDirectory() as tmp:
-            code, out, _ = self.sync(["--m3u", tmp, "--quiet"], {})
+            code, out, _ = self.sync(["playlist", tmp, "--quiet"], {})
         self.assertEqual((code, out), (0, ""))
 
     def test_without_quiet_it_prints(self):
         with tempfile.TemporaryDirectory() as tmp:
-            self.assertIn("playlists", self.sync(["--m3u", tmp], {})[1])
+            self.assertIn("playlists", self.sync(["playlist", tmp], {})[1])
 
     def test_quiet_keeps_json_data(self):
         code, out, _ = self.sync(["devices", "--json", "--quiet"], {})
@@ -75,14 +75,14 @@ class QuietVerboseTest(Isolated):
         self.assertIsInstance(json.loads(out), list)
 
     def test_quiet_does_not_leak_into_the_next_run(self):
-        self.sync(["--devices", "--quiet"], {})
-        self.assertNotEqual(self.sync(["--devices"], {})[1], "")
+        self.sync(["devices", "--quiet"], {})
+        self.assertNotEqual(self.sync(["devices"], {})[1], "")
 
     def test_quiet_and_verbose_conflict(self):
-        self.assertEqual(self.sync(["--devices", "--quiet", "--verbose"], {})[0], 2)
+        self.assertEqual(self.sync(["devices", "--quiet", "--verbose"], {})[0], 2)
 
     def test_verbose_reports_settings_on_stderr(self):
-        _, out, err = self.sync(["--devices", "--verbose"], {"bucket": "mybucket"})
+        _, out, err = self.sync(["devices", "--verbose"], {"bucket": "mybucket"})
         self.assertIn("mybucket", err)
         self.assertNotIn("mybucket", out)
 
@@ -97,7 +97,7 @@ class QuietVerboseTest(Isolated):
         for quiet in (True, False):
             with tempfile.TemporaryDirectory() as tmp, mock.patch.object(clean, "_clean_root", tmp), \
                     mock.patch.object(clean, "_clean_card", lambda: print("cleaned")), \
-                    mock.patch.object(sys, "argv", ["sync-roms", "--m3u", tmp] + (["--quiet"] if quiet else [])), \
+                    mock.patch.object(sys, "argv", ["sync-roms", "playlist", tmp] + (["--quiet"] if quiet else [])), \
                     mock.patch.object(usersettings, "load_settings", lambda: {}), \
                     contextlib.redirect_stdout(io.StringIO()) as out, contextlib.redirect_stderr(io.StringIO()) as err:
                 self.assertEqual(cli.main(), 0)
@@ -204,7 +204,7 @@ class DiffJsonTest(Isolated):
         self.assertIn("--system", err)
 
     def test_json_alone_is_refused_for_other_commands(self):
-        self.assertEqual(self.sync(["--m3u", "--json"], {})[0], 2)
+        self.assertEqual(self.sync(["playlist", "--json"], {})[0], 2)
 
 
 class DryRunJsonTest(Isolated):
