@@ -227,6 +227,28 @@ def _retag(data, old, new):
         data["declined"][key] = _replace(ids, old, new)
 
 
+def _retarget_limits(old, new):
+    """The surprise_tags setting and every card's surprise_tags with old swapped for new (dropped when new is None);
+    written only where something changed."""
+    from . import usersettings
+    ids = usersettings.load_settings().get("surprise_tags")
+    if isinstance(ids, list) and old in ids:
+        usersettings.save_setting("surprise_tags", _replace(ids, old, new) or None)
+    cards = store.load_cards()
+    changed = False
+    for entry in cards.values():
+        ids = entry.get("surprise_tags") if isinstance(entry, dict) else None
+        if isinstance(ids, list) and old in ids:
+            kept = _replace(ids, old, new)
+            if kept:
+                entry["surprise_tags"] = kept
+            else:
+                del entry["surprise_tags"]
+            changed = True
+    if changed:
+        store.write_cards(cards)
+
+
 def rename_tag(old_id, new_id):
     def change(data):
         if new_id in data["tags"] and new_id != old_id:
@@ -234,7 +256,9 @@ def rename_tag(old_id, new_id):
         if old_id in data["tags"]:
             data["tags"][new_id] = data["tags"].pop(old_id)
         _retag(data, old_id, new_id)
-    return _write(change)
+    result = _write(change)
+    _retarget_limits(old_id, new_id)
+    return result
 
 
 def merge_tag(src_id, dst_id):
@@ -242,14 +266,18 @@ def merge_tag(src_id, dst_id):
     def change(data):
         data["tags"].pop(src_id, None)
         _retag(data, src_id, dst_id)
-    return _write(change)
+    result = _write(change)
+    _retarget_limits(src_id, dst_id)
+    return result
 
 
 def delete_tag(tag_id):
     def change(data):
         data["tags"].pop(tag_id, None)
         _retag(data, tag_id, None)
-    return _write(change)
+    result = _write(change)
+    _retarget_limits(tag_id, None)
+    return result
 
 
 def retarget(old_key, new_key):

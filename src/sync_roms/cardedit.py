@@ -4,7 +4,7 @@ import json
 import queue
 import threading
 
-from . import budget, cardpicks, collections as colls, edit, guest, inventory, languages, listedit, metafilter, picker, previews, s3, scrape_plan, spruce_themes, store, surprise, tagui, themeart, ui, usersettings
+from . import budget, cardpicks, collections as colls, edit, guest, inventory, languages, listedit, metafilter, picker, previews, s3, scrape_plan, spruce_themes, store, surprise, tagui, tags, themeart, ui, usersettings
 
 FULL_KEY = "f"
 OFF_KEY = "x"
@@ -434,6 +434,8 @@ def settings_menu(name, systems, playable):
             f"🏆 RAOfflineProxy (RetroAchievements offline proxy app): {state(store.card_flag(entry, 'raofflineproxy'))}",
             "Systems Surprise may use (every card)",
             "Systems Surprise may use (this card)",
+            "Tags Surprise picks from (every card)",
+            "Tags Surprise picks from (this card)",
             *([f"🎨 One theme only: {state(entry.get('one_theme') is True)}",
                f"🎨 Spruce theme: {current or 'none'}"] if spruce else [])], cursor=pos)
         if i is None:
@@ -447,9 +449,13 @@ def settings_menu(name, systems, playable):
             pick_surprise_systems(systems)
         elif i == 5:
             pick_card_surprise_systems(name, playable)
-        elif i == 6 and spruce:
+        elif i == 6:
+            pick_surprise_tags()
+        elif i == 7:
+            pick_card_surprise_tags(name)
+        elif i == 8 and spruce:
             toggle_one_theme(name)
-        elif i == 7 and spruce:
+        elif i == 9 and spruce:
             pick_spruce_theme(name, current)
 
 
@@ -523,6 +529,44 @@ def pick_card_surprise_systems(name, playable):
         entry["surprise_excluded_systems"] = off
     else:
         entry.pop("surprise_excluded_systems", None)
+    store.write_cards(cards)
+
+
+def _pick_tags(title, current):
+    """Check the tags out of all of them; (the tag ids checked plus those of current that no tag has any more), or None
+    when cancelled."""
+    defs = tags.all_tags()
+    ids = sorted(defs, key=lambda i: defs[i]["name"].casefold())
+    states = picker.filter_list(title, [f"{defs[i]['emoji']} {defs[i]['name']}" for i in ids], multi=True,
+                                initial=[i in current for i in ids])
+    if states is None:
+        return None
+    return sorted((current - set(ids)) | {i for i, on in zip(ids, states) if on})
+
+
+def pick_surprise_tags():
+    """Check the tags Surprise picks from on every card; saved as surprise_tags (removed when none are checked)."""
+    chosen = _pick_tags("🎁 Tags Surprise picks from (every card)",
+                        set(usersettings.load_settings().get("surprise_tags") or ()))
+    if chosen is not None:
+        usersettings.save_setting("surprise_tags", chosen or None)
+
+
+def pick_card_surprise_tags(name):
+    """Check the tags Surprise picks from on this card (instead of the ones for every card); saved as the card's
+    surprise_tags (removed when none are checked)."""
+    cards = store.load_cards()
+    entry = cards.get(name)
+    if not isinstance(entry, dict):
+        return
+    ids = entry.get("surprise_tags")
+    chosen = _pick_tags(f"🎁 Tags Surprise picks from ({name})", set(ids) if isinstance(ids, list) else set())
+    if chosen is None:
+        return
+    if chosen:
+        entry["surprise_tags"] = chosen
+    else:
+        entry.pop("surprise_tags", None)
     store.write_cards(cards)
 
 

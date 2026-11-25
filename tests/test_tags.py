@@ -5,7 +5,7 @@ import unittest
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import helpers  # noqa: E402,F401
-from sync_roms import tags  # noqa: E402
+from sync_roms import store, tags, usersettings  # noqa: E402
 
 TAGS = {"shmups": {"name": "Shmups", "emoji": "🚀", "description": "Shoot them up"},
         "cave": {"name": "Cave", "emoji": "🐝"}}
@@ -124,6 +124,38 @@ class Writes(helpers.StorageFolder):
         self.assertNotIn("cave", s["tags"])
         self.assertEqual(s["games"][A]["tags"], ["shmups"])
         self.assertEqual(s["declined"][C], ["shmups"])
+
+    def surprise_limits(self):
+        usersettings.save_setting("surprise_tags", ["cave", "shmups"])
+        store.write_cards({"c": {"surprise_tags": ["cave"]}, "d": {"surprise_tags": ["shmups"]}, "e": {}})
+
+    def test_delete_tag_leaves_the_surprise_limits(self):
+        helpers.storage_tags(self, sample(), root=self.storage)
+        self.surprise_limits()
+        tags.delete_tag("cave")
+        self.assertEqual(usersettings.load_settings()["surprise_tags"], ["shmups"])
+        cards = store.load_cards()
+        self.assertNotIn("surprise_tags", cards["c"])
+        self.assertEqual(cards["d"]["surprise_tags"], ["shmups"])
+        tags.delete_tag("shmups")
+        self.assertNotIn("surprise_tags", usersettings.load_settings())
+
+    def test_merge_and_rename_replace_the_tag_in_the_surprise_limits(self):
+        helpers.storage_tags(self, sample(), root=self.storage)
+        self.surprise_limits()
+        tags.merge_tag("cave", "shmups")
+        self.assertEqual(usersettings.load_settings()["surprise_tags"], ["shmups"])
+        self.assertEqual(store.load_cards()["c"]["surprise_tags"], ["shmups"])
+        helpers.storage_tags(self, sample(), root=self.storage)
+        tags.rename_tag("shmups", "shoot")
+        self.assertEqual(usersettings.load_settings()["surprise_tags"], ["shoot"])
+        self.assertEqual(store.load_cards()["d"]["surprise_tags"], ["shoot"])
+
+    def test_no_surprise_limits_writes_nothing(self):
+        helpers.storage_tags(self, sample(), root=self.storage)
+        tags.delete_tag("cave")
+        self.assertFalse(os.path.exists(self.path("cards.json")))
+        self.assertFalse(os.path.exists(self.path("settings.json")))
 
     def test_rename_define_decline_variants(self):
         helpers.storage_tags(self, sample(), root=self.storage)

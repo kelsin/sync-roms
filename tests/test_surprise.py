@@ -13,7 +13,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import helpers  # noqa: E402
 import isolate  # noqa: E402,F401
 from helpers import VITA_DLC as DLC, VITA_GAME as G, VITA_UPDATE as NEW  # noqa: E402
-from sync_roms import cardedit, mirroring, picker, runtime, store, surprise, usersettings  # noqa: E402
+from sync_roms import cardedit, mirroring, picker, runtime, store, surprise, tags, usersettings  # noqa: E402
 
 GBA = {"bucket": "gba", "bios": {"files": ["gba_bios.bin"]}}
 IN = ["Super Mario Advance (USA, Europe).zip", "Castlevania - Aria of Sorrow (USA).zip",
@@ -440,6 +440,44 @@ class Step(StorageCase):
             got = self.both(False, False, 7)
         self.assertEqual(len(got), 10)
         self.assertEqual({g["system"] for g in got}, {"gba", "gb"})
+
+    def tag_gb(self):
+        helpers.storage_tags(self, {"tags": {"pk": {"name": "Pk", "emoji": "🔴"}},
+                                    "games": {f"gb/G{i} (USA).gb": {"tags": ["pk"]} for i in range(15)},
+                                    "declined": {}}, root=self.root)
+
+    def test_chosen_tags_card_over_setting_and_empty_means_no_limit(self):
+        self.assertIsNone(surprise.chosen_tags({}))
+        usersettings.save_setting("surprise_tags", ["a"])
+        self.assertEqual(surprise.chosen_tags({}), {"a"})
+        self.assertEqual(surprise.chosen_tags({"surprise_tags": ["b", 3]}), {"b"})
+        self.assertEqual(surprise.chosen_tags({"surprise_tags": []}), {"a"})
+        self.assertEqual(surprise.chosen_tags(None), {"a"})
+        usersettings.save_setting("surprise_tags", None)
+        self.assertIsNone(surprise.chosen_tags({"surprise_tags": []}))
+
+    def test_pools_keep_only_tagged_units_when_limited(self):
+        self.tag_gb()
+        taken = set()
+        full = surprise._pools(self.chosen(), taken)
+        self.assertEqual({b: len(u) for b, u in full.items()}, {"gba": 15, "gb": 15})
+        only = surprise._pools(self.chosen(), taken, tags.games_with({"pk"}, set()))
+        self.assertEqual({b: len(u) for b, u in only.items()}, {"gba": 0, "gb": 15})
+
+    def test_fill_picks_only_from_the_chosen_tags(self):
+        self.tag_gb()
+        self.card(surprise_tags=["pk"])
+        with self.patched(filter_list=self.fail_call, edit_card=self.fail_call):
+            got = self.both(False, False, 3)
+        self.assertEqual(len(got), 10)
+        self.assertEqual({g["system"] for g in got}, {"gb"})
+
+    def test_fill_uses_the_global_setting_when_the_card_has_none(self):
+        self.tag_gb()
+        usersettings.save_setting("surprise_tags", ["pk"])
+        with self.patched(filter_list=self.fail_call, edit_card=self.fail_call):
+            got = self.both(False, False, 3)
+        self.assertEqual({g["system"] for g in got}, {"gb"})
 
     def test_off_clears_surprises_keeps_history_and_picks_nothing(self):
         self.card(surprise=False, surprises=[self.surprise("gba", 0)])

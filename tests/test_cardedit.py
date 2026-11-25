@@ -268,6 +268,42 @@ class Flow(DataDir):
         self.assertFalse(calls[2][2]["initial"][0])
         self.assertNotIn("surprise_excluded_systems", self.read("cards.json")["c"])
 
+    def two_tags(self):
+        storage_tags(self, {"tags": {"zed": {"name": "Zed", "emoji": "⚡"}, "abe": {"name": "Abe", "emoji": "🐝"}},
+                            "games": {}, "declined": {}})
+
+    def test_settings_menu_has_the_tag_rows(self):
+        self.card(size="1 GB")
+        calls = self.run_card(returns((cardedit.SETTINGS_KEY, 0)), returns(None), returns(None))
+        self.assertEqual(calls[1][1][6:8], ["Tags Surprise picks from (every card)", "Tags Surprise picks from (this card)"])
+
+    def test_u_tags_saves_the_checked_ones_for_every_card(self):
+        self.card(size="1 GB")
+        self.two_tags()
+        calls = self.run_card(returns((cardedit.SETTINGS_KEY, 0)), returns(6), returns([False, True]), returns(None), returns(None))
+        self.assertEqual(calls[2][1], ["🐝 Abe", "⚡ Zed"])
+        self.assertEqual(self.read_settings()["surprise_tags"], ["zed"])
+        self.run_card(returns((cardedit.SETTINGS_KEY, 0)), returns(6), returns([False, False]), returns(None), returns(None))
+        self.assertNotIn("surprise_tags", self.read_settings())
+
+    def test_u_tags_esc_changes_nothing(self):
+        self.card(size="1 GB")
+        self.two_tags()
+        self.write_json("settings.json", {"surprise_tags": ["zed"]})
+        self.run_card(returns((cardedit.SETTINGS_KEY, 0)), returns(6), returns(None), returns(None), returns(None))
+        self.assertEqual(self.read_settings()["surprise_tags"], ["zed"])
+
+    def test_u_card_tags_saves_on_the_card_only_and_none_removes_the_field(self):
+        self.card(size="1 GB")
+        self.two_tags()
+        calls = self.run_card(returns((cardedit.SETTINGS_KEY, 0)), returns(7), returns([True, False]), returns(None), returns(None))
+        self.assertEqual(calls[2][2]["initial"], [False, False])
+        self.assertEqual(self.read("cards.json")["c"]["surprise_tags"], ["abe"])
+        self.assertIsNone(self.read_settings().get("surprise_tags"))
+        calls = self.run_card(returns((cardedit.SETTINGS_KEY, 0)), returns(7), returns([False, False]), returns(None), returns(None))
+        self.assertEqual(calls[2][2]["initial"], [True, False])
+        self.assertNotIn("surprise_tags", self.read("cards.json")["c"])
+
     def read_settings(self):
         try:
             return self.read("settings.json")
@@ -403,19 +439,19 @@ class Flow(DataDir):
 
     def test_settings_menu_sets_and_clears_spruce_theme(self):
         self.card(layout="spruce")
-        with mock.patch.object(picker, "filter_list", side_effect=[7, None]), \
+        with mock.patch.object(picker, "filter_list", side_effect=[9, None]), \
                 mock.patch.object(cardedit.spruce_themes, "pick_one", return_value="Mono") as pick:
             cardedit.settings_menu("c", CATALOG["systems"], [])
         self.assertEqual(self.read("cards.json")["c"]["spruce_theme"], "Mono")
         self.assertEqual(pick.call_args.args[1], None)
         seen = []
-        picks = iter([7, None])
+        picks = iter([9, None])
         with mock.patch.object(picker, "filter_list", lambda t, labels, **kw: seen.append(labels) or next(picks)), \
                 mock.patch.object(cardedit.spruce_themes, "pick_one", return_value=False):
             cardedit.settings_menu("c", CATALOG["systems"], [])
         self.assertEqual(seen[0][-1], "🎨 Spruce theme: Mono")
         self.assertEqual(self.read("cards.json")["c"]["spruce_theme"], "Mono")
-        with mock.patch.object(picker, "filter_list", side_effect=[7, None]), \
+        with mock.patch.object(picker, "filter_list", side_effect=[9, None]), \
                 mock.patch.object(cardedit.spruce_themes, "pick_one", return_value=None) as pick:
             cardedit.settings_menu("c", CATALOG["systems"], [])
         self.assertEqual(pick.call_args.args[1], "Mono")
@@ -424,12 +460,12 @@ class Flow(DataDir):
     def test_settings_menu_toggles_one_theme(self):
         self.card(layout="spruce")
         seen = []
-        picks = iter([6, 6, None])
+        picks = iter([8, 8, None])
         with mock.patch.object(picker, "filter_list", lambda t, labels, **kw: seen.append(labels) or next(picks)):
             cardedit.settings_menu("c", CATALOG["systems"], [])
         self.assertEqual([l[-2] for l in seen], ["🎨 One theme only: off", "🎨 One theme only: on", "🎨 One theme only: off"])
         self.assertNotIn("one_theme", self.read("cards.json")["c"])
-        with mock.patch.object(picker, "filter_list", side_effect=[6, None]):
+        with mock.patch.object(picker, "filter_list", side_effect=[8, None]):
             cardedit.settings_menu("c", CATALOG["systems"], [])
         self.assertIs(self.read("cards.json")["c"]["one_theme"], True)
 
