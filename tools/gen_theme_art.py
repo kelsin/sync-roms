@@ -1181,17 +1181,34 @@ def professor_layton(p):  # the professor's top hat
             p.path(arc(0, y, 30, 6, 0, 180))
 
 
-def mortal_kombat(p):  # the dragon medallion
-    ring = arc(0, 0, 36, 36, 0, 354)
-    p.o(0, 0, 44)
-    p.path(ring, True)
-    head = rounded([(14, 46), (2, 18), (-14, 14), (-28, 10), (-31, 5), (-14, 2), (-33, -2), (-29, -10), (-22, -12),
-                    (-8, -14), (0, -20), (12, -28), (8, -14), (18, -12), (26, -10), (22, -2), (32, 0), (27, 8),
-                    (38, 10), (33, 17), (50, 22), (46, 46)], 2)
-    with p.inside(ring):
-        p.path(head, True)
-    p.pg([(-16, -8), (-6, -9), (-10, -5)], 1)
-    p.o(-27, -6, 1.6)
+def mortal_kombat(p):  # the dragon medallion: a dragon's head and body curled inside a ring
+    p.o(0, 0, 47)
+    p.o(0, 0, 41)
+    spine = spline([(0, -6), (11, 0), (17, 10), (15, 22), (4, 28), (-10, 26), (-19, 18), (-19, 9)])
+    side_a, side_b = [], []
+    for i, (x, y) in enumerate(spine):
+        a, b = spine[max(i - 1, 0)], spine[min(i + 1, len(spine) - 1)]
+        tx, ty = b[0] - a[0], b[1] - a[1]
+        n = math.hypot(tx, ty)
+        w = 7.5 * (1 - i / len(spine)) + 0.8
+        side_a.append((x - ty / n * w, y + tx / n * w))
+        side_b.append((x + ty / n * w, y - tx / n * w))
+    body = side_a + [spine[-1]] + side_b[::-1]
+    for i in range(6, 42, 9):  # the crest along the outside of the neck and back
+        x, y = side_b[i]
+        bx, by = side_b[i + 6]
+        nx, ny = x - spine[i][0], y - spine[i][1]
+        k = 8 / math.hypot(nx, ny)
+        p.pg([(x - nx * 0.3, y - ny * 0.3), (bx + nx * k, by + ny * k), (bx - nx * 0.3, by - ny * 0.3)], 0.8)
+    p.path(body, True, opaque=True)
+    p.pg([(-29, -12), (-27, -4), (-25, -12)], 0.6)
+    p.pg([(-23, 2), (-21.5, -6), (-20, 2)], 0.6)
+    p.path(spline([(-4, -19), (4, -30), (15, -32), (23, -27)]) + spline([(23, -27), (15, -26), (6, -22), (2, -14)])[1:],
+           True)
+    head = [(4, -18), (-4, -21), (-12, -18), (-24, -16), (-34, -14), (-33, -10), (-16, -8), (-30, 4), (-28, 8),
+            (-14, 6), (-2, 4), (8, -4)]
+    p.pg(head, 1.5, opaque=True)
+    p.pg([(-16, -15), (-7, -16), (-10, -12)], 0.6)
 
 
 def tekken(p):  # the logo's italic, knife-cut t
@@ -1299,7 +1316,7 @@ ART = {
     "ys": (ys, (38, 112, 124), -6, 0.9, (-14, 0)),
     "horses": (horses, (150, 96, 60), -5, 0.95, (-34, 0)),
     "professor-layton": (professor_layton, (150, 78, 44), -6, 1.0, (-10, 0)),
-    "mortal-kombat": (mortal_kombat, (140, 32, 28), -4, 1.0, (-10, 0)),
+    "mortal-kombat": (mortal_kombat, (140, 32, 28), 0, 0.95, (-14, 0)),
     "tekken": (tekken, (96, 52, 150), 0, 0.9, (-28, 0)),
     "samurai-shodown": (samurai_shodown, (120, 40, 50), -30, 1.12, (-14, 14)),
     "fatal-fury": (fatal_fury, (60, 100, 150), -4, 1.0, (-16, 0)),
