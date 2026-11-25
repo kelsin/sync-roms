@@ -1294,11 +1294,16 @@ def sync_card(args):
         failed += spruce_retroarch.install(card, layout_name, base, dry_run)
         failed += knulli_conf.install(card, layout_name, base, dry_run)
         failed += spruce_splore.install(card, layout_name, base, dry_run)
+        failed += portmaster.stage(card, device, layout_name, base, port_picks, dry_run, args.no_delete)[0]
         if clean_card and wrote:
             clean._clean_root = base
         return failed
 
     chosen = [s for s in systems if available(s)]
+    port_picks = []  # the picked port zips: PortMaster installs them from its autoinstall folder, never Roms/PORTS
+    if portmaster.enabled(device, layout_name):
+        port_picks = sorted(os.path.basename(k) for s in chosen if s["bucket"] == portmaster.PORTS for k in available(s))
+        chosen = [s for s in chosen if s["bucket"] != portmaster.PORTS]
     deselected = []  # guest syncs: the seeded ROMs the card editor deselected, the only ROMs a guest sync deletes
     if guest:
         picked = {s["bucket"]: set(available(s)) for s in systems}

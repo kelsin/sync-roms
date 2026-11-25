@@ -52,6 +52,21 @@
         "type": "array",
         "items": {"type": "string"}
       },
+      "portmaster_data": {
+        "description": "Spruce cards: sorted port folder names whose game data is on the card (copied by sync or marked done); never copied again",
+        "type": "array",
+        "items": {"type": "string"}
+      },
+      "portmaster_staged": {
+        "description": "Spruce cards: sorted file names sync put in PortMaster's autoinstall folder that were still there at the end of the sync",
+        "type": "array",
+        "items": {"type": "string"}
+      },
+      "portmaster_ports": {
+        "description": "Spruce cards: sorted port folders installed on the card that need game data, so mirror keeps their data",
+        "type": "array",
+        "items": {"type": "string"}
+      },
       "spruce_emu": {
         "description": "Per ROM folder, the BIOS zip names sync-roms added to the ignoreList of the folder's Spruce Emu config",
         "type": "object",
