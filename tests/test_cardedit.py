@@ -1180,6 +1180,19 @@ class Flow(DataDir):
         self.assertFalse(kw.get("multi"))
         self.assertEqual(store.card_games("c"), {"gb": [g("gb/Red.gb")]})
 
+    def test_t_in_the_variants_list_edits_that_variants_tags_and_reopens_on_its_row(self):
+        self.with_variants(self.RED, {"bucket": "psx/x.chd", "note": "PS1: x"})
+        self.card()
+        asked = []
+        with mock.patch.object(cardedit.tagui, "edit_game_tags", side_effect=lambda *a: asked.append(a)):
+            _, calls = self.run_system(lambda labels, kw: (cardedit.VARIANT_KEY, labels.index("Ruby.zip")),
+                                       lambda labels, kw: ("t", 1), returns(None),
+                                       lambda labels, kw: kw["session"]["sel"])
+        self.assertEqual(asked, [("psx/x.chd", "PS1: x")])
+        self.assertIn("t", calls[1][2]["hotkeys"])
+        self.assertEqual([e[-1] for e in calls[1][2]["extras"]], [("", ""), ("", "")])
+        self.assertEqual(calls[2][2]["cursor"], 1)
+
     def test_v_with_two_variants_cancelled_changes_nothing(self):
         self.with_variants(self.RED, {"bucket": "psx/x.chd", "note": "PS1: x"})
         self.card()

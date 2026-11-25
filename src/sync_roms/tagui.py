@@ -35,7 +35,9 @@ def _new_tag():
         problem = "a tag needs a name"
     elif not emoji:
         problem = "a tag needs an emoji"
-    elif not tag_id or tag_id in existing:
+    elif not tag_id:
+        problem = f"{name} has no letters or digits to make an id from"
+    elif tag_id in existing:
         problem = f"there is already a tag named {name}"
     elif any(t["emoji"] == emoji for t in existing.values()):
         problem = f"{emoji} is already another tag's emoji"

@@ -859,9 +859,17 @@ def _toggle_variant(picks, key, title):
     bucket, or None when none was."""
     found = picks.variants.get(key, [])
     if len(found) > 1:
-        i = picker.filter_list(f"Variants of {title}",
-                               [f"{'✅' if picks.on_card(v['bucket']) else '⬜'} {v['note']}" for v in found],
-                               extras=[[languages.column(v["bucket"])] for v in found])
+        i = 0
+        while True:  # t edits the highlighted variant's tags, then the list opens again on its row
+            i = picker.filter_list(f"Variants of {title}",
+                                   [f"{'✅' if picks.on_card(v['bucket']) else '⬜'} {v['note']}" for v in found],
+                                   extras=[[languages.column(v["bucket"]), tag]
+                                           for v, tag in zip(found, tagui.column([v["bucket"] for v in found]))],
+                                   hotkeys=(tagui.TAG_KEY,), cursor=i if isinstance(i, int) else 0)
+            if not isinstance(i, tuple):
+                break
+            i = i[1]
+            tagui.edit_game_tags(found[i]["bucket"], found[i]["note"])
         found = [] if i is None else [found[i]]
     if not found:
         return None

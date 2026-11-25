@@ -75,6 +75,22 @@ class TagUi(unittest.TestCase):
             self.assertEqual(len(self.notes), 1, answers)
             self.assertEqual(list(tags.all_tags()), ["cave", "shmups"])
 
+    def test_emoji_only_name_gets_its_own_message(self):
+        calls = []
+        with mock.patch.object(picker, "filter_list", lambda t, l, **kw: ("n", None) if not calls.append(1) and len(calls) == 1 else None), \
+                mock.patch.object(ui, "ask", side_effect=["🎨", "🎨"]):
+            self.assertFalse(tagui.edit_game_tags(A, "A"))
+        self.assertIn("no letters or digits", self.notes[0])
+        self.assertNotIn("already", self.notes[0])
+
+    def test_unmounted_share_systemexit(self):
+        before = tags.load()
+        with mock.patch.object(picker, "filter_list", return_value=[True, True]), \
+                mock.patch.object(tags, "set_game_tags", side_effect=SystemExit("share not mounted")):
+            self.assertFalse(tagui.edit_game_tags(B, "B"))
+        self.assertEqual(len(self.notes), 1)
+        self.assertIs(tags.load(), before)
+
     def test_edit_game_tags_storage_error(self):
         before = tags.load()
         with mock.patch.object(picker, "filter_list", return_value=[True, True]), \
