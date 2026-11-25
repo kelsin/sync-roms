@@ -75,5 +75,29 @@ class Page(helpers.DataDir):
         self.assertEqual(collections_page.page_data()["systems"]["zzz"], "zzz")
 
 
+TEMPLATE = os.path.join(os.path.dirname(collections_page.__file__), "data", "collections-page.html")
+DATA_BLOCK = '<script type="application/json" id="page-data">{}</script>'
+
+
+class TemplateTest(unittest.TestCase):
+    def setUp(self):
+        with open(TEMPLATE, encoding="utf-8") as f:
+            self.html = f.read()
+
+    def test_empty_data_block(self):
+        self.assertEqual(self.html.count(DATA_BLOCK), 1)
+
+    def test_no_external_urls(self):
+        self.assertNotIn("http://", self.html)
+        self.assertNotIn("https://", self.html)
+
+    def test_no_innerhtml(self):
+        self.assertNotIn("innerHTML", self.html)
+
+    def test_reads_and_writes_hash(self):
+        for needle in ("replaceState", "hashchange", "URLSearchParams"):
+            self.assertIn(needle, self.html)
+
+
 if __name__ == "__main__":
     unittest.main()
