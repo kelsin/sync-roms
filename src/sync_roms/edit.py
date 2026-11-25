@@ -440,11 +440,11 @@ def edit_manifest():
             else:
                 add_card()
 
-    def edit_sets():
-        """The sets in storage, saved there at the set editor's review; a failure (SystemExit) returns here instead of ending the editor."""
-        from . import setedit
+    def edit_tags():
+        """The tags in storage, saved as they are changed; a failure (SystemExit) returns here instead of ending the editor."""
+        from . import tageditor
         try:
-            setedit.edit_sets()
+            tageditor.edit_tags()
         except SystemExit:
             pass  # the reason is a note, on the menu
 
@@ -456,7 +456,7 @@ def edit_manifest():
         """The top menu. Returns True to review and save, False to quit without saving."""
         try:
             while True:
-                options = ["💳 Cards", "📦 Sets", "💖 Collections", "🧩 Device systems", "✅ Done (review & save)", "🚪 Quit (card games are already saved)"]
+                options = ["💳 Cards", "🏷️ Tags", "💖 Collections", "🧩 Device systems", "✅ Done (review & save)", "🚪 Quit (card games are already saved)"]
                 extras = [[("  " + str(len(targets)) + " pending", "cyan")] if targets else [],
                           [], [], [("  " + str(len(overlay_pending)) + " edited", "cyan")] if overlay_pending else [], [], []]
                 i = picker.filter_list("✏️  What do you want to edit?  (Esc = review & save)", options, extras=extras,
@@ -466,7 +466,7 @@ def edit_manifest():
                 if i == 0:
                     edit_cards()
                 elif i == 1:
-                    edit_sets()
+                    edit_tags()
                 elif i == 2:
                     edit_collections()
                 elif i == 3:
@@ -476,7 +476,7 @@ def edit_manifest():
                     if not changed_targets() and not overlay_pending or ui.confirm("Discard your pending changes and quit?", default=False):
                         return False
         except KeyboardInterrupt:
-            print(ui.yellow("\n🛑 Interrupted — card games are saved; collection and set changes, if any, were offered for saving or review; pending device and device-system changes are kept: review them below."))
+            print(ui.yellow("\n🛑 Interrupted — card games are saved; collection changes, if any, were offered for saving or review; pending device and device-system changes are kept: review them below."))
             return True
 
     def changed_targets():

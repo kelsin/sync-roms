@@ -1,5 +1,5 @@
-"""Games-list helpers shared by the set and collection editors."""
-from . import edit, inventory, m3u, picker, previews, s3, store, tags, tagui, themeart, ui
+"""Games-list helpers shared by the tag and collection editors."""
+from . import edit, inventory, m3u, picker, previews, s3, store, tags, tagui, ui
 
 
 # --- Multi-disc games --------------------------------------------------------------------------------
@@ -86,93 +86,16 @@ def reconcile(games, shown, category=""):
     return out
 
 
-def recategorize(games, game, category):
-    """Give game a new category (empty removes it) and move it next to the games of that category."""
-    if (game.get("category") or "") == category:
-        return
-    moved = {}
-    for k, v in game.items():
-        if k != "category":
-            moved[k] = v
-        if k == "title" and category:
-            moved["category"] = category
-    if category:
-        moved.setdefault("category", category)
-    games[:] = [x for x in games if x is not game]
-    insert_game(games, moved)
-
-
-def set_series(games, game, series):
-    """Give game a series (empty removes it), keeping it after the title and category; returns game."""
-    moved = {}
-    for k, v in game.items():
-        if k != "series":
-            moved[k] = v
-        if series and k == ("category" if "category" in game else "title"):
-            moved["series"] = series
-    game.clear()
-    game.update(moved)
-    return game
-
-
-def series_of(game_set, min_games=2):
-    """[(series, game count)] of a set's games in file order of first appearance, leaving out series with fewer than
-    min_games games."""
-    counts = {}
-    for g in game_set["games"]:
-        if g.get("series"):
-            counts[g["series"]] = counts.get(g["series"], 0) + 1
-    return [(name, n) for name, n in counts.items() if n >= min_games]
-
-
-def series_keys(game_set, series):
-    """The bucket keys (with each game's files) of the set's games in series."""
-    return {k for g in game_set["games"] if g.get("series") == series for k in [g["bucket"], *g.get("files", [])]}
-
-
-def pick_name(title, names, current, noun, what):
-    """Pick a name from a list: "" for none (first row), a known name, or a new one typed (last row); None when
-    cancelled (an empty new name too). The cursor starts on current."""
-    i = picker.filter_list(title, ["(none)", *names, "new…"], hint="Enter pick · Esc cancel",
-                           cursor=next((n + 1 for n, x in enumerate(names) if x.casefold() == (current or "").casefold()), 0))
-    if i is None:
-        return None
-    if i == 0:
-        return ""
-    if i <= len(names):
-        return names[i - 1]
-    typed = ui.ask(f"🏷️  New {noun} for {what}: ", cancellable=True)
-    typed = (typed or "").strip()
-    if not typed:
-        return None
-    return next((n for n in names if n.casefold() == typed.casefold()), typed)  # "cave" is the existing "Cave"
-
-
-def ask_category(games, what):
-    """The category typed for what, "" for none."""
-    cats = list(dict.fromkeys(g["category"] for g in games if g.get("category")))
-    if cats:
-        print(ui.dim(f"  Categories: {', '.join(cats)}"))
-    typed = ui.ask(f"🏷️  Category for {what} (empty for none): ").strip()
-    return next((c for c in cats if c.casefold() == typed.casefold()), typed)  # "cave" is the existing "Cave"
-
-
-def game_label(game, names):
-    """A game's row label; names: {system bucket: system name}."""
-    return f"{game.get('category') + ' — ' if game.get('category') else ''}{names.get(game.get('system'), game.get('system'))}" \
-           f" — {game.get('title') or game['bucket']}"
-
-
 ALL_SYSTEMS = "🌐 All systems"
 
 
-def add_from_system(listing, systems, shown, keys_of, label, categories=True, toggle=None):
+def add_from_system(listing, systems, shown, keys_of, label, toggle=None):
     """Pick one of systems with files in storage and toggle its games in listing (via shown, a view of it).
     label is listing's name as shown, with its emoji.
 
     toggle(s, title, rows) shows the system's rows (s is its entry in shown) instead of a plain edit.toggle_games.
-    New games get the category asked for when categories is true (none after Ctrl-C, which keeps the toggles made and
-    is then raised again), and the discs of a multi-disc game whose playlist is in storage."""
+    New games get the discs of a multi-disc game whose playlist is in storage. Ctrl-C keeps the toggles made, then is
+    raised again."""
     options = stocked(systems)
     j = picker.filter_list("✏️  Add games from which system?", [ALL_SYSTEMS] + [s["name"] for s in options],
                            extras=[[]] + file_counts(options),
@@ -192,7 +115,6 @@ def add_from_system(listing, systems, shown, keys_of, label, categories=True, to
         picked = [options[j - 1]]
         rows = system_rows(s, keys_of(s["bucket"]))
         title = f"✏️  {s['name']} — ✅ in {label}, ⬜ in storage only"
-    had = {g["bucket"] for p in picked for g in shown[p["bucket"]]["games"]}
     interrupted = False
     try:
         if everywhere:
@@ -201,51 +123,11 @@ def add_from_system(listing, systems, shown, keys_of, label, categories=True, to
             toggle(s, title, rows)
         else:
             edit.toggle_games(title, rows)
-    except KeyboardInterrupt:  # Ctrl-C in the list or a picker it opens: the toggles made are kept, with no category
+    except KeyboardInterrupt:  # Ctrl-C in the list or a picker it opens: the toggles made are kept
         interrupted = True
-    added = {g["bucket"] for p in picked for g in shown[p["bucket"]]["games"]} - had
-    try:
-        category = ask_category(listing["games"], f"{len(added)} new game(s)") if categories and added and not interrupted else ""
-    except KeyboardInterrupt:  # Ctrl-C at the question: no category
-        category, interrupted = "", True
-    listing["games"] = reconcile(listing["games"], shown, category)
+    listing["games"] = reconcile(listing["games"], shown)
     for p in picked:
         fold_discs(listing["games"], keys_of(p["bucket"]))
-    if interrupted:
-        raise KeyboardInterrupt
-
-
-def add_from_set(listing, sets, shown, keys_of, label, categories=True):
-    """Pick one of sets and toggle its games, across every system, in listing (via shown, a view of it).
-    label is listing's name as shown, with its emoji.
-
-    New games get the category asked for when categories is true (none after Ctrl-C, which keeps the toggles made and
-    is then raised again), and the set's extra files (the discs of a multi-disc game)."""
-    j = picker.filter_list("✏️  Add games from which set?", [f"{themeart.set_emoji(x)} {x['name']}  ({len(x['games'])} games)" for x in sets],
-                           preview=lambda k: previews.collection(themeart.set_art(sets[k])))
-    if j is None:
-        return
-    chosen = sets[j]
-    rows = edit.set_rows(chosen, shown, lambda s: keys_of(s["bucket"]))
-    if not rows:
-        edit.note(ui.yellow(f"ℹ️  {themeart.set_emoji(chosen)} {chosen['name']} has no games on known systems."))
-        return
-    had = {g["bucket"] for s in shown.values() for g in s["games"]}
-    interrupted = False
-    try:
-        edit.toggle_games(f"✏️  {themeart.set_emoji(chosen)} {chosen['name']} — ✅ in {label}, ⬜ not", rows)
-    except KeyboardInterrupt:
-        interrupted = True
-    added = {g["bucket"] for s in shown.values() for g in s["games"]} - had
-    try:
-        category = ask_category(listing["games"], f"{len(added)} new game(s)") if categories and added and not interrupted else ""
-    except KeyboardInterrupt:  # Ctrl-C at the question: no category
-        category, interrupted = "", True
-    listing["games"] = reconcile(listing["games"], shown, category)
-    files = {g["bucket"]: g["files"] for g in chosen["games"] if g.get("bucket") and g.get("files")}
-    for g in listing["games"]:
-        if g.get("bucket") in added and g["bucket"] in files and "files" not in g:
-            g["files"] = list(files[g["bucket"]])
     if interrupted:
         raise KeyboardInterrupt
 
@@ -336,7 +218,7 @@ def print_changes(found):
             print((ui.green if line.startswith("+") else ui.red if line.startswith("-") else str)(f"    {line}"))
 
 
-# --- The sets and collections menu -------------------------------------------------------------------
+# --- The collections menu -------------------------------------------------------------------
 
 def edit_menu(noun, before, working, state, emoji, art, delete_note, new_item, open_item, save, question, empty_ok=True):
     """The menu of the games lists in working ({id: list}, before as loaded) for the set or collection editor (noun);

@@ -1028,7 +1028,7 @@ class Aliases(unittest.TestCase):
 
     def test_every_alias_runs_main_command(self):
         parser = commands.build_parser()
-        for alias, argv in (("card", ["list"]), ("game", ["list", "--card", "X"]), ("set", ["edit"]), ("collection", ["edit"]),
+        for alias, argv in (("card", ["list"]), ("game", ["list", "--card", "X"]), ("tag", ["edit"]), ("collection", ["edit"]),
                             ("theme", ["pick"]), ("save", ["manage"]), ("device", []), ("layout", []), ("playlists", ["/x"]),
                             ("scrapes", ["missing"]), ("downloads", ["pico8"]), ("umount", [])):
             with self.subTest(alias=alias):

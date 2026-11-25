@@ -16,7 +16,7 @@ from . import collections as colls
 from . import guest as guests
 
 
-ALIASES = {"card": "cards", "game": "games", "set": "sets", "collection": "collections", "theme": "themes", "save": "saves",  # alias -> main name
+ALIASES = {"card": "cards", "game": "games", "tag": "tags", "collection": "collections", "theme": "themes", "save": "saves",  # alias -> main name
            "device": "devices", "layout": "layouts", "playlists": "playlist", "scrapes": "scrape", "downloads": "download",
            "umount": "unmount"}
 
@@ -27,9 +27,9 @@ def canonical(word):
 
 SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "sync": ("[CARD]", "download the ROMs, BIOS and scraped data for a card (this is what plain `sync-roms CARD` does)"),
-    "edit": ("", "interactive editor: cards, sets, collections, device systems"),
+    "edit": ("", "interactive editor: cards, tags, collections, device systems"),
     "games": ("list|add|remove|full|sets|export|import", "edit a card's games, interactively or from scripts"),
-    "sets": ("edit", "edit the game sets in storage by hand and save the changes there"),
+    "tags": ("edit", "edit the tags in storage by hand: their games, names, emoji, art, merging and deleting"),
     "collections": ("edit", "edit your collections of favourite games (saved in ~/.sync-roms/collections/)"),
     "themes": ("update|pick|build|publish|palettes", "copy the latest Art Book Next for ES-DE and the PyUI themes for spruce from GitHub into storage; build and publish custom spruce themes"),
     "download": ("pico8", "add the PICO-8 BBS Featured carts storage doesn't have, and newer revisions of those it has"),
@@ -133,22 +133,21 @@ TOPICS = {
   list, s narrows it by tags (Enter cycles a tag: needed, left out, off). ? in any list shows all
   its keys.
 """,
-    "sets": """
-  sync-roms sets edit                         edit the sets in storage (games, categories, new and
-                                              deleted sets), then save them
+    "tags": """
+  sync-roms tags edit                         edit the tags in storage (games, names, emoji, art,
+                                              new, merged and deleted tags)
 
-  The sets are shared by everyone using this storage: each set is storage's sets/<id>.json. Saving
-  writes the new and changed sets there and deletes the deleted ones; nothing else in storage or
-  ~/.sync-roms changes. Pick a set to switch games off, add games from a system or from another set
-  across its systems (you're asked for a category), change a game's category or rename it. ➕ New set
-  creates one; d deletes the highlighted one. Esc reviews the changes before they're saved.
+  The tags are shared by everyone using this storage: they are storage's tags.json. Every change is
+  saved as you make it; nothing else in storage or ~/.sync-roms changes. Pick a tag to switch its
+  games off, add games from a system or from another tag, rename it, change its emoji, description
+  or art, merge it into another tag or delete it. n in the list adds a tag.
 """,
     "collections": """
   sync-roms collections edit                  edit your collections of favourite games
 
   Your own lists of games (like a set, but personal), saved to ~/.sync-roms/collections/<id>.json
   after Done or Esc shows the changes; Quit discards. No git or gh needed, and nothing goes to
-  storage or the repo. Same keys as the set editor. Deleting a collection that cards use asks first,
+  storage or the repo. Deleting a collection that cards use asks first,
   then removes it from them (the file is kept as <id>.json.bak). In a card's system list, l adds a
   collection to that card. Theme art picks the picture (Action, RPG, ...) the collection gets on
   ES-DE, Knulli and ROCKNIX cards that use Art Book Next.
@@ -215,8 +214,8 @@ TOPICS = {
   and asks once (write profile; without a terminal it needs --yes). Each cart goes to
   pico8/<BBS file name> with its title and author in scrapes/pico8/metadata.json. An upgrade
   removes the old revision, moves its metadata and scraped media to the new name and points your
-  cards, Surprise history and collections at it; sets that name the old file are listed to change
-  with sets edit. Carts in ignored.json are skipped.
+  cards, Surprise history and collections at it; sets that name the old file are listed.
+  Carts in ignored.json are skipped.
   Requests go one at a time; the first HTTP error stops it, keeping what was added.
 """,
     "flash": """

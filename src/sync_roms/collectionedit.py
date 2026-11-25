@@ -68,7 +68,7 @@ def edit_one(collection, systems, keys_of):
             finally:  # Ctrl-C too: the toggles made are kept
                 collection["games"] = reconcile(collection["games"], shown)
         elif i == 1:
-            add_from_system(collection, systems, shown, keys_of, label, categories=False, toggle=toggle_filtered)
+            add_from_system(collection, systems, shown, keys_of, label, toggle=toggle_filtered)
         elif i == 2:
             add_from_tag(collection, shown, keys_of, label)
         elif i == 4:

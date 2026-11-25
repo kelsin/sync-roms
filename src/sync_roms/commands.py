@@ -11,11 +11,11 @@ import sys
 import webbrowser
 
 from . import collections as colls
-from . import bezels, budget, cardedit, cardshare, collectionedit, external, guest, inventory, knulli_conf, m3u, names, picker, runtime, s3, setedit, spruce_settings, store, surprise, themeart, ui, usersettings
+from . import bezels, budget, cardedit, cardshare, collectionedit, external, guest, inventory, knulli_conf, m3u, names, picker, runtime, s3, spruce_settings, store, surprise, tageditor, themeart, ui, usersettings
 
 
 UNKNOWN_SHOWN = 8  # device ids named in an "unknown device" error
-COMMANDS = {"sync", "edit", "devices", "upload", "diff", "playlist", "prepare", "install", "mirror", "games", "sets", "collections", "themes", "download", "flash", "format", "unmount", "mount", "cards", "saves", "layouts", "cache", "config", "doctor", "guide", "check", "scrape", "refresh", "completion"}
+COMMANDS = {"sync", "edit", "devices", "upload", "diff", "playlist", "prepare", "install", "mirror", "games", "tags", "collections", "themes", "download", "flash", "format", "unmount", "mount", "cards", "saves", "layouts", "cache", "config", "doctor", "guide", "check", "scrape", "refresh", "completion"}
 SCRAPE_ACTIONS = ("match", "review", "missing", "art", "clean")
 LITERAL = frozenset()  # the values after `scrape match` that start with a dash: values, never options
 
@@ -1722,9 +1722,9 @@ def build_parser():
     p = gsub.add_parser("export", allow_abbrev=False); common(p); p.set_defaults(fn=games_export)
     p = gsub.add_parser("import", allow_abbrev=False); common(p); p.add_argument("file"); p.set_defaults(fn=games_import)
 
-    sets = sub.add_parser("sets", add_help=False, allow_abbrev=False)
-    ssub = sets.add_subparsers(dest="action", required=True)
-    p = ssub.add_parser("edit", allow_abbrev=False); p.set_defaults(fn=lambda a: setedit.edit_sets())
+    tags_cmd = sub.add_parser("tags", add_help=False, allow_abbrev=False)
+    tagsub = tags_cmd.add_subparsers(dest="action", required=True)
+    p = tagsub.add_parser("edit", allow_abbrev=False); p.set_defaults(fn=lambda a: tageditor.edit_tags())
 
     collections = sub.add_parser("collections", add_help=False, allow_abbrev=False)
     colsub = collections.add_subparsers(dest="action", required=True)

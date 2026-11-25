@@ -47,7 +47,7 @@ Your settings and cards in the data folder are never touched by an install or up
 
 ### AWS profiles
 
-Create the read-only profile (used for everything that only reads) and, if you write to storage (`upload`, `scrape`, `sets edit` and the like), the write profile. Each asks for an access key, secret, and region (`us-east-1`):
+Create the read-only profile (used for everything that only reads) and, if you write to storage (`upload`, `scrape`, `tags edit` and the like), the write profile. Each asks for an access key, secret, and region (`us-east-1`):
 
 ```bash
 aws configure --profile roms-readonly
@@ -170,7 +170,7 @@ Every mode is a command (plain `sync-roms [CARD]` syncs a card). A command's ali
 | `sync [CARD]` | download ROMs, BIOS and scraped data to a card | |
 | `edit` | [interactive editor](#editing-a-cards-games-edit-games) | |
 | `games list\|add\|remove\|full\|sets\|export\|import` | [edit a card's games from scripts](#editing-from-scripts-games) | `game` |
-| `sets edit` | edit the [game sets](#sets-sets-edit) in storage by hand and save them there | `set` |
+| `tags edit` | edit the [tags](#tags-tags-edit) in storage by hand | `tag` |
 | `collections edit` | edit your [collections](#collections-collections-edit) of favourite games | `collection` |
 | `themes update` | put the latest Art Book Next for ES-DE (for collections' [theme art](#theme-art)) and every [PyUI theme](#spruce) (needs `7z`) in storage | `theme` |
 | `themes build [STYLE...] [--palette NAME\|--all-palettes] [--out DIR]` | build the custom spruce theme styles (Pixel Consoles, Pixel Controllers, ToTK - James) in each chosen palette (without a flag: picked in a list, or the saved `custom_theme_palettes`; `ToTK - James` has no palette and is built once, from the ToTK theme in storage, so naming only it asks for none) from the SPRUCE base theme in storage into the cache, or into `DIR` with `--out`; writes nothing to storage | |
@@ -320,7 +320,7 @@ A card syncs exactly what is picked for it (games, whole sets, full systems), sa
 sync-roms edit
 ```
 
-1. **The menu** has **Cards**, **Sets** ([`sets edit`](#sets-sets-edit)), **Collections** ([`collections edit`](#collections-collections-edit)) and **🧩 Device systems**, which edits which systems a device can play (saved as the `add`/`remove` overlay in [`device-systems.json`](#data-folder)). Under **Cards**, pick one of your cards, or **➕ New card** (asks for its folder name, then its device and layout, like the first sync does, and saves the card). Each card's row shows its device and layout. `v` changes them instead of opening the card (saved with the review at the end) and drops the card's games for systems the new device or layout doesn't use; `r` renames a card and `d` deletes one (both ask first, and act at once).
+1. **The menu** has **Cards**, **Tags** ([`tags edit`](#tags-tags-edit)), **Collections** ([`collections edit`](#collections-collections-edit)) and **🧩 Device systems**, which edits which systems a device can play (saved as the `add`/`remove` overlay in [`device-systems.json`](#data-folder)). Under **Cards**, pick one of your cards, or **➕ New card** (asks for its folder name, then its device and layout, like the first sync does, and saves the card). Each card's row shows its device and layout. `v` changes them instead of opening the card (saved with the review at the end) and drops the card's games for systems the new device or layout doesn't use; `r` renames a card and `d` deletes one (both ask first, and act at once).
 2. **A card** opens on every system its device can play, in the usual order. Systems recommended for the device's screen are marked ⭐; each system with picks shows how many games and how much space they take (ROMs plus the scraped files the card's layout installs), and every system shows its size as a full system (🗂️, all its files, scrapes and BIOS). The bottom line shows the card's total (games, scrapes and the BIOS files of the systems it syncs) against its size and the free space, in green below 70% of the card, yellow below 90% and red above (or over). Sizes come from the [storage cache](#storage-cache-cache); without one they show `…` and the total says "not sized". Games save to `cards.json` as you leave a system. `Esc` goes back to the menu. The keys:
    - `Enter` opens a system, `f` makes it a full system (again brings the game list back).
    - `x` turns the system off on this card: nothing of it syncs and Surprise skips it, while its picks, sets and collections stay saved (again turns it back on).
@@ -358,13 +358,15 @@ sync-roms games import list.txt --card SD         # - reads stdin
 
 `games export` prints `SYSTEM/file` per line and `SYSTEM/*` for a full system, then `@collections ID`, `@frontend_collections NAME`, `@drivers NAME`, `@pico8 ZIP`, `@surprise true|false` (only when it differs from the layout's default) and `@surprises SYSTEM/file` (one per surprise) lines. `games import` adds the games of such a file; a field with `@` lines in the file replaces the card's value, lines starting with `#` are skipped, and entries for an unknown system are skipped with a warning.
 
-### Sets (`sets edit`)
+### Tags (`tags edit`)
+
+Tags live in storage's `tags.json`, shared by everyone using that storage. `sync-roms tags edit` lists them with their emoji, name and game count; `n` adds one (a name and an emoji; an emoji another tag uses is refused). Pick a tag to switch its games off, add games from a system or from another tag, rename it (its id never changes), change its emoji, description or [theme art](#theme-art), merge it into another tag or delete it (both ask first; deleting says how many games lose it). Every change is saved to storage as it is made, and a storage error shows as a note on the screen.
+
+### Sets
 
 The sets live in storage as `sets/<id>.json` (the id is the file name), so everyone using that storage shares them; each machine keeps a copy in `storage/sets/` in the data folder, checked against storage once a run. A set another machine added shows up after `sync-roms cache update`; until then a card naming it keeps the id and skips it with a warning.
 
 A set file is `{"name": ..., "description": ..., "games": [{"title": ..., "system": "gba", "bucket": "gba/Game.zip"}]}`, with an optional `"art": "<id>"` picking its [theme art](#theme-art) (without it a set uses the art under its own id). A multi-disc game adds `"files": [...]` with its other storage keys (the discs); `bucket` is the playlist (`.m3u`) or disc 1. Toggling the game adds or removes every file, one card entry each. A game may also have a `category` (the set editor groups rows by it), a `series` and `variants` (`[{"bucket", "note"}]`: later versions of the game that add something, shown by the editors and not synced with the set).
-
-`sync-roms sets edit` edits them. Pick a set to switch games off, add games from a system (those with files in storage, by company then name; with a storage cache each shows its file count) or from another set across all its systems (you're asked for a category; existing ones are listed), change a game's category or series (a list of the known names, `(none)` first and `new…` last, which asks for the name; the cursor starts on the game's current one and Esc changes nothing), or rename it. **➕ New set** creates a set and `d` deletes the highlighted one (it warns if a card still references it). Esc shows the changes; confirming writes the new and changed set files to storage and deletes the deleted ones, and writes nothing else to storage or the data folder. The edits stay pending, with an error, when the storage folder is unmounted, when another machine saved a set since the editor opened, or when the sets were read from the local copies because storage couldn't be checked: quit and reopen to start from storage's sets. `Ctrl-C` with changes pending shows the same review first; the toggles of a games list open at that moment (or just left for its category question) count, and the games it adds get no category.
 
 ### Collections (`collections edit`)
 

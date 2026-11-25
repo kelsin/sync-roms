@@ -7,7 +7,7 @@ from unittest import mock
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from helpers import DataDir, storage_tags  # noqa: E402
-from sync_roms import cli, collectionedit, commands, collections, edit, inventory, listedit, picker, setedit, store, tags, tagui, themeart, ui  # noqa: E402
+from sync_roms import cli, collectionedit, commands, collections, edit, inventory, listedit, picker, store, tags, tagui, themeart, ui  # noqa: E402
 
 SYSTEMS = [{"name": "Game Boy Advance", "bucket": "gba"}, {"name": "PlayStation", "bucket": "psx"}]
 DISCS = {"psx/FF7.m3u", "psx/FF7 (Disc 1).chd", "psx/FF7 (Disc 2).chd", "psx/Crash.chd"}
@@ -23,17 +23,6 @@ def tag_games(test, games, defs=None):
         "games": {k: {"tags": ["mix"], **({"files": files} if files else {})} for k, files in games.items()}})))
 
 
-class Shared(unittest.TestCase):
-    def test_set_editor_uses_the_shared_helpers(self):
-        for name in ("view", "add_from_system", "folder_lister", "insert_game", "reconcile", "recategorize", "ask_category", "game_label", "add_from_set"):
-            self.assertIs(getattr(setedit, name), getattr(listedit, name))
-
-    def test_both_editors_share_the_menu_and_its_review(self):
-        for module in (setedit, collectionedit):
-            self.assertIs(module.edit_menu, listedit.edit_menu)
-            self.assertIs(module.diff_lists, listedit.diff_lists)
-
-
 class MenusKeepTheCursor(unittest.TestCase):
     def cursors(self, run, *picks):
         """run() with filter_list answering picks in turn; the cursor each call was opened on."""
@@ -47,9 +36,9 @@ class MenusKeepTheCursor(unittest.TestCase):
         return seen
 
     def test_the_set_and_collection_menus_reopen_on_the_row_just_used(self):
-        for module in (collectionedit, setedit):
+        for module in (collectionedit,):
             with self.subTest(module.__name__), mock.patch.object(module, "add_from_system"), \
-                    mock.patch.object(module, "add_from_tag" if module is collectionedit else "add_from_set"):
+                    mock.patch.object(module, "add_from_tag"):
                 seen = self.cursors(lambda: module.edit_one({"name": "Favs", "games": []}, SYSTEMS, lambda b: set()),
                                     2, 1, None)
                 self.assertEqual(seen, [0, 2, 1])
@@ -104,33 +93,21 @@ class Stocked(unittest.TestCase):
 
     def test_add_games_hides_systems_with_a_missing_or_empty_folder(self):
         cache = {"gba/": {"Ruby.zip": 1}, "psx/": {}, "gb/": {"Tetris.zip": 1}}
-        for module in (collectionedit, setedit):
+        for module in (collectionedit,):
             # psx is cached as empty, saturn has no folder; gb has a folder and games
             self.assertEqual(self.offered(module, lambda: {"gba", "psx", "gb"}, cache), [ALL, "Game Boy", "Game Boy Advance"])
 
     def test_add_games_shows_each_systems_file_count_from_the_cache(self):
         cache = {"gba/": {"gba/Ruby.zip": 1, "gba/Emerald.zip": 2, "gba/hacks/": 0}, "gb/": {"gb/Tetris.zip": 1}}
-        for module in (collectionedit, setedit):
+        for module in (collectionedit,):
             extras = []
             self.assertEqual(self.offered(module, lambda: {"gba", "gb"}, cache, extras), [ALL, "Game Boy", "Game Boy Advance"])
             self.assertEqual(extras, [[], [("  1 file", "dim")], [("  2 files", "dim")]], module.__name__)
 
-    def test_renaming_a_set_changes_the_next_menu_title(self):
-        titles, picks = [], iter([5, None])  # Rename, then back
-        game_set = {"id": "x", "name": "Old", "games": []}
-
-        def fake(title, labels, **k):
-            titles.append(title)
-            return next(picks)
-
-        with mock.patch.object(picker, "filter_list", fake), mock.patch.object(setedit.ui, "ask", side_effect=["New", ""]):
-            setedit.edit_one(game_set, self.SYSTEMS, lambda bucket: set())
-        self.assertEqual(titles, ["✏️  📦 Old (Esc = back)", "✏️  📦 New (Esc = back)"])
-
     def test_add_games_counts_nothing_without_a_cache(self):
         extras = []
         with mock.patch.object(inventory, "files", side_effect=AssertionError("listed a folder")):
-            self.offered(setedit, lambda: {"gba", "psx", "gb", "saturn"}, {}, extras)
+            self.offered(collectionedit, lambda: {"gba", "psx", "gb", "saturn"}, {}, extras)
         self.assertEqual(extras, [[], [], [], [], []])  # every system listed (no cache to tell), none counted
 
     def test_add_games_lists_systems_by_company_then_name_like_the_card_editor(self):
@@ -138,7 +115,7 @@ class Stocked(unittest.TestCase):
                    {"name": "PlayStation", "bucket": "psx", "company": "Sony"},
                    {"name": "Mega Drive", "bucket": "md", "company": "Sega"},
                    {"name": "Game Boy", "bucket": "gb", "company": "Nintendo"}]
-        for module in (collectionedit, setedit):
+        for module in (collectionedit,):
             with mock.patch.object(self, "SYSTEMS", systems):
                 self.assertEqual(self.offered(module, lambda: {"gba", "psx", "md", "gb"}, {}),
                                  [ALL, "Game Boy", "Game Boy Advance", "Mega Drive", "PlayStation"], module.__name__)
@@ -174,24 +151,6 @@ class Discs(unittest.TestCase):
         self.assertEqual(rows, ["psx/Crash.chd", "psx/FF7.m3u"])
         self.assertEqual(collection["games"], [{"title": "FF7", "system": "psx", "bucket": "psx/FF7.m3u",
                                                 "files": ["psx/FF7 (Disc 1).chd", "psx/FF7 (Disc 2).chd"]}])
-
-    def test_adding_a_multi_disc_game_to_a_set_stores_its_discs(self):
-        game_set = {"name": "Favs", "games": []}
-        picks = iter([1, 2, None])  # add from a system, PlayStation (after All systems), back
-        rows = []
-
-        def toggle(title, shown_rows, **k):  # switch on the FF7 row
-            rows.extend(r[1] for r in shown_rows)
-            s, key, title, _ = shown_rows[1]
-            s["games"].append({"bucket": key, "title": title})
-
-        with mock.patch.object(picker, "filter_list", lambda *a, **k: next(picks)), \
-                mock.patch.object(edit, "toggle_games", toggle), mock.patch.object(ui, "ask", return_value=""):
-            setedit.edit_one(game_set, SYSTEMS, lambda bucket: DISCS if bucket == "psx" else set())
-        self.assertEqual(rows, ["psx/Crash.chd", "psx/FF7.m3u"])
-        self.assertEqual(game_set["games"], [{"title": "FF7", "system": "psx", "bucket": "psx/FF7.m3u",
-                                              "files": ["psx/FF7 (Disc 1).chd", "psx/FF7 (Disc 2).chd"]}])
-
 
     def test_adding_from_a_tag_spans_systems_and_keeps_discs(self):
         collection = {"name": "Favs", "games": [dict(RUBY)]}
@@ -359,34 +318,17 @@ class AddFromSystem(unittest.TestCase):
                 r[0]["games"].append({"bucket": r[1], "title": r[2]})
 
     def test_all_systems_is_the_first_option_then_the_stocked_systems(self):
-        labels, _ = self.add_all({"name": "Favs", "games": []}, lambda *a, **k: None, ask=AssertionError, categories=False)
+        labels, _ = self.add_all({"name": "Favs", "games": []}, lambda *a, **k: None, ask=AssertionError)
         self.assertEqual(labels, [ALL, "Game Boy Advance", "PlayStation"])
 
-    def test_all_systems_adds_games_of_several_systems_with_discs_and_no_category_prompt(self):
+    def test_all_systems_adds_games_of_several_systems_with_discs(self):
         listing = {"name": "Favs", "games": []}
-        _, asked = self.add_all(listing, self.switch_on_ruby_and_ff7, categories=False)
+        _, asked = self.add_all(listing, self.switch_on_ruby_and_ff7)
         asked.assert_not_called()
         self.assertEqual(listing["games"], [RUBY, {"title": "FF7", "system": "psx", "bucket": "psx/FF7.m3u",
                                                   "files": ["psx/FF7 (Disc 1).chd", "psx/FF7 (Disc 2).chd"]}])
 
-    def test_all_systems_asks_the_category_once(self):
-        listing = {"name": "Favs", "games": []}
-        _, asked = self.add_all(listing, self.switch_on_ruby_and_ff7, ask=["Cave"])
-        asked.assert_called_once()
-        self.assertEqual([g["category"] for g in listing["games"]], ["Cave", "Cave"])
-
-    def test_new_games_get_the_category_asked_for(self):
-        listing = {"name": "Favs", "games": [{"title": "Ruby", "category": "Cave", "system": "gba", "bucket": "gba/Ruby.zip"}]}
-        titles = []
-
-        def toggle(title, rows, **k):
-            titles.append(title)
-            self.switch_on(rows, 0)
-        self.add(listing, toggle, ask=["cave"])
-        self.assertEqual(titles, ["✏️  PlayStation — ✅ in 📦 Favs, ⬜ in storage only"])
-        self.assertEqual(listing["games"][1], {"title": "Crash", "category": "Cave", "system": "psx", "bucket": "psx/Crash.chd"})
-
-    def test_without_categories_nothing_is_asked_and_toggle_shows_the_rows(self):
+    def test_toggle_shows_the_rows(self):
         listing = {"name": "Favs", "games": []}
         seen = []
 
@@ -394,12 +336,12 @@ class AddFromSystem(unittest.TestCase):
             seen.append((s["bucket"], [r[1] for r in rows]))
             self.switch_on(rows, 1)
         self.add(listing, mock.Mock(side_effect=AssertionError("plain list")), ask=AssertionError("asked"),
-                 categories=False, toggle=toggle)
+                 toggle=toggle)
         self.assertEqual(seen, [("psx", ["psx/Crash.chd", "psx/FF7.m3u"])])
         self.assertEqual(listing["games"], [{"title": "FF7", "system": "psx", "bucket": "psx/FF7.m3u",
                                              "files": ["psx/FF7 (Disc 1).chd", "psx/FF7 (Disc 2).chd"]}])
 
-    def test_ctrl_c_keeps_the_toggles_without_a_category_and_is_raised_again(self):
+    def test_ctrl_c_keeps_the_toggles_and_is_raised_again(self):
         listing = {"name": "Favs", "games": []}
 
         def toggle(title, rows, **k):
@@ -407,12 +349,6 @@ class AddFromSystem(unittest.TestCase):
             raise KeyboardInterrupt
         with self.assertRaises(KeyboardInterrupt):
             self.add(listing, toggle, ask=AssertionError("asked"))
-        self.assertEqual(listing["games"], [{"title": "Crash", "system": "psx", "bucket": "psx/Crash.chd"}])
-
-    def test_ctrl_c_at_the_category_question_adds_them_without_one(self):
-        listing = {"name": "Favs", "games": []}
-        with self.assertRaises(KeyboardInterrupt):
-            self.add(listing, lambda title, rows, **k: self.switch_on(rows, 0), ask=KeyboardInterrupt)
         self.assertEqual(listing["games"], [{"title": "Crash", "system": "psx", "bucket": "psx/Crash.chd"}])
 
     def test_esc_at_the_system_list_changes_nothing(self):

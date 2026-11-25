@@ -65,7 +65,7 @@ class BashCompletion(unittest.TestCase):
     def test_completion_main_names_only(self):
         offered = self.complete("sync-roms", "")
         self.assertIn("cards", offered)
-        for alias in ("card", "game", "set", "scrapes", "umount"):
+        for alias in ("card", "game", "tag", "scrapes", "umount"):
             self.assertNotIn(alias, offered)
 
     def test_subcommands(self):
@@ -97,11 +97,11 @@ class OtherShells(unittest.TestCase):
                 self.assertIn(f"-l {flag[2:]}", text)
 
     def test_fish_second_words_are_tied_to_the_first_word(self):
-        # `set` is sets' alias and cards' and config's second word: a "seen anywhere" test offers `edit` after `cards set`
+        # `set` is cards' and config's second word: a "seen anywhere" test offers `edit` after `cards set`
         text = script_for("fish")
-        self.assertNotIn("__fish_seen_subcommand_from sets set", text)
+        self.assertNotIn("__fish_seen_subcommand_from tags tag", text)
         self.assertNotIn("__fish_seen_subcommand_from cards card", text)
-        self.assertIn("contains -- (commandline -opc)[2] sets set", text)
+        self.assertIn("contains -- (commandline -opc)[2] tags tag", text)
         self.assertIn("contains -- (commandline -opc)[2] cards card", text)
         self.assertIn("contains -- (commandline -opc)[2] config;", text)
 

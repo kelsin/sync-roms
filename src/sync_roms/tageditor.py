@@ -1,0 +1,192 @@
+"""`sync-roms tags edit`: edit the tags in storage. Every change is saved as it is made."""
+from . import edit, names, picker, previews, s3, store, tags, tagui, themeart, ui
+from .collectionedit import pick_art
+from .listedit import add_from_system, add_from_tag, folder_lister, view
+
+
+def _label(tag):
+    return f"{tag['emoji']} {tag['name']}"
+
+
+def _games_of(tag_id):
+    """The keys of the games with the tag."""
+    return [k for k, rec in tags.load()["games"].items() if tag_id in rec["tags"]]
+
+
+def _save(write, *args, **kwargs):
+    """write(*args, **kwargs) to storage; False, with a note, when storage refused it."""
+    try:
+        write(*args, **kwargs)
+    except (*s3.ERRORS, SystemExit) as e:  # ui.fail raises SystemExit: its error is printed
+        edit.note(ui.yellow(f"⚠️  Couldn't save the tags in storage: {e}"))
+        return False
+    return True
+
+
+# --- One tag -----------------------------------------------------------------------------------------
+
+def switch_games_off(tag_id, label, system_names):
+    """The tag's games as a list to toggle: the ones unchecked lose the tag (saved even after Ctrl-C)."""
+    keys = _games_of(tag_id)
+    if not keys:
+        edit.note(ui.yellow("ℹ️  No game has this tag yet."))
+        return
+    entry = {"bucket": "", "games": [{"bucket": k} for k in keys]}
+    rows = sorted(((entry, k, names.title(k), f"{system_names.get(k.partition('/')[0], k.partition('/')[0])} — {names.title(k)}")
+                   for k in keys), key=lambda r: (store.sort_key(r[2]), r[1]))
+    try:
+        edit.toggle_games(f"✏️  {label} — ✅ has the tag, ⬜ remove it", rows)
+    finally:
+        gone = set(keys) - {g["bucket"] for g in entry["games"]}
+        if gone:
+            _save(tags.retag_games, tag_id, remove=gone)
+
+
+def add_games(tag_id, systems, keys_of, add):
+    """add(listing, shown) lets the user toggle games into a listing of the tag's games (shown is a view of it); the
+    games it gained get the tag, and those it lost lose it (saved even after Ctrl-C)."""
+    keys = _games_of(tag_id)
+    listing = {"games": [{"system": k.partition("/")[0], "bucket": k} for k in keys]}
+    try:
+        add(listing, view(listing, systems))
+    finally:
+        now = {g["bucket"]: g for g in listing["games"] if g.get("bucket")}
+        gained = [k for k in now if k not in keys]
+        lost = [k for k in keys if k not in now]
+        if gained or lost:
+            _save(tags.retag_games, tag_id, add=gained, remove=lost,
+                  files={k: now[k]["files"] for k in gained if now[k].get("files")})
+
+
+def rename(tag_id, tag):
+    name = ui.ask(f"Name [{tag['name']}] (empty cancels): ").strip()
+    if not name:
+        edit.note(ui.yellow("⚠️  A tag needs a name; nothing was changed."))
+    else:
+        _save(tags.define_tag, tag_id, {"name": name})  # the id never changes
+
+
+def change_emoji(tag_id, tag):
+    emoji = ui.ask(f"Emoji [{tag['emoji']}] (empty cancels): ").strip()
+    if not emoji:
+        problem = "a tag needs an emoji"
+    elif any(i != tag_id and t["emoji"] == emoji for i, t in tags.all_tags().items()):
+        problem = f"{emoji} is already another tag's emoji"
+    else:
+        _save(tags.define_tag, tag_id, {"emoji": emoji})
+        return
+    edit.note(ui.yellow(f"⚠️  {problem}; nothing was changed."))
+
+
+def change_art(tag_id, tag):
+    picked = {"name": tag["name"], "art": tag.get("art")}
+    pick_art(picked)
+    if picked.get("art") != tag.get("art"):
+        _save(tags.define_tag, tag_id, {"art": picked.get("art")})
+
+
+def merge(tag_id, tag):
+    """Merge the tag into another one picked from a list; returns whether it is gone."""
+    defs = tags.all_tags()
+    ids = sorted((i for i in defs if i != tag_id), key=lambda i: defs[i]["name"].casefold())
+    if not ids:
+        edit.note(ui.yellow("ℹ️  There is no other tag to merge into."))
+        return False
+    j = picker.filter_list(f"✏️  Merge {_label(tag)} into which tag?", [_label(defs[i]) for i in ids])
+    if j is None:
+        return False
+    into = defs[ids[j]]
+    n = len(_games_of(tag_id))
+    if not ui.confirm(f"🔀 Merge {_label(tag)} into {_label(into)}? Its {n} game(s) get {into['name']} and "
+                      f"{tag['name']} is deleted.", default=False):
+        return False
+    return _save(tags.merge_tag, tag_id, ids[j])
+
+
+def delete(tag_id, tag):
+    """Delete the tag after asking; returns whether it is gone."""
+    n = len(_games_of(tag_id))
+    if not ui.confirm(f"🗑️  Delete {_label(tag)}? {n} game(s) lose it.", default=False):
+        return False
+    return _save(tags.delete_tag, tag_id)
+
+
+def edit_one(tag_id, systems, keys_of):
+    """The menu of one tag: its games, adding games, name, emoji, description, art, merging, deleting."""
+    system_names = {s["bucket"]: s["name"] for s in systems}
+    pos = 0
+    while True:
+        tag = tags.all_tags().get(tag_id)
+        if tag is None:
+            return
+        art = tag.get("art")
+        i = picker.filter_list(f"✏️  {_label(tag)} (Esc = back)",
+                               [f"Games with this tag ({len(_games_of(tag_id))}): switch some off",
+                                "Add games from a system", "Add games from another tag",
+                                f"Rename ({tag['name']})", f"Emoji ({tag['emoji']})",
+                                f"Description{': ' + tag['description'] if tag.get('description') else ''}",
+                                f"{themeart.art_emoji(art)} Theme art: {themeart.art_choices().get(art, 'none') if art else 'none'}",
+                                "Merge into another tag", "Delete this tag"], cursor=pos)
+        if i is None:
+            return
+        pos = i
+        if i == 0:
+            switch_games_off(tag_id, _label(tag), system_names)
+        elif i == 1:
+            add_games(tag_id, systems, keys_of, lambda listing, shown: add_from_system(
+                listing, systems, shown, keys_of, _label(tag)))
+        elif i == 2:
+            add_games(tag_id, systems, keys_of, lambda listing, shown: add_from_tag(listing, shown, keys_of, _label(tag)))
+        elif i == 3:
+            rename(tag_id, tag)
+        elif i == 4:
+            change_emoji(tag_id, tag)
+        elif i == 5:
+            text = ui.ask("Description (empty clears it): ").strip()
+            _save(tags.define_tag, tag_id, {"description": text or None})
+        elif i == 6:
+            change_art(tag_id, tag)
+        elif i == 7:
+            if merge(tag_id, tag):
+                return
+        elif delete(tag_id, tag):
+            return
+
+
+# --- The list ----------------------------------------------------------------------------------------
+
+@picker.one_app
+def edit_tags():
+    """The list of tags; Enter opens one, n adds a new one. Returns the exit code."""
+    systems = sorted(store.repo_json("systems"), key=lambda s: s["name"].lower())
+    keys_of = folder_lister()
+    pos = 0
+    while True:
+        defs = tags.all_tags()
+        ids = sorted(defs, key=lambda i: defs[i]["name"].casefold())
+        n = len(ids)
+        counts = tagui._count()
+        i = picker.filter_list("🏷️  Which tag?  (Esc = back)",
+                               [f"{_label(defs[x])}  ({counts.get(x, 0)} games)" for x in ids] + ["➕ New tag"],
+                               hotkeys=(tagui.NEW_KEY,), hint="/ filter · Enter open · n new tag · Esc back", cursor=pos,
+                               preview=lambda k: previews.collection(defs[ids[k]].get("art")) if k < n else None)
+        if i is None:
+            return 0
+        if isinstance(i, tuple):
+            i = n
+        pos = i
+        if i < n:
+            edit_one(ids[i], systems, keys_of)
+        else:
+            made = _save_new()
+            if made:
+                edit_one(made, systems, keys_of)
+
+
+def _save_new():
+    """tagui's new-tag questions, with a storage failure noted instead of raised."""
+    try:
+        return tagui._new_tag()
+    except (*s3.ERRORS, SystemExit) as e:
+        edit.note(ui.yellow(f"⚠️  Couldn't save the tags in storage: {e}"))
+        return None

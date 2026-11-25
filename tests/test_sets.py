@@ -523,16 +523,6 @@ class SeriesTest(unittest.TestCase):
         {"title": "G", "system": "gba", "bucket": "gba/G.zip", "series": "Zelda"},
     ]}
 
-    def test_series_of_skips_small_series_in_file_order(self):
-        self.assertEqual(listedit.series_of(self.GAMES), [("Mario", 2), ("Zelda", 2), ("Metroid", 2)])
-        self.assertEqual(listedit.series_of({"games": self.GAMES["games"][:3]}), [])
-        self.assertEqual(listedit.series_of({"games": self.GAMES["games"][:3]}, min_games=1),
-                         [("Mario", 1), ("Zelda", 1)])
-
-    def test_series_keys_include_files(self):
-        self.assertEqual(listedit.series_keys(self.GAMES, "Mario"), {"gba/A.zip", "gba/D.zip", "gba/D2.zip"})
-        self.assertEqual(listedit.series_keys(self.GAMES, "None"), set())
-
     def test_check_game_file_rejects_non_string_series(self):
         with tempfile.TemporaryDirectory() as d:
             path = os.path.join(d, "s.json")

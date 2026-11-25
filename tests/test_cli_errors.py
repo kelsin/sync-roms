@@ -189,7 +189,7 @@ class UsageHelpTest(Isolated):
         self.assertIn("the following arguments are required: ROM, GAME", err)
 
     def test_commands_without_their_action_name_the_actions(self):
-        for argv, listed in ((["sets"], "sets edit"), (["collections"], "collections edit"), (["themes", "-n"], "themes update"),
+        for argv, listed in ((["tags"], "tags edit"), (["collections"], "collections edit"), (["themes", "-n"], "themes update"),
                              (["download"], "download pico8"), (["games"], "games add")):
             with self.subTest(argv=argv):
                 code, _, err = self.sync(argv)

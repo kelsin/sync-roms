@@ -194,6 +194,21 @@ def set_game_tags(key, ids):
     return _write(change)
 
 
+def retag_games(tag_id, add=(), remove=(), files=None):
+    """One write: the tag goes on the games in add (files: {key: the extra files its record gets}) and off those in
+    remove."""
+    def change(data):
+        for key in add:
+            rec = data["games"].setdefault(key, {"tags": []})
+            rec["tags"] = sorted({*rec["tags"], tag_id})
+            if files and files.get(key) and "files" not in rec:
+                rec["files"] = list(files[key])
+        for key in remove:
+            if key in data["games"]:
+                data["games"][key]["tags"] = _replace(data["games"][key]["tags"], tag_id, None)
+    return _write(change)
+
+
 def define_tag(tag_id, fields):
     """Create the tag, or update the given fields of it (a field set to None is removed)."""
     def change(data):

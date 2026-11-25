@@ -310,14 +310,14 @@ class MenuActions(EditBase):
             edit.edit_manifest()
         return seen
 
-    def test_top_menu_entries_are_exactly_cards_sets_collections_and_device_systems(self):
+    def test_top_menu_entries_are_exactly_cards_tags_collections_and_device_systems(self):
         top = self.top_titles([None])[0][1]
-        self.assertEqual(top, ["💳 Cards", "📦 Sets", "💖 Collections", "🧩 Device systems",
+        self.assertEqual(top, ["💳 Cards", "🏷️ Tags", "💖 Collections", "🧩 Device systems",
                                "✅ Done (review & save)", "🚪 Quit (card games are already saved)"])
 
-    def test_choosing_sets_calls_edit_sets_and_a_failure_returns_to_the_menu(self):
-        from sync_roms import setedit
-        with mock.patch.object(setedit, "edit_sets", side_effect=SystemExit(3)) as run:
+    def test_choosing_tags_calls_edit_tags_and_a_failure_returns_to_the_menu(self):
+        from sync_roms import tageditor
+        with mock.patch.object(tageditor, "edit_tags", side_effect=SystemExit(3)) as run:
             self.assertEqual(self.run_menu([1, 4]), 0)
         run.assert_called_once()
 

@@ -9,7 +9,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from sync_roms import cardedit, collectionedit, commands, edit, picker, saves_manage, setedit, store, ui  # noqa: E402
+from sync_roms import cardedit, collectionedit, commands, edit, picker, saves_manage, store, ui  # noqa: E402
 from helpers import Cmd, DataDir, feed_list, storage_sets  # noqa: E402
 
 
@@ -167,7 +167,7 @@ class Hints(unittest.TestCase):
     def test_every_hint_and_the_keep_question_fit_80_cells_with_the_help_prefix(self):
         hints = {"systems": cardedit.LIST_HINT, "systems from a sync": cardedit.LIST_HINT + cardedit.KEEP_HINT,
                  "collection games on a card": cardedit.COLLECTION_GAMES_HINT, "all games": cardedit.ALL_GAMES_HINT,
-                 "card games": cardedit.GAMES_HINT, "collections": cardedit.COLLECTIONS_HINT, "set editor games": setedit.GAMES_HINT,
+                 "card games": cardedit.GAMES_HINT, "collections": cardedit.COLLECTIONS_HINT,
                  "collection games": collectionedit.GAMES_HINT, "card list": edit.MENU_HINT,
                  "multi": picker.MULTI_HINT, "single": picker.SINGLE_HINT, "saves manage": saves_manage.HINT}
         for name, hint in hints.items():
@@ -181,9 +181,6 @@ class Hints(unittest.TestCase):
     def test_the_keys_left_out_of_the_hints_are_in_the_help(self):
         lines = picker.help_lines(False, cardedit.LIST_HINT, key_help=cardedit.LIST_KEYS + cardedit.KEEP_KEYS)
         for key in "fxasSFDK":
-            self.assertTrue(any(line.startswith(key + " ") for line in lines), key)
-        lines = picker.help_lines(True, setedit.GAMES_HINT, key_help=setedit.GAMES_KEYS, has_note=True)
-        for key in ("r", "c", "w", "a", "o", "/"):
             self.assertTrue(any(line.startswith(key + " ") for line in lines), key)
         lines = picker.help_lines(True, saves_manage.HINT, key_help=saves_manage.KEY_HELP)
         for key in ("Space/Tab", "Enter", "w", "m", "p", "d", "Esc"):

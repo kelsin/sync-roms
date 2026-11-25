@@ -6,7 +6,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from sync_roms import cardedit, edit, languages, setedit  # noqa: E402
+from sync_roms import cardedit, edit, languages  # noqa: E402
 
 
 class LanguagesTest(unittest.TestCase):
@@ -108,17 +108,6 @@ class EditorColumnsTest(unittest.TestCase):
         with mock.patch.object(edit.picker, "filter_list", fake):
             edit.toggle_games("t", rows)
         self.assertEqual(seen["extras"], [[("  \U0001F1EF\U0001F1F5", "dim"), ("", "")]])
-
-    def test_pick_game_flag_extras(self):
-        games = [{"title": "Mother 3", "bucket": "gba/Mother 3 (Japan).zip"}]
-        seen = {}
-
-        def fake(title, labels, **kw):
-            seen.update(kw)
-            return 0
-        with mock.patch.object(setedit.picker, "filter_list", fake):
-            self.assertEqual(setedit.pick_game("t", games, {"gba": "GBA"}), 0)
-        self.assertEqual(seen["extras"], [[("  \U0001F1EF\U0001F1F5", "dim")]])
 
 
 if __name__ == "__main__":
