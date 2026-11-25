@@ -62,17 +62,17 @@ class EditorColumnsTest(unittest.TestCase):
     def test_row_extras_flag_column(self):
         sp = types.SimpleNamespace(bucket="gba", groups={}, bundled={}, locked_from={}, surprise=set(), in_storage=set())
         work = {"costs": {"gba": {"gba/Mother 3 (Japan).zip": 2048}}}
-        out = cardedit._row_extras(sp, work, "gba/Mother 3 (Japan).zip", {}, False)
-        self.assertEqual(out[3], ("  \U0001F1EF\U0001F1F5", "dim"))
-        self.assertEqual(out[4], ("  " + cardedit.size_text(2048), "dim"))
-        out = cardedit._row_extras(sp, work, "gba/VitaShell.vpk", {}, False)
-        self.assertEqual(out[3], ("", "dim"))
-        self.assertEqual(len(out), 5)
+        out = cardedit._row_extras(sp, work, "gba/Mother 3 (Japan).zip")
+        self.assertEqual(out[2], ("  \U0001F1EF\U0001F1F5", "dim"))
+        self.assertEqual(out[3], ("  " + cardedit.size_text(2048), "dim"))
+        out = cardedit._row_extras(sp, work, "gba/VitaShell.vpk")
+        self.assertEqual(out[2], ("", "dim"))
+        self.assertEqual(len(out), 4)
 
     def test_full_system_row_flag_extras(self):
         key = "psx/Parappa (Japan).zip"
         system = {"bucket": "psx"}
-        picks = types.SimpleNamespace(cover=lambda: {})
+        picks = types.SimpleNamespace()
         seen = {}
 
         def fake(title, labels, **kw):
@@ -82,7 +82,7 @@ class EditorColumnsTest(unittest.TestCase):
                 mock.patch.object(cardedit.previews, "game_pane", return_value={}):
             cardedit._games_pass("t", [(system, key, "Parappa", "Parappa")], picks, {}, {}, {key: True}, {}, None,
                                  None, {})
-        self.assertEqual(seen["extras"], [[("", "dim")] * 3 + [("  \U0001F1EF\U0001F1F5", "dim"), ("", "")]])
+        self.assertEqual(seen["extras"], [[("", "dim")] * 2 + [("  \U0001F1EF\U0001F1F5", "dim"), ("", "")]])
 
     def test_variant_picker_flag_extras(self):
         picks = types.SimpleNamespace(

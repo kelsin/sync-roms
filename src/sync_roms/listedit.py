@@ -64,14 +64,7 @@ def file_counts(systems):
     return out
 
 
-def insert_game(games, game):
-    """Add game after the last game of its category, or at the end when its category is new (or it has none)."""
-    cat = game.get("category")
-    last = max((i for i, x in enumerate(games) if cat and x.get("category") == cat), default=len(games) - 1)
-    games.insert(last + 1, game)
-
-
-def reconcile(games, shown, category=""):
+def reconcile(games, shown):
     """A games list's games after the toggler changed `shown` (a view): drop what was switched off, add what was switched on.
 
     Entries of systems that weren't shown, and untouched entries, are kept as they are."""
@@ -80,9 +73,8 @@ def reconcile(games, shown, category=""):
     have = {g.get("bucket") for g in out}
     for key, (system, g) in now.items():
         if key not in have:
-            insert_game(out, {"title": g["title"], **({"category": category} if category else {}),
-                              "system": system, "bucket": key,  # then the entry's other fields: a note, files
-                              **{k: v for k, v in g.items() if k not in ("title", "category", "system", "bucket")}})
+            out.append({"title": g["title"], "system": system, "bucket": key,  # then the entry's other fields: a note, files
+                        **{k: v for k, v in g.items() if k not in ("title", "system", "bucket")}})
     return out
 
 
@@ -149,7 +141,7 @@ def add_from_tag(listing, shown, keys_of, label):
     tag = defs[ids[j]]
     games = [{"system": k.partition("/")[0], "bucket": k, **({"files": records[k]["files"]} if "files" in records[k] else {})}
              for k in games_of[ids[j]]]
-    rows = edit.set_rows({"games": games}, shown, lambda s: keys_of(s["bucket"]))
+    rows = edit.list_rows({"games": games}, shown, lambda s: keys_of(s["bucket"]))
     if not rows:
         edit.note(ui.yellow(f"ℹ️  {tag['emoji']} {tag['name']} has no games on known systems."))
         return
@@ -176,7 +168,7 @@ def game_line(game):
 
 
 def diff_lists(before, after):
-    """[(kind, id, [lines])] for every games list (set or collection) that was created, removed or changed; kind is new,
+    """[(kind, id, [lines])] for every games list (a collection) that was created, removed or changed; kind is new,
     removed or changed."""
     found = []
     for sid in sorted(set(before) | set(after)):
@@ -193,15 +185,10 @@ def diff_lists(before, after):
             new = {g["bucket"]: g for g in b["games"] if g.get("bucket")}
             lines += [f"+ {game_line(new[k])}" for k in new if k not in old]
             lines += [f"- {game_line(old[k])}" for k in old if k not in new]
-            lines += [f"~ {game_line(new[k])}: category {old[k].get('category') or 'none'} → {new[k].get('category') or 'none'}"
-                      for k in new if k in old and (old[k].get("category") or "") != (new[k].get("category") or "")]
             for k in new:
                 if k not in old:
                     continue
-                if (old[k].get("series") or "") != (new[k].get("series") or ""):
-                    lines.append(f"~ {game_line(new[k])}: series {old[k].get('series') or 'none'} → {new[k].get('series') or 'none'}")
-                other = sorted(f for f in set(old[k]) | set(new[k])
-                               if f not in ("category", "series") and old[k].get(f) != new[k].get(f))
+                other = sorted(f for f in set(old[k]) | set(new[k]) if old[k].get(f) != new[k].get(f))
                 if other:
                     lines.append(f"~ {game_line(new[k])}: {', '.join(other)} changed")
             if not lines and [g["bucket"] for g in a["games"] if g.get("bucket")] != [g["bucket"] for g in b["games"] if g.get("bucket")]:
@@ -221,7 +208,7 @@ def print_changes(found):
 # --- The collections menu -------------------------------------------------------------------
 
 def edit_menu(noun, before, working, state, emoji, art, delete_note, new_item, open_item, save, question, empty_ok=True):
-    """The menu of the games lists in working ({id: list}, before as loaded) for the set or collection editor (noun);
+    """The menu of the games lists in working ({id: list}, before as loaded) for the collection editor (noun);
     Done and Esc review the changes and ask question (save, keep editing or discard). state["review"] starts at that
     review and stays true until the user goes back to editing; when that review ends the editor, returns None.
     Returns the exit code.

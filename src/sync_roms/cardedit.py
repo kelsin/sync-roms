@@ -31,7 +31,7 @@ LIST_KEYS = [("Enter", "the system's games"), ("f", "full system: every file in 
              ("s", "every game across this card's systems with the tags picked first"), ("l", "collections on this card"),
              ("S", "settings menu: Surprise, theme, collections and RAOfflineProxy on or off, and the systems Surprise may use"),
              ("F", "guest card: a friend's card; syncs only copy ROMs, BIOS and scrapes (again to undo)"),
-             ("D", "clear every pick, full system and set from the card")]
+             ("D", "clear every pick and full system from the card")]
 KEEP_HINT = " · K keep"
 KEEP_KEYS = [("K", "pick every card file that matches a storage game")]
 TAGS_HELP = ("s", "narrow by tags: games with every ✅ tag and no 🚫 one")
@@ -381,7 +381,7 @@ def edit_card(name, setup=None, to_fetch=None, card_match=None, on_guest=None):
                         on_guest()
                 changed = ALL
             elif key == CLEAR_ALL_KEY:
-                if ui.confirm(f"🧹 Clear every pick, full system and set from {name}?", default=False):
+                if ui.confirm(f"🧹 Clear every pick and full system from {name}?", default=False):
                     store.update_card(name, games={}, **({"excluded": {}} if store.card_excluded(name) else {}))
                     changed = ALL
             continue
@@ -403,7 +403,7 @@ def keep_card_files(name, setup, systems, card_match):
             edit.note(ui.yellow(f"⚠️  Couldn't list {system['name']} in storage: {e}"))
             continue
         matched = card_match(system, list(sp.in_storage))
-        n = sp.keep(sorted(matched), picks.cover())
+        n = sp.keep(sorted(matched))
         added, touched = added + n, touched + bool(n)
     picks.save()
     edit.note(f"Picked {added} card file(s) in {touched} system(s).")
@@ -645,7 +645,7 @@ def _work_out(picks, shown, others, card_usages, to_fetch, variant=None):
     (others: their usage without BIOS, and those with something picked) and each shown SystemPicks' game costs.
     card_usages: as for edit_system. variant: the system bucket v just changed; when it is one of the others, its
     usage in card_usages is counted again."""
-    card = picks.card()  # with the picks, set references and exclusions as edited so far
+    card = picks.card()  # with the picks and exclusions as edited so far
     if card_usages is not None:
         for x in others:
             if x["bucket"] == variant:
@@ -673,22 +673,20 @@ def _status(work, now, capacity, to_fetch):
     return status_of(total, capacity, fetch, count=False)  # the whole card's file count says little here
 
 
-def _row_extras(sp, work, key, notes, state):
-    """A game row's columns: files, set note, lock, language flag, size (blank where it has none)."""
-    out = [("", "dim"), ("", "dim"), ("", "cyan"), languages.column(key), ("", "dim")]
+def _row_extras(sp, work, key):
+    """A game row's columns: files, lock, language flag, size (blank where it has none)."""
+    out = [("", "dim"), ("", "cyan"), languages.column(key), ("", "dim")]
     costs = work["costs"][sp.bucket]
     if key in sp.groups:
         out[0] = (f"  🔗 {len(sp.groups[key])} files", "dim")
     elif key in sp.bundled:
         out[0] = (f"  🔗 {len(sp.bundled[key]) + 1} files", "dim")
-    if key in notes:  # the note ends in the set's emoji and name (edit.cover_notes)
-        out[1] = (f"  {notes[key].split(': ', 1)[-1]}", "cyan" if state else "dim")
     if key in sp.locked_from:
-        out[2] = (f"  {surprise.LABEL if key in sp.surprise else sp.locked_from[key]}", "cyan")
+        out[1] = (f"  {surprise.LABEL if key in sp.surprise else sp.locked_from[key]}", "cyan")
     if key in costs:
-        out[4] = (f"  {size_text(costs[key])}", "dim")
+        out[3] = (f"  {size_text(costs[key])}", "dim")
     elif key in sp.in_storage:
-        out[4] = (f"  {SIZING}", "dim")
+        out[3] = (f"  {SIZING}", "dim")
     return out
 
 
@@ -735,8 +733,7 @@ def _games_pass(title, shown, picks, sps, files_of, start, work, capacity, to_fe
     switched with it}; start: {bucket key: synced} when the editor opened; work: _work_out's; place:
     picker.carry_place's, kept across passes; list_kw: filter_list's arguments each list sets itself (hint, hotkeys,
     key_help, filters, select_all). Returns filter_list's result."""
-    notes = picks.cover()
-    bases = {b: sp.states(notes) for b, sp in sps.items()}
+    bases = {b: sp.states() for b, sp in sps.items()}
     keys = [r[1] for r in shown]
     sp_of = [sps.get(r[0]["bucket"]) for r in shown]  # None on a full system
     base = {k: sp is None or bases[sp.bucket][k] for k, sp in zip(keys, sp_of)}
@@ -764,9 +761,9 @@ def _games_pass(title, shown, picks, sps, files_of, start, work, capacity, to_fe
         b = key.partition("/")[0]
         return bases[b].get(key, False) if b in bases else picks.on_card(key)
     tag_marks = tagui.column(keys)
-    extras = [(_row_extras(sp, work, k, notes, st) + [_variant_mark(picks, k, on_card)]
-               if sp else [("", "dim")] * 3 + [languages.column(k)]) + [tag]
-              for k, sp, st, tag in zip(keys, sp_of, session["sel"], tag_marks)]
+    extras = [(_row_extras(sp, work, k) + [_variant_mark(picks, k, on_card)]
+               if sp else [("", "dim")] * 2 + [languages.column(k)]) + [tag]
+              for k, sp, tag in zip(keys, sp_of, tag_marks)]
 
     def switched(state):
         """{system bucket: (keys, states)} of the rows this pass switched, each with its files."""
@@ -792,7 +789,7 @@ def _games_pass(title, shown, picks, sps, files_of, start, work, capacity, to_fe
 
     def apply(state):
         for b, (ks, ws) in switched(state).items():
-            sps[b].apply(ks, notes, bases[b], ws)
+            sps[b].apply(ks, bases[b], ws)
 
     try:
         result = picker.filter_list(
@@ -802,7 +799,7 @@ def _games_pass(title, shown, picks, sps, files_of, start, work, capacity, to_fe
             session=session, note_text=lambda i: edit.note_text(sp_of[i].games, keys[i]),
             on_note=lambda i, text: edit.save_note(
                 sp_of[i].games, keys[i], text,
-                covered=(keys[i] in notes or keys[i] in sp_of[i].collected) and keys[i] not in sp_of[i].excluded),
+                covered=keys[i] in sp_of[i].collected and keys[i] not in sp_of[i].excluded),
             **previews.game_pane(keys), links=links,
             locked=[sp is None or k in sp.surprise for k, sp in zip(keys, sp_of)],
             locked_note=[edit.FULL_SYSTEM_NOTE if sp is None else _locked_note(sp, k) for k, sp in zip(keys, sp_of)],
@@ -812,7 +809,7 @@ def _games_pass(title, shown, picks, sps, files_of, start, work, capacity, to_fe
         raise
     apply(session["sel"] if isinstance(result, tuple) else result)
     for b, (ks, ws) in hidden.items() if reverted else ():  # u at Esc's question: what the pass hid goes back too
-        sps[b].apply(ks, picks.cover(), sps[b].states(picks.cover()), ws)
+        sps[b].apply(ks, sps[b].states(), ws)
     return result
 
 
@@ -837,7 +834,7 @@ def edit_system(name, system, setup, to_fetch=None, card_usages=None):
     others = [x for x in can_play(store.repo_json("systems"), setup) if x["bucket"] != bucket]
     capacity = budget.card_capacity(card_entry(name, setup, cards))
     work = _work_out(picks, [sp], others, card_usages, to_fetch)
-    start = sp.states(picks.cover())
+    start = sp.states()
 
     place = {}  # picker.carry_place's: the last pass's row, filter text, view and scroll
     off_note = " · 🚫 off on this card" if bucket in store.systems_off(store.saved_card(name, cards)) else ""
@@ -846,7 +843,7 @@ def edit_system(name, system, setup, to_fetch=None, card_usages=None):
             kept = {r[1] for r in sp.rows if filters.keep(r[1])}
             shown = [r for r in sp.rows if r[1] in kept and sp.playlist_of.get(r[1]) not in kept]  # a shown playlist hides its discs
             result = _games_pass(
-                f"✏️  {system['name']} on {name} — ✅ synced, ⬜ not, 📦 from a set{off_note}", shown, picks, {bucket: sp}, {},
+                f"✏️  {system['name']} on {name} — ✅ synced, ⬜ not{off_note}", shown, picks, {bucket: sp}, {},
                 start, work, capacity, to_fetch, place, hint=GAMES_HINT, hotkeys=(*GameFilters.KEYS, VARIANT_KEY, tagui.TAG_KEY),
                 key_help=GAMES_KEYS, filters=filters.describe())
             if not isinstance(result, tuple):
@@ -899,7 +896,7 @@ def edit_set(name, game_set, setup, to_fetch=None, card_usages=None, all_games=F
         if s and key and key not in seen:
             seen.add(key)
             found.append((s, key, list(g.get("files", []))))
-    sps = {}  # {system bucket: SystemPicks} of the systems with set games, but full ones
+    sps = {}  # {system bucket: SystemPicks} of the systems with listed games, but full ones
     for s in {s["bucket"]: s for s, _, _ in found if not picks.full(s["bucket"])}.values():
         try:
             sps[s["bucket"]] = picks.system(s)
@@ -910,8 +907,8 @@ def edit_set(name, game_set, setup, to_fetch=None, card_usages=None, all_games=F
             if s["bucket"] not in sps or key in sps[s["bucket"]].titles and key in sps[s["bucket"]].in_storage]
     files_of = {key: files for _, key, files in kept}
     present = {k for key, files in files_of.items() for k in (key, *files)}  # the rest are left out: no warning
-    rows = edit.set_rows({"games": [g for g in game_set["games"] if g.get("bucket") in files_of]},
-                         playable, lambda _s: present)
+    rows = edit.list_rows({"games": [g for g in game_set["games"] if g.get("bucket") in files_of]},
+                          playable, lambda _s: present)
     if all_games:
         label_of = {g["bucket"]: g["label"] for g in game_set["games"]}
         rows = sorted(((s, key, title, f"{s['name']} — {label_of[key]}") for s, key, title, _ in rows),
@@ -927,7 +924,7 @@ def edit_set(name, game_set, setup, to_fetch=None, card_usages=None, all_games=F
     capacity = budget.card_capacity(card_entry(name, setup, cards))
     work = _work_out(picks, list(sps.values()), others, card_usages, to_fetch)
 
-    opened = {b: sp.states(picks.cover()) for b, sp in sps.items()}
+    opened = {b: sp.states() for b, sp in sps.items()}
     start = {key: s["bucket"] not in sps or opened[s["bucket"]][key] for s, key, _, _ in rows}
     place = {}  # picker.carry_place's: the last pass's row, filter text, view and scroll
     try:
@@ -936,13 +933,13 @@ def edit_set(name, game_set, setup, to_fetch=None, card_usages=None, all_games=F
             if all_games:
                 emoji, hint, hotkeys, key_help = "🌐", ALL_GAMES_HINT, (VARIANT_KEY, tagui.TAG_KEY, SET_KEY, CLEAR_KEY), ALL_GAMES_KEYS
                 filters = f"{tag_filter.describe()} (c clear filters)" if tag_filter.describe() else ""
-                origin = "📦 from a set"
+                origin = ""
             else:
                 emoji, hint, hotkeys, key_help = (themeart.collection_emoji(game_set), COLLECTION_GAMES_HINT,
                                                   (VARIANT_KEY, tagui.TAG_KEY), COLLECTION_GAMES_KEYS)
-                filters, origin = "", "💖 from a collection"
+                filters, origin = "", ", 💖 from a collection"
             result = _games_pass(
-                f"{emoji} {game_set['name']} on {name} — ✅ synced, ⬜ not, {origin}", shown, picks, sps, files_of,
+                f"{emoji} {game_set['name']} on {name} — ✅ synced, ⬜ not{origin}", shown, picks, sps, files_of,
                 start, work, capacity, to_fetch, place, hint=hint, hotkeys=hotkeys, key_help=key_help, filters=filters,
                 select_all=not all_games)
             if not isinstance(result, tuple):

@@ -72,7 +72,6 @@ class UnhonoredFlagsTest(Isolated):
                  (["config", "-n"], "config show"), (["config", "path", "-n"], "config path"),
                  (["doctor", "-n"], "doctor"), (["check", "--dry-run"], "check"), (["completion", "bash", "-n"], "completion"),
                  (["games", "list", "-n", "--card", "SD"], "games list"), (["games", "export", "-n", "--card", "SD"], "games export"),
-                 (["games", "sets", "list", "-n", "--card", "SD"], "games sets list"),
                  (["themes", "pick", "-n"], "themes pick"), (["themes", "build", "--out", "/nowhere", "-n"], "themes build"),
                  (["themes", "palettes", "--dry-run"], "themes palettes")]
         for argv, name in cases:
@@ -351,10 +350,10 @@ class QuietColorTest(unittest.TestCase):
         self.assertEqual((out.getvalue(), err.getvalue()), ("", "❌ x\n"))
 
     def test_report_commands_keep_their_output_under_quiet(self):
-        for argv in (["doctor"], ["config", "show"], ["cache"], ["games", "sets", "list"], ["cards", "list"]):
+        for argv in (["doctor"], ["config", "show"], ["cache"], ["cards", "list"]):
             with self.subTest(argv=argv):
                 self.assertTrue(cli.is_data_command(argv))
-        for argv in (["cache", "update"], ["games", "sets", "add"], ["config", "set"], ["upload"]):
+        for argv in (["cache", "update"], ["games", "add"], ["config", "set"], ["upload"]):
             with self.subTest(argv=argv):
                 self.assertFalse(cli.is_data_command(argv))
 

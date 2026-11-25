@@ -216,7 +216,7 @@ def apply_device_overlay(devices, systems, overlay):
         d["systems"] += [x for x in dict.fromkeys(change.get("add", [])) if x in known and x not in d["systems"]]
 
 
-SETS_KEY = "sets"  # reserved key in a games list: ids of whole game sets to sync
+LEGACY_SETS = "sets"  # a games list's old whole-set references: synced no more, dropped when the list is saved
 _warned = set()  # warnings already printed this run, so a menu redraw doesn't repeat them
 
 
@@ -233,7 +233,7 @@ def card_games(card, cards=None):
 
 
 def card_excluded(card, cards=None):
-    """Games a card opted out of, {system bucket: [bucket keys]}: dropped from what its sets sync there.
+    """Games a card opted out of, {system bucket: [bucket keys]}: dropped from what its collections sync there.
     cards: cards.json already loaded."""
     excluded = saved_card(card, cards).get("excluded")
     return excluded if isinstance(excluded, dict) else {}
@@ -315,62 +315,14 @@ def all_card_names(cards=None):
     return sorted(load_cards() if cards is None else cards)
 
 
-def list_sets(games):
-    """The set ids a games list references; anything that isn't a list of strings is ignored."""
-    ids = games.get(SETS_KEY, [])
-    if not isinstance(ids, list) or not all(isinstance(i, str) for i in ids):
-        if SETS_KEY not in _warned:
-            _warned.add(SETS_KEY)
-            print(f"warning: games: {SETS_KEY!r} must be a list of set ids, ignored (saving that list drops it)",
-                  file=sys.stderr)
-        return [i for i in ids if isinstance(i, str)] if isinstance(ids, list) else []
-    return ids
+def merge_lists(systems, lists):
+    """Set each system's games/full_system to the union of the games lists.
 
-
-def set_games(game_set):
-    """A set's games as {"title", "bucket", "system"} entries, with each game's extra files as entries of their own."""
-    out, seen = [], set()
-    for g in game_set["games"]:
-        for key in [g.get("bucket")] + list(g.get("files", [])):
-            if key and key not in seen:
-                seen.add(key)
-                title = g.get("title") if key == g.get("bucket") and g.get("title") else key_title(key)
-                out.append({"title": title, "bucket": key, "system": g.get("system")})
-    return out
-
-
-def variant_index(sets):
-    """The variants the sets give their games, both ways: (variants, parents).
-
-    variants is {canonical bucket key: [variant entries as in the file]} in file order, a variant listed once per
-    canonical game. parents is {variant bucket key: {"bucket", "system", "title"} of its canonical game}; the first
-    set to name a variant wins. Entries without variants or without a bucket are skipped.
+    A list is {system bucket: [games] | {"full_system": true}}. Games go in the order lists come, deduplicated by
+    bucket key.
     """
-    variants, parents = {}, {}
-    for s in sets:
-        for g in s["games"]:
-            key = g.get("bucket")
-            if not key or not g.get("variants"):
-                continue
-            have = variants.setdefault(key, [])
-            for v in g["variants"]:
-                if all(h["bucket"] != v["bucket"] for h in have):
-                    have.append(dict(v))
-                parents.setdefault(v["bucket"], {"bucket": key, "system": g.get("system"),
-                                                 "title": g.get("title") or key_title(key)})
-    return variants, parents
-
-
-def merge_lists(systems, lists, sets):
-    """Set each system's games/full_system to the union of the games lists and the sets they reference.
-
-    A list is {system bucket: [games] | {"full_system": true}, "sets": [set ids]}. Games go in the order
-    lists come, direct games before set games, deduplicated by bucket key.
-    """
-    by_id = {x["id"]: x for x in sets}
     for s in systems:
         s["games"], s["full_system"] = [], False
-    by_bucket = {s["bucket"]: s for s in systems}
 
     seen = {s["bucket"]: set() for s in systems}
 
@@ -388,47 +340,26 @@ def merge_lists(systems, lists, sets):
                 for g in entry:
                     if isinstance(g, dict):
                         add(s, g)
-    for raw in lists:
-        for set_id in list_sets(raw):
-            if set_id not in by_id:  # not in storage: skipped (load_manifest warns about it once per card)
-                continue
-            for g in set_games(by_id[set_id]):
-                if g["system"] in by_bucket:
-                    add(by_bucket[g["system"]], g)
     return systems
-
-
-def warn_unknown_sets(sets, cards):
-    """Warn, once per card per read of the sets, about the set ids a card references that aren't in storage. cards.json
-    is never changed: the storage cache may just not list a set another machine added yet."""
-    known = {x["id"] for x in sets}
-    for n in all_card_names(cards):
-        unknown = [i for i in list_sets(card_games(n, cards)) if i not in known]
-        if unknown and n not in _warned_cards:
-            _warned_cards.add(n)
-            ui.warn(f"card {n}: sets that aren't in storage (run `{inventory.UPDATE_HINT}` if another machine added "
-                    f"them): {', '.join(unknown)}")
 
 
 def load_catalog():
     """Layouts, systems and devices from the repo with the device-system overlay applied. Read-only: no seeding,
-    no games, sets or cards, nothing pruned or rewritten."""
+    no games or cards, nothing pruned or rewritten."""
     catalog = {name: repo_json(name) for name in ("layouts", "systems", "devices")}
     apply_device_overlay(catalog["devices"], catalog["systems"], load_overlay())
     return catalog
 
 
 def load_manifest(card_names=(), keep_off=False):
-    """Systems, devices and layouts from the repo, joined with the games of the named cards (their picks, set
-    references and full systems, plus the games of their collections and, with Surprise on, their current
-    surprises) and the device-system overlay. No cards means no games. A one-card manifest empties the card's
-    systems_off, unless keep_off."""
-    sets = load_sets()
+    """Systems, devices and layouts from the repo, joined with the games of the named cards (their picks and full
+    systems, plus the games of their collections and, with Surprise on, their current surprises) and the
+    device-system overlay. No cards means no games. A one-card manifest empties the card's systems_off, unless
+    keep_off."""
     cards = load_cards()
-    warn_unknown_sets(sets, cards)
     manifest = {name: repo_json(name) for name in ("layouts", "systems", "devices")}
     lists = [card_games(n, cards) for n in card_names]
-    merge_lists(manifest["systems"], lists, sets)
+    merge_lists(manifest["systems"], lists)
     if len(card_names) == 1:
         excluded = card_excluded(card_names[0], cards)
         for s in manifest["systems"]:
@@ -591,11 +522,12 @@ def set_text(game_set):
     return json.dumps(set_data(game_set), indent=2, ensure_ascii=False) + "\n"
 
 
+# The old game sets in storage, read (and written) only by `check`, bbs and the update-variants skill until those move
+# to tags; nothing syncs them.
 SETS = "sets/"  # storage folder of the game sets, one sets/<id>.json each
 _sets_lock = threading.RLock()  # editors read the sets from several threads
 _sets = None  # JSON text of the sets read from storage this run, in file-name order (json.loads of it is faster than
 # deep-copying the parse, and load_sets is called many times a run); None until read
-_warned_cards = set()  # cards already warned about this read of the sets (warn_unknown_sets)
 _skipped = []  # keys of the files in sets/ this read skipped as not being sets (skipped_sets)
 _fallback = False  # whether this read used local copies because storage couldn't be listed or checked
 
@@ -695,7 +627,6 @@ def reset_sets():
     with _sets_lock:
         _sets = None
         _fallback = False
-        _warned_cards.clear()
         _skipped.clear()
 
 
@@ -747,9 +678,7 @@ def load_sets():
 
     Each file is {"name", "description" (optional), "art" (optional, an art.json id), "games": [{"title", "system",
     "bucket", "files" (optional)}]}; its id is its file name.
-    "category" (optional) groups games in the set editor.
-    "series" (optional) names the game's series (one of data/series.json), to narrow the editors to it.
-    "files" are extra bucket keys (e.g. the discs of a multi-disc game) toggled together with "bucket".
+    "files" are extra bucket keys (e.g. the discs of a multi-disc game).
     """
     return sorted(set_files(), key=lambda x: sort_key(x["name"]))
 
@@ -758,13 +687,6 @@ def write_set(set_id, game_set):
     """Put a set's file in storage (and its local copy); the sets are read again on next use."""
     from . import shared  # imported here: shared uses this module
     shared.write(SETS + set_id + ".json", set_text(game_set))
-    reset_sets()
-
-
-def delete_set(set_id):
-    """Delete a set's file from storage (and its local copy); the sets are read again on next use."""
-    from . import shared  # imported here: shared uses this module
-    shared.delete(SETS + set_id + ".json")
     reset_sets()
 
 
@@ -785,13 +707,11 @@ def sort_games(games):
 
 
 def sorted_list(raw):
-    """A games list with systems sorted ("sets" last), each system's games by bucket key and set ids alphabetical."""
+    """A games list with systems sorted, each system's games by bucket key, without old set references."""
     out = {}
-    for key in sorted(raw, key=lambda k: (k == SETS_KEY, k)):
+    for key in sorted(k for k in raw if k != LEGACY_SETS):
         entry = raw[key]
-        if key == SETS_KEY and isinstance(entry, list):
-            entry = sorted(entry, key=str)
-        elif isinstance(entry, list) and all(isinstance(g, dict) for g in entry):
+        if isinstance(entry, list) and all(isinstance(g, dict) for g in entry):
             entry = sort_games(entry)
         out[key] = entry
     return out

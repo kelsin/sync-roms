@@ -59,7 +59,7 @@ def edit_one(collection, systems, keys_of):
         pos = i
         shown = view(collection, systems)
         if i == 0:
-            rows = edit.set_rows(collection, shown, lambda s: keys_of(s["bucket"]))
+            rows = edit.list_rows(collection, shown, lambda s: keys_of(s["bucket"]))
             if not rows:
                 edit.note(ui.yellow("ℹ️  This collection has no games yet."))
                 continue

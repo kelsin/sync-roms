@@ -1,4 +1,4 @@
-"""Scriptable subcommands: sync, edit, devices, upload, diff, playlist, prepare, install, mirror, games, sets, collections, themes,
+"""Scriptable subcommands: sync, edit, devices, upload, diff, playlist, prepare, install, mirror, games, collections, themes,
 download, flash, format, unmount, mount, cards, saves, layouts, cache, config, doctor, guide, check, scrape and completion; plus helpers the
 sync flow uses."""
 import argparse
@@ -179,14 +179,11 @@ def game_entries(raw):
 def games_list(args):
     raw, _ = load_target(args.card)
     full = sorted(k for k, v in raw.items() if isinstance(v, dict) and v.get("full_system"))
-    sets = store.list_sets(raw)
     entries = game_entries(raw)
     if args.json:
-        ui.emit_json({"full_systems": full, "sets": sets,
-                      "games": [{"system": s, "bucket": k, "title": t} for s, k, t in entries]})
+        ui.emit_json({"full_systems": full, "games": [{"system": s, "bucket": k, "title": t} for s, k, t in entries]})
         return 0
-    ui.table([(s, "*", "(full system)") for s in full] + [("sets", i, "(whole set)") for i in sets]
-             + [(s, k, t) for s, k, t in entries])
+    ui.table([(s, "*", "(full system)") for s in full] + [(s, k, t) for s, k, t in entries])
     return 0
 
 
@@ -279,32 +276,6 @@ def games_full(args):
         else:
             del raw[args.system]
         return finish(args, raw, save, [("-", f"{args.system} (full system)")])
-    return finish(args, raw, save, [])
-
-
-def games_sets(args):
-    raw, save = load_target(args.card)
-    known = {x["id"]: x for x in store.load_sets()}
-    if args.verb == "list":
-        on = store.list_sets(raw)
-        ui.table([(f"{'✅' if set_id in on else '⬜'} {set_id}", f"{themeart.set_emoji(x)} {x['name']}") for set_id, x in known.items()])
-        return 0
-    if not args.set_id:
-        ui.fail(f"sets {args.verb} needs a set id. Known: {', '.join(known)}", 2)
-    on = list(store.list_sets(raw))
-    if args.set_id not in known and not (args.verb == "remove" and args.set_id in on):  # a card may name a gone set
-        ui.fail(f"Unknown set {args.set_id!r} (run `{inventory.UPDATE_HINT}` if another machine added it). "
-                f"Known: {', '.join(known)}", 2)
-    if args.verb == "add" and args.set_id not in on:
-        raw[store.SETS_KEY] = on + [args.set_id]
-        return finish(args, raw, save, [("+", f"set {args.set_id}")])
-    if args.verb == "remove" and args.set_id in on:
-        on.remove(args.set_id)
-        if on:
-            raw[store.SETS_KEY] = on
-        else:
-            raw.pop(store.SETS_KEY, None)
-        return finish(args, raw, save, [("-", f"set {args.set_id}")])
     return finish(args, raw, save, [])
 
 
@@ -611,7 +582,7 @@ def cards_copy(args):
     dst_synced = {s["bucket"]: set(store.listed(s)) for s in store.load_manifest([args.dst], keep_off=True)["systems"]}
     cards = store.load_cards()
     entry, counts, skipped = cardshare.copy_selections(cards[args.src], cards[args.dst], playable, dst_synced)
-    shown = f"{counts['games']} games, {counts['full']} full systems, {counts['sets']} sets, {counts['collections']} collections, {counts['excluded']} exclusions"
+    shown = f"{counts['games']} games, {counts['full']} full systems, {counts['collections']} collections, {counts['excluded']} exclusions"
     if args.dry_run:
         print(ui.yellow(f"🧪 Would copy from {args.src} to {args.dst}: {shown}"))
     else:
@@ -861,8 +832,6 @@ def check_game_data(problems, data, where, systems):
             problems.append(f"{where}: {g['bucket']}: missing 'title'")
         if not isinstance(g.get("category", ""), str):
             problems.append(f"{where}: {g['bucket']}: 'category' must be a string")
-        if not isinstance(g.get("series", ""), str):
-            problems.append(f"{where}: {g['bucket']}: 'series' must be a string")
         listed += check_keys(problems, where, system, g)
     return listed
 
@@ -1007,7 +976,7 @@ def check_data(list_keys=None, repo_systems=None):
             problems.append(f"{where}: must be an object")
             return
         for key, entry in raw.items():
-            if key == store.SETS_KEY:
+            if key == store.LEGACY_SETS:
                 if not isinstance(entry, list) or not all(isinstance(i, str) for i in entry):
                     problems.append(f"{where}: 'sets' must be a list of set ids")
                 else:
@@ -1717,8 +1686,6 @@ def build_parser():
     p = gsub.add_parser("add", allow_abbrev=False); common(p); p.add_argument("system"); p.add_argument("keys", nargs="+"); p.set_defaults(fn=games_add)
     p = gsub.add_parser("remove", allow_abbrev=False); common(p); p.add_argument("system"); p.add_argument("keys", nargs="+"); p.set_defaults(fn=games_remove)
     p = gsub.add_parser("full", allow_abbrev=False); common(p); p.add_argument("system"); p.add_argument("state", choices=["on", "off"]); p.set_defaults(fn=games_full)
-    p = gsub.add_parser("sets", aliases=["set"], allow_abbrev=False); common(p); p.add_argument("verb", choices=["list", "add", "remove"])
-    p.add_argument("set_id", nargs="?"); p.set_defaults(fn=games_sets)
     p = gsub.add_parser("export", allow_abbrev=False); common(p); p.set_defaults(fn=games_export)
     p = gsub.add_parser("import", allow_abbrev=False); common(p); p.add_argument("file"); p.set_defaults(fn=games_import)
 
@@ -1823,7 +1790,7 @@ def run(argv):
     args = ap.parse_args(argv)
     if getattr(args, "dry_run", False) and not (args.fn is config_cmd and args.action == "apply") and (args.fn in (games_list, games_export, layouts_cmd, config_cmd, cache_cmd, doctor_cmd, guide_cmd, check_cmd, completion_cmd, themes_pick, themes_build, themes_palettes,
                                                           edit_cmd, install_cmd, devices_cmd, diff_cmd, scrape_review_cmd, scrape_missing_cmd, refresh_cmd)
-                                            or (args.fn is games_sets and args.verb == "list") or (args.fn is mirror_cmd and args.action == "clear")):
+                                            or (args.fn is mirror_cmd and args.action == "clear")):
         name = " ".join(w for w in (args.command, getattr(args, "action", None), getattr(args, "verb", None)) if w)
         if args.fn is config_cmd and args.action in ("set", "unset"):
             ui.fail(f"--dry-run can't preview `{name}`: run it without --dry-run to change settings.json", 2)

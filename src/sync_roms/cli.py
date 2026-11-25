@@ -28,7 +28,7 @@ def canonical(word):
 SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "sync": ("[CARD]", "download the ROMs, BIOS and scraped data for a card (this is what plain `sync-roms CARD` does)"),
     "edit": ("", "interactive editor: cards, tags, collections, device systems"),
-    "games": ("list|add|remove|full|sets|export|import", "edit a card's games, interactively or from scripts"),
+    "games": ("list|add|remove|full|export|import", "edit a card's games, interactively or from scripts"),
     "tags": ("edit", "edit the tags in storage by hand: their games, names, emoji, art, merging and deleting"),
     "collections": ("edit", "edit your collections of favourite games (saved in ~/.sync-roms/collections/)"),
     "themes": ("update|pick|build|publish|palettes", "copy the latest Art Book Next for ES-DE and the PyUI themes for spruce from GitHub into storage; build and publish custom spruce themes"),
@@ -114,7 +114,6 @@ TOPICS = {
       KEY: file name, SYSTEM/file key, or a glob like 'Mario*'
   sync-roms games remove SYSTEM KEY... --card NAME [-n]
   sync-roms games full SYSTEM on|off --card NAME [-n]
-  sync-roms games sets list | add ID | remove ID --card NAME [-n]
   sync-roms games export --card NAME        one SYSTEM/file per line (full systems as 'SYSTEM/*'),
                                             then '@collections ID', '@frontend_collections NAME',
                                             '@drivers NAME', '@pico8 ZIP', '@surprise true|false'
@@ -145,7 +144,7 @@ TOPICS = {
     "collections": """
   sync-roms collections edit                  edit your collections of favourite games
 
-  Your own lists of games (like a set, but personal), saved to ~/.sync-roms/collections/<id>.json
+  Your own lists of games, saved to ~/.sync-roms/collections/<id>.json
   after Done or Esc shows the changes; Quit discards. No git or gh needed, and nothing goes to
   storage or the repo. Deleting a collection that cards use asks first,
   then removes it from them (the file is kept as <id>.json.bak). In a card's system list, l adds a
@@ -214,7 +213,7 @@ TOPICS = {
   and asks once (write profile; without a terminal it needs --yes). Each cart goes to
   pico8/<BBS file name> with its title and author in scrapes/pico8/metadata.json. An upgrade
   removes the old revision, moves its metadata and scraped media to the new name and points your
-  cards, Surprise history and collections at it; sets that name the old file are listed.
+  cards, Surprise history and collections at it.
   Carts in ignored.json are skipped.
   Requests go one at a time; the first HTTP error stops it, keeping what was added.
 """,
@@ -270,7 +269,7 @@ TOPICS = {
   put back in.
 """,
     "edit": """
-  sync-roms edit                              main menu: Cards, Sets (saved to storage),
+  sync-roms edit                              main menu: Cards, Tags (saved to storage),
                                               Collections, Device systems
 
   ? in any list shows all its keys. In a card's system list: Enter opens a system's games, f makes
@@ -294,7 +293,7 @@ TOPICS = {
   sync-roms cards clean [CARD] [--dry-run] [--yes]
       delete the media other layouts' scrapes left in the card's ROM folders
   sync-roms cards delete NAME [--yes]
-  sync-roms cards copy SRC DST                merge SRC's games, sets, excluded and collections into
+  sync-roms cards copy SRC DST                merge SRC's games, excluded and collections into
                                               DST (not surprises); skips systems DST can't play
   sync-roms cards export FILE [--yes]         surprises and collections go into the file as plain
                                               games; asks before overwriting FILE (--yes overwrites;
@@ -429,8 +428,7 @@ TOPICS = {
   --retry            also look up the ROMs ScreenScraper didn't know before (ROMs whose lookup
                      failed are always tried again; non-games never are: see review) and, with
                      --fill-media, the media it didn't offer
-  --all              every ROM in the storage, not just those your cards list (games, sets, full
-                     systems)
+  --all              every ROM in the storage, not just those your cards list (games, full systems)
   --fill-media       also scrape ROMs that have metadata but lack some media type in storage; their
                      existing metadata is kept. Types ScreenScraper didn't offer for a ROM are
                      remembered and not asked for again until --retry
@@ -797,7 +795,7 @@ LEAD_FLAGS = {"-n", "--dry-run", "-y", "--yes", "-a", "--ask", "--json"}  # flag
 
 GLOBAL_VALUE_FLAGS = {"--profile": "profile", "--write-profile": "write_profile", "--bucket": "bucket", "--root": "root", "--endpoint": "endpoint"}
 DATA_COMMANDS = {("devices",), ("layouts",), ("completion",), ("games", "list"), ("games", "export"), ("cards", "list"), ("config", "path"),
-                 ("config", "show"), ("doctor",), ("games", "sets", "list")}
+                 ("config", "show"), ("doctor",)}
 
 
 def extract_globals(argv):
@@ -829,8 +827,6 @@ def is_data_command(argv):
     """Whether the command's stdout is its result (so --quiet must not discard it)."""
     words = tuple(a for a in argv if not a.startswith("-"))
     words = tuple(canonical(w) for w in words[:1]) + words[1:]
-    if words[:2] == ("games", "set"):
-        words = ("games", "sets", *words[2:])
     return words in (("cards",), ("cache",)) or any(words[:len(d)] == d for d in DATA_COMMANDS)
 
 

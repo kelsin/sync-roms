@@ -155,7 +155,7 @@ class Flow(DataDir):
                       "gb/": {"gb/Red.gb": 2}}
         self.cache = {}
         self.folders = {"gba", "gb", "psx"}
-        for target, attrs in ((store, {"load_catalog": lambda: CATALOG, "load_sets": lambda: [SET],
+        for target, attrs in ((store, {"load_catalog": lambda: CATALOG,
                                        "repo_json": lambda name: CATALOG[name],
                                        "recommended_systems": lambda device, systems: set()}),
                               (s3, {"list_sizes": lambda prefix, sizes=True: self.files.get(prefix, {}),
@@ -917,7 +917,7 @@ class Flow(DataDir):
         self.assertEqual(store.saved_card("c")["systems_off"], ["gba"])
 
     def test_clear_all_hotkey_empties_the_card_after_confirming(self):
-        entry = {"games": {"gba": [g("gba/Ruby.zip")], "gb": {"full_system": True}, "sets": ["pk"]},
+        entry = {"games": {"gba": [g("gba/Ruby.zip")], "gb": {"full_system": True}},
                  "excluded": {"gba": ["gba/Ruby.zip"]}}
         for answer, want in ((False, entry["games"]), (True, {})):
             self.card(**entry)
@@ -960,22 +960,18 @@ class Flow(DataDir):
         self.assertEqual(self.read("cards.json"), before)
         self.assertFalse(os.path.exists(self.path("cards.json.bak")))
 
-    def test_set_games_are_marked_and_switching_one_off_excludes_it(self):
+    def test_old_set_references_put_nothing_on_and_saving_drops_them(self):
         self.card(games={"sets": ["pk"]})
-        changed, calls = self.run_system(toggle("Ruby.zip"))
-        _, labels, kw = calls[0]
-        self.assertEqual(kw["initial"], [False, True, True, False])
-        self.assertEqual(kw["extras"][labels.index("Ruby.zip")][1], ("  📦 Pokemon", "cyan"))
+        changed, calls = self.run_system(toggle("Zelda.zip"))
+        self.assertEqual(calls[0][2]["initial"], [False, False, False, False])
         self.assertTrue(changed)
-        entry = self.read("cards.json")["c"]
-        self.assertEqual(entry["excluded"], {"gba": ["gba/Ruby.zip"]})
-        self.assertEqual(entry["games"], {"sets": ["pk"]})
+        self.assertEqual(self.read("cards.json")["c"]["games"], {"gba": [g("gba/Zelda.zip")]})
+        self.assertNotIn("📦", calls[0][0])
 
     def with_variants(self, *variants):
-        """Sets with a "vs" set whose gba/Ruby.zip has the given variants."""
-        vset = {"id": "vs", "name": "Variants", "description": "", "games": [
-            {"system": "gba", "bucket": "gba/Ruby.zip", "variants": list(variants)}]}
-        self.enterContext(mock.patch.object(store, "load_sets", return_value=[SET, vset]))
+        """tags.json with gba/Ruby.zip tagged and given the variants."""
+        storage_tags(self, {"tags": {"pk": {"name": "Pokemon", "emoji": "🔴"}}, "declined": {},
+                            "games": {"gba/Ruby.zip": {"tags": ["pk"], "variants": list(variants)}}})
 
     RED = {"bucket": "gb/Red.gb", "note": "GB: the original"}
 
@@ -1016,8 +1012,7 @@ class Flow(DataDir):
 
     def test_a_game_with_its_variant_on_the_card_is_marked_in_the_list(self):
         self.with_variants(self.RED)
-        self.card(games={"gba": [g("gba/Zelda.zip")], "psx": [g("psx/x.chd")], "sets": ["vs"]},
-                  excluded={"gba": ["gba/Ruby.zip"]})
+        self.card(games={"gba": [g("gba/Zelda.zip")], "psx": [g("psx/x.chd")]}, excluded={"gba": ["gba/Ruby.zip"]})
 
         def press_v(labels, kw):
             self.assertEqual(kw["extras"][labels.index("Ruby.zip")][-2][0], "")
@@ -1031,8 +1026,7 @@ class Flow(DataDir):
 
     def test_v_adds_the_variant_on_its_own_system_and_saves(self):
         self.with_variants(self.RED)
-        self.card(games={"gba": [g("gba/Zelda.zip")], "psx": [g("psx/x.chd")], "sets": ["vs"]},
-                  excluded={"gba": ["gba/Ruby.zip"]})
+        self.card(games={"gba": [g("gba/Zelda.zip")], "psx": [g("psx/x.chd")]}, excluded={"gba": ["gba/Ruby.zip"]})
 
         def press_v(labels, kw):
             return (cardedit.VARIANT_KEY, labels.index("Ruby.zip"))
@@ -1043,7 +1037,7 @@ class Flow(DataDir):
         changed, _ = self.run_system(press_v, now_on)
         self.assertTrue(changed)
         self.assertEqual(store.card_games("c"), {"gba": [g("gba/Zelda.zip")], "gb": [g("gb/Red.gb")],
-                                                 "psx": [g("psx/x.chd")], "sets": ["vs"]})
+                                                 "psx": [g("psx/x.chd")]})
         self.assertEqual(store.card_excluded("c"), {"gba": ["gba/Ruby.zip"]})
 
     def test_v_counts_the_variant_in_the_status(self):
@@ -1075,7 +1069,7 @@ class Flow(DataDir):
             self.assertTrue(kw["row_note"](labels.index("Ruby.zip")).endswith("✅ on the card (v removes it)"))
             return kw["session"]["sel"]
         self.run_system(off_then_v, now_on)
-        self.assertEqual(store.card_games("c"), {"gb": [g("gb/Red.gb")], "sets": ["pk"]})
+        self.assertEqual(store.card_games("c"), {"gb": [g("gb/Red.gb")]})  # the old set reference dropped
         self.assertEqual(store.card_excluded("c"), {"gba": ["gba/Zelda.zip"]})
 
     def test_v_adds_a_variants_files_with_it(self):
@@ -1110,14 +1104,14 @@ class Flow(DataDir):
         self.run_system(press_v, lambda labels, kw: kw["session"]["sel"])
         self.assertEqual(store.card_games("c"), {"gba": [g("gba/Emerald.zip")]})
 
-    def test_v_leaves_a_full_system_or_set_covered_variant_alone(self):
+    def test_v_leaves_a_full_system_variant_alone(self):
         self.with_variants(self.RED)
         press_v = lambda labels, kw: (cardedit.VARIANT_KEY, labels.index("Ruby.zip"))  # noqa: E731
 
         def on_then_enter(labels, kw):
             self.assertTrue(kw["row_note"](labels.index("Ruby.zip")).endswith("✅ on the card (v removes it)"))
             return kw["session"]["sel"]
-        for games in ({"gb": {"full_system": True}}, {"sets": ["pk"]}):
+        for games in ({"gb": {"full_system": True}},):
             self.card(games=games)
             before = self.read("cards.json")
             self.run_system(press_v, on_then_enter)
@@ -1404,12 +1398,13 @@ class Flow(DataDir):
     def initial_of(self, kw, labels, name):
         return kw["initial"][labels.index(name)]
 
-    def test_switching_on_an_excluded_set_game_drops_the_exclusion_only(self):
-        self.card(games={"sets": ["pk"]}, excluded={"gba": ["gba/Ruby.zip"]})
+    def test_switching_on_an_excluded_collection_game_drops_the_exclusion_only(self):
+        self.favs()
+        self.card(collections=["favs"], excluded={"gba": ["gba/Ruby.zip"]})
         _, calls = self.run_system(toggle("Ruby.zip"))
         self.assertFalse(self.initial_of(calls[0][2], calls[0][1], "Ruby.zip"))
         entry = self.read("cards.json")["c"]
-        self.assertEqual(entry["games"], {"sets": ["pk"]})  # the set syncs it: no direct pick
+        self.assertEqual(entry.get("games", {}), {})  # the collection syncs it: no direct pick
         self.assertNotIn("gba", entry.get("excluded", {}))
 
     def test_an_excluded_direct_pick_shows_off_as_sync_skips_it_and_on_clears_it(self):
@@ -1493,10 +1488,10 @@ class Flow(DataDir):
             "toggle a collection on": ({}, [returns((cardedit.COLLECTIONS_KEY, 0)), returns((" ", 0)), returns(None)]),
             "toggle a collection off": ({"collections": ["favs"], "games": {"gba": [g("gba/Zelda.zip")]}},
                                         [returns((cardedit.COLLECTIONS_KEY, 0)), returns((" ", 0)), returns(None)]),
-            "clear all": ({"games": {"gba": [g("gba/Ruby.zip")], "gb": {"full_system": True}, "sets": ["pk"]},
+            "clear all": ({"games": {"gba": [g("gba/Ruby.zip")], "gb": {"full_system": True}},
                            "excluded": {"gba": ["gba/Ruby.sav"]}}, [returns((cardedit.CLEAR_ALL_KEY, 0))]),
             "surprise off": ({"surprises": zelda}, [returns((cardedit.SETTINGS_KEY, 0)), returns(0), returns(None)]),
-            "exclude a set game": ({"games": {"sets": ["pk"]}}, [returns(1), game_view_is_fresh(toggle("Ruby.zip"))]),
+            "exclude a collection game": ({"collections": ["favs"]}, [returns(1), game_view_is_fresh(toggle("Ruby.zip"))]),
         }
         for case, (entry, steps) in cases.items():
             with self.subTest(case), mock.patch.object(ui, "confirm", return_value=True), self.workers_run_at_once():
@@ -1813,8 +1808,9 @@ class SetFlow(Flow):
         self.assertEqual({x["bucket"] for x in games["gba"]}, {"gba/Ruby.zip", "gba/Ruby.sav"})
         self.assertNotIn("gb", games)
 
-    def test_switching_off_a_set_reference_game_excludes_it(self):
-        self.card(games={store.SETS_KEY: ["pk"]})
+    def test_switching_off_a_collection_game_excludes_it(self):
+        self.favs()
+        self.card(collections=["favs"])
 
         def step(labels, kw):
             self.assertTrue(kw["initial"][0])
@@ -1941,8 +1937,9 @@ class SetFlow(Flow):
         self.assertEqual(self.read("cards.json")["c"]["games"]["gba"],
                          [{**g("gba/Ruby.sav")}, {**g("gba/Ruby.zip"), "note": "best one"}])
 
-    def test_w_on_a_game_that_comes_from_a_set_says_notes_go_only_on_direct_picks(self):
-        self.card(games={"sets": ["pk"]})
+    def test_w_on_a_game_that_comes_from_a_collection_says_notes_go_only_on_direct_picks(self):
+        self.favs()
+        self.card(collections=["favs"])
         answers = []
 
         def step(labels, kw):
@@ -1950,11 +1947,10 @@ class SetFlow(Flow):
             return kw["session"]["sel"]
         self.run_set(step)
         self.assertIn("directly", answers[0])
-        self.assertIn("set or collection", answers[0])
+        self.assertIn("from a collection", answers[0])
 
     def test_v_adds_the_variant_to_the_card(self):
-        vset = {**SET, "games": [{**SET["games"][0], "variants": [{"bucket": "gba/Emerald.zip", "note": "more"}]},
-                                 SET["games"][1]]}
+        self.with_variants({"bucket": "gba/Emerald.zip", "note": "more"})
         self.card()
 
         def press_v(labels, kw):
@@ -1963,8 +1959,7 @@ class SetFlow(Flow):
         def now_on(labels, kw):
             self.assertTrue(kw["row_note"](labels.index("Game Boy Advance — Ruby")).endswith("✅ on the card (v removes it)"))
             return kw["session"]["sel"]
-        with mock.patch.object(store, "load_sets", return_value=[vset]):
-            changed, _ = self.run_set(press_v, now_on, game_set=vset)
+        changed, _ = self.run_set(press_v, now_on)
         self.assertTrue(changed)
         self.assertEqual(store.card_games("c"), {"gba": [g("gba/Emerald.zip")]})
 
@@ -1987,13 +1982,14 @@ class SetFlow(Flow):
         self.assertEqual(seen, [self.fresh(count=False)[0]])
 
     def test_one_pass_changes_two_systems(self):
-        self.card(games={"gba": [g("gba/Zelda.zip")], store.SETS_KEY: ["pk"]}, excluded={"gba": ["gba/Ruby.zip"]})
+        self.favs()
+        self.card(games={"gba": [g("gba/Zelda.zip")]}, collections=["favs"], excluded={"gba": ["gba/Ruby.zip"]})
 
         def step(labels, kw):
             self.assertEqual(kw["initial"], [True, False])
             return toggle("Game Boy — Red", "Game Boy Advance — Ruby")(labels, kw)
         self.assertTrue(self.run_set(step)[0])
-        self.assertEqual(store.card_games("c"), {"gba": [g("gba/Zelda.zip")], store.SETS_KEY: ["pk"]})
+        self.assertEqual(store.card_games("c"), {"gba": [g("gba/Ruby.sav"), g("gba/Zelda.zip")]})  # the save switched with Ruby
         self.assertEqual(store.card_excluded("c"), {"gb": ["gb/Red.gb"]})
 
     def test_a_vita_dlc_in_the_set_is_not_a_row(self):
@@ -2031,7 +2027,7 @@ class SetFlow(Flow):
         _, calls = self.run_all(lambda labels, kw: kw["session"]["sel"])
         title, labels, kw = calls[0]
         self.assertEqual(labels, self.ALL_LABELS)
-        self.assertEqual(title, "🌐 All games on c — ✅ synced, ⬜ not, 📦 from a set")
+        self.assertEqual(title, "🌐 All games on c — ✅ synced, ⬜ not")
         self.assertEqual(kw["hotkeys"], (cardedit.VARIANT_KEY, "t", cardedit.SET_KEY, cardedit.CLEAR_KEY))
         self.assertIs(kw["select_all"], False)
 
@@ -2126,7 +2122,6 @@ class SetupChange(DataDir):
         device = {**DEVICE, "systems": ["gba"]}
         with mock.patch.object(store, "repo_json", side_effect=lambda name: [dict(s) for s in CATALOG[name]]), \
                 mock.patch.object(store, "load_manifest", return_value=CATALOG), \
-                mock.patch.object(store, "load_sets", return_value=[]), \
                 mock.patch.object(picker, "filter_list", side_effect=lambda *a, **k: next(picks)), \
                 mock.patch.object(picker, "choose_setup", return_value=(device, "esde")), \
                 mock.patch.object(ui, "choose", return_value="s"), \
@@ -2142,7 +2137,6 @@ class SetupChange(DataDir):
         out = io.StringIO()
         with mock.patch.object(store, "repo_json", side_effect=lambda name: [dict(s) for s in CATALOG[name]]), \
                 mock.patch.object(store, "load_manifest", return_value=CATALOG), \
-                mock.patch.object(store, "load_sets", return_value=[]), \
                 mock.patch.object(picker, "filter_list", side_effect=lambda *a, **k: next(picks)), \
                 mock.patch.object(picker, "choose_setup", return_value=({**DEVICE, "systems": ["gba"]}, "esde")), \
                 mock.patch.object(ui, "choose", return_value="d"), \

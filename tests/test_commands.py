@@ -190,7 +190,7 @@ class GamesTest(CardCmd):
         self.assertEqual(self.run_cmd("games", "full", "gba", "on")[1].strip(), "Nothing to change.")
         self.assertEqual(self.games()["gba"], {"full_system": True, "games": listed})
         self.assertEqual(json.loads(self.run_cmd("games", "list", "--json")[1]),
-                         {"full_systems": ["gba"], "sets": [], "games": []})
+                         {"full_systems": ["gba"], "games": []})
         self.run_cmd("games", "full", "gba", "off", "--dry-run")
         self.assertEqual(self.games()["gba"], {"full_system": True, "games": listed})
         code, out, _ = self.run_cmd("games", "full", "gba", "off")
@@ -341,14 +341,16 @@ class GamesTest(CardCmd):
         self.assertEqual(self.read("cards.json")["SD"]["games"]["gba"][0]["bucket"], "gba/A.zip")
         self.assertEqual(self.read("cards.json")["SD"]["layout"], "esde")
 
-    def test_sets_add_remove(self):
-        storage_sets(self, {"mix": {"name": "Mix", "games": [{"title": "A", "system": "gba", "bucket": "gba/A.zip"}]}})
-        set_id = "mix"
-        self.run_cmd("games", "sets", "add", set_id)
-        self.assertEqual(self.games()["sets"], [set_id])
-        self.run_cmd("games", "sets", "remove", set_id)
-        self.assertNotIn("sets", self.games())
-        self.assertEqual(self.run_cmd("games", "sets", "add", "nope")[0], 2)
+    def test_games_sets_is_gone_and_list_shows_no_sets(self):
+        for argv in (("games", "sets", "list"), ("games", "set", "add", "mix")):
+            with self.subTest(argv=argv):
+                self.assertEqual(self.run_cmd(*argv)[0], 2)
+        raw = self.read("cards.json")
+        raw["SD"]["games"] = {"gba": [{"title": "A", "bucket": "gba/A.zip"}], "sets": ["mix"]}
+        self.write_json("cards.json", raw)
+        self.assertEqual(json.loads(self.run_cmd("games", "list", "--json")[1]),
+                         {"full_systems": [], "games": [{"system": "gba", "bucket": "gba/A.zip", "title": "A"}]})
+        self.assertNotIn("mix", self.run_cmd("games", "list")[1])
 
     def write_cards(self, cards):
         with open(self.path("cards.json"), "w") as f:
@@ -403,8 +405,7 @@ class CardsTest(Cmd):
     def test_copy_counts_what_dst_syncs_in_a_system_it_turned_off(self):
         cards = self._two_cards()
         cards["A"]["excluded"] = {"gba": ["gba/Y.zip"]}
-        storage_sets(self, {"mix": {"name": "Mix", "games": [{"title": "Y", "system": "gba", "bucket": "gba/Y.zip"}]}})
-        cards["B"]["games"] = {"sets": ["mix"]}
+        cards["B"]["games"] = {"gba": [{"title": "Y", "bucket": "gba/Y.zip"}]}
         cards["B"]["systems_off"] = ["gba"]
         with open(self.path("cards.json"), "w") as f:
             json.dump(cards, f)
@@ -1036,10 +1037,6 @@ class Aliases(unittest.TestCase):
                 self.assertIs(parser.parse_args([alias, *argv]).fn, parser.parse_args([main, *argv]).fn)
         self.assertEqual(set(cli.ALIASES.values()) - set(commands.COMMANDS), set())
 
-    def test_games_set_alias(self):
-        args = commands.build_parser().parse_args(["games", "set", "list", "--card", "X"])
-        self.assertIs(args.fn, commands.games_sets)
-
     def test_aliases_route_as_commands_not_cards(self):
         with mock.patch.object(commands, "cards_list", return_value=0) as listed, mock.patch.object(cli, "sync_card", side_effect=AssertionError("synced")):
             self.run_cli("card")
@@ -1072,7 +1069,7 @@ class Aliases(unittest.TestCase):
         self.assertEqual(out("umount", "--help"), out("help", "unmount"))
 
     def test_quiet_keeps_alias_data_stdout(self):
-        for argv in (["device"], ["layout", "x"], ["card", "list"], ["game", "set", "list"]):
+        for argv in (["device"], ["layout", "x"], ["card", "list"]):
             with self.subTest(argv=argv):
                 self.assertTrue(cli.is_data_command(argv))
 
@@ -1080,7 +1077,7 @@ class Aliases(unittest.TestCase):
         words = commands.second_words()
         self.assertIn("layout", words["cards"])
         self.assertNotIn("convert", words["cards"])
-        self.assertIn("sets", words["games"])
+        self.assertNotIn("sets", words["games"])
         self.assertNotIn("set", words["games"])
         self.assertEqual(set(words) & set(cli.ALIASES), set())
 

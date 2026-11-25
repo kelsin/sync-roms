@@ -1,9 +1,8 @@
 """The --edit game list editor."""
 import os
-import sys
 from collections import defaultdict
 
-from . import languages, names, picker, previews, runtime, s3, store, surprise, tagui, themeart, ui, vita
+from . import languages, names, picker, previews, runtime, s3, store, surprise, tags, tagui, ui, vita
 
 
 def note(text):
@@ -51,10 +50,10 @@ def note_text(games, key):
 
 def save_note(games, key, text, covered=False):
     """Save the note typed after `w` for the game listed under key in games; the message the list shows. covered: the
-    game is on only because a set or collection brings it, so it has no direct pick to hold a note."""
+    game is on only because a collection brings it, so it has no direct pick to hold a note."""
     if not set_note({"games": games}, key, text):
         if covered:
-            return "Notes go only on games picked directly; this one comes from a set or collection"
+            return "Notes go only on games picked directly; this one comes from a collection"
         return "Switch the game on and press Enter first, then add its note"
     return "Note saved" if text else "Note cleared"
 
@@ -97,7 +96,7 @@ def _toggle_games(title, rows, hotkeys, hint, place, filters, key_help, select_a
         return have[s["bucket"]]
 
     initial = [lock or key in listed(s) for lock, (s, key, _, _) in zip(locked, rows)]
-    variants, parents = store.variant_index(store.load_sets())
+    variants, parents = tags.variant_index()
     system_names = {s["bucket"]: s["name"] for s in store.repo_json("systems")}
     session = {"sel": list(initial)}
     picker.carry_place(place, [key for _, key, _, _ in rows], session)
@@ -157,13 +156,12 @@ def edit_card_system(card, bucket, setup):
     return cardedit.edit_system(card, system, setup)
 
 
-def set_rows(game_set, by_bucket, bucket_keys):
-    """Rows for one set, grouped by category (in file order) then sorted by system and title.
+def list_rows(listing, by_bucket, bucket_keys):
+    """Rows for one games list (a collection, a tag's games), sorted by system and title.
 
     Entries for unknown systems are skipped."""
     rows, seen = [], set()
-    order = {}
-    for g in game_set["games"]:
+    for g in listing["games"]:
         s = by_bucket.get(g.get("system"))
         key = g.get("bucket")
         if not s or not key or key in seen:
@@ -173,10 +171,8 @@ def set_rows(game_set, by_bucket, bucket_keys):
         have = bucket_keys(s)
         warn = "" if s.get("full_system") or all(k in have for k in [key] + list(g.get("files", []))) \
             else "  ⚠️ not in storage"
-        cat = g.get("category") or ""
-        order.setdefault(cat, len(order))
-        rows.append((cat, (s, key, title, f"{cat + ' — ' if cat else ''}{s['name']} — {title}{warn}")))
-    return [r for _, r in sorted(rows, key=lambda c: (order[c[0]], c[1][0]["name"].lower(), store.sort_key(c[1][2])))]
+        rows.append((s, key, title, f"{s['name']} — {title}{warn}"))
+    return sorted(rows, key=lambda r: (r[0]["name"].lower(), store.sort_key(r[2])))
 
 
 def valid_card_name(name, existing):
@@ -190,20 +186,8 @@ def valid_card_name(name, existing):
     return None
 
 
-def cover_notes(sets_by_id, own_set_ids):
-    """Why games are synced without being in the list being edited.
-
-    Returns {bucket key: note}, from the list's own set references.
-    """
-    keys = {}
-    for sid in own_set_ids:
-        for g in store.set_games(sets_by_id[sid]) if sid in sets_by_id else []:
-            keys.setdefault(g["bucket"], f"Full set: {themeart.set_emoji(sets_by_id[sid])} {sets_by_id[sid]['name']}")
-    return keys
-
-
 def variant_line(key, variants, parents, system_names, on=None):
-    """The note under a set game row about its variants, or a variant row's canonical game; "" for neither.
+    """The note under a game row about its variants, or a variant row's canonical game; "" for neither.
 
     on is None for a read-only view, else a callable(variant bucket) -> bool saying whether it is on the card.
     """
@@ -222,11 +206,6 @@ def variant_line(key, variants, parents, system_names, on=None):
     return ""
 
 
-def toggle_set_ref(sets_on, set_id):
-    """The set ids with set_id switched on or off."""
-    return [i for i in sets_on if i != set_id] if set_id in sets_on else sets_on + [set_id]
-
-
 SETUP_KEY = "v"
 DELETE_KEY = "d"
 RENAME_KEY = "r"
@@ -235,12 +214,10 @@ GAMES_HINT = "Space toggle · Enter done · / filter · w note · a all · o vie
 
 
 def new_target(label, raw, setup=None):
-    """The editing state of one games list: its systems, set references and what they were when opened."""
+    """The editing state of one games list: its systems and what they were when opened."""
     data = {"systems": store.apply_games(store.repo_json("systems"), raw)}
-    sets_on = store.list_sets(raw)
-    return {"label": label, "data": data, "raw": dict(raw), "sets_on": sets_on, "setup": setup, "was": snapshot(data),
-            "was_full": {s["bucket"]: s["full_system"] for s in data["systems"]}, "was_sets": list(sets_on),
-            "was_notes": notes_snapshot(data)}
+    return {"label": label, "data": data, "raw": dict(raw), "setup": setup, "was": snapshot(data),
+            "was_full": {s["bucket"]: s["full_system"] for s in data["systems"]}, "was_notes": notes_snapshot(data)}
 
 
 def drop_inapplicable(t, setup):
@@ -266,28 +243,18 @@ def target_changes(t):
             key = g.get("bucket")
             if key in t["was_notes"] and notes[key] != t["was_notes"][key]:
                 added.setdefault(s["bucket"], []).append(f"{key} (note)")
-    on, was = set(t["sets_on"]), set(t["was_sets"])
-    if on - was:
-        added[store.SETS_KEY] = sorted(on - was)
-    if was - on:
-        removed[store.SETS_KEY] = sorted(was - on)
     return added, removed
 
 
 @picker.one_app
 def edit_manifest():
-    """The editor's top menu: Cards (each opens the card editor, which saves games as they change), Sets (saved to storage at its review),
+    """The editor's top menu: Cards (each opens the card editor, which saves games as they change), Tags (each edit saved to storage),
     Collections (saved as you leave the collection editor), Device systems; device/firmware and device-system changes are reviewed and saved at the end."""
     print(ui.bold("✏️  Edit mode") + ui.dim(f"  {s3.access()}"))
     if not store.cards_readable():
         ui.fail(f"{os.path.join(store.data_dir(), 'cards.json')} isn't valid JSON, so nothing could be saved. "
                 "Fix or move it first.", 3)
     manifest = store.load_manifest()
-    names = {s["bucket"] for s in manifest["systems"]}
-    for game_set in store.load_sets():
-        for g in game_set["games"]:
-            if g.get("system") not in names:
-                print(ui.yellow(f"⚠️  Set {themeart.set_emoji(game_set)} {game_set['name']}: unknown system {g.get('system')!r}, skipped"), file=sys.stderr)
 
     targets = {}  # card name -> {"label", "setup"}: a device/firmware change saved with the review (games save at once)
 

@@ -60,9 +60,8 @@ class Sorting(DataDir):
         store.save_lists({"c": {"snes": [{"bucket": "snes/2"}, {"bucket": "snes/1"}], "gba": [{"bucket": "gba/Z.zip"}, {"bucket": "gba/a.zip"}],
                                 "sets": ["z", "a"]}})
         card = self.read("cards.json")["c"]["games"]
-        self.assertEqual(list(card), ["gba", "sets", "snes"])
+        self.assertEqual(list(card), ["gba", "snes"])  # old set references dropped
         self.assertEqual([g["bucket"] for g in card["gba"]], ["gba/a.zip", "gba/Z.zip"])
-        self.assertEqual(card["sets"], ["a", "z"])
         self.assertEqual([g["bucket"] for g in card["snes"]], ["snes/1", "snes/2"])
 
 
@@ -73,7 +72,7 @@ class Schemas(unittest.TestCase):
 
     def test_schemas_exist_and_cover_what_cards_store(self):
         games, cards = self.load("games.schema.json"), self.load("cards.schema.json")
-        self.assertIn("sets", games["properties"])
+        self.assertNotIn("properties", games)  # no "sets": every key is a system
         card = cards["additionalProperties"]["properties"]
         for key in ("device", "layout", "systems", "games", "collections", "frontend_collections",
                     "surprise", "surprises", "guest"):

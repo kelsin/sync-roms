@@ -69,7 +69,8 @@ class BashCompletion(unittest.TestCase):
             self.assertNotIn(alias, offered)
 
     def test_subcommands(self):
-        self.assertIn("sets", self.complete("sync-roms", "games", ""))
+        self.assertNotIn("sets", self.complete("sync-roms", "games", ""))
+        self.assertIn("add", self.complete("sync-roms", "games", ""))
         self.assertEqual(self.complete("sync-roms", "scrape", "c"), ["clean"])
         self.assertIn("art", self.complete("sync-roms", "scrape", ""))
         self.assertEqual(self.complete("sync-roms", "scrape", "art", "--fo"), ["--for"])
