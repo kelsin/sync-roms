@@ -67,7 +67,7 @@ def _plan(base):
             warnings.append(f"{shown}: spruce's Start button for {_platform(path)} wasn't found; quit left on its default")
             continue
         try:
-            text = cardfs.read(path).decode("utf-8")  # raw: cardfs.text would turn CRLF into LF
+            text = cardfs.raw_text(path)  # raw: cardfs.text would turn CRLF into LF
         except (OSError, ValueError):
             warnings.append(f"{shown} can't be read; its quit hotkey left as it is")
             continue
@@ -103,7 +103,7 @@ def install(card, layout_name, base, dry_run):
     plan, warnings = _plan(base)
     for w in warnings:
         ui.warn(w)
-    changed = 0
+    changed = failures = 0
     for path, shown, key, _, value, text in plan:
         new = _edit(text, key, value)
         if new == text:
@@ -113,9 +113,10 @@ def install(card, layout_name, base, dry_run):
                 cardfs.write_text(path, new)
             except OSError as e:
                 ui.warn(f"{shown} can't be written: {e}")
-                return 1
+                failures += 1
+                continue
         changed += 1
     if changed:
         print(ui.dim(f"🧪 Would set the quit hotkey to hotkey + Start in {changed} RetroArch config(s)") if dry_run
               else f"🎮 Quit hotkey set to hotkey + Start in {changed} RetroArch config(s)")
-    return 0
+    return failures

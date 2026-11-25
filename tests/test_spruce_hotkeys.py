@@ -3,11 +3,12 @@ import io
 import os
 import sys
 import unittest
+from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 import helpers  # noqa: E402
-from sync_roms import applied, spruce_hotkeys  # noqa: E402
+from sync_roms import applied, cardfs, spruce_hotkeys, spruce_syncthing  # noqa: E402
 
 BRICK = 'RA_HOTKEY_LINE="input_enable_hotkey_btn"\nRA_SELECT_VAL="5"\nRA_START_VAL="6"\n'
 BRICK_CFG = 'input_enable_hotkey_btn = "5"\ninput_exit_emulator_btn = "0"\nother = "1"\n'
@@ -106,6 +107,52 @@ class Install(helpers.CardDir):
         self.brick()
         self.assertEqual(spruce_hotkeys.entries(self.card),
                          [applied.Entry(SHOWN, "input_exit_emulator_btn", "0", "6", False)])
+
+    def test_keeps_syncthings_pending_edit_while_caching(self):
+        self.brick()
+        with self.err_out(), cardfs.caching():
+            spruce_syncthing.run("c", "spruce", self.card, False)
+            self.failures = spruce_hotkeys.install("c", "spruce", self.card, False)
+        text = self.read()
+        self.assertIn('sort_savefiles_enable = "true"', text)
+        self.assertIn('input_exit_emulator_btn = "6"', text)
+
+    @contextlib.contextmanager
+    def err_out(self):
+        with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+            yield
+
+    def test_write_error_warns_and_continues(self):
+        self.brick()
+        other = self.cp("Saves", "ra-configs", "retroarch-Other.cfg")
+        self.script("Other", BRICK)
+        helpers.touch(other, BRICK_CFG.encode())
+        real = cardfs.write_text
+
+        def flaky(path, new):
+            if path == self.cfg:
+                raise OSError("read-only")
+            return real(path, new)
+
+        with mock.patch.object(cardfs, "write_text", flaky):
+            self.run_install()
+        self.assertIn("can't be written", self.err.getvalue())
+        self.assertIn('input_exit_emulator_btn = "6"', self.read(other))
+        self.assertEqual(self.failures, 1)
+
+    def test_unreadable_cfg_warns(self):
+        self.brick()
+        real = cardfs.read
+
+        def deny(path):
+            if path.endswith(".cfg") and "ra-configs" in path:
+                raise OSError("denied")
+            return real(path)
+
+        with mock.patch.object(cardfs, "read", deny):
+            self.run_install()
+        self.assertIn("can't be read", self.err.getvalue())
+        self.assertEqual(self.read(), BRICK_CFG)
 
     def test_other_layouts_untouched(self):
         self.brick()

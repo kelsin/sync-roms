@@ -225,7 +225,7 @@ def retroarch_writes(base):
     writes, lines, warnings = [], [], []
     for path in paths:
         try:
-            old = cardfs.read(path).decode("utf-8")  # raw: cardfs.text would turn CRLF into LF
+            old = cardfs.raw_text(path)  # raw: cardfs.text would turn CRLF into LF
         except (OSError, ValueError):
             warnings.append(f"Saves/ra-configs/{os.path.basename(path)} can't be read; its save settings left as they are")
             continue
@@ -288,7 +288,7 @@ def entries(card, base):
             result.append(applied.Entry(f"Emu/{folder}/config.json", "core", old, core, False))
     for path in sorted(glob.glob(os.path.join(glob.escape(base), "Saves", "ra-configs", "retroarch-*.cfg"))):
         try:
-            text = cardfs.read(path).decode("utf-8")
+            text = cardfs.raw_text(path)
         except (OSError, ValueError):
             continue  # retroarch_writes warns about it below
         for key, value in data()["retroarch"].items():
