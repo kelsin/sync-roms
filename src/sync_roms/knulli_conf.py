@@ -92,9 +92,35 @@ def hotkey_values():
     return dict(store.repo_json("hotkeys")["knulli"])
 
 
+def allowed():
+    """The keys knulli_settings may hold (data/knulli-settings.json)."""
+    return store.repo_json("knulli-settings")["keys"]
+
+
+def _saved():
+    """The saved knulli_settings as {key: value}; {} (with a warning) when malformed."""
+    saved = usersettings.load_settings().get("knulli_settings")
+    if saved is None:
+        return {}
+    if not isinstance(saved, dict) or not all(isinstance(v, str) for v in saved.values()):
+        ui.warn("knulli_settings in settings.json must be {key: value}; ignored")
+        return {}
+    return saved
+
+
+def wanted_settings():
+    """{key: value} of the allowlisted knulli_settings entries; the others are warned about once."""
+    saved = _saved()
+    allow = allowed()
+    unknown = [key for key in saved if key not in allow]
+    if unknown:
+        ui.warn(f"knulli_settings in settings.json has settings that aren't shared, ignored: {', '.join(unknown)}")
+    return {key: value for key, value in saved.items() if key in allow}
+
+
 def wanted(current):
     """{key: value} of every setting to write, given the file's current values."""
-    return {**ra_values(), **wifi_values(current), **hotkey_values()}
+    return {**ra_values(), **wifi_values(current), **hotkey_values(), **wanted_settings()}
 
 
 def entries(base):
@@ -117,4 +143,47 @@ def install(card, layout_name, base, dry_run):
         return 0
     path = os.path.join(base, FILE)
     cardfs.write_text(path, merge(cardfs.text(path), {e.key: e.new for e in found}))
+    return 0
+
+
+def import_settings(path):
+    """Copy the allowlisted settings' current values from the Knulli card at path into settings.json's knulli_settings."""
+    file = os.path.join(path, FILE)
+    if not os.path.isfile(file):
+        ui.fail(f"{file} is missing; is {path} a Knulli card that has been booted once?", 2)
+    current = parse(cardfs.text(file))
+    settings = usersettings.load_settings()
+    saved = settings.get("knulli_settings")
+    saved = dict(saved) if isinstance(saved, dict) and all(isinstance(v, str) for v in saved.values()) else {}
+    same, changed = [], []  # (key, card value, saved value or None)
+    for key in allowed():
+        if key in current:
+            have = saved.get(key)
+            (same if have == current[key] else changed).append((key, current[key], have))
+    if not same and not changed:
+        ui.fail(f"{SHOWN} has none of the settings that can be saved", 2)
+    if same:
+        print(ui.bold(f"Identical ({len(same)}):"))
+        print(ui.dim("\n".join(f"   {k} = {v}" for k, v, _ in same)))
+    if not changed:
+        print(ui.green("Nothing differs from what settings.json has; nothing to import."))
+        return 0
+    print(ui.bold(f"Different or new ({len(changed)}):"))
+    print("\n".join(f"   {k} = {v}" if old is None else f"   {k} = {old} -> {v}" for k, v, old in changed))
+    answer = ui.choose_required(f"Import these {len(changed)} setting(s)? Yes, No, or Pick one by one", "ynp")
+    if answer == "n":
+        print("Nothing imported.")
+        return 0
+    if answer == "p":
+        accepted = [c for c in changed if ui.choose_required(f"   {c[0]} = {c[1]}: import?", "yn") == "y"]
+    else:
+        accepted = changed
+    if not accepted:
+        print("Nothing imported.")
+        return 0
+    for key, value, _ in accepted:
+        saved[key] = value
+    settings["knulli_settings"] = saved
+    usersettings.save_settings(settings)
+    print(ui.green(f"💾 Saved {len(accepted)} Knulli setting(s) from {SHOWN} in settings.json"))
     return 0

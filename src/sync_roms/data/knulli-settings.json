@@ -1,0 +1,4 @@
+{
+  "note": "Your own Knulli preferences, safe on any Knulli device. Left out: hardware, display output, audio, network, services, login and hotkey settings.",
+  "keys": ["global.shaderset", "global.integerscale", "global.bezel", "global.ratio", "global.smooth", "global.rewind", "global.autosave", "global.incrementalsavestates", "global.quickresume", "global.retroachievements.leaderboards", "global.retroachievements.verbose", "global.retroachievements.screenshot", "global.retroachievements.challenge_indicators", "global.retroachievements.richpresence", "global.retroachievements.encore", "global.retroachievements.unofficial", "global.retroachievements.sound", "system.language", "system.timezone"]
+}

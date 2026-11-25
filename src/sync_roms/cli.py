@@ -501,8 +501,8 @@ TOPICS = {
   sync-roms config path                 the data folder
   sync-roms config set NAME VALUE       save one setting in settings.json
   sync-roms config unset NAME           remove it (back to its default)
-  sync-roms config import [CARD]        save a card's own settings (spruceOS preferences) in
-                                        settings.json
+  sync-roms config import [CARD]        save a card's own settings (spruceOS or Knulli
+                                        preferences) in settings.json
   sync-roms config apply [CARD] [--dry-run] [--yes]   apply the saved settings to a spruce card or
                                                       an Android device
 
@@ -528,6 +528,11 @@ TOPICS = {
   assumed, and with no terminal input nothing is saved. Every sync of a spruce card then sets those
   that the card's file already has. spruce_settings isn't a `config set` name: import it, or edit
   settings.json by hand ({"section": {"key": value}}, values as the card holds them).
+
+  For a Knulli card it copies the allowlisted preferences (shaders, scaling, rewind, autosave, quick
+  resume, the RetroAchievements display options, language and timezone) from system/knulli.conf into
+  settings.json's knulli_settings. knulli_settings isn't a config set name: import it, or edit
+  settings.json by hand ({"key": "value"}).
 
   config apply sets the saved settings without a sync. A mounted spruce card (CARD as for import)
   gets the spruceOS settings, WiFi networks and Syncthing settings a sync writes. An Android device

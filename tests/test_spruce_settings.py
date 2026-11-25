@@ -486,7 +486,7 @@ class Import(helpers.Cmd):
         store.write_cards({"RGSP": {"device": "full", "layout": "onion"}})
         code, _, err = self.run_cmd("config", "import", self.card)
         self.assertEqual(code, 2)
-        self.assertIn("importing settings from onion cards isn't supported yet (supported: spruce)", err)
+        self.assertIn("importing settings from onion cards isn't supported yet (supported: spruce, knulli)", err)
 
     def test_card_without_a_settings_file(self):
         os.makedirs(os.path.join(self.tmp.name, "RGSP2"))

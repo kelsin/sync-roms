@@ -3,11 +3,12 @@ import io
 import os
 import sys
 import unittest
+from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 import helpers  # noqa: E402
-from sync_roms import knulli_conf, usersettings  # noqa: E402
+from sync_roms import knulli_conf, store, usersettings  # noqa: E402
 
 RA = "global.retroachievements"
 KEY = "a" * 32
@@ -157,6 +158,82 @@ class Install(helpers.CardDir):
         out = self.run_install(wifi_networks=[{"ssid": "A", "psk": "secret-pass"}])
         self.assertIn("(hidden)", out)
         self.assertNotIn("secret-pass", out + self.err.getvalue())
+
+    def test_preferences_written(self):
+        self.put("foo=1\n")
+        self.run_install(knulli_settings={"global.smooth": "0", "system.hostname": "x"})
+        lines = self.content().split("\n")
+        self.assertIn("global.smooth=0", lines)
+        self.assertNotIn("system.hostname=x", lines)
+        self.assertIn("system.hostname", self.err.getvalue())
+
+    def test_preferences_malformed_warns(self):
+        for bad in ("x", {"global.smooth": 0}):
+            self.put("foo=1\n")
+            self.run_install(knulli_settings=bad)
+            self.assertNotIn("global.smooth", self.content())
+            self.assertIn("knulli_settings in settings.json must be {key: value}; ignored", self.err.getvalue())
+
+
+class Import(helpers.Cmd):
+    def setUp(self):
+        super().setUp()
+        usersettings.save_settings({})
+        self.card = os.path.join(self.tmp.name, "KN")
+        store.write_cards({"KN": {"device": "full", "layout": "knulli"}})
+
+    def put(self, text):
+        path = os.path.join(self.card, "system", "knulli.conf")
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(text)
+
+    def imp(self, answers):
+        with mock.patch("builtins.input", side_effect=answers):
+            return self.run_cmd("config", "import", self.card)
+
+    def test_import_yes_saves_allowlisted_only(self):
+        self.put("global.smooth=0\nsystem.hostname=X\n#global.rewind=1\n")
+        code, out, _ = self.imp(["y"])
+        self.assertEqual(code, 0)
+        self.assertEqual(self.read("settings.json")["knulli_settings"], {"global.smooth": "0"})
+        self.assertIn("Saved 1 Knulli setting(s) from system/knulli.conf in settings.json", out)
+        self.assertNotIn("hostname", out)
+
+    def test_import_nothing_differs(self):
+        self.put("global.smooth=0\n")
+        usersettings.save_settings({"knulli_settings": {"global.smooth": "0"}})
+        code, out, _ = self.imp([])
+        self.assertEqual(code, 0)
+        self.assertIn("Nothing differs", out)
+        self.assertEqual(self.read("settings.json")["knulli_settings"], {"global.smooth": "0"})
+
+    def test_import_no_keeps_settings(self):
+        self.put("global.smooth=0\n")
+        code, out, _ = self.imp(["n"])
+        self.assertEqual(code, 0)
+        self.assertIn("Nothing imported.", out)
+        self.assertNotIn("knulli_settings", self.read("settings.json"))
+
+    def test_import_missing_file_fails(self):
+        os.makedirs(self.card)
+        code, _, err = self.imp([])
+        self.assertEqual(code, 2)
+        self.assertIn("is missing; is", err)
+
+    def test_import_none_of_the_keys_fails(self):
+        self.put("system.hostname=X\n")
+        code, _, err = self.imp([])
+        self.assertEqual(code, 2)
+        self.assertIn("system/knulli.conf has none of the settings that can be saved", err)
+
+    def test_config_import_dispatches_knulli(self):
+        from sync_roms import commands
+        self.assertIs(commands.IMPORTERS["knulli"], knulli_conf.import_settings)
+        self.put("global.smooth=0\n")
+        with mock.patch.dict(commands.IMPORTERS, {"knulli": mock.Mock(return_value=0)}) as _:
+            self.assertEqual(commands.import_settings(self.card), 0)
+            commands.IMPORTERS["knulli"].assert_called_once_with(self.card)
 
 
 if __name__ == "__main__":
