@@ -827,7 +827,8 @@ def _toggle_variant(picks, key, title):
     found = picks.variants.get(key, [])
     if len(found) > 1:
         i = picker.filter_list(f"Variants of {title}",
-                               [f"{'✅' if picks.on_card(v['bucket']) else '⬜'} {v['note']}" for v in found])
+                               [f"{'✅' if picks.on_card(v['bucket']) else '⬜'} {v['note']}" for v in found],
+                               extras=[[languages.column(v["bucket"])] for v in found])
         found = [] if i is None else [found[i]]
     if not found:
         return None
@@ -870,7 +871,8 @@ def _games_pass(title, shown, picks, sps, files_of, start, work, capacity, to_fe
         """picks.on_card, from this pass's states where the key's system has them."""
         b = key.partition("/")[0]
         return bases[b].get(key, False) if b in bases else picks.on_card(key)
-    extras = [_row_extras(sp, work, k, notes, st) + [_variant_mark(picks, k, on_card)] if sp else []
+    extras = [_row_extras(sp, work, k, notes, st) + [_variant_mark(picks, k, on_card)]
+              if sp else [("", "dim")] * 3 + [languages.column(k)]
               for k, sp, st in zip(keys, sp_of, session["sel"])]
 
     def switched(state):

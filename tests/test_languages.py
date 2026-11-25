@@ -31,6 +31,14 @@ class LanguagesTest(unittest.TestCase):
                           ("gba/Mother 3 (Japan) [T-En by Chewy].zip", "\U0001F1FA\U0001F1F8")):
             self.assertEqual(languages.flag(key), want, key)
 
+    def test_flag_regional_beats_language_tag_when_not_english(self):
+        for key, want in (("gba/G (Brazil) (Pt).zip", "\U0001F1E7\U0001F1F7"),
+                          ("gba/G (Taiwan) (Zh-Hant).zip", "\U0001F1F9\U0001F1FC"),
+                          ("gba/G (Switzerland) (De,Fr).zip", "\U0001F1E8\U0001F1ED"),
+                          ("gba/G (USA) (Es).zip", "\U0001F1EA\U0001F1F8"),
+                          ("gba/G (Europe) (Fr,De).zip", "\U0001F1EB\U0001F1F7")):
+            self.assertEqual(languages.flag(key), want, key)
+
     def test_flag_unrecognised_groups_blank(self):
         for key in ("gba/Tetris (Rev 1).zip", "gba/VitaShell.vpk", "gba/Game (Unknown).zip"):
             self.assertEqual(languages.flag(key), "", key)
@@ -53,12 +61,41 @@ class LanguagesTest(unittest.TestCase):
 class EditorColumnsTest(unittest.TestCase):
     def test_row_extras_flag_column(self):
         sp = types.SimpleNamespace(bucket="gba", groups={}, bundled={}, locked_from={}, surprise=set(), in_storage=set())
-        work = {"costs": {"gba": {}}}
+        work = {"costs": {"gba": {"gba/Mother 3 (Japan).zip": 2048}}}
         out = cardedit._row_extras(sp, work, "gba/Mother 3 (Japan).zip", {}, False)
         self.assertEqual(out[3], ("  \U0001F1EF\U0001F1F5", "dim"))
+        self.assertEqual(out[4], ("  " + cardedit.size_text(2048), "dim"))
         out = cardedit._row_extras(sp, work, "gba/VitaShell.vpk", {}, False)
         self.assertEqual(out[3], ("", "dim"))
         self.assertEqual(len(out), 5)
+
+    def test_full_system_row_flag_extras(self):
+        key = "psx/Parappa (Japan).zip"
+        system = {"bucket": "psx"}
+        picks = types.SimpleNamespace(cover=lambda: {})
+        seen = {}
+
+        def fake(title, labels, **kw):
+            seen.update(kw)
+            return kw["initial"]
+        with mock.patch.object(cardedit.picker, "filter_list", fake), \
+                mock.patch.object(cardedit.previews, "game_pane", return_value={}):
+            cardedit._games_pass("t", [(system, key, "Parappa", "Parappa")], picks, {}, {}, {key: True}, {}, None,
+                                 None, {})
+        self.assertEqual(seen["extras"], [[("", "dim")] * 3 + [("  \U0001F1EF\U0001F1F5", "dim")]])
+
+    def test_variant_picker_flag_extras(self):
+        picks = types.SimpleNamespace(
+            variants={"gba/A.zip": [{"bucket": "gba/A (Japan).zip", "note": "x"}, {"bucket": "gba/A (USA).zip", "note": "y"}]},
+            on_card=lambda b: False)
+        seen = {}
+
+        def fake(title, labels, **kw):
+            seen.update(kw)
+            return None
+        with mock.patch.object(cardedit.picker, "filter_list", fake):
+            cardedit._toggle_variant(picks, "gba/A.zip", "A")
+        self.assertEqual(seen["extras"], [[("  \U0001F1EF\U0001F1F5", "dim")], [("  \U0001F1FA\U0001F1F8", "dim")]])
 
     def test_toggle_games_flag_extras(self):
         system = {"bucket": "gba", "games": [{"bucket": "gba/Mother 3 (Japan).zip"}]}

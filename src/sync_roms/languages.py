@@ -69,12 +69,9 @@ def _deciding(name):
     return None
 
 
-def english(name):
-    """True when the ROM is in English (a `[T-En` translation, an English language tag, else an English region), False
-    when it isn't, None when the name says nothing."""
+def _english(name, found):
     if re.search(r"\[T-En", name, re.I):
         return True
-    found = _deciding(name)
     if not found:
         return None
     kind, parts = found
@@ -83,20 +80,32 @@ def english(name):
     return bool(ENGLISH_REGIONS & set(parts))
 
 
+def english(name):
+    """True when the ROM is in English (a `[T-En` translation, an English language tag, else an English region), False
+    when it isn't, None when the name says nothing."""
+    return _english(name, _deciding(name))
+
+
 def flag(key):
-    """A flag emoji for the ROM's language: the US flag for English, else the first mapped one of its deciding group, or
-    an empty string."""
+    """A flag emoji for the ROM's language: the US flag for English; else the first mapped flag of a region group with
+    no English region (Brazil beats a `Pt` tag), else the first mapped one of the deciding group; or an empty string."""
     name = stem(key)
-    is_english = english(name)
+    found = _deciding(name)
+    is_english = _english(name, found)
     if is_english is None:
         return ""
     if is_english:
         return US
-    kind, parts = _deciding(name)
+    for parts in paren_groups(name):
+        if all(p in REGIONS for p in parts) and not ENGLISH_REGIONS & set(parts):
+            for p in parts:
+                if p in REGION_FLAGS:
+                    return REGION_FLAGS[p]
+    kind, parts = found
     for p in parts:
-        found = LANGUAGE_FLAGS.get(p.split("-")[0]) if kind == "language" else REGION_FLAGS.get(p)
-        if found:
-            return found
+        mapped = LANGUAGE_FLAGS.get(p.split("-")[0]) if kind == "language" else REGION_FLAGS.get(p)
+        if mapped:
+            return mapped
     return ""
 
 

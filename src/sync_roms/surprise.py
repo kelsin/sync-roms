@@ -14,7 +14,6 @@ SLOTS = 10
 RECOMMENDED_SHARE = 2 / 3
 DEFAULT_TTL_DAYS = 183
 COLLECTION = "Surprise"
-ARCADE = languages.ARCADE
 NOT_FULL = ("Proto", "Beta", "Demo", "Sample", "Kiosk", "Pirate", "Hack", "Unl")
 RERELEASE = ("Virtual Console", "Switch Online", "Classic Mini", "Mini Mix", "Mega Drive Mini", "Genesis Mini",
              "Collection", "Anthology", "Archives", "Sega Ages", "Sega Channel", "Evercade", "Steam", "GOG",
