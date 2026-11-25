@@ -93,6 +93,31 @@ class SyncThemes(helpers.StorageDir):
         with open(system) as f:
             self.assertEqual(json.load(f), {"theme": "B", "vol": 5})
 
+    def test_one_theme_syncs_only_the_current_theme(self):
+        store.update_card("card", spruce_theme="B", one_theme=True, spruce_themes_installed=["A"])
+        self.card_theme("A")
+        self.assertEqual(self.sync(), 0, self.err.getvalue())
+        self.assertEqual(self.on_card(), ["B"])
+        self.assertEqual(self.saved().get("spruce_themes_installed"), ["B"])
+
+    def test_one_theme_without_a_theme_asks_and_saves(self):
+        store.update_card("card", one_theme=True)
+        picked = mock.Mock(return_value="C")
+        with mock.patch.object(spruce_themes, "pick_one", picked):
+            self.assertEqual(self.sync(yes=False), 0, self.err.getvalue())
+        picked.assert_called_once_with("🎨 Spruce theme (card)", None)
+        self.assertEqual(self.saved().get("spruce_theme"), "C")
+        self.assertEqual(self.on_card(), ["C"])
+
+    def test_one_theme_without_a_theme_and_yes_syncs_no_themes(self):
+        store.update_card("card", one_theme=True)
+        picked = mock.Mock()
+        with mock.patch.object(spruce_themes, "pick_one", picked):
+            self.assertEqual(self.sync(), 0, self.err.getvalue())
+        picked.assert_not_called()
+        self.assertEqual(self.on_card(), [])
+        self.assertIn("One theme only is on", self.out.getvalue())
+
     def test_t_override_not_saved(self):
         store.update_card("card", spruce_theme="B")
         self.choose.side_effect = ["t", "y"]
@@ -244,6 +269,18 @@ class SyncThemes(helpers.StorageDir):
         self.choose.side_effect = ["t", "y"]
         self.pick.return_value = ["A", "C"]
         with mock.patch.object(runtime, "_mirror_root", mirror):
+            self.assertEqual(self.sync(yes=False), 0, self.err.getvalue())
+        self.assertTrue(os.path.isfile(os.path.join(self.card, "Themes", "C", "icons", "a.png")), self.out.getvalue() + self.err.getvalue())
+
+    def test_one_theme_picked_at_sync_time_is_read_past_the_mirror(self):
+        mirror = os.path.join(self.tmp.name, "mirror")
+        for key in ("gba/Game.zip", f"{PREFIX}A/config.json", f"{PREFIX}A/icons/a.png"):
+            os.makedirs(os.path.dirname(os.path.join(mirror, key)), exist_ok=True)
+            with open(os.path.join(self.root, key), "rb") as src, open(os.path.join(mirror, key), "wb") as dst:
+                dst.write(src.read())
+        store.update_card("card", one_theme=True)
+        with mock.patch.object(runtime, "_mirror_root", mirror), \
+                mock.patch.object(spruce_themes, "pick_one", return_value="C"):
             self.assertEqual(self.sync(yes=False), 0, self.err.getvalue())
         self.assertTrue(os.path.isfile(os.path.join(self.card, "Themes", "C", "icons", "a.png")), self.out.getvalue() + self.err.getvalue())
 

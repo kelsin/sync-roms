@@ -346,9 +346,12 @@ def edit_card(name, setup=None, to_fetch=None, card_match=None, on_guest=None):
             extras[:] = work_out()[1]
             return True
 
-        on = surprise.enabled(store.load_cards().get(name))
+        saved = store.load_cards().get(name)
+        on = surprise.enabled(saved)
+        one_theme = isinstance(saved, dict) and saved.get("layout") == "spruce" and saved.get("one_theme") is True
         i = picker.filter_list(f"💳 {name} — its systems (⭐ for the device) · 🎁 Surprise {'on' if on else 'off'}"
-                               + (" · 👤 guest" if guest.is_guest(store.load_cards().get(name)) else ""),
+                               + (f" · 🎨 {spruce_themes.current(name) or 'one theme: none picked'}" if one_theme else "")
+                               + (" · 👤 guest" if guest.is_guest(saved) else ""),
                                labels, extras=extras, cursor=pos,
                                hotkeys=(FULL_KEY, OFF_KEY, ALL_KEY, SET_KEY, COLLECTIONS_KEY, SETTINGS_KEY, GUEST_KEY,
                                         CLEAR_ALL_KEY, *((KEEP_KEY,) if card_match else ())),
@@ -427,7 +430,7 @@ def card_status(name, setup, systems, to_fetch=None):
 
 def settings_menu(name, systems, playable):
     """S in the system list: turn the card's Surprise, theme, custom collections or RAOfflineProxy on or off, pick the systems
-    Surprise may use on every card or on this card (playable: the systems the card can play) and, on a spruce card, its current theme."""
+    Surprise may use on every card or on this card (playable: the systems the card can play) and, on a spruce card, its one-theme mode and current theme."""
     state = lambda on: "on" if on else "off"
     pos = 0
     while True:
@@ -442,7 +445,8 @@ def settings_menu(name, systems, playable):
             f"🏆 RAOfflineProxy (RetroAchievements offline proxy app): {state(store.card_flag(entry, 'raofflineproxy'))}",
             "Systems Surprise may use (every card)",
             "Systems Surprise may use (this card)",
-            *([f"🎨 Spruce theme: {current or 'none'}"] if spruce else [])], cursor=pos)
+            *([f"🎨 One theme only: {state(entry.get('one_theme') is True)}",
+               f"🎨 Spruce theme: {current or 'none'}"] if spruce else [])], cursor=pos)
         if i is None:
             return
         pos = i
@@ -455,7 +459,21 @@ def settings_menu(name, systems, playable):
         elif i == 5:
             pick_card_surprise_systems(name, playable)
         elif i == 6 and spruce:
+            toggle_one_theme(name)
+        elif i == 7 and spruce:
             pick_spruce_theme(name, current)
+
+
+def toggle_one_theme(name):
+    """Switch a spruce card's one-theme mode (one_theme: true, removed for off)."""
+    cards = store.load_cards()
+    entry = cards.get(name)
+    if not isinstance(entry, dict):
+        return
+    if entry.pop("one_theme", None) is True:
+        store.write_cards(cards)
+    else:
+        store.update_card(name, one_theme=True)
 
 
 def pick_spruce_theme(name, current):
