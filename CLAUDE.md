@@ -116,7 +116,7 @@ Old personal sets in `sets/` are left on disk and never read; a sync reads an ol
 | `size` | `cards new`/`set` | Readable card size (`512 GB`). |
 | `games` | the editors (`--edit`), `games` commands | Games per system, with their notes. A system's entry may be `{"full_system": true}` (its earlier list kept inside as `games`) to sync its whole storage folder. `"sets": [set ids]` syncs whole sets (live references). |
 | `excluded` | card editor | `{system: [keys]}` dropped from what the card's sets and collections bring. |
-| `collections` | card editor | Collection ids synced whole. |
+| `collections` | card editor | Collection ids synced whole; the card editor's `l` → Enter picks single games from one, as direct picks. |
 | `systems_off` | card editor's `x` | System ids nothing syncs for on this card; picks, sets and collections there stay saved. Surprise skips them. |
 | `surprise` | card editor's S menu | Stored only when it differs from `surprise.default_on`: on for a card with no layout yet, `frontend.FRONTEND_LAYOUTS`, `onion`, `muos` and `spruce`; off for `allium`. |
 | `surprises` | sync | `[{"system","bucket","title","files"?}]`. |
@@ -142,6 +142,8 @@ Sets come only from storage, through `store.load_sets` (`inventory.files` for th
 A set file is `{"name", "description"?, "art"?, "games"}`. Games have `title`, `system`, `bucket` and optional `files`, `category`, `series` and `variants`. `art` is an `art.json` id; without it a set uses the art under its own id.
 
 A collection file (see Personal data) has the same top-level keys (its games may carry a `note`) but its own loader and schema and no categories.
+
+While `custom_collections` is on, sync writes every collection with a game on the card (in `collections` or not), each with only its games on the card.
 
 Rules for sets:
 

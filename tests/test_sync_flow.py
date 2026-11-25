@@ -21,6 +21,14 @@ from helpers import MANIFEST, list_sizes  # noqa: E402
 
 GAME = {"title": "Game", "system": "gba", "bucket": "gba/Game.zip"}
 FAVS = {"id": "favs", "name": "Favs", "games": [GAME]}
+
+
+def surprise_manifest(only_surprise):
+    """MANIFEST with gba/Game.zip as load_manifest merges it: a surprise's game carries its label, a direct pick none."""
+    game = {"bucket": "gba/Game.zip", **({"from": cli.surprise.LABEL} if only_surprise else {})}
+    return {**MANIFEST, "systems": [{**MANIFEST["systems"][0], "games": [game]}]}
+
+
 REAL_LOAD_COLLECTIONS = collections_mod.load_collections
 REAL_BUILD_SCRAPE_PLAN, REAL_APPLY_SCRAPE_PLAN = scrape_plan.build_scrape_plan, scrape_plan.apply_scrape_plan
 REAL_STALE_MEDIA = scrape_plan.stale_media
@@ -727,7 +735,7 @@ class SyncFlowTest(unittest.TestCase):
                     (scrape_plan, "apply_scrape_plan", REAL_APPLY_SCRAPE_PLAN),
                     (cli.downloads, "run_downloads", lambda todo, *a: self.fetched.extend(todo) or 0)] if scrape else []
         with mock.patch.dict(os.environ, {"ESDE_APPDATA_DIR": appdata}):
-            return self.run_sync(cards={"collections": ["favs"]} if colls else {}, colls=[FAVS], manifest=manifest,
+            return self.run_sync(cards={"collections": ["favs"]} if colls else {}, colls=[FAVS] if colls else [], manifest=manifest,
                                  setup=(None, "emudeck"), files=["Emulation/roms/gba/Game.zip"], prepare=prepare,
                                  extra=[(ui, "warn", self.warned.append)] + scraping, **kw)
 
@@ -1088,6 +1096,49 @@ class SyncFlowTest(unittest.TestCase):
         self.assertEqual(installed, [])
         self.assertEqual(self.after, (None, None))
         self.assertFalse([u for u in updates if "frontend_collections" in u])
+
+    def test_a_collection_with_a_game_on_the_card_is_written_without_being_listed(self):
+        _, _, updates, _, _ = self.run_sync(
+            cards={"games": {"gba": [GAME]}, "surprise": False}, colls=[FAVS], files=["ROMs/gba/Game.zip"],
+            after=lambda d: read_from(d, "ES-DE", "collections", "custom-Favs.cfg"))
+        self.assertEqual(self.after, "%ROMPATH%/gba/Game.zip\n")
+        self.assertTrue([u for u in updates if "Favs" in (u.get("frontend_collections") or ())])
+
+    def test_a_surprise_in_a_collection_does_not_write_the_collection(self):
+        _, _, updates, _, _ = self.run_sync(
+            cards={"surprise": True, "surprises": [{"system": "gba", "bucket": "gba/Game.zip", "title": "Game"}]},
+            colls=[FAVS], files=["ROMs/gba/Game.zip"], manifest=surprise_manifest(True),
+            after=lambda d: read_from(d, "ES-DE", "collections", "custom-Favs.cfg"))
+        self.assertIsNone(self.after)
+        self.assertFalse([u for u in updates if "Favs" in (u.get("frontend_collections") or ())])
+
+    def test_a_surprise_that_is_also_a_direct_pick_writes_the_collection(self):
+        self.run_sync(
+            cards={"games": {"gba": [GAME]}, "surprise": True,
+                   "surprises": [{"system": "gba", "bucket": "gba/Game.zip", "title": "Game"}]},
+            colls=[FAVS], files=["ROMs/gba/Game.zip"], manifest=surprise_manifest(False),
+            after=lambda d: read_from(d, "ES-DE", "collections", "custom-Favs.cfg"))
+        self.assertEqual(self.after, "%ROMPATH%/gba/Game.zip\n")
+
+    def test_collections_off_writes_no_matched_collection(self):
+        _, _, updates, _, _ = self.run_sync(
+            cards={"games": {"gba": [GAME]}, "surprise": False, "custom_collections": False}, colls=[FAVS],
+            files=["ROMs/gba/Game.zip"], after=lambda d: read_from(d, "ES-DE", "collections", "custom-Favs.cfg"))
+        self.assertIsNone(self.after)
+        self.assertFalse([u for u in updates if "frontend_collections" in u])
+
+    def test_a_collection_with_no_game_on_the_card_is_not_written(self):
+        other = {"id": "other", "name": "Other", "games": [{"system": "gba", "bucket": "gba/Else.zip", "title": "Else"}]}
+        _, _, updates, _, _ = self.run_sync(
+            cards={"games": {"gba": [GAME]}, "surprise": False}, colls=[other], files=["ROMs/gba/Game.zip"],
+            after=lambda d: read_from(d, "ES-DE", "collections", "custom-Other.cfg"))
+        self.assertIsNone(self.after)
+        self.assertFalse([u for u in updates if "frontend_collections" in u])
+
+    def test_a_listed_collection_with_a_game_on_the_card_is_written_once(self):
+        self.run_sync(cards={"games": {"gba": [GAME]}, "collections": ["favs"], "surprise": False}, colls=[FAVS],
+                      files=["ROMs/gba/Game.zip"], after=lambda d: read_from(d, "ES-DE", "collections", "custom-Favs.cfg"))
+        self.assertEqual(self.after, "%ROMPATH%/gba/Game.zip\n")
 
     def test_a_collection_with_art_but_no_games_on_the_card_gets_none(self):
         installed = []

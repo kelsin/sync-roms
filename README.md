@@ -295,13 +295,13 @@ A card is a folder name (the card root's name) with a remembered device, layout 
 | a system in `games` set to `{"full_system": true}` | sync every file in the system's storage folder (subfolders included) instead of a list, so adding a file to storage is enough to publish it. No system is one by default. Toggled by `f` in the card editor (🗂️) or `games full SYSTEM on\|off`; the list the system had stays in the entry as `games` and comes back when it is switched off |
 | `sets` in `games` | ids of sets to sync whole. The reference is live: games added to the set later are synced too, for the systems the card's device can play. `games sets add ID --card NAME` adds one (the card editor's `s` picks a set's games one by one instead) |
 | `excluded` | `{"gba": ["gba/A.zip"]}`: set and collection games this card opts out of, by switching them off (and back on) in a system's game list, where they show as 📦 or 💖 |
-| `collections` | ids of your collections on this card; their games can be switched off one by one in a system's game list (into `excluded`) |
+| `collections` | ids of your collections on this card; their games can be switched off one by one in a system's game list (into `excluded`). Single games picked from a collection with `l` → `Enter` are ordinary picks in `games` |
 | `systems_off` | system ids turned off on this card with `x` in the card editor: nothing syncs for them and Surprise skips them, while their picks, sets and collections stay saved. Absent when none |
 | `surprise` | Surprise on or off, only when it differs from the layout's default |
 | `surprises` | the current surprises, `[{"system", "bucket", "title", "files"?}]`, `files` being a multi-disc game's other keys |
 | `surprise_excluded_systems` | system ids Surprise never picks from on this card, on top of the setting of the same name |
 | `theme` | `false` (like the next two, on when absent and switched in the card editor's `S` menu): a sync doesn't copy Art Book Next, doesn't select it in ES-DE or Knulli and adds no collection art (Surprise's included) |
-| `custom_collections` | `false`: a sync writes no collections to the frontend, Surprise's included (and, on Onion, no Surprise app), and removes the ones it wrote before; the games themselves still sync, Surprise's too |
+| `custom_collections` | A collection is written when it is on the card or any of its games is. `false`: a sync writes no collections to the frontend, Surprise's included (and, on Onion, no Surprise app), and removes the ones it wrote before; the games themselves still sync, Surprise's too |
 | `raofflineproxy` | `false`: no RAOfflineProxy on the card |
 | `muos_storage` | `muos` cards: `"sd1"` (default, mounted at `/mnt/mmc`) or `"sd2"` (`/mnt/sdcard`), the storage muOS reads the ROMs from, which collection entries point at. Set it by hand; there is no editor for it |
 | `spruce_theme` | `spruce` cards: the current PyUI theme (a folder name from storage's `os/spruceos/themes/`), picked in the card editor's `S` menu; synced when storage has it and set as the card's selected theme |
@@ -323,7 +323,7 @@ sync-roms edit
    - `Enter` opens a system, `f` makes it a full system (again brings the game list back).
    - `x` turns the system off on this card: nothing of it syncs and Surprise skips it, while its picks, sets and collections stay saved (again turns it back on).
    - `a` lists every game across the card's systems and `s` a set's games across them. In `s`'s list of sets, `Enter` opens a set (where `a` switches every game shown) and `Space` (or `Tab`) switches all its games on the card's systems on (or off when all are on already), as toggling each in the set would; full systems are untouched.
-   - `l` adds a collection to the card (each shows how many of its games are playable on the card's device, and `Space`/`Tab` toggles the whole collection, `Enter` is done).
+   - `l` adds a collection to the card (each shows how many of its games are playable on the card's device, `Space`/`Tab` toggles the whole collection, and `Enter` opens its games to pick them one by one, as direct picks; it also shows how many of its games are on the card).
    - `S` opens a settings menu: turn [Surprise](#surprise) (🎁), the card's theme (🎨), its custom collections (💖) and RAOfflineProxy (🏆) on or off, or pick the systems Surprise may use on every card or on this card. The menu stays open on the row you used until `Esc`.
    - `D` clears every pick, full system and set from the card.
    - `K` (opened from a sync) picks, in every system that isn't a full one, the files already on the card that match a storage game (names compared ignoring case), so a sync keeps them.
