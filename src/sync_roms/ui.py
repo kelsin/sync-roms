@@ -322,7 +322,8 @@ def eta(seconds):
 
 class ProgressBar:
     """One line under the log, then a line per file in flight: say() prints a line above it, draw() refreshes it. Does nothing but print on a non-tty."""
-    def __init__(self, count, fraction, total_bytes=None, io=None, active=None):
+    def __init__(self, count, fraction, total_bytes=None, io=None, active=None, glyph="↓"):
+        self.glyph = glyph  # starts each line under the bar: ↓ downloads, ↑ uploads, ⚙ conversions (one cell wide)
         self.active = active  # () -> [(name, moved, size)] of the files in flight, shown under the bar
         self.io = io  # a ByteProgress that also counts bytes written, to tell a slow network from a slow disk
         self.count, self.fraction = count, fraction  # fraction() is the 0-1 progress of the whole run
@@ -386,10 +387,10 @@ class ProgressBar:
         for name, moved, total in shown:
             filled = int(moved / total * 10)
             tail = f"  {moved / total:4.0%} of {human_size(total)}"
-            fit = width - cell_width("    ↓ ") - 11 - cell_width(tail)  # 11: the file's bar and a space
+            fit = width - cell_width(f"    {self.glyph} ") - 11 - cell_width(tail)  # 11: the file's bar and a space
             if cell_width(name) > fit:
                 name = cut_cells(name, max(0, fit - 1)) + "…"
-            line = cut_cells(f"    ↓ {'█' * filled}{'░' * (10 - filled)} {name}{tail}", width)  # cut plain, then colored
+            line = cut_cells(f"    {self.glyph} {'█' * filled}{'░' * (10 - filled)} {name}{tail}", width)  # cut plain, then colored
             lines.append(dim(line[:6]) + rainbow_bar(filled, 10) + dim(line[6 + filled:]))
         if len(shown) < len(active):
             lines.append(dim(f"    … and {len(active) - len(shown)} more"))
