@@ -653,9 +653,8 @@ const HOTKEY_SCHEME = [
 ];
 // Per layout: `auto` (what sets it, instead of steps), `steps` ([where, set]; set null for a step that is run, not set),
 // `differs` ({scheme button: what it does instead on this layout}), `extras` (other shortcuts the layout keeps),
-// `unknown` (nothing recorded yet for this layout).
+// `unknown` (nothing recorded yet for this layout), `note` (what to do when there are no steps, instead of the default text).
 const KNULLI_HOTKEYS = "Start > Game Settings > Per System Advanced Configuration > (system) > Controls > Hotkeys";
-const MUOS_HOTKEYS = "Pickles Menu > Settings > Input > Hotkeys > Hotkey Buttons";
 const HOTKEY_LAYOUT = {
   esde: {
     auto: `Run <code class="copy">sync-roms config apply &lt;card&gt;</code> with the device connected over adb: it sets RetroArch's hotkeys.`,
@@ -701,15 +700,9 @@ const HOTKEY_LAYOUT = {
     ],
   },
   muos: {
-    steps: [
-      [`${MUOS_HOTKEYS} > Fast Forward`, "R2, mode Press"],
-    ],
-    differs: {
-      R1: "not save state: Menu + R2 saves",
-      L1: "slow motion: Menu + L2 loads",
-      R2: "save state, and fast-forward too after the step below",
-      L2: "load state",
-    },
+    note: "Pickles' defaults differ from the scheme on these buttons; no steps recorded to change them.",
+    steps: [],
+    differs: { R1: "fast-forward (toggle)", L1: "slow motion", R2: "save state", L2: "load state" },
     extras: [
       "Tap Menu: Pickles Menu.",
       "R2 + Select + B: force quit.",
@@ -949,6 +942,7 @@ const SECTIONS = [
           const l = HOTKEY_LAYOUT[ctx.layout];
           if (l.auto) return `<p>${l.auto}</p>`;
           if (l.unknown) return "<p>Not recorded for this layout yet.</p>";
+          if (l.note) return `<p>${esc(l.note)}</p>`;
           if (!l.steps.length) return `<p>${Object.keys(l.differs).length ? "These can't be changed on this layout." : "Nothing to change."}</p>`;
           return `<ol>${l.steps.map(([where, set]) => set == null
             ? `<li>Run <span class="path">${path(where)}</span>.</li>`
