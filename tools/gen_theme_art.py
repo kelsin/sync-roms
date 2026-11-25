@@ -1061,6 +1061,77 @@ def zelda(p):  # shield
     p.c([(-17, 14), (0, 30), (17, 14)])
 
 
+def fire_emblem(p):  # the binding shield: five gem sockets around a flame
+    p.o(0, 0, 42)
+    for a in range(-90, 270, 72):
+        p.o(32 * math.cos(math.radians(a)), 32 * math.sin(math.radians(a)), 4.5)
+    p.o(0, 0, 21)
+    p.cc([(0, 15), (-9, 10), (-10, 1), (-6, -6), (-4, -16), (1, -8), (5, -12), (9, -2), (10, 8), (7, 13)])
+    p.cc([(0, 9), (-4, 5), (-3, 0), (0, -4), (3, 1), (4, 5)])
+
+
+def farming(p):  # harvest moon turnip
+    leaf = rounded([(0, -6), (-11, -20), (-12, -34), (-6, -44), (0, -48), (6, -44), (12, -34), (11, -20)], 4)
+    for a in (-42, 42):
+        p.path(turn(leaf, a, 0, -6), True)
+    p.path(leaf, True, opaque=True)
+    p.l([(0, -10), (0, -48)], 0)
+    half = spline([(0, -10), (17, -8), (28, 2), (27, 16), (18, 28), (7, 36), (0, 50)])
+    bulb = half + mirror(half[::-1])[1:-1]
+    p.path(bulb, True, opaque=True)
+    with p.inside(bulb):
+        p.c([(-32, 10), (-15, 4), (0, 9), (15, 4), (32, 10)])
+
+
+def phantasy_star(p):  # rappy
+    wing = [(20, -4), (38, -16), (48, -12), (44, -2), (50, 4), (44, 12), (46, 18), (26, 18)]
+    p.pg(wing, 2)
+    p.pg(mirror(wing), 2)
+    p.o(0, -30, 5, 13)
+    for s in (-1, 1):
+        p.o(s * 15, -26, 4.5, 11, rot=s * 30)
+    for x in (-11, 11):
+        p.pg([(x - 7, 50), (x, 38), (x + 7, 50)], 2)
+    p.o(0, 10, 32, 31, opaque=True)
+    for x in (-12, 12):
+        p.o(x, 0, 7)
+        p.o(x, 0, 2.2)
+        p.o(x, 0, 0.8)
+    p.pg([(0, 9), (7, 15), (0, 22), (-7, 15)], 1.5)
+    p.l([(-7, 15), (7, 15)], 0)
+
+
+def ys(p):  # wings around the black pearl
+    wing = (spline([(4, -6), (9, -26), (22, -42), (40, -50), (54, -48)])
+            + rounded([(54, -48), (55, -32), (47, -34), (51, -16), (42, -20), (42, -2), (33, -8), (28, 9), (20, 0),
+                       (12, 12), (4, 6)], 4, False)[1:])
+    vein = [(4, -12), (16, -26), (32, -34), (56, -38)]
+    shaft = spline(vein)
+    for side in (1, -1):
+        p.path([(x * side, y) for x, y in wing], True)
+        with p.inside([(x * side, y) for x, y in wing]):
+            p.c([(x * side, y) for x, y in vein])
+        for nx, ny in ((42, -20), (33, -8), (20, 0)):
+            top = min(shaft, key=lambda q: abs(q[0] - (nx - 6)))
+            p.l([(nx * side, ny), (top[0] * side, top[1])], 0)
+    p.o(0, 0, 13, opaque=True)
+    p.o(0, 0, 6)
+
+
+def horses(p):  # horse's head in a bridle
+    p.pg([(10, -40), (26, -36), (30, -26), (40, -24), (38, -12), (48, -6), (44, 6), (52, 14), (46, 26), (52, 36),
+          (44, 46), (20, 46)], 3)
+    head = spline([(14, 46), (8, 24), (0, 14), (-16, 22), (-30, 28), (-40, 20), (-38, 6), (-28, -14), (-14, -30),
+                   (-2, -36), (6, -50), (14, -38), (24, -22), (34, 10), (40, 46)])
+    p.path(head, True, opaque=True)
+    with p.inside(head):
+        p.c([(-44, -16), (-30, 4), (-18, 32)])
+        p.c([(-31, -1), (-14, -6), (2, -14), (14, -30), (22, -46)])
+    p.o(-12, -16, 2.2)
+    p.o(-12, -16, 0.8)
+    p.o(-33, 17, 3)
+
+
 # id: (drawing, band colour, rotation in degrees, scale, offset in px)
 ART = {
     "adventure": (adventure, (44, 146, 118), -6, 1.0, (0, 0)),
@@ -1103,6 +1174,11 @@ ART = {
     "donkey-kong": (donkey_kong, (134, 84, 48), 10, 1.0, (-12, 0)),
     "yoshi": (yoshi, (90, 180, 70), 12, 1.0, (0, 0)),
     "wario": (wario, (214, 168, 28), -6, 1.0, (2, 0)),
+    "fire-emblem": (fire_emblem, (182, 48, 44), -6, 1.0, (-10, 0)),
+    "farming": (farming, (148, 170, 60), 6, 1.0, (0, 0)),
+    "phantasy-star": (phantasy_star, (64, 88, 176), -5, 0.92, (-12, 0)),
+    "ys": (ys, (38, 112, 124), -6, 0.9, (-14, 0)),
+    "horses": (horses, (150, 96, 60), -5, 0.95, (-34, 0)),
     "pac-man": (pac_man, (28, 36, 96), -6, 1.0, (-12, 0)),
     "tetris": (tetris, (40, 170, 200), -5, 1.0, (-36, 0)),
     "dragon-quest": (dragon_quest, (60, 130, 220), -5, 1.0, (-6, 0)),
