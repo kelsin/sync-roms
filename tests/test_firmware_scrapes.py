@@ -484,6 +484,24 @@ class EsdeExtrasSyncTest(unittest.TestCase):
             wanted = mirroring.mirror_wanted({"systems": []})
         self.assertEqual(wanted, {"os/spruceos/spruceV4.6.0.7z": 2})
 
+    def test_mirror_keeps_runtimes_and_gamedata_for_cards_ports(self):
+        meta = {"a.zip": {"portmaster": {"folder": "a", "rtr": False, "runtime": ["rt1.squashfs"]}},
+                "b.zip": {"portmaster": {"folder": "b", "rtr": True, "runtime": []}}}
+        listings = {"ports/": {"ports/a.zip": 1, "ports/b.zip": 2, "ports/c.zip": 3},
+                    "os/portmaster/runtimes/": {"os/portmaster/runtimes/rt1.squashfs": 4, "os/portmaster/runtimes/rt2.squashfs": 5},
+                    "os/portmaster/gamedata/": {"os/portmaster/gamedata/a/d.dat": 6, "os/portmaster/gamedata/b/d.dat": 7,
+                                                "os/portmaster/gamedata/x/d.dat": 8, "os/portmaster/gamedata/y/d.dat": 9}}
+        manifest = {"systems": [{"bucket": "ports", "games": [{"bucket": "ports/a.zip"}, {"bucket": "ports/b.zip"}],
+                                 "bios": {"files": []}}]}
+        with mock.patch.object(mirroring.s3, "read_root", return_value=None), \
+                mock.patch.object(mirroring.s3, "list_sizes", side_effect=lambda p, sizes=True: listings.get(p, {})), \
+                mock.patch.object(mirroring.scrape_plan, "load_metadata", return_value=meta), \
+                mock.patch.object(mirroring.store, "load_cards", return_value={"c": {"portmaster_ports": ["x"]}}):
+            wanted = mirroring.mirror_wanted(manifest)
+        self.assertEqual({k: v for k, v in wanted.items() if k.startswith("os/portmaster/")},
+                         {"os/portmaster/runtimes/rt1.squashfs": 4, "os/portmaster/gamedata/a/d.dat": 6,
+                          "os/portmaster/gamedata/x/d.dat": 8})
+
     def test_mirror_wants_listed_and_current_themes(self):
         pre = "os/spruceos/themes/"
         listing = {pre + "A/config.json": 1, pre + "A/x.png": 2, pre + "B/config.json": 3, pre + "C/config.json": 4,

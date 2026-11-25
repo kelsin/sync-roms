@@ -4,7 +4,7 @@ import hashlib
 import os
 from concurrent.futures import ThreadPoolExecutor
 
-from . import bezels, downloads, drivers, inventory, onion_surprise, raofflineproxy, runtime, s3, scrape_plan, spruce_os, spruce_themes, store, themeart, ui, usersettings
+from . import bezels, downloads, drivers, inventory, onion_surprise, portmaster, portmaster_needed, raofflineproxy, runtime, s3, scrape_plan, spruce_os, spruce_themes, store, themeart, ui, usersettings
 
 
 MIRROR_PRUNE_ASK = 25  # delete more unreferenced mirror files than this (or over a tenth of it) only after confirming
@@ -18,15 +18,17 @@ def mirror_wanted(manifest):
     systems = manifest["systems"]
     todo = [s for s in systems if s.get("full_system") or store.listed(s)]
     with ThreadPoolExecutor(runtime.WORKERS) as ex:
-        others = [ex.submit(inventory.files, prefix) for prefix in ("BIOS/", runtime.THEMES_PREFIX, runtime.ESDE_THEMES_PREFIX, drivers.PREFIX, runtime.PICO8_PREFIX, runtime.APKS_PREFIX, bezels.PREFIX, runtime.ONION_PREFIX, runtime.SPRUCE_PREFIX, runtime.SPRUCE_THEMES_PREFIX)]
+        others = [ex.submit(inventory.files, prefix) for prefix in ("BIOS/", runtime.THEMES_PREFIX, runtime.ESDE_THEMES_PREFIX, drivers.PREFIX, runtime.PICO8_PREFIX, runtime.APKS_PREFIX, bezels.PREFIX, runtime.ONION_PREFIX, runtime.SPRUCE_PREFIX, runtime.SPRUCE_THEMES_PREFIX, portmaster.RUNTIMES, portmaster_needed.GAMEDATA)]
         proxy_listings = {prefix: ex.submit(inventory.files, prefix) for prefix in raofflineproxy.prefixes()}
         roms = list(ex.map(store.list_system, todo))
         scrapes = list(ex.map(lambda s: scrape_plan.scrape_listing(s["bucket"]), todo))
-        bios, themes, esde_themes, driver_zips, pico8_zips, apks, bezel_files, onion, spruce, spruce_theme_files = (f.result() for f in others)
-    wanted = {}
+        bios, themes, esde_themes, driver_zips, pico8_zips, apks, bezel_files, onion, spruce, spruce_theme_files, port_runtimes, port_data = (f.result() for f in others)
+    wanted, picked_ports = {}, set()
     for s, have, scraped in zip(todo, roms, scrapes):
         keys = [k for k in store.available_keys(s, have) if k in have]
         wanted.update((k, have[k]) for k in keys)
+        if s["bucket"] == portmaster.PORTS:
+            picked_ports.update(k.split("/", 1)[1] for k in keys)
         stems = {os.path.splitext(k.split("/", 1)[1])[0] for k in keys}
         for key, size in scraped.items():
             parts = key.split("/")
@@ -43,6 +45,7 @@ def mirror_wanted(manifest):
     prefix = runtime.SPRUCE_THEMES_PREFIX
     wanted.update((k, v) for k, v in spruce_theme_files.items()
                   if not k.endswith("/") and k[len(prefix):].split("/")[0] in chosen)
+    wanted.update(_port_files(picked_ports, port_runtimes, port_data))
     app = inventory.newest(onion, runtime.ONION_PREFIX, onion_surprise.PATTERN)
     if app:
         wanted[app] = onion[app]
@@ -54,6 +57,33 @@ def mirror_wanted(manifest):
         key = inventory.newest(listing, prefix, pattern)
         if key:
             wanted[key] = listing[key]
+    return wanted
+
+
+def _port_files(picked, runtimes, gamedata):
+    """{key: size} of the runtimes of the picked port zips, and the game data of their folders that need it and of the
+    folders the cards' `portmaster_ports` name."""
+    try:
+        metadata = scrape_plan.load_metadata(portmaster.PORTS) if picked or any(
+            isinstance(c, dict) and c.get("portmaster_ports") for c in store.load_cards().values()) else {}
+    except (ValueError, *s3.ERRORS):
+        metadata = {}
+    wanted, folders = {}, set()
+    for zip_name in picked:
+        entry = metadata.get(zip_name)
+        facts = entry.get("portmaster") if isinstance(entry, dict) else None
+        if not isinstance(facts, dict):
+            continue
+        for rt in facts.get("runtime") or []:
+            if portmaster.RUNTIMES + rt in runtimes:
+                wanted[portmaster.RUNTIMES + rt] = runtimes[portmaster.RUNTIMES + rt]
+        if not facts.get("rtr") and isinstance(facts.get("folder"), str) and facts["folder"].strip("/"):
+            folders.add(facts["folder"].strip("/"))
+    for card in store.load_cards().values():
+        if isinstance(card, dict):
+            folders.update(n.strip("/") for n in card.get("portmaster_ports") or [] if isinstance(n, str) and n.strip("/"))
+    wanted.update((k, v) for k, v in gamedata.items() if not k.endswith("/")
+                  and k[len(portmaster_needed.GAMEDATA):].split("/")[0] in folders)
     return wanted
 
 
