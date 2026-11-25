@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ROM Collections</title>
+<style>
+:root {
+  --bg: #f5f3ef;
+  --surface: #ffffff;
+  --surface-2: #f0ede7;
+  --text: #1f1d1a;
+  --muted: #6b665e;
+  --border: #e2ddd4;
+  --accent: #b4532a;
+  --accent-soft: #f6e3d8;
+  --accent-text: #8a3b19;
+  --shadow: 0 1px 2px rgba(40, 30, 20, .06), 0 4px 14px rgba(40, 30, 20, .06);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #161514;
+    --surface: #211f1d;
+    --surface-2: #2a2825;
+    --text: #ece8e1;
+    --muted: #a39d93;
+    --border: #36332f;
+    --accent: #e48a5c;
+    --accent-soft: #3b2a20;
+    --accent-text: #f2b08e;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 4px 14px rgba(0, 0, 0, .25);
+    color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+button, input, select { font: inherit; color: inherit; }
+.wrap { max-width: 1100px; margin: 0 auto; padding: 0 16px 48px; }
+header { padding: 28px 0 8px; }
+h1 { margin: 0; font-size: 26px; letter-spacing: -.01em; }
+.bar {
+  position: sticky; top: 0; z-index: 2;
+  background: var(--bg);
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 20px;
+}
+.controls { display: flex; flex-wrap: wrap; gap: 8px; }
+.controls input, .controls select, .controls button, .chip {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: 8px;
+  padding: 7px 10px;
+  min-width: 0;
+}
+.controls input { flex: 1 1 220px; }
+.controls select { flex: 0 1 220px; }
+.controls button { cursor: pointer; }
+input:focus-visible, select:focus-visible, button:focus-visible, summary:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 1px;
+}
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.chips:empty { display: none; }
+.chip { cursor: pointer; border-radius: 999px; padding: 4px 11px; font-size: 14px; }
+.chip[aria-pressed="true"] {
+  background: var(--accent-soft); border-color: var(--accent); color: var(--accent-text);
+}
+.count { margin-top: 10px; color: var(--muted); font-size: 14px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; align-items: start; }
+@media (max-width: 400px) { .grid { grid-template-columns: 1fr; } }
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  min-width: 0;
+}
+.pics {
+  display: flex; gap: 8px; justify-content: center; align-items: center;
+  padding: 12px; background: var(--surface-2); overflow: hidden; container-type: inline-size;
+}
+/* One height for all three pictures (about 2.05 heights wide together), shrunk to fit the card. */
+.pics img { display: block; height: min(150px, calc((100cqw - 40px) / 2.1)); width: auto; flex: none; border-radius: 6px; }
+.body { padding: 12px 14px 4px; }
+.head { display: flex; align-items: flex-start; gap: 10px; }
+.name { margin: 0; font-size: 18px; overflow-wrap: anywhere; flex: 1; min-width: 0; }
+.link {
+  flex: none; border: 1px solid var(--border); background: var(--surface); border-radius: 6px;
+  padding: 2px 8px; font-size: 13px; cursor: pointer;
+}
+.link.done { border-color: var(--accent); color: var(--accent-text); }
+.desc { margin: 4px 0 0; color: var(--muted); overflow-wrap: anywhere; }
+.meta { margin: 6px 0 0; font-size: 13px; color: var(--muted); }
+details { border-top: 1px solid var(--border); margin-top: 10px; }
+summary { cursor: pointer; padding: 10px 14px; color: var(--accent-text); font-weight: 600; font-size: 14px; }
+ul.games { list-style: none; margin: 0; padding: 0 0 6px; }
+.game {
+  display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; align-items: center;
+  padding: 8px 14px; border-top: 1px solid var(--border);
+}
+.game:nth-child(even) { background: var(--surface-2); }
+.title { overflow-wrap: anywhere; }
+.sub { grid-column: 1; font-size: 13px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.tags span { cursor: default; }
+.copy {
+  grid-column: 2; grid-row: 1 / span 2;
+  border: 1px solid var(--border); background: var(--surface); border-radius: 6px;
+  padding: 4px 10px; font-size: 13px; cursor: pointer; min-width: 64px;
+}
+.copy.done { border-color: var(--accent); color: var(--accent-text); }
+.nomatch { padding: 8px 14px; border-top: 1px solid var(--border); color: var(--muted); font-size: 14px; }
+.empty { color: var(--muted); text-align: center; padding: 48px 0; }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header><h1>ROM Collections</h1></header>
+  <div class="bar">
+    <div class="controls">
+      <input id="search" type="search" placeholder="Search collections and games" aria-label="Search">
+      <select id="system" aria-label="System"></select>
+      <button id="clear" type="button">Clear</button>
+    </div>
+    <div class="chips" id="chips"></div>
+    <div class="count" id="count"></div>
+  </div>
+  <main class="grid" id="grid"></main>
+  <p class="empty" id="empty" hidden></p>
+</div>
+<!-- The page's data, filled in by `sync-roms collections page`; empty in the repo. -->
+<script type="application/json" id="page-data">{}</script>
+<script>
+(function () {
+  "use strict";
+  var data = JSON.parse(document.getElementById("page-data").textContent);
+  var tagDefs = data.tags || {};
+  var systems = data.systems || {};
+  var list = data.collections || [];
+  var pressed = new Set();
+  var cards = [];
+  var current = null;
+
+  function el(tag, cls, text) {
+    var node = document.createElement(tag);
+    if (cls) node.className = cls;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+  function plural(n, word) { return n + " " + word + (n === 1 ? "" : "s"); }
+  function byName(a, b) { return a.name.localeCompare(b.name); }
+
+  var select = document.getElementById("system");
+  var all = el("option", "", "All systems");
+  all.value = "";
+  select.appendChild(all);
+  Object.keys(systems).map(function (id) { return {id: id, name: systems[id]}; }).sort(byName)
+    .forEach(function (s) {
+      var option = el("option", "", s.name);
+      option.value = s.id;
+      select.appendChild(option);
+    });
+
+  var chips = document.getElementById("chips");
+  Object.keys(tagDefs).map(function (id) { return {id: id, name: tagDefs[id].name, emoji: tagDefs[id].emoji}; })
+    .sort(byName).forEach(function (t) {
+      var chip = el("button", "chip", t.emoji + " " + t.name);
+      chip.type = "button";
+      chip.setAttribute("aria-pressed", "false");
+      chip.dataset.tag = t.id;
+      chip.addEventListener("click", function () {
+        if (pressed.has(t.id)) pressed.delete(t.id); else pressed.add(t.id);
+        chip.setAttribute("aria-pressed", String(pressed.has(t.id)));
+        update();
+      });
+      chips.appendChild(chip);
+    });
+
+  function fallbackCopy(text) {
+    var area = document.createElement("textarea");
+    area.value = text;
+    area.setAttribute("readonly", "");
+    area.style.position = "fixed";
+    area.style.opacity = "0";
+    document.body.appendChild(area);
+    area.select();
+    try {
+      return document.execCommand("copy") === true;
+    } catch (e) {
+      return false;
+    } finally {
+      document.body.removeChild(area);
+    }
+  }
+  function copy(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(text).then(function () { return true; },
+        function () { return fallbackCopy(text); });
+    }
+    return Promise.resolve(fallbackCopy(text));
+  }
+  function copyButton(button, text, label) {
+    var timer;
+    button.addEventListener("click", function () {
+      copy(text()).then(function (ok) {
+        button.textContent = ok ? "Copied" : "Copy failed";
+        button.classList.toggle("done", ok);
+        clearTimeout(timer);
+        timer = setTimeout(function () {
+          button.textContent = label;
+          button.classList.remove("done");
+        }, 1500);
+      });
+    });
+  }
+
+  function gameRow(game) {
+    var row = el("li", "game");
+    row.appendChild(el("span", "title", game.title));
+    var sub = el("span", "sub");
+    sub.appendChild(el("span", "", systems[game.system] || game.system));
+    var tagBox = el("span", "tags");
+    (game.tags || []).forEach(function (id) {
+      var def = tagDefs[id];
+      if (!def) return;
+      var span = el("span", "", def.emoji);
+      span.title = def.name;
+      tagBox.appendChild(span);
+    });
+    if (tagBox.childNodes.length) sub.appendChild(tagBox);
+    row.appendChild(sub);
+    var paths = (game.paths || []).join("\n");
+    var button = el("button", "copy", "Copy");
+    button.type = "button";
+    button.title = paths;
+    copyButton(button, function () { return paths; }, "Copy");
+    row.appendChild(button);
+    return row;
+  }
+
+  var grid = document.getElementById("grid");
+  list.forEach(function (c) {
+    var card = el("article", "card");
+    var art = c.art || {};
+    var pics = el("div", "pics");
+    [["box", "box"], ["band", "band"], ["totk", "ToTK"]].forEach(function (kind) {
+      if (!art[kind[0]]) return;
+      var img = document.createElement("img");
+      img.loading = "lazy";
+      img.src = art[kind[0]];
+      img.alt = c.name + " " + kind[1];
+      pics.appendChild(img);
+    });
+    if (pics.childNodes.length) card.appendChild(pics);
+    var body = el("div", "body");
+    var head = el("div", "head");
+    head.appendChild(el("h2", "name", c.name));
+    var link = el("button", "link", "🔗");
+    link.type = "button";
+    link.title = "Copy link to this collection";
+    link.setAttribute("aria-label", "Copy link to this collection");
+    copyButton(link, function () { return pageUrl() + "#" + params(c.id).toString(); }, "🔗");
+    head.appendChild(link);
+    body.appendChild(head);
+    if (c.description) body.appendChild(el("p", "desc", c.description));
+    var meta = el("p", "meta");
+    body.appendChild(meta);
+    card.appendChild(body);
+    var details = el("details");
+    var summary = el("summary", "", "Games");
+    details.appendChild(summary);
+    var ul = el("ul", "games");
+    var rows = (c.games || []).map(function (g) {
+      var row = gameRow(g);
+      ul.appendChild(row);
+      return {game: g, row: row};
+    });
+    var nomatch = el("li", "nomatch", "No games match the filters");
+    nomatch.hidden = true;
+    ul.appendChild(nomatch);
+    details.appendChild(ul);
+    details.hidden = !rows.length;
+    summary.addEventListener("click", function () {
+      if (!details.open) current = c.id;
+      else if (current === c.id) current = null;
+      writeHash();
+    });
+    card.appendChild(details);
+    grid.appendChild(card);
+    cards.push({collection: c, card: card, meta: meta, details: details, summary: summary, rows: rows,
+                 nomatch: nomatch});
+  });
+
+  var search = document.getElementById("search");
+  var count = document.getElementById("count");
+  var empty = document.getElementById("empty");
+
+  function params(collection) {
+    var out = new URLSearchParams();
+    var query = search.value.trim();
+    if (query) out.set("q", query);
+    if (select.value) out.set("system", select.value);
+    if (pressed.size) out.set("tags", Array.from(pressed).sort().join(","));
+    if (collection) out.set("c", collection);
+    return out;
+  }
+  function pageUrl() {
+    if (location.origin === "null") return location.href.split("#")[0];
+    return location.origin + location.pathname;
+  }
+  function writeHash() {
+    var hash = params(current).toString();
+    try {
+      if (hash) history.replaceState(null, "", "#" + hash);
+      else history.replaceState(null, "", location.pathname + location.search);
+    } catch (e) {
+      // Some browsers refuse replaceState on file:// pages; the page still works without the hash.
+    }
+  }
+  function applyHash() {
+    var hash = new URLSearchParams(location.hash.slice(1));
+    search.value = hash.get("q") || "";
+    var system = hash.get("system") || "";
+    select.value = Object.prototype.hasOwnProperty.call(systems, system) ? system : "";
+    pressed.clear();
+    (hash.get("tags") || "").split(",").forEach(function (id) {
+      if (id && Object.prototype.hasOwnProperty.call(tagDefs, id)) pressed.add(id);
+    });
+    chips.querySelectorAll(".chip").forEach(function (chip) {
+      chip.setAttribute("aria-pressed", String(pressed.has(chip.dataset.tag)));
+    });
+    var wanted = hash.get("c");
+    var target = cards.filter(function (entry) { return entry.collection.id === wanted; })[0];
+    current = target ? wanted : null;
+    update();
+    if (target) {
+      var top = target.card.getBoundingClientRect().top + window.scrollY;
+      window.scrollTo(0, top - document.querySelector(".bar").offsetHeight - 12);
+    }
+  }
+
+  function update() {
+    var query = search.value.trim().toLowerCase();
+    var system = select.value;
+    var filtering = Boolean(query || system || pressed.size);
+    var shownCollections = 0, shownGames = 0;
+    cards.forEach(function (entry) {
+      var nameHit = query && entry.collection.name.toLowerCase().indexOf(query) !== -1;
+      var passing = 0;
+      entry.rows.forEach(function (r) {
+        var g = r.game;
+        var ok = (!query || nameHit || String(g.title).toLowerCase().indexOf(query) !== -1) &&
+          (!system || g.system === system) &&
+          Array.from(pressed).every(function (t) { return (g.tags || []).indexOf(t) !== -1; });
+        r.row.hidden = !ok;
+        if (ok) passing++;
+      });
+      var picked = entry.collection.id === current;
+      var noneMatch = picked && filtering && passing === 0;
+      entry.nomatch.hidden = !noneMatch;
+      entry.details.hidden = !entry.rows.length && !noneMatch;
+      var visible = picked || !filtering || passing > 0;
+      entry.card.hidden = !visible;
+      entry.details.open = picked || (filtering && passing > 0);
+      var total = entry.rows.length;
+      entry.meta.textContent = filtering && passing !== total
+        ? passing + " of " + plural(total, "game") : plural(total, "game");
+      entry.summary.textContent = filtering ? "Matching games" : "Games";
+      if (visible) { shownCollections++; shownGames += passing; }
+    });
+    count.textContent = plural(shownCollections, "collection") + " · " + plural(shownGames, "game");
+    if (!list.length) {
+      empty.textContent = "No collections yet.";
+      empty.hidden = false;
+    } else if (!shownCollections) {
+      empty.textContent = "No games match.";
+      empty.hidden = false;
+    } else {
+      empty.hidden = true;
+    }
+    writeHash();
+  }
+
+  search.addEventListener("input", update);
+  select.addEventListener("change", update);
+  document.getElementById("clear").addEventListener("click", function () {
+    search.value = "";
+    select.value = "";
+    pressed.clear();
+    chips.querySelectorAll(".chip").forEach(function (c) { c.setAttribute("aria-pressed", "false"); });
+    update();
+  });
+  window.addEventListener("hashchange", applyHash);
+  applyHash();
+})();
+</script>
+</body>
+</html>
