@@ -56,7 +56,7 @@ def load_collections():
         if problem and path not in store._warned:
             store._warned.add(path)
             ui.warn(problem)
-    return sorted(found, key=lambda c: c["name"].lower())
+    return sorted(found, key=lambda c: store.sort_key(c["name"]))
 
 
 def save_collection(collection):

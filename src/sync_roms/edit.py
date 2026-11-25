@@ -121,7 +121,7 @@ def toggle_games(title, rows, hotkeys=(), hint=None, place=None, filters="", key
 
 def system_rows(s, in_bucket):
     """Rows for toggle_games over every file of a system's storage folder (Vita DLC and updates only if listed)
-    plus any listed game that isn't in it."""
+    plus any listed game that isn't in it, sorted by title (an arcade set's or PICO-8 cart's scraped name)."""
     listed = {g["bucket"] for g in s["games"] if g.get("bucket")}
 
     def label(k, title):
@@ -129,9 +129,8 @@ def system_rows(s, in_bucket):
         return (path if title == store.key_title(k) else f"{title} — {path}") \
             + ("" if k in in_bucket else "  ⚠️ not in storage")
 
-    return [(s, k, title, label(k, title))
-            for k in sorted(in_bucket | listed, key=str.lower) if not vita.is_extra(k) or k in listed
-            for title in [names.title(k)]]
+    titled = [(k, names.title(k)) for k in in_bucket | listed if not vita.is_extra(k) or k in listed]
+    return [(s, k, title, label(k, title)) for k, title in sorted(titled, key=lambda r: (store.sort_key(r[1]), r[0]))]
 
 
 def edit_card_system(card, bucket, setup):
@@ -160,7 +159,7 @@ def set_rows(game_set, by_bucket, bucket_keys):
         cat = g.get("category") or ""
         order.setdefault(cat, len(order))
         rows.append((cat, (s, key, title, f"{cat + ' — ' if cat else ''}{s['name']} — {title}{warn}")))
-    return [r for _, r in sorted(rows, key=lambda c: (order[c[0]], c[1][0]["name"].lower(), c[1][2].lower()))]
+    return [r for _, r in sorted(rows, key=lambda c: (order[c[0]], c[1][0]["name"].lower(), store.sort_key(c[1][2])))]
 
 
 def valid_card_name(name, existing):

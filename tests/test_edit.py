@@ -32,6 +32,28 @@ class Helpers(unittest.TestCase):
         s["games"] = []
         self.assertEqual([r[1] for r in edit.system_rows(s, {G, DLC, NEW})], [G])
 
+    def test_sort_key_skips_leading_articles(self):
+        titles = ["Lost Vikings 2", "The Lost Vikings", "An American Tail", "A Boy and His Blob", "Theme Park",
+                  "Bomberman", "Another World", "Animal Crossing"]
+        self.assertEqual(sorted(titles, key=store.sort_key),
+                         ["An American Tail", "Animal Crossing", "Another World", "Bomberman", "A Boy and His Blob",
+                          "The Lost Vikings", "Lost Vikings 2", "Theme Park"])
+
+    def test_system_rows_sort_without_leading_articles(self):
+        s = {"bucket": "snes", "games": []}
+        keys = {"snes/Lost Vikings 2 (USA).zip", "snes/The Lost Vikings (USA).zip", "snes/Mega Man X (USA).zip",
+                "snes/Lost Vikings, The (Europe).zip"}
+        self.assertEqual([r[1] for r in edit.system_rows(s, keys)],
+                         ["snes/The Lost Vikings (USA).zip", "snes/Lost Vikings, The (Europe).zip",
+                          "snes/Lost Vikings 2 (USA).zip", "snes/Mega Man X (USA).zip"])
+
+    def test_system_rows_sort_arcade_sets_by_scraped_name(self):
+        s = {"bucket": "mame", "games": []}
+        scraped = {"mame": {"aaa.zip": "The Simpsons (4 Players World, set 1)", "zzz.zip": "Galaga (Namco rev. B)"}}
+        with mock.patch.object(names, "_scraped", scraped):
+            self.assertEqual([r[1] for r in edit.system_rows(s, {"mame/aaa.zip", "mame/zzz.zip"})],
+                             ["mame/zzz.zip", "mame/aaa.zip"])
+
     def test_system_rows_use_arcade_names(self):
         s = {"bucket": "fbneo", "games": []}
         with mock.patch.object(names, "_scraped", {"fbneo": {"1941j.zip": "1941: Counter Attack (Japan)"}}):

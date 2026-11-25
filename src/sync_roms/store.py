@@ -751,7 +751,7 @@ def load_sets():
     "series" (optional) names the game's series (one of data/series.json), to narrow the editors to it.
     "files" are extra bucket keys (e.g. the discs of a multi-disc game) toggled together with "bucket".
     """
-    return sorted(set_files(), key=lambda x: x["name"].lower())
+    return sorted(set_files(), key=lambda x: sort_key(x["name"]))
 
 
 def write_set(set_id, game_set):
@@ -770,6 +770,14 @@ def delete_set(set_id):
 
 def slug(name):
     return re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
+
+
+def sort_key(name):
+    """name as it sorts: case, a leading "The", "A" or "An" (or a trailing ", The") and then its tags ("(USA)",
+    "[!]") left out, so "Lost Vikings 2 (USA)" follows "The Lost Vikings (USA)"."""
+    full = re.sub(r"^(the|an?)\s+(?=\S)", "", name.casefold())
+    base = re.sub(r"\s*[(\[].*", "", full)
+    return re.sub(r",\s*(the|an?)$", "", base), full
 
 
 def sort_games(games):

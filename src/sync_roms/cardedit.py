@@ -1038,7 +1038,7 @@ def edit_set(name, game_set, setup, to_fetch=None, card_usages=None, narrow_sets
     if narrow_sets:
         label_of = {g["bucket"]: g["label"] for g in game_set["games"]}
         rows = sorted(((s, key, title, f"{s['name']} — {label_of[key]}") for s, key, title, _ in rows),
-                      key=lambda r: (r[2].lower(), r[0]["name"].lower()))
+                      key=lambda r: (store.sort_key(r[2]), r[0]["name"].lower()))
     listed = [r for r in rows if r[0]["bucket"] not in sps  # a shown playlist hides its discs
               or sps[r[0]["bucket"]].playlist_of.get(r[1]) not in files_of]
     series_filter = None  # the series the list is narrowed to
