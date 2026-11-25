@@ -1,4 +1,6 @@
-"""The spruce settings saved in settings.json (the ra_* RetroAchievements ones and the allowlisted spruce_settings), written into a spruce card's Saves/spruce/spruce-config.json, and the import of the latter from a card."""
+"""The spruce settings saved in settings.json (the ra_* RetroAchievements ones and the allowlisted spruce_settings), written into a spruce card's Saves/spruce/spruce-config.json, and the import of the latter from a card.
+ra_api_key also goes in Saves/cheevos/apikey.txt, where spruceOS's Cheevos app reads it (spruceOS itself writes that file only
+when the key is typed in its menu)."""
 import json
 import os
 import re
@@ -28,6 +30,43 @@ def wanted():
 
 
 HIDDEN = ("password", "webApiKey")  # block keys whose values are never shown
+KEY_FILE = os.path.join("Saves", "cheevos", "apikey.txt")
+API_KEY = re.compile(r"[A-Za-z0-9]{32}")  # the shape Cheevos and spruceOS accept
+
+
+def _api_key(base):
+    """(key file's current first line or None, key to write) when ra_api_key should be in the card's Saves/cheevos/apikey.txt,
+    else None: not set, not a Web API key's shape (warned about), or no Saves/ on the card (spruceOS not installed)."""
+    key = usersettings.load_settings().get("ra_api_key")
+    if not isinstance(key, str) or not key.strip():
+        return None
+    key = key.strip()
+    if not API_KEY.fullmatch(key):
+        ui.warn("ra_api_key isn't a RetroAchievements Web API key (32 letters and digits); not written to "
+                + KEY_FILE.replace(os.sep, "/"))
+        return None
+    if not os.path.isdir(os.path.join(base, "Saves")):
+        return None
+    lines = [line.strip() for line in cardfs.text(os.path.join(base, KEY_FILE)).splitlines() if line.strip()]
+    return (lines[0] if lines else None), key
+
+
+def _key_entries(base):
+    found = _api_key(base)
+    return [applied.Entry(KEY_FILE.replace(os.sep, "/"), "key", found[0], found[1], True)] if found else []
+
+
+def _install_key(base, dry_run):
+    """Write ra_api_key into the card's Saves/cheevos/apikey.txt when it differs."""
+    found = _api_key(base)
+    if not found or found[0] == found[1]:
+        return
+    shown = KEY_FILE.replace(os.sep, "/")
+    if dry_run:
+        print(ui.dim(f"🧪 Dry run: would write the RetroAchievements Web API key to {shown}"))
+        return
+    cardfs.write_text(os.path.join(base, KEY_FILE), found[1] + "\n")
+    print(f"🏆 RetroAchievements Web API key → {shown}")
 
 
 def _lines(values):
@@ -109,12 +148,13 @@ def entries(card, base):
     values = wanted()
     extra = wanted_settings()
     forced = spruce_syncthing.forced_settings(card)
+    keys = _key_entries(base)
     if not values and not extra and not forced:
-        return []
+        return keys
     shown = FILE.replace(os.sep, "/")
     found = _options(base, shown)
     if not found:
-        return []
+        return keys
     options = found[2]
     result = []
     for key, value in values.items():
@@ -130,7 +170,7 @@ def entries(card, base):
             result.append(applied.Entry(shown, f"{section} / {key} (Syncthing)", entry.get("selected"), value, False))
         else:
             ui.warn(f"{shown} has no {section} / {key}; update spruceOS for Syncthing saves to work")
-    return result
+    return result + keys
 
 
 def install(card, layout_name, base, dry_run):
@@ -139,6 +179,7 @@ def install(card, layout_name, base, dry_run):
     The failure count (always 0: a file that can't be used is warned about and skipped)."""
     if layout_name != "spruce":
         return 0
+    _install_key(base, dry_run)
     from . import spruce_syncthing
     values = wanted()
     extra = wanted_settings()
