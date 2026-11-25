@@ -1,5 +1,35 @@
 # Changelog
 
+## [3.36.0](https://github.com/kelsin/sync-roms/compare/v3.35.0...v3.36.0) (2026-11-25)
+
+
+### :video_game: Features
+
+* **android:** set up syncthing-fork and raofflineproxy in config apply ([#597](https://github.com/kelsin/sync-roms/issues/597)) ([4b5ab65](https://github.com/kelsin/sync-roms/commit/4b5ab651f70c253023c8b1e0f75ebb677b014d25))
+* copy android bezels to esde cards ([#594](https://github.com/kelsin/sync-roms/issues/594)) ([a7b8cc6](https://github.com/kelsin/sync-roms/commit/a7b8cc65a36addb28e041f5cbb65a6d7672ddf26))
+* **edit:** add a whole set's games from the card editor ([#586](https://github.com/kelsin/sync-roms/issues/586)) ([ba0ee25](https://github.com/kelsin/sync-roms/commit/ba0ee25f595d9c70992bf95ee2285d074f99608d))
+* **edit:** show a language flag on game rows ([#591](https://github.com/kelsin/sync-roms/issues/591)) ([007e7ea](https://github.com/kelsin/sync-roms/commit/007e7eaa2cd2c0cca8e40902097610f5ab953be4))
+* **edit:** show each card's own collection art in its set and collection lists ([#588](https://github.com/kelsin/sync-roms/issues/588)) ([c6d2cd3](https://github.com/kelsin/sync-roms/commit/c6d2cd3815ee56527c33e9c8a4e709f4225d4fb6))
+* **edit:** sort titles without leading articles ([#589](https://github.com/kelsin/sync-roms/issues/589)) ([58f9f6c](https://github.com/kelsin/sync-roms/commit/58f9f6c90f1c1368104fc2e1e70ecdec63a96eac))
+* one hotkey scheme for spruce cards and android ([#599](https://github.com/kelsin/sync-roms/issues/599)) ([7c34cee](https://github.com/kelsin/sync-roms/commit/7c34ceea08c0b9b1af36f78aad4ec1f608b5ab18))
+* **sync:** add a one-theme mode for spruce cards ([#593](https://github.com/kelsin/sync-roms/issues/593)) ([1c872ca](https://github.com/kelsin/sync-roms/commit/1c872cad1adaa4abc2cd5203b195f2c9279384de))
+* **sync:** drop spruceOS sample ROM files without asking ([#590](https://github.com/kelsin/sync-roms/issues/590)) ([03dd58f](https://github.com/kelsin/sync-roms/commit/03dd58f282af9f5c27c2c44b7fa60b1d2dd943e6))
+* **sync:** write the RA web api key to spruce cards for cheevos ([#595](https://github.com/kelsin/sync-roms/issues/595)) ([ca8189d](https://github.com/kelsin/sync-roms/commit/ca8189d1b5f49d777ea116f1cf67b8b0b62fd8ae))
+* **ui:** draw progress bars as rainbows ([#592](https://github.com/kelsin/sync-roms/issues/592)) ([5a607df](https://github.com/kelsin/sync-roms/commit/5a607dffa714c6c52a2285faaa139e154c68eb5d))
+
+
+### :bug: Bug Fixes
+
+* **cards:** default the cards install confirm to yes ([#583](https://github.com/kelsin/sync-roms/issues/583)) ([caf5804](https://github.com/kelsin/sync-roms/commit/caf58049374cc11c54c6453037c870c86189df36))
+* correct data-loss, storage and CLI defects found in a code review ([#585](https://github.com/kelsin/sync-roms/issues/585)) ([0e1fdd1](https://github.com/kelsin/sync-roms/commit/0e1fdd19aa5407b9344baa7eb931afdb8ddeba18))
+* make enter confirm non-destructive prompts and guard them without a terminal ([#587](https://github.com/kelsin/sync-roms/issues/587)) ([b248d10](https://github.com/kelsin/sync-roms/commit/b248d10e1f5765be8daf16bddc2f164d29aac3ce))
+* **themes:** scale pixel theme font sizes per screen ([#596](https://github.com/kelsin/sync-roms/issues/596)) ([845c4b5](https://github.com/kelsin/sync-roms/commit/845c4b50414fe21818b65dc590b192b6fa5afd7e))
+
+
+### :book: Documentation
+
+* **guide:** add a local network multiplayer section ([#598](https://github.com/kelsin/sync-roms/issues/598)) ([d745180](https://github.com/kelsin/sync-roms/commit/d7451801bac42a1b1142e0c605d5a3d062f00e50))
+
 ## [3.35.0](https://github.com/kelsin/sync-roms/compare/v3.34.0...v3.35.0) (2026-11-24)
 
 
