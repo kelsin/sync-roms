@@ -5,6 +5,7 @@ import json
 import os
 import shutil
 import sys
+import tempfile
 import unittest
 from unittest import mock
 
@@ -453,6 +454,43 @@ class Download(helpers.StorageDir):
         self.assertIn("x-2.p8.png", err)
         self.assertEqual(self.stored(), {"pico8/molemole-1.p8.png", META})
         self.assertEqual(self.meta(), {"molemole-1.p8.png": {"name": "Mole Mole", "developer": "Adam Atomic"}})
+
+    def add(self, todo):
+        """bbs.add_carts with a fetch that writes PNG into tmp; (result, stderr)."""
+        def fetch(cart, tmp):
+            path = os.path.join(tmp, cart["file"])
+            with open(path, "wb") as f:
+                f.write(PNG)
+            return path
+        err = io.StringIO()
+        with tempfile.TemporaryDirectory() as tmp, contextlib.redirect_stderr(err):
+            return bbs.add_carts(todo, fetch, tmp), err.getvalue()
+
+    def test_add_carts_from_local_files(self):
+        result, _ = self.add([(None, {"file": "x-0.p8.png", "title": "T", "author": "A"})])
+        self.assertEqual(result, (["pico8/x-0.p8.png"], 0, 0))
+        self.assertEqual(self.stored(), {"pico8/x-0.p8.png", META})
+        self.assertEqual(self.meta(), {"x-0.p8.png": {"name": "T", "developer": "A"}})
+
+    def test_add_carts_without_title_writes_no_metadata_entry(self):
+        result, _ = self.add([(None, {"file": "x-0.p8.png", "title": None, "author": None})])
+        self.assertEqual(result, (["pico8/x-0.p8.png"], 0, 0))
+        self.assertIn("pico8/x-0.p8.png", self.stored())
+        self.assertNotIn("x-0.p8.png", self.meta())
+
+    def test_add_carts_upgrade_without_title_keeps_the_old_entry(self):
+        entry = {"name": "Old", "developer": "D"}
+        self.put("pico8/x-1.p8.png")
+        self.put(META, json.dumps({"x-1.p8.png": entry}).encode())
+        os.makedirs(self.data, exist_ok=True)
+        helpers.write_json(os.path.join(self.data, "cards.json"),
+                           {"c": {"games": {"pico8": [{"title": "Old", "bucket": "pico8/x-1.p8.png"}]}}})
+        result, _ = self.add([("pico8/x-1.p8.png", {"file": "x-2.p8.png", "title": None, "author": None})])
+        self.assertEqual(result, ([], 1, 0))
+        self.assertEqual(self.meta(), {"x-2.p8.png": entry})
+        self.assertNotIn("pico8/x-1.p8.png", self.stored())
+        with open(os.path.join(self.data, "cards.json")) as f:
+            self.assertEqual(json.load(f)["c"]["games"]["pico8"], [{"title": "Old", "bucket": "pico8/x-2.p8.png"}])
 
 
 if __name__ == "__main__":
