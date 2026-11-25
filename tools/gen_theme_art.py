@@ -1183,15 +1183,29 @@ def star_fox(p):  # arwing, seen from the front
     p.o(0, 17, 4)
 
 
-def contra(p):  # the title's C: a heavy block letter, chamfered and slanted, with a bevel line
-    def slant(pts):
-        return [(x - 0.22 * y, y) for x, y in pts]
+def contra(p):  # the flame c: a swoosh of fire from a flaring head at upper right round to a thin tail at lower right
+    a0, a1, r = -36, -312, 33       # angles (0 right, 90 down): from the head over the top, down the left, to the tail
 
-    letter = slant([(-16, -42), (38, -42), (38, -22), (-10, -22), (-10, 22), (38, 22), (38, 42), (-16, 42),
-                    (-34, 24), (-34, -24)])
-    p.pg(letter, 2.5)
-    with p.inside(rounded(letter, 2.5)):
-        p.l(slant([(44, -32), (-12, -32), (-22, -22), (-22, 22), (-12, 32), (44, 32)]), 2)
+    def at(a, rad):
+        return (rad * math.cos(math.radians(a)), rad * math.sin(math.radians(a)))
+
+    def lick(i, period):
+        """A flame tongue's profile: rising slowly from its root to a sharp tip, then dropping back."""
+        f = (i % period) / period
+        return f * f
+
+    outer, inner = [], []
+    n = 276
+    for i in range(n + 1):
+        t = i / n
+        a = a0 + (a1 - a0) * t
+        w = (3 + 27 * (1 - t) ** 1.3) / 2
+        fade = min(1, (n - i) / 40)
+        outer.append(at(a, r + w + (3 + 7 * (1 - t)) * fade * lick(n - i, 23)))
+        inner.append(at(a, r - w - 5 * fade * lick(n - i + 20, 46)))
+    head = [at(a0 + 3, r - 10), at(a0 + 16, r - 6), at(a0 + 5, r - 1), at(a0 + 20, r + 7), at(a0 + 5, r + 9),
+            at(a0 + 14, r + 22)]
+    p.pg(outer + inner[::-1] + head, 1.2)
 
 
 def ninja_gaiden(p):  # katana and a shuriken
@@ -1279,7 +1293,7 @@ ART = {
     "ys": (ys, (38, 112, 124), -6, 0.9, (-14, 0)),
     "horses": (horses, (150, 96, 60), -5, 0.95, (-34, 0)),
     "star-fox": (star_fox, (46, 92, 168), -6, 1.0, (-10, 0)),
-    "contra": (contra, (176, 52, 40), -6, 1.0, (-14, 0)),
+    "contra": (contra, (44, 52, 104), 0, 0.9, (-28, 0)),
     "ninja-gaiden": (ninja_gaiden, (92, 40, 110), 0, 1.0, (-6, 0)),
     "gradius": (gradius, (34, 74, 120), -6, 0.9, (-22, 0)),
     "metal-slug": (metal_slug, (120, 110, 56), -4, 1.0, (-14, 0)),
