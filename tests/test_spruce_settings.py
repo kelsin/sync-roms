@@ -171,6 +171,89 @@ class Entries(InstallBase):
         self.assertEqual(keys, ["Emulator Settings / raAutoSave"])
 
 
+KEY = "0123456789abcdefABCDEF0123456789"
+
+
+class ApiKeyFile(InstallBase):
+    def setUp(self):
+        super().setUp()
+        self.key_path = self.cp("Saves", "cheevos", "apikey.txt")
+
+    def key_file(self):
+        with open(self.key_path, encoding="utf-8") as f:
+            return f.read()
+
+    def test_writes_the_key_for_cheevos(self):
+        self.put_config(BASE)
+        out = self.run_install(ra_api_key=KEY)
+        self.assertEqual(self.key_file(), KEY + "\n")
+        self.assertEqual(self.block()["webApiKey"], {"selected": KEY})
+        self.assertIn("Saves/cheevos/apikey.txt", out)
+        self.assertNotIn(KEY, out + self.err.getvalue())
+
+    def test_written_without_spruce_config(self):
+        os.makedirs(self.cp("Saves"))
+        self.run_install(ra_api_key=KEY)
+        self.assertEqual(self.key_file(), KEY + "\n")
+
+    def test_not_written_without_saves(self):
+        self.run_install(ra_api_key=KEY)
+        self.assertFalse(os.path.exists(self.key_path))
+
+    def test_same_key_is_not_rewritten(self):
+        self.put_config(BASE)
+        os.makedirs(os.path.dirname(self.key_path))
+        with open(self.key_path, "w", encoding="utf-8") as f:
+            f.write("\n" + KEY + "  \r\n")
+        out = self.run_install(ra_api_key=KEY)
+        self.assertEqual(self.key_file(), "\n" + KEY + "  \n")
+        self.assertNotIn("apikey.txt", out)
+
+    def test_other_key_is_replaced(self):
+        self.put_config(BASE)
+        os.makedirs(os.path.dirname(self.key_path))
+        with open(self.key_path, "w", encoding="utf-8") as f:
+            f.write("x" * 32 + "\n")
+        self.run_install(ra_api_key=KEY)
+        self.assertEqual(self.key_file(), KEY + "\n")
+
+    def test_bad_key_is_warned_about_and_not_written(self):
+        self.put_config(BASE)
+        self.run_install(ra_api_key="short")
+        self.assertFalse(os.path.exists(self.key_path))
+        self.assertIn("isn't a RetroAchievements Web API key", self.err.getvalue())
+        self.assertNotIn("short", self.err.getvalue())
+
+    def test_unset_key_leaves_the_file(self):
+        self.put_config(BASE)
+        os.makedirs(os.path.dirname(self.key_path))
+        with open(self.key_path, "w", encoding="utf-8") as f:
+            f.write(KEY + "\n")
+        self.run_install(ra_mode="Casual")
+        self.assertEqual(self.key_file(), KEY + "\n")
+
+    def test_dry_run_writes_nothing(self):
+        self.put_config(BASE)
+        out = self.run_install(dry_run=True, ra_api_key=KEY)
+        self.assertFalse(os.path.exists(self.key_path))
+        self.assertIn("would write the RetroAchievements Web API key", out)
+
+    def test_other_layouts_are_untouched(self):
+        self.put_config(BASE)
+        self.run_install(layout="onion", ra_api_key=KEY)
+        self.assertFalse(os.path.exists(self.key_path))
+
+    def test_entries_list_the_key_file_hidden(self):
+        self.put_config(BASE)
+        usersettings.save_settings({"syncthing": False, "ra_api_key": KEY})
+        with contextlib.redirect_stderr(io.StringIO()):
+            found = {e.where: e for e in spruce_settings.entries("c", self.card)}
+        entry = found["Saves/cheevos/apikey.txt"]
+        self.assertIsNone(entry.old)
+        self.assertEqual(entry.new, KEY)
+        self.assertTrue(entry.secret)
+
+
 class SharedSettings(Install):
     def shared(self, data):
         usersettings.save_settings({"spruce_settings": data})
