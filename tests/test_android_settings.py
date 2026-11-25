@@ -362,11 +362,18 @@ class Apply(helpers.DataDir):
 
     def test_apply_dry_run_lists_overlay_only_with_bezels(self):
         self.files[self.cfg_path] = RIGHT_CFG
-        with mock.patch.object(bezels, "files", lambda d: {"os/android/bezels/x/a.cfg": 1}):
+        with mock.patch.object(bezels, "files", lambda d: {"os/android/bezels/d/retroarch/a.cfg": 1}):
             self.run_apply(dry_run=True, device_id="d")
         self.assertIn("overlay_directory", self.out.getvalue())
+        self.assertIn("/storage/6AF3-53E9/Bezels/retroarch", self.out.getvalue())
         self.out.truncate(0), self.out.seek(0)
         with mock.patch.object(bezels, "files", lambda d: {}):
+            self.run_apply(dry_run=True, device_id="d")
+        self.assertNotIn("overlay_directory", self.out.getvalue())
+
+    def test_apply_no_overlay_for_drastic_only_bezels(self):
+        self.files[self.cfg_path] = RIGHT_CFG
+        with mock.patch.object(bezels, "files", lambda d: {"os/android/bezels/d/drastic/a.png": 1}):
             self.run_apply(dry_run=True, device_id="d")
         self.assertNotIn("overlay_directory", self.out.getvalue())
 

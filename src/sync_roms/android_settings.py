@@ -378,7 +378,8 @@ def apply(target, layout, systems, dry_run, device_id=None):
     failed = []
     overlay = None
     try:
-        if device_id and bezels.files(device_id):
+        folder = bezels.PREFIX + (device_id or "") + "/retroarch/"
+        if device_id and any(k.startswith(folder) for k in bezels.files(device_id)):
             overlay = f"/storage/{target.volume}/Bezels/retroarch"
     except s3.ERRORS as e:
         ui.warn(f"Can't list the bezels in storage: {e}")
