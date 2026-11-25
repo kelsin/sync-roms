@@ -532,8 +532,9 @@ TOPICS = {
   config apply sets the saved settings without a sync. A mounted spruce card (CARD as for import)
   gets the spruceOS settings, WiFi networks and Syncthing settings a sync writes. An Android device
   over adb (CARD naming an Android card, or none to pick the device) gets RetroArch's and ES-DE's
-  settings (RetroArch Cloud Sync turned off) and its APKs installed or upgraded, except those that
-  don't fit the device.
+  settings (RetroArch Cloud Sync turned off, its overlay folder pointed at the card's
+  Bezels/retroarch when storage has bezels for the device) and its APKs installed or upgraded,
+  except those that don't fit the device.
   --dry-run lists every setting, changed or not; --yes skips the questions.
 """,
     "cache": """

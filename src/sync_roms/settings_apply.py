@@ -54,6 +54,6 @@ def run(card_arg, dry_run):
         setup = picker.saved_setup(cards[target.card], catalog["devices"], catalog["layouts"], target.card)
         if not setup:
             ui.fail(f"{target.card!r} has no usable layout. Set it with `sync-roms cards set {target.card} --layout NAME`", 2)
-        return android_settings.apply(target, catalog["layouts"][setup[1]], catalog["systems"], dry_run)
+        return android_settings.apply(target, catalog["layouts"][setup[1]], catalog["systems"], dry_run, setup[0]["id"] if setup[0] else None)
     except adb.AdbError as e:
         ui.fail(f"Lost the connection to the device: {e}", 1)
