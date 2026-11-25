@@ -1171,6 +1171,92 @@ def horses(p):  # horse's head in a bridle
     p.o(-33, 17, 3)
 
 
+def professor_layton(p):  # the professor's top hat
+    p.o(0, 24, 50, 13)
+    crown = (arc(0, -40, 24, 6, 180, 360) + [(20, 24)] + arc(0, 24, 20, 6, 0, 180)[1:-1] + [(-20, 24)])
+    p.path(crown, True, opaque=True)
+    p.path(arc(0, -40, 24, 6, 0, 180))
+    with p.inside(crown):
+        for y in (2, 13):
+            p.path(arc(0, y, 30, 6, 0, 180))
+
+
+def mortal_kombat(p):  # the dragon logo: a dragon facing right inside a ring, its body running into the ring
+    ring = arc(0, 0, 40, 40, 0, 354)
+    p.o(0, 0, 46)
+    p.path(ring, True)
+    back = [(-15, -44), (-14, -38), (-17, -36), (-20, -34), (-20, -32), (-14, -31), (-24, -29), (-28, -26), (-32, -22),
+            (-34, -18), (-35, -13), (-35, -5), (-36, 2), (-38, 4), (-44, 7), (-34, 6), (-30, 11), (-27, 15), (-28, 22),
+            (-32, 23), (-26, 25), (-24, 20), (-21, 20), (-20, 25), (-20, 28), (-17, 24), (-13, 25), (-8, 28), (-8, 31),
+            (-13, 33), (-20, 32), (-26, 30), (-34, 30)]
+    front = [(-4, -44), (-4, -37), (-6, -34), (-3, -33), (-1, -34), (0, -32), (8, -32), (9, -29), (13, -29), (16, -26),
+             (17, -23), (14, -22), (16, -20), (20, -18), (25, -16), (29, -16), (31, -13), (30, -10), (29, -8), (27, -6),
+             (24, -7), (21, -8), (17, -10), (13, -13), (5, -17), (0, -15), (8, -12), (14, -7), (21, -4), (26, -2),
+             (22, 1), (16, 1), (12, -1), (5, -7), (-3, -11), (-8, -8), (-13, -9), (-15, -6), (-14, -3), (-11, 2),
+             (-2, 3), (13, 3), (21, 5), (27, 12), (29, 20), (30, 28), (32, 36)]
+    k = 0.88  # the dragon sits a little inside the ring; its ends still run out to it
+    with p.inside(ring):
+        for line in (back, front):
+            p.path(rounded([line[0]] + [(x * k, y * k) for x, y in line[1:-1]] + [line[-1]], 2, False))
+    p.c([(x * k, y * k) for x, y in [(25, 0), (27, 4), (30, 8), (34, 9), (36, 6), (35, 2), (32, 2)]])
+    p.pg([(x * k, y * k) for x, y in [(0, -21), (4, -23), (9, -20), (5, -19)]], 1.5)
+    p.o(21 * k, -13 * k, 1.6)
+
+
+def tekken(p):  # the logo's italic, knife-cut t
+    lean = 0.55  # x per unit of y, leaning right
+    p.pg([(-44, -40), (52, -40), (52 - 12 * lean, -28), (26, -28), (26 - 68 * lean, 40), (4 - 74 * lean, 46), (4, -28),
+          (-44 - 12 * lean, -28)], 0)
+
+
+def samurai_shodown(p):  # a katana and a falling sakura blossom
+    blade = spline([(-12, -6), (14, -7), (36, -11), (54, -20)]) + spline([(54, -20), (40, -4), (14, 3), (-12, 3)])[1:]
+    p.path(blade, True)
+    with p.inside(blade):
+        p.c([(-14, -2), (14, -3), (36, -8), (56, -18)])
+    p.rr(-18, -14, -12, 11, 2)
+    grip = [(-18, -6), (-52, -4), (-52, 5), (-18, 3)]
+    p.pg(grip, 2)
+    with p.inside(grip):
+        for x in range(-47, -18, 9):
+            p.l([(x - 5, -8), (x + 5, 8)], 0)
+            p.l([(x + 5, -8), (x - 5, 8)], 0)
+    petal = [(0, -3), (-6, -8), (-8, -15), (-4, -21), (0, -15), (4, -21), (8, -15), (6, -8)]
+    for a in range(0, 360, 72):
+        p.pg([(x + 4, y - 34) for x, y in turn(petal, a)], 1.5)
+    p.o(4, -34, 5, opaque=True)
+    p.o(4, -34, 0.8)
+    p.pg([(x + 16, y + 28) for x, y in turn(petal, 150, 0, -10)], 1.5)
+
+
+def fatal_fury(p):  # the hungry wolf
+    half = [(0, -22), (9, -26), (26, -50), (32, -22), (44, -6), (38, 2), (44, 14), (30, 20), (16, 36), (0, 46)]
+    head = half + mirror(half[::-1])[1:-1]
+    p.pg(head, 2.5)
+    for s in (1, -1):
+        p.pg([(14 * s, -27), (24 * s, -42), (27 * s, -25)], 1.5)
+        p.pg([(6 * s, -6), (20 * s, -12), (18 * s, -4)], 1.2)
+        p.c([(6 * s, -6), (8 * s, 10), (7 * s, 26)])
+    p.pg([(-7, 26), (7, 26), (0, 34)], 2)
+
+
+def r_type(p):  # the r-9 arrowhead side on, with the force pod at its nose
+    hull = rounded([(16, -2), (4, -10), (-26, -10), (-38, -26), (-48, -26), (-44, -10), (-52, -6), (-52, 8), (-34, 12),
+                    (-4, 12), (14, 6)], 2.5)
+    p.path(hull, True)
+    p.path(arc(-12, -10, 10, 7, 180, 360))
+    with p.inside(hull):
+        p.l([(-60, 2), (30, 2)], 0)
+    for y in (-4, 4):
+        p.l([(-57, y), (-63, y)])
+    for s in (1, -1):
+        p.pg([(34, -9 * s), (50, -18 * s), (44, -4 * s)], 1.5)
+    p.o(30, 0, 13, opaque=True)
+    p.o(30, 0, 6)
+    p.o(30, 0, 2.2)
+    p.o(30, 0, 0.8)
+
+
 def star_fox(p):  # arwing, seen from the front
     for s in (1, -1):
         p.pg([(s * x, y) for x, y in [(6, 4), (48, 14), (48, 20), (6, 18)]], 2)
@@ -1355,6 +1441,12 @@ ART = {
     "phantasy-star": (phantasy_star, (64, 88, 176), -5, 0.92, (-12, 0)),
     "ys": (ys, (38, 112, 124), -6, 0.9, (-14, 0)),
     "horses": (horses, (150, 96, 60), -5, 0.95, (-34, 0)),
+    "professor-layton": (professor_layton, (150, 78, 44), -6, 1.0, (-10, 0)),
+    "mortal-kombat": (mortal_kombat, (140, 32, 28), 0, 0.95, (-12, 0)),
+    "tekken": (tekken, (96, 52, 150), 0, 0.9, (-28, 0)),
+    "samurai-shodown": (samurai_shodown, (120, 40, 50), -30, 1.12, (-14, 14)),
+    "fatal-fury": (fatal_fury, (60, 100, 150), -4, 1.0, (-16, 0)),
+    "r-type": (r_type, (108, 58, 88), -6, 0.85, (-30, 22)),
     "star-fox": (star_fox, (46, 92, 168), -6, 1.0, (-10, 0)),
     "contra": (contra, (44, 52, 104), 0, 0.9, (-28, 0)),
     "ninja-gaiden": (ninja_gaiden, (92, 40, 110), 0, 1.0, (-6, 0)),
