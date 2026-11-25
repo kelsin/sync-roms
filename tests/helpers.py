@@ -254,6 +254,31 @@ def storage_sets(test, sets, root=None):
     return root
 
 
+def storage_tags(test, data, root=None):
+    """Put tags in storage as tags.json and make tags.load() read them (once, as a run does).
+
+    data: the tags data (written with tags.dump), a str (the file's exact text) or None (no file). root: the storage
+    folder already wired in as runtime.ROOT; without it a throwaway one is made and wired in, its local copies going
+    to store.data_dir() (patch that first). Returns the storage folder."""
+    from sync_roms import inventory, tags
+    if root is None:
+        root = test.enterContext(tempfile.TemporaryDirectory())
+        for name, value in (("ROOT", root), ("BUCKET", None), ("ENDPOINT", None), ("_mirror_root", None)):
+            test.enterContext(mock.patch.object(runtime, name, value))
+    path = os.path.join(root, tags.KEY)
+    if data is None:
+        if os.path.exists(path):
+            os.remove(path)
+    else:
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(data if isinstance(data, str) else tags.dump(data))
+    inventory.reset()
+    test.addCleanup(inventory.reset)
+    tags.reset()
+    test.addCleanup(tags._set, tags._empty())  # back to no tags, as isolate leaves it
+    return root
+
+
 class Isolated(RealDataDirGuard):
     """Runs cli.sync() with a given argv and settings.json, leaving the process-wide settings as they were."""
 
