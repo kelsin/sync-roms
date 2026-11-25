@@ -7,15 +7,18 @@ from . import collections, names, s3, store, tags, themeart, ui
 
 QUALITY = 80
 BAND_WIDTH = 150
+BAND_CROP = (50, 600, 343, 1050)  # the band's plain colour around the drawing in y 600..1050
 
 
-def webp_uri(path, width=None):
-    """A `data:` URI of the picture as WebP, shrunk to width (never enlarged) when given; None when path is missing."""
+def webp_uri(path, width=None, crop=None):
+    """A `data:` URI of the picture as WebP, cropped to crop when given, then shrunk to width (never enlarged) when given; None when path is missing."""
     from PIL import Image
     if not os.path.exists(path):
         return None
     with Image.open(path) as image:
         image.load()
+        if crop:
+            image = image.crop(crop)
         if width and image.width > width:
             image = image.resize((width, max(1, round(image.height * width / image.width))), Image.LANCZOS)
         out = io.BytesIO()
@@ -27,7 +30,7 @@ def _art(art_id):
     """The collection's pictures by kind; a kind with no file is left out."""
     band = themeart.art_png(art_id)
     box = themeart.art_png(art_id, "art-box/Imgs_med")
-    found = {"band": webp_uri(band, BAND_WIDTH) if band else None,
+    found = {"band": webp_uri(band, BAND_WIDTH, BAND_CROP) if band else None,
              "box": webp_uri(box) if box else None,
              "totk": webp_uri(os.path.join(themeart.ZELDA_ART, "Imgs_med", f"{art_id}.png"))}
     return {kind: uri for kind, uri in found.items() if uri}

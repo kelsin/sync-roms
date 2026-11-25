@@ -59,7 +59,18 @@ class Page(helpers.DataDir):
         self.save(art="mario")
         uri = collections_page.page_data()["collections"][0]["art"]["band"]
         image = Image.open(io.BytesIO(base64.b64decode(uri.split(",", 1)[1])))
-        self.assertEqual(image.width, 150)
+        self.assertEqual(image.size, (150, 230))
+
+    def test_band_is_cropped(self):
+        from PIL import Image
+        self.save(art="mario")
+        uri = collections_page.page_data()["collections"][0]["art"]["band"]
+        image = Image.open(io.BytesIO(base64.b64decode(uri.split(",", 1)[1]))).convert("RGBA")
+        top_left, bottom_left = image.getpixel((0, 0)), image.getpixel((0, image.height - 1))
+        self.assertEqual(top_left[3], 255)
+        self.assertEqual(bottom_left[3], 255)
+        # WebP is lossy, so the colours match within a few levels rather than exactly.
+        self.assertTrue(all(abs(a - b) <= 8 for a, b in zip(top_left[:3], bottom_left[:3])))
 
     def test_no_storage_means_no_tags(self):
         self.save(games=[{"system": "snes", "bucket": SMW, "title": "T"}])
