@@ -1,5 +1,8 @@
 {
-  "note": "spruceOS's hotkey defaults with quit on Start, so spruce cards change only quit.",
+  "note": "spruceOS's hotkey defaults with quit on Start, so spruce cards change only quit. Knulli cards get the scheme as knulli.conf hotkey remaps; Knulli has no slow-motion or Show FPS hotkey, so those two are left out there.",
+  "knulli": {"global.hotkey_b": "x", "global.hotkey_y": "pagedown", "global.hotkey_x": "pageup", "global.hotkey_down": "left",
+             "global.hotkey_up": "right", "global.hotkey_right": "r2",
+             "global.hotkey_left": "up", "global.toggle_fast_forward": "1"},
   "scheme": [
     {"action": "Show the RetroArch menu", "button": "X", "retroarch": "input_menu_toggle"},
     {"action": "Save state", "button": "R1", "retroarch": "input_save_state"},

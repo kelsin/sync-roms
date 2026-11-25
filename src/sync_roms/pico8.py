@@ -95,3 +95,11 @@ def keep_in(dest, card, layout_name=None):
     if os.path.isdir(dest):
         keep |= {n for n in os.listdir(dest) if n.lower().startswith("splore") or "with splore" in n.lower()}
     return keep
+
+
+def remind(layout_name, wrote):
+    """The last line of a sync that put PICO-8 on a Knulli card (wrote: its card paths): how to install it."""
+    if layout_name != "knulli":
+        return
+    for path in wrote:
+        print(ui.bold(f"🕹️  PICO-8 {os.path.basename(path)} is on the card: run Device Settings → Install Pico-8 on the device to install it"))
