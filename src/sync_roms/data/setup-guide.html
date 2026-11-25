@@ -651,30 +651,38 @@ const HOTKEY_SCHEME = [
   ["Show FPS", "Y"],
   ["Quit", "Start"],
 ];
+// RetroArch's own menu, set by hand (EmuDeck, ES-DE on Windows).
+const RETROARCH_STEPS = [
+  ["Settings > Input > Hotkeys > Hotkey Enable", "Select"],
+  ["Settings > Input > Hotkeys > Menu Toggle", "X"],
+  ["Settings > Input > Hotkeys > Save State", "R1"],
+  ["Settings > Input > Hotkeys > Load State", "L1"],
+  ["Settings > Input > Hotkeys > State Slot -", "D-pad Left"],
+  ["Settings > Input > Hotkeys > State Slot +", "D-pad Right"],
+  ["Settings > Input > Hotkeys > Fast-Forward (Toggle)", "R2"],
+  ["Settings > Input > Hotkeys > Fast-Forward (Hold)", "unbound"],
+  ["Settings > Input > Hotkeys > Slow-Motion (Toggle)", "L2"],
+  ["Settings > Input > Hotkeys > Show FPS (Toggle)", "Y"],
+  ["Settings > Input > Hotkeys > Quit RetroArch", "Start"],
+  ["Main Menu > Configuration File > Save Current Configuration", null],
+];
+const KNULLI_HOTKEYS = "Start > Game Settings > Per System Advanced Configuration > (system) > Controls > Hotkeys";
 // Per layout: `auto` (what sets it, instead of steps), `steps` ([where, set]; set null for a step that is run, not set),
 // `differs` ({scheme button: what it does instead on this layout}), `extras` (other shortcuts the layout keeps),
-// `unknown` (nothing recorded yet for this layout), `note` (what to do when there are no steps, instead of the default text).
-const KNULLI_HOTKEYS = "Start > Game Settings > Per System Advanced Configuration > (system) > Controls > Hotkeys";
+// `unknown` (nothing recorded yet for this layout), `note` (what to do when there are no steps, instead of the default text),
+// `windows` (replaces the entry on the Windows platform). hotkeyLayout(ctx) picks the entry.
+function hotkeyLayout(ctx) {
+  const l = HOTKEY_LAYOUT[ctx.layout];
+  return ctx.platform === "windows" && l.windows ? l.windows : l;
+}
 const HOTKEY_LAYOUT = {
   esde: {
     auto: `Run <code class="copy">sync-roms config apply &lt;card&gt;</code> with the device connected over adb: it sets RetroArch's hotkeys.`,
     steps: [], differs: {}, extras: ["Select is Android's Back key."],
+    windows: { steps: RETROARCH_STEPS, differs: {}, extras: [] },
   },
   emudeck: {
-    steps: [
-      ["Settings > Input > Hotkeys > Hotkey Enable", "Select"],
-      ["Settings > Input > Hotkeys > Menu Toggle", "X"],
-      ["Settings > Input > Hotkeys > Save State", "R1"],
-      ["Settings > Input > Hotkeys > Load State", "L1"],
-      ["Settings > Input > Hotkeys > State Slot -", "D-pad Left"],
-      ["Settings > Input > Hotkeys > State Slot +", "D-pad Right"],
-      ["Settings > Input > Hotkeys > Fast-Forward (Toggle)", "R2"],
-      ["Settings > Input > Hotkeys > Fast-Forward (Hold)", "unbound"],
-      ["Settings > Input > Hotkeys > Slow Motion (Toggle)", "L2"],
-      ["Settings > Input > Hotkeys > Show FPS (Toggle)", "Y"],
-      ["Settings > Input > Hotkeys > Quit RetroArch", "Start"],
-      ["Main Menu > Configuration File > Save Current Configuration", null],
-    ],
+    steps: RETROARCH_STEPS,
     differs: {},
     extras: [
       "Start + Select: quit (EmuDeck's Quit Gamepad Combo).",
@@ -692,7 +700,7 @@ const HOTKEY_LAYOUT = {
       [`${KNULLI_HOTKEYS} > Rewind`, "D-pad Up"],
       [`${KNULLI_HOTKEYS} > Emulator Menu`, "X"],
     ],
-    differs: { Y: "no FPS hotkey on Knulli" },
+    differs: { R2: "fast-forward; toggle or hold not recorded", L2: "not recorded on Knulli", Y: "no FPS hotkey on Knulli" },
     extras: [
       "Function + Start held 5 s: force-restart EmulationStation.",
       "Function + L1: screenshot, Knulli's own shortcut on the same button as Quick Load.",
@@ -710,11 +718,14 @@ const HOTKEY_LAYOUT = {
     ],
   },
   onion: {
+    note: "Onion's docs say not to change RetroArch's config; these come from Onion's own layer.",
     steps: [],
     differs: {
       X: "Show FPS (Menu + Select opens the RetroArch menu)",
       R1: "Fast-forward (toggle)",
       L1: "Rewind (toggle)",
+      R2: "not fast-forward: Menu + R1 is",
+      Y: "not FPS: Menu + X is",
       L2: "Load state",
       Start: "Aspect ratio",
     },
@@ -733,12 +744,12 @@ const HOTKEY_LAYOUT = {
     steps: [], differs: {},
     extras: [
       "Select + A: screenshot.",
-      "Tap Home: in-game menu. Hold Home 3 s: game switcher.",
+      "Tap Home: in-game menu (RetroArch and PPSSPP). Hold Home 3 s: game switcher.",
       "Hold Power 3 s: quick save and shut down; the game resumes on the next boot.",
     ],
   },
   nextui: {
-    unknown: true, steps: [], differs: {},
+    unknown: true, steps: [], differs: { X: "no RetroArch menu on NextUI" },
     extras: [
       "Menu: in-game options menu (save/load states, emulator options, shortcuts). There is no RetroArch menu.",
       "Menu + Select held: game switcher.",
@@ -926,20 +937,21 @@ const SECTIONS = [
     id: "hotkeys",
     title: "Hotkeys",
     when: { layout: Object.keys(HOTKEY_LAYOUT) },
-    lede: "One scheme everywhere: hold the device's hotkey button, then press the second button. Rows marked as different are what this layout does instead.",
+    lede: "One scheme everywhere: hold the device's hotkey button, then press the second button. A row with a note is what this layout does instead, or isn't recorded.",
     items: [
       {
         title: "The scheme",
         body: ctx => `<p>Hotkey button on this layout: <b>${esc(HOTKEY[ctx.layout])}</b>${ctx.layout === "spruce" ? " (spruce's default; spruce's own settings can pick another)" : ""}.</p>`,
         settingsFn: ctx => HOTKEY_SCHEME.map(([a, b]) => {
-          const what = HOTKEY_LAYOUT[ctx.layout].differs[b];
-          return what ? [a, `${HOTKEY[ctx.layout]} + ${b}: ${what}`, "Differs on this layout."] : [a, `${HOTKEY[ctx.layout]} + ${b}`];
+          const l = hotkeyLayout(ctx), what = l.differs[b], combo = `${HOTKEY[ctx.layout]} + ${b}`;
+          if (what) return [a, `${combo}: ${what}`, "Not the scheme on this layout, or not recorded."];
+          return l.unknown ? [a, combo, "The scheme; not recorded on this layout."] : [a, combo];
         }),
       },
       {
         title: "What to do",
         body: ctx => {
-          const l = HOTKEY_LAYOUT[ctx.layout];
+          const l = hotkeyLayout(ctx);
           if (l.auto) return `<p>${l.auto}</p>`;
           if (l.unknown) return "<p>Not recorded for this layout yet.</p>";
           if (l.note) return `<p>${esc(l.note)}</p>`;
@@ -951,7 +963,10 @@ const SECTIONS = [
       },
       {
         title: "Also on this layout",
-        body: ctx => `<ul>${HOTKEY_LAYOUT[ctx.layout].extras.map(t => `<li>${esc(t)}</li>`).join("")}</ul>`,
+        body: ctx => {
+          const extras = hotkeyLayout(ctx).extras;
+          return extras.length ? `<ul>${extras.map(t => `<li>${esc(t)}</li>`).join("")}</ul>` : "<p>Nothing recorded.</p>";
+        },
       },
       {
         title: "Standalone emulators",
