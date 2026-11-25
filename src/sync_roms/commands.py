@@ -1395,7 +1395,7 @@ def collections_page_cmd(args):
 def collections_share_cmd(args):
     link, built, started = tailshare.share()
     if built:
-        print(f"Built {collections_page.DEFAULT_PATH()}")
+        print(f"Rebuilt {collections_page.DEFAULT_PATH()}")
     line = f"{'Sharing' if started else 'Already shared'} at {link}"
     print(line + (" 📋" if tailshare.copy_to_clipboard(link) else ""))
     return 0

@@ -144,12 +144,10 @@ def _start_server():
 
 
 def share():
-    """Write the page when missing, run its local server and have tailscale serve proxy to it. Returns (link, built,
+    """Write the page when missing or out of date, run its local server and have tailscale serve proxy to it. Returns (link, built,
     started): started when the server or the serve entry had to be set up."""
     page = os.path.join(SHARE_DIR(), "index.html")
-    built = not os.path.exists(page)
-    if built:
-        collections_page.write_page(page)
+    built = collections_page.update_page(page)
     found = serving()
     running = _running()
     port = running[1] if running else _start_server()
