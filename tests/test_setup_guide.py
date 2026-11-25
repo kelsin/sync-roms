@@ -48,6 +48,24 @@ class SetupGuideTest(unittest.TestCase):
         hotkeys = html.split('id: "hotkeys",', 1)[1].split("items:", 1)[0]
         self.assertIn("when: { layout: Object.keys(HOTKEY_LAYOUT) }", hotkeys)
 
+    def test_hotkey_scheme_matches_data(self):
+        import json
+        import re
+        with open(update_setup_guide.GUIDE) as f:
+            html = f.read()
+        block = html.split("const HOTKEY_SCHEME = [", 1)[1].split("];", 1)[0]
+        with open(os.path.join(os.path.dirname(update_setup_guide.GUIDE), "hotkeys.json")) as f:
+            scheme = json.load(f)["scheme"]
+        self.assertEqual(re.findall(r'\["([^"]+)", "([^"]+)"\]', block),
+                         [(e["action"], e["button"]) for e in scheme])
+
+    def test_no_unverified_hotkey_text(self):
+        with open(update_setup_guide.GUIDE) as f:
+            html = f.read()
+        hotkeys = html.split("// Hotkeys:", 1)[1].split("const SECTIONS", 1)[0]
+        for word in ("unverified", "unconfirmed", "couldn't", "weren't documented"):
+            self.assertNotIn(word, hotkeys)
+
     def test_cores_section_matches_spruce_syncthing(self):
         import json
         with open(update_setup_guide.GUIDE) as f:
