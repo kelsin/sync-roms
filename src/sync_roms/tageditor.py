@@ -35,7 +35,7 @@ def switch_games_off(tag_id, label, system_names):
     rows = sorted(((entry, k, names.title(k), f"{system_names.get(k.partition('/')[0], k.partition('/')[0])} — {names.title(k)}")
                    for k in keys), key=lambda r: (store.sort_key(r[2]), r[1]))
     try:
-        edit.toggle_games(f"✏️  {label} — ✅ has the tag, ⬜ remove it", rows, notes=False)
+        edit.toggle_games(f"✏️  {label} — ✅ has the tag, ⬜ remove it", rows, notes=False, tag_filter=False)
     finally:
         gone = set(keys) - {g["bucket"] for g in entry["games"]}
         if gone:

@@ -104,7 +104,7 @@ def suggest_command(args):
                           f"{defs[i]['emoji']} {defs[i]['name']} — {s['name']} — {title}"), i))
     rows.sort(key=lambda r: r[0])  # each row has its own listing (named by its number, as the toggler keys them)
     edit.toggle_games("🏷️  Suggested tags — ✅ add it, ⬜ don't suggest it again", [r[1] for r in rows],
-                      notes=False)
+                      notes=False, tag_filter=False)
     accepted, declined = {}, {}
     for _, (entry, key, _, _), i in rows:
         (accepted if entry["games"] else declined).setdefault(key, []).append(i)
