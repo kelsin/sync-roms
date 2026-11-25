@@ -11,7 +11,7 @@ from concurrent.futures import ThreadPoolExecutor
 from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError
 
 from . import __version__, bezels, budget, cardedit, cardfs, clean, commands, downloads, drivers, frontend, inventory, m3u, mirroring, picker, runtime, s3, scrape_plan, store
-from . import knulli_conf, muos_collections, nextui_folders, onion_surprise, pico8, raofflineproxy, rocknix_collections, saves, spruce_collections, spruce_bootlogo, spruce_emu, spruce_os, spruce_fixes, spruce_hotkeys, spruce_retroarch, spruce_settings, spruce_splore, spruce_syncthing, spruce_themes, spruce_wifi, splore, surprise, themeart, ui, usersettings, vita
+from . import knulli_conf, muos_collections, nextui_folders, onion_surprise, pico8, portmaster, raofflineproxy, rocknix_collections, saves, spruce_collections, spruce_bootlogo, spruce_emu, spruce_os, spruce_fixes, spruce_hotkeys, spruce_retroarch, spruce_settings, spruce_splore, spruce_syncthing, spruce_themes, spruce_wifi, splore, surprise, themeart, ui, usersettings, vita
 from . import collections as colls
 from . import guest as guests
 
@@ -1326,7 +1326,8 @@ def sync_card(args):
     # systems can share a folder (Onion: WS, NGP), so a folder's expected files are the union over all of them
     # a system with nothing to sync is always scanned, selected or not: whatever it has on the card is unwanted
     chosen_ids = {s["bucket"] for s in chosen}
-    dropped_dests = {os.path.join(roms_dir, s["folders"][layout_name]) for s in dropped if s["folders"].get(layout_name)}
+    dropped_dests = {os.path.join(roms_dir, s["folders"][layout_name]) for s in dropped
+                     if s["folders"].get(layout_name) and not portmaster.owns_folder(s)}
     # a system's rom_files are BIOS files that go in its ROM folder (MAME-style BIOS zips), kept while it has ROMs to sync
     dest_keys, dest_discs, dest_bios, dest_folders = defaultdict(list), defaultdict(set), defaultdict(set), defaultdict(dict)
     for t in systems:
@@ -1344,7 +1345,7 @@ def sync_card(args):
     cardfs.clear()  # the discs moved above, and the card editor's previews listed the card a while ago
     if guest:  # no sweep of a friend's card: only what the card editor deselected
         extras = list(deselected)
-    for dest in [] if guest else sorted({dest_of(s) for s in systems if s["bucket"] in chosen_ids or not available(s)} | dropped_dests):
+    for dest in [] if guest else sorted({dest_of(s) for s in systems if (s["bucket"] in chosen_ids or not available(s)) and not portmaster.owns_folder(s)} | dropped_dests):
         extras += downloads.find_extras(dest, dest_keys[dest], onion, disc_dir, dest_discs[dest], dest_bios[dest] | own_files[dest] | (pico8.keep_in(dest, card, layout_name) if dest in pico8_dests else set()), renames=renames, folders=dest_folders[dest], skip_saves=saves.beside_roms(layout))
 
     # BIOS for every system with ROMs already on the card too, even when this sync doesn't touch that system
