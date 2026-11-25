@@ -11,7 +11,7 @@ from concurrent.futures import ThreadPoolExecutor
 from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError
 
 from . import __version__, bezels, budget, cardedit, cardfs, clean, commands, downloads, drivers, frontend, inventory, m3u, mirroring, picker, runtime, s3, scrape_plan, store
-from . import knulli_conf, muos_collections, nextui_folders, onion_surprise, pico8, raofflineproxy, rocknix_collections, saves, spruce_collections, spruce_bootlogo, spruce_emu, spruce_os, spruce_fixes, spruce_hotkeys, spruce_retroarch, spruce_settings, spruce_syncthing, spruce_themes, spruce_wifi, surprise, themeart, ui, usersettings, vita
+from . import knulli_conf, muos_collections, nextui_folders, onion_surprise, pico8, raofflineproxy, rocknix_collections, saves, spruce_collections, spruce_bootlogo, spruce_emu, spruce_os, spruce_fixes, spruce_hotkeys, spruce_retroarch, spruce_settings, spruce_splore, spruce_syncthing, spruce_themes, spruce_wifi, splore, surprise, themeart, ui, usersettings, vita
 from . import collections as colls
 from . import guest as guests
 
@@ -34,6 +34,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "themes": ("update|pick|build|publish|palettes", "copy the latest Art Book Next for ES-DE and the PyUI themes for spruce from GitHub into storage; build and publish custom spruce themes"),
     "download": ("pico8", "add the PICO-8 BBS Featured carts storage doesn't have, and newer revisions of those it has"),
     "flash": ("", "write a Knulli, BaseOS, muOS, ROCKNIX or OakMoss image from storage's os/ to an SD card"),
+    "format": ("", "erase an SD card as exFAT or FAT32 with a picked label"),
     "unmount": ("", "clean the macOS junk off an SD card and unmount it"),
     "mount": ("", "mount again an SD card that was unmounted but not pulled out"),
     "cards": ("[list|new|set|rename|layout|install|clean|delete|copy|export|import]", "list and manage the cards you've synced"),
@@ -236,6 +237,18 @@ TOPICS = {
   fly, with 4 MiB blocks (sudo may ask for your password before downloading and writing). Last, the
   temp folder is removed and the card is ejected; after a failure it is unmounted instead, so you
   can retry.
+""",
+    "format": """
+  sync-roms format [--dry-run]                erase an SD card as exFAT or FAT32 (macOS only)
+
+  Pick an external SD card (shown with its volume names; the boot disk and the disk holding storage
+  are never offered), a filesystem (exFAT or FAT32), then a label: your card names, then the layout
+  names uppercased, or type your own. FAT32 labels are uppercase, at most 11 characters; exFAT at
+  most 15; longer ones are left out of the list, and a typed one with characters the filesystem
+  doesn't allow is asked again. Type the disk id (disk4) to confirm: --yes never skips that.
+  --dry-run stops there and shows the command. Right before erasing, the card must still be the
+  same disk (id, size and name). Then `sudo diskutil eraseDisk <FS> <LABEL> MBR <disk>` erases it
+  (sudo may ask for your password). The card is left mounted.
 """,
     "unmount": """
   sync-roms unmount [--dry-run]                clean the macOS junk off an SD card and unmount it
@@ -1129,15 +1142,16 @@ def sync_card(args):
 
     relist()
     interactive = not (ui.ASSUME_YES or args.json) and ui.has_terminal()
-    def reload_changes():
-        """Pick up the card's games as saved now: refresh the mirror and the listings for the systems that changed."""
+    def reload_changes(stale=()):
+        """Pick up the card's games as saved now: refresh the mirror and the listings for the systems that changed.
+        stale: system ids whose storage folder changed this run, refreshed too."""
         nonlocal systems, saved
 
         def picks(s):
             return s.get("full_system"), store.listed(s)
         before = {s["bucket"]: picks(s) for s in systems}
         systems = synced(store.load_manifest([card])["systems"])  # with the card's games as they are saved now
-        changed = [s["bucket"] for s in systems if picks(s) != before.get(s["bucket"])]
+        changed = [s["bucket"] for s in systems if picks(s) != before.get(s["bucket"]) or s["bucket"] in stale]
         if changed and runtime._mirror_root:  # the new picks reach the mirror before they are copied from it
             root = runtime._mirror_root
             try:
@@ -1179,6 +1193,27 @@ def sync_card(args):
             guests.save_seed(card, seed)
             if reload:
                 reload_changes()
+
+    splore_failed = 0
+    pico8_system = next((s for s in systems if s["bucket"] == "pico8"), None)
+    if layout_name == "spruce" and not guest and pico8_system and (pico8_system.get("full_system") or store.listed(pico8_system)):
+        # the carts Splore cached on the card go to storage (and the new ones into the card's games) before the editor
+        full = pico8_system.get("full_system") and not args.dry_run
+
+        def held():
+            """Storage's pico8/ names (None when it can't be listed): a full system's picks don't change when carts are
+            added, so this tells whether its listing and the mirror need refreshing."""
+            try:
+                return set(inventory.files("pico8/", sizes=False))
+            except s3.ERRORS:
+                return None
+        with mirroring.storage_reads():  # storage's pico8/ itself: the mirror holds only the carts the cards pick
+            before = held() if full else None
+            splore_failed = splore.run(card, base, os.path.join(roms_dir, pico8_system["folders"][layout_name]),
+                                       pico8_system, args.dry_run)
+            stale = ["pico8"] if full and (before is None or held() != before) else []
+        if not args.dry_run:
+            reload_changes(stale)
 
     if guest:  # no Surprise: the card editor opens on the picks seeded from the card
         reseed()
@@ -1222,6 +1257,7 @@ def sync_card(args):
         failed += spruce_hotkeys.install(card, layout_name, base, dry_run)
         failed += spruce_retroarch.install(card, layout_name, base, dry_run)
         failed += knulli_conf.install(card, layout_name, base, dry_run)
+        failed += spruce_splore.install(card, layout_name, base, dry_run)
         if clean_card and wrote:
             clean._clean_root = base
         return failed
@@ -1233,10 +1269,10 @@ def sync_card(args):
         # x (systems_off) skips a system this sync, and a system no longer synced is never touched
         deselected = guests.deletions(seed, picked, store.systems_off(store.saved_card(card)) | (set(seed) - set(picked)))
     if not chosen and not deselected:
-        failed = 0
+        failed = splore_failed
         pico8_wrote = []
         if not guest:
-            failed = install_apps(args.dry_run, pico8_wrote)
+            failed += install_apps(args.dry_run, pico8_wrote)
             if onion_surprise.write_list(card, layout_name, base, roms_dir, systems, args.dry_run) and clean_card:
                 clean._clean_root = base
             failed += stage_spruce(args.dry_run)
@@ -1748,7 +1784,7 @@ def sync_card(args):
     started = time.monotonic()
     failures = []
     disc_dirs = {os.path.normpath(dest_of(s)): disc_dir for s in chosen if available(s)} if disc_dir else None
-    failed = move_failed + removal_failed + downloads.run_downloads(rom_todo, "ROMs", "💿", roms_dir, failures, disc_dirs) + downloads.run_downloads(bios_todo, "BIOS", "🧠", bios_dir, failures)
+    failed = splore_failed + move_failed + removal_failed + downloads.run_downloads(rom_todo, "ROMs", "💿", roms_dir, failures, disc_dirs) + downloads.run_downloads(bios_todo, "BIOS", "🧠", bios_dir, failures)
     if apk_jobs:
         failed += downloads.run_downloads(apk_todo, "Android", "🤖", apk_dir, failures)
     if bezel_jobs:

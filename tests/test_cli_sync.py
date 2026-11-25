@@ -12,10 +12,13 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 
-from helpers import MANIFEST, SYSTEM, DataDir, list_sizes, touch  # noqa: E402
-from sync_roms import cli, commands, downloads, inventory, s3, scrape_plan, store, usersettings  # noqa: E402
+from helpers import MANIFEST, SYSTEM, DataDir, list_sizes, storage_sets, touch  # noqa: E402
+from sync_roms import bbs, cli, commands, downloads, inventory, s3, scrape_plan, splore, store, usersettings  # noqa: E402
 
 REAL_LOAD_CARDS = store.load_cards
+REAL_LOAD_MANIFEST = store.load_manifest
+REAL_SAVE_CARD = store.save_card
+REAL_LIST_SIZES = s3.list_sizes
 
 
 class SyncSmokeTest(DataDir):
@@ -1226,8 +1229,9 @@ class SyncSmokeTest(DataDir):
         found = []
         code = self.run_sync(False, patches=patches,
                              prepare=lambda card: os.makedirs(os.path.join(card, "App", "BootLogo", "Imgs")),
-                             after=lambda card: found.append(os.path.isfile(os.path.join(card, "App", "BootLogo", "Imgs", "K.png"))))
-        self.assertEqual((code, found), (0, [True]))
+                             after=lambda card: found.append((os.path.isfile(os.path.join(card, "App", "BootLogo", "Imgs", "K.png")),
+                                                              os.path.getsize(os.path.join(card, "Roms", "PICO8", downloads.SPRUCE_FILES["pico8"][0])))))
+        self.assertEqual((code, found), (0, [(True, 0)]))  # and the Splore launcher, empty
 
     def test_spruce_samples_are_deleted_without_asking_and_its_own_files_kept(self):
         """spruceOS's sample files go without a question, BootMenu.nds and the PICO-8 files stay, other files are asked about."""
@@ -1303,6 +1307,128 @@ class SyncSmokeTest(DataDir):
                     self.assertFalse(found["old"])
                     self.assertEqual(found["config"]["ignoreList"], ["neogeo.zip", "pgm.zip"])
                     self.assertEqual(found["owned"], {"ARCADE": ["pgm.zip"]})
+
+    PICO8 = {"name": "PICO-8", "bucket": "pico8", "folders": {"spruce": "PICO8", "onion": "PICO"}, "bios": {"files": []},
+             "games": [{"bucket": "pico8/a-0.p8.png"}]}
+
+    def splore_sync(self, layout, args=(), result=0, mirror=None, dry_run=False):
+        """Sync a card of layout with splore.run mocked: (exit code, [(its args, what had run before it, the mirror
+        it read)], the card, how often the card's games were loaded after it). mirror: the sync's local mirror folder."""
+        manifest = {**MANIFEST, "layouts": {layout: {"label": layout, "roms_dir": "Roms", "bios_dir": "BIOS"}},
+                    "systems": [self.PICO8]}
+        order, calls, cards, loads = [], [], [], []
+
+        def run(*a):
+            calls.append((a, list(order), cli.runtime._mirror_root))
+            return result
+
+        def load_manifest(names=()):
+            if calls:
+                loads.append(names)
+            return manifest
+        patches = ((store, {"load_manifest": load_manifest, "load_cards": REAL_LOAD_CARDS}),
+                   (cli.picker, {"saved_setup": lambda *a: (None, layout)}),
+                   (cli, {"free_space": lambda path: 10**9}),
+                   (cli.splore, {"run": run}),
+                   (cli.runtime, {"_mirror_root": mirror}),
+                   (cli.surprise, {"run_surprise": lambda *a, **k: order.append("editor") or []}))
+        code = self.run_sync(dry_run, patches=patches, args=args, after=cards.append)
+        return code, calls, cards[0], len(loads)
+
+    def test_spruce_sync_runs_splore(self):
+        for result in (0, 1):
+            with self.subTest(result=result):
+                code, calls, card, loads = self.splore_sync("spruce", result=result, mirror=self.path("mirror"))
+                self.assertEqual(code, result)  # its failure is the sync's
+                [(args, before, mirror)] = calls
+                self.assertEqual(args[:3], (os.path.basename(card), card, os.path.join(card, "Roms", "PICO8")))
+                self.assertEqual((args[3]["bucket"], args[4]), ("pico8", False))
+                self.assertEqual(before, [])  # before the card editor
+                self.assertIsNone(mirror)  # storage itself, never the mirror
+                self.assertGreater(loads, 0)  # the card's picks reloaded
+        with self.subTest(dry_run=True):
+            code, calls, card, loads = self.splore_sync("spruce", dry_run=True)
+            self.assertEqual(code, 0)
+            [(args, _, _)] = calls
+            self.assertIs(args[4], True)
+            self.assertEqual(loads, 0)  # nothing to reload: a dry run writes nothing
+
+    def test_guest_and_other_layouts_skip_splore(self):
+        for layout, args in (("spruce", ("--guest",)), ("onion", ())):
+            with self.subTest(layout=layout):
+                self.assertEqual(self.splore_sync(layout, args)[1], [])
+
+    def test_new_splore_cart_is_synced_to_the_card(self):
+        root = storage_sets(self, {})
+        touch(os.path.join(root, "pico8", "a-0.p8.png"), bbs._PNG + b"a")
+        listed = [{"title": "A", "bucket": "pico8/a-0.p8.png"}]
+        # a mirror (only the carts the cards pick, read in place of storage) is modelled over the storage folder
+        cases = [(cache, mirror, picks) for cache, mirror in ((False, False), (True, False), (False, True))
+                 for picks in (listed, {"full_system": True})]
+        for cache, mirror, picks in cases:
+            with self.subTest(cache=cache, full_system=isinstance(picks, dict), mirror=mirror):
+                with contextlib.suppress(FileNotFoundError):
+                    os.remove(os.path.join(root, "pico8", "n-0.p8.png"))
+                mirror_root = None
+                if mirror:
+                    mirror_root = self.enterContext(tempfile.TemporaryDirectory())
+                    touch(os.path.join(mirror_root, cli.runtime.MIRROR_MARKER))
+                    touch(os.path.join(mirror_root, "pico8", "a-0.p8.png"), bbs._PNG + b"a")
+                with contextlib.suppress(FileNotFoundError):
+                    os.remove(inventory.path())
+                inventory.reset()
+                if cache:  # the sync's listings come from it, patched by the upload
+                    with contextlib.redirect_stdout(io.StringIO()):
+                        inventory.update(True)
+
+                def prepare(card):
+                    touch(os.path.join(card, *splore.CACHE, "bbs", "carts", "n-0.p8.png"), bbs._PNG + b"n")
+                    store.write_cards({os.path.basename(card): {"layout": "spruce", "games": {"pico8": picks}}})
+                found = []
+                patches = ((store, {"load_manifest": REAL_LOAD_MANIFEST, "load_cards": REAL_LOAD_CARDS, "save_card": REAL_SAVE_CARD}),
+                           (s3, {"list_sizes": REAL_LIST_SIZES}),
+                           (usersettings, {"apply_settings": lambda: None}),  # storage stays the folder above
+                           (cli.picker, {"saved_setup": lambda *a: (None, "spruce")}),
+                           (cli, {"free_space": lambda path: 10**9}),
+                           (cli.downloads, {"run_downloads": downloads.run_downloads}),
+                           (cli.runtime, {"_mirror_root": mirror_root}))
+                code = self.run_sync(False, prepare=prepare, patches=patches, after=lambda card: found.append(
+                    os.path.isfile(os.path.join(card, "Roms", "PICO8", "n-0.p8.png"))))
+                out = self.out.getvalue() + self.err.getvalue()
+                self.assertEqual(code, 0, out)
+                self.assertEqual("cache updated" in out, cache)
+                self.assertTrue(os.path.isfile(os.path.join(root, "pico8", "n-0.p8.png")))
+                self.assertEqual(found, [True], out)
+                self.assertFalse([line for line in out.splitlines() if "n-0" in line and "delete" in line.lower()])
+
+    def test_held_splore_cart_on_the_card_is_kept(self):
+        root = storage_sets(self, {})
+        touch(os.path.join(root, "pico8", "a-0.p8.png"), bbs._PNG + b"a")
+        touch(os.path.join(root, "pico8", "h-0.p8.png"), bbs._PNG + b"h")  # another card uploaded it
+        inventory.reset()
+        games = []
+
+        def prepare(card):
+            touch(os.path.join(card, *splore.CACHE, "bbs", "carts", "h-0.p8.png"), bbs._PNG + b"h")
+            touch(os.path.join(card, "Roms", "PICO8", "Held.p8.png"), bbs._PNG + b"h")  # its Splore import
+            store.write_cards({os.path.basename(card): {"layout": "spruce", "games": {
+                "pico8": [{"title": "A", "bucket": "pico8/a-0.p8.png"}]}}})
+
+        def after(card):
+            games.append(store.card_games(os.path.basename(card))["pico8"])
+            self.assertEqual(sorted(os.listdir(os.path.join(card, "Roms", "PICO8"))), sorted([downloads.SPRUCE_FILES["pico8"][0], "a-0.p8.png", "h-0.p8.png"]))
+        patches = ((store, {"load_manifest": REAL_LOAD_MANIFEST, "load_cards": REAL_LOAD_CARDS, "save_card": REAL_SAVE_CARD}),
+                   (s3, {"list_sizes": REAL_LIST_SIZES}),
+                   (usersettings, {"apply_settings": lambda: None}),
+                   (cli.picker, {"saved_setup": lambda *a: (None, "spruce")}),
+                   (cli, {"free_space": lambda path: 10**9}),
+                   (cli.downloads, {"run_downloads": downloads.run_downloads}))
+        code = self.run_sync(False, prepare=prepare, patches=patches, after=after)
+        out = self.out.getvalue() + self.err.getvalue()
+        self.assertEqual(code, 0, out)
+        self.assertIn("Renamed Held.p8.png → h-0.p8.png", out)
+        self.assertEqual([g["bucket"] for g in games[0]], ["pico8/a-0.p8.png", "pico8/h-0.p8.png"])
+        self.assertNotIn(os.path.join("Roms", "PICO8", "h-0.p8.png"), out)  # not listed as an extra
 
     def test_onion_card_with_nothing_to_sync_removes_a_stale_surprise_list(self):
         layouts = {"onion": {"label": "Onion", "roms_dir": "Roms", "bios_dir": "BIOS"}}

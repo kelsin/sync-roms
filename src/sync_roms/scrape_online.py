@@ -854,11 +854,12 @@ def scrape_system(client, system, items, threads, skip, shrink, outcomes, listin
 
 
 def run_scrape(client, systems, todo, skip, ask=True, replace=False, forced=None, rerun=RERUN, outcomes=None, fill=False,
-               listings=None, metadata=None, brief=False, translated=frozenset()):
+               listings=None, metadata=None, brief=False, translated=frozenset(), review=True):
     """Confirm (unless not ask), then scrape todo ({system: [(ROM, size, etag)]}) in batches. Returns the exit code.
     replace, forced, rerun, fill, translated: see run_batch and record. outcomes: filled with {system: {ROM: how, or None when unknown}}.
     listings: {system: {key: size} of scrapes/<system>/} and metadata: {system: its metadata.json} the caller already has.
-    brief: a search from `scrape review`: no quota request (one thread) and no results block."""
+    brief: a search from `scrape review`: no quota request (one thread) and no results block.
+    review: offer to review the non-games on a terminal; False (an unattended caller) only names the command."""
     count = sum(len(v) for v in todo.values())
     listings, metadata = dict(listings or {}), metadata or {}
     before = set(scrape_state.notgames())
@@ -912,7 +913,7 @@ def run_scrape(client, systems, todo, skip, ask=True, replace=False, forced=None
         print(report({name: [r for r, _, _ in items] for name, items in todo.items()}, outcomes))
     interrupted = isinstance(halted, KeyboardInterrupt)
     if not interrupted:  # nothing is asked after Ctrl-C
-        _offer_review(client, systems, todo, sorted(set(scrape_state.notgames()) - before))
+        _offer_review(client, systems, todo, sorted(set(scrape_state.notgames()) - before), review)
     if not forced and any(how is None for got in outcomes.values() for how in got.values()):
         _hints()
     skipped = sum(n for (name, rom), n in _media_skipped.items() if outcomes.get(name, {}).get(rom))  # of the ROMs recorded
@@ -932,12 +933,14 @@ def _hints():
     print(ui.dim("   Say which game one is: sync-roms scrape match SYSTEM ROM GAME_ID_OR_NAME"))
 
 
-def _offer_review(client, systems, todo, new):
-    """After a run that turned up non-games: review them now (on a terminal, if the user wants)."""
+def _offer_review(client, systems, todo, new, review=True):
+    """After a run that turned up non-games: review them now (on a terminal, if the user wants; never without review)."""
     if not new:
         return
     print(ui.yellow(f"\n🚫 {len(new)} ROM(s) came back as non-games"))
-    if sys.stdin.isatty() and ui.confirm("Review them now?", default=True):
+    if not review:
+        print(ui.dim(f"   Review them: sync-roms scrape review {' '.join(sorted(todo))}"))
+    elif sys.stdin.isatty() and ui.confirm("Review them now?", default=True):
         from . import scrape_review
         sizes = {f"{name}/{r}": size for name, items in todo.items() for r, size, _ in items}
         scrape_review.review(systems, new, sizes, client)

@@ -1,5 +1,5 @@
 """Scriptable subcommands: sync, edit, devices, upload, diff, playlist, prepare, install, mirror, games, sets, collections, themes,
-download, flash, unmount, mount, cards, saves, layouts, cache, config, doctor, guide, check, scrape and completion; plus helpers the
+download, flash, format, unmount, mount, cards, saves, layouts, cache, config, doctor, guide, check, scrape and completion; plus helpers the
 sync flow uses."""
 import argparse
 import datetime
@@ -15,7 +15,7 @@ from . import bezels, budget, cardedit, cardshare, collectionedit, external, gue
 
 
 UNKNOWN_SHOWN = 8  # device ids named in an "unknown device" error
-COMMANDS = {"sync", "edit", "devices", "upload", "diff", "playlist", "prepare", "install", "mirror", "games", "sets", "collections", "themes", "download", "flash", "unmount", "mount", "cards", "saves", "layouts", "cache", "config", "doctor", "guide", "check", "scrape", "completion"}
+COMMANDS = {"sync", "edit", "devices", "upload", "diff", "playlist", "prepare", "install", "mirror", "games", "sets", "collections", "themes", "download", "flash", "format", "unmount", "mount", "cards", "saves", "layouts", "cache", "config", "doctor", "guide", "check", "scrape", "completion"}
 SCRAPE_ACTIONS = ("match", "review", "missing", "art", "clean")
 LITERAL = frozenset()  # the values after `scrape match` that start with a dash: values, never options
 
@@ -1483,6 +1483,11 @@ def flash_cmd(args):
     return flash.run(args)
 
 
+def format_cmd(args):
+    from . import format_card
+    return format_card.run(args)
+
+
 def _scrape_system(args, name):
     """Set args.system from the SYSTEM word or --system (not both) of `name`; a path is refused."""
     word, flag = getattr(args, "word", None), getattr(args, "system", None)
@@ -1732,6 +1737,7 @@ def build_parser():
     p.add_argument("--count", type=_positive_int, metavar="N"); p.set_defaults(fn=download_pico8)
 
     p = sub.add_parser("flash", add_help=False, allow_abbrev=False); common(p, card=False); p.set_defaults(fn=flash_cmd)
+    p = sub.add_parser("format", add_help=False, allow_abbrev=False); common(p, card=False); p.set_defaults(fn=format_cmd)
     p = sub.add_parser("unmount", add_help=False, allow_abbrev=False); common(p, card=False); p.set_defaults(fn=unmount_cmd)
     p = sub.add_parser("mount", add_help=False, allow_abbrev=False); common(p, card=False); p.set_defaults(fn=mount_cmd)
 
