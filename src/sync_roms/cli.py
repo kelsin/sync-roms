@@ -11,7 +11,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError
 
-from . import __version__, budget, cardedit, cardfs, clean, commands, downloads, drivers, edit, external, frontend, inventory, m3u, mirroring, picker, runtime, s3, scrape_plan, store
+from . import __version__, bezels, budget, cardedit, cardfs, clean, commands, downloads, drivers, edit, external, frontend, inventory, m3u, mirroring, picker, runtime, s3, scrape_plan, store
 from . import muos_collections, nextui_folders, onion_surprise, pico8, raofflineproxy, rocknix_collections, saves, spruce_collections, spruce_bootlogo, spruce_emu, spruce_os, spruce_fixes, spruce_settings, spruce_syncthing, spruce_themes, spruce_wifi, surprise, themeart, ui, usersettings, vita
 from . import collections as colls
 from . import guest as guests
@@ -66,15 +66,16 @@ TOPICS = {
       showing the card's size and how much isn't on it yet as you add games and collections;
       otherwise every surprise is replaced. Then, with Surprise on, the empty slots are filled.
    3. Every system with games picked on the card is synced. The totals to download are shown: ROMs,
-      BIOS, scraped data and, where the card gets them, Android APKs, GPU drivers and Onion themes.
+      BIOS, scraped data and, where the card gets them, Android APKs, bezels, GPU drivers and Onion
+      themes.
    4. Card files spelled differently from storage are renamed, and unwanted ones that match a
       missing file are moved to its place. Local ROMs no longer in a system's list, in a system with
       no games listed, or in a system the card's device no longer lists, are listed and, after you
       confirm (default no), deleted first so the free space shown is accurate. Then free space is
       shown and you confirm the download.
    5. ROMs download, then BIOS: BIOS for every system with ROMs on the card is installed, games
-      picked or not. Then what the card's layout gets: Android APKs, GPU drivers (old ones are
-      removed), PICO-8, the Onion Surprise app, RAOfflineProxy and Onion themes.
+      picked or not. Then what the card's layout gets: Android APKs, bezels, GPU drivers (old ones
+      are removed), PICO-8, the Onion Surprise app, RAOfflineProxy and Onion themes.
    6. Scraped data for the card's games is installed from storage's scrapes/ folder, then media on
       the card for ROMs it doesn't have is removed, in every system's folder, synced or not.
    7. Onion, Allium and Spruce system folders left with no ROMs and nothing else are removed, synced
@@ -1564,6 +1565,10 @@ def sync_card(args):
                  if not k.endswith("/") and (store.card_flag(store.saved_card(card), "raofflineproxy")
                                              or not raofflineproxy.APK_NAME.fullmatch(os.path.basename(k)))] if layout_name == "esde" and not guest else [])
     apk_jobs = downloads.with_sizes(apk_jobs)
+    # and the device's bezels (os/android/bezels/<device id>/) in a Bezels/ folder
+    bezel_dir = os.path.join(base, "Bezels")
+    bezel_jobs = (downloads.with_sizes(bezels.jobs((device or {}).get("id"), base))
+                  if layout_name == "esde" and not guest else [])
     # and the suggested GPU drivers for the device's Adreno GPU, kept up to date in storage first, in a Drivers/ folder
     driver_entries = [] if guest else drivers.for_device(device, layout_name)
     drivers_dir = os.path.join(base, "Drivers")
@@ -1602,6 +1607,7 @@ def sync_card(args):
 
     rom_todo, bios_todo = downloads.plan_downloads(rom_jobs, disc_dir), downloads.plan_downloads(bios_jobs)
     apk_todo = downloads.plan_downloads(apk_jobs)
+    bezel_todo = downloads.plan_downloads(bezel_jobs)
     driver_todo = downloads.plan_downloads(driver_jobs)
     theme_todo = spruce_themes.todo(theme_jobs) if theme_plan else downloads.plan_downloads(theme_jobs)
     if guest:  # never overwrite a file on a friend's card
@@ -1706,7 +1712,7 @@ def sync_card(args):
     summary = [f"{icon} {label}: {ui.bold(str(len(todo)))} to download ({ui.human_size(total_bytes(todo))}), "
                f"{len(jobs) - len(todo)} already present"
                for icon, label, todo, jobs, always in (("💿", "ROMs", rom_todo, rom_jobs, True), ("🧠", "BIOS", bios_todo, bios_jobs, True),
-                                                       ("🤖", "Android", apk_todo, apk_jobs, False), ("🎮", "Drivers", driver_todo, driver_jobs, False),
+                                                       ("🤖", "Android", apk_todo, apk_jobs, False), ("🖼️", "Bezels", bezel_todo, bezel_jobs, False), ("🎮", "Drivers", driver_todo, driver_jobs, False),
                                                        ("🎨", "Themes", theme_todo, theme_jobs, False))
                if always or jobs]
     print("\n" + "\n".join(summary))
@@ -1719,7 +1725,7 @@ def sync_card(args):
     list_kept(kept_extras, "local ROM(s) no longer in the selection")
     if renames or card_moves:
         print(f"📦 Card files to rename or move instead of downloading: {ui.bold(str(len(renames) + len(card_moves)))}")
-    todo_all = rom_todo + bios_todo + apk_todo + driver_todo + theme_todo + scrape_todo
+    todo_all = rom_todo + bios_todo + apk_todo + bezel_todo + driver_todo + theme_todo + scrape_todo
     size = saved.get("size")
 
     def space(free):
@@ -1860,7 +1866,7 @@ def sync_card(args):
             free += spruce_themes.freed(base, theme_plan["remove"])
         plan_json = {
             "downloads": [{"kind": kind, "key": key, "path": path, "size": size or 0}
-                          for kind, todo in (("rom", rom_todo), ("bios", bios_todo), ("android", apk_todo), ("driver", driver_todo),
+                          for kind, todo in (("rom", rom_todo), ("bios", bios_todo), ("android", apk_todo), ("bezel", bezel_todo), ("driver", driver_todo),
                                           ("theme", theme_todo), ("scrape", scrape_todo))
                           for key, path, size in todo],
             "delete": list(extras) + samples, "kept": kept_extras, "theme_remove": theme_plan["remove"] if theme_plan else [], "rename": [{"from": a, "to": b} for a, b in renames + [(p, j[1]) for p, j in card_moves]],
@@ -1964,7 +1970,7 @@ def sync_card(args):
                 theme_jobs = downloads.with_sizes(theme_plan["jobs"])
                 theme_todo = spruce_themes.todo(theme_jobs)
         if picked is not None:
-            todo_all = rom_todo + bios_todo + apk_todo + driver_todo + theme_todo + scrape_todo
+            todo_all = rom_todo + bios_todo + apk_todo + bezel_todo + driver_todo + theme_todo + scrape_todo
             print(f"🎨 Themes: {ui.bold(str(len(theme_todo)))} to download ({ui.human_size(total_bytes(theme_todo))}), "
                   f"{len(theme_jobs) - len(theme_todo)} already present"
                   + (f"; {len(theme_plan['remove'])} to remove" if theme_plan["remove"] else ""))
@@ -1986,6 +1992,8 @@ def sync_card(args):
     failed = move_failed + removal_failed + downloads.run_downloads(rom_todo, "ROMs", "💿", roms_dir, failures, disc_dirs) + downloads.run_downloads(bios_todo, "BIOS", "🧠", bios_dir, failures)
     if apk_jobs:
         failed += downloads.run_downloads(apk_todo, "Android", "🤖", apk_dir, failures)
+    if bezel_jobs:
+        failed += downloads.run_downloads(bezel_todo, "Bezels", "🖼️", bezel_dir, failures)
     if driver_entries:
         failed += downloads.run_downloads(driver_todo, "Drivers", "🎮", drivers_dir, failures)
     # also when the card gets no drivers now (another device or layout): the ones sync copied before go
@@ -2061,7 +2069,7 @@ def sync_card(args):
     if not failed and not args.no_eject and usersettings.load_settings().get("eject", True) is not False:
         clean._eject_root = base  # after the card tidy, which still needs it mounted
     failed_keys = {k for k, _ in failures}
-    got = [j for j in rom_todo + bios_todo + apk_todo + driver_todo + theme_todo + scrape_todo if j[0] not in failed_keys]
+    got = [j for j in rom_todo + bios_todo + apk_todo + bezel_todo + driver_todo + theme_todo + scrape_todo if j[0] not in failed_keys]
     done = (f"downloaded {len(got)} file(s) ({ui.human_size(total_bytes(got))}) in {ui.eta(time.monotonic() - started)}"
             + (f"; {len(missing)} listed ROM(s) not in storage" if missing else ""))
     if failed:

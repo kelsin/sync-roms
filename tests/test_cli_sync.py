@@ -450,6 +450,25 @@ class SyncSmokeTest(DataDir):
         self.assertEqual([k for k, _ in got], ["os/android/APKs/Obtainium.apk"])
         self.assertEqual(os.path.basename(os.path.dirname(got[0][1])), "APKs")
 
+    def test_bezels_are_copied_to_bezels_for_the_cards_device_on_esde_cards(self):
+        listing = {"os/android/bezels/magicx-zero40/": 0, "os/android/bezels/magicx-zero40/retroarch/gb.cfg": 86,
+                   "os/android/bezels/other/x.cfg": 5}
+        for layout, device_id, args, expected in (("esde", "magicx-zero40", (), ["Bezels/retroarch/gb.cfg"]),
+                                                  ("esde", "magicx-zero40", ("--guest",), []),
+                                                  ("esde", "magicx-zero40-pro", (), []),
+                                                  ("onion", "magicx-zero40", (), [])):
+            got = []
+            layouts = {**MANIFEST["layouts"], "onion": {"label": "onion", "roms_dir": "Roms", "bios_dir": "BIOS"}}
+            patches = ((cli, {"free_space": lambda path: 10**9}),
+                       (store, {"load_manifest": lambda names=(): {**MANIFEST, "systems": [{**SYSTEM, "folders": {"esde": "gba", "onion": "GBA"}}], "layouts": layouts}}),
+                       (cli.picker, {"saved_setup": lambda *a: ({"id": device_id, "name": device_id, "systems": ["gba"], "note": ""}, layout)}),
+                       (cli.downloads, {"run_downloads": lambda todo, label, icon, base, *a: (got.extend(os.path.relpath(j[1], base + "/..") for j in todo) if label == "Bezels" else None) or 0}),
+                       (cli.s3, {"list_sizes": lambda prefix, sizes=True: {k: v for k, v in listing.items() if k.startswith(prefix)} if prefix.startswith("os/android/bezels/") else list_sizes(prefix)}),
+                       (cli.ui, {"choose": lambda q, *a, **k: "n"}))
+            with self.subTest(layout=layout, device=device_id, args=args):
+                self.run_sync(False, patches=patches, args=args)
+                self.assertEqual(got, expected)
+
     def test_raofflineproxy_apk_is_left_out_when_the_card_has_it_off(self):
         for flag, expected in ((True, ["os/android/APKs/Obtainium.apk", "os/android/APKs/RAOfflineProxy-v3.apk"]), (False, ["os/android/APKs/Obtainium.apk"])):
             got = []
