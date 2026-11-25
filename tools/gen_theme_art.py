@@ -1183,16 +1183,15 @@ def star_fox(p):  # arwing, seen from the front
     p.o(0, 17, 4)
 
 
-def contra(p):  # the winged weapon capsule with its S
-    wing = [(16, -8), (30, -24), (50, -28), (44, -18), (52, -12), (42, -4), (46, 4), (20, 8)]
-    for side in (wing, mirror(wing)):
-        p.pg(side, 2)
-        with p.inside(rounded(side, 2)):
-            s = 1 if side is wing else -1
-            p.l([(s * 16, -10), (s * 44, -18)], 0)
-            p.l([(s * 16, 0), (s * 42, -4)], 0)
-    p.o(0, -2, 24, 18, opaque=True)
-    p.path(arc(0, -8.5, 8, 6.5, 325, 90) + arc(0, 4.5, 8, 6.5, 270, 505)[1:])
+def contra(p):  # the title's C: a heavy block letter, chamfered and slanted, with a bevel line
+    def slant(pts):
+        return [(x - 0.22 * y, y) for x, y in pts]
+
+    letter = slant([(-16, -42), (38, -42), (38, -22), (-10, -22), (-10, 22), (38, 22), (38, 42), (-16, 42),
+                    (-34, 24), (-34, -24)])
+    p.pg(letter, 2.5)
+    with p.inside(rounded(letter, 2.5)):
+        p.l(slant([(44, -32), (-12, -32), (-22, -22), (-22, 22), (-12, 32), (44, 32)]), 2)
 
 
 def ninja_gaiden(p):  # katana and a shuriken
@@ -1280,7 +1279,7 @@ ART = {
     "ys": (ys, (38, 112, 124), -6, 0.9, (-14, 0)),
     "horses": (horses, (150, 96, 60), -5, 0.95, (-34, 0)),
     "star-fox": (star_fox, (46, 92, 168), -6, 1.0, (-10, 0)),
-    "contra": (contra, (176, 52, 40), -6, 1.0, (-20, 0)),
+    "contra": (contra, (176, 52, 40), -6, 1.0, (-14, 0)),
     "ninja-gaiden": (ninja_gaiden, (92, 40, 110), 0, 1.0, (-6, 0)),
     "gradius": (gradius, (34, 74, 120), -6, 0.9, (-22, 0)),
     "metal-slug": (metal_slug, (120, 110, 56), -4, 1.0, (-14, 0)),
