@@ -913,8 +913,12 @@ def check_tags(problems, systems):
         good = [v for v in variants if isinstance(v, dict) and isinstance(v.get("bucket"), str) and v["bucket"]]
         if len(good) < len(variants):
             problems.append(f"{where}: {key}: each variant needs a bucket key")
-        for v in good:
-            listed += check_keys(problems, where, system, {"bucket": v["bucket"], "files": v.get("files", [])})
+        for v in good:  # a variant may be on another system than its game
+            v_system = v["bucket"].partition("/")[0]
+            if v_system not in systems:
+                problems.append(f"{where}: {key}: variant {v['bucket']!r}: unknown system {v_system!r}")
+            else:
+                listed += check_keys(problems, where, v_system, {"bucket": v["bucket"], "files": v.get("files", [])})
     return {where: listed} if listed else {}
 
 

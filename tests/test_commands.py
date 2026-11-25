@@ -55,9 +55,22 @@ class CheckTagsTest(StorageDir):
             "gba/B.zip": {"tags": ["shmups"], "files": ["gen/X.zip"], "variants": [{"bucket": "nes/V.zip", "note": ""}]}}})
         self.assertEqual(problems, ["tags.json: gba/A.zip: unknown tag 'nope'",
                                     "tags.json: 'gen/X.zip' isn't under gba/",
-                                    "tags.json: 'nes/V.zip' isn't under gba/",
+                                    "tags.json: gba/B.zip: variant 'nes/V.zip': unknown system 'nes'",
                                     "tags.json: nes/N.zip: unknown system 'nes'"])
         self.assertEqual(keys, {"tags.json": [("gba", "gba/A.zip"), ("gba", "gba/B.zip")]})
+
+    def test_a_variant_on_another_known_system_is_fine(self):
+        problems, keys, _ = self.check({"tags": TAG_DEFS, "games": {"gba/A.zip": {"tags": ["rpg"], "variants": [
+            {"bucket": "gen/A Plus.zip", "note": "Genesis: more", "files": ["gen/A Plus 2.zip", "gba/W.zip"]}]}}})
+        self.assertEqual(problems, ["tags.json: 'gba/W.zip' isn't under gen/"])  # a variant's files are on its system
+        self.assertEqual(keys, {"tags.json": [("gba", "gba/A.zip"), ("gen", "gen/A Plus.zip"),
+                                              ("gen", "gen/A Plus 2.zip")]})
+
+    def test_a_variant_under_an_unknown_folder_is_a_problem(self):
+        problems, keys, _ = self.check({"tags": TAG_DEFS, "games": {"gba/A.zip": {"tags": ["rpg"], "variants": [
+            {"bucket": "nope/A.zip", "note": ""}]}}})
+        self.assertEqual(problems, ["tags.json: gba/A.zip: variant 'nope/A.zip': unknown system 'nope'"])
+        self.assertEqual(keys, {"tags.json": [("gba", "gba/A.zip")]})
 
     def test_a_tag_id_that_isnt_a_string_is_a_problem(self):
         problems, _, _ = self.check(json.dumps({"tags": TAG_DEFS, "games": {"gba/A.zip": {"tags": ["rpg", ["x"], 3]}}}))
