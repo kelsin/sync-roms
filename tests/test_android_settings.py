@@ -43,6 +43,28 @@ class CfgWanted(helpers.DataDir):
             self.assertNotIn("cheevos_hardcore_mode_enable", w)
             self.assertNotIn("cheevos_username", w)
 
+    def test_hotkeys(self):
+        w = android_settings.cfg_wanted()
+        expected = {"input_enable_hotkey_btn": "109", "input_exit_emulator_btn": "108", "input_save_state_btn": "103",
+                    "input_load_state_btn": "102", "input_toggle_fast_forward_btn": "105",
+                    "input_toggle_slowmotion_btn": "104", "input_menu_toggle_btn": "99", "input_fps_toggle_btn": "100",
+                    "input_state_slot_decrease_btn": "h0left", "input_state_slot_increase_btn": "h0right",
+                    "input_hold_fast_forward_btn": "nul", "input_quit_gamepad_combo": "0",
+                    "input_menu_toggle_gamepad_combo": "0", "input_exit_emulator_axis": "nul"}
+        self.assertEqual({k: w[k] for k in expected}, expected)
+
+    def test_hotkeys_clear_a_vendor_preset(self):
+        text = ('input_enable_hotkey_btn = "109"\ninput_exit_emulator_btn = "108"\ninput_state_slot_decrease_btn = "104"\n'
+                'input_state_slot_increase_btn = "105"\ninput_toggle_fast_forward_btn = "96"\ninput_hold_fast_forward_btn = "105"\n')
+        wanted = android_settings.cfg_wanted()
+        cfg = android.parse_config(android_settings.cfg_apply(text, android_settings.cfg_entries(text, wanted)))
+        held = {"99", "100", "102", "103", "104", "105", "108", "h0left", "h0right"}
+        for key, value in cfg.items():
+            if key.startswith("input_") and key.endswith("_btn") and not key.startswith("input_player") and value in held:
+                self.assertEqual(wanted[key], value, key)
+        self.assertEqual(cfg["input_hold_fast_forward_btn"], "nul")
+        self.assertEqual(cfg["input_state_slot_decrease_btn"], "h0left")
+
     def test_clears_cloud_sync(self):
         w = self.wanted()
         self.assertEqual({k: w[k] for k in ("cloud_sync_enable", "webdav_url", "webdav_username", "webdav_password")},
@@ -147,7 +169,7 @@ class EsdeWanted(helpers.DataDir):
 
 
 OLD_CFG = 'cloud_sync_enable = "true"\nsavefile_directory = "x"\n'
-RIGHT_CFG = "".join(f'{k} = "{v}"\n' for k, v in android_settings.CLOUD_SYNC.items())
+RIGHT_CFG = "".join(f'{k} = "{v}"\n' for k, v in {**android_settings.hotkeys(), **android_settings.CLOUD_SYNC}.items())
 ESDE_SYSTEMS = [{"bucket": "nes", "folders": {"esde": "nes"}}]
 TARGET = android.Target("S", "Pixel", "6AF3-53E9", "card")
 LAYOUT = {"roms_dir": "ROMs"}
