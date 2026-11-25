@@ -73,7 +73,7 @@ copy it writes.
   - `test_games_titles_tags_paths`: a collection with a game `{"system": "snes", "bucket": "snes/Super Mario World (USA).zip", "title": "Super Mario World"}`
     and a game with `files`. Assert `paths == ["snes/Super Mario World (USA).zip"]` and the second game's
     `paths == [bucket, *files]`. Assert `tags == ["mario", "platformers"]` when `tags.json` has those plus an
-    undefined id `"ghost"`. Assert `systems["snes"] == "Super Nintendo Entertainment System"` (the name from
+    undefined id `"ghost"`. Assert `systems["snes"] == "Nintendo SNES (Super Nintendo)"` (the name from
     `store.repo_json("systems")`).
   - `test_title_falls_back_to_names_title`: a game with no title; patch `names.title` and assert it's used.
   - `test_art_uris`: a collection with `"art": "mario"` gets `band`, `box` and `totk`, each starting with
