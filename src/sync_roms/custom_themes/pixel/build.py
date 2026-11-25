@@ -41,13 +41,14 @@ BLACKED = {
 
 FONT_DIR = os.path.join(store.REPO_DATA, "themes", "fusion-pixel")
 FONT, FONT_LICENSE = "fusion-pixel-12px-proportional-ja.ttf", "FONT-LICENSE.txt"
-# {config section: {size key: size}}: the pixel font is only crisp at multiples of 12
-FONT_SIZES = {"batteryPercentage": {"size": 12}, "title": {"size": 24}, "hint": {"size": 24}, "currentpage": {"size": 24},
-              "total": {"size": 24}, "list": {"size": 24}, "grid": {"grid1x4": 24, "grid3x4": 12}}
+# {config section: [size keys]}: each rounded down to a multiple of 12, where the pixel font is crisp
+FONT_SIZES = {"batteryPercentage": ["size"], "title": ["size"], "hint": ["size"], "currentpage": ["size"], "total": ["size"],
+              "list": ["size"], "grid": ["grid1x4", "grid3x4"]}
 
 
 def set_font(config):
-    """Point every "font" in config at FONT and set the FONT_SIZES the config has; returns the fonts it replaced."""
+    """Point every "font" in config at FONT and round the FONT_SIZES the config has down to a multiple of 12 (at least
+    12), so each screen's config keeps the base's scale; returns the fonts it replaced."""
     replaced = set()
 
     def walk(node):
@@ -62,10 +63,10 @@ def set_font(config):
             walk(child)
 
     walk(config)
-    for section, sizes in FONT_SIZES.items():
-        for key, size in sizes.items():
+    for section, keys in FONT_SIZES.items():
+        for key in keys:
             if key in config.get(section, {}):
-                config[section][key] = size
+                config[section][key] = max(12, config[section][key] // 12 * 12)
     return replaced - {FONT}
 
 

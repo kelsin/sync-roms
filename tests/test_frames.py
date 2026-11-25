@@ -1,3 +1,4 @@
+import json
 import os
 import sys
 import tempfile
@@ -136,6 +137,16 @@ def synthetic(path, size, box):
 
 
 def make_base(path, files=None, copies=None):
+    """The skins, and in config.json (kept when there is one) the fonts row_height reads."""
+    config_path = os.path.join(path, "config.json")
+    config = {}
+    if os.path.exists(config_path):
+        with open(config_path) as f:
+            config = json.load(f)
+    config.update({"list": {"size": 24}, "grid": {"grid3x4": 12}})
+    os.makedirs(path, exist_ok=True)
+    with open(config_path, "w") as f:
+        json.dump(config, f)
     for name, (size, box) in (BASE if files is None else files).items():
         synthetic(os.path.join(path, "skin", name), size, box)
     for folder, entries in (COPIES if copies is None else copies).items():
@@ -307,7 +318,7 @@ class Frames(unittest.TestCase):
                 (size, box), base_size = sizes[rel], BASE[rel.split("/", 1)[1]][0]
                 cell = frames.cell_for(size, base_size, spec.small)
                 if spec.height is not None:  # one list row tall, whatever the base's height
-                    size = (size[0], spec.height(*frames.screen(rel.split("/", 1)[0])))
+                    size = (size[0], spec.height(theme, rel.split("/", 1)[0]))
                     box = None
                 img = load(os.path.join(theme, rel))
                 self.assertEqual(img.size, size)
@@ -703,11 +714,16 @@ class Frames(unittest.TestCase):
     def test_list_bars_are_one_row_tall(self):
         """PyUI crops the selection bar to the row from its top: the file is the row, rims on all four sides."""
         from sync_roms.custom_themes.pixel import frames_select
-        # 640x480: settings rows are the 5 px title offset, the 24 px title font (32 high), the 12 px description
-        # font (16 high) and 10 px padding; game list rows the title font and padding
-        self.assertEqual(frames_select.row_height(True)(640, 480), 5 + 32 + 16 + 10)
-        self.assertEqual(frames_select.row_height(False)(640, 480), 32 + 10)
-        self.assertEqual(frames_select.row_height(True)(1280, 720), 7 + 32 + 16 + 15)
+        # 640x480 (config.json): settings rows are the 5 px title offset, the 24 px title font (32 high), the 12 px
+        # description font (16 high) and 10 px padding; game list rows the title font and padding
+        sizes = os.path.join(self.tmp.name, "sizes")
+        make_base(sizes, {}, {})
+        self.assertEqual(frames_select.row_height(True)(sizes, "skin"), 5 + 32 + 16 + 10)
+        self.assertEqual(frames_select.row_height(False)(sizes, "skin"), 32 + 10)
+        self.assertEqual(frames_select.row_height(True)(sizes, "skin_1280x720"), 7 + 32 + 16 + 15)  # no config of its own
+        with open(os.path.join(sizes, "config_1280x720.json"), "w") as f:  # its own fonts: 36 px (48 high), 24 px (32)
+            json.dump({"list": {"size": 36}, "grid": {"grid3x4": 24}}, f)
+        self.assertEqual(frames_select.row_height(True)(sizes, "skin_1280x720"), 7 + 48 + 32 + 15)
         theme, _ = self.build(GRUVBOX)
         hi = frames.shades(GRUVBOX).hi
         for file, height in (("bg-list-l.png", 63), ("bg-list-s.png", 42)):

@@ -146,7 +146,7 @@ class FrameSpec:
     background: tuple = None  # painted over the whole footprint first (full-screen backgrounds stay opaque)
     group: tuple = field(default=())  # files (in the same folder) whose footprints are intersected: one shared grid
     small: bool = False  # the small-file cell rule whatever the width (see cell_for)
-    height: object = None  # height(screen_w, screen_h): the file's height on that screen, its footprint the whole file
+    height: object = None  # height(theme_dir, skin folder): the file's height there, its footprint the whole file
 
 
 FRAMES = {}  # "skin/<file>.png": FrameSpec, drawn in every skin*/ folder that has the file
@@ -191,7 +191,7 @@ def apply(theme_dir, palette):
                            min(box[3], other_box[3]))
             cell = cell_for(size, base_sizes[name], spec.small)
             if spec.height is not None:
-                height = spec.height(*screen(folder))
+                height = spec.height(theme_dir, folder)
                 size, box = (size[0], height), (box[0], 0, box[2], height)
             canvas = Canvas(size, cell, box, spec.background)
             spec.draw(canvas, colors)

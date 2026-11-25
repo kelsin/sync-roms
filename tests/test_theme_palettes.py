@@ -196,7 +196,7 @@ class Build(helpers.StorageDir):
             self.assertEqual(len(sizes), 8, file)
             self.assertLessEqual(set(sizes), {12, 24}, file)
             self.assertEqual((config["batteryPercentage"]["size"], config["title"]["size"], config["grid"]["grid1x4"],
-                              config["grid"]["grid3x4"]), (12, 24, 24, 12), file)
+                              config["grid"]["grid3x4"]), (24, 24, 24, 12), file)  # 25 and 18, rounded down
 
     def test_unknown_style_raises_keyerror(self):
         with self.assertRaises(KeyError):
