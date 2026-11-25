@@ -179,6 +179,7 @@ Every mode is a command (plain `sync-roms [CARD]` syncs a card). A command's ali
 | `themes pick` | choose the PyUI themes every spruce card gets by default (`spruce_themes` setting) | |
 | `download pico8` | add the [PICO-8 BBS Featured carts](#pico-8-carts-from-the-bbs-download-pico8) storage doesn't have, and newer revisions of those it has | `downloads` |
 | `flash` | [write a Knulli, BaseOS, muOS, ROCKNIX or OakMoss image](#flashing-an-sd-card-flash) from storage's `os/` to an SD card, macOS only | |
+| `format` | [erase an SD card as exFAT or FAT32](#formatting-an-sd-card-format) with a picked label, macOS only | |
 | `unmount` | pick an SD card, remove macOS's junk from it as a sync does (`.metadata_never_index`, `.fseventsd`, `._` files) and unmount it, macOS only | `umount` |
 | `mount` | pick an SD card that was unmounted (by `unmount` or a sync) but not pulled out and mount it again with `diskutil mountDisk`, macOS only | |
 | `cards list\|new\|set\|rename\|layout\|install\|clean\|delete\|copy\|export\|import` | [manage cards](#cards-cards) | `card` |
@@ -460,6 +461,7 @@ BIOS files sit flat in `roms/bios`. RetroArch saves sit beside the ROMs: a sync 
 - **Collections and Surprise**: the one `Collections/collections.json` holds every collection; collections made on the device are kept as they are.
 - **Art**: a sync also removes the picture of a collection it wrote that has no art any more, even with `"theme": false`.
 - **spruceOS**: the newest `spruceV<version>.7z` from storage's `os/spruceos/` is copied to the card root, unextracted, for Apps → EZ Updater on the device: once per file, after the card's other writes, and only when the card has room for it with 64 MiB to spare. The one staged before is removed (kept with `--no-delete`). The sync's last line then reminds you to run EZ Updater.
+- **Splore carts**: when the card syncs PICO-8, the carts PICO-8's Splore downloaded on the device (its cache in `Emu/PICO8/.lexaloffle/pico-8/bbs/`) that storage's `pico8/` doesn't have, or has an older revision of, are listed and added to storage after one question (default yes; `--yes` adds them, and without a terminal and without `--yes` they are only listed), with their titles from Splore's favourites. New carts are scraped when a ScreenScraper login is saved (else `sync-roms scrape pico8` does it later) and added to the card's games (a full PICO-8 system has them already); the same sync copies them to `Roms/PICO8/`. Copies Splore's import put in `Roms/PICO8/` under another name are renamed to the cart's own file name and, like any cached cart storage already has that is on the card under its own name, added to the card's games, so they aren't asked about as extra files. Not on guest cards; `--dry-run` only lists.
 - **Fixes**: a "Spruce fixes" block patches known spruceOS bugs on the card until upstream releases the fix. Until [spruceOS#2070](https://github.com/spruceUI/spruceOS/pull/2070) ships, that includes PyUI's game lists: backing out of a collection or a folder with B highlights it the next time instead of opening it again, and each folder remembers its own last game (PyUI still goes back inside after a game). Three PyUI files are patched, and their CRLF line ends are kept; a card patched with the earlier **Reopen last collection** setting has it taken out again. This happens only when the card's PyUI matches a known version (4.6.0 or the current `Development` code); otherwise the card is left as it is, with a warning. `--dry-run` shows what it would change.
 
 - **Themes**: `themes update` keeps every PyUI theme unpacked in storage's `os/spruceos/themes/`, `themes pick` chooses the default list (`spruce_themes`), and a sync copies that list plus the card's `spruce_theme` into `Themes/` (a card with one-theme mode on, turned on in the `S` menu, gets only its `spruce_theme`: a sync with a terminal and without `--yes` asks for one when none is set, and `t` still picks for that sync) (only missing or different files; each theme's `config*.json` is compared by content, so tweaks made on the device go back to storage's). With a terminal and without `--yes`, the download question takes `t` to pick the themes for that sync only (nothing is saved) and is asked even when nothing else is to download. Themes a sync installed and no longer wants are removed (not with `--no-delete`, and never the card's `spruce_theme` or the theme the device has selected). It then sets `"theme"` in the card's `Saves/*-system.json` files (spruceOS must have booted on the card). A card with no systems to sync gets no themes.
@@ -636,6 +638,16 @@ Every command reads what storage holds (each file's name and size, and for a buc
 - The image is copied to a local temp folder (free space is checked first). Right before writing, the card must still be the same disk (id, size and name).
 - `sudo dd` writes it decompressed (gz, xz or zip) on the fly with 4 MiB blocks. sudo may ask for your password before downloading and writing.
 - The temp folder is removed, writes are flushed and the card is ejected. After a failure the card is unmounted instead, so you can retry.
+
+## Formatting an SD card (`format`)
+
+`sync-roms format [--dry-run]` erases an SD card as exFAT or FAT32 with a label you pick. macOS only.
+
+- You pick an external SD card (shown with its volume names), then a filesystem, then a label: your card names, then the layout names uppercased, or type your own. FAT32 labels are uppercase, at most 11 characters; exFAT at most 15. Longer ones are left out of the list, and a typed one with characters the filesystem doesn't allow is asked again.
+- The boot disk and the disk holding storage are never offered.
+- You confirm by typing the disk id (`disk4`). `--yes` never skips this. `--dry-run` stops here and shows the command.
+- Right before erasing, the card must still be the same disk (id, size and name).
+- `sudo diskutil eraseDisk <FS> <LABEL> MBR <disk>` erases it. sudo may ask for your password. The card is left mounted.
 
 ## Claude Code skills
 
