@@ -1202,7 +1202,7 @@ def doctor_cmd(args):
     problems = check_data()
     line(not problems, f"data files in {store.data_dir()}" + ("" if not problems else f": {len(problems)} problem(s)"), "sync-roms check")
     if args.fix and any(not external.find_tool(tool) for tool in external.TOOL_FORMULAE):
-        return external.install_tools_command()
+        return max(external.install_tools_command(), 1 if bad else 0)
     return 1 if bad else 0
 
 

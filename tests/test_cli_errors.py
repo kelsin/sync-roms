@@ -124,6 +124,22 @@ class UsageHelpTest(Isolated):
         self.assertIn("is the card mounted?", err)
         self.assertIn("sync-roms help", err)
 
+    def test_help_after_leading_flags_prints_help_and_runs_nothing(self):
+        for argv, topic in ((["-y", "help"], "USAGE"), (["-n", "help"], "USAGE"), (["-y", "help", "upload"], "sync-roms upload")):
+            with self.subTest(argv=argv), mock.patch.object(scrape_files, "clean_scrapes", side_effect=AssertionError("cleaned")), \
+                    mock.patch.object(commands, "prepare_storage", side_effect=AssertionError("read storage")):
+                code, out, err = self.sync(argv)
+            self.assertEqual((code, err), (0, ""))
+            self.assertIn(topic, out)
+
+    def test_legacy_parse_with_no_command_never_cleans(self):
+        args = cli.build_parser().parse_args(["-y", "x"])
+        with mock.patch.object(scrape_files, "clean_scrapes", side_effect=AssertionError("cleaned")), \
+                mock.patch.object(commands, "prepare_storage", side_effect=AssertionError("read storage")), \
+                contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as cm:
+            cli.dispatch_mode(args, None)
+        self.assertEqual(cm.exception.code, 2)
+
     def test_help_for_an_unknown_topic_exits_2(self):
         code, out, err = self.sync(["help", "bogus"])
         self.assertEqual((code, out), (2, ""))

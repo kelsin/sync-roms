@@ -628,8 +628,17 @@ class PlainCommands(unittest.TestCase):
                     mock.patch.object(commands, "check_data", lambda: []), \
                     mock.patch.object(external, "find_tool", lambda tool, f=found: f), \
                     mock.patch.object(external, "install_tools_command", return_value=0) as install:
-                self.run_cli("doctor", "--fix")
+                self.assertEqual(self.run_cli("doctor", "--fix"), 0)
             self.assertEqual(install.call_count, calls)
+
+    def test_doctor_fix_keeps_doctors_own_failure(self):
+        from sync_roms import external
+        for problems, installed, expect in (([" bad"], 0, 1), ([], 3, 3), ([" bad"], 3, 3)):
+            with self.subTest(problems=problems, installed=installed), mock.patch.object(runtime, "ROOT", self.tmp), \
+                    mock.patch.object(commands, "check_data", lambda p=problems: p), \
+                    mock.patch.object(external, "find_tool", lambda tool: None), \
+                    mock.patch.object(external, "install_tools_command", return_value=installed):
+                self.assertEqual(self.run_cli("doctor", "--fix"), expect)
 
     def test_global_flags_any_position(self):
         from sync_roms import upload

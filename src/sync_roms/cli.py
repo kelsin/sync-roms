@@ -1002,10 +1002,11 @@ def run(argv):
             print(help_text(ALIASES.get(cmd[0], cmd[0])))
             return 0
         return commands.run(cmd)
-    if argv and argv[0] == "help":
-        if len(argv) > 1 and ALIASES.get(argv[1], argv[1]) not in SUBCOMMANDS:
-            ui.fail(f"No help for {argv[1]!r}: it isn't a command. See `sync-roms help` for the commands.", 2)
-        print(help_text(ALIASES.get(argv[1], argv[1]) if len(argv) > 1 else None))
+    if word == "help":
+        name = argv[lead + 1] if lead + 1 < len(argv) else None
+        if name is not None and ALIASES.get(name, name) not in SUBCOMMANDS:
+            ui.fail(f"No help for {name!r}: it isn't a command. See `sync-roms help` for the commands.", 2)
+        print(help_text(ALIASES.get(name, name) if name is not None else None))
         return 0
     topic = next((ALIASES.get(a, a) for a in argv if a in SUBCOMMANDS or a in ALIASES), None) if ("-h" in argv or "--help" in argv) else None
     if topic:  # before translate(), which refuses `clean` without its subcommand
@@ -1028,6 +1029,8 @@ def dispatch_mode(args, mode):
     """Run the command a flag stands for and return its exit code.
 
     The modules a command needs are imported here, so the other commands (and --help) don't pay for them."""
+    if mode is None:  # never fall through to a command that deletes
+        ui.fail("No command given: see `sync-roms help` for the commands.", 2)
     if args.set_credentials:
         from . import scrape_online
         return scrape_online.set_credentials()
@@ -1051,6 +1054,7 @@ def dispatch_mode(args, mode):
         from . import scrape_art
         args.system = args.scrape_art or None
         return scrape_art.art_command(args)
+    assert args.clean_scrapes, mode
     from . import scrape_files
     return commands.refresh_mirror(scrape_files.clean_scrapes(args), args)
 
