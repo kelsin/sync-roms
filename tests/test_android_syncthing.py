@@ -1,14 +1,18 @@
+import contextlib
 import io
+import itertools
 import os
 import sys
 import unittest
+import urllib.error
 import zipfile
+from unittest import mock
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "src"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from sync_roms import android, android_syncthing, applied  # noqa: E402
+from sync_roms import adb, android, android_syncthing, applied, spruce_syncthing  # noqa: E402
 
 SID = "-".join(["AAAAAAA"] * 8)
 SRV = {"id": SID, "address": "tcp://server:22000",
@@ -137,3 +141,165 @@ class Plan(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class Apply(unittest.TestCase):
+    """android_syncthing.apply with adb and the REST API mocked."""
+
+    def setUp(self):
+        self.out, self.err = io.StringIO(), io.StringIO()
+        quiet = contextlib.ExitStack()
+        quiet.enter_context(contextlib.redirect_stdout(self.out))
+        quiet.enter_context(contextlib.redirect_stderr(self.err))
+        self.addCleanup(quiet.close)
+        self.shells, self.api_calls, self.removed = [], [], []
+        self.sdk, self.packages = "30", f"package:{android_syncthing.PACKAGE}\npackage:other"
+        self.whitelist, self.appops, self.dumpsys = "", "MANAGE_EXTERNAL_STORAGE: default", ""
+        self.has_export, self.exported = True, export()
+        self.srv, self.config, self.health, self.config_error = SRV, {"devices": [], "folders": []}, True, None
+        for target, name, value in ((spruce_syncthing, "enabled", lambda: True),
+                                    (spruce_syncthing, "server", lambda: self.srv),
+                                    (adb, "shell", self.shell), (adb, "is_file", lambda s, p: self.has_export),
+                                    (adb, "exec_out", lambda s, *w: self.exported),
+                                    (adb, "forward", lambda s, port: 5555),
+                                    (adb, "forward_remove", lambda s, port: self.removed.append(port)),
+                                    (android_syncthing, "_api", self.api),
+                                    (android_syncthing.time, "sleep", lambda t: None),
+                                    (android_syncthing.time, "monotonic", itertools.count().__next__)):
+            self.enterContext(mock.patch.object(target, name, value))
+
+    def shell(self, serial, *words, check=True):
+        self.shells.append(words)
+        if words[:3] == ("pm", "list", "packages"):
+            return self.packages
+        if words[:3] == ("dumpsys", "deviceidle", "whitelist"):
+            return self.whitelist
+        if words[:2] == ("getprop", "ro.build.version.sdk"):
+            return self.sdk + "\n"
+        if words[:2] == ("appops", "get"):
+            return self.appops
+        if words[:2] == ("dumpsys", "package"):
+            return self.dumpsys
+        return ""
+
+    def api(self, port, key, method, path, body=None):
+        self.api_calls.append((method, path, body))
+        if path == "/rest/noauth/health":
+            if not self.health:
+                raise urllib.error.URLError("down")
+            return {"status": "OK"}
+        if self.config_error:
+            raise self.config_error
+        return {"/rest/config": self.config, "/rest/config/defaults/device": DD,
+                "/rest/config/defaults/folder": DF}.get(path)
+
+    def run_apply(self, dry_run=False):
+        failed = []
+        android_syncthing.apply("S", dry_run, failed)
+        return failed
+
+    def written(self):
+        return [c for c in self.api_calls if c[0] != "GET"]
+
+    def test_skips_when_syncthing_off(self):
+        with mock.patch.object(spruce_syncthing, "enabled", lambda: False):
+            self.assertEqual(self.run_apply(), [])
+        self.assertEqual(self.shells, [])
+
+    def test_not_installed_prints_hint(self):
+        self.packages = "package:other"
+        self.assertEqual(self.run_apply(), [])
+        self.assertIn("Syncthing-Fork isn't installed", self.out.getvalue())
+        self.assertEqual(self.shells, [("pm", "list", "packages")])
+
+    def test_access_entries_android_11(self):
+        self.srv = None
+        self.run_apply()
+        pkg = android_syncthing.PACKAGE
+        self.assertIn(("dumpsys", "deviceidle", "whitelist", f"+{pkg}"), self.shells)
+        self.assertIn(("appops", "set", pkg, "MANAGE_EXTERNAL_STORAGE", "allow"), self.shells)
+        self.assertIn("all files access = allow", self.out.getvalue())
+
+    def test_access_entries_only_for_changed(self):
+        self.srv = None
+        pkg = android_syncthing.PACKAGE
+        self.whitelist, self.appops = f"user,{pkg},10123", "MANAGE_EXTERNAL_STORAGE: allow"
+        self.run_apply()
+        self.assertFalse([w for w in self.shells if w[:2] == ("appops", "set") or w[:4] == ("dumpsys", "deviceidle", "whitelist", f"+{pkg}")])
+
+    def test_access_entries_android_10(self):
+        self.srv = None
+        self.sdk = "29"
+        self.run_apply()
+        pkg = android_syncthing.PACKAGE
+        self.assertIn(("pm", "grant", pkg, "android.permission.READ_EXTERNAL_STORAGE"), self.shells)
+        self.assertIn(("pm", "grant", pkg, "android.permission.WRITE_EXTERNAL_STORAGE"), self.shells)
+        self.assertFalse([w for w in self.shells if w[:2] == ("appops", "set")])
+        self.assertIn("storage permission = granted", self.out.getvalue())
+
+    def test_access_entries_android_10_already_granted(self):
+        self.srv = None
+        self.sdk = "29"
+        self.dumpsys = "android.permission.WRITE_EXTERNAL_STORAGE: granted=true"
+        self.run_apply()
+        self.assertFalse([w for w in self.shells if w[:2] == ("pm", "grant")])
+
+    def test_no_export_warns_without_failing(self):
+        self.has_export = False
+        self.assertEqual(self.run_apply(), [])
+        self.assertIn("Syncthing-Fork has no export at /storage/emulated/0/backups/syncthing/config.zip", self.err.getvalue())
+        self.assertEqual(self.api_calls, [])
+        self.assertIn("all files access = allow", self.out.getvalue())
+
+    def test_bad_export_warns_without_failing(self):
+        self.exported = b"nope"
+        self.assertEqual(self.run_apply(), [])
+        self.assertIn("Syncthing-Fork's export isn't a zip; the server and folders aren't set", self.err.getvalue())
+
+    def test_dry_run_never_launches_or_writes(self):
+        self.health = False
+        self.assertEqual(self.run_apply(True), [])
+        self.assertFalse([w for w in self.shells if w[0] == "monkey"])
+        self.assertEqual(self.written(), [])
+        self.assertEqual(self.shells and [w for w in self.shells if w[:2] == ("appops", "set")], [])
+        self.assertIn("Syncthing-Fork isn't running", self.out.getvalue())
+        self.assertEqual(self.removed, [5555])
+
+    def test_down_launches_app_then_warns(self):
+        self.health = False
+        self.assertEqual(self.run_apply(), [])
+        self.assertTrue([w for w in self.shells if w[0] == "monkey"])
+        self.assertIn("Syncthing-Fork isn't running", self.err.getvalue())
+
+    def test_forward_removed_on_error(self):
+        self.config_error = urllib.error.URLError("boom")
+        self.assertEqual(self.run_apply(), ["Syncthing-Fork"])
+        self.assertEqual(self.removed, [5555])
+
+    def test_adb_error_fails(self):
+        with mock.patch.object(adb, "exec_out", side_effect=adb.AdbError("lost")):
+            self.assertEqual(self.run_apply(), ["Syncthing-Fork"])
+
+    def test_403_warns_without_failing(self):
+        self.config_error = urllib.error.HTTPError("u", 403, "Forbidden", {}, None)
+        self.assertEqual(self.run_apply(), [])
+        self.assertIn("refused the export's API key", self.err.getvalue())
+        self.assertEqual(self.removed, [5555])
+
+    def test_real_run_sends_planned_calls(self):
+        self.assertEqual(self.run_apply(), [])
+        self.assertEqual([(m, p) for m, p, _ in self.written()],
+                         [("PUT", f"/rest/config/devices/{SID}"), ("PUT", "/rest/config/folders/ra-saves"),
+                          ("PUT", "/rest/config/folders/ra-states")])
+        self.assertIn("device server", self.out.getvalue())
+        self.assertEqual(self.removed, [5555])
+
+    def test_dry_run_shows_plan_without_writing(self):
+        self.assertEqual(self.run_apply(True), [])
+        self.assertEqual(self.written(), [])
+        self.assertIn("would set   device server", self.out.getvalue())
+
+    def test_plan_warnings_are_printed(self):
+        self.config = {"devices": [], "folders": [folder("ra-saves", "/elsewhere")]}
+        self.run_apply()
+        self.assertIn("ra-saves is at /elsewhere", self.err.getvalue())

@@ -7,7 +7,7 @@ import tempfile
 import zipfile
 from xml.sax.saxutils import escape, unescape
 
-from . import adb, android, apk, applied, bezels, inventory, raofflineproxy, runtime, s3, spruce_syncthing, store, ui, usersettings
+from . import adb, android, android_syncthing, apk, applied, bezels, inventory, raofflineproxy, runtime, s3, spruce_syncthing, store, ui, usersettings
 
 CFG = "retroarch.cfg"
 SECRETS = ("cheevos_password", "webdav_password", "cheevos_token")
@@ -390,12 +390,14 @@ def apply(target, layout, systems, dry_run, device_id=None):
         if dry_run:
             applied.show(ra_entries + esde_entries, True)
             _apk_part(serial, target, tmp, True, failed)
+            android_syncthing.apply(serial, True, failed)
             return 1 if failed else 0
         if any(applied.changed(e) for e in ra_entries):
             _write_retroarch(serial, pkg, cfg_remote, tmp, failed, overlay)
         if any(applied.changed(e) for e in esde_entries):
             _write_esde(serial, target.volume, gamelists, tmp, failed)
         _apk_part(serial, target, tmp, False, failed)
+        android_syncthing.apply(serial, False, failed)
         return 1 if failed else 0
     finally:
         shutil.rmtree(tmp, ignore_errors=True)

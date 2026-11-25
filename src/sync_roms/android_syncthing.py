@@ -1,14 +1,22 @@
 """Syncthing-Fork on an Android device: reading its config export and planning the server and folders to add."""
 import io
+import json
 import re
+import ssl
+import time
+import urllib.error
+import urllib.request
 import zipfile
 import xml.etree.ElementTree as ET
 
-from . import android, applied
+from . import adb, android, applied, spruce_syncthing, ui
 
 PACKAGE = "com.github.catfriend1.syncthingfork"
 EXPORT = "/storage/emulated/0/backups/syncthing/config.zip"
 WHERE = "Syncthing-Fork"
+NO_EXPORT = ("Syncthing-Fork has no export at /storage/emulated/0/backups/syncthing/config.zip: export its settings "
+             "(Settings > Import and Export > Export, no backup password) so config apply can add the server and folders")
+DOWN = "Syncthing-Fork isn't running (its run conditions may keep it stopped); the server and folders aren't set"
 ENCRYPTED = "is encrypted (export it without a backup password)"
 PATHS = {"saves": android.DEFAULT_SAVES, "states": android.DEFAULT_STATES}
 
@@ -76,3 +84,117 @@ def plan(config, srv, defaults_device, defaults_folder):
                       {**defaults_folder, "id": folder_id, "label": label, "path": path, "type": "sendreceive",
                        "devices": [{"deviceID": server}]}))
     return entries, calls, warnings
+
+
+def _access_entries(serial):
+    """[(Entry, adb shell words that set it)]: battery exemption and storage access."""
+    whitelist = adb.shell(serial, "dumpsys", "deviceidle", "whitelist")
+    result = [(applied.Entry(WHERE, "battery optimization", "exempt" if PACKAGE in whitelist else "on", "exempt", False),
+               ["dumpsys", "deviceidle", "whitelist", f"+{PACKAGE}"])]
+    if int(adb.shell(serial, "getprop", "ro.build.version.sdk").strip() or 0) >= 30:
+        out = adb.shell(serial, "appops", "get", PACKAGE, "MANAGE_EXTERNAL_STORAGE")
+        mode = re.search(r"MANAGE_EXTERNAL_STORAGE:\s*(\w+)", out)
+        old = "allow" if "allow" in out else mode.group(1) if mode else "default"
+        result.append((applied.Entry(WHERE, "all files access", old, "allow", False),
+                       ["appops", "set", PACKAGE, "MANAGE_EXTERNAL_STORAGE", "allow"]))
+    else:
+        granted = "android.permission.WRITE_EXTERNAL_STORAGE: granted=true" in adb.shell(serial, "dumpsys", "package", PACKAGE)
+        result.append((applied.Entry(WHERE, "storage permission", "granted" if granted else None, "granted", False),
+                       None))
+    return result
+
+
+def _grant(serial):
+    for permission in ("READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE"):
+        adb.shell(serial, "pm", "grant", PACKAGE, f"android.permission.{permission}")
+
+
+def _api(port, key, method, path, body=None):
+    """The JSON answer of Syncthing-Fork's REST API on 127.0.0.1:port, None when empty."""
+    request = urllib.request.Request(f"https://127.0.0.1:{port}{path}", method=method, headers={"X-API-Key": key},
+                                     data=None if body is None else json.dumps(body).encode())
+    if body is not None:
+        request.add_header("Content-Type", "application/json")
+    with urllib.request.urlopen(request, timeout=10, context=ssl._create_unverified_context()) as response:
+        raw = response.read()
+    return json.loads(raw) if raw.strip() else None
+
+
+def _up(port, key):
+    """Whether the health check answers within 15 seconds."""
+    deadline = time.monotonic() + 15
+    while True:
+        try:
+            _api(port, key, "GET", "/rest/noauth/health")
+            return True
+        except OSError:
+            pass
+        if time.monotonic() >= deadline:
+            return False
+        time.sleep(1)
+
+
+def _folder_part(serial, srv, dry_run):
+    """entries for the server and folders (their REST calls sent unless a dry run), or [] with a warning when they can't be reached."""
+    if not adb.is_file(serial, EXPORT):
+        ui.warn(NO_EXPORT)
+        return []
+    found = read_export(adb.exec_out(serial, "cat", EXPORT))
+    if isinstance(found, str):
+        ui.warn(f"Syncthing-Fork's export {found}; the server and folders aren't set")
+        return []
+    key, remote = found
+    port = adb.forward(serial, remote)
+    try:
+        if not _up(port, key):
+            if not dry_run:
+                adb.shell(serial, "monkey", "-p", PACKAGE, "-c", "android.intent.category.LAUNCHER", "1")
+            if dry_run or not _up(port, key):
+                if dry_run:
+                    print(ui.dim(DOWN))
+                else:
+                    ui.warn(DOWN)
+                return []
+        try:
+            config = _api(port, key, "GET", "/rest/config")
+            device = _api(port, key, "GET", "/rest/config/defaults/device")
+            default = _api(port, key, "GET", "/rest/config/defaults/folder")
+        except urllib.error.HTTPError as e:
+            if e.code != 403:
+                raise
+            ui.warn("Syncthing-Fork refused the export's API key: export its settings again")
+            return []
+        entries, calls, warnings = plan(config, srv, device, default)
+        for warning in warnings:
+            ui.warn(warning)
+        if not dry_run:
+            for method, path, body in calls:
+                _api(port, key, method, path, body)
+        return entries
+    finally:
+        adb.forward_remove(serial, port)
+
+
+def apply(serial, dry_run, failed):
+    """Give Syncthing-Fork its access and, from its config export, the server and folders; trouble is warned about, adb and REST errors counted in `failed`."""
+    if not spruce_syncthing.enabled():
+        return
+    try:
+        if f"package:{PACKAGE}" not in adb.shell(serial, "pm", "list", "packages").split():
+            print(ui.dim("Syncthing-Fork isn't installed: install it to sync saves with the server"))
+            return
+        access = _access_entries(serial)
+        if not dry_run:
+            for entry, words in access:
+                if not applied.changed(entry):
+                    continue
+                if words is None:
+                    _grant(serial)
+                else:
+                    adb.shell(serial, *words)
+        srv = spruce_syncthing.server()
+        entries = _folder_part(serial, srv, dry_run) if srv else []
+        applied.show([e for e, _ in access] + entries, dry_run)
+    except (adb.AdbError, OSError, ValueError) as e:
+        ui.warn(f"Syncthing-Fork: {e}")
+        failed.append("Syncthing-Fork")

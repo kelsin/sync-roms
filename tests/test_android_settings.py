@@ -8,7 +8,7 @@ from unittest import mock
 
 import helpers
 from test_apk import manifest_bytes
-from sync_roms import adb, android, android_settings, applied, bezels, inventory, s3, store, ui, usersettings
+from sync_roms import adb, android, android_settings, android_syncthing, applied, bezels, inventory, s3, store, ui, usersettings
 
 E = applied.Entry
 
@@ -250,6 +250,15 @@ class Apply(helpers.DataDir):
         self.apks[APKS + name] = apk_zip(package, version)
         if installed is not None:
             self.packages[package] = installed
+
+    def test_apply_runs_syncthing_after_apks(self):
+        self.files[self.cfg_path] = RIGHT_CFG
+        for dry_run in (True, False):
+            order = []
+            with mock.patch.object(android_settings, "_apk_part", lambda *a: order.append("apks")), \
+                    mock.patch.object(android_syncthing, "apply", lambda serial, dry, failed: order.append(("syncthing", serial, dry))):
+                self.assertEqual(self.run_apply(dry_run), 0)
+            self.assertEqual(order, ["apks", ("syncthing", TARGET.serial, dry_run)])
 
     def test_apply_installs_only_missing_packages(self):
         self.apk_setup()
