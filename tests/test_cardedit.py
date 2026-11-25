@@ -465,7 +465,7 @@ class Flow(DataDir):
                 mock.patch.dict(DEVICE, systems=["gba", "gb", "nds"]):
             calls = self.run_card(returns((cardedit.COLLECTIONS_KEY, 0)), returns((" ", 0)), returns(None), returns(None))
         self.assertEqual(calls[1][1], ["💖 Favs"])
-        self.assertEqual(calls[1][2]["extras"], [[("  ✅ on the card", "green"), ("  2 playable, 2 not playable", "dim")]])
+        self.assertEqual(calls[1][2]["extras"], [[("  ✅ on the card", "green"), ("  2/2 on the card", "cyan"), ("  2 playable, 2 not playable", "dim")]])
         self.assertEqual(self.read("cards.json")["c"]["collections"], ["favs"])
 
     def test_collections_hotkey_skips_malformed_games(self):
@@ -473,23 +473,81 @@ class Flow(DataDir):
         self.card()
         with contextlib.redirect_stderr(io.StringIO()):
             calls = self.run_card(returns((cardedit.COLLECTIONS_KEY, 0)), returns(None), returns(None))
-        self.assertEqual(calls[1][2]["extras"][0][1], ("  2 playable, 1 not playable", "dim"))
+        self.assertEqual(calls[1][2]["extras"][0][2], ("  2 playable, 1 not playable", "dim"))
 
-    def test_space_toggles_a_collection_off_again_and_enter_is_done(self):
+    def test_space_toggles_a_collection_off_again(self):
         self.favs()
         self.card(collections=["favs"])
-        calls = self.run_card(returns((cardedit.COLLECTIONS_KEY, 0)), returns((" ", 0)), returns(0), returns(None))
+        calls = self.run_card(returns((cardedit.COLLECTIONS_KEY, 0)), returns((" ", 0)), returns(None), returns(None))
         self.assertEqual(self.read("cards.json")["c"]["collections"], [])
-        self.assertNotIn("enter", calls[1][2]["hotkeys"])  # Enter picks the row: the list is done
+        self.assertNotIn("enter", calls[1][2]["hotkeys"])  # Enter picks the row: it opens its games
         self.assertEqual(len(calls), 3)  # the system list, the collections once, the system list
         self.assertIn("Space", calls[1][0])
         self.assertNotIn("Enter toggles", calls[1][0])
+        self.assertIn("Enter opens", calls[1][0])
 
-    def test_enter_in_the_collections_list_changes_nothing(self):
+    def favs_two(self):
+        collections.save_collection({"id": "favs", "name": "Favs", "games": [
+            {"title": "Ruby", "system": "gba", "bucket": "gba/Ruby.zip"},
+            {"title": "Zelda", "system": "gba", "bucket": "gba/Zelda.zip"}]})
+
+    def test_enter_in_the_collections_list_opens_its_games_and_adds_nothing_whole(self):
         self.favs()
         self.card(collections=["favs"])
-        self.run_card(returns((cardedit.COLLECTIONS_KEY, 0)), returns(0), returns(None))
+        with mock.patch.object(cardedit, "edit_set") as opened:
+            self.run_card(returns((cardedit.COLLECTIONS_KEY, 0)), returns(0), returns(None))
+        opened.assert_called_once()
+        self.assertEqual(opened.call_args.args[1]["id"], "favs")
         self.assertEqual(self.read("cards.json")["c"]["collections"], ["favs"])
+
+    def test_enter_on_a_collection_not_on_the_card_does_not_add_it(self):
+        self.favs()
+        self.card()
+        with mock.patch.object(cardedit, "edit_set") as opened:
+            self.run_card(returns((cardedit.COLLECTIONS_KEY, 0)), returns(0), returns(None))
+        self.assertEqual(opened.call_args.args[1]["id"], "favs")
+        self.assertNotIn("collections", self.read("cards.json")["c"])
+
+    def test_collections_list_esc_opens_nothing(self):
+        self.favs()
+        self.card()
+        with mock.patch.object(cardedit, "edit_set") as opened:
+            self.run_card(returns((cardedit.COLLECTIONS_KEY, 0)), returns(None), returns(None))
+        opened.assert_not_called()
+
+    def test_collection_view_picks_a_single_game_as_a_direct_pick(self):
+        self.favs_two()
+        self.card()
+        self.run_card(returns((cardedit.COLLECTIONS_KEY, 0)), returns(0), toggle("Game Boy Advance — Zelda"), returns(None))
+        card = self.read("cards.json")["c"]
+        self.assertEqual(card["games"]["gba"], [{"title": "Zelda", "bucket": "gba/Zelda.zip"}])
+        self.assertNotIn("collections", card)
+
+    def test_collection_view_switching_off_a_whole_collection_game_excludes_it(self):
+        self.favs_two()
+        self.card(collections=["favs"])
+        self.run_card(returns((cardedit.COLLECTIONS_KEY, 0)), returns(0), toggle("Game Boy Advance — Zelda"), returns(None))
+        card = self.read("cards.json")["c"]
+        self.assertEqual(card["excluded"], {"gba": ["gba/Zelda.zip"]})
+        self.assertEqual(card["collections"], ["favs"])
+
+    def test_collections_list_counts_the_collections_games_on_the_card(self):
+        self.favs_two()
+        self.card(games={"gba": [g("gba/Ruby.zip")]})
+        calls = self.run_card(returns((cardedit.COLLECTIONS_KEY, 0)), returns((" ", 0)), returns(None), returns(None))
+        script_extras = calls[1][2]["extras"]
+        self.assertEqual(script_extras[0][1], ("  2/2 on the card", "cyan"))  # after the toggle, the same list
+        self.assertEqual(script_extras[0][0], ("  ✅ on the card", "green"))
+
+    def test_collections_list_counts_before_the_whole_collection_is_on(self):
+        self.favs_two()
+        self.card(games={"gba": [g("gba/Ruby.zip")]})
+        seen = []
+        self.run_card(returns((cardedit.COLLECTIONS_KEY, 0)),
+                      lambda labels, kw: seen.append([list(e) for e in kw["extras"]]),
+                      returns(None), returns(None))
+        self.assertEqual(seen[0][0][0], ("", "green"))
+        self.assertEqual(seen[0][0][1], ("  1/2 on the card", "cyan"))
 
     def test_collections_list_of_a_missing_or_malformed_card_entry_marks_none(self):
         self.favs()

@@ -24,7 +24,7 @@ LIST_HINT = "Enter · a all games · f full · s set · l colls · S settings"
 GAMES_HINT = "Space toggle · Enter done · a all · s set · m meta · p past · v variant"
 META_HINT = "Enter list its values · Esc back"
 VALUES_HINT = "Enter narrow to it · Esc back · / filter"
-COLLECTIONS_HINT = "Space/Tab toggle · Enter done · / filter"
+COLLECTIONS_HINT = "Enter show its games · Space/Tab toggle the collection · / filter"
 SETS_HINT = "Enter show its games · Space/Tab toggle its games here · / filter"
 SET_GAMES_HINT = "Space toggle · Enter done · a all · w note · v variant · r series"
 CARD_SETS_HINT = "Enter show its games · Space/Tab toggle its games · / filter"
@@ -374,8 +374,10 @@ def edit_card(name, setup=None, to_fetch=None, card_match=None, on_guest=None):
                     edit_set(name, chosen, setup, to_fetch, usages)
                 changed = ALL  # Space/Tab in the list may have switched games
             elif key == COLLECTIONS_KEY:
-                pick_collections(name, {s["bucket"] for s in can_play(catalog["systems"], setup)},
-                                 lambda: card_status(name, setup, systems, to_fetch))
+                chosen = pick_collections(name, {s["bucket"] for s in can_play(catalog["systems"], setup)},
+                                          lambda: card_status(name, setup, systems, to_fetch), setup)
+                if chosen:
+                    edit_set(name, chosen, setup, to_fetch, usages)
                 changed = ALL
             elif key == SETTINGS_KEY:
                 settings_menu(name, catalog["systems"], playable)
@@ -551,9 +553,10 @@ def toggle_surprise(name):
     return surprise.enabled(entry)
 
 
-def pick_collections(name, playable, card_status=None):
-    """Toggle the collections a card includes (Space/Tab, in place; Enter is done), saving each
-    toggle at once. Each is shown with how many of its games are on systems in playable (system buckets the card syncs).
+def pick_collections(name, playable, card_status=None, setup=None):
+    """Toggle the collections a card includes (Space/Tab, in place), saving each toggle at once; returns the
+    collection Enter was pressed on (to open its games), or None. Each is shown with how many of its games are on
+    systems in playable (system buckets the card syncs) and, with setup (device, layout), how many are on the card.
     card_status(): the card's size status, worked out again after each toggle."""
     found = colls.load_collections()
     if not found:
@@ -563,9 +566,10 @@ def pick_collections(name, playable, card_status=None):
     entry = store.saved_card(name)
     saved = entry.get("collections")
     ids = [i for i in saved if isinstance(i, str)] if isinstance(saved, list) else []
-    labels, counts = [], []
+    labels, counts, playable_games = [], [], []
     for c in found:
-        p = sum(1 for g in colls.collection_games(c) if g.get("system") in playable)
+        playable_games.append([g for g in colls.collection_games(c) if g.get("system") in playable])
+        p = len(playable_games[-1])
         n = len(colls.collection_games(c)) - p
         labels.append(f"{themeart.art_emoji(c.get('art'))} {c['name']}")
         counts.append((f"  {p} playable" + (f", {n} not playable" if n else ""), "dim"))
@@ -573,7 +577,11 @@ def pick_collections(name, playable, card_status=None):
     shown = {}
 
     def mark():
-        extras[:] = [[("  ✅ on the card" if c["id"] in ids else "", "green"), count] for c, count in zip(found, counts)]
+        picks = cardpicks.CardPicks(name, setup) if setup else None  # fresh: a toggle changes what is locked
+        extras[:] = [[("  ✅ on the card" if c["id"] in ids else "", "green"),
+                      *([(f"  {sum(1 for g in games if picks.on_card(g['bucket']))}/{len(games)} on the card", "cyan")]
+                        if picks else []), count]
+                     for c, count, games in zip(found, counts, playable_games)]
         shown["status"] = card_status() if card_status else None
 
     def on_hotkey(_key, idx):
@@ -586,11 +594,13 @@ def pick_collections(name, playable, card_status=None):
         return True
 
     mark()
-    picker.filter_list(f"💖 Collections on {name} (Space toggles · Enter done)", labels, extras=extras,
+    i = picker.filter_list(f"💖 Collections on {name} (Space toggles · Enter opens)", labels, extras=extras,
                        hotkeys=(" ", "\t"), on_hotkey=on_hotkey, hint=COLLECTIONS_HINT,
-                       key_help=[("Space/Tab", "put the collection on the card or take it off")],
+                       key_help=[("Space/Tab", "put the collection on the card or take it off"),
+                                 ("Enter", "show its games to pick them one by one")],
                        status=(lambda _state: shown["status"]) if card_status else None,
                        preview=lambda i: previews.card_collection(found[i].get("art"), entry) if i < len(found) else None)
+    return found[i] if isinstance(i, int) and i < len(found) else None
 
 
 def pick_card_set(name, setup, systems, current=None):
