@@ -1250,6 +1250,7 @@ def sync_card(args):
         mirroring.use_mirror(mirror, args.dry_run)
     print("📄 Reading the card's games list...")
     card = os.path.basename(base) or base
+    mirrored_theme = spruce_themes.current(card)  # the card's theme when the mirror was refreshed
     manifest = store.load_manifest([card])
     systems, layouts = manifest["systems"], manifest["layouts"]
     if not any(s["games"] or s.get("full_system") for s in systems):
@@ -1595,8 +1596,9 @@ def sync_card(args):
                     cardedit.pick_spruce_theme(card, None)
             if not spruce_themes.current(card):
                 print(ui.dim("🎨 One theme only is on and the card has no theme: pick one in the card editor's S menu"))
-        theme_plan = spruce_themes.plan(card, base, theme_names, args.no_delete)
-        theme_jobs = downloads.with_sizes(theme_plan["jobs"])
+        with mirroring.storage_reads() if spruce_themes.current(card) != mirrored_theme else contextlib.nullcontext():
+            theme_plan = spruce_themes.plan(card, base, theme_names, args.no_delete)
+            theme_jobs = downloads.with_sizes(theme_plan["jobs"])
 
     rom_todo, bios_todo = downloads.plan_downloads(rom_jobs, disc_dir), downloads.plan_downloads(bios_jobs)
     apk_todo = downloads.plan_downloads(apk_jobs)
@@ -1933,7 +1935,9 @@ def sync_card(args):
 
     # on spruce cards t picks this sync's themes; the removals wait for the answer, so a kept theme isn't copied again
     pick_themes = theme_plan is not None and not ui.ASSUME_YES and ui.has_terminal()
-    themes_picked = False  # a list picked with t: the mirror keeps only the default list's themes, so storage is read
+    # a list picked with t, or a card theme picked since the mirror was refreshed: the mirror keeps only the default
+    # list's themes and the cards' then-current ones, so storage is read
+    themes_picked = spruce_themes.current(card) != mirrored_theme
     while todo_all or pick_themes:
         if todo_all:
             short = space(free_space(base) + (spruce_themes.freed(base, theme_plan["remove"]) if theme_plan else 0))

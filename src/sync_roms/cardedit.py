@@ -346,13 +346,12 @@ def edit_card(name, setup=None, to_fetch=None, card_match=None, on_guest=None):
             extras[:] = work_out()[1]
             return True
 
-        on = surprise.enabled(store.load_cards().get(name))
         saved = store.load_cards().get(name)
+        on = surprise.enabled(saved)
         one_theme = isinstance(saved, dict) and saved.get("layout") == "spruce" and saved.get("one_theme") is True
-        theme = saved.get("spruce_theme") if one_theme else None
         i = picker.filter_list(f"💳 {name} — its systems (⭐ for the device) · 🎁 Surprise {'on' if on else 'off'}"
-                               + (f" · 🎨 {theme if isinstance(theme, str) and theme else 'one theme: none picked'}" if one_theme else "")
-                               + (" · 👤 guest" if guest.is_guest(store.load_cards().get(name)) else ""),
+                               + (f" · 🎨 {spruce_themes.current(name) or 'one theme: none picked'}" if one_theme else "")
+                               + (" · 👤 guest" if guest.is_guest(saved) else ""),
                                labels, extras=extras, cursor=pos,
                                hotkeys=(FULL_KEY, OFF_KEY, ALL_KEY, SET_KEY, COLLECTIONS_KEY, SETTINGS_KEY, GUEST_KEY,
                                         CLEAR_ALL_KEY, *((KEEP_KEY,) if card_match else ())),

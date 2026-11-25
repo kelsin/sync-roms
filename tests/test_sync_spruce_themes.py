@@ -272,6 +272,18 @@ class SyncThemes(helpers.StorageDir):
             self.assertEqual(self.sync(yes=False), 0, self.err.getvalue())
         self.assertTrue(os.path.isfile(os.path.join(self.card, "Themes", "C", "icons", "a.png")), self.out.getvalue() + self.err.getvalue())
 
+    def test_one_theme_picked_at_sync_time_is_read_past_the_mirror(self):
+        mirror = os.path.join(self.tmp.name, "mirror")
+        for key in ("gba/Game.zip", f"{PREFIX}A/config.json", f"{PREFIX}A/icons/a.png"):
+            os.makedirs(os.path.dirname(os.path.join(mirror, key)), exist_ok=True)
+            with open(os.path.join(self.root, key), "rb") as src, open(os.path.join(mirror, key), "wb") as dst:
+                dst.write(src.read())
+        store.update_card("card", one_theme=True)
+        with mock.patch.object(runtime, "_mirror_root", mirror), \
+                mock.patch.object(spruce_themes, "pick_one", return_value="C"):
+            self.assertEqual(self.sync(yes=False), 0, self.err.getvalue())
+        self.assertTrue(os.path.isfile(os.path.join(self.card, "Themes", "C", "icons", "a.png")), self.out.getvalue() + self.err.getvalue())
+
     def test_dry_run_json_lists_theme_removals(self):
         store.update_card("card", spruce_themes_installed=["C"])
         self.card_theme("C")
