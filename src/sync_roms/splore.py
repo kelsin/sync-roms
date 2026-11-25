@@ -1,8 +1,10 @@
 """PICO-8 Splore carts cached on a spruceOS card: read what the card holds and tell new carts from upgrades."""
 import glob
 import os
+import shutil
+import tempfile
 
-from . import bbs, ignore, inventory
+from . import bbs, cardfs, drivers, ignore, inventory, names, s3, scrape_online, store, ui, usersettings
 
 CACHE = ("Emu", "PICO8", ".lexaloffle", "pico-8")
 
@@ -62,3 +64,131 @@ def cached(base):
 def plan(base):
     """(new, upgrades) of the card's cached carts against storage's `pico8/`."""
     return bbs.classify(cached(base), set(inventory.files("pico8/", sizes=False)), ignore.keys())
+
+
+def _same(path, other):
+    """Whether two files hold the same bytes."""
+    try:
+        if os.path.getsize(path) != os.path.getsize(other):
+            return False
+        with open(path, "rb") as a, open(other, "rb") as b:
+            return a.read() == b.read()
+    except OSError:
+        return False
+
+
+def _renames(base, pico8_dir, held):
+    """[(old name, cart file)] of the top-level `.p8.png` copies in pico8_dir that hold a cached cart's bytes under
+    another name, when held (the `pico8/` keys) has that cart and pico8_dir doesn't have its file yet."""
+    carts = [c for c in cached(base) if f"pico8/{c['file']}" in held]
+    out, taken = [], set()
+    for name, (is_dir, _) in sorted(cardfs.listing(pico8_dir).items()):
+        if is_dir or not name.endswith(".p8.png"):
+            continue
+        for c in carts:
+            if name != c["file"] and c["file"] not in taken and not cardfs.exists(os.path.join(pico8_dir, c["file"])) \
+                    and _same(os.path.join(pico8_dir, name), c["path"]):
+                out.append((name, c["file"]))
+                taken.add(c["file"])
+                break
+    return out
+
+
+def _rename(base, pico8_dir):
+    """Rename the card's Splore-import copies of carts storage has to the cart's own file name. Exit code."""
+    try:
+        held = set(inventory.files("pico8/", sizes=False))
+    except s3.ERRORS as e:
+        ui.warn(f"Couldn't list pico8/ in {s3.location()} ({e}); not renaming Splore imports")
+        return 1
+    code = 0
+    for old, file in _renames(base, pico8_dir, held):
+        try:
+            os.rename(os.path.join(pico8_dir, old), os.path.join(pico8_dir, file))
+        except OSError as e:
+            ui.warn(f"Couldn't rename {old} to {file} ({e})")
+            code = 1
+            continue
+        print(f"  📦 Renamed {old} → {file}")
+    cardfs.clear()
+    return code
+
+
+def _fetch(cart, tmp):
+    path = os.path.join(tmp, cart["file"])
+    shutil.copyfile(cart["path"], path)
+    return path
+
+
+def _scrape(added, system):
+    """Scrape the carts just added; 0, or 1 when the scrape failed (warned)."""
+    settings = usersettings.load_settings()
+    if not all(settings.get(k) for k in scrape_online.CREDENTIALS):
+        print(ui.dim("  no ScreenScraper login saved: `sync-roms scrape pico8` scrapes them"))
+        return 0
+    try:
+        sizes = inventory.files("pico8/")
+        todo = [(key[len("pico8/"):], sizes.get(key), inventory.tag(key)) for key in added]
+        return scrape_online.run_scrape(scrape_online.make_client(), {"pico8": system}, {"pico8": todo}, set(),
+                                        ask=False) and 1
+    except SystemExit:  # ui.fail already said why
+        ui.warn("The Splore carts' scrape stopped; `sync-roms scrape pico8` tries again")
+        return 1
+    except Exception as e:
+        ui.warn(f"Couldn't scrape the Splore carts ({e}); `sync-roms scrape pico8` tries again")
+        return 1
+
+
+def _add_to_card(card, added):
+    games = store.card_games(card)
+    entries = games.get("pico8")
+    if isinstance(entries, dict):  # a full system: every cart syncs already
+        return
+    entries = list(entries) if isinstance(entries, list) else []
+    named = {g.get("bucket") for g in entries if isinstance(g, dict)}
+    new = [{"title": names.title(key), "bucket": key} for key in added if key not in named]
+    if new:
+        store.update_card(card, games={**games, "pico8": entries + new})
+
+
+def run(card, base, pico8_dir, system, dry_run):
+    """Add the carts in a spruce card's Splore cache to storage's pico8/ (new carts and newer revisions), scrape the
+    new ones and add them to the card's games, then rename the card's Splore-import copies (base: the card's root;
+    pico8_dir: its PICO-8 ROM folder; system: the pico8 entry of systems). Exit code, 0 or 1."""
+    try:
+        new, upgrades = plan(base)
+    except s3.ERRORS as e:
+        ui.warn(f"Couldn't read pico8/ in {s3.location()} ({e}); skipping the Splore carts")
+        return 1
+    todo = [(None, c) for c in new] + upgrades
+    if not todo:
+        return _rename(base, pico8_dir)
+    print(ui.bold("🕹️  Splore carts on the card"))
+    for old, c in todo:
+        print(f"  new: {c['file']}" if old is None else f"  upgrade: {old} → {c['file']}")
+    print(f"  {len(new)} new, {len(upgrades)} upgrade(s)")
+    if dry_run:
+        print(ui.dim(f"  would scrape {len(new)} cart(s)"))
+        try:
+            held = set(inventory.files("pico8/", sizes=False)) | {f"pico8/{c['file']}" for _, c in todo}
+        except s3.ERRORS as e:
+            ui.warn(f"Couldn't list pico8/ in {s3.location()} ({e})")
+            return 1
+        for old, file in _renames(base, pico8_dir, held):
+            print(f"  would rename {old} → {file}")
+        return 0
+    if not drivers.can_write():
+        ui.warn(f"No write access to {s3.location()}: the Splore carts stay on the card only")
+        return _rename(base, pico8_dir)
+    if not ui.has_terminal() and not ui.ASSUME_YES:
+        print(ui.dim("  run sync with --yes, or on a terminal, to add them"))
+        return _rename(base, pico8_dir)
+    if not ui.confirm(f"Add these to {s3.location()} and scrape the new ones?", default=True):
+        return _rename(base, pico8_dir)
+    with tempfile.TemporaryDirectory() as tmp:
+        added, _, code = bbs.add_carts(todo, _fetch, tmp)
+    if added:
+        names.reset()  # the titles add_carts just wrote
+        code = _scrape(added, system) or code
+        _add_to_card(card, added)
+    return _rename(base, pico8_dir) or code
