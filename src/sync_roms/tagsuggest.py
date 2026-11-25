@@ -1,10 +1,9 @@
 """`sync-roms tags suggest`: tags for games from the genre ScreenScraper gave them, reviewed before they are saved.
 
 The repo's genre-tags.json maps a genre to tag ids: a ROM's `genre` in its system's scraped metadata.json is looked up
-in full, else by its part before " / " ("Sports / Darts" is "Sports"). Suggestions cover one version per game: the
+in full, else by its part before " / " ("Sports / Darts" is "Sports"). Suggestions cover every version of a game: the
 tagged games, and the pool, which is every full English game in storage (surprise.is_candidate) that isn't a tagged
-game, one of its files or variants, or another version of it (the same scraped name, else names.title, on the same
-system), one key per name. A suggestion the user turned down is in tags.json's `declined` and isn't made again."""
+game or one of its files. A suggestion the user turned down is in tags.json's `declined` and isn't made again."""
 from . import edit, inventory, names, s3, scrape_plan, store, surprise, tags, ui
 
 _metadata = {}  # {system bucket: its parsed metadata.json}, read once per run
@@ -41,22 +40,17 @@ def _records(bucket):
 
 
 def pool(system):
-    """{key: title} of one version of each game of the system that has no record (see the module docstring)."""
+    """{key: title} of every game of the system that has no record and isn't a file of a tagged game (see the module
+    docstring)."""
     bucket = system["bucket"]
     covered = set()
     for key, rec in tags.load()["games"].items():
         covered.add(key)
         covered.update(rec.get("files", ()))
-        for v in rec.get("variants", ()):
-            covered.add(v["bucket"])
-            covered.update(v.get("files", ()))
-    taken = {_title(k) for k in _records(bucket)}
     out = {}
     for unit in surprise.units(system, inventory.files(f"{bucket}/", sizes=False), set(system["bios"]["files"])):
-        title = _title(unit[0])
-        if not covered.intersection(unit) and title not in taken:
-            taken.add(title)
-            out[unit[0]] = title
+        if not covered.intersection(unit):
+            out[unit[0]] = _title(unit[0])
     return out
 
 

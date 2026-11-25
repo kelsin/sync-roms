@@ -924,7 +924,7 @@ def check_tags(problems, systems):
 
 def check_tag_notices(systems):
     """Things worth knowing about the tags that don't make `check` fail, as strings: tags with no games, each
-    system's untagged games (tagsuggest.untagged), genre-tags.json and surprise_tags ids that aren't tags and cards'
+    system's count of untagged games (tagsuggest.untagged), genre-tags.json and surprise_tags ids that aren't tags and cards'
     leftover "sets". systems: systems.json loaded."""
     data = tags.load()
     bare = sorted(set(data["tags"]) - {i for rec in data["games"].values() for i in rec["tags"]})

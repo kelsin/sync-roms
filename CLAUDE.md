@@ -159,15 +159,14 @@ While `custom_collections` is on, sync writes every collection with a game on th
 
 Rules for tagged games:
 
-- A game is tagged once across all tags: one version per game (arcade original over home ports; else the original lead platform, then the lighter one to emulate; English for text-heavy games), and every tag that applies to the game goes on that version.
-- A later version of the same game that adds something (extra content or modes, an HD or handheld remaster) goes in that game's `variants`, `[{"bucket", "note"}]`, the note saying in a few words what it adds. Variants aren't synced with the game's tags; the editors show them on the game's highlighted row, and `v` in the card editor adds one to the card.
-- A version that plays substantially differently is its own game. A compilation is tagged only when it holds a game no tag covers on its own.
-- The Retro Oddities, Handheld Greatest Hits and System Essentials tags keep their own versions and only lose straight re-releases.
+- Every version of a game gets every tag that applies to it (regional releases, revisions, remasters, ports), so a tag filter finds each version. A game no tag fits stays untagged.
+- A game's `variants`, `[{"bucket", "note"}]`, are related versions, the note saying in a few words what one adds. They're a note for the editors, which show them on the game's highlighted row, and `v` in the card editor adds one to the card; they're tagged like any other game.
+- A compilation is tagged only when it holds a game no tag covers on its own.
 - Tags are flat: no groups, categories or series. Make a group a tag of its own (`cave` and `shmups` are both tags).
 - Every game list shows a game's tag emoji as its last column. `t` edits the highlighted game's tags (`n` adds a tag), `s` opens the tag filter (`Enter` cycles a tag off, required ✅, excluded 🚫; `c` clears it), and the card editor's own `s` opens all games narrowed by tags first. They live in `tagui.py` and `cardedit.py`.
-- `sync-roms tags edit` (`tageditor.py`) edits tags and `sync-roms tags suggest [system ...]` (`tagsuggest.py`, `data/genre-tags.json`) suggests tags from scraped genres for one version per game, saving the unchecked ones to `declined`. `tools/migrate_sets_to_tags.py` is the one-time script that made `tags.json` from the old set files.
+- `sync-roms tags edit` (`tageditor.py`) edits tags and `sync-roms tags suggest [system ...]` (`tagsuggest.py`, `data/genre-tags.json`) suggests tags from scraped genres for every version of a game, saving the unchecked ones to `declined`. `tools/migrate_sets_to_tags.py` is the one-time script that made `tags.json` from the old set files.
 - Surprise picks only games with any of the tags in the `surprise_tags` setting, or in a card's own `surprise_tags` (card editor S menu), which wins; with neither it has no limit.
-- `sync-roms check` notes tags with no games, each system's untagged games (the same one-version pool `tags suggest` uses), `genre-tags.json` ids that aren't tags and a card's leftover `"sets"` key.
+- `sync-roms check` notes tags with no games, one count per system of its untagged games (the pool `tags suggest` uses), `genre-tags.json` ids that aren't tags and a card's leftover `"sets"` key.
 
 ### Scraped names and metadata
 

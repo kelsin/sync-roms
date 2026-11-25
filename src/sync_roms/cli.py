@@ -144,8 +144,8 @@ TOPICS = {
   games off, add games from a system or from another tag, rename it, change its emoji, description
   or art, merge it into another tag or delete it. n in the list adds a tag.
 
-  suggest covers one version of each game (the tagged games, and the full English games of storage
-  that aren't one of their versions, files or variants) and lists each tag the game's genre maps
+  suggest covers every version of each game (the tagged games, and the full English games of storage
+  that aren't one of their files) and lists each tag the game's genre maps
   to (src/sync_roms/data/genre-tags.json) and it lacks, all checked. Enter adds the checked ones;
   the unchecked ones are remembered in tags.json and not suggested again.
 """,
