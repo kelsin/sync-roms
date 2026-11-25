@@ -503,6 +503,10 @@ const PLAY_STORE = name => `<b>Google Play Store</b>: install <b>${name}</b> (pa
 // Systems that run in RetroArch cores.
 const RETROARCH_SYSTEMS = ["nes", "snes", "gb", "gbc", "gba", "genesis", "mastersystem", "gamegear", "segacd", "sega32x",
   "tg16", "atari2600", "atarilynx", "mame", "neogeo", "fbneo", "3do"];
+// Notes for the RetroArch rows sync-roms writes: Android (esde, not windows-pc) through `config apply`, spruce through sync.
+const APPLY_NOTE = "Set by sync-roms config apply.";
+const SYNCTHING_NOTE = "Set by sync-roms config apply while the syncthing setting is on.";
+const SYNC_NOTE = "Set by sync.";
 const RA_ROWS = {
   hardcore: "off",
   hardcoreNote: "RAOfflineProxy only does casual achievements.",
@@ -988,18 +992,22 @@ const SECTIONS = [
       {
         title: "Saving",
         body: `<p class="path">${path("RetroArch menu > Settings > Saving")}</p>`,
-        settings: [
-          ["Settings > Saving > Sort Saves into Folders by Core Name", "on"],
-          ["Settings > Saving > Sort Save States into Folders by Core Name", "on"],
-          ["Settings > Saving > Sort Saves into Folders by Content Directory", "off"],
-          ["Settings > Saving > Sort Save States into Folders by Content Directory", "off"],
-          ["Settings > Saving > Write Saves to Content Directory", "off"],
-          ["Settings > Saving > Write Save States to Content Directory", "off"],
-          ["Settings > Saving > Auto Save State", "on"],
-          ["Settings > Saving > Auto Load State", "on"],
-          ["Settings > Saving > Increment Save State Index Automatically", "on"],
-          ["Settings > Saving > Maximum Auto-Increment Save States to Keep", "10"],
-        ],
+        settingsFn: ctx => {
+          const android = ctx.platform === "android";
+          return [
+            ["Settings > Saving > Sort Saves into Folders by Core Name", "on"],
+            ["Settings > Saving > Sort Save States into Folders by Core Name", "on"],
+            ["Settings > Saving > Sort Saves into Folders by Content Directory", "off"],
+            ["Settings > Saving > Sort Save States into Folders by Content Directory", "off"],
+            ["Settings > Saving > Write Saves to Content Directory", "off"],
+            ["Settings > Saving > Write Save States to Content Directory", "off"],
+            ["Settings > Saving > Auto Save State", "on"],
+            ["Settings > Saving > Auto Load State", "on"],
+          ].map(([p, v]) => android ? [p, v, SYNCTHING_NOTE] : [p, v]).concat([
+            ["Settings > Saving > Increment Save State Index Automatically", "on"],
+            ["Settings > Saving > Maximum Auto-Increment Save States to Keep", "10"],
+          ].map(([p, v]) => android ? [p, v, APPLY_NOTE] : [p, v]));
+        },
       },
     ],
   },
@@ -1024,12 +1032,15 @@ const SECTIONS = [
         title: "RetroArch",
         when: { layout: ["esde", "emudeck"] },
         body: `<p>Log in once in RetroArch; the cores share it. Other emulators have their own login (see each one under Standalone emulators).</p>`,
-        settings: [
-          ["Settings > Achievements > Achievements", "on"],
-          ["Settings > Achievements > Username", "my RetroAchievements username"],
-          ["Settings > Achievements > Password", "my RetroAchievements password", "Only used to log in once; RetroArch stores a token."],
-          ["Settings > Achievements > Hardcore Mode", RA_ROWS.hardcore, RA_ROWS.hardcoreNote],
-        ],
+        settingsFn: ctx => {
+          const android = ctx.platform === "android";
+          return [
+            ["Settings > Achievements > Achievements", "on", android ? "Set by sync-roms config apply from ra_mode." : undefined],
+            ["Settings > Achievements > Username", "my RetroAchievements username", android ? "Set by sync-roms config apply from ra_username." : undefined],
+            ["Settings > Achievements > Password", "my RetroAchievements password", android ? "Set by sync-roms config apply from ra_password; RetroArch stores a token once it logs in." : "Only used to log in once; RetroArch stores a token."],
+            ["Settings > Achievements > Hardcore Mode", RA_ROWS.hardcore, android ? "Set by sync-roms config apply from ra_mode. " + RA_ROWS.hardcoreNote : RA_ROWS.hardcoreNote],
+          ];
+        },
       },
       {
         title: "Onion and Allium",
@@ -1231,12 +1242,16 @@ const SECTIONS = [
           ${ctx.layout === "allium" ? `<p class="note">Allium has no netplay menu of its own; open RetroArch's menu from Allium's in-game menu.</p>` : ""}
           ${ctx.platform === "windows" ? `<p class="note">The host must accept incoming TCP and UDP 55435 (UDP is what the LAN list finds): allow RetroArch through Windows Firewall on private networks.</p>` : ""}
           ${ctx.platform === "android" ? `<p class="note">ES-DE has no netplay option: launch the game from ES-DE, then use RetroArch's menu. The Play Store RetroArch gets its cores from Google Play, so their versions can lag the other devices'; the APK from retroarch.com downloads the same cores as the others.</p>` : ""}`,
-        settings: [
-          ["Settings > User > Username", "a name per device", "Shown in the host list."],
-          ["Settings > Network > Publicly Announce Netplay", "off", "On by default: it lists the game in the internet lobby."],
-          ["Settings > Network > Use Relay Server", "off"],
-          ["Settings > Network > Netplay TCP Port", "55435", "The default; the same on both."],
-        ],
+        settingsFn: ctx => {
+          const set = ctx.platform === "android" ? APPLY_NOTE : ctx.layout === "spruce" ? SYNC_NOTE : "";
+          const note = (...parts) => parts.filter(Boolean).join(" ");
+          return [
+            ["Settings > User > Username", "a name per device", "Shown in the host list."],
+            ["Settings > Network > Publicly Announce Netplay", "off", note("On by default: it lists the game in the internet lobby.", set)],
+            ["Settings > Network > Use Relay Server", "off", note(set)],
+            ["Settings > Network > Netplay TCP Port", "55435", note("The default; the same on both.", set)],
+          ];
+        },
       },
       {
         title: "Onion",
