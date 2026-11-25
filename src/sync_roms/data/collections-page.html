@@ -84,10 +84,10 @@ input:focus-visible, select:focus-visible, button:focus-visible, summary:focus-v
 }
 .pics {
   display: flex; gap: 8px; justify-content: center; align-items: center;
-  padding: 12px; background: var(--surface-2); overflow: hidden;
+  padding: 12px; background: var(--surface-2); overflow: hidden; container-type: inline-size;
 }
-.pics img { display: block; height: 150px; width: auto; flex: none; border-radius: 6px; }
-@media (max-width: 400px) { .pics img { height: 130px; } }
+/* One height for all three pictures (about 2.05 heights wide together), shrunk to fit the card. */
+.pics img { display: block; height: min(150px, calc((100cqw - 40px) / 2.1)); width: auto; flex: none; border-radius: 6px; }
 .body { padding: 12px 14px 4px; }
 .head { display: flex; align-items: flex-start; gap: 10px; }
 .name { margin: 0; font-size: 18px; overflow-wrap: anywhere; flex: 1; min-width: 0; }
