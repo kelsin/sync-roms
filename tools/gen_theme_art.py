@@ -1181,34 +1181,26 @@ def professor_layton(p):  # the professor's top hat
             p.path(arc(0, y, 30, 6, 0, 180))
 
 
-def mortal_kombat(p):  # the dragon medallion: a dragon's head and body curled inside a ring
-    p.o(0, 0, 47)
-    p.o(0, 0, 41)
-    spine = spline([(0, -6), (11, 0), (17, 10), (15, 22), (4, 28), (-10, 26), (-19, 18), (-19, 9)])
-    side_a, side_b = [], []
-    for i, (x, y) in enumerate(spine):
-        a, b = spine[max(i - 1, 0)], spine[min(i + 1, len(spine) - 1)]
-        tx, ty = b[0] - a[0], b[1] - a[1]
-        n = math.hypot(tx, ty)
-        w = 7.5 * (1 - i / len(spine)) + 0.8
-        side_a.append((x - ty / n * w, y + tx / n * w))
-        side_b.append((x + ty / n * w, y - tx / n * w))
-    body = side_a + [spine[-1]] + side_b[::-1]
-    for i in range(6, 42, 9):  # the crest along the outside of the neck and back
-        x, y = side_b[i]
-        bx, by = side_b[i + 6]
-        nx, ny = x - spine[i][0], y - spine[i][1]
-        k = 8 / math.hypot(nx, ny)
-        p.pg([(x - nx * 0.3, y - ny * 0.3), (bx + nx * k, by + ny * k), (bx - nx * 0.3, by - ny * 0.3)], 0.8)
-    p.path(body, True, opaque=True)
-    p.pg([(-29, -12), (-27, -4), (-25, -12)], 0.6)
-    p.pg([(-23, 2), (-21.5, -6), (-20, 2)], 0.6)
-    p.path(spline([(-4, -19), (4, -30), (15, -32), (23, -27)]) + spline([(23, -27), (15, -26), (6, -22), (2, -14)])[1:],
-           True)
-    head = [(4, -18), (-4, -21), (-12, -18), (-24, -16), (-34, -14), (-33, -10), (-16, -8), (-30, 4), (-28, 8),
-            (-14, 6), (-2, 4), (8, -4)]
-    p.pg(head, 1.5, opaque=True)
-    p.pg([(-16, -15), (-7, -16), (-10, -12)], 0.6)
+def mortal_kombat(p):  # the dragon logo: a dragon facing right inside a ring, its body running into the ring
+    ring = arc(0, 0, 40, 40, 0, 354)
+    p.o(0, 0, 46)
+    p.path(ring, True)
+    back = [(-15, -44), (-14, -38), (-17, -36), (-20, -34), (-20, -32), (-14, -31), (-24, -29), (-28, -26), (-32, -22),
+            (-34, -18), (-35, -13), (-35, -5), (-36, 2), (-38, 4), (-44, 7), (-34, 6), (-30, 11), (-27, 15), (-28, 22),
+            (-32, 23), (-26, 25), (-24, 20), (-21, 20), (-20, 25), (-20, 28), (-17, 24), (-13, 25), (-8, 28), (-8, 31),
+            (-13, 33), (-20, 32), (-26, 30), (-34, 30)]
+    front = [(-4, -44), (-4, -37), (-6, -34), (-3, -33), (-1, -34), (0, -32), (8, -32), (9, -29), (13, -29), (16, -26),
+             (17, -23), (14, -22), (16, -20), (20, -18), (25, -16), (29, -16), (31, -13), (30, -10), (29, -8), (27, -6),
+             (24, -7), (21, -8), (17, -10), (13, -13), (5, -17), (0, -15), (8, -12), (14, -7), (21, -4), (26, -2),
+             (22, 1), (16, 1), (12, -1), (5, -7), (-3, -11), (-8, -8), (-13, -9), (-15, -6), (-14, -3), (-11, 2),
+             (-2, 3), (13, 3), (21, 5), (27, 12), (29, 20), (30, 28), (32, 36)]
+    k = 0.88  # the dragon sits a little inside the ring; its ends still run out to it
+    with p.inside(ring):
+        for line in (back, front):
+            p.path(rounded([line[0]] + [(x * k, y * k) for x, y in line[1:-1]] + [line[-1]], 2, False))
+    p.c([(x * k, y * k) for x, y in [(25, 0), (27, 4), (30, 8), (34, 9), (36, 6), (35, 2), (32, 2)]])
+    p.pg([(x * k, y * k) for x, y in [(0, -21), (4, -23), (9, -20), (5, -19)]], 1.5)
+    p.o(21 * k, -13 * k, 1.6)
 
 
 def tekken(p):  # the logo's italic, knife-cut t
@@ -1381,7 +1373,7 @@ ART = {
     "ys": (ys, (38, 112, 124), -6, 0.9, (-14, 0)),
     "horses": (horses, (150, 96, 60), -5, 0.95, (-34, 0)),
     "professor-layton": (professor_layton, (150, 78, 44), -6, 1.0, (-10, 0)),
-    "mortal-kombat": (mortal_kombat, (140, 32, 28), 0, 0.95, (-14, 0)),
+    "mortal-kombat": (mortal_kombat, (140, 32, 28), 0, 0.95, (-12, 0)),
     "tekken": (tekken, (96, 52, 150), 0, 0.9, (-28, 0)),
     "samurai-shodown": (samurai_shodown, (120, 40, 50), -30, 1.12, (-14, 14)),
     "fatal-fury": (fatal_fury, (60, 100, 150), -4, 1.0, (-16, 0)),
