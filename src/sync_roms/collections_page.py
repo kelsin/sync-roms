@@ -1,6 +1,7 @@
 """The data of the collections page (`sync-roms collections page`): collections, their games, tags and pictures."""
 import base64
 import io
+import json
 import os
 
 from . import collections, names, s3, store, tags, themeart, ui
@@ -66,3 +67,21 @@ def page_data():
     return {"tags": {i: {"name": t["name"], "emoji": t["emoji"]} for i, t in defined.items()},
             "systems": {s: system_names.get(s, s) for s in sorted(used)},
             "collections": out}
+
+
+TEMPLATE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "collections-page.html")
+
+
+def DEFAULT_PATH():
+    """The page `collections page` writes without --out (the folder `collections share` serves)."""
+    return os.path.join(store.data_dir(), "share", "collections", "index.html")
+
+
+def write_page(path):
+    """Write the page, the template with page_data() in its data block, to path (folders made, atomically)."""
+    with open(TEMPLATE, encoding="utf-8") as f:
+        html = f.read()
+    block = json.dumps(page_data()).replace("<", "\\u003c")
+    html = html.replace('id="page-data">{}<', f'id="page-data">{block}<', 1)
+    os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
+    store.write_text(path, html)

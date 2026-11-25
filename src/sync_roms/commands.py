@@ -11,7 +11,7 @@ import sys
 import webbrowser
 
 from . import collections as colls
-from . import bezels, budget, cardedit, cardshare, collectionedit, external, guest, inventory, knulli_conf, m3u, names, picker, runtime, s3, shared, spruce_settings, store, surprise, tageditor, tags, tagsuggest, themeart, ui, usersettings
+from . import bezels, budget, cardedit, cardshare, collectionedit, collections_page, external, guest, inventory, knulli_conf, m3u, names, picker, runtime, s3, shared, spruce_settings, store, surprise, tageditor, tags, tagsuggest, themeart, ui, usersettings
 
 
 UNKNOWN_SHOWN = 8  # device ids named in an "unknown device" error
@@ -1383,6 +1383,15 @@ def collections_edit(args):
     return collectionedit.edit_collections()
 
 
+def collections_page_cmd(args):
+    path = os.path.abspath(os.path.expanduser(args.out)) if args.out else collections_page.DEFAULT_PATH()
+    collections_page.write_page(path)
+    print(path)
+    if not webbrowser.open(pathlib.Path(path).as_uri()):
+        ui.fail("Couldn't open a browser: open the file above yourself", 1)
+    return 0
+
+
 def themes_update(args):
     from . import spruce_themes, themeart
     usersettings.ensure_bucket()
@@ -1790,6 +1799,8 @@ def build_parser():
     colsub = collections.add_subparsers(dest="action", required=True)
     p = colsub.add_parser("edit", allow_abbrev=False)
     p.set_defaults(fn=collections_edit)
+    p = colsub.add_parser("page", allow_abbrev=False); common(p, card=False); p.add_argument("--out", metavar="FILE")
+    p.set_defaults(fn=collections_page_cmd)
 
     themes = sub.add_parser("themes", add_help=False, allow_abbrev=False)
     tsub = themes.add_subparsers(dest="action", required=True)
@@ -1893,7 +1904,7 @@ def run(argv):
     ap = build_parser()
     ap.prog = f"sync-roms {argv[0]}"  # its errors (unrecognized arguments) point at the command's help
     args = ap.parse_args(argv)
-    if getattr(args, "dry_run", False) and not (args.fn is config_cmd and args.action == "apply") and (args.fn in (games_list, games_export, layouts_cmd, config_cmd, cache_cmd, doctor_cmd, guide_cmd, check_cmd, completion_cmd, themes_pick, themes_build, themes_palettes,
+    if getattr(args, "dry_run", False) and not (args.fn is config_cmd and args.action == "apply") and (args.fn in (games_list, games_export, layouts_cmd, config_cmd, cache_cmd, doctor_cmd, guide_cmd, collections_page_cmd, check_cmd, completion_cmd, themes_pick, themes_build, themes_palettes,
                                                           edit_cmd, install_cmd, devices_cmd, diff_cmd, scrape_review_cmd, scrape_missing_cmd, refresh_cmd, ports_done, ports_needed)
                                             or (args.fn is mirror_cmd and args.action == "clear")):
         name = " ".join(w for w in (args.command, getattr(args, "action", None), getattr(args, "verb", None)) if w)

@@ -1,13 +1,15 @@
 import base64
 import io
 import os
+import pathlib
 import sys
+import tempfile
 import unittest
 from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import helpers  # noqa: E402
-from sync_roms import collections, collections_page, names, tags  # noqa: E402
+from sync_roms import collections, collections_page, names, store, tags  # noqa: E402
 
 SMW = "snes/Super Mario World (USA).zip"
 TAGS = {"mario": {"name": "Mario", "emoji": "🍄"}, "platformers": {"name": "Platformers", "emoji": "🏃"}}
@@ -112,3 +114,48 @@ class TemplateTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class CommandTest(helpers.Cmd):
+    def setUp(self):
+        super().setUp()
+        self.enterContext(mock.patch.object(tags, "load", tag_data))
+        self.opened = self.enterContext(mock.patch("webbrowser.open", return_value=True))
+
+    def save(self, name):
+        collections.save_collection({"id": "mario", "name": name, "description": "d", "games": []})
+
+    def page(self, *args):
+        return self.run_cmd("collections", "page", *args)[0]
+
+    def test_writes_and_opens(self):
+        self.save("Plumber Picks")
+        self.assertEqual(self.page(), 0)
+        path = collections_page.DEFAULT_PATH()
+        self.assertEqual(path, os.path.join(store.data_dir(), "share", "collections", "index.html"))
+        with open(path, encoding="utf-8") as f:
+            html = f.read()
+        self.assertIn("Plumber Picks", html)
+        self.assertNotIn('id="page-data">{}<', html)
+        self.opened.assert_called_once_with(pathlib.Path(path).as_uri())
+
+    def test_out_writes_elsewhere(self):
+        self.save("Plumber Picks")
+        out = os.path.join(self.enterContext(tempfile.TemporaryDirectory()), "x", "page.html")
+        self.assertEqual(self.page("--out", out), 0)
+        with open(out, encoding="utf-8") as f:
+            self.assertIn("Plumber Picks", f.read())
+        self.assertFalse(os.path.exists(collections_page.DEFAULT_PATH()))
+        self.opened.assert_called_once_with(pathlib.Path(out).as_uri())
+
+    def test_script_tag_escaped(self):
+        self.save("</script><b>")
+        self.page()
+        with open(collections_page.DEFAULT_PATH(), encoding="utf-8") as f, \
+                open(collections_page.TEMPLATE, encoding="utf-8") as t:
+            html, template = f.read(), t.read()
+        self.assertEqual(html.count("</script>"), template.count("</script>"))
+        self.assertNotIn("<b>", html.split('id="page-data">')[1].split("</script>")[0])
+
+    def test_dry_run_refused(self):
+        self.assertEqual(self.page("--dry-run"), 2)

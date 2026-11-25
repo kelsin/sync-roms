@@ -89,6 +89,7 @@ Only one storage layout is supported; don't add support for others. Repo data an
 - `syncthing.json`: `note`, `cores` ({system id: libretro core}), `retroarch` ({retroarch.cfg key: value}), `esde_labels` ({core: ES-DE label}) and `spruce.settings` ({section: {key: value}} for `spruce-config.json`), the settings that let Syncthing sync saves between devices, and `spruce.folders` ({`saves`, `states`}: the folder names under `Saves/` that `spruce_syncthing` shares with the server).
 - `retroarch.json`: `note` and `settings` ({retroarch.cfg key: value}), the RetroArch preferences on every device whether or not Syncthing is on: save states in numbered slots (`savestate_auto_index`, `savestate_max_keep`) and netplay off the public lobby and relay on the default port. Spruce cards get them from sync and `config apply`, Android from `config apply`.
 - `hotkeys.json`: the hotkey scheme (spruceOS's defaults, quit on Start): `scheme` (action, button, RetroArch key), `android` (button to Android keycode) and `android_clear` (RetroArch hotkeys `config apply` unbinds on Android).
+- `collections-page.html`: the template of `collections page` (one self-contained page, no external URLs; its empty `page-data` block is filled from `collections_page.page_data()`).
 - `cards.schema.json`, `games.schema.json`, `collections.schema.json`: JSON schemas.
 - `themes/fusion-pixel/`: the Fusion Pixel 12px font (proportional, Japanese variant, OFL) of the Pixel themes and the palette previews, with its licenses.
 
@@ -105,6 +106,7 @@ The data folder is `store.data_dir()`: `$XDG_DATA_HOME/sync-roms`, `%APPDATA%\sy
 - `surprises.json`: history of Surprise picks: system, bucket, title, card, ISO date. Pruned past `surprise_ttl_days` (default 183) on write.
 - `device-systems.json`: optional overlay, `{device id: {"add": [...], "remove": [...]}}` of system ids, applied to the repo defaults. Notes always come from the defaults.
 - `collections/<id>.json`: one per collection (`collections.py`); never in the repo or storage.
+- `share/collections/index.html`: written by `collections page`, served by `collections share`.
 - `saves/`: RetroArch saves and states, `<system>/<stem>/<stamp>-<card>/` with `stash.json`, written by `saves stash`, read by `saves apply`; `saves manage` labels, moves and deletes stashes, and `stash.json` may hold an optional `note`.
 - `bootlogos/<W>x<H>/`: your own boot logos (`.png`, `.bmp`), one folder per device `resolution`; never in the repo or storage.
 - `cache/`: what can be rebuilt: `storage-cache.json`, `preview-cache/` (the editors' 300 px WebP game pictures, `<image key without extension>.<ETag or s<size>>.webp`), `previews/`, `theme-art/`, `themes/` (`base/<BASE>/`, a custom theme's base theme from storage; `build/<theme>/`, built custom themes; `palettes.png`, the `themes palettes` overview; `palette-previews/<palette>.png`, the palette picker's previews), `names.json`, `portmaster/ports.json` (PortMaster's catalogue, refreshed by `ports` commands when over a day old or with `--refresh`, never fetched during a sync).
