@@ -94,18 +94,20 @@ def _renames(base, pico8_dir, held):
     return out
 
 
-def _rename(base, pico8_dir, dry_run=False, planned=()):
-    """Rename the card's Splore-import copies of carts storage has to the cart's own file name. Exit code.
-    dry_run: only list them, counting the planned keys (carts the run would add) as held."""
+def _rename(card, base, pico8_dir, dry_run=False, planned=()):
+    """Rename the card's Splore-import copies of carts storage has to the cart's own file name, then add the cached
+    carts storage has and pico8_dir holds to the card's games (a cart the games don't name would be an extra). Exit
+    code. dry_run: only list them, counting the planned keys (carts the run would add) as held."""
     try:
         held = set(inventory.files("pico8/", sizes=False)) | set(planned)
     except s3.ERRORS as e:
         ui.warn(f"Couldn't list pico8/ in {s3.location()} ({e}); not renaming Splore imports")
         return 1
-    code = 0
+    code, renamed = 0, set()
     for old, file in _renames(base, pico8_dir, held):
         if dry_run:
             print(f"  would rename {old} → {file}")
+            renamed.add(file)
             continue
         try:
             os.rename(os.path.join(pico8_dir, old), os.path.join(pico8_dir, file))
@@ -116,6 +118,16 @@ def _rename(base, pico8_dir, dry_run=False, planned=()):
         print(f"  📦 Renamed {old} → {file}")
     if not dry_run:
         cardfs.clear()
+    games = store.card_games(card).get("pico8")
+    if isinstance(games, dict):  # a full system: every cart syncs already
+        return code
+    named = {g.get("bucket") for g in games if isinstance(g, dict)} if isinstance(games, list) else set()
+    keys = [key for c in cached(base) if (key := f"pico8/{c['file']}") in held and key not in named
+            and key not in ignore.keys() and (c["file"] in renamed or cardfs.exists(os.path.join(pico8_dir, c["file"])))]
+    for key in keys:
+        print(f"  {'would add' if dry_run else '➕ Added'} {key[len('pico8/'):]} to the card's games")
+    if keys and not dry_run:
+        _add_to_card(card, keys)
     return code
 
 
@@ -140,7 +152,7 @@ def _scrape(added, system):
         sizes = inventory.files("pico8/")
         todo = [(key[len("pico8/"):], sizes.get(key), inventory.tag(key)) for key in added]
         return scrape_online.run_scrape(scrape_online.make_client(), {"pico8": system}, {"pico8": todo}, set(),
-                                        ask=False)
+                                        ask=False, review=False)
     except SystemExit:  # ui.fail already said why
         ui.warn("The Splore carts' scrape stopped; `sync-roms scrape pico8` tries again")
         return 1
@@ -172,7 +184,7 @@ def run(card, base, pico8_dir, system, dry_run):
         return 1
     todo = [(None, c) for c in new] + upgrades
     if not todo:
-        return _rename(base, pico8_dir, dry_run)
+        return _rename(card, base, pico8_dir, dry_run)
     print(ui.bold("🕹️  Splore carts on the card"))
     for old, c in todo:
         print(f"  new: {c['file']}" if old is None else f"  upgrade: {old} → {c['file']}")
@@ -180,15 +192,16 @@ def run(card, base, pico8_dir, system, dry_run):
     if dry_run:
         print(ui.dim(f"  would scrape {len(new)} cart(s)" if _has_login() else
                      "  no ScreenScraper login saved: would not scrape them (`sync-roms scrape pico8` does)"))
-        return _rename(base, pico8_dir, True, {f"pico8/{c['file']}" for _, c in todo})
+        return _rename(card, base, pico8_dir, True, {f"pico8/{c['file']}" for _, c in todo})
     if not drivers.can_write():
         ui.warn(f"No write access to {s3.location()}: the Splore carts stay on the card only")
-        return _rename(base, pico8_dir)
+        return _rename(card, base, pico8_dir)
     if not ui.has_terminal() and not ui.ASSUME_YES:
         print(ui.dim("  run sync with --yes, or on a terminal, to add them"))
-        return _rename(base, pico8_dir)
-    if not ui.confirm(f"Add these to {s3.location()} and scrape the new ones?", default=True):
-        return _rename(base, pico8_dir)
+        return _rename(card, base, pico8_dir)
+    scrape = " and scrape the new ones" if new and _has_login() else ""
+    if not ui.confirm(f"Add these to {s3.location()}{scrape}?", default=True):
+        return _rename(card, base, pico8_dir)
     with tempfile.TemporaryDirectory() as tmp:
         added, _, code = bbs.add_carts(todo, _fetch, tmp)
     if added:
@@ -198,4 +211,4 @@ def run(card, base, pico8_dir, system, dry_run):
         if scraped == 130:
             raise KeyboardInterrupt
         code = (scraped and 1) or code
-    return _rename(base, pico8_dir) or code
+    return _rename(card, base, pico8_dir) or code

@@ -1383,6 +1383,35 @@ class SyncSmokeTest(DataDir):
                 self.assertEqual(found, [True], out)
                 self.assertFalse([line for line in out.splitlines() if "n-0" in line and "delete" in line.lower()])
 
+    def test_held_splore_cart_on_the_card_is_kept(self):
+        root = storage_sets(self, {})
+        touch(os.path.join(root, "pico8", "a-0.p8.png"), bbs._PNG + b"a")
+        touch(os.path.join(root, "pico8", "h-0.p8.png"), bbs._PNG + b"h")  # another card uploaded it
+        inventory.reset()
+        games = []
+
+        def prepare(card):
+            touch(os.path.join(card, *splore.CACHE, "bbs", "carts", "h-0.p8.png"), bbs._PNG + b"h")
+            touch(os.path.join(card, "Roms", "PICO8", "Held.p8.png"), bbs._PNG + b"h")  # its Splore import
+            store.write_cards({os.path.basename(card): {"layout": "spruce", "games": {
+                "pico8": [{"title": "A", "bucket": "pico8/a-0.p8.png"}]}}})
+
+        def after(card):
+            games.append(store.card_games(os.path.basename(card))["pico8"])
+            self.assertEqual(sorted(os.listdir(os.path.join(card, "Roms", "PICO8"))), ["a-0.p8.png", "h-0.p8.png"])
+        patches = ((store, {"load_manifest": REAL_LOAD_MANIFEST, "load_cards": REAL_LOAD_CARDS, "save_card": REAL_SAVE_CARD}),
+                   (s3, {"list_sizes": REAL_LIST_SIZES}),
+                   (usersettings, {"apply_settings": lambda: None}),
+                   (cli.picker, {"saved_setup": lambda *a: (None, "spruce")}),
+                   (cli, {"free_space": lambda path: 10**9}),
+                   (cli.downloads, {"run_downloads": downloads.run_downloads}))
+        code = self.run_sync(False, prepare=prepare, patches=patches, after=after)
+        out = self.out.getvalue() + self.err.getvalue()
+        self.assertEqual(code, 0, out)
+        self.assertIn("Renamed Held.p8.png → h-0.p8.png", out)
+        self.assertEqual([g["bucket"] for g in games[0]], ["pico8/a-0.p8.png", "pico8/h-0.p8.png"])
+        self.assertNotIn(os.path.join("Roms", "PICO8", "h-0.p8.png"), out)  # not listed as an extra
+
     def test_onion_card_with_nothing_to_sync_removes_a_stale_surprise_list(self):
         layouts = {"onion": {"label": "Onion", "roms_dir": "Roms", "bios_dir": "BIOS"}}
         manifest = {**MANIFEST, "layouts": layouts, "systems": [{**SYSTEM, "games": [], "folders": {"onion": "GBA"}}]}

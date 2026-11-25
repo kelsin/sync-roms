@@ -207,7 +207,6 @@ class Run(Splore):
         self.run_splore()
         self.assertEqual(sorted(os.listdir(roms)), ["Again.p8.png", "Other.p8.png", "x-2.p8.png"])
 
-
     def test_dry_run_lists_renames_without_new_carts(self):
         data = bbs._PNG + b"B"
         self.put("pico8/x-2.p8.png", data)
@@ -216,10 +215,80 @@ class Run(Splore):
         os.makedirs(roms)
         with open(os.path.join(roms, "My Game.p8.png"), "wb") as f:
             f.write(data)
+        before = store.load_cards()
         code, out = self.run_splore(dry_run=True)
         self.assertEqual(code, 0)
         self.assertEqual(os.listdir(roms), ["My Game.p8.png"])
         self.assertIn("would rename My Game.p8.png → x-2.p8.png", out)
+        self.assertIn("would add x-2.p8.png to the card's games", out)
+        self.assertEqual(store.load_cards(), before)
+
+    def held_copy(self, name="My Game.p8.png"):
+        """Storage holds x-2.p8.png, the card's Splore cache has it and (name not None) its import copy is in PICO8/."""
+        data = bbs._PNG + b"B"
+        self.put("pico8/x-2.p8.png", data)
+        self.cart("bbs", "carts", "x-2.p8.png", data=data)
+        roms = self.cp("Roms", "PICO8")
+        os.makedirs(roms)
+        if name:
+            with open(os.path.join(roms, name), "wb") as f:
+                f.write(data)
+        return roms
+
+    def test_held_cart_on_the_card_is_added_to_its_games(self):
+        roms = self.held_copy()
+        before = self.stored()
+        code, out = self.run_splore()
+        self.assertEqual(code, 0)
+        self.assertEqual(os.listdir(roms), ["x-2.p8.png"])
+        self.assertEqual(self.games(), [{"title": "x-2", "bucket": "pico8/x-2.p8.png"}])
+        self.assertIn("Added x-2.p8.png to the card's games", out)
+        self.assertEqual(self.stored(), before)  # nothing uploaded
+        self.confirm.assert_not_called()
+        self.run_splore()  # named now: not added twice
+        self.assertEqual(self.games(), [{"title": "x-2", "bucket": "pico8/x-2.p8.png"}])
+
+    def test_held_cart_under_its_own_name_is_added(self):
+        self.held_copy("X-2.p8.png")  # matched as the card finds it
+        self.run_splore()
+        self.assertEqual(self.games(), [{"title": "x-2", "bucket": "pico8/x-2.p8.png"}])
+
+    def test_held_cart_not_on_the_card_is_not_added(self):
+        self.held_copy(None)
+        self.assertEqual(self.run_splore()[0], 0)
+        self.assertIsNone(self.games())
+
+    def test_ignored_held_cart_is_not_added(self):
+        self.ignored = {"pico8/x-2.p8.png"}
+        self.held_copy("x-2.p8.png")
+        self.run_splore()
+        self.assertIsNone(self.games())
+
+    def test_held_cart_on_a_full_system_card_is_not_added(self):
+        store.write_cards({"c": {"layout": "spruce", "games": {"pico8": {"full_system": True}}}})
+        self.held_copy()
+        self.run_splore()
+        self.assertEqual(self.games(), {"full_system": True})
+
+    def test_scrape_never_opens_the_review(self):
+        self.cart("bbs", "carts", "n-0.p8.png")
+        self.run_splore()
+        self.assertIs(self.scrape.call_args.kwargs["review"], False)
+
+    def test_confirm_names_the_scrape_only_when_there_is_one(self):
+        self.put("pico8/x-1.p8.png")
+        self.cart("bbs", "carts", "x-2.p8.png")
+        self.cart("bbs", "carts", "n-0.p8.png")
+        for creds, upgrade_only, scrape in ((CREDS, False, True), ({}, False, False), (CREDS, True, False)):
+            with self.subTest(creds=bool(creds), upgrade_only=upgrade_only):
+                self.settings(creds)
+                self.confirm.reset_mock()
+                self.confirm.return_value = False
+                with mock.patch.object(splore, "plan", side_effect=lambda base: ([] if upgrade_only else [
+                        {"file": "n-0.p8.png", "path": "", "title": None, "author": None}],
+                        [("pico8/x-1.p8.png", {"file": "x-2.p8.png", "path": "", "title": None, "author": None})])):
+                    self.run_splore()
+                self.assertEqual("scrape" in self.confirm.call_args.args[0], scrape)
 
     def test_ctrl_c_in_the_scrape_stops_the_sync(self):
         self.scrape.return_value = 130
