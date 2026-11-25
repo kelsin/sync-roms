@@ -8,7 +8,7 @@ import xml.etree.ElementTree as ET
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 
-from . import cardfs, downloads, frontend, inventory, runtime, s3, shared, store, ui
+from . import cardfs, downloads, frontend, inventory, portmaster, runtime, s3, shared, store, ui
 
 
 # --- Scraped data (media, metadata) --------------------------------
@@ -570,7 +570,7 @@ def stale_media(layout_name, systems, roms_dir, es_dir, base=None):
     for s in systems:
         folder = s["folders"].get(layout_name)
         rom_dir = os.path.join(roms_dir, folder) if folder else None
-        if not rom_dir or rom_dir in seen or not cardfs.is_dir(rom_dir):
+        if not rom_dir or rom_dir in seen or not cardfs.is_dir(rom_dir) or portmaster.owns_folder(s):
             continue
         seen.add(rom_dir)
         stems = card_stems(rom_dir, layout_name not in frontend.ESDE_LAYOUTS, layout_name in ONION_LAYOUTS)
@@ -626,7 +626,8 @@ def prune_empty_systems(layout_name, systems, roms_dir):
     removed = []
     if layout_name not in ONION_LAYOUTS:
         return removed
-    for rom_dir in sorted({os.path.join(roms_dir, s["folders"][layout_name]) for s in systems if s["folders"].get(layout_name)}):
+    for rom_dir in sorted({os.path.join(roms_dir, s["folders"][layout_name]) for s in systems
+                           if s["folders"].get(layout_name) and not portmaster.owns_folder(s)}):
         if not cardfs.is_dir(rom_dir) or card_stems(rom_dir, False, True):
             continue
         for folder in SPRUCE_FOLDERS if layout_name == "spruce" else ("Imgs",):

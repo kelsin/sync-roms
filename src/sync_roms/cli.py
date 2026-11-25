@@ -11,13 +11,13 @@ from concurrent.futures import ThreadPoolExecutor
 from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError
 
 from . import __version__, bezels, budget, cardedit, cardfs, clean, commands, downloads, drivers, frontend, inventory, m3u, mirroring, picker, runtime, s3, scrape_plan, store
-from . import knulli_conf, muos_collections, nextui_folders, onion_surprise, pico8, raofflineproxy, rocknix_collections, saves, spruce_collections, spruce_bootlogo, spruce_emu, spruce_os, spruce_fixes, spruce_hotkeys, spruce_retroarch, spruce_settings, spruce_splore, spruce_syncthing, spruce_themes, spruce_wifi, splore, surprise, themeart, ui, usersettings, vita
+from . import knulli_conf, muos_collections, nextui_folders, onion_surprise, pico8, portmaster, raofflineproxy, rocknix_collections, saves, spruce_collections, spruce_bootlogo, spruce_emu, spruce_os, spruce_fixes, spruce_hotkeys, spruce_retroarch, spruce_settings, spruce_splore, spruce_syncthing, spruce_themes, spruce_wifi, splore, surprise, themeart, ui, usersettings, vita
 from . import collections as colls
 from . import guest as guests
 
 
 ALIASES = {"card": "cards", "game": "games", "tag": "tags", "collection": "collections", "theme": "themes", "save": "saves",  # alias -> main name
-           "device": "devices", "layout": "layouts", "playlists": "playlist", "scrapes": "scrape", "downloads": "download",
+           "device": "devices", "layout": "layouts", "playlists": "playlist", "scrapes": "scrape", "downloads": "download", "port": "ports",
            "umount": "unmount"}
 
 
@@ -33,6 +33,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "collections": ("edit", "edit your collections of favourite games (saved in ~/.sync-roms/collections/)"),
     "themes": ("update|pick|build|publish|palettes", "copy the latest Art Book Next for ES-DE and the PyUI themes for spruce from GitHub into storage; build and publish custom spruce themes"),
     "download": ("pico8", "add the PICO-8 BBS Featured carts storage doesn't have, and newer revisions of those it has"),
+    "ports": ("search|download|done|needed", "put PortMaster ports and the runtimes they need in storage, from PortMaster's catalogue"),
     "flash": ("", "write a Knulli, BaseOS, muOS, ROCKNIX or OakMoss image from storage's os/ to an SD card"),
     "format": ("", "erase an SD card as exFAT or FAT32 with a picked label"),
     "unmount": ("", "clean the macOS junk off an SD card and unmount it"),
@@ -223,6 +224,36 @@ TOPICS = {
   cards, Surprise history and collections at it.
   Carts in ignored.json are skipped.
   Requests go one at a time; the first HTTP error stops it, keeping what was added.
+""",
+    "ports": """
+  sync-roms ports search [TEXT...] [--needs-data | --ready] [--refresh] [-n] [-y]
+      find ports in PortMaster's catalogue and pick ones to download
+  sync-roms ports download [ZIP...] [--update] [--refresh] [--dry-run]
+      put PortMaster ports in storage's ports/
+  sync-roms ports done CARD PORT... [--undo]
+      say the card already has the ports' game data (--undo: it doesn't)
+  sync-roms ports needed
+      list the ports still waiting for game data
+
+  search lists the aarch64 ports whose title, zip name, genres or description hold every word of
+  TEXT, one row each (title, zip, genres, size; "needs game data" for a port you must add files
+  to, "in storage" for one storage has). --needs-data keeps only the ports that need game data,
+  --ready only the ready-to-run ones. With a terminal (and without --yes) you pick ports with the
+  space bar and the ones storage lacks are downloaded as `ports download` does; otherwise the rows
+  are only printed. Both end by listing ports in storage that have a newer version.
+
+  Each ZIP is a port's zip name in PortMaster's catalogue (celeste.zip, or just celeste; only ports
+  that run on aarch64). Its zip goes to ports/<zip>, each runtime it needs that storage lacks to
+  os/portmaster/runtimes/, and its title and facts to scrapes/ports/metadata.json, all checked
+  against the catalogue's md5 (write profile). A zip storage has is skipped; --update replaces it
+  when the catalogue has a newer version, and --update with no ZIP updates every such port. An
+  unknown name, a failed download or an md5 mismatch is warned about and the rest go on (exit 1).
+  The catalogue is cached for a day; --refresh fetches it again.
+
+  done records in cards.json that CARD's PORT (a folder name or zip name) already has its game data,
+  so a sync stops asking for it, and takes the card off the needed list; --undo forgets that.
+  needed lists every port waiting for game data (title, instructions, where in storage to put the
+  files, the cards), and drops the ones storage now has data for. Neither takes --dry-run.
 """,
     "flash": """
   sync-roms flash [--dry-run]                 write a Knulli, BaseOS, muOS, ROCKNIX or OakMoss image
@@ -1122,6 +1153,8 @@ def sync_card(args):
 
     def to_fetch(s, keys):
         """The keys of a system's ROMs that aren't on the card yet, for the card editor's size preview."""
+        if portmaster.skip(s, layout_name):  # PortMaster installs the port zips: none goes to Roms/PORTS
+            return []
         bucket = s["bucket"]
         seen = fetching.setdefault(bucket, {})
         todo = [k for k in keys if k not in seen]
@@ -1261,9 +1294,10 @@ def sync_card(args):
                 + raofflineproxy.install(card, layout_name, base, dry_run))
 
     spruce_staged = []  # the spruceOS 7z staged this sync, for the reminder at the end
+    port_waiting = []  # the ports waiting for game data, for the summary at the end
 
     def stage_spruce(dry_run):
-        """Stage boot logos, the newest spruceOS, the saved settings and WiFi networks on a spruce card, and the knulli.conf settings on a Knulli card. The failure count."""
+        """Stage boot logos, the newest spruceOS, the saved settings, WiFi networks and PortMaster ports and game data on a spruce card, and the knulli.conf settings on a Knulli card. The failure count."""
         wrote = []
         failed = spruce_bootlogo.install(card, layout_name, device, base, dry_run, wrote, keep=args.no_delete)
         failed += spruce_os.install(card, layout_name, base, dry_run, spruce_staged, keep=args.no_delete)
@@ -1275,11 +1309,22 @@ def sync_card(args):
         failed += spruce_retroarch.install(card, layout_name, base, dry_run)
         failed += knulli_conf.install(card, layout_name, base, dry_run)
         failed += spruce_splore.install(card, layout_name, base, dry_run)
+        failed += portmaster.stage(card, device, layout_name, base, port_picks, dry_run, args.no_delete)[0]
+        if portmaster.enabled(device, layout_name):
+            ports_on_card = portmaster.installed(base)
+            pending = portmaster.pending(base, port_picks, ports_on_card) if port_picks else {}
+            got, port_waiting[:] = portmaster.game_data(card, base, ports_on_card, pending, dry_run)
+            failed += got
+            portmaster.updates(base, ports_on_card)
         if clean_card and wrote:
             clean._clean_root = base
         return failed
 
     chosen = [s for s in systems if available(s)]
+    port_picks = []  # the picked port zips: PortMaster installs them from its autoinstall folder, never Roms/PORTS
+    if portmaster.enabled(device, layout_name):
+        port_picks = sorted(os.path.basename(k) for s in chosen if s["bucket"] == portmaster.PORTS for k in available(s))
+        chosen = [s for s in chosen if s["bucket"] != portmaster.PORTS]
     deselected = []  # guest syncs: the seeded ROMs the card editor deselected, the only ROMs a guest sync deletes
     if guest:
         picked = {s["bucket"]: set(available(s)) for s in systems}
@@ -1293,8 +1338,10 @@ def sync_card(args):
             if onion_surprise.write_list(card, layout_name, base, roms_dir, systems, args.dry_run) and clean_card:
                 clean._clean_root = base
             failed += stage_spruce(args.dry_run)
-        print(ui.yellow(f"👋 {card} has nothing to sync. Add games with `sync-roms edit`."))
+        if guest or not port_picks:  # a card whose only picks are ports had them staged above
+            print(ui.yellow(f"👋 {card} has nothing to sync. Add games with `sync-roms edit`."))
         spruce_os.remind(spruce_staged)
+        portmaster.summary(card, port_waiting)
         pico8.remind(layout_name, pico8_wrote)
         return 1 if failed else 0
     print(ui.bold(f"\n🔎 Checking {len(chosen)} system(s) against storage..."))
@@ -1329,7 +1376,8 @@ def sync_card(args):
     # systems can share a folder (Onion: WS, NGP), so a folder's expected files are the union over all of them
     # a system with nothing to sync is always scanned, selected or not: whatever it has on the card is unwanted
     chosen_ids = {s["bucket"] for s in chosen}
-    dropped_dests = {os.path.join(roms_dir, s["folders"][layout_name]) for s in dropped if s["folders"].get(layout_name)}
+    dropped_dests = {os.path.join(roms_dir, s["folders"][layout_name]) for s in dropped
+                     if s["folders"].get(layout_name) and not portmaster.owns_folder(s)}
     # a system's rom_files are BIOS files that go in its ROM folder (MAME-style BIOS zips), kept while it has ROMs to sync
     dest_keys, dest_discs, dest_bios, dest_folders = defaultdict(list), defaultdict(set), defaultdict(set), defaultdict(dict)
     for t in systems:
@@ -1347,7 +1395,7 @@ def sync_card(args):
     cardfs.clear()  # the discs moved above, and the card editor's previews listed the card a while ago
     if guest:  # no sweep of a friend's card: only what the card editor deselected
         extras = list(deselected)
-    for dest in [] if guest else sorted({dest_of(s) for s in systems if s["bucket"] in chosen_ids or not available(s)} | dropped_dests):
+    for dest in [] if guest else sorted({dest_of(s) for s in systems if (s["bucket"] in chosen_ids or not available(s)) and not portmaster.owns_folder(s)} | dropped_dests):
         extras += downloads.find_extras(dest, dest_keys[dest], onion, disc_dir, dest_discs[dest], dest_bios[dest] | own_files[dest] | (pico8.keep_in(dest, card, layout_name) if dest in pico8_dests else set()), renames=renames, folders=dest_folders[dest], skip_saves=saves.beside_roms(layout))
 
     # BIOS for every system with ROMs already on the card too, even when this sync doesn't touch that system
@@ -1582,7 +1630,8 @@ def sync_card(args):
         if layout_name == "muos":
             plan = muos_collections.plan(base, muos_collections.wanted(card_colls, systems, on_card, mount), owned, args.no_delete)
         elif layout_name == "spruce":
-            plan = spruce_collections.plan(base, spruce_collections.wanted(card_colls, systems, on_card), owned, args.no_delete)
+            in_roms = [s for s in systems if not portmaster.skip(s, layout_name)]
+            plan = spruce_collections.plan(base, spruce_collections.wanted(card_colls, in_roms, on_card), owned, args.no_delete)
         else:
             wanted = frontend.wanted_collections(layout_name, card_colls, systems, on_card,
                                                  {k: d for s in systems for k, d in folders_of(s).items()})
@@ -1724,6 +1773,7 @@ def sync_card(args):
             ui.emit_json(plan_json)
         print(ui.bold(f"\n🧪 Would download {len(todo_all)} file(s) ({ui.human_size(total_bytes(todo_all))}), "
                       f"delete {len(extras)} local ROM(s) and {stale_count} media file(s); {len(missing)} listed ROM(s) not in storage"))
+        portmaster.summary(card, port_waiting)
         return 0
 
     move_failed = 0
@@ -1889,6 +1939,7 @@ def sync_card(args):
     else:
         print(ui.green(f"\n🎉 Done: {done}"))
     spruce_os.remind(spruce_staged)
+    portmaster.summary(card, port_waiting)
     pico8.remind(layout_name, pico8_wrote)
     return 1 if failed else 0
 

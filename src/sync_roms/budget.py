@@ -2,7 +2,7 @@
 import re
 from collections import namedtuple
 
-from . import collections as colls, inventory, scrape_plan, store, vita
+from . import collections as colls, inventory, portmaster, scrape_plan, store, vita
 
 Usage = namedtuple("Usage", "bytes count partial")
 
@@ -38,12 +38,15 @@ def scrape_costs(layout, system, rels, by_stem):
 def game_costs(card, system, keys):
     """({key: ROM bytes + scrape bytes} for the keys in the system's size cache, partial). A Vita game's ROM bytes
     include its DLC and newest update, unless those are keys themselves. partial: the system's sizes, or the scrape
-    sizes the layout needs, aren't cached yet. Once they are, a key left out isn't in storage: it costs nothing."""
+    sizes the layout needs, aren't cached yet. Once they are, a key left out isn't in storage: it costs nothing.
+    Spruce's port zips cost nothing: PortMaster installs them, never as files in Roms/PORTS."""
+    layout = card.get("layout")
+    if portmaster.skip(system, layout):
+        return dict.fromkeys(keys, 0), False
     bucket = system["bucket"]
     sizes = inventory.cached(f"{bucket}/")
     partial = sizes is None and bool(keys)
     sizes = sizes or {}
-    layout = card.get("layout")
     sized = [k for k in keys if k in sizes]
     extras = vita.extras(sized, sizes)
     listed = set(sized)
@@ -158,10 +161,10 @@ def picked(usage):
 
 
 def card_usage(card, systems, usages=None):
-    """The card's total: every system's usage plus the BIOS of the systems with something picked. count is games only.
-    usages: system_usages(card, systems) when already worked out."""
+    """The card's total: every system's usage plus the BIOS of the systems with something picked. count is games only,
+    spruce's port zips left out (never files on the card). usages: system_usages(card, systems) when already worked out."""
     usages = system_usages(card, systems) if usages is None else usages
-    parts = [usages[s["bucket"]] for s in systems]
+    parts = [usages[s["bucket"]] for s in systems if not portmaster.skip(s, card.get("layout"))]
     bios = bios_usage([s for s in systems if picked(usages[s["bucket"]])])
     return Usage(sum(p.bytes for p in parts) + bios.bytes, sum(p.count for p in parts),
                  bios.partial or any(p.partial for p in parts))

@@ -576,4 +576,9 @@ def folder_tag(folder):
 
 def system_applies(system, device, layout_name):
     """Whether a system is synced for a device (None for Full) and layout: the device runs it and the layout has a folder for it."""
-    return bool(system["folders"].get(layout_name)) and (device is None or system["bucket"] in device["systems"])
+    from . import portmaster
+    if not system["folders"].get(layout_name):
+        return False
+    if system["bucket"] == portmaster.PORTS:  # only PortMaster devices, whatever their tier lists
+        return portmaster.enabled(device, layout_name)
+    return device is None or system["bucket"] in device["systems"]

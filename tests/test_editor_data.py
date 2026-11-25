@@ -63,7 +63,7 @@ class Schemas(unittest.TestCase):
         self.assertNotIn("properties", games)  # no "sets": every key is a system
         card = cards["additionalProperties"]["properties"]
         for key in ("device", "layout", "systems", "games", "collections", "frontend_collections",
-                    "surprise", "surprises", "guest"):
+                    "surprise", "surprises", "guest", "portmaster_data", "portmaster_staged", "portmaster_ports"):
             self.assertIn(key, card)
         self.assertEqual(card["systems"]["items"]["type"], "string")
         self.assertEqual(self.load("collections.schema.json")["required"], ["name", "games"])

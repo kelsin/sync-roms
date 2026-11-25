@@ -9,7 +9,7 @@ import threading
 from . import inventory, s3, scrape_plan, shared, store, ui
 
 KEY = "names.json"
-SYSTEMS = ("mame", "fbneo", "pico8")
+SYSTEMS = ("mame", "fbneo", "pico8", "ports")
 _lock = threading.RLock()
 _scraped = None  # {system: {ROM path: name}}, filled per system on first use this run
 

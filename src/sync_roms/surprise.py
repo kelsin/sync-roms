@@ -8,7 +8,7 @@ import posixpath
 import random
 import re
 
-from . import frontend, inventory, languages, m3u, mirroring, names, picker, previews, s3, store, tagui, tags, ui, usersettings, vita
+from . import frontend, inventory, languages, m3u, mirroring, names, picker, portmaster, previews, s3, store, tagui, tags, ui, usersettings, vita
 
 SLOTS = 10
 RECOMMENDED_SHARE = 2 / 3
@@ -234,11 +234,12 @@ def _pools(chosen_systems, taken, tag_keys=None):
     return pools
 
 
-def _current(entry, chosen_systems):
+def _current(entry, chosen_systems, layout_name):
     """(systems' names by bucket, the entry's saved surprises that are on those systems), systems in excluded_systems(),
-    the card's own surprise_excluded_systems and the systems it has turned off (systems_off) left out."""
+    the card's own surprise_excluded_systems, the systems it has turned off (systems_off) and spruce's port zips left out."""
     excluded = excluded_systems() | card_excluded_systems(entry) | store.systems_off(entry)
-    names = {s["bucket"]: s["name"] for s in chosen_systems if s["bucket"] not in excluded}
+    names = {s["bucket"]: s["name"] for s in chosen_systems
+             if s["bucket"] not in excluded and not portmaster.skip(s, layout_name)}
     saved = entry.get("surprises")
     return names, [x for x in (saved if isinstance(saved, list) else ())
                    if isinstance(x, dict) and x.get("system") in names and isinstance(x.get("bucket"), str)]
@@ -260,7 +261,7 @@ def run_surprise(card_name, setup, chosen_systems, interactive, dry_run, to_fetc
             from . import cardedit  # cardedit imports much of the package
             cardedit.edit_card(card_name, setup, to_fetch, card_match, on_guest)
         return []
-    names, current = _current(entry, chosen_systems)
+    names, current = _current(entry, chosen_systems, setup[1])
     if dry_run:
         kept = current
         if current:
@@ -305,7 +306,7 @@ def fill_surprises(card_name, setup, chosen_systems, dry_run, rng=None, today=No
     entry = store.saved_card(card_name, cards)
     if not enabled(entry):
         return []
-    names, kept = _current(entry, chosen_systems)
+    names, kept = _current(entry, chosen_systems, setup[1])
     need = max(SLOTS - len(kept), 0)
     if not need:
         return kept

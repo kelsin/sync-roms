@@ -15,7 +15,7 @@ from . import bezels, budget, cardedit, cardshare, collectionedit, external, gue
 
 
 UNKNOWN_SHOWN = 8  # device ids named in an "unknown device" error
-COMMANDS = {"sync", "edit", "devices", "upload", "diff", "playlist", "prepare", "install", "mirror", "games", "tags", "collections", "themes", "download", "flash", "format", "unmount", "mount", "cards", "saves", "layouts", "cache", "config", "doctor", "guide", "check", "scrape", "refresh", "completion"}
+COMMANDS = {"sync", "edit", "devices", "upload", "diff", "playlist", "prepare", "install", "mirror", "games", "tags", "collections", "themes", "download", "ports", "flash", "format", "unmount", "mount", "cards", "saves", "layouts", "cache", "config", "doctor", "guide", "check", "scrape", "refresh", "completion"}
 SCRAPE_ACTIONS = ("match", "review", "missing", "art", "clean")
 LITERAL = frozenset()  # the values after `scrape match` that start with a dash: values, never options
 
@@ -1074,7 +1074,8 @@ def check_data(list_keys=None, repo_systems=None):
             problems.append(f"cards.json: {name}: 'collections' must be a list of collection ids")
         else:
             problems.extend(f"cards.json: {name}: unknown collection {i!r}" for i in picked if i not in collection_ids)
-        for field in ("frontend_collections", "drivers", "boot_logos", "spruce_os_kept"):
+        for field in ("frontend_collections", "drivers", "boot_logos", "spruce_os_kept",
+                      "portmaster_data", "portmaster_staged", "portmaster_ports"):
             names = entry.get(field, [])
             if not isinstance(names, list) or not all(isinstance(i, str) for i in names):
                 problems.append(f"cards.json: {name}: '{field}' must be a list of names")
@@ -1493,6 +1494,27 @@ def download_pico8(args):
     return bbs.download_pico8(args)
 
 
+def ports_search(args):
+    from . import portmaster_store
+    needs = True if args.needs_data else False if args.ready else None
+    return portmaster_store.search_command(" ".join(args.text), needs, args.refresh, args.yes, args.dry_run)
+
+
+def ports_download(args):
+    from . import portmaster_store
+    return portmaster_store.download(args.names, update=args.update, refresh=args.refresh, dry_run=args.dry_run)
+
+
+def ports_done(args):
+    from . import portmaster_needed
+    return portmaster_needed.done_command(args.card_name, args.ports, args.undo)
+
+
+def ports_needed(args):
+    from . import portmaster_needed
+    return portmaster_needed.needed_command()
+
+
 def saves_stash(args):
     from . import saves
     return saves.stash_command(args)
@@ -1787,6 +1809,18 @@ def build_parser():
     p = dsub.add_parser("pico8", allow_abbrev=False); common(p, card=False)
     p.add_argument("--count", type=_positive_int, metavar="N"); p.set_defaults(fn=download_pico8)
 
+    ports = sub.add_parser("ports", add_help=False, allow_abbrev=False)
+    psub = ports.add_subparsers(dest="action", required=True)
+    p = psub.add_parser("download", allow_abbrev=False); common(p, card=False); p.add_argument("names", nargs="*", metavar="ZIP")
+    p.add_argument("--update", action="store_true"); p.add_argument("--refresh", action="store_true"); p.set_defaults(fn=ports_download)
+    p = psub.add_parser("search", allow_abbrev=False); common(p, card=False); p.add_argument("text", nargs="*", metavar="TEXT")
+    group = p.add_mutually_exclusive_group()
+    group.add_argument("--needs-data", action="store_true"); group.add_argument("--ready", action="store_true")
+    p.add_argument("--refresh", action="store_true"); p.set_defaults(fn=ports_search)
+    p = psub.add_parser("done", allow_abbrev=False); common(p, card=False); p.add_argument("card_name", metavar="CARD")
+    p.add_argument("ports", nargs="+", metavar="PORT"); p.add_argument("--undo", action="store_true"); p.set_defaults(fn=ports_done)
+    p = psub.add_parser("needed", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=ports_needed)
+
     p = sub.add_parser("flash", add_help=False, allow_abbrev=False); common(p, card=False); p.set_defaults(fn=flash_cmd)
     p = sub.add_parser("format", add_help=False, allow_abbrev=False); common(p, card=False); p.set_defaults(fn=format_cmd)
     p = sub.add_parser("unmount", add_help=False, allow_abbrev=False); common(p, card=False); p.set_defaults(fn=unmount_cmd)
@@ -1860,7 +1894,7 @@ def run(argv):
     ap.prog = f"sync-roms {argv[0]}"  # its errors (unrecognized arguments) point at the command's help
     args = ap.parse_args(argv)
     if getattr(args, "dry_run", False) and not (args.fn is config_cmd and args.action == "apply") and (args.fn in (games_list, games_export, layouts_cmd, config_cmd, cache_cmd, doctor_cmd, guide_cmd, check_cmd, completion_cmd, themes_pick, themes_build, themes_palettes,
-                                                          edit_cmd, install_cmd, devices_cmd, diff_cmd, scrape_review_cmd, scrape_missing_cmd, refresh_cmd)
+                                                          edit_cmd, install_cmd, devices_cmd, diff_cmd, scrape_review_cmd, scrape_missing_cmd, refresh_cmd, ports_done, ports_needed)
                                             or (args.fn is mirror_cmd and args.action == "clear")):
         name = " ".join(w for w in (args.command, getattr(args, "action", None), getattr(args, "verb", None)) if w)
         if args.fn is config_cmd and args.action in ("set", "unset"):

@@ -387,7 +387,7 @@ class Step(StorageCase):
     def test_card_and_global_exclusions_both_apply(self):
         usersettings.save_setting("surprise_excluded_systems", ["gb"])
         entry = {"surprise_excluded_systems": ["gba", 3]}
-        names, current = surprise._current({**entry, "surprises": [self.surprise("gba", 0)]}, self.chosen())
+        names, current = surprise._current({**entry, "surprises": [self.surprise("gba", 0)]}, self.chosen(), "esde")
         self.assertEqual((names, current), ({}, []))
         self.assertEqual(surprise.card_excluded_systems({"surprise_excluded_systems": "gba"}), set())
         self.assertEqual(surprise.card_excluded_systems(None), set())
