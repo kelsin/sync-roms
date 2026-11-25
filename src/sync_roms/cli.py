@@ -33,7 +33,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "collections": ("edit", "edit your collections of favourite games (saved in ~/.sync-roms/collections/)"),
     "themes": ("update|pick|build|publish|palettes", "copy the latest Art Book Next for ES-DE and the PyUI themes for spruce from GitHub into storage; build and publish custom spruce themes"),
     "download": ("pico8", "add the PICO-8 BBS Featured carts storage doesn't have, and newer revisions of those it has"),
-    "ports": ("download", "put PortMaster ports and the runtimes they need in storage, from PortMaster's catalogue"),
+    "ports": ("search|download", "put PortMaster ports and the runtimes they need in storage, from PortMaster's catalogue"),
     "flash": ("", "write a Knulli, BaseOS, muOS, ROCKNIX or OakMoss image from storage's os/ to an SD card"),
     "format": ("", "erase an SD card as exFAT or FAT32 with a picked label"),
     "unmount": ("", "clean the macOS junk off an SD card and unmount it"),
@@ -221,8 +221,17 @@ TOPICS = {
   Requests go one at a time; the first HTTP error stops it, keeping what was added.
 """,
     "ports": """
+  sync-roms ports search [TEXT...] [--needs-data | --ready] [--refresh] [-n] [-y]
+      find ports in PortMaster's catalogue and pick ones to download
   sync-roms ports download [ZIP...] [--update] [--refresh] [--dry-run]
       put PortMaster ports in storage's ports/
+
+  search lists the aarch64 ports whose title, zip name, genres or description hold every word of
+  TEXT, one row each (title, zip, genres, size; "needs game data" for a port you must add files
+  to, "in storage" for one storage has). --needs-data keeps only the ports that need game data,
+  --ready only the ready-to-run ones. With a terminal (and without --yes) you pick ports with the
+  space bar and the ones storage lacks are downloaded as `ports download` does; otherwise the rows
+  are only printed. Both end by listing ports in storage that have a newer version.
 
   Each ZIP is a port's zip name in PortMaster's catalogue (celeste.zip, or just celeste; only ports
   that run on aarch64). Its zip goes to ports/<zip>, each runtime it needs that storage lacks to

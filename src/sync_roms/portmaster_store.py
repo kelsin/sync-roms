@@ -50,7 +50,8 @@ def remind_outdated(catalog):
     if old:
         ports = portmaster_catalog.ports(catalog)
         titles = ", ".join(_title(z, ports[z]) for z in old)
-        print(ui.yellow(f"{len(old)} ports in storage have newer versions: {titles}. Run sync-roms ports download --update"))
+        have = "1 port in storage has a newer version" if len(old) == 1 else f"{len(old)} ports in storage have newer versions"
+        print(ui.yellow(f"{have}: {titles}. Run sync-roms ports download --update"))
 
 
 def _fetch(url, md5, path):
@@ -59,6 +60,8 @@ def _fetch(url, md5, path):
         github.download(url, path)
     except _HTTP_ERRORS as e:
         return f"couldn't download {url} ({e})"
+    if not md5:
+        return f"the catalogue gives no checksum for {url}"
     if _md5(path) != md5:
         return f"the md5 of {url} isn't the catalogue's"
     return None
@@ -134,6 +137,7 @@ def download(names, update=False, refresh=False, dry_run=False):
             if not _put(key, source.get("url"), source.get("md5"), tmp):
                 failed = True
                 continue
+            stored.add(key)
             for rt in needed:
                 src = portmaster_catalog.runtime_source(catalog, rt)
                 if src is None:
@@ -153,3 +157,41 @@ def download(names, update=False, refresh=False, dry_run=False):
     if not update:
         remind_outdated(catalog)
     return 1 if failed else 0
+
+
+def _row(entry, stored):
+    attr, source = entry.get("attr") or {}, entry.get("source") or {}
+    row = f"{_title(entry['zip'], entry)}  {entry['zip']}  {', '.join(attr.get('genres') or [])}  {ui.human_size(source.get('size') or 0)}"
+    if not attr.get("rtr"):
+        row += " · needs game data"
+    if PORTS + entry["zip"] in stored:
+        row += " · in storage"
+    return row
+
+
+def search_command(text, needs_data, refresh, yes, dry_run):
+    """List the catalogue's ports matching text; with a terminal, pick ports to download. Exit code."""
+    from . import picker
+    catalog = portmaster_catalog.load(refresh=refresh)
+    if catalog is None:
+        return 1
+    try:
+        stored = set(inventory.files(PORTS, sizes=False))
+    except (*s3.ERRORS, ValueError) as e:
+        ui.warn(f"Couldn't read storage ({e})")
+        return 1
+    found = portmaster_catalog.search(catalog, text, needs_data)
+    if not found:
+        print("No ports match")
+    else:
+        labels = [_row(e, stored) for e in found]
+        if ui.has_terminal() and not yes:
+            picks = picker.filter_list("Download which ports?", labels, multi=True)
+            names = [e["zip"] for e, p in zip(found, picks or []) if p and PORTS + e["zip"] not in stored]
+            if names:
+                code = download(names, refresh=False, dry_run=dry_run)
+                return code
+        else:
+            print("\n".join(labels))
+    remind_outdated(catalog)
+    return 0

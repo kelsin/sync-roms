@@ -178,6 +178,7 @@ Every mode is a command (plain `sync-roms [CARD]` syncs a card). A command's ali
 | `themes palettes` | write the overview image of all 28 palettes (a numbered mock list screen for each) and open it | |
 | `themes pick` | choose the PyUI themes every spruce card gets by default (`spruce_themes` setting) | |
 | `download pico8` | add the [PICO-8 BBS Featured carts](#pico-8-carts-from-the-bbs-download-pico8) storage doesn't have, and newer revisions of those it has | `downloads` |
+| `ports search [TEXT...]` | search PortMaster's catalogue (title, zip name, genres, description) and, with a terminal, pick ports to download | `port` |
 | `ports download [ZIP...]` | put PortMaster ports (named as in PortMaster's catalogue, `celeste` or `celeste.zip`) in storage's `ports/`, with the runtimes they need in `os/portmaster/runtimes/` and their titles in `scrapes/ports/metadata.json`; a zip storage has is skipped | `port` |
 | `flash` | [write a Knulli, BaseOS, muOS, ROCKNIX or OakMoss image](#flashing-an-sd-card-flash) from storage's `os/` to an SD card, macOS only | |
 | `format` | [erase an SD card as exFAT or FAT32](#formatting-an-sd-card-format) with a picked label, macOS only | |
@@ -246,7 +247,8 @@ For one command:
 | `--palette NAME`, `--all-palettes` | `themes build`, `themes publish` | The palettes to build each style in (`--palette` repeatable, duplicates ignored), or all 28. Without either, a terminal (without `--yes`) shows the palette picker; otherwise the saved `custom_theme_palettes` are built (none saved: exit 2). The flags never change the saved palettes |
 | `--count N` | `download pico8` | Stop after N carts to add or upgrade |
 | `--update` | `ports download` | Replace the zips storage has when PortMaster's catalogue has a newer version (another md5); with no ZIP, every such port |
-| `--refresh` | `ports download` | Fetch PortMaster's catalogue again even when the cached copy is less than a day old |
+| `--needs-data`, `--ready` | `ports search` | Only the ports that need game data added by hand, or only the ready-to-run ones (not both) |
+| `--refresh` | `ports download`, `ports search` | Fetch PortMaster's catalogue again even when the cached copy is less than a day old |
 | `--bucket-keys` | `check` | Also verify with the read-only profile that every game key in your cards and sets exists in storage |
 | `--fix` | `doctor` | After the checks, run `install` when 7z, unar or chdman is missing |
 

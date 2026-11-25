@@ -32,7 +32,7 @@ def catalog(celeste_url="u-celeste"):
     }
 
 
-class Download(helpers.StorageDir):
+class Base(helpers.StorageDir):
     def setUp(self):
         super().setUp()
         self.catalog = catalog()
@@ -59,6 +59,8 @@ class Download(helpers.StorageDir):
         with open(path, "rb") as f:
             return f.read()
 
+
+class Download(Base):
     def test_download_puts_zip_runtime_and_metadata(self):
         code, _, err = self.run_download(["celeste"])
         self.assertEqual(code, 0, err)
@@ -130,8 +132,26 @@ class Download(helpers.StorageDir):
         self.assertEqual(self.run_download(["celeste", "2048"])[0], 0)
         self.catalog = catalog("u-celeste2")
         _, out, _ = self.run_download(["2048"])
-        self.assertIn("1 ports in storage have newer versions: Celeste. Run sync-roms ports download --update", out)
+        self.assertIn("1 port in storage has a newer version: Celeste. Run sync-roms ports download --update", out)
         self.assertEqual(portmaster_store.outdated(self.catalog), ["celeste.zip"])
+
+    def test_remind_outdated_plural(self):
+        self.assertEqual(self.run_download(["celeste", "2048"])[0], 0)
+        self.catalog = catalog("u-celeste2")
+        self.catalog["ports"]["2048.zip"]["source"]["md5"] = "0" * 32
+        _, out, _ = self.run_download([])
+        self.assertIn("2 ports in storage have newer versions: 2048, Celeste. Run", out)
+
+    def test_two_names_for_one_zip_download_once(self):
+        self.assertEqual(self.run_download(["celeste", "celeste.zip"])[0], 0)
+        self.assertEqual(self.fetched.count("u-celeste"), 1)
+
+    def test_catalogue_without_md5_warns_about_checksum(self):
+        self.catalog["ports"]["2048.zip"]["source"]["md5"] = None
+        code, _, err = self.run_download(["2048"])
+        self.assertEqual(code, 1)
+        self.assertIn("no checksum", err)
+        self.assertIsNone(self.stored("ports/2048.zip"))
 
     def test_missing_metadata_counts_as_outdated(self):
         self.put("ports/2048.zip", b"by hand")
@@ -153,6 +173,57 @@ class Download(helpers.StorageDir):
             code, _, _ = helpers.Cmd.run_cmd(self, "ports", "download", "celeste", "--update", "--refresh", "-n")
         self.assertEqual(code, 0)
         download.assert_called_once_with(["celeste"], update=True, refresh=True, dry_run=True)
+
+
+class Search(Base):
+    def run_search(self, text="", needs_data=None, yes=False, dry_run=False):
+        out, err = io.StringIO(), io.StringIO()
+        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+            code = portmaster_store.search_command(text, needs_data, False, yes, dry_run)
+        return code, out.getvalue()
+
+    def test_search_prints_rows_with_flags(self):
+        self.put("ports/2048.zip", b"x")
+        code, out = self.run_search()
+        self.assertEqual(code, 0)
+        self.assertIn("Celeste  celeste.zip", out)
+        self.assertIn("needs game data", out.split("Celeste")[1].split("\n")[0])
+        row = next(l for l in out.splitlines() if "2048.zip" in l)
+        self.assertIn("in storage", row)
+        self.assertNotIn("needs game data", row)
+
+    def test_search_ready_filter(self):
+        _, out = self.run_search(needs_data=False)
+        self.assertNotIn("celeste.zip", out)
+        self.assertIn("2048.zip", out)
+
+    def test_search_picker_downloads_picks(self):
+        with mock.patch.object(portmaster_store.ui, "has_terminal", return_value=True), \
+                mock.patch("sync_roms.picker.filter_list", return_value=[False, True]) as pick, \
+                mock.patch.object(portmaster_store, "download", return_value=0) as download:
+            code, _ = self.run_search("")
+        self.assertEqual(code, 0)
+        self.assertEqual(pick.call_args.args[0], "Download which ports?")
+        download.assert_called_once_with(["celeste.zip"], refresh=False, dry_run=False)
+
+    def test_search_picker_skips_ports_in_storage(self):
+        self.put("ports/celeste.zip", b"x")
+        with mock.patch.object(portmaster_store.ui, "has_terminal", return_value=True), \
+                mock.patch("sync_roms.picker.filter_list", return_value=[False, True]), \
+                mock.patch.object(portmaster_store, "download", return_value=0) as download:
+            self.run_search("")
+        download.assert_not_called()
+
+    def test_search_no_matches_message(self):
+        code, out = self.run_search("zzz")
+        self.assertEqual(code, 0)
+        self.assertIn("No ports match", out)
+
+    def test_cli_passes_flags(self):
+        with mock.patch.object(portmaster_store, "search_command", return_value=0) as search:
+            code, _, _ = helpers.Cmd.run_cmd(self, "ports", "search", "super", "mario", "--ready", "--refresh", "-y")
+        self.assertEqual(code, 0)
+        search.assert_called_once_with("super mario", False, True, True, False)
 
 
 if __name__ == "__main__":
