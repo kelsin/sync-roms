@@ -1101,6 +1101,66 @@ class TagColumn(DataDir):
         self.assertEqual(asked, [("nes/B (USA).zip", "B")])
         self.assertEqual(len(seen), 2)
 
+    def test_toggle_games_hides_rows_the_filter_rejects(self):
+        self.tags.change_game_tags("nes/A (USA).zip", add=["x"])
+        tagui = edit.tagui
+        tagui.FILTER.clear()
+        self.addCleanup(tagui.FILTER.clear)
+        tagui.FILTER.required = {"x"}
+        seen = []
+        with mock.patch.object(picker, "filter_list", side_effect=lambda t, l, **kw: seen.append((l, kw)) or kw["session"]["sel"]):
+            edit.toggle_games("t", self.ROWS)
+        self.assertEqual(seen[0][0], ["A", "B"])
+        tagui.FILTER.required = {"x"}
+        self.tags.change_game_tags("nes/A (USA).zip", remove=["x"])
+        seen.clear()
+        with mock.patch.object(picker, "filter_list", side_effect=lambda t, l, **kw: seen.append((l, kw)) or kw["session"]["sel"]):
+            edit.toggle_games("t", self.ROWS, filters="mine")
+        self.assertEqual(seen[0][0], ["B"])
+        self.assertIn("✅ 🐝 X (c clear filters)", seen[0][1]["filters"])
+        self.assertIn("mine", seen[0][1]["filters"])
+        self.assertIn("s", seen[0][1]["hotkeys"])
+        self.assertIn("c", seen[0][1]["hotkeys"])
+
+    def test_toggle_games_s_and_c_handled_inside(self):
+        tagui = edit.tagui
+        tagui.FILTER.clear()
+        self.addCleanup(tagui.FILTER.clear)
+        calls, seen = [], []
+        answers = iter([("s", 0), ("c", 0)])
+
+        def fake(title, labels, **kw):
+            seen.append(kw["session"])
+            kw["session"]["query"] = "q"
+            return next(answers, None) or kw["session"]["sel"]
+        place = {}
+        with mock.patch.object(picker, "filter_list", fake), \
+                mock.patch.object(tagui, "handle_key", side_effect=lambda *a: calls.append(a) or True):
+            self.assertIsNone(edit.toggle_games("t", self.ROWS, place=place))
+        self.assertEqual([c[0] for c in calls], ["s", "c"])
+        self.assertEqual(calls[0][1], ["nes/A (USA).zip", "nes/B (USA).zip"])
+        self.assertIs(calls[0][2], place)
+        self.assertEqual(len(seen), 3)
+
+    def test_toggle_games_no_matches_shows_banner_and_message(self):
+        tagui = edit.tagui
+        tagui.FILTER.clear()
+        self.addCleanup(tagui.FILTER.clear)
+        tagui.FILTER.required = {"x"}
+        self.tags.change_game_tags("nes/B (USA).zip", remove=["x"])
+        seen = []
+        answers = iter([("c", None)])
+
+        def fake(title, labels, **kw):
+            seen.append((labels, kw["filters"]))
+            return next(answers, None) or kw["session"]["sel"]
+        with mock.patch.object(picker, "filter_list", fake):
+            edit.toggle_games("t", self.ROWS)
+        self.assertEqual(seen[0][0], [])
+        self.assertIn("✅ 🐝 X (c clear filters)", seen[0][1])
+        self.assertIn("no games match the tag filter", seen[0][1])
+        self.assertEqual(seen[1], (["A", "B"], ""))
+
     def test_notes_off_drops_w(self):
         seen = []
         with mock.patch.object(picker, "filter_list", side_effect=lambda t, l, **kw: seen.append(kw) or kw["session"]["sel"]):

@@ -28,7 +28,7 @@ ALL_GAMES_HINT = "Space toggle · Enter done · v variant · t tags · s tag · 
 LIST_KEYS = [("Enter", "the system's games"), ("f", "full system: every file in its folder (again to undo)"),
              ("x", "turn the system off on this card: nothing of it syncs, its picks stay (again to turn it back on)"),
              ("a", "every game across this card's systems"),
-             ("s", "every game across this card's systems with the tags picked first"), ("l", "collections on this card"),
+             ("s", "narrow every game to tags (the filter stays on in every list), then list them"), ("l", "collections on this card"),
              ("S", "settings menu: Surprise, theme, collections and RAOfflineProxy on or off, and the systems Surprise may use"),
              ("F", "guest card: a friend's card; syncs only copy ROMs, BIOS and scrapes (again to undo)"),
              ("D", "clear every pick and full system from the card")]
@@ -40,8 +40,7 @@ GAMES_KEYS = [TAGS_HELP, ("m", "narrow by scraped metadata (developer, genre, ye
               tagui.KEY_HELP, ("c", "clear the search, tag, metadata and surprise filters")]
 COLLECTION_GAMES_HINT = "Space toggle · Enter done · a all · v variant · t tags"
 COLLECTION_GAMES_KEYS = [("v", "the game's variants on other systems"), tagui.KEY_HELP]
-ALL_GAMES_KEYS = [("v", "the game's variants on other systems"), tagui.KEY_HELP, TAGS_HELP,
-                  ("c", "clear the search and tag filters")]
+ALL_GAMES_KEYS = [("v", "the game's variants on other systems"), tagui.KEY_HELP, *tagui.KEYS_HELP]
 SIZING = "…"
 
 
@@ -645,7 +644,7 @@ class GameFilters:
     def __init__(self, system):
         self.system = system
         self.meta = Metadata(system["bucket"])
-        self.tags = tagui.TagFilter()  # the tags the list is narrowed to
+        self.tags = tagui.FILTER  # the tags every list is narrowed to
         self.meta_filt = {}  # {metadata field: value} the list is narrowed to as well
         self.past = None  # bucket keys of the past surprises the list is narrowed to
 
@@ -667,10 +666,9 @@ class GameFilters:
         """Apply a filter hotkey; returns whether pressed was one. keys: every row's bucket key; place: the list's
         picker.carry_place (c clears its / filter too)."""
         if pressed == CLEAR_KEY:
-            self.tags.clear()
+            tagui.handle_key(pressed, keys, place)  # the tags and the / filter
             self.past = None
             self.meta_filt.clear()
-            place.get("session", {}).pop("query", None)  # the / filter too
         elif pressed == PAST_SURPRISE_KEY:
             self.past = surprise.past_keys(self.system["bucket"]) or None
             if self.past is None:
@@ -678,7 +676,7 @@ class GameFilters:
         elif pressed == META_KEY:
             pick_meta(self.system, self.meta, self.meta_filt, lambda field: [k for k in keys if self.keep(k, field)])
         elif pressed == SET_KEY:
-            self.tags.pick(keys)
+            tagui.handle_key(pressed, keys, place)
         else:
             return False
         return True
@@ -909,7 +907,7 @@ def edit_system(name, system, setup, to_fetch=None, card_usages=None):
 
 def edit_all(name, setup, systems, to_fetch=None, card_usages=None, pick_tags=False):
     """Every file of the systems' storage folders (from the storage cache) in one list, by title then system, toggled
-    as in edit_set (a full system's on and locked) and narrowed by tags with s. pick_tags: the tags are picked before
+    as in edit_set (a full system's on and locked) and narrowed by the tag filter. pick_tags: the tags are picked before
     the list opens, which then doesn't open when none is. Returns whether anything changed."""
     picks = cardpicks.CardPicks(name, setup)  # handed to edit_set, so each folder is listed once
     games = []
@@ -959,10 +957,9 @@ def edit_set(name, game_set, setup, to_fetch=None, card_usages=None, all_games=F
                       key=lambda r: (store.sort_key(r[2]), r[0]["name"].lower()))
     listed = [r for r in rows if r[0]["bucket"] not in sps  # a shown playlist hides its discs
               or sps[r[0]["bucket"]].playlist_of.get(r[1]) not in files_of]
-    tag_filter = tagui.TagFilter()  # all_games: the tags the list is narrowed to
     if pick_tags:
-        tag_filter.pick({r[1] for r in listed})
-        if not tag_filter.required and not tag_filter.excluded:
+        tagui.FILTER.pick({r[1] for r in listed})
+        if not tagui.FILTER.required and not tagui.FILTER.excluded:
             return False
     others = [x for x in playable.values() if x["bucket"] not in sps]
     capacity = budget.card_capacity(card_entry(name, setup, cards))
@@ -973,10 +970,12 @@ def edit_set(name, game_set, setup, to_fetch=None, card_usages=None, all_games=F
     place = {}  # picker.carry_place's: the last pass's row, filter text, view and scroll
     try:
         while True:
-            shown = [r for r in listed if tag_filter.keep(r[1])]
+            shown = [r for r in listed if not all_games or tagui.FILTER.keep(r[1])]
             if all_games:
-                emoji, hint, hotkeys, key_help = "🌐", ALL_GAMES_HINT, (VARIANT_KEY, tagui.TAG_KEY, SET_KEY, CLEAR_KEY), ALL_GAMES_KEYS
-                filters = f"{tag_filter.describe()} (c clear filters)" if tag_filter.describe() else ""
+                emoji, hint, hotkeys, key_help = "🌐", ALL_GAMES_HINT, (VARIANT_KEY, tagui.TAG_KEY, *tagui.HOTKEYS), ALL_GAMES_KEYS
+                filters = tagui.banner()
+                if not shown and listed:
+                    filters += " · no games match the tag filter"
                 origin = ""
             else:
                 emoji, hint, hotkeys, key_help = (themeart.collection_emoji(game_set), COLLECTION_GAMES_HINT,
@@ -991,11 +990,8 @@ def edit_set(name, game_set, setup, to_fetch=None, card_usages=None, all_games=F
             if result[0] == tagui.TAG_KEY:
                 if result[1] is not None:
                     tagui.edit_game_tags(*shown[result[1]][1:3])
-            elif result[0] == CLEAR_KEY:
-                tag_filter.clear()
-                place.get("session", {}).pop("query", None)  # the / filter too
-            elif result[0] == SET_KEY:
-                tag_filter.pick({r[1] for r in listed})
+            elif tagui.handle_key(result[0], {r[1] for r in listed}, place):
+                pass
             elif result[1] is not None:
                 variant = _toggle_variant(picks, *shown[result[1]][1:3])
                 if variant:

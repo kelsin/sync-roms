@@ -62,15 +62,28 @@ FULL_SYSTEM_NOTE = "Full system: every file in its folder is synced, so it can't
 
 
 def toggle_games(title, rows, hotkeys=(), hint=None, place=None, filters="", key_help=None, select_all=True, notes=True):
-    """_toggle_games, reopened in the same place after `t` edited a game's tags (the toggles made so far are applied
-    first); the other keys are returned as it does."""
+    """_toggle_games over the rows tagui.FILTER keeps, reopened in the same place after `t` edited a game's tags or
+    `s`/`c` changed the tag filter (the toggles made so far are applied first); the other keys are returned as it does.
+    A caller that lists s or c in hotkeys handles them itself."""
     place = {} if place is None else place
+    own = tuple(k for k in tagui.HOTKEYS if k not in hotkeys)
+    helps = [h for h in tagui.KEYS_HELP if h[0] in own]
     while True:
-        pressed, i = _toggle_games(title, rows, hotkeys, hint, place, filters, key_help, select_all, notes)
-        if pressed != tagui.TAG_KEY:
+        shown = [r for r in rows if tagui.FILTER.keep(r[1])]
+        line = tagui.FILTER.describe()
+        banner = tagui.banner() if line and line not in filters else ""
+        if line and not shown and rows:
+            banner += " · no games match the tag filter"
+        pressed, i = _toggle_games(title, shown, (*hotkeys, *own), hint, place,
+                                   " · ".join(x for x in (filters, banner) if x),
+                                   None if key_help is None else [*key_help, *helps], select_all, notes)
+        if pressed == tagui.TAG_KEY:
+            if i is not None:
+                tagui.edit_game_tags(shown[i][1], shown[i][2])
+        elif pressed in own:
+            tagui.handle_key(pressed, [r[1] for r in rows], place)
+        else:
             return pressed
-        if i is not None:
-            tagui.edit_game_tags(rows[i][1], rows[i][2])
 
 
 def _toggle_games(title, rows, hotkeys, hint, place, filters, key_help, select_all, notes):

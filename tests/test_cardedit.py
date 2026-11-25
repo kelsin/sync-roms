@@ -2052,6 +2052,7 @@ class SetFlow(Flow):
     def test_esc_in_the_all_games_list_narrowed_to_a_tag_asks_about_a_toggle_it_hides(self):
         self.tag_pokemon()
         for answer, games in (("u", {}), ("y", {"gba": [g("gba/Emerald.zip")]})):
+            cardedit.tagui.FILTER.clear()  # it is sticky across lists
             self.card()  # Emerald on, s, the Pokemon tag (not Emerald), Esc
             rows = self.keyed(lambda: cardedit.edit_all("c", (DEVICE, "esde"), [GBA, GB]),
                               ["space", "s"], ["enter"], ["escape"], ["escape", answer])

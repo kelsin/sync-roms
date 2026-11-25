@@ -216,5 +216,48 @@ class TagFilterTest(unittest.TestCase):
         self.assertEqual(self.notes, ["ℹ️  No tag has games among these."])
 
 
+class StickyFilter(unittest.TestCase):
+    def setUp(self):
+        data_dir = self.enterContext(tempfile.TemporaryDirectory())
+        self.enterContext(mock.patch.object(store, "data_dir", return_value=data_dir))
+        helpers.storage_tags(self, {
+            "tags": {"shmups": {"name": "Shmups", "emoji": "🚀"}, "cave": {"name": "Cave", "emoji": "🐝"}},
+            "games": {A: {"tags": ["shmups"]}, B: {"tags": ["cave"]}}, "declined": {}})
+        tagui.FILTER.clear()
+        self.addCleanup(tagui.FILTER.clear)
+
+    def test_filter_is_shared(self):
+        from sync_roms import cardedit
+        with mock.patch.object(cardedit, "_spawn", lambda fn: None), mock.patch.object(cardedit, "_metadata", {"nes": None}):
+            self.assertIs(cardedit.GameFilters({"bucket": "nes", "name": "NES"}).tags, tagui.FILTER)
+
+    def test_banner_empty_without_filter(self):
+        self.assertEqual(tagui.banner(), "")
+
+    def test_banner_lists_required_and_excluded(self):
+        tagui.FILTER.required, tagui.FILTER.excluded = {"shmups"}, {"cave"}
+        self.assertEqual(tagui.banner(), "✅ 🚀 Shmups · 🚫 🐝 Cave (c clear filters)")
+
+    def test_handle_key_clear_resets_filter_and_query(self):
+        tagui.FILTER.required = {"shmups"}
+        place = {"session": {"query": "x"}}
+        self.assertTrue(tagui.handle_key("c", [A], place))
+        self.assertEqual(tagui.FILTER.required, set())
+        self.assertEqual(place, {"session": {}})
+        self.assertTrue(tagui.handle_key("c", [A]))  # no place
+
+    def test_handle_key_s_picks_over_the_rows(self):
+        with mock.patch.object(tagui.FILTER, "pick") as pick:
+            self.assertTrue(tagui.handle_key("s", [A, B], {}))
+        pick.assert_called_once_with([A, B])
+
+    def test_handle_key_ignores_other_keys(self):
+        tagui.FILTER.required = {"shmups"}
+        self.assertFalse(tagui.handle_key("m", [A]))
+        self.assertEqual(tagui.FILTER.required, {"shmups"})
+        self.assertEqual(tagui.HOTKEYS, ("s", "c"))
+        self.assertEqual([k for k, _ in tagui.KEYS_HELP], ["s", "c"])
+
+
 if __name__ == "__main__":
     unittest.main()

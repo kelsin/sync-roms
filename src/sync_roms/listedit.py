@@ -288,21 +288,5 @@ def all_rows(shown, systems, keys_of):
 
 
 def toggle_all(title, rows, place=None):
-    """edit.toggle_games over rows from all_rows, with s narrowing by tags and c clearing that and the / filter."""
-    from . import cardedit  # cardedit imports this module
-    tag_filter = tagui.TagFilter()
-    place = {} if place is None else place
-    key_help = [(cardedit.SET_KEY, "narrow by tags"), (cardedit.CLEAR_KEY, "clear filters")]
-    while True:
-        pressed = edit.toggle_games(
-            title, [r for r in rows if tag_filter.keep(r[1])],
-            hotkeys=(cardedit.SET_KEY, cardedit.CLEAR_KEY),
-            hint="Space toggle · Enter done · s tag · c clear filters", key_help=key_help, place=place,
-            select_all=False, filters=f"{tag_filter.describe()} (c clear filters)" if tag_filter.describe() else "")
-        if pressed == cardedit.CLEAR_KEY:
-            tag_filter.clear()
-            place.get("session", {}).pop("query", None)
-        elif pressed == cardedit.SET_KEY:
-            tag_filter.pick({r[1] for r in rows})
-        else:
-            return
+    """edit.toggle_games over rows from all_rows (s and c, the sticky tag filter, are its own)."""
+    edit.toggle_games(title, rows, hint="Space toggle · Enter done · s tag · c clear filters", place=place, select_all=False)

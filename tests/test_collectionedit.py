@@ -678,28 +678,22 @@ class AllRows(unittest.TestCase):
         _, rows = self.rows(gba=frozenset())
         self.assertFalse([r for r in rows if r[1].startswith("gba/")])
 
-    def test_toggle_all_narrows_by_tags_and_clears_them(self):
-        from sync_roms import cardedit
+    def test_toggle_all_leaves_s_and_c_to_the_sticky_filter(self):
+        _, rows = self.rows()
+        with mock.patch.object(edit, "toggle_games", return_value=None) as fake:
+            listedit.toggle_all("All", rows, place={})
+        self.assertEqual(fake.call_args.args[1], rows)
+        self.assertNotIn("hotkeys", fake.call_args.kwargs)
+
+    def test_toggle_all_shows_only_what_the_sticky_filter_keeps(self):
         tag_games(self, {"gba/Ruby.zip": None})
         _, rows = self.rows()
-        script = iter([cardedit.SET_KEY, cardedit.CLEAR_KEY, None])
-        seen, offered = [], []
+        tagui.FILTER.required = {"mix"}
+        seen = []
 
-        def fake(title, shown, **k):
-            seen.append(([r[1] for r in shown], k["filters"], k["hotkeys"]))
-            return next(script)
-
-        def pick(f, row_keys):
-            offered.append(row_keys)
-            f.required.add("mix")
-        place = {"session": {"query": "x"}}
-        with mock.patch.object(edit, "toggle_games", fake), mock.patch.object(tagui.TagFilter, "pick", pick):
-            listedit.toggle_all("All", rows, place=place)
-        every = [r[1] for r in rows]
-        self.assertEqual(offered, [set(every)])
-        self.assertEqual(seen, [(every, "", ("s", "c")), (["gba/Ruby.zip"], "✅ 🔀 Mix (c clear filters)", ("s", "c")),
-                                (every, "", ("s", "c"))])
-        self.assertNotIn("query", place["session"])
+        with mock.patch.object(picker, "filter_list", lambda t, labels, **k: seen.append((labels, k["filters"])) or k["session"]["sel"]):
+            listedit.toggle_all("All", rows)
+        self.assertEqual(seen, [(["Game Boy Advance — Ruby.zip"], "✅ 🔀 Mix (c clear filters)")])
 
     def test_toggle_all_turns_select_all_off(self):
         _, rows = self.rows()

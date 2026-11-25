@@ -152,3 +152,27 @@ class TagFilter:
                 self.excluded.discard(i)
             else:
                 self.required.add(i)
+
+
+FILTER = TagFilter()  # the one tag filter every game list shares; only c clears it
+SET_KEY = "s"
+HOTKEYS = (SET_KEY, CLEAR_KEY)
+KEYS_HELP = [(SET_KEY, "narrow by tags (stays on in every list)"), (CLEAR_KEY, "clear filters")]
+
+
+def banner():
+    """The filters line's tag part for a list: what FILTER shows, or "" with no filter."""
+    return f"{FILTER.describe()} (c clear filters)" if FILTER.describe() else ""
+
+
+def handle_key(pressed, row_keys, place=None):
+    """Apply s (pick tags among row_keys) or c (clear FILTER and the list's / filter in place); returns whether
+    pressed was one of them."""
+    if pressed == SET_KEY:
+        FILTER.pick(row_keys)
+    elif pressed == CLEAR_KEY:
+        FILTER.clear()
+        ((place or {}).get("session") or {}).pop("query", None)
+    else:
+        return False
+    return True
