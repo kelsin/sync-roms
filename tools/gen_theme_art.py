@@ -1231,6 +1231,23 @@ def fatal_fury(p):  # the hungry wolf
     p.pg([(-7, 26), (7, 26), (0, 34)], 2)
 
 
+def r_type(p):  # the r-9 arrowhead side on, with the force pod at its nose
+    hull = rounded([(16, -2), (4, -10), (-26, -10), (-38, -26), (-48, -26), (-44, -10), (-52, -6), (-52, 8), (-34, 12),
+                    (-4, 12), (14, 6)], 2.5)
+    p.path(hull, True)
+    p.path(arc(-12, -10, 10, 7, 180, 360))
+    with p.inside(hull):
+        p.l([(-60, 2), (30, 2)], 0)
+    for y in (-4, 4):
+        p.l([(-57, y), (-63, y)])
+    for s in (1, -1):
+        p.pg([(34, -9 * s), (50, -18 * s), (44, -4 * s)], 1.5)
+    p.o(30, 0, 13, opaque=True)
+    p.o(30, 0, 6)
+    p.o(30, 0, 2.2)
+    p.o(30, 0, 0.8)
+
+
 # id: (drawing, band colour, rotation in degrees, scale, offset in px)
 ART = {
     "adventure": (adventure, (44, 146, 118), -6, 1.0, (0, 0)),
@@ -1286,6 +1303,7 @@ ART = {
     "tekken": (tekken, (96, 52, 150), 8, 1.0, (-16, 0)),
     "samurai-shodown": (samurai_shodown, (120, 40, 50), -30, 1.12, (-14, 14)),
     "fatal-fury": (fatal_fury, (60, 100, 150), -4, 1.0, (-16, 0)),
+    "r-type": (r_type, (108, 58, 88), -6, 0.85, (-30, 22)),
     "pac-man": (pac_man, (28, 36, 96), -6, 1.0, (-12, 0)),
     "tetris": (tetris, (40, 170, 200), -5, 1.0, (-36, 0)),
     "dragon-quest": (dragon_quest, (60, 130, 220), -5, 1.0, (-6, 0)),
