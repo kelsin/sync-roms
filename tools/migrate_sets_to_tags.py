@@ -10,13 +10,14 @@ it already holds games, unless --force). The set files are left untouched.
 """
 import argparse
 import collections
+import json
 import os
 import re
 import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
 
-from sync_roms import inventory, runtime, s3, shared, store, tags, themeart, ui, usersettings  # noqa: E402
+from sync_roms import inventory, runtime, s3, shared, tags, themeart, ui, usersettings  # noqa: E402
 
 SERIES_MIN = 15
 
@@ -306,20 +307,25 @@ def build(sets, emoji=None):
 
 
 def read_sets():
-    """The sets in storage's sets/ as dicts, in file-name order."""
+    """The sets in storage's sets/ as {"id", "name", "description", "art"?, "games"} dicts, in file-name order."""
     out = []
-    for key in sorted(inventory.files(store.SETS, sizes=False)):
-        set_id = store._set_id(key)
-        if set_id is None:
+    for key in sorted(inventory.files("sets/", sizes=False)):
+        name = key[len("sets/"):]
+        if "/" in name or name.startswith(".") or not name.endswith(".json"):
             continue
         try:
-            data = store._set_file(shared.read(key))
-        except (UnicodeDecodeError, s3.ERRORS):
+            data = json.loads(shared.read(key))
+        except (UnicodeDecodeError, ValueError, *s3.ERRORS):
             data = None
-        if data is None:
+        if not (isinstance(data, dict) and isinstance(data.get("games"), list)):
             print(f"skipped {key}: not a set")
             continue
-        out.append(store._set_dict(set_id, data))
+        set_id = name[:-len(".json")]
+        game_set = {"id": set_id, "name": data.get("name", set_id), "description": data.get("description", ""),
+                    "games": data["games"]}
+        if isinstance(data.get("art"), str):
+            game_set["art"] = data["art"]
+        out.append(game_set)
     return out
 
 

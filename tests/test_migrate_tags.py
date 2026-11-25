@@ -1,9 +1,12 @@
 import importlib.util
 import itertools
 import os
+import sys
 import unittest
 
-from sync_roms import themeart
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import helpers  # noqa: E402
+from sync_roms import themeart  # noqa: E402
 
 _spec = importlib.util.spec_from_file_location(
     "migrate_sets_to_tags", os.path.join(os.path.dirname(__file__), "..", "tools", "migrate_sets_to_tags.py"))
@@ -87,6 +90,18 @@ class BuildTests(unittest.TestCase):
         self.assertEqual(len(set(emojis)), len(emojis))
         with self.assertRaises(ValueError):
             migrate.build([make_set("a", "A", [game("x/1.zip", category="Nope")])])
+
+
+class ReadSetsTests(helpers.StorageFolder):
+    def test_read_sets(self):
+        helpers.storage_sets(self, root=self.root.name, sets={"b": make_set("b", "Bee", [game("x/1.zip")], art="shmups"),
+                                    "a": make_set("a", "Aye", many("y", 2))})
+        sets = migrate.read_sets()
+        self.assertEqual([s["id"] for s in sets], ["a", "b"])
+        self.assertEqual([s["name"] for s in sets], ["Aye", "Bee"])
+        self.assertEqual(sets[1]["art"], "shmups")
+        self.assertEqual(sets[0]["art"], "favorites")
+        self.assertEqual([g["bucket"] for g in sets[0]["games"]], ["y/g0.zip", "y/g1.zip"])
 
 
 if __name__ == "__main__":
