@@ -1,5 +1,26 @@
 # Changelog
 
+## [4.1.0](https://github.com/kelsin/sync-roms/compare/v4.0.0...v4.1.0) (2026-11-25)
+
+
+### :video_game: Features
+
+* **art:** add professor layton, mortal kombat, tekken, samurai shodown, fatal fury and r-type art ([#610](https://github.com/kelsin/sync-roms/issues/610)) ([2fed996](https://github.com/kelsin/sync-roms/commit/2fed99687c9ab154f60d9f7afe57db62ff6385b1))
+* **art:** add shin megami tensei, kingdom hearts, mana, lunar and ace attorney art ([#608](https://github.com/kelsin/sync-roms/issues/608)) ([54152d1](https://github.com/kelsin/sync-roms/commit/54152d1eb1eab65923ff25c479c222d147c544dd))
+* **art:** add star fox, contra, ninja gaiden, gradius and metal slug art ([#609](https://github.com/kelsin/sync-roms/issues/609)) ([ee39196](https://github.com/kelsin/sync-roms/commit/ee39196ce2486edbaeaa8ce73b083a273d65624d))
+* **collections:** add a shareable collections page and tailscale sharing ([#618](https://github.com/kelsin/sync-roms/issues/618)) ([a53f3fa](https://github.com/kelsin/sync-roms/commit/a53f3fa302248a1efe07b80845dde2d4026fdc62))
+* **format:** add format command for SD cards ([#611](https://github.com/kelsin/sync-roms/issues/611)) ([9402cb7](https://github.com/kelsin/sync-roms/commit/9402cb7a241c136db4b671d9ff1530f6c71649f5))
+* **knulli:** write settings into knulli.conf ([#613](https://github.com/kelsin/sync-roms/issues/613)) ([cec6c58](https://github.com/kelsin/sync-roms/commit/cec6c58730cf3570bac523df5d77d819b1d93878))
+* **portmaster:** add portmaster ports and game data for spruce cards ([#617](https://github.com/kelsin/sync-roms/issues/617)) ([a70a0ad](https://github.com/kelsin/sync-roms/commit/a70a0ad7674f34b42e7925b0d542c4d54d1192df))
+* **sync:** bring splore carts from spruce cards into storage ([#607](https://github.com/kelsin/sync-roms/issues/607)) ([f65f43f](https://github.com/kelsin/sync-roms/commit/f65f43f085f79761d28635b2596d3d76da72b0b1))
+* **tags:** replace game sets with per-game tags ([#616](https://github.com/kelsin/sync-roms/issues/616)) ([d242eb3](https://github.com/kelsin/sync-roms/commit/d242eb3e35f1424988be114fb0c6187e93690d18))
+* **upload:** prepare, scrape after upload, add refresh command ([#615](https://github.com/kelsin/sync-roms/issues/615)) ([08105cc](https://github.com/kelsin/sync-roms/commit/08105ccdf0ee80f52e9776aa1dafecefc5c5e7ea))
+
+
+### :bug: Bug Fixes
+
+* **art:** draw the horses art without a bridle ([#614](https://github.com/kelsin/sync-roms/issues/614)) ([f19a2ec](https://github.com/kelsin/sync-roms/commit/f19a2ec772581f477209afb28e06bcaae67c320e))
+
 ## [4.0.0](https://github.com/kelsin/sync-roms/compare/v3.36.0...v4.0.0) (2026-11-25)
 
 
