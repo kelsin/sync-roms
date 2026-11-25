@@ -183,8 +183,7 @@ ul.games { list-style: none; margin: 0; padding: 0 0 6px; }
   var options = document.getElementById("tag-options");
   tagList.forEach(function (t) {
     var option = el("option");
-    option.value = t.name;
-    option.label = t.emoji;
+    option.value = t.emoji + " " + t.name;
     options.appendChild(option);
   });
   function renderChips() {
@@ -206,7 +205,9 @@ ul.games { list-style: none; margin: 0; padding: 0 0 6px; }
     var text = typed.trim().toLowerCase();
     if (!text) return false;
     var free = tagList.filter(function (t) { return !pressed.has(t.id); });
-    var hits = free.filter(function (t) { return t.name.toLowerCase() === text; });
+    var hits = free.filter(function (t) {
+      return t.name.toLowerCase() === text || (t.emoji + " " + t.name).toLowerCase() === text;
+    });
     if (!hits.length && prefix) {
       hits = free.filter(function (t) { return t.name.toLowerCase().indexOf(text) !== -1; });
       if (hits.length !== 1) hits = [];

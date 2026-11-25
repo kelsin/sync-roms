@@ -38,8 +38,16 @@ class Tailscale(helpers.DataDir):
         self.calls = []
         self.enterContext(mock.patch.object(tailshare.shutil, "which", lambda n: "/bin/" + n))
         self.enterContext(mock.patch.object(tailshare.subprocess, "run", self.run_cmd))
-        self.enterContext(mock.patch.object(collections_page, "write_page", self.write_page))
+        self.html = "page"
+        self.enterContext(mock.patch.object(collections_page, "render", lambda: self.html))
         self.writes = []
+        real_write = collections_page.store.write_text
+
+        def write_text(path, text, **kw):
+            if path.endswith("index.html"):
+                self.writes.append(path)
+            return real_write(path, text, **kw)
+        self.enterContext(mock.patch.object(collections_page.store, "write_text", write_text))
         self.page = os.path.join(tailshare.SHARE_DIR(), "index.html")
         self.alive, self.listening, self.killed, self.popens = set(), set(), [], []
         self.enterContext(mock.patch.object(tailshare.subprocess, "Popen", self.popen))
@@ -65,12 +73,6 @@ class Tailscale(helpers.DataDir):
         store.write_json(tailshare.STATE_FILE(), {"pid": pid, "port": port})
         self.alive.add(pid)
         self.listening.add(port)
-
-    def write_page(self, path):
-        self.writes.append(path)
-        os.makedirs(os.path.dirname(path), exist_ok=True)
-        with open(path, "w") as f:
-            f.write("page")
 
     def run_cmd(self, argv, **kw):
         self.calls.append((argv, kw))
@@ -98,9 +100,19 @@ class Share(Tailscale):
                               "cwd": tailshare.SHARE_DIR()})
         self.assertEqual(self.read("share-server.json"), {"pid": 4321, "port": PORT})
 
+    def test_share_rebuilds_an_out_of_date_page_even_when_already_shared(self):
+        os.makedirs(tailshare.SHARE_DIR())
+        with open(self.page, "w") as f:
+            f.write("old")
+        self.running()
+        self.serve_status = SERVING
+        self.assertEqual(tailshare.share(), (LINK, True, False))
+        self.assertEqual(self.writes, [self.page])
+
     def test_share_keeps_existing_page_server_and_serve(self):
         os.makedirs(tailshare.SHARE_DIR())
-        open(self.page, "w").close()
+        with open(self.page, "w") as f:
+            f.write("page")
         self.running()
         self.serve_status = SERVING
         self.assertEqual(tailshare.share(), (LINK, False, False))
@@ -371,7 +383,7 @@ class Commands(unittest.TestCase):
                 mock.patch.object(collections_page, "DEFAULT_PATH", lambda: "/p/index.html"):
             code, out = self.run_cmd(["collections", "share"])
         self.assertEqual(code, 0)
-        self.assertIn("Built /p/index.html", out)
+        self.assertIn("Rebuilt /p/index.html", out)
         self.assertIn(f"Sharing at {LINK} 📋", out.splitlines()[-1])
 
     def test_share_command_already_shared_no_clipboard(self):
