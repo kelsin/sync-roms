@@ -11,7 +11,7 @@ from concurrent.futures import ThreadPoolExecutor
 from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError
 
 from . import __version__, bezels, budget, cardedit, cardfs, clean, commands, downloads, drivers, frontend, inventory, m3u, mirroring, picker, runtime, s3, scrape_plan, store
-from . import muos_collections, nextui_folders, onion_surprise, pico8, raofflineproxy, rocknix_collections, saves, spruce_collections, spruce_bootlogo, spruce_emu, spruce_os, spruce_fixes, spruce_hotkeys, spruce_retroarch, spruce_settings, spruce_syncthing, spruce_themes, spruce_wifi, surprise, themeart, ui, usersettings, vita
+from . import muos_collections, nextui_folders, onion_surprise, pico8, raofflineproxy, rocknix_collections, saves, spruce_collections, spruce_bootlogo, spruce_emu, spruce_os, spruce_fixes, spruce_hotkeys, spruce_retroarch, spruce_settings, spruce_syncthing, spruce_themes, spruce_wifi, splore, surprise, themeart, ui, usersettings, vita
 from . import collections as colls
 from . import guest as guests
 
@@ -1122,15 +1122,16 @@ def sync_card(args):
 
     relist()
     interactive = not (ui.ASSUME_YES or args.json) and ui.has_terminal()
-    def reload_changes():
-        """Pick up the card's games as saved now: refresh the mirror and the listings for the systems that changed."""
+    def reload_changes(stale=()):
+        """Pick up the card's games as saved now: refresh the mirror and the listings for the systems that changed.
+        stale: system ids whose storage folder changed this run, refreshed too."""
         nonlocal systems, saved
 
         def picks(s):
             return s.get("full_system"), store.listed(s)
         before = {s["bucket"]: picks(s) for s in systems}
         systems = synced(store.load_manifest([card])["systems"])  # with the card's games as they are saved now
-        changed = [s["bucket"] for s in systems if picks(s) != before.get(s["bucket"])]
+        changed = [s["bucket"] for s in systems if picks(s) != before.get(s["bucket"]) or s["bucket"] in stale]
         if changed and runtime._mirror_root:  # the new picks reach the mirror before they are copied from it
             root = runtime._mirror_root
             try:
@@ -1172,6 +1173,22 @@ def sync_card(args):
             guests.save_seed(card, seed)
             if reload:
                 reload_changes()
+
+    splore_failed = 0
+    pico8_system = next((s for s in systems if s["bucket"] == "pico8"), None)
+    if layout_name == "spruce" and not guest and pico8_system and (pico8_system.get("full_system") or store.listed(pico8_system)):
+        # the carts Splore cached on the card go to storage (and the new ones into the card's games) before the editor
+        held = inventory.cached("pico8/")
+        with mirroring.storage_reads():  # storage's pico8/ itself: the mirror holds only the carts the cards pick
+            splore_failed = splore.run(card, base, os.path.join(roms_dir, pico8_system["folders"][layout_name]),
+                                       pico8_system, args.dry_run)
+        if not args.dry_run:
+            stale = []
+            if pico8_system.get("full_system"):  # its picks don't change, but its listing and the mirror lack the carts just added
+                listings.pop("pico8", None)
+                # with no storage cache a mirror's listing lacks them too, so they wait for the next sync rather than fail
+                stale = ["pico8"] if inventory.cached("pico8/") != held else []
+            reload_changes(stale)
 
     if guest:  # no Surprise: the card editor opens on the picks seeded from the card
         reseed()
@@ -1225,9 +1242,9 @@ def sync_card(args):
         # x (systems_off) skips a system this sync, and a system no longer synced is never touched
         deselected = guests.deletions(seed, picked, store.systems_off(store.saved_card(card)) | (set(seed) - set(picked)))
     if not chosen and not deselected:
-        failed = 0
+        failed = splore_failed
         if not guest:
-            failed = install_apps(args.dry_run)
+            failed += install_apps(args.dry_run)
             if onion_surprise.write_list(card, layout_name, base, roms_dir, systems, args.dry_run) and clean_card:
                 clean._clean_root = base
             failed += stage_spruce(args.dry_run)
@@ -1738,7 +1755,7 @@ def sync_card(args):
     started = time.monotonic()
     failures = []
     disc_dirs = {os.path.normpath(dest_of(s)): disc_dir for s in chosen if available(s)} if disc_dir else None
-    failed = move_failed + removal_failed + downloads.run_downloads(rom_todo, "ROMs", "💿", roms_dir, failures, disc_dirs) + downloads.run_downloads(bios_todo, "BIOS", "🧠", bios_dir, failures)
+    failed = splore_failed + move_failed + removal_failed + downloads.run_downloads(rom_todo, "ROMs", "💿", roms_dir, failures, disc_dirs) + downloads.run_downloads(bios_todo, "BIOS", "🧠", bios_dir, failures)
     if apk_jobs:
         failed += downloads.run_downloads(apk_todo, "Android", "🤖", apk_dir, failures)
     if bezel_jobs:
