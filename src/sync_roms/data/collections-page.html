@@ -84,9 +84,10 @@ input:focus-visible, select:focus-visible, button:focus-visible, summary:focus-v
 }
 .pics {
   display: flex; gap: 8px; justify-content: center; align-items: center;
-  padding: 12px; background: var(--surface-2); height: 174px; overflow: hidden;
+  padding: 12px; background: var(--surface-2); overflow: hidden;
 }
-.pics img { height: 150px; width: auto; max-width: 33%; object-fit: contain; border-radius: 6px; }
+.pics img { display: block; height: 150px; width: auto; flex: none; border-radius: 6px; }
+@media (max-width: 400px) { .pics img { height: 130px; } }
 .body { padding: 12px 14px 4px; }
 .head { display: flex; align-items: flex-start; gap: 10px; }
 .name { margin: 0; font-size: 18px; overflow-wrap: anywhere; flex: 1; min-width: 0; }
@@ -114,6 +115,7 @@ ul.games { list-style: none; margin: 0; padding: 0 0 6px; }
   padding: 4px 10px; font-size: 13px; cursor: pointer; min-width: 64px;
 }
 .copy.done { border-color: var(--accent); color: var(--accent-text); }
+.nomatch { padding: 8px 14px; border-top: 1px solid var(--border); color: var(--muted); font-size: 14px; }
 .empty { color: var(--muted); text-align: center; padding: 48px 0; }
 [hidden] { display: none !important; }
 </style>
@@ -189,21 +191,27 @@ ul.games { list-style: none; margin: 0; padding: 0 0 6px; }
     area.style.opacity = "0";
     document.body.appendChild(area);
     area.select();
-    try { document.execCommand("copy"); } finally { document.body.removeChild(area); }
+    try {
+      return document.execCommand("copy") === true;
+    } catch (e) {
+      return false;
+    } finally {
+      document.body.removeChild(area);
+    }
   }
   function copy(text) {
     if (navigator.clipboard && navigator.clipboard.writeText) {
-      return navigator.clipboard.writeText(text).catch(function () { fallbackCopy(text); });
+      return navigator.clipboard.writeText(text).then(function () { return true; },
+        function () { return fallbackCopy(text); });
     }
-    fallbackCopy(text);
-    return Promise.resolve();
+    return Promise.resolve(fallbackCopy(text));
   }
   function copyButton(button, text, label) {
     var timer;
     button.addEventListener("click", function () {
-      copy(text()).then(function () {
-        button.textContent = "Copied";
-        button.classList.add("done");
+      copy(text()).then(function (ok) {
+        button.textContent = ok ? "Copied" : "Copy failed";
+        button.classList.toggle("done", ok);
         clearTimeout(timer);
         timer = setTimeout(function () {
           button.textContent = label;
@@ -242,7 +250,7 @@ ul.games { list-style: none; margin: 0; padding: 0 0 6px; }
     var card = el("article", "card");
     var art = c.art || {};
     var pics = el("div", "pics");
-    [["band", "band"], ["box", "box"], ["totk", "ToTK"]].forEach(function (kind) {
+    [["box", "box"], ["band", "band"], ["totk", "ToTK"]].forEach(function (kind) {
       if (!art[kind[0]]) return;
       var img = document.createElement("img");
       img.loading = "lazy";
@@ -274,6 +282,9 @@ ul.games { list-style: none; margin: 0; padding: 0 0 6px; }
       ul.appendChild(row);
       return {game: g, row: row};
     });
+    var nomatch = el("li", "nomatch", "No games match the filters");
+    nomatch.hidden = true;
+    ul.appendChild(nomatch);
     details.appendChild(ul);
     details.hidden = !rows.length;
     summary.addEventListener("click", function () {
@@ -283,7 +294,8 @@ ul.games { list-style: none; margin: 0; padding: 0 0 6px; }
     });
     card.appendChild(details);
     grid.appendChild(card);
-    cards.push({collection: c, card: card, meta: meta, details: details, summary: summary, rows: rows});
+    cards.push({collection: c, card: card, meta: meta, details: details, summary: summary, rows: rows,
+                 nomatch: nomatch});
   });
 
   var search = document.getElementById("search");
@@ -305,8 +317,12 @@ ul.games { list-style: none; margin: 0; padding: 0 0 6px; }
   }
   function writeHash() {
     var hash = params(current).toString();
-    if (hash) history.replaceState(null, "", "#" + hash);
-    else history.replaceState(null, "", location.pathname + location.search);
+    try {
+      if (hash) history.replaceState(null, "", "#" + hash);
+      else history.replaceState(null, "", location.pathname + location.search);
+    } catch (e) {
+      // Some browsers refuse replaceState on file:// pages; the page still works without the hash.
+    }
   }
   function applyHash() {
     var hash = new URLSearchParams(location.hash.slice(1));
@@ -347,10 +363,9 @@ ul.games { list-style: none; margin: 0; padding: 0 0 6px; }
         if (ok) passing++;
       });
       var picked = entry.collection.id === current;
-      if (picked) {
-        entry.rows.forEach(function (r) { r.row.hidden = false; });
-        passing = entry.rows.length;
-      }
+      var noneMatch = picked && filtering && passing === 0;
+      entry.nomatch.hidden = !noneMatch;
+      entry.details.hidden = !entry.rows.length && !noneMatch;
       var visible = picked || !filtering || passing > 0;
       entry.card.hidden = !visible;
       entry.details.open = picked || (filtering && passing > 0);
