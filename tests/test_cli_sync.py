@@ -1201,6 +1201,23 @@ class SyncSmokeTest(DataDir):
                     if games and not dry_run:  # staged after the card's other writes
                         self.assertGreater(order.index("os/spruceos/spruceV4.6.0.7z"), order.index("flush"))
 
+    def test_knulli_sync_writes_knulli_conf(self):
+        layouts = {"knulli": {"label": "Knulli", "roms_dir": "roms", "bios_dir": "bios"}}
+        manifest = {**MANIFEST, "layouts": layouts, "systems": [{**SYSTEM, "folders": {"knulli": "gba"}}]}
+        for args, wrote in (((), True), (("--guest",), False)):
+            with self.subTest(args=args), tempfile.TemporaryDirectory() as card:
+                conf = os.path.join(card, "system", "knulli.conf")
+                os.makedirs(os.path.dirname(conf))
+                with open(conf, "w") as f:
+                    f.write("a=1\n")
+                patches = ((store, {"load_manifest": lambda names=(), m=manifest: m}),
+                           (cli.picker, {"saved_setup": lambda *a: (None, "knulli")}),
+                           (cli, {"free_space": lambda path: 10**9}),
+                           (usersettings, {"load_settings": lambda: {"ra_username": "bob"}}))
+                self.run_sync(False, patches=patches, args=args, card_dir=card)
+                with open(conf) as f:
+                    self.assertEqual("global.retroachievements.username=bob" in f.read(), wrote)
+
     def test_spruce_sync_stages_boot_logos_for_the_cards_device(self):
         layouts = {"spruce": {"label": "Spruce", "roms_dir": "Roms", "bios_dir": "BIOS"}}
         device = {**next(d for d in store.repo_json("devices") if d["id"] == "miyoo-a30"), "systems": [SYSTEM["bucket"]], "note": ""}

@@ -91,8 +91,25 @@ class Apply(helpers.Cmd):
         self.addCleanup(os.chdir, old)
         code, _, err = self.run_cmd("config", "apply")
         self.assertEqual(code, 2)
-        self.assertIn("supports spruce cards and Android devices, not onion", err)
+        self.assertIn("supports spruce and Knulli cards and Android devices, not onion", err)
         self.resolve.assert_not_called()
+
+    def test_knulli_card_applies_knulli_conf(self):
+        base = self.card("k", "knulli")
+        conf = os.path.join(base, "system", "knulli.conf")
+        os.makedirs(os.path.dirname(conf))
+        with open(conf, "w") as f:
+            f.write("a=1\n")
+        usersettings.save_settings({"ra_username": "bob"})
+        code, out, _ = self.run_cmd("config", "apply", base, "--dry-run")
+        self.assertEqual(code, 0)
+        self.assertIn("would set", out)
+        with open(conf) as f:
+            self.assertEqual(f.read(), "a=1\n")
+        code, _, _ = self.run_cmd("config", "apply", base)
+        self.assertEqual(code, 0)
+        with open(conf) as f:
+            self.assertIn("global.retroachievements.username=bob\n", f.read())
 
     def test_apply_mounted_android_refused(self):
         base = self.card("a", "esde", "retroid-pocket-5")

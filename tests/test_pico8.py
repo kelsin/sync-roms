@@ -23,6 +23,18 @@ def zip_bytes():
     return buf.getvalue()
 
 
+class Remind(unittest.TestCase):
+    def test_remind_knulli_only(self):
+        for layout, shown in (("knulli", True), ("spruce", False)):
+            out = io.StringIO()
+            with contextlib.redirect_stdout(out):
+                pico8.remind(layout, ["/x/roms/pico8/pico-8_0.2.6b_raspi.zip"])
+                pico8.remind(layout, [])
+            self.assertEqual("Install Pico-8" in out.getvalue(), shown)
+            if shown:
+                self.assertIn("pico-8_0.2.6b_raspi.zip", out.getvalue())
+
+
 class Pico8(helpers.CardDir):
     FIELD = "pico8"
     card_path = helpers.CardDir.cp

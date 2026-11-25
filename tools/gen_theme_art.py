@@ -1257,6 +1257,75 @@ def r_type(p):  # the r-9 arrowhead side on, with the force pod at its nose
     p.o(30, 0, 0.8)
 
 
+def star_fox(p):  # arwing, seen from the front
+    for s in (1, -1):
+        p.pg([(s * x, y) for x, y in [(6, 4), (48, 14), (48, 20), (6, 18)]], 2)
+    for s in (1, -1):
+        root = [(24, 4 + 18 * 10 / 42), (36, 4 + 30 * 10 / 42)]
+        p.pg([(s * x, y) for x, y in [root[0], (34, -44), (40, -46), root[1]]], 1.5, opaque=True)
+    body = [(0, -22), (13, -6), (11, 26), (-11, 26), (-13, -6)]
+    p.pg(body, 4, opaque=True)
+    p.pg([(0, -14), (7, -4), (0, 6), (-7, -4)], 1.5)
+    p.o(0, 17, 4)
+
+
+def contra(p):  # the flame c: a swoosh of fire from a flaring head at upper right round to a thin tail at lower right
+    a0, a1, r = -36, -312, 33       # angles (0 right, 90 down): from the head over the top, down the left, to the tail
+
+    def at(a, rad):
+        return (rad * math.cos(math.radians(a)), rad * math.sin(math.radians(a)))
+
+    def lick(i, period):
+        """A flame tongue's profile: rising slowly from its root to a sharp tip, then dropping back."""
+        f = (i % period) / period
+        return f * f
+
+    outer, inner = [], []
+    n = 276
+    for i in range(n + 1):
+        t = i / n
+        a = a0 + (a1 - a0) * t
+        w = (3 + 27 * (1 - t) ** 1.3) / 2
+        fade = min(1, (n - i) / 40)
+        outer.append(at(a, r + w + (3 + 7 * (1 - t)) * fade * lick(n - i, 23)))
+        inner.append(at(a, r - w - 5 * fade * lick(n - i + 20, 46)))
+    head = [at(a0 + 3, r - 10), at(a0 + 16, r - 6), at(a0 + 5, r - 1), at(a0 + 20, r + 7), at(a0 + 5, r + 9),
+            at(a0 + 14, r + 22)]
+    p.pg(outer + inner[::-1] + head, 1.2)
+
+
+def ninja_gaiden(p):  # katana and a shuriken
+    a = 38
+    p.pg(turn([(-4, 8), (-4, -40), (4, -54), (4, 8)], a), 1)
+    p.l(turn([(0, 4), (0, -38)], a), 0)
+    p.pg(turn([(-13, 8), (13, 8), (13, 15), (-13, 15)], a), 2, opaque=True)
+    grip = turn([(-4.5, 15), (4.5, 15), (4.5, 46), (-4.5, 46)], a)
+    p.pg(grip, 1.5)
+    with p.inside(rounded(grip, 1.5)):
+        p.l(turn([(-6, 18), (6, 26), (-6, 34), (6, 42)], a), 0)
+    p.pg(star(14, 36, 14, 5, 4, -70), 0.8)
+    p.o(14, 36, 2.2)
+
+
+def gradius(p):  # vic viper, nose to the right, with two options behind
+    half = [(26, 0), (28, -3), (52, -3), (50, -10), (18, -10), (-12, -40), (-20, -40), (-12, -12), (-32, -12),
+            (-46, -24), (-51, -21), (-42, -5)]
+    p.pg(half + [(x, -y) for x, y in half[:0:-1]], 1.5)
+    p.o(6, 0, 9, 4.5)
+    for y in (-44, 44):
+        p.o(-44, y, 7)
+        p.o(-44, y, 2.2)
+        p.o(-44, y, 0.8)
+
+
+def metal_slug(p):  # the slug tank, side on
+    p.rr(14, -14, 52, -7, 2)
+    p.pg([(-36, 18), (-31, 2), (28, 2), (38, 18)], 2)
+    p.path(arc(-4, 2, 22, 18, 180, 360), True, opaque=True)
+    p.rr(-12, -22, 0, -16, 2, opaque=True)
+    p.path(rounded([(-40, 18), (38, 18), (38, 40), (-40, 40)], 10), True, opaque=True)
+    for x in (-26, -9, 8, 25):
+        p.o(x, 29, 6)
 def shin_megami_tensei(p):  # the demon summoning circle: a pentagram in a double ring
     p.o(0, 0, 46)
     p.o(0, 0, 38)
@@ -1378,6 +1447,11 @@ ART = {
     "samurai-shodown": (samurai_shodown, (120, 40, 50), -30, 1.12, (-14, 14)),
     "fatal-fury": (fatal_fury, (60, 100, 150), -4, 1.0, (-16, 0)),
     "r-type": (r_type, (108, 58, 88), -6, 0.85, (-30, 22)),
+    "star-fox": (star_fox, (46, 92, 168), -6, 1.0, (-10, 0)),
+    "contra": (contra, (44, 52, 104), 0, 0.9, (-28, 0)),
+    "ninja-gaiden": (ninja_gaiden, (92, 40, 110), 0, 1.0, (-6, 0)),
+    "gradius": (gradius, (34, 74, 120), -6, 0.9, (-22, 0)),
+    "metal-slug": (metal_slug, (120, 110, 56), -4, 1.0, (-14, 0)),
     "shin-megami-tensei": (shin_megami_tensei, (150, 36, 48), -6, 1.0, (-10, 0)),
     "kingdom-hearts": (kingdom_hearts, (60, 84, 170), -32, 0.88, (-30, -6)),
     "mana": (mana, (60, 150, 96), -5, 1.0, (-8, 0)),

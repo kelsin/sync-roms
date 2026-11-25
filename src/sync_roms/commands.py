@@ -11,7 +11,7 @@ import sys
 import webbrowser
 
 from . import collections as colls
-from . import bezels, budget, cardedit, cardshare, collectionedit, external, guest, inventory, m3u, names, picker, runtime, s3, setedit, spruce_settings, store, surprise, themeart, ui, usersettings
+from . import bezels, budget, cardedit, cardshare, collectionedit, external, guest, inventory, knulli_conf, m3u, names, picker, runtime, s3, setedit, spruce_settings, store, surprise, themeart, ui, usersettings
 
 
 UNKNOWN_SHOWN = 8  # device ids named in an "unknown device" error
@@ -733,7 +733,7 @@ def config_value(name, text):
     return text
 
 
-IMPORTERS = {"spruce": spruce_settings.import_settings}  # card layout -> importer(card folder): saves the card's settings in settings.json
+IMPORTERS = {"spruce": spruce_settings.import_settings, "knulli": knulli_conf.import_settings}  # card layout -> importer(card folder): saves the card's settings in settings.json
 
 
 def import_settings(card):
