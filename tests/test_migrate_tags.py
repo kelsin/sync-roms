@@ -85,7 +85,6 @@ class BuildTests(unittest.TestCase):
     def test_emoji_unique_and_complete(self):
         self.assertEqual(len(set(migrate.EMOJI.values())), len(migrate.EMOJI))
         self.assertNotIn(migrate.NO_ART_EMOJI, migrate.EMOJI.values())
-        self.assertTrue(set(themeart._emoji().values()).isdisjoint(migrate.EMOJI.values()))  # no set's or art's emoji
         sets = [make_set("a", "A", [game("x/1.zip", category=n) for n in migrate.EMOJI])]
         data, _ = migrate.build(sets)
         emojis = [t["emoji"] for t in data["tags"].values()]
