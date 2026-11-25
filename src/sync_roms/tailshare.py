@@ -129,8 +129,9 @@ def _start_server():
     """Start the page server on a free port, save its state, and wait for it to listen. Returns the port."""
     port = _free_port()
     try:
-        proc = subprocess.Popen([sys.executable, "-m", "http.server", "--bind", "127.0.0.1", "--directory", SHARE_DIR(), str(port)],
-                                stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
+        proc = subprocess.Popen([sys.executable, "-I", "-m", "http.server", "--bind", "127.0.0.1", "--directory", SHARE_DIR(), str(port)],
+                                stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True,
+                                cwd=SHARE_DIR())
     except OSError:
         ui.fail("The local page server didn't start", 1)
     store.write_json(STATE_FILE(), {"pid": proc.pid, "port": port})

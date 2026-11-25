@@ -91,10 +91,11 @@ class Share(Tailscale):
         self.assertEqual(self.page, os.path.join(self.tmp.name, "share", "collections", "index.html"))
         self.assertIn(SERVE, self.argvs())
         [(argv, kw)] = self.popens
-        self.assertEqual(argv, [sys.executable, "-m", "http.server", "--bind", "127.0.0.1", "--directory",
+        self.assertEqual(argv, [sys.executable, "-I", "-m", "http.server", "--bind", "127.0.0.1", "--directory",
                                 tailshare.SHARE_DIR(), str(PORT)])
         self.assertEqual(kw, {"stdin": subprocess.DEVNULL, "stdout": subprocess.DEVNULL,
-                              "stderr": subprocess.DEVNULL, "start_new_session": True})
+                              "stderr": subprocess.DEVNULL, "start_new_session": True,
+                              "cwd": tailshare.SHARE_DIR()})
         self.assertEqual(self.read("share-server.json"), {"pid": 4321, "port": PORT})
 
     def test_share_keeps_existing_page_server_and_serve(self):
