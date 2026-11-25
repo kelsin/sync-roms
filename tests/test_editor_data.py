@@ -254,6 +254,8 @@ class GenreTags(unittest.TestCase):
             self.assertIsInstance(ids, list, genre)
             self.assertTrue(ids, genre)
             self.assertTrue(all(isinstance(i, str) and i == store.slug(i) for i in ids), genre)
+        self.assertEqual(data["Role Playing Game"], ["rpg"])
+        self.assertEqual(data["Simulation / Life"], ["life-sim", "simulation"])
 
 
 if __name__ == "__main__":

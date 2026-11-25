@@ -40,6 +40,14 @@ GENERIC = {"Other", "Other 16-bit", "Other 32-bit and Later", "Other 8-bit", "Ot
            "Deception", "Card, Board & Sports"}
 FT_GENRE = {"Action", "Action RPG", "Adventure", "Fighting & Brawler", "RPG", "Rhythm & Idol", "Shooter", "Simulation"}
 
+# Genre tags no set provides: created with no games; genre-tags.json maps genres to them.
+EXTRA_TAGS = {
+    "rpg": {"name": "Role-Playing Games", "emoji": "⚔️"},
+    "action-adventure": {"name": "Action Adventure", "emoji": "🤺"},
+    "simulation": {"name": "Simulation", "emoji": "🛠️"},
+    "educational": {"name": "Educational", "emoji": "🎓"},
+}
+
 # The emoji of the tags that don't come from a set, by tag name. Set tags keep their set's emoji.
 EMOJI = {
     "Ace Attorney": "⚖️",
@@ -290,6 +298,13 @@ def build(sets, emoji=None):
         data["tags"][t["id"]] = tag
         for bucket in t["games"]:
             data["games"].setdefault(bucket, {"tags": []})["tags"].append(t["id"])
+    for tag_id, extra in EXTRA_TAGS.items():
+        if extra["emoji"] in used:
+            raise ValueError(f"the tags {used[extra['emoji']]!r} and {extra['name']!r} share the emoji {extra['emoji']}")
+        if tag_id in data["tags"]:
+            raise ValueError(f"two tags have the id {tag_id!r}")
+        used[extra["emoji"]] = extra["name"]
+        data["tags"][tag_id] = dict(extra)
     for rec in data["games"].values():
         rec["tags"] = sorted(set(rec["tags"]))
     for s in sets:

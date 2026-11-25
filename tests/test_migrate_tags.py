@@ -4,6 +4,7 @@ import json
 import os
 import sys
 import unittest
+from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import helpers  # noqa: E402
@@ -58,14 +59,14 @@ class BuildTests(unittest.TestCase):
         sets = [make_set("a", "A", [game("x/1.zip", category="Saturn"), game("x/2.zip", category="Other"),
                                     game("x/3.zip", category="RPG")])]
         data, report = migrate.build(sets, {})
-        self.assertEqual(sorted(data["tags"]), ["a"])
+        self.assertEqual(sorted(set(data["tags"]) - set(migrate.EXTRA_TAGS)), ["a"])
         self.assertEqual(sorted(r["name"] for r in report["pruned"]), ["Other", "RPG", "Saturn"])
 
     def test_alias_merges(self):
         sets = [make_set("mario", "Mario", [game("x/1.zip", series="Super Mario")]),
                 make_set("vn", "Visual Novels", [game("x/2.zip", category="Visual Novel")])]
         data, report = migrate.build(sets, {})
-        self.assertEqual(sorted(data["tags"]), ["mario", "vn"])
+        self.assertEqual(sorted(set(data["tags"]) - set(migrate.EXTRA_TAGS)), ["mario", "vn"])
         self.assertEqual(data["games"]["x/1.zip"]["tags"], ["mario"])
         self.assertEqual({r["name"]: r["detail"] for r in report["merged"]},
                          {"Super Mario": "Mario", "Visual Novel": "Visual Novels"})
@@ -91,6 +92,24 @@ class BuildTests(unittest.TestCase):
         self.assertEqual(len(set(emojis)), len(emojis))
         with self.assertRaises(ValueError):
             migrate.build([make_set("a", "A", [game("x/1.zip", category="Nope")])])
+
+    def test_extra_tags_have_no_games(self):
+        data, _ = migrate.build([make_set("a", "A", many("x", 1))], {})
+        self.assertEqual(data["tags"]["rpg"], {"name": "Role-Playing Games", "emoji": "\u2694\ufe0f"})
+        self.assertEqual(data["tags"]["action-adventure"], {"name": "Action Adventure", "emoji": "\U0001F93A"})
+        self.assertEqual(data["tags"]["simulation"], {"name": "Simulation", "emoji": "\U0001F6E0\ufe0f"})
+        self.assertEqual(data["tags"]["educational"], {"name": "Educational", "emoji": "\U0001F393"})
+        self.assertFalse({i for rec in data["games"].values() for i in rec["tags"]} & set(migrate.EXTRA_TAGS))
+
+    def test_extra_tag_emoji_clash_raises(self):
+        a = make_set("a", "A", many("x", 1), art="favorites")
+        with mock.patch.object(themeart, "art_emoji", return_value=migrate.EXTRA_TAGS["rpg"]["emoji"]):
+            with self.assertRaises(ValueError):
+                migrate.build([a], {})
+
+    def test_extra_tag_id_clash_raises(self):
+        with self.assertRaises(ValueError):
+            migrate.build([make_set("rpg", "RPG Set", many("x", 1), art="shmups")], {})
 
 
 class ReadSetsTests(helpers.StorageFolder):
