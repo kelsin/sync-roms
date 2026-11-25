@@ -9,7 +9,7 @@ from unittest import mock
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 import helpers  # noqa: E402,F401
-from sync_roms import flash, format_card, picker, store, ui  # noqa: E402
+from sync_roms import flash, format_card, picker, runtime, store, ui  # noqa: E402
 
 CARD = flash.Disk("disk4", 64_000_000_000, "SD Card Reader", ("SHARE",))
 CARDS = {"MIYOOFLIP": {}, "Odin SD": {}, "averyverylongname": {}}
@@ -23,7 +23,8 @@ def patched(cards=CARDS, layouts=LAYOUTS):
 
 class Helpers(unittest.TestCase):
     def choices(self, fs, cards=CARDS):
-        with patched(cards)[0], patched(cards)[1]:
+        cards_patch, layouts_patch = patched(cards)
+        with cards_patch, layouts_patch:
             return format_card.label_choices(fs)
 
     def test_label_choices(self):
@@ -39,6 +40,9 @@ class Helpers(unittest.TestCase):
         self.assertIsNotNone(format_card.label_problem("A" * 12, "FAT32"))
         self.assertIsNone(format_card.label_problem("A" * 15, "exFAT"))
         self.assertIsNotNone(format_card.label_problem("  ", "exFAT"))
+        for fs in ("exFAT", "FAT32"):
+            for ch in ("\t", "\x00", "\x7f"):
+                self.assertIsNotNone(format_card.label_problem(f"A{ch}B", fs))
 
     def test_erase_command(self):
         self.assertEqual(format_card.erase_command("disk4", "FAT32", "SPRUCE"),
@@ -108,12 +112,18 @@ class Run(unittest.TestCase):
         self.assertEqual(self.erased(), [])
 
     def test_wrong_confirmation(self):
-        self.picks = [0, 1, 3]
         for answer in ("Disk4", ""):
             self.picks, self.answers = [0, 1, 3], [answer]
             self.assertEqual(self.format(), 0)
             self.assertEqual(self.erased(), [])
             self.assertIn("Not formatted", self.err)
+
+    def test_root_disks_are_excluded(self):
+        self.picks = [None]
+        self.disks_of.side_effect = lambda path: {"disk9"} if path == "/data" else {"disk0"}
+        with mock.patch.object(runtime, "ROOT", "/data"):
+            self.assertEqual(self.format(), 0)
+        self.assertEqual(self.external_disks.call_args.args[0], {"disk0", "disk9"})
 
     def test_dry_run(self):
         self.picks = [0, 1, 3]

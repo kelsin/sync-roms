@@ -6,7 +6,7 @@ from . import flash, picker, runtime, store, ui
 
 FILESYSTEMS = [("exFAT", "ExFAT"), ("FAT32", "FAT32")]  # shown name, diskutil name
 MAX_LENGTH = {"exFAT": 15, "FAT32": 11}
-BAD_CHARS = {"exFAT": r'["*/:<>?\\|]', "FAT32": r'["*+,./:;<=>?\[\\\]|]'}
+BAD_CHARS = {"exFAT": r'["*/:<>?\\|\x00-\x1f\x7f]', "FAT32": r'["*+,./:;<=>?\[\\\]|\x00-\x1f\x7f]'}
 TYPE_LABEL = "✏️  Type a label…"
 
 
