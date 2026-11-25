@@ -1293,35 +1293,47 @@ class SyncSmokeTest(DataDir):
     PICO8 = {"name": "PICO-8", "bucket": "pico8", "folders": {"spruce": "PICO8", "onion": "PICO"}, "bios": {"files": []},
              "games": [{"bucket": "pico8/a-0.p8.png"}]}
 
-    def splore_sync(self, layout, args=(), result=0, mirror=None):
+    def splore_sync(self, layout, args=(), result=0, mirror=None, dry_run=False):
         """Sync a card of layout with splore.run mocked: (exit code, [(its args, what had run before it, the mirror
-        it read)], the card). mirror: the sync's local mirror folder."""
+        it read)], the card, how often the card's games were loaded after it). mirror: the sync's local mirror folder."""
         manifest = {**MANIFEST, "layouts": {layout: {"label": layout, "roms_dir": "Roms", "bios_dir": "BIOS"}},
                     "systems": [self.PICO8]}
-        order, calls, cards = [], [], []
+        order, calls, cards, loads = [], [], [], []
 
         def run(*a):
             calls.append((a, list(order), cli.runtime._mirror_root))
             return result
-        patches = ((store, {"load_manifest": lambda names=(), m=manifest: m, "load_cards": REAL_LOAD_CARDS}),
+
+        def load_manifest(names=()):
+            if calls:
+                loads.append(names)
+            return manifest
+        patches = ((store, {"load_manifest": load_manifest, "load_cards": REAL_LOAD_CARDS}),
                    (cli.picker, {"saved_setup": lambda *a: (None, layout)}),
                    (cli, {"free_space": lambda path: 10**9}),
                    (cli.splore, {"run": run}),
                    (cli.runtime, {"_mirror_root": mirror}),
                    (cli.surprise, {"run_surprise": lambda *a, **k: order.append("editor") or []}))
-        code = self.run_sync(False, patches=patches, args=args, after=cards.append)
-        return code, calls, cards[0]
+        code = self.run_sync(dry_run, patches=patches, args=args, after=cards.append)
+        return code, calls, cards[0], len(loads)
 
     def test_spruce_sync_runs_splore(self):
         for result in (0, 1):
             with self.subTest(result=result):
-                code, calls, card = self.splore_sync("spruce", result=result, mirror=self.path("mirror"))
+                code, calls, card, loads = self.splore_sync("spruce", result=result, mirror=self.path("mirror"))
                 self.assertEqual(code, result)  # its failure is the sync's
                 [(args, before, mirror)] = calls
                 self.assertEqual(args[:3], (os.path.basename(card), card, os.path.join(card, "Roms", "PICO8")))
                 self.assertEqual((args[3]["bucket"], args[4]), ("pico8", False))
                 self.assertEqual(before, [])  # before the card editor
                 self.assertIsNone(mirror)  # storage itself, never the mirror
+                self.assertGreater(loads, 0)  # the card's picks reloaded
+        with self.subTest(dry_run=True):
+            code, calls, card, loads = self.splore_sync("spruce", dry_run=True)
+            self.assertEqual(code, 0)
+            [(args, _, _)] = calls
+            self.assertIs(args[4], True)
+            self.assertEqual(loads, 0)  # nothing to reload: a dry run writes nothing
 
     def test_guest_and_other_layouts_skip_splore(self):
         for layout, args in (("spruce", ("--guest",)), ("onion", ())):
@@ -1331,10 +1343,19 @@ class SyncSmokeTest(DataDir):
     def test_new_splore_cart_is_synced_to_the_card(self):
         root = storage_sets(self, {})
         touch(os.path.join(root, "pico8", "a-0.p8.png"), bbs._PNG + b"a")
-        for cache, picks in ((c, p) for c in (False, True) for p in ([{"title": "A", "bucket": "pico8/a-0.p8.png"}], {"full_system": True})):
-            with self.subTest(cache=cache, full_system=isinstance(picks, dict)):
+        listed = [{"title": "A", "bucket": "pico8/a-0.p8.png"}]
+        # a mirror (only the carts the cards pick, read in place of storage) is modelled over the storage folder
+        cases = [(cache, mirror, picks) for cache, mirror in ((False, False), (True, False), (False, True))
+                 for picks in (listed, {"full_system": True})]
+        for cache, mirror, picks in cases:
+            with self.subTest(cache=cache, full_system=isinstance(picks, dict), mirror=mirror):
                 with contextlib.suppress(FileNotFoundError):
                     os.remove(os.path.join(root, "pico8", "n-0.p8.png"))
+                mirror_root = None
+                if mirror:
+                    mirror_root = self.enterContext(tempfile.TemporaryDirectory())
+                    touch(os.path.join(mirror_root, cli.runtime.MIRROR_MARKER))
+                    touch(os.path.join(mirror_root, "pico8", "a-0.p8.png"), bbs._PNG + b"a")
                 with contextlib.suppress(FileNotFoundError):
                     os.remove(inventory.path())
                 inventory.reset()
@@ -1351,7 +1372,8 @@ class SyncSmokeTest(DataDir):
                            (usersettings, {"apply_settings": lambda: None}),  # storage stays the folder above
                            (cli.picker, {"saved_setup": lambda *a: (None, "spruce")}),
                            (cli, {"free_space": lambda path: 10**9}),
-                           (cli.downloads, {"run_downloads": downloads.run_downloads}))
+                           (cli.downloads, {"run_downloads": downloads.run_downloads}),
+                           (cli.runtime, {"_mirror_root": mirror_root}))
                 code = self.run_sync(False, prepare=prepare, patches=patches, after=lambda card: found.append(
                     os.path.isfile(os.path.join(card, "Roms", "PICO8", "n-0.p8.png"))))
                 out = self.out.getvalue() + self.err.getvalue()

@@ -1178,16 +1178,21 @@ def sync_card(args):
     pico8_system = next((s for s in systems if s["bucket"] == "pico8"), None)
     if layout_name == "spruce" and not guest and pico8_system and (pico8_system.get("full_system") or store.listed(pico8_system)):
         # the carts Splore cached on the card go to storage (and the new ones into the card's games) before the editor
-        held = inventory.cached("pico8/")
+        full = pico8_system.get("full_system") and not args.dry_run
+
+        def held():
+            """Storage's pico8/ names (None when it can't be listed): a full system's picks don't change when carts are
+            added, so this tells whether its listing and the mirror need refreshing."""
+            try:
+                return set(inventory.files("pico8/", sizes=False))
+            except s3.ERRORS:
+                return None
         with mirroring.storage_reads():  # storage's pico8/ itself: the mirror holds only the carts the cards pick
+            before = held() if full else None
             splore_failed = splore.run(card, base, os.path.join(roms_dir, pico8_system["folders"][layout_name]),
                                        pico8_system, args.dry_run)
+            stale = ["pico8"] if full and (before is None or held() != before) else []
         if not args.dry_run:
-            stale = []
-            if pico8_system.get("full_system"):  # its picks don't change, but its listing and the mirror lack the carts just added
-                listings.pop("pico8", None)
-                # with no storage cache a mirror's listing lacks them too, so they wait for the next sync rather than fail
-                stale = ["pico8"] if inventory.cached("pico8/") != held else []
             reload_changes(stale)
 
     if guest:  # no Surprise: the card editor opens on the picks seeded from the card
