@@ -1171,6 +1171,66 @@ def horses(p):  # horse's head in a bridle
     p.o(-33, 17, 3)
 
 
+def professor_layton(p):  # the professor's top hat
+    p.o(0, 24, 50, 13)
+    crown = (arc(0, -40, 24, 6, 180, 360) + [(20, 24)] + arc(0, 24, 20, 6, 0, 180)[1:-1] + [(-20, 24)])
+    p.path(crown, True, opaque=True)
+    p.path(arc(0, -40, 24, 6, 0, 180))
+    with p.inside(crown):
+        for y in (2, 13):
+            p.path(arc(0, y, 30, 6, 0, 180))
+
+
+def mortal_kombat(p):  # the dragon medallion
+    ring = arc(0, 0, 36, 36, 0, 354)
+    p.o(0, 0, 44)
+    p.path(ring, True)
+    head = rounded([(14, 46), (2, 18), (-14, 14), (-28, 10), (-31, 5), (-14, 2), (-33, -2), (-29, -10), (-22, -12),
+                    (-8, -14), (0, -20), (12, -28), (8, -14), (18, -12), (26, -10), (22, -2), (32, 0), (27, 8),
+                    (38, 10), (33, 17), (50, 22), (46, 46)], 2)
+    with p.inside(ring):
+        p.path(head, True)
+    p.pg([(-16, -8), (-6, -9), (-10, -5)], 1)
+    p.o(-27, -6, 1.6)
+
+
+def tekken(p):  # the mishima lightning
+    p.pg([(10, -50), (-24, 2), (-4, 2), (-16, 48), (26, -10), (6, -10), (22, -50)], 1.5)
+    for a, b in (((-24, -30), (-36, -38)), ((-30, -12), (-44, -14)), ((28, 8), (38, 14)), ((26, 24), (32, 34))):
+        p.l([a, b])
+
+
+def samurai_shodown(p):  # a katana and a falling sakura blossom
+    blade = spline([(-12, -6), (14, -7), (36, -11), (54, -20)]) + spline([(54, -20), (40, -4), (14, 3), (-12, 3)])[1:]
+    p.path(blade, True)
+    with p.inside(blade):
+        p.c([(-14, -2), (14, -3), (36, -8), (56, -18)])
+    p.rr(-18, -14, -12, 11, 2)
+    grip = [(-18, -6), (-52, -4), (-52, 5), (-18, 3)]
+    p.pg(grip, 2)
+    with p.inside(grip):
+        for x in range(-47, -18, 9):
+            p.l([(x - 5, -8), (x + 5, 8)], 0)
+            p.l([(x + 5, -8), (x - 5, 8)], 0)
+    petal = [(0, -3), (-6, -8), (-8, -15), (-4, -21), (0, -15), (4, -21), (8, -15), (6, -8)]
+    for a in range(0, 360, 72):
+        p.pg([(x + 4, y - 34) for x, y in turn(petal, a)], 1.5)
+    p.o(4, -34, 5, opaque=True)
+    p.o(4, -34, 0.8)
+    p.pg([(x + 16, y + 28) for x, y in turn(petal, 150, 0, -10)], 1.5)
+
+
+def fatal_fury(p):  # the hungry wolf
+    half = [(0, -22), (9, -26), (26, -50), (32, -22), (44, -6), (38, 2), (44, 14), (30, 20), (16, 36), (0, 46)]
+    head = half + mirror(half[::-1])[1:-1]
+    p.pg(head, 2.5)
+    for s in (1, -1):
+        p.pg([(14 * s, -27), (24 * s, -42), (27 * s, -25)], 1.5)
+        p.pg([(6 * s, -6), (20 * s, -12), (18 * s, -4)], 1.2)
+        p.c([(6 * s, -6), (8 * s, 10), (7 * s, 26)])
+    p.pg([(-7, 26), (7, 26), (0, 34)], 2)
+
+
 # id: (drawing, band colour, rotation in degrees, scale, offset in px)
 ART = {
     "adventure": (adventure, (44, 146, 118), -6, 1.0, (0, 0)),
@@ -1221,6 +1281,11 @@ ART = {
     "phantasy-star": (phantasy_star, (64, 88, 176), -5, 0.92, (-12, 0)),
     "ys": (ys, (38, 112, 124), -6, 0.9, (-14, 0)),
     "horses": (horses, (150, 96, 60), -5, 0.95, (-34, 0)),
+    "professor-layton": (professor_layton, (150, 78, 44), -6, 1.0, (-10, 0)),
+    "mortal-kombat": (mortal_kombat, (140, 32, 28), -4, 1.0, (-10, 0)),
+    "tekken": (tekken, (96, 52, 150), 8, 1.0, (-16, 0)),
+    "samurai-shodown": (samurai_shodown, (120, 40, 50), -30, 1.12, (-14, 14)),
+    "fatal-fury": (fatal_fury, (60, 100, 150), -4, 1.0, (-16, 0)),
     "pac-man": (pac_man, (28, 36, 96), -6, 1.0, (-12, 0)),
     "tetris": (tetris, (40, 170, 200), -5, 1.0, (-36, 0)),
     "dragon-quest": (dragon_quest, (60, 130, 220), -5, 1.0, (-6, 0)),
