@@ -10,7 +10,7 @@ import sys
 import webbrowser
 
 from . import collections as colls
-from . import budget, cardedit, cardshare, collectionedit, external, guest, inventory, m3u, names, picker, runtime, s3, setedit, spruce_settings, store, surprise, themeart, ui, usersettings
+from . import bezels, budget, cardedit, cardshare, collectionedit, external, guest, inventory, m3u, names, picker, runtime, s3, setedit, spruce_settings, store, surprise, themeart, ui, usersettings
 
 
 UNKNOWN_SHOWN = 8  # device ids named in an "unknown device" error
@@ -1139,9 +1139,15 @@ def guide_cmd(args):
     cards = [{"name": n, "device": c.get("device"), "layout": c.get("layout")}
              for n, c in store.load_cards().items() if isinstance(c, dict) and not c.get("guest")]
     block = json.dumps(cards).replace("<", "\\u003c")
+    try:
+        bezel_devices = bezels.devices()
+    except (*s3.ERRORS, SystemExit):  # storage unset or unreachable: the guide still opens
+        bezel_devices = []
+    bezel_block = json.dumps(bezel_devices).replace("<", "\\u003c")
     path = os.path.join(store.cache_dir(), "setup-guide.html")
     os.makedirs(store.cache_dir(), exist_ok=True)
-    store.write_text(path, html.replace('id="cards-data">[]<', f'id="cards-data">{block}<', 1))
+    html = html.replace('id="cards-data">[]<', f'id="cards-data">{block}<', 1)
+    store.write_text(path, html.replace('id="bezels-data">[]<', f'id="bezels-data">{bezel_block}<', 1))
     print(path)
     if not webbrowser.open(pathlib.Path(path).as_uri()):
         ui.fail("Couldn't open a browser: open the file above yourself", 1)
