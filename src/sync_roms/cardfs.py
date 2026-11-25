@@ -149,6 +149,14 @@ def text(path):
     return data
 
 
+def raw_text(path):
+    """path's text with its own line ends (CRLF kept), including write_text's pending edit while caching();
+    raises OSError when it can't be read."""
+    if _texts is not None and path in _texts:
+        return _texts[path]
+    return read(path).decode("utf-8")
+
+
 def _put(path, new):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     store.replace_file(path, new, newline="\n")

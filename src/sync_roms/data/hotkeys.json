@@ -1,0 +1,23 @@
+{
+  "note": "spruceOS's hotkey defaults with quit on Start, so spruce cards change only quit.",
+  "scheme": [
+    {"action": "Show the RetroArch menu", "button": "X", "retroarch": "input_menu_toggle"},
+    {"action": "Save state", "button": "R1", "retroarch": "input_save_state"},
+    {"action": "Load state", "button": "L1", "retroarch": "input_load_state"},
+    {"action": "Previous slot", "button": "D-pad Left", "retroarch": "input_state_slot_decrease"},
+    {"action": "Next slot", "button": "D-pad Right", "retroarch": "input_state_slot_increase"},
+    {"action": "Fast-forward (toggle)", "button": "R2", "retroarch": "input_toggle_fast_forward"},
+    {"action": "Slow motion (toggle)", "button": "L2", "retroarch": "input_toggle_slowmotion"},
+    {"action": "Show FPS", "button": "Y", "retroarch": "input_fps_toggle"},
+    {"action": "Quit", "button": "Start", "retroarch": "input_exit_emulator"}
+  ],
+  "android": {"Select": "109", "Start": "108", "X": "99", "Y": "100", "L1": "102", "R1": "103", "L2": "104", "R2": "105",
+              "D-pad Left": "h0left", "D-pad Right": "h0right"},
+  "android_clear": ["input_hold_fast_forward", "input_hold_slowmotion", "input_rewind", "input_pause_toggle",
+                    "input_frame_advance", "input_reset", "input_screenshot", "input_shader_next", "input_shader_prev",
+                    "input_shader_toggle", "input_disk_eject_toggle", "input_disk_next", "input_disk_prev",
+                    "input_close_content", "input_audio_mute", "input_osk_toggle", "input_game_focus_toggle",
+                    "input_netplay_game_watch", "input_cheat_toggle", "input_movie_record_toggle",
+                    "input_recording_toggle", "input_streaming_toggle", "input_ai_service", "input_volume_up",
+                    "input_volume_down", "input_overlay_next", "input_grab_mouse_toggle", "input_toggle_fullscreen"]
+}

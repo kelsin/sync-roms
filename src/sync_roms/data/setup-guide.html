@@ -639,121 +639,129 @@ function shaderPickRows(c, ctx) {
 }
 // Hotkeys: one scheme on every device. HOTKEY is each layout's own hotkey button (held, then the second button).
 const HOTKEY = { esde: "Select", emudeck: "Select", knulli: "Function", muos: "Menu", onion: "Menu", allium: "Menu", spruce: "Select", nextui: "Menu" };
+// The scheme in hotkeys.json (a test checks they match): [action, second button].
 const HOTKEY_SCHEME = [
   ["Show the RetroArch menu", "X"],
-  ["Save state", "R2"],
-  ["Load state", "L2"],
-  ["Save state slot down / up", "D-pad Left / D-pad Right"],
-  ["Fast-forward (only while held)", "R1"],
+  ["Save state", "R1"],
+  ["Load state", "L1"],
+  ["Previous slot", "D-pad Left"],
+  ["Next slot", "D-pad Right"],
+  ["Fast-forward (toggle)", "R2"],
+  ["Slow motion (toggle)", "L2"],
   ["Show FPS", "Y"],
-  ["Quit the game", "Start"],
+  ["Quit", "Start"],
 ];
-const retroarchBinds = h => [
-  ["Settings > Input > Hotkeys > Hotkey Enable", "Select", "On Android Select/Back is the Back key; this is what EmuDeck's Android config uses too."],
+// RetroArch's own menu, set by hand (EmuDeck, ES-DE on Windows).
+const RETROARCH_STEPS = [
+  ["Settings > Input > Hotkeys > Hotkey Enable", "Select"],
   ["Settings > Input > Hotkeys > Menu Toggle", "X"],
-  ["Settings > Input > Hotkeys > Save State", "R2", "Bind by pressing the button; a trigger binds as an axis, which is fine."],
-  ["Settings > Input > Hotkeys > Load State", "L2"],
+  ["Settings > Input > Hotkeys > Save State", "R1"],
+  ["Settings > Input > Hotkeys > Load State", "L1"],
   ["Settings > Input > Hotkeys > State Slot -", "D-pad Left"],
   ["Settings > Input > Hotkeys > State Slot +", "D-pad Right"],
-  ["Settings > Input > Hotkeys > Fast-Forward (Hold)", "R1", "Leave Fast-Forward (Toggle) unbound so fast-forward only runs while held."],
+  ["Settings > Input > Hotkeys > Fast-Forward (Toggle)", "R2"],
+  ["Settings > Input > Hotkeys > Fast-Forward (Hold)", "unbound"],
+  ["Settings > Input > Hotkeys > Slow-Motion (Toggle)", "L2"],
   ["Settings > Input > Hotkeys > Show FPS (Toggle)", "Y"],
-  ["Settings > Input > Hotkeys > Quit RetroArch", "Start", "Closes RetroArch and returns to the frontend."],
-  ["Main Menu > Configuration File > Save Current Configuration", "run once after binding", "Hotkeys live in the global retroarch.cfg."],
+  ["Settings > Input > Hotkeys > Quit RetroArch", "Start"],
+  ["Main Menu > Configuration File > Save Current Configuration", null],
 ];
-// What each layout's own hotkey layer does by default and what to change to reach HOTKEY_SCHEME.
-// `src` marks what could not be confirmed on the vendor's docs, to check on the device.
+const KNULLI_HOTKEYS = "Start > Game Settings > Per System Advanced Configuration > (system) > Controls > Hotkeys";
+// Per layout: `auto` (what sets it, instead of steps), `steps` ([where, set]; set null for a step that is run, not set),
+// `differs` ({scheme button: what it does instead on this layout}), `extras` (other shortcuts the layout keeps),
+// `unknown` (nothing recorded yet for this layout), `note` (what to do when there are no steps, instead of the default text),
+// `windows` (replaces the entry on the Windows platform). hotkeyLayout(ctx) picks the entry.
+function hotkeyLayout(ctx) {
+  const l = HOTKEY_LAYOUT[ctx.layout];
+  return ctx.platform === "windows" && l.windows ? l.windows : l;
+}
 const HOTKEY_LAYOUT = {
-  esde: { rows: () => retroarchBinds(), other: [
-    "Nothing else on a gamepad: RetroArch's other hotkeys have no default controller binding. A keyboard still has RetroArch's defaults (F1 menu, F2 save, F4 load, F6/F7 slot, L hold fast-forward, F3 FPS, Esc quit), so leave those alone.",
-    "Optional extras to bind in the same Hotkeys menu if wanted: Reset, Pause, Rewind (hold), Screenshot, Slow Motion, Next/Previous Shader, Disk Next.",
-    "Optional safety net: Settings > Input > Menu Toggle Gamepad Combo (L3+R3) opens the menu even if Hotkey Enable is misbound.",
-  ] },
-  emudeck: { rows: () => retroarchBinds(), other: [
-    "EmuDeck's own RetroArch preset binds save to R1, load to L1, slots to D-pad Left/Right, fast-forward (hold) to R2, pause and FPS to face buttons, Menu Toggle Gamepad Combo to L3+R3 and Quit Gamepad Combo to Start+Select. Rebind the rows above to match this scheme. Rerunning EmuDeck's configuration can write its preset back (unverified): check after updates.",
-    "Steam Deck with Steam Input: the Deck's Select is View. Keep the controller layout on a gamepad template so RetroArch sees real buttons.",
-  ] },
-  knulli: { rows: () => [
-    ["Start > Game Settings > Per System Advanced Configuration > (system) > Controls > Hotkeys > Quick Save", "R2", "Default is a face button. Do not edit RetroArch for hotkeys on Knulli; this menu is the way. Only the second button changes, and only for RetroArch cores."],
-    ["… > Hotkeys > Quick Load", "L2"],
-    ["… > Hotkeys > Previous Slot", "D-pad Left", "Default is D-pad Down."],
-    ["… > Hotkeys > Next Slot", "D-pad Right", "Default is D-pad Up."],
-    ["… > Hotkeys > Fast Forward", "R1", "Default is D-pad Right. Whether it holds is Batocera's behaviour: test it."],
-    ["… > Hotkeys > Rewind", "D-pad Up", "Frees Left/Right; rewind isn't required."],
-    ["… > Hotkeys > Emulator Menu", "X", "Default is a face button."],
-  ], other: [
-    "No FPS hotkey exists on Knulli. Use the framerate overlay setting under Game Settings instead (always on, not a toggle; exact name unverified).",
-    "Function + Start (tap) quits to EmulationStation; held 5 s it force-restarts EmulationStation. Not editable.",
-    "Function + L1 screenshot, Function + Select swaps D-pad and analog stick (devices with no sticks), Function + Volume brightness, Function + Power LED modes. Function + Reset is also bound by default.",
-    "Hardcore RetroAchievements disables save, load, fast-forward and rewind.",
-    "Per game instead of per system: hold the launch button on a game, Advanced Game Options > Controls > Hotkeys. Do each RetroArch system once.",
-    "Drastic (NDS) keeps its own: L2 swaps screens, Function + L2 single/dual screen, R2 touch click, Function + R2 microphone. Standalone emulators' hotkeys are fixed in source.",
-  ] },
-  muos: { rows: () => [
-    ["Pickles Menu > Settings > Input > Hotkeys > Hotkey Buttons > Fast Forward", "R1, mode Hold", "Default is Press (a toggle). Everything else below is already the default."],
-    ["Menu + R2", "Quick save", "Default."],
-    ["Menu + L2", "Quick load", "Default."],
-    ["Menu + D-pad Left / Right", "Previous / next slot", "RetroArch default."],
-    ["Menu + Y", "Show FPS", "Default."],
-    ["Menu + X", "RetroArch menu", "RetroArch default."],
-    ["Menu + Start", "Quit / close content", "Default."],
-  ], other: [
-    "RetroArch's own muOS hotkey for fast-forward is also R1 as a toggle. In the RetroArch menu bind Settings > Input > Hotkeys > Fast-Forward (Hold) to R1 and unbind Fast-Forward (Toggle) so both layers hold (unverified where muOS keeps that file; do it in the menu).",
-    "Menu + L1 slow motion, Menu + B pause, Menu + X toggle header (Pickles), Menu + A controller type, Menu + Select manual. Menu + Volume brightness.",
-    "L2 + R2 + X screenshot, L2 + R2 + Start safe restart, L2 + R2 + Select safe shutdown, R2 + Select + B force quit, L2 + R2 + A swap D-pad/stick, L2 + R2 + Y stage overlay.",
-    "Tapping Menu alone opens the Pickles Menu.",
-  ] },
-  onion: { rows: () => [
-    ["Menu + R2", "Save state", "Onion's docs list it; as the default is unverified, check on the device."],
-    ["Menu + L2", "Load state"],
-    ["Menu + D-pad Left / Right", "Previous / next slot"],
-    ["Menu + R", "Fast-forward, but a toggle", "Not editable that I found; hold-only isn't possible here."],
-    ["Menu + X", "Show FPS", "Differs from Y."],
-    ["Menu + Select", "RetroArch menu", "Differs from X."],
-    ["(none)", "Quit", "Tap Menu: saves and exits to the GameSwitcher. Hold Menu: saves and exits to the menu."],
-  ], other: [
-    "These come from Onion's keymon layer, not retroarch.cfg, and Onion's docs say not to change RetroArch's config. Nothing to change; the table says how it differs.",
-    "Menu + Start changes aspect ratio, Menu + L toggles rewind, double-tap Menu launches the second-most-recent game. On Game Boy L2/R2 change the palette.",
-  ] },
-  allium: { rows: () => [
-    ["Menu", "In-game menu: save, load, reset, RetroArch menu, quit", "Allium's README lists the menu but not its combos. Open it in a game and note what it offers."],
-  ], other: [
-    "Allium's hotkey combos weren't documented anywhere I could read. Run its show-hotkeys utility on the device to list them (README), then fill this in.",
-  ] },
-  spruce: { rows: () => [
-    ["Settings > Input > Hotkeys > Save State", "R1 -> R2", "Default is Select + R1."],
-    ["Settings > Input > Hotkeys > Load State", "L1 -> L2", "Default is Select + L1."],
-    ["Settings > Input > Hotkeys > Slow Motion", "L2 -> unbind", "Frees L2."],
-    ["Settings > Input > Hotkeys > Fast-Forward", "R2 toggle -> Fast-Forward (Hold) on R1", "Default is a toggle on R2. Unbind the toggle."],
-    ["Settings > Input > Hotkeys > Quit", "B -> Start", "Default exits to MainUI on Select + B."],
-    ["Select + X / Y / D-pad Left, Right", "RetroArch menu / FPS / slots", "Already the defaults."],
-  ], other: [
-    "Spruce warns that RetroArch's Default settings reset its changes, so don't use Reset to Default in these menus. Whether spruce's launcher re-applies its own config on boot is unverified: check after a reboot.",
-    "Select + A screenshot, Select + D-pad Up shaders on/off. Start + L1/R1 brightness.",
-    "Hold Power 3 s: quick save, shutdown, resume. Hold Home 3 s: game switcher. Tap Home: in-game menu (RetroArch and PPSSPP).",
-  ] },
-  nextui: { rows: () => [
-    ["In-game Menu > Shortcuts", "match the scheme", "NextUI's minarch (not RetroArch) lets each emulator's shortcuts be changed from its in-game menu. Defaults for save, load, slots, fast-forward, FPS and quit weren't documented where I could read them: open the list and set each to the scheme above."],
-  ], other: [
-    "Menu opens the in-game options menu (save/load states, emulator options, shortcuts). Menu + Select held opens the game switcher. Screenshot is unbound by default.",
-    "There is no RetroArch menu on NextUI.",
-  ] },
+  esde: {
+    auto: `Run <code class="copy">sync-roms config apply &lt;card&gt;</code> with the device connected over adb: it sets RetroArch's hotkeys.`,
+    steps: [], differs: {}, extras: ["Select is Android's Back key."],
+    windows: { steps: RETROARCH_STEPS, differs: {}, extras: [] },
+  },
+  emudeck: {
+    steps: RETROARCH_STEPS,
+    differs: {},
+    extras: [
+      "Start + Select: quit (EmuDeck's Quit Gamepad Combo).",
+      "L3 + R3: RetroArch menu (EmuDeck's Menu Toggle Gamepad Combo).",
+      "With Steam Input the Deck's Select is View: keep the controller layout on a gamepad template so RetroArch sees real buttons.",
+    ],
+  },
+  knulli: {
+    steps: [
+      [`${KNULLI_HOTKEYS} > Quick Save`, "R1"],
+      [`${KNULLI_HOTKEYS} > Quick Load`, "L1"],
+      [`${KNULLI_HOTKEYS} > Previous Slot`, "D-pad Left"],
+      [`${KNULLI_HOTKEYS} > Next Slot`, "D-pad Right"],
+      [`${KNULLI_HOTKEYS} > Fast Forward`, "R2"],
+      [`${KNULLI_HOTKEYS} > Rewind`, "D-pad Up"],
+      [`${KNULLI_HOTKEYS} > Emulator Menu`, "X"],
+    ],
+    differs: { R2: "fast-forward; toggle or hold not recorded", L2: "not recorded on Knulli", Y: "no FPS hotkey on Knulli" },
+    extras: [
+      "Function + Start held 5 s: force-restart EmulationStation.",
+      "Function + L1: screenshot, Knulli's own shortcut on the same button as Quick Load.",
+      "Per game instead of per system: hold the launch button on a game, Advanced Game Options > Controls > Hotkeys.",
+    ],
+  },
+  muos: {
+    note: "Pickles' defaults differ from the scheme on these buttons; no steps recorded to change them.",
+    steps: [],
+    differs: { R1: "fast-forward (toggle)", L1: "slow motion", R2: "save state", L2: "load state" },
+    extras: [
+      "Tap Menu: Pickles Menu.",
+      "R2 + Select + B: force quit.",
+      "L2 + R2 + X: screenshot.",
+    ],
+  },
+  onion: {
+    note: "Onion's docs say not to change RetroArch's config; these come from Onion's own layer.",
+    steps: [],
+    differs: {
+      X: "Show FPS (Menu + Select opens the RetroArch menu)",
+      R1: "Fast-forward (toggle)",
+      L1: "Rewind (toggle)",
+      R2: "not fast-forward: Menu + R1 is",
+      Y: "not FPS: Menu + X is",
+      L2: "Load state",
+      Start: "Aspect ratio",
+    },
+    extras: [
+      "Tap Menu: save and exit to the GameSwitcher. Hold Menu: save and exit to the menu.",
+      "Menu + Select: RetroArch menu.",
+      "Double-tap Menu: launch the second-most-recent game.",
+    ],
+  },
+  allium: {
+    unknown: true, steps: [], differs: {},
+    extras: ["Menu: in-game menu (save, load, reset, RetroArch menu, quit)."],
+  },
+  spruce: {
+    auto: "Nothing: sync-roms sets quit to Select + Start on every sync; the rest is spruce's default. Don't use RetroArch's Reset to Default or spruce's Reset RA hotkeys, or sync again after.",
+    steps: [], differs: {},
+    extras: [
+      "Select + A: screenshot.",
+      "Tap Home: in-game menu (RetroArch and PPSSPP). Hold Home 3 s: game switcher.",
+      "Hold Power 3 s: quick save and shut down; the game resumes on the next boot.",
+    ],
+  },
+  nextui: {
+    unknown: true, steps: [], differs: { X: "no RetroArch menu on NextUI" },
+    extras: [
+      "Menu: in-game options menu (save/load states, emulator options, shortcuts). There is no RetroArch menu.",
+      "Menu + Select held: game switcher.",
+      "Screenshot is unbound by default.",
+    ],
+  },
 };
-// Standalone emulators (Android): controller combos found, from the emulators' own sources and docs where I could read them.
-// status: yes (all bindable) | partial | no (nothing found) ; text is what to do.
+// Standalone emulators (Android) with something to bind: what to bind for the scheme.
 const EMU_HOTKEYS = {
-  "DuckStation": ["yes", "Hotkeys can be bound to controller buttons, including chords (verified in the source). Bind: Select+R2 Save Selected Slot, Select+L2 Load Selected Slot, Select+Left / Right Select Previous / Next Slot, Select+R1 Fast Forward (Hold), Select+Y Toggle OSD (shows FPS with the rest of the overlay), Select+X Open Pause Menu, Select+Start Power Off System. Settings > Controllers > Hotkeys (path unconfirmed on Android)."],
-  "PPSSPP Gold": ["partial", "Settings > Controls > Control mapping lists Unthrottle (hold), Rewind and Save State; Load State, slot and pause actions are probably there too (unconfirmed). Bind Unthrottle to R1, Save State to R2, Load State to L2 as a chord with Select. No FPS hotkey found: Settings > Graphics has an FPS counter (always on)."],
-  "Flycast": ["no", "Flycast's controller hotkeys are minimal (quick menu, fast-forward, stop on desktop; no save/load combos found). Use its in-game menu. On arcade games Select is Insert Coin."],
-  "Dolphin": ["no", "No controller hotkeys found on Android; desktop Dolphin can bind them in Options > Hotkey Settings. Use the in-game menu."],
-  "Eden": ["partial", "The Back button opens the in-game menu. FPS: Overlay options > Show Performance Stats Overlay. No controller combos for save/load found."],
-  "Azahar": ["no", "Controller hotkeys exist on desktop only (unconfirmed on Android). Use the in-game menu."],
-  "WatermelonDS": ["no", "No controller hotkeys found."],
-  "DraStic": ["no", "Nothing found for the Android build. On Knulli/muOS it has Select+L2 save and Select+R2 load, which doesn't apply here."],
-  "M64Plus FZ Pro": ["no", "Nothing found for FZ Pro. Check its Controls screen."],
-  "Redream": ["no", "Nothing found."],
-  "Yaba Sanshiro 2 Pro": ["no", "No combo found; its menu has Save State and Load State (unconfirmed)."],
-  "ARMSX2": ["no", "Nothing found."],
-  "Vita3K": ["no", "Nothing found."],
+  "DuckStation": "Hotkeys can be bound to controller buttons, including chords. Bind: Select+R1 Save Selected Slot, Select+L1 Load Selected Slot, Select+Left / Right Select Previous / Next Slot, Select+R2 Fast Forward, Select+Y Toggle OSD (shows FPS with the rest of the overlay), Select+X Open Pause Menu, Select+Start Power Off System.",
+  "PPSSPP Gold": "Settings > Controls > Control mapping: bind Save State to Select+R1 and Unthrottle (fast-forward while held) to Select+R2, as chords. FPS: Settings > Graphics has an FPS counter (always on).",
+  "Eden": "The Back button opens the in-game menu. FPS: Overlay options > Show Performance Stats Overlay.",
 };
 const SECTIONS = [
   {
@@ -929,33 +937,44 @@ const SECTIONS = [
     id: "hotkeys",
     title: "Hotkeys",
     when: { layout: Object.keys(HOTKEY_LAYOUT) },
-    lede: "One scheme everywhere: hold the device's hotkey button, then press the second button. Only the hotkey button differs by layout.",
+    lede: "One scheme everywhere: hold the device's hotkey button, then press the second button. A row with a note is what this layout does instead, or isn't recorded.",
     items: [
       {
         title: "The scheme",
-        body: ctx => `<p>Hotkey button on this layout: <b>${esc(HOTKEY[ctx.layout])}</b>. Fast-forward runs only while the button is held.</p>`,
-        settingsFn: ctx => HOTKEY_SCHEME.map(([a, b]) => [a, `${HOTKEY[ctx.layout]} + ${b}`]),
+        body: ctx => `<p>Hotkey button on this layout: <b>${esc(HOTKEY[ctx.layout])}</b>${ctx.layout === "spruce" ? " (spruce's default; spruce's own settings can pick another)" : ""}.</p>`,
+        settingsFn: ctx => HOTKEY_SCHEME.map(([a, b]) => {
+          const l = hotkeyLayout(ctx), what = l.differs[b], combo = `${HOTKEY[ctx.layout]} + ${b}`;
+          if (what) return [a, `${combo}: ${what}`, "Not the scheme on this layout, or not recorded."];
+          return l.unknown ? [a, combo, "The scheme; not recorded on this layout."] : [a, combo];
+        }),
       },
       {
-        title: "Change from the defaults",
-        body: ctx => `<p>Rows are what to set; where a row says it is already the default, nothing to do. Entries marked unverified or unconfirmed come from docs I couldn't fully read: check them on the device.</p>`,
-        settingsFn: ctx => HOTKEY_LAYOUT[ctx.layout].rows(),
-      },
-      {
-        title: "Other shortcuts that stay available",
-        body: ctx => `<p>Leave them, or remove the ones I don't want.</p><ul>${HOTKEY_LAYOUT[ctx.layout].other.map(t => `<li>${esc(t)}</li>`).join("")}</ul>`,
-      },
-      {
-        title: "Per emulator",
+        title: "What to do",
         body: ctx => {
-          const retro = `<li><b>RetroArch cores</b> (${ctx.layout === "nextui" ? "minarch" : ctx.layout === "muos" ? "Pickles and RetroArch" : "RetroArch"}): the scheme above.</li>`;
-          if (ctx.platform !== "android") return `<ul>${retro}<li>Standalone emulators on this layout${ctx.layout === "knulli" ? " have hotkeys fixed in source (Knulli's docs)" : ""}: use the in-app controls where it has any, binding the same chords from the scheme.</li></ul>`;
-          const rows = ctx.emus.filter(e => e.emulator !== "RetroArch").map(e => {
-            const [st, t] = EMU_HOTKEYS[e.emulator] || ["no", "Nothing found."];
-            const label = { yes: "bindable", partial: "partly", no: "none found" }[st];
-            return `<li><b>${esc(e.emulator)}</b> (${label}): ${esc(t)}</li>`;
-          }).join("");
-          return `<p>Android has no hotkey layer: a combo exists only where the emulator itself implements it, and Select is the Back key.</p><ul>${retro}${rows}</ul>`;
+          const l = hotkeyLayout(ctx);
+          if (l.auto) return `<p>${l.auto}</p>`;
+          if (l.unknown) return "<p>Not recorded for this layout yet.</p>";
+          if (l.note) return `<p>${esc(l.note)}</p>`;
+          if (!l.steps.length) return `<p>${Object.keys(l.differs).length ? "These can't be changed on this layout." : "Nothing to change."}</p>`;
+          return `<ol>${l.steps.map(([where, set]) => set == null
+            ? `<li>Run <span class="path">${path(where)}</span>.</li>`
+            : `<li>Open <span class="path">${path(where)}</span>, set <b>${esc(set)}</b>.</li>`).join("")}</ol>`;
+        },
+      },
+      {
+        title: "Also on this layout",
+        body: ctx => {
+          const extras = hotkeyLayout(ctx).extras;
+          return extras.length ? `<ul>${extras.map(t => `<li>${esc(t)}</li>`).join("")}</ul>` : "<p>Nothing recorded.</p>";
+        },
+      },
+      {
+        title: "Standalone emulators",
+        when: { platform: ["android"] },
+        body: ctx => {
+          const rows = ctx.emus.filter(e => EMU_HOTKEYS[e.emulator])
+            .map(e => `<li><b>${esc(e.emulator)}</b>: ${esc(EMU_HOTKEYS[e.emulator])}</li>`).join("");
+          return `${rows ? `<ul>${rows}</ul>` : ""}<p>Other emulators: use their in-game menu.</p>`;
         },
       },
     ],

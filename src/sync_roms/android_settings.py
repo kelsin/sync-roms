@@ -20,8 +20,23 @@ XML_DECLARATION = '<?xml version="1.0"?>\n'
 BLOCK = re.compile(r"<alternativeEmulator>\s*<label>(.*?)</label>\s*</alternativeEmulator>[ \t]*\r?\n?", re.S)
 
 
+def hotkeys():
+    """{key: value} binding the hotkey scheme by Android keycode, with the other hotkeys unbound."""
+    data = store.repo_json("hotkeys")
+    wanted = {}
+    for entry in data["scheme"]:
+        wanted[entry["retroarch"] + "_btn"] = data["android"][entry["button"]]
+        wanted[entry["retroarch"] + "_axis"] = "nul"
+    wanted["input_enable_hotkey_btn"] = data["android"]["Select"]
+    wanted["input_enable_hotkey_axis"] = "nul"
+    for stem in data["android_clear"]:
+        wanted[stem + "_btn"] = wanted[stem + "_axis"] = "nul"
+    wanted["input_menu_toggle_gamepad_combo"] = wanted["input_quit_gamepad_combo"] = "0"
+    return wanted
+
+
 def cfg_wanted(overlay_dir=None):
-    """{key: value} for retroarch.cfg: the Syncthing save settings (when on), RetroAchievements, the overlay folder (when given), then Cloud Sync cleared."""
+    """{key: value} for retroarch.cfg: the Syncthing save settings (when on), RetroAchievements, the overlay folder (when given), the hotkeys, then Cloud Sync cleared."""
     wanted = {}
     if spruce_syncthing.enabled():
         wanted.update(spruce_syncthing.data()["retroarch"])
@@ -36,6 +51,7 @@ def cfg_wanted(overlay_dir=None):
             wanted[key] = settings[setting]
     if overlay_dir:
         wanted["overlay_directory"] = overlay_dir
+    wanted.update(hotkeys())
     wanted.update(CLOUD_SYNC)
     return wanted
 
