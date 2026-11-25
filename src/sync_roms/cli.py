@@ -1748,7 +1748,11 @@ def sync_card(args):
             return [v for v in values if isinstance(v, str)] if isinstance(values, list) else []
         by_id = {c["id"]: c for c in colls.load_collections()}
         collections_on = store.card_flag(entry, "custom_collections")
-        card_colls = [by_id[i] for i in names("collections") if i in by_id] if collections_on else []
+        synced = {k for s in chosen for k in available(s)}
+        listed = names("collections")
+        card_colls = ([by_id[i] for i in listed if i in by_id]
+                      + [c for c in by_id.values() if c["id"] not in listed
+                         and any(g.get("bucket") in synced for g in c["games"])]) if collections_on else []
         surprises = [x for x in entry.get("surprises") or () if isinstance(x, dict)
                      and isinstance(x.get("system"), str) and isinstance(x.get("bucket"), str)]
         if collections_on and surprise.enabled(entry) and surprises:  # as saved now: the card editor may have changed them

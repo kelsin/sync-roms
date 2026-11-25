@@ -143,6 +143,8 @@ A set file is `{"name", "description"?, "art"?, "games"}`. Games have `title`, `
 
 A collection file (see Personal data) has the same top-level keys (its games may carry a `note`) but its own loader and schema and no categories.
 
+While `custom_collections` is on, sync writes every collection with a game on the card (in `collections` or not), each with only its games on the card.
+
 Rules for sets:
 
 - A game appears once across all sets: one version per game (arcade original over home ports; else the original lead platform, then the lighter one to emulate; English for text-heavy games), and every set that has the game uses that version.

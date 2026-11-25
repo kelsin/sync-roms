@@ -301,7 +301,7 @@ A card is a folder name (the card root's name) with a remembered device, layout 
 | `surprises` | the current surprises, `[{"system", "bucket", "title", "files"?}]`, `files` being a multi-disc game's other keys |
 | `surprise_excluded_systems` | system ids Surprise never picks from on this card, on top of the setting of the same name |
 | `theme` | `false` (like the next two, on when absent and switched in the card editor's `S` menu): a sync doesn't copy Art Book Next, doesn't select it in ES-DE or Knulli and adds no collection art (Surprise's included) |
-| `custom_collections` | `false`: a sync writes no collections to the frontend, Surprise's included (and, on Onion, no Surprise app), and removes the ones it wrote before; the games themselves still sync, Surprise's too |
+| `custom_collections` | A collection is written when it is on the card or any of its games is. `false`: a sync writes no collections to the frontend, Surprise's included (and, on Onion, no Surprise app), and removes the ones it wrote before; the games themselves still sync, Surprise's too |
 | `raofflineproxy` | `false`: no RAOfflineProxy on the card |
 | `muos_storage` | `muos` cards: `"sd1"` (default, mounted at `/mnt/mmc`) or `"sd2"` (`/mnt/sdcard`), the storage muOS reads the ROMs from, which collection entries point at. Set it by hand; there is no editor for it |
 | `spruce_theme` | `spruce` cards: the current PyUI theme (a folder name from storage's `os/spruceos/themes/`), picked in the card editor's `S` menu; synced when storage has it and set as the card's selected theme |
