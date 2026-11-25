@@ -38,6 +38,10 @@ them. It can be shared as one file or hosted anywhere. It is for browsing only: 
 - `sync-roms collections unshare`, when `/collections` is served, runs `tailscale serve --https=443 --set-path /collections off`. That removes
   only this entry and leaves other serve entries alone (never `tailscale serve reset`). The page file stays.
 
+- Links that carry state: the search, the system, the chosen tags and an open collection live in the URL hash.
+  Copying the address bar, or a collection's 🔗 button, gives a friend the same view, scrolled to that
+  collection.
+
 ## Non-goals
 
 - Editing anything, or links to download ROMs.

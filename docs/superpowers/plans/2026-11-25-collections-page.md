@@ -121,6 +121,9 @@ The page:
 - With any filter active: collections with no passing games are hidden, the others open, and only passing games
   are shown. Without a filter, everything shows and is closed.
 - With no collections it shows "No collections yet."
+- Shareable URLs: the filters and an open collection live in the hash (`q`, `system`, `tags`, `c`), kept up to
+  date with `history.replaceState` and applied on load and `hashchange`. Each collection has a 🔗 button that
+  copies a link to it with the current filters. (Full detail is in the Task 2 brief addendum, 2026-11-25.)
 - All text is set with `textContent`, never `innerHTML` with data.
 
 - [ ] **Step 1: Write failing tests** `TemplateTest`:
