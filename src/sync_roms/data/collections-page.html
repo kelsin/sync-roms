@@ -60,17 +60,20 @@ h1 { margin: 0; font-size: 26px; letter-spacing: -.01em; }
   min-width: 0;
 }
 .controls input { flex: 1 1 220px; }
+.tagbox {
+  flex: 1 1 100%; min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px;
+  border: 1px solid var(--border); background: var(--surface); border-radius: 8px; padding: 3px 6px;
+}
+.tagbox:focus-within { outline: 2px solid var(--accent); outline-offset: 1px; }
+.controls .tagbox input { flex: 1 1 100px; border: 0; background: none; padding: 4px; outline: none; }
 .controls select { flex: 0 1 220px; }
 .controls button { cursor: pointer; }
 input:focus-visible, select:focus-visible, button:focus-visible, summary:focus-visible {
   outline: 2px solid var(--accent); outline-offset: 1px;
 }
-.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
-.chips:empty { display: none; }
-.chip { cursor: pointer; border-radius: 999px; padding: 4px 11px; font-size: 14px; }
-.chip[aria-pressed="true"] {
-  background: var(--accent-soft); border-color: var(--accent); color: var(--accent-text);
-}
+.chips { display: contents; }
+.chip { cursor: pointer; border-radius: 999px; padding: 2px 10px; font-size: 14px; }
+.chip { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-text); }
 .count { margin-top: 10px; color: var(--muted); font-size: 14px; }
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; align-items: start; }
 @media (max-width: 400px) { .grid { grid-template-columns: 1fr; } }
@@ -128,8 +131,12 @@ ul.games { list-style: none; margin: 0; padding: 0 0 6px; }
       <input id="search" type="search" placeholder="Search collections and games" aria-label="Search">
       <select id="system" aria-label="System"></select>
       <button id="clear" type="button">Clear</button>
+      <div class="tagbox">
+        <span class="chips" id="chips"></span>
+        <input id="tag-input" type="text" list="tag-options" placeholder="Filter by tag" aria-label="Filter by tag" autocomplete="off">
+        <datalist id="tag-options"></datalist>
+      </div>
     </div>
-    <div class="chips" id="chips"></div>
     <div class="count" id="count"></div>
   </div>
   <main class="grid" id="grid"></main>
@@ -169,19 +176,52 @@ ul.games { list-style: none; margin: 0; padding: 0 0 6px; }
     });
 
   var chips = document.getElementById("chips");
-  Object.keys(tagDefs).map(function (id) { return {id: id, name: tagDefs[id].name, emoji: tagDefs[id].emoji}; })
-    .sort(byName).forEach(function (t) {
-      var chip = el("button", "chip", t.emoji + " " + t.name);
+  var tagInput = document.getElementById("tag-input");
+  var tagList = Object.keys(tagDefs).map(function (id) {
+    return {id: id, name: tagDefs[id].name, emoji: tagDefs[id].emoji};
+  }).sort(byName);
+  var options = document.getElementById("tag-options");
+  tagList.forEach(function (t) {
+    var option = el("option");
+    option.value = t.name;
+    option.label = t.emoji;
+    options.appendChild(option);
+  });
+  function renderChips() {
+    chips.textContent = "";
+    tagList.filter(function (t) { return pressed.has(t.id); }).forEach(function (t) {
+      var chip = el("button", "chip", t.emoji + " " + t.name + " \u00d7");
       chip.type = "button";
-      chip.setAttribute("aria-pressed", "false");
-      chip.dataset.tag = t.id;
+      chip.title = "Remove " + t.name;
+      chip.setAttribute("aria-label", "Remove tag " + t.name);
       chip.addEventListener("click", function () {
-        if (pressed.has(t.id)) pressed.delete(t.id); else pressed.add(t.id);
-        chip.setAttribute("aria-pressed", String(pressed.has(t.id)));
+        pressed.delete(t.id);
+        renderChips();
         update();
       });
       chips.appendChild(chip);
     });
+  }
+  function addTag(typed, prefix) {
+    var text = typed.trim().toLowerCase();
+    if (!text) return false;
+    var free = tagList.filter(function (t) { return !pressed.has(t.id); });
+    var hits = free.filter(function (t) { return t.name.toLowerCase() === text; });
+    if (!hits.length && prefix) {
+      hits = free.filter(function (t) { return t.name.toLowerCase().indexOf(text) !== -1; });
+      if (hits.length !== 1) hits = [];
+    }
+    if (hits.length !== 1) return false;
+    pressed.add(hits[0].id);
+    tagInput.value = "";
+    renderChips();
+    update();
+    return true;
+  }
+  tagInput.addEventListener("input", function () { addTag(tagInput.value, false); });
+  tagInput.addEventListener("keydown", function (event) {
+    if (event.key === "Enter") { event.preventDefault(); addTag(tagInput.value, true); }
+  });
 
   function fallbackCopy(text) {
     var area = document.createElement("textarea");
@@ -333,9 +373,7 @@ ul.games { list-style: none; margin: 0; padding: 0 0 6px; }
     (hash.get("tags") || "").split(",").forEach(function (id) {
       if (id && Object.prototype.hasOwnProperty.call(tagDefs, id)) pressed.add(id);
     });
-    chips.querySelectorAll(".chip").forEach(function (chip) {
-      chip.setAttribute("aria-pressed", String(pressed.has(chip.dataset.tag)));
-    });
+    renderChips();
     var wanted = hash.get("c");
     var target = cards.filter(function (entry) { return entry.collection.id === wanted; })[0];
     current = target ? wanted : null;
@@ -394,7 +432,8 @@ ul.games { list-style: none; margin: 0; padding: 0 0 6px; }
     search.value = "";
     select.value = "";
     pressed.clear();
-    chips.querySelectorAll(".chip").forEach(function (c) { c.setAttribute("aria-pressed", "false"); });
+    tagInput.value = "";
+    renderChips();
     update();
   });
   window.addEventListener("hashchange", applyHash);
