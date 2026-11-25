@@ -35,8 +35,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "layouts": ("[ID]", "list the firmware card layouts, or one layout's folders and devices"),
     "upload": ("[DIR]", "upload ROMs to the storage folder of a system you pick"),
     "diff": ("[DIR]", "list the ROMs in only DIR or only storage, ignoring renames"),
-    "scrape": ("[SYSTEM | match SYSTEM ROM GAME | review [SYSTEM] | missing [SYSTEM] | art [SYSTEM]]", "scrape the ROMs that have no metadata from ScreenScraper into storage's scrapes/ folder"),
-    "clean": ("scrapes", "remove scrapes/ media and metadata for ROMs that aren't in storage"),
+    "scrape": ("[SYSTEM | match SYSTEM ROM GAME | review [SYSTEM] | missing [SYSTEM] | art [SYSTEM] | clean]", "scrape the ROMs that have no metadata from ScreenScraper into storage's scrapes/ folder"),
     "playlist": ("[DIR]", "create or fix the .m3u playlist of every multi-disc game"),
     "prepare": ("[DIR]", "unzip archives and convert disc images to verified .chd"),
     "install": ("", "brew install the 7z, unar and chdman that `prepare` needs"),
@@ -392,6 +391,7 @@ TOPICS = {
   sync-roms scrape missing [SYSTEM | --system ID] [--all]
   sync-roms scrape art [SYSTEM | --system ID] [--for onion|spruce|both] [--dry-run] [--replace]
       [--workers N]
+  sync-roms scrape clean [--dry-run]
   sync-roms scrape --set-credentials
 
   Looks up every available ROM with no entry in scrapes/<system>/metadata.json on ScreenScraper and
@@ -435,6 +435,8 @@ TOPICS = {
                      estimated size and reads no image; --replace remakes existing files; --workers
                      N bounds the parallel downloads (default: your CPU count). Spruce art needs
                      Pillow
+  clean              remove scrapes/ media and metadata for ROMs that aren't in storage at all (asks
+                     first; --yes deletes without asking)
   --set-credentials  ask for your ScreenScraper username and password (saved in settings.json,
                      readable only by you; blank keeps the current value), then check them with one
                      request and show today's quota and threads, or the error (exit 1 when
@@ -446,12 +448,6 @@ TOPICS = {
   in a row can't reach it. Ctrl-C stops it too: the ROMs that finished are uploaded and saved, it
   says how many were saved and how many are left, and it exits 130 (a second Ctrl-C aborts at once).
   Writes use the write profile.
-""",
-    "clean": """
-  sync-roms clean scrapes [--dry-run]
-
-  Removes scrapes/ media and metadata for ROMs that aren't in storage at all (asks first; --yes
-  deletes without asking).
 """,
     "playlist": """
   sync-roms playlist [DIR] [--dry-run]
@@ -636,11 +632,11 @@ def help_text(topic=None):
   {ui.yellow('-n, --dry-run')}   show what would happen, change nothing (commands that can't honor it refuse it)
   {ui.yellow('-y, --yes')}       answer prompts with their default (deleting stays "no"). In these commands
                   --yes is the confirmation, so they go ahead: `upload` (overwrites), `convert`
-                  (removes the originals), `clean scrapes`, `cards clean`, `cards convert` (the old
+                  (removes the originals), `scrape clean`, `cards clean`, `cards convert` (the old
                   layout's media), `cards install` (the card's other files), `cards delete`,
                   `cards export` (overwrites FILE), `saves manage` (deletes the picked stashes),
                   `themes publish` (stale theme files), `download pico8` (old cart revisions) and
-                  `scrape match`. Without a terminal, `upload`, `convert`, `clean scrapes`,
+                  `scrape match`. Without a terminal, `upload`, `convert`, `scrape clean`,
                   `cards install`, `cards export` (over FILE), `themes publish`, `download pico8`
                   and `scrape match` exit 2 unless --yes is given
   {ui.yellow('--quiet')}         print only errors, warnings and --json data (prompts go to stderr)
@@ -778,11 +774,7 @@ class Parser(argparse.ArgumentParser):
 
 
 # subcommand -> the legacy flags it stands for. {rest} are its remaining arguments.
-LEGACY = {
-    ("clean", "scrapes"): ["--clean-scrapes"],
-    ("scrape", "match"): ["--scrape-match"], ("scrape", "review"): ["--scrape-review"],
-    ("scrape", "missing"): ["--scrape-missing"], ("scrape", "art"): ["--scrape-art"], ("scrape",): ["--scrape"],
-}
+LEGACY = {}
 WORDS = {flags[0]: " ".join(words) for words, flags in LEGACY.items()}  # mode flag -> its command, for messages
 TYPED = None  # (command words, mode flag) of the command translate() last rewrote, for Parser.error
 BOOL_FLAGS = {"-n", "--dry-run", "-y", "--yes", "-a", "--ask"}
@@ -991,7 +983,7 @@ def run(argv):
     if word in ("-h", "--help"):
         print(help_text())
         return 0
-    if word not in commands.COMMANDS | {"help"} | {words[0] for words in LEGACY}:  # a card, or nothing: sync it
+    if word not in commands.COMMANDS | {"help"}:  # a card, or nothing: sync it
         if word is not None and not word.startswith("-"):
             commands.check_card(word)
         argv = argv[:lead] + ["sync"] + argv[lead:]
@@ -1002,27 +994,11 @@ def run(argv):
             print(help_text(ALIASES.get(cmd[0], cmd[0])))
             return 0
         return commands.run(cmd)
-    if word == "help":
-        name = argv[lead + 1] if lead + 1 < len(argv) else None
-        if name is not None and ALIASES.get(name, name) not in SUBCOMMANDS:
-            ui.fail(f"No help for {name!r}: it isn't a command. See `sync-roms help` for the commands.", 2)
-        print(help_text(ALIASES.get(name, name) if name is not None else None))
-        return 0
-    topic = next((ALIASES.get(a, a) for a in argv if a in SUBCOMMANDS or a in ALIASES), None) if ("-h" in argv or "--help" in argv) else None
-    if topic:  # before translate(), which refuses `clean` without its subcommand
-        print(help_text(topic))
-        return 0
-    argv = translate(argv)
-    args = build_parser().parse_args(argv)
-    if args.version:
-        print(f"sync-roms {__version__}")
-        return 0
-    if args.help:
-        print(help_text(topic))
-        return 0
-    ui.ASSUME_YES = args.yes
-    mode = check_modes(args)
-    return dispatch_mode(args, mode)
+    name = argv[lead + 1] if lead + 1 < len(argv) else None  # `help [COMMAND]`
+    if name is not None and ALIASES.get(name, name) not in SUBCOMMANDS:
+        ui.fail(f"No help for {name!r}: it isn't a command. See `sync-roms help` for the commands.", 2)
+    print(help_text(ALIASES.get(name, name) if name is not None else None))
+    return 0
 
 
 def dispatch_mode(args, mode):

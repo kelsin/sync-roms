@@ -1,6 +1,6 @@
 """Scriptable subcommands: sync, edit, devices, upload, diff, playlist, prepare, install, mirror, games, sets, collections, themes,
-download, flash, unmount, mount, cards, saves, layouts, cache, config, doctor, guide, check and completion; plus helpers the sync
-flow uses."""
+download, flash, unmount, mount, cards, saves, layouts, cache, config, doctor, guide, check, scrape and completion; plus helpers the
+sync flow uses."""
 import argparse
 import datetime
 import json
@@ -15,7 +15,9 @@ from . import bezels, budget, cardedit, cardshare, collectionedit, external, gue
 
 
 UNKNOWN_SHOWN = 8  # device ids named in an "unknown device" error
-COMMANDS = {"sync", "edit", "devices", "upload", "diff", "playlist", "prepare", "install", "mirror", "games", "sets", "collections", "themes", "download", "flash", "unmount", "umount", "mount", "cards", "saves", "layouts", "cache", "config", "doctor", "guide", "check", "completion"}
+COMMANDS = {"sync", "edit", "devices", "upload", "diff", "playlist", "prepare", "install", "mirror", "games", "sets", "collections", "themes", "download", "flash", "unmount", "umount", "mount", "cards", "saves", "layouts", "cache", "config", "doctor", "guide", "check", "scrape", "completion"}
+SCRAPE_ACTIONS = ("match", "review", "missing", "art", "clean")
+LITERAL = frozenset()  # the values after `scrape match` that start with a dash: values, never options
 
 
 class Parser(argparse.ArgumentParser):
@@ -24,6 +26,9 @@ class Parser(argparse.ArgumentParser):
         if message == "the following arguments are required: action":  # a command typed without its subcommand
             ui.fail(f"'{name}' needs a subcommand: " + ", ".join(f"{name} {w}" for w in second_words()[name]), 2)
         ui.fail(f"{message}\n   Try 'sync-roms {name} --help'.", 2)
+
+    def _parse_optional(self, arg_string):
+        return None if arg_string in LITERAL else super()._parse_optional(arg_string)
 
 
 # --- Helpers the sync flow uses ----------------------------------------------------------------------
@@ -1316,9 +1321,9 @@ def completion_lists(what):
 
 
 def all_flags():
-    """Every option string the CLI accepts (flag parser, subcommand parsers and global flags), sorted."""
+    """Every option string the CLI accepts (the command parsers and global flags), sorted."""
     from . import cli
-    found = set(cli.GLOBAL_VALUE_FLAGS) | {"--quiet", "--verbose"}
+    found = set(cli.GLOBAL_VALUE_FLAGS) | {"--quiet", "--verbose", "--version", "-h", "--help"}
 
     def walk(parser):
         for action in parser._actions:
@@ -1326,7 +1331,6 @@ def all_flags():
             if isinstance(action, argparse._SubParsersAction):
                 for child in action.choices.values():
                     walk(child)
-    walk(cli.build_parser())
     walk(build_parser())
     return sorted(found)
 
@@ -1476,13 +1480,89 @@ def flash_cmd(args):
     return flash.run(args)
 
 
+def _scrape_system(args, name):
+    """Set args.system from the SYSTEM word or --system (not both) of `name`; a path is refused."""
+    word, flag = getattr(args, "word", None), getattr(args, "system", None)
+    if word and flag:
+        ui.fail(f"`{name}` takes one system: `{name} SYSTEM` or `{name} --system SYSTEM`", 2)
+    args.system = word or flag
+    if args.system and any(sep and sep in args.system for sep in (os.sep, os.altsep)):
+        ui.fail(f"`{name}` expects a system id, not a path ({args.system!r})", 2)
+
+
+def _skip_media(args):
+    """Turn --skip-media's comma-separated value into a list of known media types."""
+    if args.skip_media is not None:
+        from . import scrape_online
+        args.skip_media = [t.strip() for t in args.skip_media.split(",") if t.strip()]
+        scrape_online._check_skip(args.skip_media)
+
+
+def scrape_cmd(args):
+    from . import scrape_online
+    if args.set_credentials:
+        if args.word or args.system or args.retry or args.all or args.fill_media or args.skip_media is not None or args.dry_run:
+            ui.fail("--set-credentials only goes with `scrape`, on its own", 2)
+        return scrape_online.set_credentials()
+    _scrape_system(args, "scrape")
+    _skip_media(args)
+    prepare_storage(args)
+    return scrape_online.scrape_command(args)
+
+
+def scrape_match_cmd(args):
+    from . import scrape_online
+    _scrape_system(args, "scrape match")
+    _skip_media(args)
+    prepare_storage(args)
+    return scrape_online.match_command(args)
+
+
+def scrape_review_cmd(args):
+    from . import scrape_review
+    _scrape_system(args, "scrape review")
+    prepare_storage(args)
+    return scrape_review.review_command(args)
+
+
+def scrape_missing_cmd(args):
+    from . import scrape_online
+    _scrape_system(args, "scrape missing")
+    prepare_storage(args)
+    return scrape_online.missing_command(args)
+
+
+def scrape_art_cmd(args):
+    from . import scrape_art
+    _scrape_system(args, "scrape art")
+    prepare_storage(args)
+    return scrape_art.art_command(args)
+
+
+def scrape_clean_cmd(args):
+    from . import scrape_files
+    prepare_storage(args)
+    return refresh_mirror(scrape_files.clean_scrapes(args), args)
+
+
+def scrape_argv(argv):
+    """`scrape` with its action named (bare `scrape [SYSTEM]` gets the parser's own hidden `scrape` action), and LITERAL set
+    to the values after `scrape match` that start with a dash: flags may come first, then the next three words are values."""
+    global LITERAL
+    LITERAL = frozenset()
+    if len(argv) < 2 or argv[1] not in SCRAPE_ACTIONS:
+        return ["scrape", "scrape", *argv[1:]]
+    if argv[1] == "match":
+        tail, n = argv[2:], 0
+        while n < len(tail) and tail[n].startswith("-"):
+            n += 2 if tail[n] == "--skip-media" else 1
+        LITERAL = frozenset(a for a in tail[n:n + 3] if a.startswith("-"))
+    return argv
+
+
 def second_words():
     """{command: the words that can follow it} for the commands that have subcommands."""
-    from . import cli
-    words = {}
-    for key in cli.LEGACY:
-        if len(key) > 1:
-            words.setdefault(key[0], []).append(key[1])
+    words = {"scrape": list(SCRAPE_ACTIONS)}
     words["mirror"] = ["use", "clear"]
     words["games"] = ["add", "export", "full", "import", "list", "remove", "sets"]
     words["sets"] = ["edit"]
@@ -1666,17 +1746,38 @@ def build_parser():
     p = sub.add_parser("check", allow_abbrev=False); common(p, card=False); p.add_argument("--bucket-keys", action="store_true"); p.set_defaults(fn=check_cmd)
     p = sub.add_parser("completion", allow_abbrev=False); common(p, card=False); p.add_argument("shell", choices=["bash", "zsh", "fish", "list"])
     p.add_argument("what", nargs="?"); p.set_defaults(fn=completion_cmd)
+
+    scrape = sub.add_parser("scrape", add_help=False, allow_abbrev=False)
+    scsub = scrape.add_subparsers(dest="action", required=True)
+    p = scsub.add_parser("scrape", allow_abbrev=False); common(p, card=False)  # bare `scrape`, named by scrape_argv
+    p.add_argument("word", nargs="?", metavar="SYSTEM"); p.add_argument("--system")
+    for flag in ("--retry", "--all", "--fill-media", "--set-credentials"):
+        p.add_argument(flag, action="store_true")
+    p.add_argument("--skip-media"); p.set_defaults(fn=scrape_cmd, action=None)
+    p = scsub.add_parser("match", allow_abbrev=False); common(p, card=False)
+    p.add_argument("system", metavar="SYSTEM"); p.add_argument("rom", metavar="ROM"); p.add_argument("game", metavar="GAME")
+    p.add_argument("--translated", action="store_true"); p.add_argument("--skip-media"); p.set_defaults(fn=scrape_match_cmd)
+    p = scsub.add_parser("review", allow_abbrev=False); common(p, card=False); p.add_argument("word", nargs="?", metavar="SYSTEM")
+    p.set_defaults(fn=scrape_review_cmd)
+    p = scsub.add_parser("missing", allow_abbrev=False); common(p, card=False); p.add_argument("word", nargs="?", metavar="SYSTEM")
+    p.add_argument("--system"); p.add_argument("--all", action="store_true"); p.set_defaults(fn=scrape_missing_cmd)
+    p = scsub.add_parser("art", allow_abbrev=False); common(p, card=False); p.add_argument("word", nargs="?", metavar="SYSTEM")
+    p.add_argument("--system"); p.add_argument("--for", dest="target", choices=["onion", "spruce", "both"], default="both")
+    p.add_argument("--workers", type=_positive_int, metavar="N"); p.add_argument("--replace", action="store_true"); p.set_defaults(fn=scrape_art_cmd)
+    p = scsub.add_parser("clean", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=scrape_clean_cmd)
     return ap
 
 
 def run(argv):
     if argv[0] == "cards" and (len(argv) == 1 or argv[1].startswith("-")):  # bare `cards` is `cards list`
         argv = ["cards", "list", *argv[1:]]
+    if argv[0] == "scrape":
+        argv = scrape_argv(argv)
     ap = build_parser()
     ap.prog = f"sync-roms {argv[0]}"  # its errors (unrecognized arguments) point at the command's help
     args = ap.parse_args(argv)
     if getattr(args, "dry_run", False) and not (args.fn is config_cmd and args.action == "apply") and (args.fn in (games_list, games_export, layouts_cmd, config_cmd, cache_cmd, doctor_cmd, guide_cmd, check_cmd, completion_cmd, themes_pick, themes_build, themes_palettes,
-                                                          edit_cmd, install_cmd, devices_cmd, diff_cmd)
+                                                          edit_cmd, install_cmd, devices_cmd, diff_cmd, scrape_review_cmd, scrape_missing_cmd)
                                             or (args.fn is games_sets and args.verb == "list") or (args.fn is mirror_cmd and args.action == "clear")):
         name = " ".join(w for w in (args.command, getattr(args, "action", None), getattr(args, "verb", None)) if w)
         if args.fn is config_cmd and args.action in ("set", "unset"):

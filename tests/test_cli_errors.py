@@ -91,8 +91,17 @@ class UnhonoredFlagsTest(Isolated):
     def test_cache_full_needs_update(self):
         self.refused(["cache", "--full"], "--full only applies to `cache update`")
 
-    def test_clean_scrapes_takes_no_folder(self):
-        self.refused(["clean", "scrapes", "/some/dir"], "`clean scrapes` doesn't take a folder")
+    def test_scrape_clean_takes_no_folder(self):
+        self.refused(["scrape", "clean", "/some/dir"], "unrecognized arguments: /some/dir\n   Try 'sync-roms scrape --help'.")
+
+    def test_clean_scrapes_is_no_longer_a_command(self):
+        with tempfile.TemporaryDirectory() as cwd:
+            old = os.getcwd()
+            os.chdir(cwd)
+            try:
+                self.refused(["clean", "scrapes"], "clean isn't a command or a folder")
+            finally:
+                os.chdir(old)
 
     def test_refusals_name_the_command_typed(self):
         self.refused(["devices", "--dry-run"], "--dry-run has no effect on `devices`")
@@ -102,7 +111,7 @@ class UnhonoredFlagsTest(Isolated):
 
 class UsageHelpTest(Isolated):
     def test_help_for_commands_that_need_a_subcommand(self):
-        for name in ("upload", "clean", "install"):
+        for name in ("upload", "scrape", "install"):
             for flag in ("--help", "-h"):
                 with self.subTest(name=name, flag=flag):
                     code, out, err = self.sync([name, flag])
@@ -156,6 +165,7 @@ class UsageHelpTest(Isolated):
 
     def test_translated_command_errors_name_the_words_typed(self):
         for argv, words, flag in ((["scrape", "match", "gba"], "scrape match", "--scrape-match"),
+                                  (["scrape", "art", "--for", "x"], "scrape art", "--scrape-art"),
                                   (["mirror", "use"], "mirror use", "--use-mirror"),
                                   (["-n", "upload", "--bogus"], "upload", "--upload"), (["sync", "a", "b"], "sync", "--edit")):
             with self.subTest(argv=argv):
@@ -164,7 +174,7 @@ class UsageHelpTest(Isolated):
                 self.assertNotIn(flag, err)
                 self.assertIn(f"Try 'sync-roms {words.split()[0]} --help'.", err)
         _, _, err = self.sync(["scrape", "match", "gba"])
-        self.assertIn("`scrape match`: expected 3 arguments", err)
+        self.assertIn("the following arguments are required: ROM, GAME", err)
 
     def test_commands_without_their_action_name_the_actions(self):
         for argv, listed in ((["sets"], "sets edit"), (["collections"], "collections edit"), (["themes", "-n"], "themes update"),

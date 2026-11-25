@@ -244,7 +244,6 @@ For one command:
 | `--count N` | `download pico8` | Stop after N carts to add or upgrade |
 | `--bucket-keys` | `check` | Also verify with the read-only profile that every game key in your cards and sets exists in storage |
 | `--fix` | `doctor` | After the checks, run `install` when 7z, unar or chdman is missing |
-| `-c`, `--clean-scrapes`, `--scrape`, `--scrape-match SYSTEM ROM GAME`, `--scrape-review [SYSTEM]`, `--scrape-missing [SYSTEM]`, `--scrape-art [SYSTEM]` | (old flags) | Use the command beside each in the Commands table |
 
 | Environment variable | Description |
 | --- | --- |

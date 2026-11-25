@@ -544,17 +544,13 @@ class CliTest(unittest.TestCase):
             run.assert_called_once_with(expect)
 
     def test_conflicting_or_ignored_flags_exit_2(self):
-        parse = lambda *a: cli.check_modes(cli.build_parser().parse_args(list(a)))  # noqa: E731
-        for argv in (["--scrape", "--clean-scrapes"], ["--replace"], ["--scrape-review", "-n"], ["--scrape", "-a"]):
-            with self.subTest(argv=argv), contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as cm:
-                parse(*argv)
-            self.assertEqual(cm.exception.code, 2)
-        self.assertEqual(parse("--scrape-art", "--replace"), "--scrape-art")
-        for argv in (["edit", "-n"], ["devices", "-a"], ["playlist", "--system", "gba"], ["edit", "--replace"]):
+        for argv in (["edit", "-n"], ["devices", "-a"], ["playlist", "--system", "gba"], ["edit", "--replace"],
+                     ["scrape", "clean", "--replace"], ["scrape", "review", "-n"], ["scrape", "-a"]):
             with self.subTest(argv=argv), contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as cm:
                 commands.run(argv)
             self.assertEqual(cm.exception.code, 2)
         self.assertEqual(commands.build_parser().parse_args(["upload", "--replace"]).replace, True)
+        self.assertEqual(commands.build_parser().parse_args(["scrape", "art", "--replace"]).replace, True)
 
     def test_abbreviations_are_refused(self):
         with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as cm:
