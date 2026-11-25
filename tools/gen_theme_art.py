@@ -1194,16 +1194,10 @@ def mortal_kombat(p):  # the dragon medallion
     p.o(-27, -6, 1.6)
 
 
-def tekken(p):  # the title logo's t: a chiselled letter with slanted bar ends and a pointed stem
-    half = [(0, -44), (48, -44), (40, -24), (10, -24), (10, 26), (0, 46)]
-    inner = [(0, -37), (38, -37), (35.5, -31), (4, -31), (4, 24.5), (0, 32.5)]
-    outer = half + mirror(half[::-1])[1:-1]
-    p.pg(outer, 0)
-    p.pg(inner + mirror(inner[::-1])[1:-1], 0)
-    for (ox, oy), (ix, iy) in list(zip(half, inner))[1:-1]:
-        for s in (1, -1):
-            p.l([(ox * s, oy), (ix * s, iy)], 0)
-    p.l([half[-1], inner[-1]], 0)
+def tekken(p):  # the logo's italic, knife-cut t
+    lean = 0.55  # x per unit of y, leaning right
+    p.pg([(-44, -40), (52, -40), (52 - 12 * lean, -28), (26, -28), (26 - 68 * lean, 40), (4 - 74 * lean, 46), (4, -28),
+          (-44 - 12 * lean, -28)], 0)
 
 
 def samurai_shodown(p):  # a katana and a falling sakura blossom
@@ -1306,7 +1300,7 @@ ART = {
     "horses": (horses, (150, 96, 60), -5, 0.95, (-34, 0)),
     "professor-layton": (professor_layton, (150, 78, 44), -6, 1.0, (-10, 0)),
     "mortal-kombat": (mortal_kombat, (140, 32, 28), -4, 1.0, (-10, 0)),
-    "tekken": (tekken, (96, 52, 150), -6, 0.95, (-22, 0)),
+    "tekken": (tekken, (96, 52, 150), 0, 0.9, (-28, 0)),
     "samurai-shodown": (samurai_shodown, (120, 40, 50), -30, 1.12, (-14, 14)),
     "fatal-fury": (fatal_fury, (60, 100, 150), -4, 1.0, (-16, 0)),
     "r-type": (r_type, (108, 58, 88), -6, 0.85, (-30, 22)),
