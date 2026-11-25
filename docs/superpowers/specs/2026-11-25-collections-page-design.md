@@ -8,7 +8,8 @@ them. It can be shared as one file or hosted anywhere. It is for browsing only: 
 ## Goals
 
 - `sync-roms collections page [--out FILE]` writes the page and opens it in the browser. Without `--out` it
-  writes `cache/collections.html`.
+  writes `share/collections/index.html` in the data folder, the folder `share` serves, so rerunning it refreshes a
+  shared page.
 - One row per collection (from `collections.load_collections`) with its name, description, game count and its
   three pictures: the ES-DE band (`art-book-next/art/<id>.png`), the box (`art-book-next/art-box/Imgs_med/<id>.png`)
   and the ToTK card (`totk-james/collections/Imgs_med/<id>.png`). The art id is the collection's `art`, or else its
@@ -27,12 +28,13 @@ them. It can be shared as one file or hosted anywhere. It is for browsing only: 
   Collections with no matching games are hidden, and while a filter is active the matching collections open
   automatically.
 
-- `sync-roms collections share` builds the page into `share/collections/index.html` in the data folder (only
+- `sync-roms collections share` builds the page into `share/collections/index.html` in the data folder when it
+  isn't there yet (only
   that folder is served, never the data folder itself, which holds `settings.json` with passwords and keys). It
   serves that folder on the tailnet with `tailscale serve --bg --set-path /collections <folder>`, and prints the
-  link `https://<Self.DNSName without the trailing dot>/collections/` from `tailscale status --json`. Running it
-  again rebuilds the page; the serve entry stays.
-- `sync-roms collections unshare` runs `tailscale serve --https=443 --set-path /collections off`. That removes
+  link `https://<Self.DNSName without the trailing dot>/collections/` from `tailscale status --json`. It starts
+  serving only when `/collections` isn't served already (`tailscale serve status --json`).
+- `sync-roms collections unshare`, when `/collections` is served, runs `tailscale serve --https=443 --set-path /collections off`. That removes
   only this entry and leaves other serve entries alone (never `tailscale serve reset`). The page file stays.
 
 ## Non-goals

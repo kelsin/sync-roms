@@ -148,7 +148,8 @@ The page:
   `| \`collections page\` | write a shareable HTML page of your collections and open it | \`collection\` |`, and a
   short paragraph under "Collections" saying the page holds your game lists and storage paths and is safe to share
   only if you're fine with that.
-- Modify: `CLAUDE.md`: add `collections-page.html` to Repo data, and `collections.html` to Personal data `cache/`.
+- Modify: `CLAUDE.md`: add `collections-page.html` to Repo data, and `share/collections/index.html` (written by
+  `collections page`, served by `collections share`) to Personal data.
 - Test: `tests/test_collections_page.py` (add `CommandTest`), and the existing `tests/test_readme.py` and
   `tests/test_completion.py`
 
@@ -158,15 +159,17 @@ The page:
   parent folders.
 - The command: `sync-roms collections page [--out FILE]`. It uses `common(p, card=False)` if that is how the
   read-only commands get `--quiet`, and refuses `--dry-run` like `guide`. With no `--out` it writes
-  `os.path.join(store.cache_dir(), "collections.html")`. It prints the path. It opens the file in the browser
-  only when `--out` isn't given (my call: `--out` is for sharing or hosting). If opening fails it calls
+  `os.path.join(store.data_dir(), "share", "collections", "index.html")` (the folder Task 4 serves; define
+  `collections_page.DEFAULT_PATH()` returning it). It prints the path and opens the file in the browser
+  (with or without `--out`). If opening fails it calls
   `ui.fail("Couldn't open a browser: open the file above yourself", 1)`. Returns 0.
 
 - [ ] **Step 1: Write failing tests** `CommandTest`:
   - `test_writes_and_opens`: run `cli.main(["collections", "page"])` with `webbrowser.open` patched to return
     True. The cache file exists, holds one collection's name inside the data block, and the empty block is gone.
     `open` is called with its `file://` URI.
-  - `test_out_does_not_open`: `--out <tmp>/x/page.html` writes there and doesn't call `webbrowser.open`.
+  - `test_out_writes_elsewhere`: `--out <tmp>/x/page.html` writes there (folders made), not to the default path,
+    and opens it.
   - `test_script_tag_escaped`: a collection titled `</script><b>` doesn't add a second `</script>` before the
     template's own.
 - [ ] **Step 2: Run them.** Expected: FAIL.
@@ -187,23 +190,34 @@ The page:
 **Interfaces:**
 - Consumes: `collections_page.write_page(path)` from Task 3.
 - Produces:
-  - `tailshare.SHARE_DIR() -> str`, which is `os.path.join(store.data_dir(), "share", "collections")`
+  - `tailshare.SHARE_DIR() -> str`, the folder of `collections_page.DEFAULT_PATH()`, which is `os.path.join(store.data_dir(), "share", "collections")`
   - `tailshare.PATH = "/collections"`
-  - `tailshare.share() -> str`: writes the page to `<SHARE_DIR>/index.html` and runs
-    `["tailscale", "serve", "--bg", "--set-path", PATH, SHARE_DIR()]`. Then it reads
-    `["tailscale", "status", "--json"]` and returns `f"https://{Self.DNSName.rstrip('.')}{PATH}/"`.
-  - `tailshare.unshare() -> None`: runs `["tailscale", "serve", "--https=443", "--set-path", PATH, "off"]`.
+  - `tailshare.serving() -> bool`: reads `["tailscale", "serve", "status", "--json"]` and returns True when any
+    `Web.<host:port>.Handlers` has the key `PATH`. Empty output or `{}` means False.
+  - `tailshare.share() -> tuple[str, bool, bool]`: writes the page with `collections_page.write_page` only when
+    `<SHARE_DIR>/index.html` is missing. It runs `["tailscale", "serve", "--bg", "--set-path", PATH, SHARE_DIR()]`
+    only when `serving()` is False. Then it reads `["tailscale", "status", "--json"]` and returns
+    `(f"https://{Self.DNSName.rstrip('.')}{PATH}/", built, started)`.
+  - `tailshare.unshare() -> bool`: when `serving()`, it runs
+    `["tailscale", "serve", "--https=443", "--set-path", PATH, "off"]` and returns True; otherwise it returns False.
   - Both run through `subprocess.run(..., capture_output=True, text=True, stdin=subprocess.DEVNULL, timeout=60)`.
     `shutil.which("tailscale")` being None calls `ui.fail("tailscale isn't installed or not on PATH", 1)`. A
     non-zero exit calls `ui.fail(f"tailscale serve failed: {stderr.strip()}", 1)`.
-- The commands are `collections share` (prints the link) and `collections unshare` (prints
-  `Stopped sharing the collections page.`). They refuse `--dry-run` like `guide`. Never call `tailscale serve reset`.
+- The commands are `collections share` and `collections unshare`. `share` prints `Built <path>` when it built the
+  page, then `Sharing at <link>` (or `Already shared at <link>`). `unshare` prints
+  `Stopped sharing the collections page.` or `The collections page isn't shared.`; both exit 0. To refresh a
+  shared page, run `collections page`, which rewrites the served file. They refuse `--dry-run` like `guide`. Never call `tailscale serve reset`.
 
 - [ ] **Step 1: Write failing tests** with `subprocess.run` and `shutil.which` patched:
-  - `test_share_writes_and_serves`: the file exists under the data folder's `share/collections/index.html`. The
-    serve argv is as above. The returned link is `https://box.tail1.ts.net/collections/` for
+  - `test_share_writes_and_serves`: with no page and no serve entry, the file is written under the data folder's
+    `share/collections/index.html`, the serve argv is as above, and it returns `built` and `started` True.
+  - `test_share_keeps_existing_page_and_serve`: with the page present and the status JSON
+    `{"Web": {"box.tail1.ts.net:443": {"Handlers": {"/collections": {"Path": "x"}}}}}`, nothing is written or
+    served, and it returns `(link, False, False)`.
+  - `test_unshare_when_not_serving`: status `{}` gives False and no `off` call. The returned link is `https://box.tail1.ts.net/collections/` for
     `DNSName "box.tail1.ts.net."`.
-  - `test_unshare_only_turns_off_its_path`: the argv is as above, and no call contains `"reset"`.
+  - `test_unshare_only_turns_off_its_path`: while serving, the argv is as above, it returns True, and no call
+    contains `"reset"`.
   - `test_missing_tailscale_fails`: `which` returns None, so `SystemExit` with code 1 and no `subprocess.run` call.
   - `test_serve_error_surfaces`: returncode 1 with stderr `"HTTPS not enabled"` gives exit 1 with that text on
     stderr.
