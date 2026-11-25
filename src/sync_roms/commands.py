@@ -15,7 +15,7 @@ from . import bezels, budget, cardedit, cardshare, collectionedit, external, gue
 
 
 UNKNOWN_SHOWN = 8  # device ids named in an "unknown device" error
-COMMANDS = {"sync", "edit", "devices", "upload", "diff", "playlist", "prepare", "install", "mirror", "games", "sets", "collections", "themes", "download", "flash", "format", "unmount", "mount", "cards", "saves", "layouts", "cache", "config", "doctor", "guide", "check", "scrape", "refresh", "completion"}
+COMMANDS = {"sync", "edit", "devices", "upload", "diff", "playlist", "prepare", "install", "mirror", "games", "sets", "collections", "themes", "download", "ports", "flash", "format", "unmount", "mount", "cards", "saves", "layouts", "cache", "config", "doctor", "guide", "check", "scrape", "refresh", "completion"}
 SCRAPE_ACTIONS = ("match", "review", "missing", "art", "clean")
 LITERAL = frozenset()  # the values after `scrape match` that start with a dash: values, never options
 
@@ -1466,6 +1466,11 @@ def download_pico8(args):
     return bbs.download_pico8(args)
 
 
+def ports_download(args):
+    from . import portmaster_store
+    return portmaster_store.download(args.names, update=args.update, refresh=args.refresh, dry_run=args.dry_run)
+
+
 def saves_stash(args):
     from . import saves
     return saves.stash_command(args)
@@ -1748,6 +1753,11 @@ def build_parser():
     dsub = download.add_subparsers(dest="action", required=True)
     p = dsub.add_parser("pico8", allow_abbrev=False); common(p, card=False)
     p.add_argument("--count", type=_positive_int, metavar="N"); p.set_defaults(fn=download_pico8)
+
+    ports = sub.add_parser("ports", add_help=False, allow_abbrev=False)
+    psub = ports.add_subparsers(dest="action", required=True)
+    p = psub.add_parser("download", allow_abbrev=False); common(p, card=False); p.add_argument("names", nargs="*", metavar="ZIP")
+    p.add_argument("--update", action="store_true"); p.add_argument("--refresh", action="store_true"); p.set_defaults(fn=ports_download)
 
     p = sub.add_parser("flash", add_help=False, allow_abbrev=False); common(p, card=False); p.set_defaults(fn=flash_cmd)
     p = sub.add_parser("format", add_help=False, allow_abbrev=False); common(p, card=False); p.set_defaults(fn=format_cmd)

@@ -17,7 +17,7 @@ from . import guest as guests
 
 
 ALIASES = {"card": "cards", "game": "games", "set": "sets", "collection": "collections", "theme": "themes", "save": "saves",  # alias -> main name
-           "device": "devices", "layout": "layouts", "playlists": "playlist", "scrapes": "scrape", "downloads": "download",
+           "device": "devices", "layout": "layouts", "playlists": "playlist", "scrapes": "scrape", "downloads": "download", "port": "ports",
            "umount": "unmount"}
 
 
@@ -33,6 +33,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "collections": ("edit", "edit your collections of favourite games (saved in ~/.sync-roms/collections/)"),
     "themes": ("update|pick|build|publish|palettes", "copy the latest Art Book Next for ES-DE and the PyUI themes for spruce from GitHub into storage; build and publish custom spruce themes"),
     "download": ("pico8", "add the PICO-8 BBS Featured carts storage doesn't have, and newer revisions of those it has"),
+    "ports": ("download", "put PortMaster ports and the runtimes they need in storage, from PortMaster's catalogue"),
     "flash": ("", "write a Knulli, BaseOS, muOS, ROCKNIX or OakMoss image from storage's os/ to an SD card"),
     "format": ("", "erase an SD card as exFAT or FAT32 with a picked label"),
     "unmount": ("", "clean the macOS junk off an SD card and unmount it"),
@@ -218,6 +219,18 @@ TOPICS = {
   cards, Surprise history and collections at it; sets that name the old file are listed to change
   with sets edit. Carts in ignored.json are skipped.
   Requests go one at a time; the first HTTP error stops it, keeping what was added.
+""",
+    "ports": """
+  sync-roms ports download [ZIP...] [--update] [--refresh] [--dry-run]
+      put PortMaster ports in storage's ports/
+
+  Each ZIP is a port's zip name in PortMaster's catalogue (celeste.zip, or just celeste; only ports
+  that run on aarch64). Its zip goes to ports/<zip>, each runtime it needs that storage lacks to
+  os/portmaster/runtimes/, and its title and facts to scrapes/ports/metadata.json, all checked
+  against the catalogue's md5 (write profile). A zip storage has is skipped; --update replaces it
+  when the catalogue has a newer version, and --update with no ZIP updates every such port. An
+  unknown name, a failed download or an md5 mismatch is warned about and the rest go on (exit 1).
+  The catalogue is cached for a day; --refresh fetches it again.
 """,
     "flash": """
   sync-roms flash [--dry-run]                 write a Knulli, BaseOS, muOS, ROCKNIX or OakMoss image
