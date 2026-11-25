@@ -8,28 +8,16 @@ import posixpath
 import random
 import re
 
-from . import frontend, inventory, m3u, mirroring, names, picker, previews, s3, store, ui, usersettings, vita
+from . import frontend, inventory, languages, m3u, mirroring, names, picker, previews, s3, store, ui, usersettings, vita
 
 SLOTS = 10
 RECOMMENDED_SHARE = 2 / 3
 DEFAULT_TTL_DAYS = 183
 COLLECTION = "Surprise"
-ARCADE = ("mame", "fbneo")
-
-ENGLISH_REGIONS = {"USA", "World", "Europe", "UK", "United Kingdom", "Australia", "Canada"}
-REGIONS = ENGLISH_REGIONS | {
-    "Japan", "Korea", "Asia", "China", "Taiwan", "Hong Kong", "India", "Israel", "Turkey", "UAE", "Brazil", "Argentina",
-    "Chile", "Mexico", "Latin America", "France", "Germany", "Spain", "Italy", "Netherlands", "Sweden", "Denmark",
-    "Finland", "Norway", "Scandinavia", "Poland", "Portugal", "Russia", "Greece", "Ireland", "Switzerland", "Austria",
-    "Belgium", "Croatia", "Czech", "Hungary", "New Zealand", "South Africa", "Ukraine", "Bulgaria", "Romania",
-    "Serbia", "Slovakia", "Slovenia", "Estonia", "Latvia", "Lithuania", "Iceland", "Indonesia", "Thailand", "Vietnam",
-    "Philippines", "Malaysia", "Singapore", "Egypt", "Saudi Arabia", "Peru", "Colombia", "Venezuela", "Uruguay",
-    "Macao", "Unknown"}
 NOT_FULL = ("Proto", "Beta", "Demo", "Sample", "Kiosk", "Pirate", "Hack", "Unl")
 RERELEASE = ("Virtual Console", "Switch Online", "Classic Mini", "Mini Mix", "Mega Drive Mini", "Genesis Mini",
              "Collection", "Anthology", "Archives", "Sega Ages", "Sega Channel", "Evercade", "Steam", "GOG",
              "Retro-Bit", "Limited Run", "e-Reader", "QUByte Classics")
-LANGUAGE = re.compile(r"^[A-Z][a-z](-[A-Za-z]+)?$")
 
 
 LABEL = "\U0001F381 Surprise"
@@ -131,35 +119,20 @@ def past_keys(bucket):
     return {k for k in recent(load_history(), datetime.date.today(), ttl_days()) if k.startswith(bucket + "/")}
 
 
-def _paren_groups(name):
-    return [[p.strip() for p in g.split(",")] for g in re.findall(r"\(([^)]*)\)", name)]
-
-
-def _english(name):
-    groups = _paren_groups(name)
-    for parts in groups:
-        if all(LANGUAGE.match(p) for p in parts):
-            return any(p == "En" or p.startswith("En-") for p in parts)
-    for parts in groups:
-        if all(p in REGIONS for p in parts):
-            return bool(ENGLISH_REGIONS & set(parts))
-    return True
-
-
 def is_candidate(key, system, bios):
     """Whether the bucket key is a full English game: no BIOS, prototype, beta, demo, hack, re-release or compilation."""
     base = posixpath.basename(key)
     if base in bios or "[BIOS]" in base:
         return False
-    stem = names.title(key) if system["bucket"] in ARCADE else posixpath.splitext(base)[0]
+    stem = languages.stem(key)
     if re.search(r"\[[bh][^\]]*\]", stem, re.I):
         return False
-    groups = _paren_groups(stem)
+    groups = languages.paren_groups(stem)
     if any(p.startswith(NOT_FULL) for parts in groups for p in parts):
         return False
     if any(t in g for g in re.findall(r"\(([^)]*)\)", stem) for t in RERELEASE):
         return False
-    return _english(stem)
+    return languages.english(stem) is not False
 
 
 def units(system, keys, bios):

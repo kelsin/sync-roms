@@ -31,6 +31,9 @@ OUT = ["Mother 3 (Japan).zip", "Rhythm Tengoku (Japan).zip", "Densetsu no Stafy 
 
 
 class SurpriseRulesTest(unittest.TestCase):
+    def test_translations_are_candidates(self):
+        self.assertTrue(surprise.is_candidate("gba/Mother 3 (Japan) [T-En by Chewy v1.3].zip", GBA, set()))
+
     def test_full_english_names(self):
         bios = {"gba_bios.bin"}
         self.assertEqual([n for n in IN if not surprise.is_candidate("gba/" + n, GBA, bios)], [])

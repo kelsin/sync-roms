@@ -3,7 +3,7 @@ import os
 import sys
 from collections import defaultdict
 
-from . import names, picker, previews, runtime, s3, store, surprise, themeart, ui, vita
+from . import languages, names, picker, previews, runtime, s3, store, surprise, themeart, ui, vita
 
 
 def note(text):
@@ -94,7 +94,8 @@ def toggle_games(title, rows, hotkeys=(), hint=None, place=None, filters="", key
                                    on_note=lambda i, text: save_note(rows[i][0]["games"], rows[i][1], text),
                                    hotkeys=hotkeys, session=session, filters=filters,
                                    row_note=lambda i: variant_line(rows[i][1], variants, parents, system_names),
-                                   select_all=select_all, **previews.game_pane([key for _, key, _, _ in rows]))
+                                   select_all=select_all, extras=[[languages.column(key)] for _, key, _, _ in rows],
+                                   **previews.game_pane([key for _, key, _, _ in rows]))
     except KeyboardInterrupt:  # Ctrl-C: the toggles made so far are applied, then the caller gets the Ctrl-C
         interrupted, state = True, session["sel"]
     pressed = state[0] if isinstance(state, tuple) else None

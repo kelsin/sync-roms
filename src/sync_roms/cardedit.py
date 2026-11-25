@@ -4,7 +4,7 @@ import json
 import queue
 import threading
 
-from . import budget, cardpicks, collections as colls, edit, guest, inventory, listedit, metafilter, picker, previews, s3, scrape_plan, spruce_themes, store, surprise, themeart, ui, usersettings
+from . import budget, cardpicks, collections as colls, edit, guest, inventory, languages, listedit, metafilter, picker, previews, s3, scrape_plan, spruce_themes, store, surprise, themeart, ui, usersettings
 
 FULL_KEY = "f"
 OFF_KEY = "x"
@@ -790,8 +790,8 @@ def _status(work, now, capacity, to_fetch):
 
 
 def _row_extras(sp, work, key, notes, state):
-    """A game row's columns: files, set note, lock, size (blank where it has none)."""
-    out = [("", "dim"), ("", "dim"), ("", "cyan"), ("", "dim")]
+    """A game row's columns: files, set note, lock, language flag, size (blank where it has none)."""
+    out = [("", "dim"), ("", "dim"), ("", "cyan"), languages.column(key), ("", "dim")]
     costs = work["costs"][sp.bucket]
     if key in sp.groups:
         out[0] = (f"  🔗 {len(sp.groups[key])} files", "dim")
@@ -802,9 +802,9 @@ def _row_extras(sp, work, key, notes, state):
     if key in sp.locked_from:
         out[2] = (f"  {surprise.LABEL if key in sp.surprise else sp.locked_from[key]}", "cyan")
     if key in costs:
-        out[3] = (f"  {size_text(costs[key])}", "dim")
+        out[4] = (f"  {size_text(costs[key])}", "dim")
     elif key in sp.in_storage:
-        out[3] = (f"  {SIZING}", "dim")
+        out[4] = (f"  {SIZING}", "dim")
     return out
 
 
@@ -827,7 +827,8 @@ def _toggle_variant(picks, key, title):
     found = picks.variants.get(key, [])
     if len(found) > 1:
         i = picker.filter_list(f"Variants of {title}",
-                               [f"{'✅' if picks.on_card(v['bucket']) else '⬜'} {v['note']}" for v in found])
+                               [f"{'✅' if picks.on_card(v['bucket']) else '⬜'} {v['note']}" for v in found],
+                               extras=[[languages.column(v["bucket"])] for v in found])
         found = [] if i is None else [found[i]]
     if not found:
         return None
@@ -870,7 +871,8 @@ def _games_pass(title, shown, picks, sps, files_of, start, work, capacity, to_fe
         """picks.on_card, from this pass's states where the key's system has them."""
         b = key.partition("/")[0]
         return bases[b].get(key, False) if b in bases else picks.on_card(key)
-    extras = [_row_extras(sp, work, k, notes, st) + [_variant_mark(picks, k, on_card)] if sp else []
+    extras = [_row_extras(sp, work, k, notes, st) + [_variant_mark(picks, k, on_card)]
+              if sp else [("", "dim")] * 3 + [languages.column(k)]
               for k, sp, st in zip(keys, sp_of, session["sel"])]
 
     def switched(state):
