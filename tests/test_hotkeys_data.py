@@ -36,7 +36,7 @@ class Shape(unittest.TestCase):
         self.assertEqual(self.d["knulli"], {
             "global.hotkey_b": "x", "global.hotkey_y": "pagedown", "global.hotkey_x": "pageup",
             "global.hotkey_down": "left", "global.hotkey_up": "right", "global.hotkey_right": "r2",
-            "global.toggle_fast_forward": "1"})
+            "global.hotkey_left": "up", "global.toggle_fast_forward": "1"})
 
 
 if __name__ == "__main__":

@@ -115,7 +115,8 @@ class Install(helpers.CardDir):
         self.assertEqual(self.content(), "\n".join(f"{k}={v}" for k, v in knulli_conf.hotkey_values().items()) + "\n")
         self.assertEqual(self.content().split("\n")[:-1], [
             "global.hotkey_b=x", "global.hotkey_y=pagedown", "global.hotkey_x=pageup", "global.hotkey_down=left",
-            "global.hotkey_up=right", "global.hotkey_right=r2", "global.toggle_fast_forward=1"])
+            "global.hotkey_up=right", "global.hotkey_right=r2",
+            "global.hotkey_left=up", "global.toggle_fast_forward=1"])
 
     def test_wifi_fills_slots_in_order(self):
         self.put("foo=1\n")
@@ -199,6 +200,13 @@ class Import(helpers.Cmd):
         self.assertEqual(self.read("settings.json")["knulli_settings"], {"global.smooth": "0"})
         self.assertIn("Saved 1 Knulli setting(s) from system/knulli.conf in settings.json", out)
         self.assertNotIn("hostname", out)
+
+    def test_import_keeps_string_entries_of_mixed_saved(self):
+        self.put("global.bezel=none\n")
+        usersettings.save_settings({"knulli_settings": {"global.smooth": 0, "global.rewind": "1"}})
+        code, _, _ = self.imp(["y"])
+        self.assertEqual(code, 0)
+        self.assertEqual(self.read("settings.json")["knulli_settings"], {"global.rewind": "1", "global.bezel": "none"})
 
     def test_import_nothing_differs(self):
         self.put("global.smooth=0\n")

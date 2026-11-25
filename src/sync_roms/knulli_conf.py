@@ -154,7 +154,7 @@ def import_settings(path):
     current = parse(cardfs.text(file))
     settings = usersettings.load_settings()
     saved = settings.get("knulli_settings")
-    saved = dict(saved) if isinstance(saved, dict) and all(isinstance(v, str) for v in saved.values()) else {}
+    saved = {k: v for k, v in saved.items() if isinstance(v, str)} if isinstance(saved, dict) else {}
     same, changed = [], []  # (key, card value, saved value or None)
     for key in allowed():
         if key in current:

@@ -46,7 +46,7 @@ Password and API key values are never shown (like spruce's `HIDDEN`).
 
 Hotkeys, from `data/hotkeys.json`'s scheme. Knulli already quits on hotkey + Start. Its remap keys
 `global.hotkey_<default button>=<new button>` move Knulli's existing actions, so sync sets the remaps that put
-menu on X, save state on R1, load state on L1, slot down/up on D-pad Left/Right and fast-forward on R2 as a toggle
+menu on X, save state on R1, load state on L1, slot down/up on D-pad Left/Right, rewind on D-pad Up (`global.hotkey_left=up`) and fast-forward on R2 as a toggle
 (`global.toggle_fast_forward=1`). Slow motion and Show FPS have no Knulli hotkey and are left out (noted in
 `hotkeys.json`'s note and the guide's Knulli hotkey table). The exact remap set, including what moves off the buttons
 the scheme takes, is the builder's to derive from `libretroControllers.py`'s defaults.

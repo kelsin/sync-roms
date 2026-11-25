@@ -694,12 +694,11 @@ const HOTKEY_LAYOUT = {
     ],
   },
   knulli: {
-    note: "Sync writes the scheme into the card's system/knulli.conf as hotkey remaps (Function + X: RetroArch menu, + R1: save state, + L1: load state, + D-pad Left/Right: previous/next slot, + R2: fast-forward toggle, + Start: quit); nothing to change by hand. A stays reset and L2 stays previous shader.",
+    note: "Sync writes the scheme into the card's system/knulli.conf as hotkey remaps (Function + X: RetroArch menu, + R1: save state, + L1: load state, + D-pad Left/Right: previous/next slot, + R2: fast-forward toggle, + D-pad Up: rewind, + Start: quit); nothing to change by hand. A stays reset and L2 stays previous shader; Knulli's screenshot, AI service and next-shader hotkeys go.",
     steps: [],
     differs: { L2: "no slow motion on Knulli", Y: "no Show FPS hotkey on Knulli" },
     extras: [
       "Function + Start held 5 s: force-restart EmulationStation.",
-      "Function + L1: screenshot, Knulli's own shortcut on the same button as Quick Load.",
       "Per game instead of per system: hold the launch button on a game, Advanced Game Options > Controls > Hotkeys.",
     ],
   },
@@ -1013,7 +1012,7 @@ const SECTIONS = [
         when: { layout: ["knulli"] },
         body: `
           <p class="path">${path("Start > Game Settings > RetroAchievement Settings")}</p>
-          <p>Sync writes the login, mode and Web API key into the card's <code>system/knulli.conf</code> from your settings (<code class="copy">sync-roms config set ra_username …</code>, <code>ra_password</code>, <code>ra_mode</code>, <code>ra_api_key</code>); nothing to enter here once they are set and Knulli has made the file (it does on first boot). For the API key, use the <b>full</b> Web API key from retroachievements.org Settings > Keys (the shortened one doesn't work). The key is optional but needed for the achievements summary menu.</p>`,
+          <p>Sync writes the login, mode and Web API key into the card's <code>system/knulli.conf</code> from your settings (<code>sync-roms config set ra_username …</code>, <code>ra_password</code>, <code>ra_mode</code>, <code>ra_api_key</code>); nothing to enter here once they are set and Knulli has made the file (it does on first boot). For the API key, use the <b>full</b> Web API key from retroachievements.org Settings > Keys (the shortened one doesn't work). The key is optional but needed for the achievements summary menu.</p>`,
         settings: [
           ["Game Settings > RetroAchievement Settings > Unlock Sound", "on"],
           ["Game Settings > RetroAchievement Settings > Automatic Screenshot", "on"],
