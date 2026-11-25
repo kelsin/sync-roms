@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from helpers import MANIFEST, SYSTEM, CardDir, DataDir, touch  # noqa: E402  (imports isolate first)
 import test_cli_sync  # noqa: E402
 from unittest import mock  # noqa: E402
-from sync_roms import cli, portmaster, portmaster_catalog, scrape_plan, store  # noqa: E402
+from sync_roms import budget, cli, portmaster, portmaster_catalog, scrape_plan, store, surprise  # noqa: E402
 
 PORTS = {"name": "Ports", "bucket": "ports", "folders": {"spruce": "PORTS", "knulli": "ports"}, "bios": {"files": []}, "games": []}
 PORTMASTER_DEVICES = {
@@ -407,3 +407,91 @@ class PortsOnlySyncTest(DataDir):
                 self.assertIn("Open PortMaster on the device to install: Celeste", out)
                 self.assertNotIn("has nothing to sync", out)
                 self.assertIn("🧩 Ports waiting for game data\nCeleste (after PortMaster installs it)\n", out)
+
+
+GBA_SPRUCE = {**SYSTEM, "folders": {"spruce": "GBA"}}
+PORT_KEY = "ports/" + ZIP
+
+
+class PortsLeftOutTest(DataDir):
+    """On spruce a port zip is never a file in Roms/PORTS: Surprise, collections, scrapes and the editor's counts skip it."""
+    run_sync = test_cli_sync.SyncSmokeTest.run_sync
+
+    def test_skip_is_ports_on_spruce_only(self):
+        self.assertEqual([portmaster.skip(PORTS, "spruce"), portmaster.skip(PORTS, "knulli"),
+                          portmaster.skip(GBA_SPRUCE, "spruce")], [True, False, False])
+
+    def test_surprise_never_picks_ports_on_spruce(self):
+        store.update_card("SD", layout="spruce", surprises=[{"system": "ports", "bucket": PORT_KEY, "title": "Celeste"}])
+        pools = []
+        with mock.patch.object(surprise, "_pools", lambda systems, taken: pools.append(systems) or {}), \
+                contextlib.redirect_stdout(io.StringIO()):
+            got = surprise.fill_surprises("SD", (device_of("anbernic-rg-35xxh"), "spruce"), [GBA_SPRUCE, PORTS], True)
+        self.assertEqual(got, [])
+        self.assertEqual([[s["bucket"] for s in p] for p in pools], [["gba"]])
+
+    def sync(self, prepare, patches=(), args=()):
+        layouts = {"spruce": {"label": "Spruce", "roms_dir": "Roms", "bios_dir": "BIOS"}}
+        device = {**device_of("anbernic-rg-35xxh"), "systems": [SYSTEM["bucket"], "ports"]}
+        manifest = {**MANIFEST, "layouts": layouts, "devices": [device],
+                    "systems": [{**GBA_SPRUCE, "games": [{"bucket": "gba/Game.zip"}]}, {**PORTS, "games": [{"bucket": PORT_KEY}]}]}
+
+        def list_sizes(prefix, sizes=True):
+            return {"gba/Game.zip": 5} if prefix == "gba/" else {PORT_KEY: 3} if prefix == "ports/" else {}
+
+        patches = ((store, {"load_manifest": lambda names=(), m=manifest: m, "load_cards": test_cli_sync.REAL_LOAD_CARDS}),
+                   (cli.picker, {"saved_setup": lambda *a: (device, "spruce")}),
+                   (cli, {"free_space": lambda path: 10**9}),
+                   (cli.s3, {"list_sizes": list_sizes}),
+                   (cli.portmaster, {"stage": lambda *a: (0, []), "pending": lambda *a: {}})) + tuple(patches)
+        found = {}
+
+        def after(card):
+            for root, _, files in os.walk(card):
+                for f in files:
+                    with open(os.path.join(root, f), "rb") as data:
+                        found[os.path.relpath(os.path.join(root, f), card).replace(os.sep, "/")] = data.read()
+        self.assertEqual(self.run_sync(False, prepare=prepare, patches=patches, args=args, after=after), 0)
+        return found
+
+    def test_collections_skip_ports_games_on_spruce(self):
+        def prepare(card):
+            touch(os.path.join(card, "Roms", "GBA", "Game.zip"), b"x" * 5)
+            touch(os.path.join(card, "Roms", "PORTS", ZIP), b"zip")  # even a zip left there by hand is no collection game
+            store.update_card(os.path.basename(card), surprises=[
+                {"system": "gba", "bucket": "gba/Game.zip", "title": "Game"}, {"system": "ports", "bucket": PORT_KEY, "title": "Celeste"}])
+        found = self.sync(prepare)
+        listing = json.loads(found["Collections/collections.json"])
+        paths = [g["rom_file_path"] for c in listing for g in c["game_list"]]
+        self.assertIn("/mnt/SDCARD/Roms/GBA/Game.zip", paths)
+        self.assertFalse([p for p in paths if "/PORTS/" in p])
+
+    def test_scrape_plan_has_no_ports_gamelist_on_spruce(self):
+        real, plans = scrape_plan.build_scrape_plan, []
+
+        def build(layout_name, systems, *a, **k):
+            plans.append(([s["bucket"] for s in systems], real(layout_name, systems, *a, **k)))
+            return plans[-1][1]
+        loaded = []
+        real_load = scrape_plan.load_scrape_data
+        self.sync(lambda card: touch(os.path.join(card, "Roms", "PORTS", ZIP), b"zip"),
+                  patches=((scrape_plan, {"build_scrape_plan": build,
+                                          "load_scrape_data": lambda systems: loaded.append([s["bucket"] for s in systems]) or real_load(systems)}),))
+        self.assertTrue(plans)
+        self.assertEqual({tuple(b) for b, _ in plans} | {tuple(b) for b in loaded}, {("gba",)})
+        self.assertFalse([gl for _, plan in plans for gl in plan["gamelists"] if "PORTS" in gl])
+        self.assertNotIn("Spruce art", self.out.getvalue())
+
+    def test_editor_counts_zero_for_ports_on_spruce(self):
+        fetchers = []
+        self.sync(lambda card: None, patches=((cli.surprise, {"run_surprise": lambda *a, **k: fetchers.append(k["to_fetch"]) or []}),))
+        to_fetch = fetchers[0]
+        self.assertEqual(to_fetch(PORTS, [PORT_KEY]), [])
+        self.assertEqual(list(to_fetch(GBA_SPRUCE, ["gba/Game.zip"])), ["gba/Game.zip"])
+        cache = {"gba/": {"gba/Game.zip": 5}, "ports/": {PORT_KEY: 3}, "scrapes/gba/": {}, "scrapes/ports/": {}}
+        card = {"layout": "spruce", "games": {"gba": [{"bucket": "gba/Game.zip"}], "ports": [{"bucket": PORT_KEY}]}}
+        with mock.patch.object(budget.inventory, "cached", cache.get), mock.patch.object(store, "load_sets", lambda: []):
+            self.assertEqual(tuple(budget.card_usage(card, [GBA_SPRUCE, PORTS])), tuple(budget.card_usage(card, [GBA_SPRUCE])))
+            self.assertEqual(budget.system_usage(card, PORTS).bytes, 0)
+            self.assertEqual(budget.card_fetch_bytes(card, [GBA_SPRUCE, PORTS], to_fetch), 5)
+            self.assertEqual(budget.system_usage({**card, "layout": "knulli"}, PORTS).bytes, 3)

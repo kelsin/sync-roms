@@ -1150,6 +1150,8 @@ def sync_card(args):
 
     def to_fetch(s, keys):
         """The keys of a system's ROMs that aren't on the card yet, for the card editor's size preview."""
+        if portmaster.skip(s, layout_name):  # PortMaster installs the port zips: none goes to Roms/PORTS
+            return []
         bucket = s["bucket"]
         seen = fetching.setdefault(bucket, {})
         todo = [k for k in keys if k not in seen]
@@ -1625,7 +1627,8 @@ def sync_card(args):
         if layout_name == "muos":
             plan = muos_collections.plan(base, muos_collections.wanted(card_colls, systems, on_card, mount), owned, args.no_delete)
         elif layout_name == "spruce":
-            plan = spruce_collections.plan(base, spruce_collections.wanted(card_colls, systems, on_card), owned, args.no_delete)
+            in_roms = [s for s in systems if not portmaster.skip(s, layout_name)]
+            plan = spruce_collections.plan(base, spruce_collections.wanted(card_colls, in_roms, on_card), owned, args.no_delete)
         else:
             wanted = frontend.wanted_collections(layout_name, card_colls, systems, on_card,
                                                  {k: d for s in systems for k, d in folders_of(s).items()})

@@ -25,6 +25,12 @@ def owns_folder(system):
     return system["bucket"] == PORTS
 
 
+def skip(system, layout_name):
+    """Whether the system is the port zips on spruce: never files in Roms/PORTS, so Surprise, collections, scrapes and
+    the editor's sizes leave it out."""
+    return layout_name == "spruce" and system["bucket"] == PORTS
+
+
 def installed(base):
     """{port folder: its parsed port.json} for each Roms/PORTS/<folder>/port.json on the card."""
     found = {}
