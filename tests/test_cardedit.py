@@ -197,7 +197,7 @@ class Flow(DataDir):
                              ({"layout": "spruce", "one_theme": True, "spruce_theme": "Mono"}, "🎨 Mono"),
                              ({"layout": "esde", "one_theme": True, "spruce_theme": "Mono"}, None)):
             self.card(size="1 GB", **entry)
-            title = self.run_card(returns(None))[0][0]
+            title = self.run_card(returns(None), setup=(DEVICE, "esde"))[0][0]
             if shown:
                 self.assertTrue(title.endswith(f" · {shown}"), title)
             else:
