@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.3.0](https://github.com/kelsin/sync-roms/compare/v4.2.0...v4.3.0) (2026-11-25)
+
+
+### :video_game: Features
+
+* **collections:** sort games by name and rebuild stale page on share ([#622](https://github.com/kelsin/sync-roms/issues/622)) ([e9bac5c](https://github.com/kelsin/sync-roms/commit/e9bac5c720941742fb1430a8f417ca7888e96841))
+
 ## [4.2.0](https://github.com/kelsin/sync-roms/compare/v4.1.0...v4.2.0) (2026-11-25)
 
 
