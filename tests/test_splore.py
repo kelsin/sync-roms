@@ -208,5 +208,34 @@ class Run(Splore):
         self.assertEqual(sorted(os.listdir(roms)), ["Again.p8.png", "Other.p8.png", "x-2.p8.png"])
 
 
+    def test_dry_run_lists_renames_without_new_carts(self):
+        data = bbs._PNG + b"B"
+        self.put("pico8/x-2.p8.png", data)
+        self.cart("bbs", "carts", "x-2.p8.png", data=data)
+        roms = self.cp("Roms", "PICO8")
+        os.makedirs(roms)
+        with open(os.path.join(roms, "My Game.p8.png"), "wb") as f:
+            f.write(data)
+        code, out = self.run_splore(dry_run=True)
+        self.assertEqual(code, 0)
+        self.assertEqual(os.listdir(roms), ["My Game.p8.png"])
+        self.assertIn("would rename My Game.p8.png → x-2.p8.png", out)
+
+    def test_ctrl_c_in_the_scrape_stops_the_sync(self):
+        self.scrape.return_value = 130
+        self.cart("bbs", "carts", "n-0.p8.png")
+        self.fav(NEW)
+        with self.assertRaises(KeyboardInterrupt), contextlib.redirect_stdout(io.StringIO()):
+            splore.run("c", self.card, self.cp("Roms", "PICO8"), PICO8, False)
+        self.assertEqual(self.games(), [{"title": "N", "bucket": "pico8/n-0.p8.png"}])
+
+    def test_dry_run_without_credentials_says_no_scrape(self):
+        self.settings({})
+        self.cart("bbs", "carts", "n-0.p8.png")
+        out = self.run_splore(dry_run=True)[1]
+        self.assertNotIn("would scrape", out)
+        self.assertIn("would not scrape", out)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -94,15 +94,19 @@ def _renames(base, pico8_dir, held):
     return out
 
 
-def _rename(base, pico8_dir):
-    """Rename the card's Splore-import copies of carts storage has to the cart's own file name. Exit code."""
+def _rename(base, pico8_dir, dry_run=False, planned=()):
+    """Rename the card's Splore-import copies of carts storage has to the cart's own file name. Exit code.
+    dry_run: only list them, counting the planned keys (carts the run would add) as held."""
     try:
-        held = set(inventory.files("pico8/", sizes=False))
+        held = set(inventory.files("pico8/", sizes=False)) | set(planned)
     except s3.ERRORS as e:
         ui.warn(f"Couldn't list pico8/ in {s3.location()} ({e}); not renaming Splore imports")
         return 1
     code = 0
     for old, file in _renames(base, pico8_dir, held):
+        if dry_run:
+            print(f"  would rename {old} → {file}")
+            continue
         try:
             os.rename(os.path.join(pico8_dir, old), os.path.join(pico8_dir, file))
         except OSError as e:
@@ -110,7 +114,8 @@ def _rename(base, pico8_dir):
             code = 1
             continue
         print(f"  📦 Renamed {old} → {file}")
-    cardfs.clear()
+    if not dry_run:
+        cardfs.clear()
     return code
 
 
@@ -120,17 +125,22 @@ def _fetch(cart, tmp):
     return path
 
 
-def _scrape(added, system):
-    """Scrape the carts just added; 0, or 1 when the scrape failed (warned)."""
+def _has_login():
     settings = usersettings.load_settings()
-    if not all(settings.get(k) for k in scrape_online.CREDENTIALS):
+    return all(settings.get(k) for k in scrape_online.CREDENTIALS)
+
+
+def _scrape(added, system):
+    """Scrape the carts just added: run_scrape's exit code (130: stopped with Ctrl-C), 0 without a login, 1 when it
+    failed (warned)."""
+    if not _has_login():
         print(ui.dim("  no ScreenScraper login saved: `sync-roms scrape pico8` scrapes them"))
         return 0
     try:
         sizes = inventory.files("pico8/")
         todo = [(key[len("pico8/"):], sizes.get(key), inventory.tag(key)) for key in added]
         return scrape_online.run_scrape(scrape_online.make_client(), {"pico8": system}, {"pico8": todo}, set(),
-                                        ask=False) and 1
+                                        ask=False)
     except SystemExit:  # ui.fail already said why
         ui.warn("The Splore carts' scrape stopped; `sync-roms scrape pico8` tries again")
         return 1
@@ -162,21 +172,15 @@ def run(card, base, pico8_dir, system, dry_run):
         return 1
     todo = [(None, c) for c in new] + upgrades
     if not todo:
-        return _rename(base, pico8_dir)
+        return _rename(base, pico8_dir, dry_run)
     print(ui.bold("🕹️  Splore carts on the card"))
     for old, c in todo:
         print(f"  new: {c['file']}" if old is None else f"  upgrade: {old} → {c['file']}")
     print(f"  {len(new)} new, {len(upgrades)} upgrade(s)")
     if dry_run:
-        print(ui.dim(f"  would scrape {len(new)} cart(s)"))
-        try:
-            held = set(inventory.files("pico8/", sizes=False)) | {f"pico8/{c['file']}" for _, c in todo}
-        except s3.ERRORS as e:
-            ui.warn(f"Couldn't list pico8/ in {s3.location()} ({e})")
-            return 1
-        for old, file in _renames(base, pico8_dir, held):
-            print(f"  would rename {old} → {file}")
-        return 0
+        print(ui.dim(f"  would scrape {len(new)} cart(s)" if _has_login() else
+                     "  no ScreenScraper login saved: would not scrape them (`sync-roms scrape pico8` does)"))
+        return _rename(base, pico8_dir, True, {f"pico8/{c['file']}" for _, c in todo})
     if not drivers.can_write():
         ui.warn(f"No write access to {s3.location()}: the Splore carts stay on the card only")
         return _rename(base, pico8_dir)
@@ -189,6 +193,9 @@ def run(card, base, pico8_dir, system, dry_run):
         added, _, code = bbs.add_carts(todo, _fetch, tmp)
     if added:
         names.reset()  # the titles add_carts just wrote
-        code = _scrape(added, system) or code
-        _add_to_card(card, added)
+        scraped = _scrape(added, system)
+        _add_to_card(card, added)  # first: the carts are in storage, and a later run wouldn't add them as new
+        if scraped == 130:
+            raise KeyboardInterrupt
+        code = (scraped and 1) or code
     return _rename(base, pico8_dir) or code
