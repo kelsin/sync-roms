@@ -588,7 +588,7 @@ class PaletteArgs(helpers.StorageDir):
 def visible_backgrounds(app, row):
     """The colors a terminal shows behind each blank run of a list row: reverse swaps foreground and background."""
     lines = app.screen_stack[0].query_one("_ListLines")
-    strip = lines.render_lines(lines.region)[row]
+    strip = lines.render_lines(lines.region.at_offset((0, 0)))[row]
     shown = []
     for s in strip:
         if s.text.strip() or not s.style:
@@ -606,7 +606,7 @@ class SwatchRendering(unittest.TestCase):
 
         async def script(pilot):
             await pilot.pause()
-            rows["cur"], rows["other"] = visible_backgrounds(pilot.app, 3), visible_backgrounds(pilot.app, 4)
+            rows["cur"], rows["other"] = visible_backgrounds(pilot.app, 0), visible_backgrounds(pilot.app, 1)
             await pilot.press("escape")
         with mock.patch.object(ui, "has_terminal", return_value=True):
             helpers.pilot_list(script, "t", ["a", "b"], multi=True, esc_asks=False,

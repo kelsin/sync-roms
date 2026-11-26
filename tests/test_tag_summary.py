@@ -53,19 +53,19 @@ class Model(unittest.TestCase):
     def test_roomy_list_shows_every_tag_and_keeps_its_rows(self):
         m = model(height=30)
         self.assertEqual(m.tag_area(), picker.tag_lines(INFOS, 80))
-        self.assertEqual(m.view, 30 - 5 - 3)
+        self.assertEqual(m.view, 30 - 6 - 3)
 
     def test_a_tight_list_shows_one_line_of_names(self):
         m = model(height=12)
         self.assertEqual(len(m.tag_area()), 1)
         self.assertTrue(m.tag_area()[0].startswith("⚔️ RPG · 📖 Story"))
-        self.assertEqual(m.view, 12 - 6)
+        self.assertEqual(m.view, 12 - 7)
 
     def test_a_game_without_tags_shows_nothing_new(self):
         m = model(height=30)
         m.key("j")
         self.assertEqual(m.tag_area(), [])
-        self.assertEqual(m.view, 30 - 5)
+        self.assertEqual(m.view, 30 - 6)
 
     def test_no_tag_info_shows_nothing(self):
         m = picker._ListModel("t", ["a"], False, None, "", 0, None, None, "", (), None, None, True, None, None, True,

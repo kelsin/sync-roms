@@ -512,15 +512,15 @@ class Keys(unittest.TestCase):
         self.assertEqual(run_list(["G", "g", "enter"], self.LABELS), 0)
 
     def test_page_and_half_page_movement(self):
-        labels = [f"row {i}" for i in range(50)]  # the list model shows 19 rows until a screen sizes it
+        labels = [f"row {i}" for i in range(50)]  # the list model shows 18 rows until a screen sizes it
         self.assertEqual(run_list(["ctrl+d", "enter"], labels), 9)
-        self.assertEqual(run_list(["ctrl+f", "enter"], labels), 19)
-        self.assertEqual(run_list(["ctrl+f", "ctrl+u", "enter"], labels), 10)
-        self.assertEqual(run_list(["ctrl+f", "ctrl+f", "ctrl+b", "enter"], labels), 19)
+        self.assertEqual(run_list(["ctrl+f", "enter"], labels), 18)
+        self.assertEqual(run_list(["ctrl+f", "ctrl+u", "enter"], labels), 9)
+        self.assertEqual(run_list(["ctrl+f", "ctrl+f", "ctrl+b", "enter"], labels), 18)
         self.assertEqual(run_list(["ctrl+f", "ctrl+f", "ctrl+d", "ctrl+d", "enter"], labels), 49)  # stops on the last row
         self.assertEqual(run_list(["ctrl+d", "ctrl+b", "enter"], labels), 0)  # and on the first
         self.assertEqual(run_list(["ctrl+u", "enter"], labels), 0)
-        self.assertEqual(run_list(["ctrl+d", "ctrl+d", "ctrl+u", "ctrl+f", "enter"], labels), 28)
+        self.assertEqual(run_list(["ctrl+d", "ctrl+d", "ctrl+u", "ctrl+f", "enter"], labels), 27)
 
     def test_a_hotkey_wins_over_a_movement_key(self):
         self.assertEqual(run_list(["j", "g"], self.LABELS, hotkeys=("g",)), ("g", 1))
@@ -753,7 +753,7 @@ class TextualList(unittest.TestCase):
 
     def test_game_preview_is_300px_wide_in_its_own_column_at_the_top_right(self):
         [(shown, region, classes, pixels, list_width)] = self.preview_layout((600, 400), preview_width=300)
-        self.assertEqual((shown, region, pixels, list_width), (True, (50, 0, 30, 10), (300, 200), 50))  # 300/10, 200/20
+        self.assertEqual((shown, region, pixels, list_width), (True, (50, 4, 30, 10), (300, 200), 50))  # 300/10, 200/20
         self.assertIn("fixed", classes)
 
     def test_game_preview_shows_nothing_when_the_terminal_is_too_narrow_or_too_short(self):
@@ -765,12 +765,12 @@ class TextualList(unittest.TestCase):
     def test_game_preview_column_comes_and_goes_as_the_terminal_resizes(self):
         before, after = self.preview_layout((600, 400), size=(60, 24), resize_to=(80, 24), preview_width=300)
         self.assertEqual((before[0], before[4]), (False, 60))
-        self.assertEqual((after[0], after[1], after[4]), (True, (50, 0, 30, 10), 50))
+        self.assertEqual((after[0], after[1], after[4]), (True, (50, 4, 30, 10), 50))
 
     def test_other_previews_keep_the_auto_pane_beside_the_list(self):
         [(shown, region, classes, pixels, list_width)] = self.preview_layout((45, 108))
         self.assertEqual((shown, pixels, classes), (True, (45, 108), []))  # an 800 px cap doesn't grow it
-        self.assertEqual(region[1:], (0, region[2], 24))  # the whole height
+        self.assertEqual(region[1:], (4, region[2], 18))  # the whole height between the borders
         self.assertEqual(region[0] + region[2], 80)
         self.assertEqual(list_width, region[0])
         pane_css = picker._app_class().CSS
@@ -779,7 +779,7 @@ class TextualList(unittest.TestCase):
     def test_a_wide_preview_keeps_its_shape_when_the_pane_is_width_capped(self):
         [(shown, region, _, pixels, list_width)] = self.preview_layout((640, 480))
         # 34% of 80 is 27 cells (270 px); 270 x 202 px is 10 rows of 20 px, not the whole height
-        self.assertEqual((shown, region, list_width), (True, (53, 0, 27, 10), 53))
+        self.assertEqual((shown, region, list_width), (True, (53, 4, 27, 10), 53))
 
     def test_block_fallbacks_dont_count_as_drawing_images(self):
         from sync_roms import picker
@@ -964,10 +964,10 @@ class TextualList(unittest.TestCase):
         self.assertTrue(row.endswith(" row 1 · 3/3 shown"), row)
 
     def test_pending_counts_come_first_and_the_view_stays_ahead_of_the_position_beside_the_image_pane(self):
-        status = "💾 1 GB used · 3 files"  # in the 60 columns the pane leaves, only the compact position fits beside it
+        status = "💾 1 GB used · 3 files"  # the status row is full width: the picture doesn't narrow it
         row = self.bottom_text(status, preview=True)
         self.assertTrue(row.startswith("+0 −0 · " + status + " · view: all "), row)
-        self.assertTrue(row.endswith(" 1 · 3/3"), row)
+        self.assertTrue(row.endswith(" row 1 · 3/3 shown"), row)
 
     def test_status_counts_what_the_filter_shows(self):
         rows = []
@@ -1033,7 +1033,7 @@ class NarrowRows(unittest.TestCase):
     def test_a_long_label_is_cut_with_an_ellipsis_and_the_extras_are_columns_after_it(self):
         for size, preview in (((80, 24), False), ((80, 24), True), ((100, 24), False)):
             lines, width = self.rendered(size, preview)
-            long_row, short_row = lines[3], lines[4]
+            long_row, short_row = lines[4], lines[5]
             self.assertLess(width, cell_len("⬜ " + self.LONG + "  📦 Shmups  1.2 GB"), (size, preview))  # too long for the row
             self.assertEqual(cell_len(long_row), width)
             self.assertTrue(long_row.startswith("⬜ Pocket Monsters"), long_row)
@@ -1046,8 +1046,8 @@ class NarrowRows(unittest.TestCase):
     def test_rows_are_a_left_aligned_table_when_the_labels_fit(self):
         lines, width = self.rendered((120, 24))
         self.assertEqual(width, 120)
-        self.assertEqual(lines[3].rstrip(), "⬜ " + self.LONG + "  📦 Shmups  1.2 GB")
-        self.assertEqual(lines[4].rstrip(), "⬜ Short" + " " * 85 + " " * 11 + "  12 MB")  # label column, empty set column
+        self.assertEqual(lines[4].rstrip(), "⬜ " + self.LONG + "  📦 Shmups  1.2 GB")
+        self.assertEqual(lines[5].rstrip(), "⬜ Short" + " " * 85 + " " * 11 + "  12 MB")  # label column, empty set column
 
     def test_the_cut_counts_cells_and_never_splits_a_wide_character(self):
         from rich.text import Text
@@ -1079,6 +1079,11 @@ class NarrowRows(unittest.TestCase):
         self.assertEqual(lines[-2].rstrip(), "─" * width)
         self.assertNotIn("─", lines[-3] + lines[-1])
 
+    def test_a_border_line_separates_the_header_from_the_list(self):
+        lines, width = self.rendered()
+        self.assertEqual(lines[3].rstrip(), "─" * width)
+        self.assertNotIn("─", "".join(lines[:3]))
+
     def test_filters_show_on_the_filter_line(self):
         lines, _ = self.rendered(filters="📦 Shmups only (c clear filters)")
         self.assertEqual(lines[0].rstrip(), "t")
@@ -1090,7 +1095,7 @@ class NarrowRows(unittest.TestCase):
         with mock.patch.object(picker, "_run", seen.append):
             picker.filter_list("t", [str(i) for i in range(30)], multi=True, session=session)
         m = seen[0]
-        self.assertEqual((m.view, len(m.vis), m.vis[m.cur], m.top), (19, 25, 22, 6))  # rows 6..24: no blank rows
+        self.assertEqual((m.view, len(m.vis), m.vis[m.cur], m.top), (18, 25, 22, 7))  # rows 7..24: no blank rows
 
 
 class TagColumn(DataDir):
