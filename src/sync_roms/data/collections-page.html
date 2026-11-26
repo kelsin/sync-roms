@@ -12,6 +12,8 @@
   --text: #1f1d1a;
   --muted: #6b665e;
   --border: #e2ddd4;
+  --pill-border: #a89f90;
+  --pill-bg: #e6e0d5;
   --accent: #b4532a;
   --accent-soft: #f6e3d8;
   --accent-text: #8a3b19;
@@ -26,6 +28,8 @@
     --text: #ece8e1;
     --muted: #a39d93;
     --border: #36332f;
+    --pill-border: #6b665e;
+    --pill-bg: #38352f;
     --accent: #e48a5c;
     --accent-soft: #3b2a20;
     --accent-text: #f2b08e;
@@ -85,32 +89,31 @@ input:focus-visible, select:focus-visible, button:focus-visible, [role="button"]
   min-width: 0;
 }
 .rhead {
-  display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 16px; align-items: center;
-  padding: 14px 16px; background: var(--surface); cursor: default;
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 16px; align-items: start;
+  padding: 16px; background: var(--surface); cursor: default;
 }
 .rhead[role="button"] { cursor: pointer; }
 .rhead[role="button"]:hover { background: var(--surface-2); }
 .rhead:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.row.open { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent), var(--shadow); }
 .row.open .rhead { position: sticky; top: var(--bar-h, 0px); z-index: 1; border-bottom: 1px solid var(--border); }
 .rtitle { display: flex; align-items: center; gap: 10px; }
-.chev { flex: none; width: 1em; color: var(--accent-text); font-size: 20px; line-height: 1; }
-.chev::before { content: "\25B8"; }
-.row.open .chev::before { content: "\25BE"; }
-.name { margin: 0; font-size: 22px; line-height: 1.25; overflow-wrap: anywhere; flex: 0 1 auto; min-width: 0; }
-.link {
-  flex: none; border: 1px solid var(--border); background: var(--surface); border-radius: 6px;
-  padding: 2px 8px; font-size: 13px; cursor: pointer;
-}
-.link.done { border-color: var(--accent); color: var(--accent-text); }
+.name { margin: 0; font-size: 28px; line-height: 1.1; overflow-wrap: anywhere; flex: 0 1 auto; min-width: 0; }
 .desc { margin: 4px 0 0; color: var(--muted); overflow-wrap: anywhere; }
-.meta { margin: 4px 0 0; font-size: 13px; color: var(--muted); }
-.rtags { margin: 6px 0 0; display: flex; flex-wrap: wrap; gap: 2px 6px; font-size: 16px; line-height: 1.3; }
-.rtags span { cursor: default; }
-.pics { display: flex; gap: 8px; align-items: center; justify-content: flex-end; height: 120px; }
+.pics { display: flex; gap: 8px; align-items: center; align-self: center; justify-content: flex-end; height: 120px; }
 .pics img { display: block; height: 100%; width: auto; flex: none; border-radius: 6px; }
-.pills { margin: 8px 0 0; display: flex; flex-wrap: wrap; gap: 6px; }
-.pill { border: 1px solid var(--border); background: var(--surface-2); border-radius: 999px; padding: 1px 10px; font-size: 13px; color: var(--muted); white-space: nowrap; }
-.pill b { color: var(--text); font-weight: 600; }
+.pills { margin: 8px 0 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.pill { flex: none; display: inline-flex; align-items: center; gap: .3em; min-height: 26px; border: 1px solid var(--pill-border); background: var(--pill-bg); border-radius: 999px; padding: 2px 10px; font-size: 13px; line-height: 1.3; color: var(--muted); white-space: nowrap; }
+.pill b { color: var(--text); font-weight: 700; }
+.pills.tags { margin-top: 6px; gap: 0; }
+.tag {
+  position: relative; display: inline-flex; align-items: center; justify-content: center;
+  flex: none; width: 30px; height: 30px; font-size: 18px; line-height: 1; cursor: default;
+}
+.tip {
+  position: fixed; z-index: 6; background: var(--text); color: var(--bg); border-radius: 6px; padding: 3px 8px;
+  font-size: 12px; line-height: 1.3; white-space: nowrap; pointer-events: none;
+}
 .tablewrap { overflow-x: auto; }
 table.games { width: 100%; border-collapse: collapse; }
 .games th, .games td { padding: 8px 14px; text-align: left; vertical-align: middle; }
@@ -121,6 +124,7 @@ table.games { width: 100%; border-collapse: collapse; }
 .games td { border-top: 1px solid var(--border); }
 .games tbody tr:nth-child(even) { background: var(--surface-2); }
 .games .col-system { width: 22%; color: var(--muted); }
+.games .col-year { width: 76px; white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--muted); }
 .games .col-size { width: 96px; text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .games th.col-size { text-align: right; }
 .size-val { cursor: help; border-bottom: 1px dotted var(--muted); }
@@ -132,29 +136,33 @@ table.games { width: 100%; border-collapse: collapse; }
 }
 .size-pop span:nth-child(odd) { text-align: left; color: var(--muted); }
 .size-pop .sum { border-top: 1px solid var(--border); padding-top: 3px; margin-top: 2px; color: var(--text); font-weight: 600; }
-.games .col-tags { width: 150px; }
-.games .col-copy { width: 90px; text-align: right; }
+.games .col-tags { width: 1%; white-space: nowrap; }
+.games .col-copy { width: 122px; text-align: right; }
 .games .title { overflow-wrap: anywhere; }
 .sys-inline { display: none; font-size: 13px; color: var(--muted); }
-.cell-tags span { cursor: default; margin-right: 4px; }
+.cell-tags { line-height: 0; white-space: nowrap; }
 .copy {
   border: 1px solid var(--border); background: var(--surface); border-radius: 6px;
-  padding: 4px 10px; font-size: 13px; cursor: pointer; min-width: 64px;
+  padding: 4px 0; font-size: 13px; cursor: pointer; width: 92px; white-space: nowrap;
 }
 .copy.done { border-color: var(--accent); color: var(--accent-text); }
 .nomatch td { color: var(--muted); font-size: 14px; }
 @media (max-width: 640px) {
   .rhead { grid-template-columns: minmax(0, 1fr); padding: 12px; }
   .pics { height: 96px; justify-content: flex-start; }
-  .name { font-size: 20px; }
+  .name { font-size: 24px; }
   .games th, .games td { padding: 8px 10px; }
   .games .col-system { display: none; }
+  .games .col-year { width: 56px; }
   .games .col-size { width: 74px; }
-  .pill { font-size: 12px; padding: 0 8px; }
-  .games .col-tags { width: 84px; }
-  .games .col-copy { width: 76px; }
+  .pill { font-size: 12px; padding: 2px 8px; }
+  .games .col-copy { width: 112px; }
   .sys-inline { display: block; }
-  .copy, .link { min-height: 36px; }
+  .copy { min-height: 36px; }
+}
+.toast {
+  position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); z-index: 5;
+  background: var(--text); color: var(--bg); border-radius: 999px; padding: 6px 14px; font-size: 13px;
 }
 .empty { color: var(--muted); text-align: center; padding: 48px 0; }
 [hidden] { display: none !important; }
@@ -224,7 +232,28 @@ table.games { width: 100%; border-collapse: collapse; }
     pop.style.left = left + "px";
     pop.style.top = Math.max(8, top) + "px";
   }
-  function hidePop() { pop.hidden = true; }
+  function hidePop() { pop.hidden = true; tip.hidden = true; }
+  // The tag tooltip lives on the body, so no row or header border can clip it.
+  var tip = el("div", "tip");
+  tip.hidden = true;
+  document.body.appendChild(tip);
+  function tagOf(event) { return event.target.closest ? event.target.closest(".tag[data-tip]") : null; }
+  function showTip(event) {
+    var tag = tagOf(event);
+    if (!tag) return;
+    tip.textContent = tag.getAttribute("data-tip");
+    tip.hidden = false;
+    var box = tag.getBoundingClientRect(), width = tip.offsetWidth, height = tip.offsetHeight;
+    var left = Math.max(8, Math.min(box.left + box.width / 2 - width / 2, window.innerWidth - width - 8));
+    var top = box.top - height - 6 < 8 ? box.bottom + 6 : box.top - height - 6;
+    tip.style.left = left + "px";
+    tip.style.top = top + "px";
+  }
+  function hideTip(event) { if (tagOf(event)) tip.hidden = true; }
+  document.addEventListener("mouseover", showTip);
+  document.addEventListener("mouseout", hideTip);
+  document.addEventListener("focusin", showTip);
+  document.addEventListener("focusout", hideTip);
   window.addEventListener("scroll", hidePop, {passive: true});
   document.addEventListener("click", function (event) {
     if (!event.target.classList || !event.target.classList.contains("size-val")) hidePop();
@@ -328,7 +357,7 @@ table.games { width: 100%; border-collapse: collapse; }
     });
   }
 
-  var sortKey = "name", sortDir = 1;
+  var sortKey = "year", sortDir = 1;
   var bar = document.querySelector(".bar");
 
   function gameRow(game) {
@@ -338,6 +367,7 @@ table.games { width: 100%; border-collapse: collapse; }
     name.appendChild(el("div", "sys-inline", systems[game.system] || game.system));
     row.appendChild(name);
     row.appendChild(el("td", "col-system", systems[game.system] || game.system));
+    row.appendChild(el("td", "col-year", game.year || "\u2014"));
     var sizeCell = el("td", "col-size");
     if (game.size) {
       var val = el("span", "size-val", formatSize(sizeTotal(game)));
@@ -355,11 +385,15 @@ table.games { width: 100%; border-collapse: collapse; }
     }
     row.appendChild(sizeCell);
     var tagCell = el("td", "col-tags cell-tags");
-    (game.tags || []).forEach(function (id) {
+    (game.tags || []).filter(function (id) { return tagDefs[id]; }).sort(function (a, b) {
+      return tagDefs[a].name.localeCompare(tagDefs[b].name);
+    }).forEach(function (id) {
       var def = tagDefs[id];
-      if (!def) return;
       var span = el("span", "", def.emoji);
-      span.title = def.name;
+      span.className = "tag";
+      span.setAttribute("data-tip", def.name);
+      span.setAttribute("aria-label", def.name);
+      span.tabIndex = 0;
       tagCell.appendChild(span);
     });
     row.appendChild(tagCell);
@@ -390,37 +424,33 @@ table.games { width: 100%; border-collapse: collapse; }
     var head = el("div", "rhead");
     var text = el("div", "rtext");
     var title = el("div", "rtitle");
-    title.appendChild(el("span", "chev"));
-    title.lastChild.setAttribute("aria-hidden", "true");
     title.appendChild(el("h2", "name", c.name));
-    var link = el("button", "link", "🔗");
-    link.type = "button";
-    link.title = "Copy link to this collection";
-    link.setAttribute("aria-label", "Copy link to this collection");
-    copyButton(link, function () { return pageUrl() + "#" + params(c.id).toString(); }, "🔗");
-    link.addEventListener("click", function (event) { event.stopPropagation(); });
-    link.addEventListener("keydown", function (event) { event.stopPropagation(); });
-    title.appendChild(link);
     text.appendChild(title);
     if (c.description) text.appendChild(el("p", "desc", c.description));
-    var meta = el("p", "meta");
-    text.appendChild(meta);
-    if (c.size && (c.games || []).some(function (g) { return g.size; })) {
-      var pills = el("div", "pills");
-      [["Total", c.size.rom + c.size.art], ["ROMs", c.size.rom], ["Art data", c.size.art]].forEach(function (p) {
-        var pill = el("span", "pill", p[0] + " ");
-        pill.appendChild(el("b", "", formatSize(p[1])));
-        pills.appendChild(pill);
-      });
-      text.appendChild(pills);
+    var pills = el("div", "pills");
+    var meta = el("span", "pill meta");
+    pills.appendChild(meta);
+    function stat(value, label) {
+      var pill = el("span", "pill");
+      pill.appendChild(el("b", "", value));
+      pill.appendChild(document.createTextNode(label));
+      return pill;
     }
-    var tagBox = el("div", "rtags");
+    if (c.size && (c.games || []).some(function (g) { return g.size; })) {
+      [["Total", c.size.rom + c.size.art], ["ROMs", c.size.rom], ["Scraped Data", c.size.art]].forEach(function (p) {
+        pills.appendChild(stat(formatSize(p[1]), p[0]));
+      });
+    }
+    text.appendChild(pills);
+    var tagLine = el("div", "pills tags");
     tagsOf(c).forEach(function (t) {
-      var span = el("span", "", t.emoji);
-      span.title = t.name;
-      tagBox.appendChild(span);
+      var span = el("span", "tag", t.emoji);
+      span.setAttribute("data-tip", t.name);
+      span.setAttribute("aria-label", t.name);
+      span.tabIndex = 0;
+      tagLine.appendChild(span);
     });
-    if (tagBox.childNodes.length) text.appendChild(tagBox);
+    if (tagLine.childNodes.length) text.appendChild(tagLine);
     head.appendChild(text);
     var pics = el("div", "pics");
     [["box", "box"], ["band", "band"], ["totk", "ToTK"]].forEach(function (kind) {
@@ -457,7 +487,7 @@ table.games { width: 100%; border-collapse: collapse; }
     var table = el("table", "games");
     var tr = el("tr");
     entry.ths = {};
-    [["name", "Name", ""], ["system", "System", "col-system"], ["size", "Size", "col-size"], [null, "Tags", "col-tags"], [null, "", "col-copy"]]
+    [["name", "Name", ""], ["system", "System", "col-system"], ["year", "Year", "col-year"], ["size", "Size", "col-size"], [null, "Tags", "col-tags"], [null, "", "col-copy"]]
       .forEach(function (col) {
         var th = el("th", col[2]);
         th.scope = "col";
@@ -496,17 +526,28 @@ table.games { width: 100%; border-collapse: collapse; }
       h.th.setAttribute("aria-sort", on ? (sortDir > 0 ? "ascending" : "descending") : "none");
     });
     var rows = entry.matching.slice();
+    function tie(a, b) {  // name (the page's title order), then system
+      if (a.game.title === b.game.title) {
+        return (systems[a.game.system] || a.game.system).localeCompare(systems[b.game.system] || b.game.system) || a.index - b.index;
+      }
+      return a.index - b.index;
+    }
     rows.sort(function (a, b) {
       var order = 0;
       if (sortKey === "size") {  // no known size sorts last in either direction
         var sa = sizeTotal(a.game), sb = sizeTotal(b.game);
         if ((sa < 0) !== (sb < 0)) return sa < 0 ? 1 : -1;
-        return (sa - sb) * sortDir || a.index - b.index;
+        return (sa - sb) * sortDir || tie(a, b);
+      }
+      if (sortKey === "year") {  // no known year sorts last in either direction
+        var ya = a.game.year || "", yb = b.game.year || "";
+        if (!ya !== !yb) return ya ? -1 : 1;
+        return ya.localeCompare(yb) * sortDir || tie(a, b);
       }
       if (sortKey === "system") {
         order = (systems[a.game.system] || a.game.system).localeCompare(systems[b.game.system] || b.game.system);
       }
-      return (order || a.index - b.index) * sortDir;
+      return (order || tie(a, b)) * sortDir;
     });
     entry.tbody.textContent = "";
     rows.forEach(function (r) {
@@ -516,7 +557,7 @@ table.games { width: 100%; border-collapse: collapse; }
     if (!rows.length) {
       var none = el("tr", "nomatch");
       var cell = el("td", "", "No games match the filters");
-      cell.colSpan = 5;
+      cell.colSpan = 6;
       none.appendChild(cell);
       entry.tbody.appendChild(none);
     }
@@ -559,6 +600,18 @@ table.games { width: 100%; border-collapse: collapse; }
   function openEntry() {
     return cards.filter(function (entry) { return entry.collection.id === current; })[0];
   }
+  var toast = el("div", "toast");
+  toast.hidden = true;
+  document.body.appendChild(toast);
+  var toastTimer;
+  function copyLink(entry) {
+    copy(pageUrl() + "#" + params(entry.collection.id).toString()).then(function (ok) {
+      toast.textContent = ok ? "Link copied" : "Couldn't copy the link";
+      toast.hidden = false;
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(function () { toast.hidden = true; }, 1500);
+    });
+  }
   function toggle(entry) {
     var before = entry.row.getBoundingClientRect().top;
     var closing = current === entry.collection.id;
@@ -567,6 +620,7 @@ table.games { width: 100%; border-collapse: collapse; }
     var after = entry.row.getBoundingClientRect().top;
     if (!closing && after !== before) window.scrollBy(0, after - before); // keep the row where it was
     if (entry.row.getBoundingClientRect().top < barHeight()) scrollToRow(entry);
+    if (!closing) copyLink(entry);
   }
   function applyHash() {
     var hash = new URLSearchParams(location.hash.slice(1));
@@ -607,8 +661,10 @@ table.games { width: 100%; border-collapse: collapse; }
       if (picked) renderTable(entry);
       if (entry.body) entry.body.hidden = !picked;
       var total = entry.games.length;
-      entry.meta.textContent = filtering && passing !== total
-        ? passing + " of " + plural(total, "game") : plural(total, "game");
+      entry.meta.textContent = "";
+      entry.meta.appendChild(el("b", "", String(passing)));
+      entry.meta.appendChild(document.createTextNode(
+        (filtering && passing !== total ? "of " + total + " " : "") + (total === 1 ? "game" : "games")));
       if (visible) { shownCollections++; shownGames += passing; }
     });
     count.textContent = plural(shownCollections, "collection") + " · " + plural(shownGames, "game");

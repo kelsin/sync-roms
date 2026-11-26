@@ -9,7 +9,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import helpers  # noqa: E402
-from sync_roms import collections, collections_page, inventory, names, store, tags  # noqa: E402
+from sync_roms import collections, collections_page, inventory, names, scrape_plan, store, tags  # noqa: E402
 
 SMW = "snes/Super Mario World (USA).zip"
 TAGS = {"mario": {"name": "Mario", "emoji": "🍄"}, "platformers": {"name": "Platformers", "emoji": "🏃"}}
@@ -94,6 +94,21 @@ class Page(helpers.DataDir):
         return self.enterContext(mock.patch.object(inventory, "files", lambda prefix, sizes=True: {
             k: v for k, v in files.items() if k.startswith(prefix)}))
 
+    def test_release_year_from_metadata(self):
+        meta = {"Super Mario World (USA).zip": {"releasedate": "19901121"}, "x.sfc": {"releasedate": "unknown"}}
+        self.enterContext(mock.patch.object(scrape_plan, "load_metadata", lambda system, fresh=False: meta))
+        self.save(games=[{"system": "snes", "bucket": SMW, "title": "S"},
+                         {"system": "snes", "bucket": "snes/x.sfc", "title": "X"}])
+        games = {g["title"]: g for g in collections_page.page_data()["collections"][0]["games"]}
+        self.assertEqual(games["S"]["year"], "1990")
+        self.assertNotIn("year", games["X"])
+
+    def test_unreachable_storage_means_no_years(self):
+        self.enterContext(mock.patch.object(scrape_plan, "load_metadata", side_effect=SystemExit(2)))
+        self.save(games=[{"system": "snes", "bucket": SMW, "title": "S"}])
+        data = collections_page.page_data()
+        self.assertNotIn("year", data["collections"][0]["games"][0])
+
     def test_sizes_rom_and_art(self):
         self.listing({SMW: 1000, "snes/other.zip": 5,
                       "scrapes/snes/covers/Super Mario World (USA).png": 40,
@@ -164,7 +179,7 @@ class TemplateTest(unittest.TestCase):
         self.assertNotIn("overflow: hidden; min-width", self.html)
 
     def test_size_column_and_sort(self):
-        for needle in ('["size", "Size", "col-size"]', "col[0] === \"size\" ? -1 : 1", "Art data", "formatSize", "pills"):
+        for needle in ('["year", "Year", "col-year"]', '["size", "Size", "col-size"]', "col[0] === \"size\" ? -1 : 1", "Art data", "formatSize", "pills"):
             self.assertIn(needle, self.html)
 
     def test_reads_and_writes_hash(self):
