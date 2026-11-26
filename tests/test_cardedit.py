@@ -1743,6 +1743,21 @@ class DiscFlow(Flow):
             cardedit.match_counts("c", setup, [GBA, GB], memo)
             self.assertEqual(len(built), 2)
 
+    def test_match_counts_refresh_when_the_tags_object_is_replaced(self):
+        self.card()
+        self.tag_pokemon()
+        tagui.FILTER.required.add("pk")
+        self.addCleanup(tagui.FILTER.clear)
+        memo, setup = {}, (DEVICE, "esde")
+        before = cardedit.match_counts("c", setup, [GB], memo)
+        self.assertEqual(before, {"gb": 1})
+        old = tags.load()
+        # a tag edit replaces the loaded data; the filter and cache are the same, and the new object may even reuse the old one's id
+        new = {**old, "games": {}}
+        with mock.patch.object(tags, "load", lambda: new):
+            self.assertEqual(cardedit.match_counts("c", setup, [GB], memo), {"gb": 0})
+        self.assertIs(memo["tags"], new)
+
     def test_a_tag_filter_showing_one_disc_still_switches_the_whole_game(self):
         self.card()
         self.tag_pokemon([DISCS[1]])

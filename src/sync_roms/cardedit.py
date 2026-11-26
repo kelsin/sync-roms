@@ -100,15 +100,16 @@ def match_counts(name, setup, systems, memo):
     the storage cache changed."""
     if not tagui.FILTER.describe():
         return None
-    stamp = (inventory.version(), frozenset(tagui.FILTER.required), frozenset(tagui.FILTER.excluded), id(tags.load()))
-    if memo.get("stamp") != stamp:
+    data = tags.load()  # kept in the memo and compared with `is`: an id could be reused by a replacement
+    stamp = (inventory.version(), frozenset(tagui.FILTER.required), frozenset(tagui.FILTER.excluded))
+    if memo.get("stamp") != stamp or memo.get("tags") is not data:
         picks, out = cardpicks.CardPicks(name, setup), {}
         for s in systems:
             try:
                 out[s["bucket"]] = None if picks.full(s["bucket"]) else len(shown_rows(picks.system(s), tagui.FILTER.keep))
             except s3.ERRORS:
                 out[s["bucket"]] = None
-        memo["stamp"], memo["counts"] = stamp, out
+        memo["stamp"], memo["tags"], memo["counts"] = stamp, data, out
     return memo["counts"]
 
 
