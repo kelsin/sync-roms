@@ -1245,6 +1245,23 @@ class TagColumn(DataDir):
         self.assertIn("no games match the tag filter", seen[0][1])
         self.assertEqual(seen[1], (["A", "B"], ""))
 
+    def test_the_banner_is_left_to_a_caller_that_takes_s_whatever_its_filters_line_says(self):
+        tagui = edit.tagui
+        tagui.FILTER.required = {"x"}
+        seen = []
+        with mock.patch.object(picker, "filter_list", side_effect=lambda t, l, **kw: seen.append(kw["filters"]) or kw["session"]["sel"]):
+            edit.toggle_games("t", self.ROWS, hotkeys=("s", "c"), filters="mine")  # the caller names the filter
+            edit.toggle_games("t", self.ROWS, filters="mine: ✅ 🐝 X")  # it doesn't: a lookalike line isn't the banner
+        self.assertEqual(seen[0], "mine")
+        self.assertEqual(seen[1], "mine: ✅ 🐝 X · ✅ 🐝 X · 1 of 2 shown (c clear filters)")
+
+    def test_a_list_the_callers_own_filters_emptied_says_so(self):
+        seen = []
+        with mock.patch.object(picker, "filter_list", side_effect=lambda t, l, **kw: seen.append(kw["filters"]) or kw["session"]["sel"]):
+            edit.toggle_games("t", [], hotkeys=("s", "c"), filters="🎁 past surprises only", before=3)
+            edit.toggle_games("t", [], before=0)
+        self.assertEqual(seen, ["🎁 past surprises only · no games match the filters", ""])
+
     def test_tag_filter_false_shows_every_row_without_s_c_or_banner(self):
         tagui = edit.tagui
         tagui.FILTER.required = {"x"}

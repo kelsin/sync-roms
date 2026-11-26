@@ -80,7 +80,7 @@ def toggle_filtered(s, title, rows):
         shown = [r for r in rows if filters.keep(r[1])]
         pressed = edit.toggle_games(title, shown, hotkeys=cardedit.GameFilters.KEYS,
                                     hint=GAMES_HINT, key_help=GAMES_KEYS, place=place,
-                                    filters=filters.describe(len(shown), len(rows)))
+                                    filters=filters.describe(len(shown), len(rows)), before=len(rows))
         if not filters.handle(pressed, [r[1] for r in rows], place):
             return
 

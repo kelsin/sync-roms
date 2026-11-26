@@ -273,6 +273,24 @@ class Discs(unittest.TestCase):
         self.assertEqual(lists[2][1], ["Zelda.zip"])
         self.assertEqual(len(lists[3][1]), 3)
 
+    def test_a_list_its_filters_empty_says_no_game_matches_and_names_the_tag_filter_once(self):
+        collection = {"name": "Favs", "games": []}
+        tag_games(self, {"gba/Zelda.zip": None})
+        tagui.FILTER.required = {"mix"}
+        picks = iter([1])  # Game Boy Advance, after All systems
+        lists = []
+
+        def fake(title, labels, **kw):
+            if kw.get("multi"):
+                lists.append((list(labels), kw["filters"]))
+                return kw["initial"]
+            return next(picks)
+        with mock.patch.object(picker, "filter_list", fake), mock.patch.object(collectionedit.cardedit, "Metadata"):
+            add_from_system(collection, lambda bucket: {"gba/Ruby.zip"} if bucket == "gba" else set(),
+                            toggle=collectionedit.toggle_filtered)
+        self.assertEqual(lists[0][0], [])
+        self.assertEqual(lists[0][1], "✅ 🔀 Mix · 0 of 1 shown (c clear filters) · no games match the tag filter")
+
 
 class GamesFirst(unittest.TestCase):
     OLD = {"title": "Ruby", "system": "gba", "bucket": "gba/Ruby.zip", "note": "the good one"}

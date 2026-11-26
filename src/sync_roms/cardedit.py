@@ -8,8 +8,8 @@ from . import budget, cardpicks, collections as colls, edit, guest, inventory, l
 
 FULL_KEY = "f"
 OFF_KEY = "x"
-SET_KEY = "s"
-CLEAR_KEY = "c"
+SET_KEY = tagui.SET_KEY
+CLEAR_KEY = tagui.CLEAR_KEY
 CLEAR_ALL_KEY = "D"
 COLLECTIONS_KEY = "l"
 SETTINGS_KEY = "S"

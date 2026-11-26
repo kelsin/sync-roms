@@ -47,7 +47,10 @@ ignore._keys = frozenset()  # no test reads the ignore list from storage unless 
 names._scraped = {s: {} for s in names.SYSTEMS}  # no test reads scraped names from storage unless it calls names.reset()
 tags._set(tags._empty())  # no tags: tests that need some put them in storage (helpers.storage_tags)
 
-if not getattr(unittest.TestCase, "_sync_roms_filter_reset", False):  # the tag filter, recent tags and `.` are process-wide: every test starts without them
+# The tag filter, recent tags and `.` are process-wide: every test starts without them. TestCase.run is the one place
+# every test goes through: unittest has no public per-test hook, many setUp overrides don't call super(), and
+# _callSetUp is private.
+if not getattr(unittest.TestCase, "_sync_roms_filter_reset", False):
     _run = unittest.TestCase.run
 
     def _run_without_tag_filter(self, result=None):
