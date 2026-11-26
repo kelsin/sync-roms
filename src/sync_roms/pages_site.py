@@ -44,7 +44,8 @@ def build(site_dir, user):
     users = sorted(name for name in os.listdir(collections_dir)
                    if os.path.isfile(os.path.join(collections_dir, name, "index.html")))
     items = "\n".join(f'    <li><a href="collections/{html.escape(name)}/">{html.escape(name)}</a></li>' for name in users)
-    store.write_text(os.path.join(site_dir, "index.html"), _template("index.html").replace("<!-- users -->", items, 1))
+    credit = f'<p class="credit"><a href="{html.escape(collections_page.CREDIT_URL)}" rel="noopener">{html.escape(collections_page.CREDIT_TEXT)}</a></p>'
+    store.write_text(os.path.join(site_dir, "index.html"), _template("index.html").replace("<!-- users -->", items, 1).replace("<!-- credit -->", credit, 1))
 
 
 def git(*args, cwd=None, check=True):
