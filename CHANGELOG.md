@@ -1,5 +1,27 @@
 # Changelog
 
+## [4.4.0](https://github.com/kelsin/sync-roms/compare/v4.3.0...v4.4.0) (2026-11-26)
+
+
+### :video_game: Features
+
+* **art:** add bomberman, streets of rage, golden axe, namco, disney, tmnt, dragon ball and pokemon spin-offs art ([#632](https://github.com/kelsin/sync-roms/issues/632)) ([b08c283](https://github.com/kelsin/sync-roms/commit/b08c2833ec25233086883b1cc94dbdf962ae6a17))
+* **collections:** full-width collection rows with sortable game tables ([#629](https://github.com/kelsin/sync-roms/issues/629)) ([fe3e7f2](https://github.com/kelsin/sync-roms/commit/fe3e7f232c4da7da6b995cce7c40b62e4abe64c0))
+* **collections:** games-first collection editor with add key and settings menu ([#627](https://github.com/kelsin/sync-roms/issues/627)) ([f4eda65](https://github.com/kelsin/sync-roms/commit/f4eda65c0497424b1c66539aa8fa8bd6060715e1))
+* **picker:** show the highlighted game's tags under the list ([#624](https://github.com/kelsin/sync-roms/issues/624)) ([9f9080b](https://github.com/kelsin/sync-roms/commit/9f9080bd7f52bc845df9774a3802513e7d3bde7d))
+* **syncthing:** ignore permissions, no conflict files and versioning on shared folders ([#631](https://github.com/kelsin/sync-roms/issues/631)) ([89bbab6](https://github.com/kelsin/sync-roms/commit/89bbab66d7ec1d6c156664ac5df5eec5034eb704))
+* **tags:** tag every version of a game and filter every list by tag ([#630](https://github.com/kelsin/sync-roms/issues/630)) ([1eb4657](https://github.com/kelsin/sync-roms/commit/1eb4657935c555ae75524d775d59fd90dd97a952))
+
+
+### :bug: Bug Fixes
+
+* **guide:** keep section nav visible and anchors below the sticky header ([#628](https://github.com/kelsin/sync-roms/issues/628)) ([3b948bf](https://github.com/kelsin/sync-roms/commit/3b948bfd6356a21f00ce5dfe2d3d88c5fe55f70b))
+
+
+### :hammer_and_wrench: Code Refactoring
+
+* **tags:** drop theme art from tag metadata ([#626](https://github.com/kelsin/sync-roms/issues/626)) ([38af292](https://github.com/kelsin/sync-roms/commit/38af29205e491a9f852c501fe4c65ac275ea5285))
+
 ## [4.3.0](https://github.com/kelsin/sync-roms/compare/v4.2.0...v4.3.0) (2026-11-25)
 
 
