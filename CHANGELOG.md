@@ -1,5 +1,21 @@
 # Changelog
 
+## [4.5.0](https://github.com/kelsin/sync-roms/compare/v4.4.0...v4.5.0) (2026-11-26)
+
+
+### :video_game: Features
+
+* **collections:** add year column and refine the collection header ([#636](https://github.com/kelsin/sync-roms/issues/636)) ([c9f7d36](https://github.com/kelsin/sync-roms/commit/c9f7d3673867e041863a8aa999de36bd0dfd1247))
+* **collections:** show game sizes and collection totals ([#635](https://github.com/kelsin/sync-roms/issues/635)) ([186f3dd](https://github.com/kelsin/sync-roms/commit/186f3dd6775e63d092afa8e1cb64bef13f8e9a15))
+* **editors:** add Q to quit the collection and card editors ([#639](https://github.com/kelsin/sync-roms/issues/639)) ([f11f1d6](https://github.com/kelsin/sync-roms/commit/f11f1d6a0e37d3e0b237198720cf75bfb0d6b7b0))
+* **lists:** add a top border and keep pictures between the borders ([#638](https://github.com/kelsin/sync-roms/issues/638)) ([7b8d92e](https://github.com/kelsin/sync-roms/commit/7b8d92e2dcf2989d6fb35f1940e5079172c9925e))
+* **systems:** add short system names and show them outside system lists ([#637](https://github.com/kelsin/sync-roms/issues/637)) ([3359b86](https://github.com/kelsin/sync-roms/commit/3359b8682d56e08c9fd732c71134dfa21cb05734))
+
+
+### :bug: Bug Fixes
+
+* **collections:** keep the pinned collection header full size ([#633](https://github.com/kelsin/sync-roms/issues/633)) ([95c7457](https://github.com/kelsin/sync-roms/commit/95c745797f751b279d1d2ddf8b09411c326f537a))
+
 ## [4.4.0](https://github.com/kelsin/sync-roms/compare/v4.3.0...v4.4.0) (2026-11-26)
 
 
