@@ -1224,6 +1224,30 @@ class Flow(DataDir):
         self.assertEqual([e[-1] for e in calls[1][2]["extras"]], [("", ""), ("", "")])
         self.assertEqual(calls[2][2]["cursor"], 1)
 
+    def test_the_variants_list_reopens_on_the_same_variant_or_the_nearest_after_s_or_c(self):
+        x, y = {"bucket": "psx/x.chd", "note": "PS1: x"}, {"bucket": "psx/y.chd", "note": "PS1: y"}
+        storage_tags(self, {"tags": {"pk": {"name": "Pokemon", "emoji": "🔴"}}, "declined": {},
+                            "games": {"gba/Ruby.zip": {"tags": ["pk"], "variants": [self.RED, x, y]},
+                                      "psx/x.chd": {"tags": ["pk"]}, "psx/y.chd": {"tags": ["pk"]}}})
+        cardedit.tagui.FILTER.required.add("pk")
+        self.card()
+
+        def s_requires_pk(pressed, keys, place=None):
+            if pressed == cardedit.SET_KEY:
+                cardedit.tagui.FILTER.required.add("pk")
+            else:
+                cardedit.tagui.FILTER.clear()
+            return True
+        with mock.patch.object(cardedit.tagui, "handle_key", s_requires_pk):
+            _, calls = self.run_system(lambda labels, kw: (cardedit.VARIANT_KEY, labels.index("Ruby.zip")),
+                                       returns((cardedit.CLEAR_KEY, 1)),  # c on y: every variant listed
+                                       returns((cardedit.SET_KEY, 0)),  # s on Red, which the filter then hides
+                                       returns(None), lambda labels, kw: kw["session"]["sel"])
+        self.assertEqual([(c[1], c[2]["cursor"]) for c in calls[1:4]],
+                         [(["⬜ PS1: x", "⬜ PS1: y"], 0),
+                          (["⬜ GB: the original", "⬜ PS1: x", "⬜ PS1: y"], 2),  # still on y
+                          (["⬜ PS1: x", "⬜ PS1: y"], 0)])  # Red hidden: on x, the nearest
+
     def test_v_with_two_variants_cancelled_changes_nothing(self):
         self.with_variants(self.RED, {"bucket": "psx/x.chd", "note": "PS1: x"})
         self.card()
@@ -1953,11 +1977,20 @@ class SetFlow(Flow):
 
         def untag(*a):
             storage_tags(self, {"tags": {"pk": {"name": "Pokemon", "emoji": "🔴"}}, "games": {}, "declined": {}})
+        rows = []
+
+        def t_on_ruby(labels, kw):
+            kw["session"].update(row=1, top=0)  # where the picker leaves the cursor
+            return "t", 1
+
+        def then_s(labels, kw):
+            rows.append(kw["session"].get("row"))
+            return cardedit.SET_KEY, None
         with mock.patch.object(cardedit.tagui, "edit_game_tags", side_effect=untag):
-            _, calls = self.run_set(returns(("t", 1)), returns((cardedit.SET_KEY, None)), returns(None),
-                                    lambda labels, kw: kw["session"]["sel"])
+            _, calls = self.run_set(t_on_ruby, then_s, returns(None), lambda labels, kw: kw["session"]["sel"])
         self.assertEqual(calls[0][1], ["Game Boy — Red", "Game Boy Advance — Ruby"])
         self.assertEqual(calls[1][1], calls[0][1])  # the edited game stays until the next pass
+        self.assertEqual(rows, [1])  # with the cursor on it
 
     def test_the_variants_list_applies_the_tag_filter(self):
         self.with_variants(self.RED, {"bucket": "psx/x.chd", "note": "PS1: x"})

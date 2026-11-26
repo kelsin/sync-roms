@@ -1110,11 +1110,18 @@ class TagColumn(DataDir):
         seen, asked = [], []
 
         def fake(title, labels, **kw):
-            seen.append(kw)
-            return ("t", 1) if len(seen) == 1 else kw["session"]["sel"]
+            seen.append((list(labels), dict(kw["session"]), kw))
+            if len(seen) == 1:
+                kw["session"].update(row=1, top=0)  # where the picker leaves the cursor
+                return "t", 1
+            return kw["session"]["sel"]
         with mock.patch.object(picker, "filter_list", fake), \
                 mock.patch.object(edit.tagui, "edit_game_tags", side_effect=lambda *a: asked.append(a)):
             self.assertIsNone(edit.toggle_games("t", self.ROWS))
+        self.assertEqual(seen[1][0], seen[0][0])  # the same rows
+        self.assertEqual(seen[1][1]["row"], 1)  # the cursor on the row t was pressed on
+        self.assertEqual(seen[1][0][seen[1][1]["row"]], "B")
+        seen = [kw for *_, kw in seen]
         self.assertEqual([e[-1] for e in seen[0]["extras"]], [("", ""), ("🐝", "")])
         self.assertIn("t", seen[0]["hotkeys"])
         self.assertIn("t tags", seen[0]["hint"])

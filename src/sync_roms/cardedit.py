@@ -796,21 +796,24 @@ def _toggle_variant(picks, key, title):
     bucket, or None when none was."""
     found = picks.variants.get(key, [])
     if len(found) > 1:
-        i, all_found, frozen = 0, found, None
+        all_found, frozen, at = found, None, None  # at: the highlighted variant's place in all_found
         while True:  # t edits the highlighted variant's tags, then the list opens again on its row
             found = frozen or [v for v in all_found if tagui.FILTER.keep(v["bucket"])]
             frozen = None
+            places = [all_found.index(v) for v in found]  # on the same variant after s or c, else the nearest shown
+            cursor = min(range(len(found)), key=lambda j: (abs(places[j] - at), places[j])) if found and at is not None else 0
             i = picker.filter_list(f"Variants of {title}",
                                    [f"{'✅' if picks.on_card(v['bucket']) else '⬜'} {v['note']}" for v in found],
                                    extras=[[languages.column(v["bucket"]), tag]
                                            for v, tag in zip(found, tagui.column([v["bucket"] for v in found]))],
-                                   hotkeys=(tagui.TAG_KEY, *tagui.HOTKEYS), cursor=i if isinstance(i, int) else 0,
+                                   hotkeys=(tagui.TAG_KEY, *tagui.HOTKEYS), cursor=cursor,
                                    key_help=[tagui.KEY_HELP, *tagui.KEYS_HELP],
                                    tag_info=tagui.summary([v["bucket"] for v in found]),
                                    filters=tagui.banner(len(found), len(all_found)) + (" · no variants match the tag filter" if all_found and not found else ""))
             if not isinstance(i, tuple):
                 break
             pressed, i = i
+            at = places[i] if i is not None else at
             if pressed == tagui.TAG_KEY:
                 if i is not None:
                     tagui.edit_game_tags(found[i]["bucket"], found[i]["note"])
