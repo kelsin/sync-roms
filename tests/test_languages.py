@@ -14,6 +14,11 @@ class LanguagesTest(unittest.TestCase):
         self.assertIs(languages.english("Golden Sun (Europe) (En,Fr,De)"), True)
         self.assertIs(languages.english("Super Mario Bros. (Europe) (Fr,De)"), False)
 
+    def test_translated(self):
+        self.assertTrue(languages.translated("gba/Mother 3 [T-En by X].gba"))
+        self.assertFalse(languages.translated("gba/Mother 3 (Japan).gba"))
+        self.assertFalse(languages.translated("snes/Super Mario World (USA).zip"))
+
     def test_english_region(self):
         self.assertIs(languages.english("Mother 3 (Japan)"), False)
         self.assertIs(languages.english("Lemmings (UK)"), True)

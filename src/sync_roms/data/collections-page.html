@@ -364,7 +364,7 @@ table.games { width: 100%; border-collapse: collapse; }
   function gameRow(game) {
     var row = el("tr", "game");
     var name = el("td", "");
-    name.appendChild(el("div", "title", game.title));
+    name.appendChild(el("div", "title", game.flag ? game.title + " " + game.flag : game.title));
     name.appendChild(el("div", "sys-inline", systems[game.system] || game.system));
     row.appendChild(name);
     row.appendChild(el("td", "col-system", systems[game.system] || game.system));
