@@ -136,7 +136,8 @@ def add_from_tag(listing, shown, keys_of, label):
     ids = sorted(defs, key=lambda i: defs[i]["name"].casefold())
     games_of = {i: [k for k, rec in records.items() if i in rec["tags"]] for i in ids}
     j = picker.filter_list("✏️  Add games with which tag?",
-                           [f"{defs[i]['emoji']} {defs[i]['name']}  ({len(games_of[i])} games)" for i in ids])
+                           [f"{defs[i]['emoji']} {defs[i]['name']}  ({len(games_of[i])} games)" for i in ids],
+                           row_note=tagui.described(defs, ids))
     if j is None:
         return
     tag = defs[ids[j]]

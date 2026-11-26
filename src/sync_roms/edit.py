@@ -89,9 +89,13 @@ def toggle_games(title, rows, hotkeys=(), hint=None, place=None, filters="", key
                                    " · ".join(x for x in (filters, banner) if x),
                                    None if key_help is None else [*key_help, *(h for h in helps if h not in key_help)],
                                    every, notes)
-        if pressed == tagui.TAG_KEY:
-            if i is not None:
+        if pressed in (tagui.TAG_KEY, tagui.REPEAT_KEY):
+            if i is None:
+                note("ℹ️  No game under the cursor")
+            elif pressed == tagui.TAG_KEY:
                 tagui.edit_game_tags(shown[i][1], shown[i][2])
+            else:
+                tagui.repeat_last(shown[i][1], shown[i][2])
             frozen = shown
         elif pressed == tagui.BULK_KEY and pressed in own:
             tagui.bulk_tag([r[1] for r in shown])
@@ -116,7 +120,7 @@ def _toggle_games(title, rows, hotkeys, hint, place, filters, key_help, select_a
     """
     hint = hint or (GAMES_HINT if notes else GAMES_HINT.replace(" · w note", ""))
     hint += "" if " t tags" in hint or " t edit tags" in hint else " · t edit tags"
-    key_help = key_help if key_help is None or any(k == tagui.TAG_KEY for k, _ in key_help) else [*key_help, tagui.KEY_HELP]
+    key_help = key_help if key_help is None or any(k == tagui.TAG_KEY for k, _ in key_help) else [*key_help, tagui.KEY_HELP, tagui.REPEAT_HELP]
     locked = [bool(s.get("full_system")) for s, *_ in rows]
     have = {}  # system bucket -> keys of its listed games, kept current as games are added and removed
 
@@ -137,7 +141,7 @@ def _toggle_games(title, rows, hotkeys, hint, place, filters, key_help, select_a
                                    locked_note=[FULL_SYSTEM_NOTE if lock else "" for lock in locked], hint=hint, key_help=key_help,
                                    note_text=(lambda i: note_text(rows[i][0]["games"], rows[i][1])) if notes else None,
                                    on_note=(lambda i, text: save_note(rows[i][0]["games"], rows[i][1], text)) if notes else None,
-                                   hotkeys=(*hotkeys, tagui.TAG_KEY), session=session, filters=filters,
+                                   hotkeys=(*hotkeys, tagui.TAG_KEY, tagui.REPEAT_KEY), session=session, filters=filters,
                                    row_note=lambda i: variant_line(rows[i][1], variants, parents, system_names),
                                    select_all=select_all, extras=extras,
                                    **previews.game_pane([key for _, key, _, _ in rows]))

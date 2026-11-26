@@ -4,6 +4,9 @@ from .collectionedit import pick_art
 from .listedit import add_from_system, add_from_tag, folder_lister, view
 
 
+SORT_KEY = "o"
+
+
 def _label(tag):
     return f"{tag['emoji']} {tag['name']}"
 
@@ -62,6 +65,8 @@ def rename(tag_id, tag):
     name = ui.ask(f"Name [{tag['name']}] (empty cancels): ").strip()
     if not name:
         edit.note(ui.yellow("⚠️  A tag needs a name; nothing was changed."))
+    elif any(i != tag_id and tags.slug(t["name"]) == tags.slug(name) for i, t in tags.all_tags().items()):
+        edit.note(ui.yellow(f"⚠️  There is already a tag named {name}; nothing was changed."))
     else:
         _save(tags.define_tag, tag_id, {"name": name})  # the id never changes
 
@@ -92,7 +97,8 @@ def merge(tag_id, tag):
     if not ids:
         edit.note(ui.yellow("ℹ️  There is no other tag to merge into."))
         return False
-    j = picker.filter_list(f"✏️  Merge {_label(tag)} into which tag?", [_label(defs[i]) for i in ids])
+    j = picker.filter_list(f"✏️  Merge {_label(tag)} into which tag?", [_label(defs[i]) for i in ids],
+                           row_note=tagui.described(defs, ids))
     if j is None:
         return False
     into = defs[ids[j]]
@@ -100,7 +106,10 @@ def merge(tag_id, tag):
     if not ui.confirm(f"🔀 Merge {_label(tag)} into {_label(into)}? Its {n} game(s) get {into['name']} and "
                       f"{tag['name']} is deleted.", default=False):
         return False
-    return _save(tags.merge_tag, tag_id, ids[j])
+    if _save(tags.merge_tag, tag_id, ids[j]):
+        edit.note(f"🔀 Merged {n} game{'' if n == 1 else 's'} into {_label(into)}")
+        return True
+    return False
 
 
 def delete(tag_id, tag):
@@ -108,7 +117,10 @@ def delete(tag_id, tag):
     n = len(_games_of(tag_id))
     if not ui.confirm(f"🗑️  Delete {_label(tag)}? {n} game(s) lose it.", default=False):
         return False
-    return _save(tags.delete_tag, tag_id)
+    if _save(tags.delete_tag, tag_id):
+        edit.note(f"🗑️  Deleted {_label(tag)}")
+        return True
+    return False
 
 
 def edit_one(tag_id, systems, keys_of):
@@ -160,16 +172,22 @@ def edit_tags():
     """The list of tags; Enter opens one, n adds a new one. Returns the exit code."""
     systems = sorted(store.repo_json("systems"), key=lambda s: s["name"].lower())
     keys_of = folder_lister()
-    pos = 0
+    pos, by_count = 0, False
     while True:
         defs = tags.all_tags()
-        ids = sorted(defs, key=lambda i: defs[i]["name"].casefold())
-        n = len(ids)
         counts = tagui._count()
+        ids = sorted(defs, key=(lambda i: (-counts.get(i, 0), defs[i]["name"].casefold())) if by_count
+                     else lambda i: defs[i]["name"].casefold())
+        n = len(ids)
         i = picker.filter_list("🏷️  Which tag?  (Esc = back)",
                                [f"{_label(defs[x])}  ({counts.get(x, 0)} games)" for x in ids] + ["➕ New tag"],
-                               hotkeys=(tagui.NEW_KEY, tagui.CLEAR_KEY), cursor=pos, filters=tagui.banner(),
-                               hint=tagui.menu_hint("/ filter · Enter open · n new tag · Esc back"),
+                               hotkeys=(tagui.NEW_KEY, tagui.CLEAR_KEY, SORT_KEY), cursor=pos, filters=tagui.banner(),
+                               hint=tagui.menu_hint("/ filter · Enter open · n new tag · o sort · Esc back"),
+                               extras=[[("no games", "dim")] if not counts.get(x) else [("", "")] for x in ids] + [[("", "")]],
+                               key_help=[("Enter", "open the tag"), (tagui.NEW_KEY, "add a new tag"),
+                                         (SORT_KEY, f"sort by {'name' if by_count else 'game count'} instead"),
+                                         (tagui.CLEAR_KEY, "clear the tag filter")],
+                               row_note=tagui.described(defs, ids),
                                preview=lambda k: previews.collection(defs[ids[k]].get("art")) if k < n else None)
         if i is None:
             return 0
@@ -177,6 +195,9 @@ def edit_tags():
             if i[0] == tagui.CLEAR_KEY:
                 tagui.handle_key(tagui.CLEAR_KEY, ())
                 pos = i[1] or 0
+                continue
+            if i[0] == SORT_KEY:
+                by_count, pos = not by_count, i[1] or 0
                 continue
             i = n
         pos = i

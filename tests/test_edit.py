@@ -1101,6 +1101,18 @@ class TagColumn(DataDir):
         self.assertEqual(asked, [("nes/B (USA).zip", "B")])
         self.assertEqual(len(seen), 2)
 
+    def test_t_on_an_empty_list_says_there_is_no_game_and_dot_repeats(self):
+        notes, repeated = [], []
+        answers = iter([("t", None), (".", 1)])
+
+        def fake(title, labels, **kw):
+            return next(answers, None) or kw["session"]["sel"]
+        with mock.patch.object(picker, "filter_list", fake), mock.patch.object(edit, "note", notes.append), \
+                mock.patch.object(edit.tagui, "repeat_last", side_effect=lambda *a: repeated.append(a)):
+            edit.toggle_games("t", self.ROWS)
+        self.assertEqual(notes, ["ℹ️  No game under the cursor"])
+        self.assertEqual(repeated, [("nes/B (USA).zip", "B")])
+
     def test_t_bulk_tags_every_shown_row_and_only_where_the_filter_applies(self):
         tagui = edit.tagui
         tagui.FILTER.clear()

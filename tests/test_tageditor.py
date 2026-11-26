@@ -63,7 +63,7 @@ class Editor(unittest.TestCase):
             self.assertEqual(tageditor.edit_tags(), 0)
         self.assertEqual(banners[0][0], "✅ 🚀 Shmups (c clear filters)")
         self.assertIn("c clear filters", banners[0][1])
-        self.assertEqual(banners[1], ("", "/ filter · Enter open · n new tag · Esc back"))
+        self.assertEqual(banners[1], ("", "/ filter · Enter open · n new tag · o sort · Esc back"))
         self.assertEqual(tagui.FILTER.describe(), "")
 
     def test_rename_changes_the_name_not_the_id(self):
@@ -110,6 +110,33 @@ class Editor(unittest.TestCase):
         self.assertNotIn("shmups", tags.all_tags())
         self.assertEqual(tags.tags_of(B), ["cave"])
         self.assertEqual(tags.tags_of(A), ["cave"])
+
+    def test_merge_and_delete_say_what_happened(self):
+        self.run_editor(["Shmups", "Merge", "Cave"], confirms=[True])
+        self.assertEqual(self.notes[-1], "🔀 Merged 2 games into 🐝 Cave")
+        self.run_editor(["Cave", "Delete"], confirms=[True])
+        self.assertEqual(self.notes[-1], "🗑️  Deleted 🐝 Cave")
+
+    def test_rename_refuses_a_name_another_tag_has(self):
+        before = self.disk()
+        self.run_editor(["Shmups", "Rename", None, None], asks=["cave"])
+        self.assertEqual(self.disk(), before)
+        self.assertIn("already a tag named cave", self.notes[-1])
+
+    def test_o_toggles_the_sort_to_game_count_and_dims_empty_tags(self):
+        tags.define_tag("empty", {"name": "Aaa", "emoji": "⭕"})
+        seen = []
+        script = iter([("o", 0), None])
+
+        def fake(title, labels, **kw):
+            seen.append((labels, kw))
+            return next(script)
+        with mock.patch.object(picker, "filter_list", fake):
+            self.assertEqual(tageditor.edit_tags(), 0)
+        self.assertEqual(seen[0][0][0][:5], "⭕ Aaa")  # by name first
+        self.assertEqual(seen[1][0][0][:8], "🚀 Shmups")  # then most games first
+        self.assertIn(("no games", "dim"), seen[0][1]["extras"][0])
+        self.assertIn("o sort", seen[0][1]["hint"])
 
     def test_merge_declined_writes_nothing(self):
         before = self.disk()

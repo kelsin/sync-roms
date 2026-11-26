@@ -11,7 +11,7 @@ from sync_roms import edit, picker, store, tags, tagui, ui  # noqa: E402
 A, B = "nes/A (USA).zip", "nes/B (USA).zip"
 
 
-class TagUi(unittest.TestCase):
+class Base(unittest.TestCase):
     def setUp(self):
         data_dir = self.enterContext(tempfile.TemporaryDirectory())
         self.enterContext(mock.patch.object(store, "data_dir", return_value=data_dir))
@@ -20,6 +20,25 @@ class TagUi(unittest.TestCase):
             "games": {B: {"tags": ["shmups"]}}, "declined": {}})
         self.notes = []
         self.enterContext(mock.patch.object(edit, "note", self.notes.append))
+        tagui.RECENT.clear()
+        self.addCleanup(tagui.RECENT.clear)
+        tagui.LAST[:] = []
+        self.addCleanup(tagui.LAST.clear)
+
+    def pick_tags(self, key, on, title="B", after=None):
+        """edit_game_tags(key) answered with the tag ids in on; returns (labels, kw) of the picker."""
+        seen = []
+
+        def fake(t, labels, **kw):
+            seen.append((labels, kw))
+            return after(labels) if after else [i in on for i in self._ids(labels)]
+        with mock.patch.object(picker, "filter_list", fake):
+            self.result = tagui.edit_game_tags(key, title)
+        return seen[0]
+
+    def _ids(self, labels):
+        defs = tags.all_tags()
+        return [next(i for i, t in defs.items() if label.startswith(f"{t['emoji']} {t['name']}")) for label in labels]
 
     def bulk(self, keys, checked, confirm=True):
         """bulk_tag(keys) with the checklist answered by checked (tag ids on); returns the checklist's (labels, initial)."""
@@ -27,13 +46,15 @@ class TagUi(unittest.TestCase):
 
         def fake(title, labels, **kw):
             seen.append((labels, kw["initial"], title))
-            defs = tags.all_tags()
-            return [i in checked for i in sorted(defs, key=lambda i: defs[i]["name"].casefold())]
+            return [i in checked for i in self._ids(labels)]
         with mock.patch.object(picker, "filter_list", fake), mock.patch.object(ui, "confirm", return_value=confirm) as c:
             self.result = tagui.bulk_tag(keys)
         self.asked = [a[0][0] for a in c.call_args_list]
         return seen[0] if seen else None
 
+
+
+class TagUi(Base):
     def test_bulk_tag_adds_the_checked_tags_to_every_game_after_a_count_confirm(self):
         seen = self.bulk([A, B], {"cave", "shmups"})
         self.assertEqual(seen[0], ["🐝 Cave", "🚀 Shmups"])
@@ -45,7 +66,7 @@ class TagUi(unittest.TestCase):
     def test_bulk_tag_checks_the_tags_all_games_have_and_unchecking_removes_only_those(self):
         tags.change_game_tags(A, add=["shmups", "cave"])
         seen = self.bulk([A, B], {"cave"})
-        self.assertEqual(seen[1], [False, True])  # Shmups is on both
+        self.assertEqual(seen[1], [True, False])  # Shmups is on both, so it is listed first
         self.assertEqual((tags.tags_of(A), tags.tags_of(B)), (["cave"], ["cave"]))
 
     def test_bulk_tag_declined_or_unchanged_writes_nothing(self):
@@ -110,7 +131,7 @@ class TagUi(unittest.TestCase):
             return [True, True]
         with mock.patch.object(picker, "filter_list", fake):
             self.assertTrue(tagui.edit_game_tags(B, "B"))
-        self.assertEqual(seen, [(["🐝 Cave (0 games)", "🚀 Shmups (1 games)"], [False, True])])
+        self.assertEqual(seen, [(["🚀 Shmups (1 games)", "🐝 Cave (0 games)"], [True, False])])
         self.assertEqual(tags.tags_of(B), ["cave", "shmups"])
 
     def test_unchanged_returns_false(self):
@@ -179,7 +200,7 @@ class TagUi(unittest.TestCase):
         tags.load()
         with open(os.path.join(root, tags.KEY), "w", encoding="utf-8") as f:  # another machine adds cave to B
             f.write(tags.dump({"tags": tags.load()["tags"], "games": {B: {"tags": ["cave", "shmups"]}}, "declined": {}}))
-        with mock.patch.object(picker, "filter_list", return_value=[False, True, True]):  # rpg checked, cave unseen
+        with mock.patch.object(picker, "filter_list", return_value=[True, False, True]):  # checked first: shmups, then cave and rpg; rpg checked, cave unseen
             self.assertTrue(tagui.edit_game_tags(B, "B"))
         self.assertEqual(tags.tags_of(B), ["cave", "rpg", "shmups"])
 
@@ -203,7 +224,7 @@ class TagUi(unittest.TestCase):
             return [True, True]
         with mock.patch.object(picker, "filter_list", fake):
             self.assertTrue(tagui.edit_game_tags("nes/B (Disc 2).zip", "B"))
-        self.assertEqual(seen, [[False, True]])
+        self.assertEqual(seen, [[True, False]])  # checked tags first
         self.assertEqual(set(tags.load()["games"]), {B})
         self.assertEqual(tags.tags_of(B), ["cave", "shmups"])
 
@@ -402,3 +423,91 @@ class StickyFilter(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TagPickerErgonomics(Base):
+    def setUp(self):
+        super().setUp()
+        tags.define_tag("arcade", {"name": "Arcade", "emoji": "🕹️"})
+        tags.define_tag("zed", {"name": "Zed", "emoji": "💤", "description": "sleepy picks"})
+
+    def test_t_picker_lists_checked_then_recent_then_alphabetical(self):
+        tagui.RECENT[:] = ["zed"]
+        labels, kw = self.pick_tags(B, {"shmups"})
+        self.assertEqual([x.split(" (")[0].split(" ", 1)[1] for x in labels], ["Shmups", "Zed", "Arcade", "Cave"])
+
+    def test_t_picker_label_carries_the_description_so_search_matches_it(self):
+        labels, kw = self.pick_tags(B, {"shmups"})
+        self.assertTrue(any("sleepy picks" in x for x in labels))
+
+    def test_saving_remembers_the_added_tags_most_recent_first_capped_at_eight(self):
+        for n in range(10):
+            tags.define_tag(f"t{n}", {"name": f"T{n}", "emoji": f"{n}\ufe0f\u20e3"})
+        self.pick_tags(B, {"shmups", "cave"})
+        self.assertEqual(tagui.RECENT, ["cave"])
+        for n in range(10):
+            self.pick_tags(B, {"shmups", "cave", f"t{n}"}, after=None)
+        self.assertEqual(len(tagui.RECENT), 8)
+        self.assertEqual(tagui.RECENT[0], "t9")
+
+    def test_saving_says_what_changed(self):
+        self.pick_tags(B, {"cave"})  # shmups off, cave on
+        self.assertEqual(self.notes[-1], "🏷️  Tagged B: +1 −1")
+
+    def test_repeat_applies_the_last_add_and_remove_to_another_game(self):
+        self.pick_tags(B, {"cave"})
+        self.assertTrue(tagui.repeat_last(A, "A"))
+        self.assertEqual(tags.tags_of(A), ["cave"])
+        self.assertEqual(self.notes[-1], "🏷️  Tagged A: +1 −1")
+
+    def test_repeat_with_nothing_to_repeat_says_so(self):
+        self.assertFalse(tagui.repeat_last(A, "A"))
+        self.assertIn("Nothing to repeat", self.notes[-1])
+        self.assertEqual(tags.tags_of(A), [])
+
+    def test_esc_after_n_notes_the_new_tag_was_not_applied(self):
+        calls = []
+
+        def fake(title, labels, **kw):
+            calls.append(1)
+            return ("n", None) if len(calls) == 1 else None
+        with mock.patch.object(picker, "filter_list", fake), mock.patch.object(ui, "ask", side_effect=["Pixel Art", "🎨"]):
+            self.assertFalse(tagui.edit_game_tags(B, "B"))
+        self.assertIn("Pixel Art was added but not applied", self.notes[-1])
+        self.assertIn("pixel-art", tags.all_tags())
+
+    def test_x_in_the_filter_picker_excludes_directly_and_again_clears(self):
+        self.addCleanup(tagui.FILTER.clear)
+        tagui.FILTER.clear()
+        script = iter([("x", 0), None])
+        seen = []
+
+        def fake(title, labels, **kw):
+            seen.append(kw)
+            return next(script)
+        with mock.patch.object(picker, "filter_list", fake):
+            tagui.FILTER.pick([A, B])
+        self.assertEqual(tagui.FILTER.excluded, {"shmups"})
+        self.assertIn("x", seen[0]["hotkeys"])
+        self.assertIn("x", seen[0]["hint"])
+        script = iter([("x", 0), None])
+        with mock.patch.object(picker, "filter_list", fake):
+            tagui.FILTER.pick([A, B])
+        self.assertEqual(tagui.FILTER.excluded, set())
+
+    def test_pickers_show_the_description_as_the_row_note(self):
+        self.addCleanup(tagui.FILTER.clear)
+        tags.change_game_tags(A, add=["zed"])
+        seen = []
+
+        def fake(title, labels, **kw):
+            seen.append((labels, kw))
+            return None
+        with mock.patch.object(picker, "filter_list", fake):
+            tagui.FILTER.pick([A, B])
+            tagui.bulk_tag([A, B])
+        labels, kw = seen[0]
+        self.assertEqual(kw["row_note"](next(i for i, x in enumerate(labels) if "Zed" in x)), "sleepy picks")
+        self.assertEqual(kw["row_note"](0), "")
+        labels, kw = seen[1]
+        self.assertEqual(kw["row_note"](next(i for i, x in enumerate(labels) if "Zed" in x)), "sleepy picks")
