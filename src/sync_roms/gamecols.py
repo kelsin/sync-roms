@@ -74,7 +74,7 @@ class GameColumns:
     def kwargs(self, extras=None, poll=None):
         """filter_list's columns, extras, sort, sort_value and poll arguments."""
         self.shown = [self.cells(i) + (list(extras[i]) if extras else []) for i in range(len(self.rows))]
-        return {"columns": [picker.Column("name", "Name", True), picker.Column("system", "System", True),
+        return {"columns": [picker.Column("name", "Name", True), picker.Column("system", "System", True, searchable=True),
                             picker.Column("year", "Year", True), *self.extra_columns],
                 "extras": self.shown, "sort": picker.GAMES_SORT, "sort_value": self.sort_value,
                 "poll": lambda: self.poll(poll)}

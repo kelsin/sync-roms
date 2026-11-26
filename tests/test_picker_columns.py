@@ -8,7 +8,7 @@ from sync_roms import picker  # noqa: E402
 
 LABELS = ["B", "A", "C", "A"]
 SYSTEMS = ["snes", "gba", "nes", "nes"]
-COLUMNS = [picker.Column("name", "Name", True), picker.Column("system", "System", True),
+COLUMNS = [picker.Column("name", "Name", True), picker.Column("system", "System", True, searchable=True),
            picker.Column("year", "Year", True)]
 
 
@@ -159,6 +159,21 @@ class Keys(unittest.TestCase):
         for c in "snes":
             m.key(c)
         self.assertEqual(m.vis, [0])
+
+    def test_slash_matches_a_searchable_column_only(self):
+        cols = [picker.Column("name", "Name", True), picker.Column("tag", "Tag", True, searchable=True),
+                picker.Column("year", "Year", True)]
+        m = model(columns=cols)  # the "tag" cells hold the systems here; year cells aren't searched
+        m.key("/")
+        for c in "gba":
+            m.key(c)
+        self.assertEqual(m.vis, [1])
+        m = model(columns=[picker.Column("name", "Name", True), picker.Column("system", "System", True),
+                           picker.Column("year", "Year", True)])
+        m.key("/")
+        for c in "gba":
+            m.key(c)
+        self.assertEqual(m.vis, [])  # not searchable: only labels match
 
     def test_V_cycles_view_and_o_does_not(self):
         m = picker._ListModel("t", ["a", "b"], True, None, "", 0, None, None, "", (), None, None, True, None, None,

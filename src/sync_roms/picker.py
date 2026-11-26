@@ -174,10 +174,12 @@ def extras_widths(extras):
 
 @dataclass(frozen=True)
 class Column:
-    """A list column: its id (what sort_value is asked for), its header, and whether the list sorts by it."""
+    """A list column: its id (what sort_value is asked for), its header, whether the list sorts by it and whether `/`
+    matches its cells (as it does the label)."""
     id: str
     header: str
     sortable: bool = False
+    searchable: bool = False
 
 
 class Sort:
@@ -382,9 +384,9 @@ class _ListModel:
         if "name" in self.sortable:
             from . import store
             self.name_keys = [store.sort_key(l) for l in labels]
-        system = next((j for j, c in enumerate(columns or ()) if c.id == "system" and j), None)
-        self.lowered = [(l + ("\n" + extras[i][system - 1][0].strip() if system and extras and len(extras[i]) >= system
-                              else "")).casefold() for i, l in enumerate(labels)]
+        searched = [j - 1 for j, c in enumerate(columns or ()) if j and c.searchable]
+        self.lowered = ["\n".join([l, *(extras[i][j][0].strip() for j in searched if extras and len(extras[i]) > j)])
+                        .casefold() for i, l in enumerate(labels)]
         self.start = list(initial) if initial is not None else [False] * len(labels)
         self.locked = locked or [False] * len(labels)
         self.hidden = hidden or [False] * len(labels)
@@ -1726,7 +1728,7 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=None, 
     shown · V view (all / on / changed) · u revert · w note. A list with sortable columns adds o (a menu of them: the
     one picked sorts first, the others follow in the sort's default order) and O (reverses the whole order; unknown
     values stay last). After `/`, typed text filters (every space-separated term must appear in a label or in the
-    row's "system" column cell, case-insensitive); Enter or Tab keeps the filter, Esc clears it.
+    row's searchable column cells, case-insensitive); Enter or Tab keeps the filter, Esc clears it.
 
     Single mode returns the chosen index, or None on Esc. Multi mode returns the list of on/off states on Enter;
     Esc asks whether to keep or revert pending changes (esc_asks=False: it just returns None).

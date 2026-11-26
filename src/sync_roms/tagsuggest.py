@@ -103,7 +103,7 @@ def suggest_command(args):
                          ({"bucket": str(len(rows)), "games": [{"bucket": key}]}, key, title, title), i))
     rows.sort(key=lambda r: r[0])  # each row has its own listing (named by its number, as the toggler keys them)
     edit.toggle_games("🏷️  Suggested tags — ✅ add it, ⬜ don't suggest it again", [r[1] for r in rows],
-                      notes=False, tag_filter=False, extra_columns=[picker.Column("tag", "Tag", True)],
+                      notes=False, tag_filter=False, extra_columns=[picker.Column("tag", "Tag", True, searchable=True)],
                       extra_cells=[[(f"  {defs[i]['emoji']} {defs[i]['name']}", "")] for *_, i in rows],
                       extra_values=lambda n, col: defs[rows[n][2]]["name"].casefold() if col == "tag" else None)
     accepted, declined = {}, {}
