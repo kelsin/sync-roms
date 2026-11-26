@@ -86,7 +86,8 @@ def add_from_system(listing, systems, shown, keys_of, label, toggle=None, tag_fi
     """Pick one of systems with files in storage and toggle its games in listing (via shown, a view of it).
     label is listing's name as shown, with its emoji. Returns the hotkey that closed the games list, or None.
 
-    toggle(s, title, rows) shows the system's rows (s is its entry in shown) instead of a plain edit.toggle_games.
+    toggle(s, title, rows) shows the system's rows (s is its entry in shown) instead of a plain edit.toggle_games, and
+    returns the hotkey that closed it, or None.
     tag_filter=False: the games list ignores the sticky tag filter. query: no system is asked for: the all-systems list
     opens with that / filter. hotkeys/hint: the games list's own extra keys and hint, as edit.toggle_games takes them.
     New games get the discs of a multi-disc game whose playlist is in storage. Ctrl-C keeps the toggles made, then is
@@ -116,7 +117,7 @@ def add_from_system(listing, systems, shown, keys_of, label, toggle=None, tag_fi
         if everywhere:
             pressed = toggle_all(title, rows, place, tag_filter, hotkeys, hint)
         elif toggle:
-            toggle(s, title, rows)
+            pressed = toggle(s, title, rows)
         else:
             pressed = edit.toggle_games(title, rows, hotkeys=hotkeys, hint=hint, place=place, tag_filter=tag_filter)
     except KeyboardInterrupt:  # Ctrl-C in the list or a picker it opens: the toggles made are kept

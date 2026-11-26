@@ -557,12 +557,6 @@ class Walkthrough(unittest.TestCase):
         self.assertIn("Q quit the editor", hints[0][0])
         self.assertIn(tageditor.QUIT_KEY, hints[0][1])
 
-    def test_q_raises_for_the_top_editor_when_asked(self):
-        with mock.patch.object(picker, "filter_list", side_effect=[0, (tageditor.QUIT_KEY, None)]), \
-                mock.patch("builtins.print"):
-            with self.assertRaises(tageditor.Quit):
-                tageditor.edit_tags(quit_raises=True)
-
     def test_add_games_on_a_tag_with_no_games_adds_its_first(self):
         tags.define_tag("new", {"name": "New", "emoji": "🆕"})
         self.walk([self.pick("New"), self.pick("Add games"), self.pick("All systems"),

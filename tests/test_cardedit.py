@@ -1035,6 +1035,24 @@ class Flow(DataDir):
         self.assertEqual(self.read("cards.json")["c"]["games"], {"gba": [g("gba/Zelda.zip")]})
         self.assertNotIn("📦", calls[0][0])
 
+    def test_q_saves_the_toggles_then_quits_the_editor(self):
+        self.card()
+
+        def quit_after_toggling(labels, kw):
+            kw["session"]["sel"][labels.index("Zelda.zip")] = True
+            return edit.QUIT_KEY, labels.index("Zelda.zip")
+        with self.assertRaises(edit.Quit):
+            self.run_system(quit_after_toggling)
+        self.assertEqual(store.card_games("c"), {"gba": [g("gba/Zelda.zip")]})
+
+    def test_the_card_editor_returns_when_a_games_list_quits(self):
+        self.card()
+        script = Script(returns(0))  # open the first system; its games list quits
+        with mock.patch.object(picker, "filter_list", script), \
+                mock.patch.object(cardedit, "edit_system", side_effect=edit.Quit), contextlib.redirect_stdout(io.StringIO()):
+            self.assertIsNone(cardedit.edit_card("c"))
+        self.assertEqual(len(script.calls), 1)  # no system list again
+
     def with_variants(self, *variants):
         """tags.json with gba/Ruby.zip tagged and given the variants."""
         storage_tags(self, {"tags": {"pk": {"name": "Pokemon", "emoji": "🔴"}}, "declined": {},
@@ -1049,7 +1067,7 @@ class Flow(DataDir):
         def step(labels, kw):
             self.assertEqual(kw["row_note"](labels.index("Ruby.zip")), "↳ Variant: GB: the original (v adds it)")
             self.assertEqual(kw["row_note"](labels.index("Zelda.zip")), "")
-            self.assertEqual(kw["hint"], tagui.games_hint(cardedit.GAMES_HINT))
+            self.assertEqual(kw["hint"], f"{tagui.games_hint(cardedit.GAMES_HINT)} · {edit.QUIT_HINT}")
             self.assertIn(cardedit.VARIANT_KEY, kw["hotkeys"])
             return kw["session"]["sel"]
         self.run_system(step)
@@ -2128,8 +2146,18 @@ class SetFlow(Flow):
         title, _labels, kw = script.calls[0]
         self.assertTrue(title.startswith(cardedit.themeart.collection_emoji(collection)))
         self.assertIn("💖 from a collection", title)
-        self.assertEqual(kw["hotkeys"], (cardedit.VARIANT_KEY, "t", ".", "T", cardedit.SET_KEY, cardedit.CLEAR_KEY))
-        self.assertEqual(kw["hint"], tagui.games_hint(cardedit.COLLECTION_GAMES_HINT))
+        self.assertEqual(kw["hotkeys"], (cardedit.VARIANT_KEY, "t", ".", "T", cardedit.SET_KEY, cardedit.CLEAR_KEY, edit.QUIT_KEY))
+        self.assertEqual(kw["hint"], f"{tagui.games_hint(cardedit.COLLECTION_GAMES_HINT)} · {edit.QUIT_HINT}")
+
+    def test_q_saves_a_collections_toggles_then_quits_the_editor(self):
+        self.card()
+
+        def quit_after_toggling(labels, kw):
+            kw["session"]["sel"][0] = not kw["session"]["sel"][0]
+            return edit.QUIT_KEY, 0
+        with self.assertRaises(edit.Quit):
+            self.run_set(quit_after_toggling)
+        self.assertTrue(store.card_games("c"))
 
     def test_select_all(self):
         self.card()
@@ -2302,7 +2330,7 @@ class SetFlow(Flow):
         title, labels, kw = calls[0]
         self.assertEqual(labels, self.ALL_LABELS)
         self.assertEqual(title, "🌐 All games on c — ✅ synced, ⬜ not")
-        self.assertEqual(kw["hotkeys"], (cardedit.VARIANT_KEY, "t", ".", "T", cardedit.SET_KEY, cardedit.CLEAR_KEY))
+        self.assertEqual(kw["hotkeys"], (cardedit.VARIANT_KEY, "t", ".", "T", cardedit.SET_KEY, cardedit.CLEAR_KEY, edit.QUIT_KEY))
         self.assertIs(kw["select_all"], False)
 
     def test_a_works_in_the_all_games_list_only_while_a_tag_filter_is_set(self):

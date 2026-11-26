@@ -8,8 +8,9 @@ from .listedit import diff_lists, edit_menu, folder_lister, reconcile, view
 
 
 ADD_KEY, ADD_ALIAS, SETTINGS_KEY = "A", "+", "S"  # + is a silent alias of A
-GAMES_HINT = "Space toggle · Enter done · a all · m meta · p past"
-GAMES_KEYS = [k for k in cardedit.GAMES_KEYS if k[0] != cardedit.VARIANT_KEY]  # what ? lists in a system's games list
+GAMES_HINT = f"Space toggle · Enter done · a all · m meta · p past · {edit.QUIT_HINT}"
+QUIT_KEY = edit.QUIT_KEY
+GAMES_KEYS = [*(k for k in cardedit.GAMES_KEYS if k[0] != cardedit.VARIANT_KEY), edit.QUIT_HELP]  # what ? lists in a system's games list
 
 
 # --- Editing the games of one collection -------------------------------------------------------------
@@ -40,18 +41,21 @@ CLEAR_KEY = "x"
 
 def settings_menu(collection, others=()):
     """The collection's name, description and theme art; Esc returns. The art row shows the current picture. others:
-    the ids of the other collections, which a new name can't collide with; x clears the description."""
+    the ids of the other collections, which a new name can't collide with; x clears the description, Q raises Quit."""
     cursor = 0
     while True:
         rows = [f"Name: {collection['name']}", f"Description: {collection.get('description') or 'none'}",
                 f"{themeart.art_emoji(collection.get('art'))} Theme art: {art_label(collection.get('art'))}"]
         i = picker.filter_list(f"{header(collection)}: settings (Esc = back)", rows, cursor=cursor,
-                               preview=lambda j: themeart.art_png(collection.get("art")), hotkeys=(CLEAR_KEY,),
-                               hint="Enter edit · x clear description · Esc back",
-                               key_help=[("Enter", "edit the row"), (CLEAR_KEY, "clear the description"), ("Esc", "back")])
+                               preview=lambda j: themeart.art_png(collection.get("art")), hotkeys=(CLEAR_KEY, QUIT_KEY),
+                               hint=f"Enter edit · x clear description · {edit.QUIT_HINT} · Esc back",
+                               key_help=[("Enter", "edit the row"), (CLEAR_KEY, "clear the description"), edit.QUIT_HELP,
+                                         ("Esc", "back")])
         if i is None:
             return
         if isinstance(i, tuple):
+            if i[0] == QUIT_KEY:
+                raise edit.Quit
             cursor = i[1]
             if i[1] == 1:
                 collection["description"] = ""
@@ -73,16 +77,17 @@ def settings_menu(collection, others=()):
 
 
 def toggle_filtered(s, title, rows):
-    """edit.toggle_games over a system's rows (s is its entry in a view), narrowed by the card editor's game filters."""
+    """edit.toggle_games over a system's rows (s is its entry in a view), narrowed by the card editor's game filters.
+    Returns the hotkey that closed it (Q), or None."""
     filters = cardedit.GameFilters(s)
     place = {}  # where the list was left, kept while a key lists the same games
     while True:
         shown = [r for r in rows if filters.keep(r[1])]
-        pressed = edit.toggle_games(title, shown, hotkeys=cardedit.GameFilters.KEYS,
+        pressed = edit.toggle_games(title, shown, hotkeys=(*cardedit.GameFilters.KEYS, QUIT_KEY),
                                     hint=GAMES_HINT, key_help=GAMES_KEYS, place=place,
                                     filters=filters.describe(len(shown), len(rows)), before=len(rows))
         if not filters.handle(pressed, [r[1] for r in rows], place):
-            return
+            return pressed
 
 
 def header(collection):
@@ -115,7 +120,8 @@ def restore(collection, originals, before, systems):
 def edit_one(collection, systems, keys_of, others=()):
     """Edit one collection: its games first, every one of them whatever the tag filter (a game switched off leaves
     the collection, so none is hidden; it stays listed, so it can be switched back on), with A to add games (those lists
-    follow the filter) and S for its settings (others: the other collections' ids)."""
+    follow the filter) and S for its settings (others: the other collections' ids). Q raises edit.Quit once the toggles
+    are kept."""
     kept = {}  # game key -> (system bucket, title, label) of every row listed, so removed games stay on the list
     originals = {}  # game key -> its entry in the collection, for a game switched back on after it was removed
     place = {}
@@ -129,7 +135,11 @@ def edit_one(collection, systems, keys_of, others=()):
                       key=lambda r: (store.sort_key(r[2]), r[0]["name"].lower()))
         before = {g.get("bucket") for g in collection["games"]}
         if not rows:  # nothing to list: the same actions as a menu
-            i = picker.filter_list(f"{header(collection)} (Esc = back)", ["Add games", "Settings"])
+            i = picker.filter_list(f"{header(collection)} (Esc = back)", ["Add games", "Settings"], hotkeys=(QUIT_KEY,),
+                                   hint=f"Enter open · {edit.QUIT_HINT} · Esc back",
+                                   key_help=[("Enter", "open the row"), edit.QUIT_HELP, ("Esc", "back")])
+            if isinstance(i, tuple):
+                raise edit.Quit
             pressed = None if i is None else ADD_KEY if i == 0 else SETTINGS_KEY
             if pressed is None:
                 return
@@ -137,21 +147,27 @@ def edit_one(collection, systems, keys_of, others=()):
             try:
                 pressed = listedit.toggle_all(header(collection), rows, place, tag_filter=False,  # off hides nothing
                                               select_all=True, bulk=True,  # its rows are its games, all on screen
-                                              hotkeys=(ADD_KEY, ADD_ALIAS, SETTINGS_KEY),
-                                              hint="A add games · S settings",
-                                              key_help=[(f"{ADD_KEY} / {ADD_ALIAS}", "add games"), (SETTINGS_KEY, "settings")])
+                                              hotkeys=(ADD_KEY, ADD_ALIAS, SETTINGS_KEY, QUIT_KEY),
+                                              hint=f"A add games · S settings · {edit.QUIT_HINT}",
+                                              key_help=[(f"{ADD_KEY} / {ADD_ALIAS}", "add games"), (SETTINGS_KEY, "settings"),
+                                                        edit.QUIT_HELP])
             finally:  # Ctrl-C too: the toggles made are kept
                 collection["games"] = reconcile(collection["games"], shown)
                 restore(collection, originals, before, systems)
             if pressed is None:
                 return
+            if pressed == QUIT_KEY:
+                raise edit.Quit
         if pressed in (ADD_KEY, ADD_ALIAS):  # Ctrl-C in there keeps its toggles and is raised again
             before = {g.get("bucket") for g in collection["games"]}
             try:
-                listedit.add_from_system(collection, systems, view(collection, systems), keys_of, header_label(collection),
-                                         toggle=toggle_filtered)
+                closed = listedit.add_from_system(collection, systems, view(collection, systems), keys_of,
+                                                  header_label(collection), toggle=toggle_filtered, hotkeys=(QUIT_KEY,),
+                                                  hint=f"Space toggle · Enter done · {edit.QUIT_HINT}")
             finally:
                 restore(collection, originals, before, systems)
+            if closed == QUIT_KEY:
+                raise edit.Quit
         elif pressed == SETTINGS_KEY:
             settings_menu(collection, others)
 
@@ -217,13 +233,21 @@ def save(working, found):
 
 
 def edit_working(systems, before, working):
-    """The collections menu over working; Done and Esc review it and save it locally. Returns the exit code."""
+    """The collections menu over working; Done, Esc and Q (in a collection) review it and save it locally. Returns the exit code."""
     keys_of = folder_lister()
 
     def delete_note(cid):
         names = cards_using(cid)
         return f" Cards {', '.join(names)} use it and lose it too." if names else ""
 
-    return edit_menu("collection", before, working, {"review": False}, themeart.collection_emoji, lambda c: c.get("art"),
-                     delete_note, new_collection, lambda collection: edit_one(collection, systems, keys_of, [x for x in working if working[x] is not collection]),
-                     lambda found: save(working, found), "💾 Save these changes?")
+    state = {"review": False}
+
+    def open_item(collection):
+        try:
+            edit_one(collection, systems, keys_of, [x for x in working if working[x] is not collection])
+        except edit.Quit:  # Q: leave the editor for its review (edit_menu starts there)
+            state["review"] = True
+
+    return edit_menu("collection", before, working, state, themeart.collection_emoji, lambda c: c.get("art"),
+                     delete_note, new_collection, open_item,
+                     lambda found: save(working, found), "💾 Save these changes?") or 0

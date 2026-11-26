@@ -6,15 +6,13 @@ from .listedit import add_from_system, add_from_tag, folder_lister, view
 SORT_KEY = "o"
 ADD_KEY, ADD_ALIAS, SETTINGS_KEY = "A", "+", "S"  # in a tag's games, as in the collection editor; + is a silent alias of A
 CLEAR_KEY = "x"  # in a tag's settings: clear its description
-QUIT_KEY = "Q"  # in a tag's games, its settings and its add lists: leave the editor, what was toggled saved
-QUIT_HINT = "Q quit the editor"
+QUIT_KEY, QUIT_HINT = edit.QUIT_KEY, edit.QUIT_HINT  # in a tag's games, its settings and its add lists
 ADD_HINT = f"{edit.GAMES_HINT} · {QUIT_HINT}"  # the hint of the tag's add lists
 GAMES_HINT = f"{edit.GAMES_HINT} · A add games · S settings · {QUIT_HINT}"  # the tag's own games
 GAMES_HELP = [(f"{ADD_KEY} / {ADD_ALIAS}", "add games"), (SETTINGS_KEY, "settings"), (QUIT_KEY, "quit the editor")]
 
 
-class Quit(Exception):
-    """Q: leave the tag editor at once (and, under `sync-roms edit`, go to its review); every change is already saved."""
+Quit = edit.Quit  # Q: leave the tag editor at once; every change is already saved
 
 
 def _label(tag):
@@ -224,14 +222,11 @@ def edit_one(tag_id, systems, keys_of):
 # --- The list ----------------------------------------------------------------------------------------
 
 @picker.one_app
-def edit_tags(quit_raises=False):
-    """The list of tags; Enter opens one's games, n adds a new one. Returns the exit code. Q (in a tag) leaves it: with
-    quit_raises, by raising Quit for the caller (`sync-roms edit` goes to its review)."""
+def edit_tags():
+    """The list of tags; Enter opens one's games, n adds a new one. Returns the exit code. Q (in a tag) leaves it."""
     try:
         return _tag_list()
     except Quit:
-        if quit_raises:
-            raise
         return 0
 
 

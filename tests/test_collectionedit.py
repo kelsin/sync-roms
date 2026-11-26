@@ -235,7 +235,7 @@ class Discs(unittest.TestCase):
         self.assertEqual(lists[1][1], ["Ruby.zip"])
         self.assertEqual("🎁 past surprises only · 1 of 2 shown (c clear filters)", lists[1][2])
         self.assertIn("c clear", lists[0][3])
-        self.assertEqual([k for k, _ in lists[0][4]], ["s", "m", "p", "t", ".", "T", "c"])  # what ? lists
+        self.assertEqual([k for k, _ in lists[0][4]], ["s", "m", "p", "t", ".", "T", "c", "Q"])  # what ? lists
         self.assertNotIn("past surprises", lists[1][0])
         self.assertEqual(len(lists[2][1]), 2)
 
@@ -333,13 +333,19 @@ class GamesFirst(unittest.TestCase):
         self.assertEqual(calls[0]["keys"], ["gba/Ruby.zip"])
         for part in ("Favs", "my best", "art: none"):
             self.assertIn(part, calls[0]["title"])
-        self.assertEqual(calls[0]["hotkeys"], ("A", "+", "S"))  # s and c: the sticky tag filter's own, in edit.toggle_games
+        self.assertEqual(calls[0]["hotkeys"], ("A", "+", "S", "Q"))  # s and c: the sticky tag filter's own, in edit.toggle_games
         self.assertIs(calls[0]["tag_filter"], False)  # switching a game off removes it: the filter must hide none
         self.assertIs(calls[0]["bulk"], True)  # T and a only reach the rows on screen: the collection's own games
         self.assertIs(calls[0]["select_all"], True)
         self.assertIn("A add games", calls[0]["hint"])
         self.assertIn(("A / +", "add games"), calls[0]["key_help"])
         self.assertNotIn("+", calls[0]["hint"])
+
+    def test_q_keeps_the_toggles_then_quits_the_editor(self):
+        collection = {"name": "Favs", "games": [dict(self.OLD)]}
+        with self.assertRaises(edit.Quit):
+            self.run_editor(collection, [self.off("gba/Ruby.zip", edit.QUIT_KEY)])
+        self.assertEqual(collection["games"], [])
 
     def test_a_game_switched_off_stays_listed_after_a_hotkey(self):
         collection = {"name": "Favs", "games": [dict(self.OLD), dict(self.FF7)]}
@@ -771,6 +777,15 @@ class Editor(DataDir):
         self.assertEqual(code, 0)
         self.assertEqual(self.asked, ["💾 Save these changes?"])
         self.assertEqual(self.reviewed, [[("new", "favs", ["+ Ruby (gba/Ruby.zip)"])]])
+        self.assertEqual(self.read("collections/favs.json"), {"name": "Favs", "games": [RUBY]})
+
+    def test_q_in_a_collection_goes_to_the_review_and_saves(self):
+        def quit_after_adding(c, systems, keys_of, others=()):
+            c["games"].append(dict(RUBY))
+            raise edit.Quit
+        code, _, _ = self.run_editor([0], asks=["Favs", ""], edit_one=quit_after_adding)  # ➕ New, then Q in it
+        self.assertEqual(code, 0)
+        self.assertEqual(self.asked, ["💾 Save these changes?"])
         self.assertEqual(self.read("collections/favs.json"), {"name": "Favs", "games": [RUBY]})
 
     def test_keep_editing_goes_back_to_the_menu_and_discard_saves_nothing(self):

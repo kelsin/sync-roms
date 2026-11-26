@@ -322,6 +322,14 @@ def toggle_guest(name):
 
 @picker.one_app
 def edit_card(name, setup=None, to_fetch=None, card_match=None, on_guest=None):
+    """The card's system list (see _card_list); Q in one of its games lists leaves it, what was toggled saved."""
+    try:
+        return _card_list(name, setup, to_fetch, card_match, on_guest)
+    except edit.Quit:
+        return None
+
+
+def _card_list(name, setup, to_fetch, card_match, on_guest):
     """The card's system list. setup: (device or None for Full, layout) to edit with instead of the saved one.
     to_fetch(system, keys): the keys not on the card yet, when editing from a sync; the status then shows how much
     a sync would download. card_match(system, keys): the keys of the system's storage files that are on the card, when
@@ -932,7 +940,8 @@ def edit_system(name, system, setup, to_fetch=None, card_usages=None):
     """A card's games of one system: the whole storage folder, searchable, filterable by tags and by scraped
     metadata. Saves to cards.json when left; returns whether anything changed. to_fetch: as for edit_card.
     card_usages: budget.system_usages of the card as saved, over every system it can play (edit_card keeps them), so
-    the other systems aren't counted again; v brings the usage of its variant's system up to date in it."""
+    the other systems aren't counted again; v brings the usage of its variant's system up to date in it. Q saves, then
+    raises edit.Quit."""
     bucket = system["bucket"]
     cards = store.load_cards()
     picks = cardpicks.CardPicks(name, setup, cards)
@@ -952,6 +961,7 @@ def edit_system(name, system, setup, to_fetch=None, card_usages=None):
     start = sp.states()
 
     place = {}  # picker.carry_place's: the last pass's row, filter text, view and scroll
+    quitting = False  # Q: save, then leave the card editor
     off_note = " · 🚫 off on this card" if bucket in store.systems_off(store.saved_card(name, cards)) else ""
     try:
         while True:
@@ -959,9 +969,13 @@ def edit_system(name, system, setup, to_fetch=None, card_usages=None):
             total = len(shown_rows(sp, lambda _key: True))
             result = _games_pass(
                 f"✏️  {store.short_name(system)} on {name} — ✅ synced, ⬜ not{off_note}", shown, picks, {bucket: sp}, {},
-                start, work, capacity, to_fetch, place, hint=tagui.games_hint(GAMES_HINT), hotkeys=(*GameFilters.KEYS, VARIANT_KEY, *tagui.TAG_KEYS, tagui.BULK_KEY),
-                key_help=GAMES_KEYS, filters=filters.describe(len(shown), total))
+                start, work, capacity, to_fetch, place, hint=f"{tagui.games_hint(GAMES_HINT)} · {edit.QUIT_HINT}",
+                hotkeys=(*GameFilters.KEYS, VARIANT_KEY, *tagui.TAG_KEYS, tagui.BULK_KEY, edit.QUIT_KEY),
+                key_help=[*GAMES_KEYS, edit.QUIT_HELP], filters=filters.describe(len(shown), total))
             if not isinstance(result, tuple):
+                break
+            if result[0] == edit.QUIT_KEY:
+                quitting = True
                 break
             if result[0] in tagui.TAG_KEYS:
                 tagui.tag_key(result[0], *(shown[result[1]][1:3] if result[1] is not None else (None, None)))
@@ -976,7 +990,10 @@ def edit_system(name, system, setup, to_fetch=None, card_usages=None):
     except KeyboardInterrupt:  # Ctrl-C: the pass on screen kept its toggles
         picks.save()
         raise
-    return picks.save()
+    saved = picks.save()
+    if quitting:
+        raise edit.Quit
+    return saved
 
 
 def edit_all(name, setup, systems, to_fetch=None, card_usages=None, pick_tags=False):
@@ -1043,6 +1060,7 @@ def edit_set(name, game_set, setup, to_fetch=None, card_usages=None, all_games=F
     start = {key: s["bucket"] not in sps or opened[s["bucket"]][key] for s, key, _, _ in rows}
     place = {}  # picker.carry_place's: the last pass's row, filter text, view and scroll
     frozen = None  # the rows of the pass `t` was pressed in: shown again as they were, so the cursor stays put
+    quitting = False  # Q: save, then leave the card editor
     try:
         while True:
             shown = frozen or [r for r in listed if tagui.FILTER.keep(r[1])]
@@ -1057,11 +1075,15 @@ def edit_set(name, game_set, setup, to_fetch=None, card_usages=None, all_games=F
                 emoji, hint, hotkeys, key_help = (themeart.collection_emoji(game_set), tagui.games_hint(COLLECTION_GAMES_HINT),
                                                   (VARIANT_KEY, *tagui.TAG_KEYS, tagui.BULK_KEY, *tagui.HOTKEYS), COLLECTION_GAMES_KEYS)
                 origin = ", 💖 from a collection"
+            hint, hotkeys, key_help = f"{hint} · {edit.QUIT_HINT}", (*hotkeys, edit.QUIT_KEY), [*key_help, edit.QUIT_HELP]
             result = _games_pass(
                 f"{emoji} {game_set['name']} on {name} — ✅ synced, ⬜ not{origin}", shown, picks, sps, files_of,
                 start, work, capacity, to_fetch, place, hint=hint, hotkeys=hotkeys, key_help=key_help, filters=filters,
                 select_all=not all_games or tagui.FILTER.active())
             if not isinstance(result, tuple):
+                break
+            if result[0] == edit.QUIT_KEY:
+                quitting = True
                 break
             if result[0] in tagui.TAG_KEYS:
                 tagui.tag_key(result[0], *(shown[result[1]][1:3] if result[1] is not None else (None, None)))
@@ -1078,4 +1100,7 @@ def edit_set(name, game_set, setup, to_fetch=None, card_usages=None, all_games=F
     except KeyboardInterrupt:  # Ctrl-C: the pass on screen kept its toggles
         picks.save()
         raise
-    return picks.save()
+    saved = picks.save()
+    if quitting:
+        raise edit.Quit
+    return saved
