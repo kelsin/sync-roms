@@ -217,7 +217,8 @@ def edit_card_system(card, bucket, setup):
 
 
 def list_rows(listing, by_bucket, bucket_keys):
-    """Rows for one games list (a collection, a tag's games), sorted by system and title.
+    """Rows for one games list (a collection, a tag's games), by system and title: the order ties keep in the list's
+    sort (its columns set the order shown).
 
     Entries for unknown systems are skipped."""
     rows, seen = [], set()
@@ -270,6 +271,9 @@ SETUP_KEY = "v"
 DELETE_KEY = "d"
 RENAME_KEY = "r"
 MENU_HINT = "Enter open · Esc back · v device · r rename · d delete"
+CARD_COLUMNS = [picker.Column("name", "Card", True), picker.Column("device", "Device", True),
+                picker.Column("surprise", "Surprise"), picker.Column("changes", "Changes")]
+CARDS_SORT = picker.Sort(("name", "device"))  # the card list's sort, for the run
 GAMES_HINT = "Space toggle · Enter done · / filter · w note · a all · V view · t tags"
 
 
@@ -394,11 +398,15 @@ def edit_manifest():
             t["label"] = f"💳 {new}"
             targets[new] = t
 
-    def setup_extra(name, cards):
-        """The card's device and firmware as a row suffix (cards: cards.json already loaded); a pending change in cyan."""
+    def current_setup(name, cards):
+        """(the card's device and firmware, pending change first, or None; whether it is a pending change)."""
         t = targets.get(name)
         pending = bool(t and t["setup"])
-        setup = t["setup"] if pending else saved_setup(name, cards)
+        return (t["setup"] if pending else saved_setup(name, cards)), pending
+
+    def setup_extra(name, cards):
+        """The card's device and firmware as a row suffix (cards: cards.json already loaded); a pending change in cyan."""
+        setup, pending = current_setup(name, cards)
         gift = f"  🎁 {'on' if surprise.enabled(cards.get(name)) else 'off'}"
         if not setup:
             return [("  ⚠️  no device set", "red"), (gift, "dim")]
@@ -446,20 +454,26 @@ def edit_manifest():
         return True
 
     def edit_cards():
-        """The card list: open a card, add one, or change/rename/delete the highlighted one. Esc goes back."""
-        pos = 0
+        """The card list (Card, Device, Surprise and Changes columns, sorted by card or device): open a card, add one,
+        or change/rename/delete the highlighted one. Esc goes back."""
+        pos = None  # the top of the sorted list until a row was used
         while True:
             saved = store.load_cards()
             cards = sorted(set(saved) | {k for k in targets if k is not None})
             n = len(cards)
             options = [f"💳 {name}" for name in cards] + ["➕ New card"]
-            extras = [setup_extra(name, saved) + pending_extra(name) for name in cards] + [[]]
-            i = picker.filter_list("💳 Which card?  (Esc = back)", options, extras=extras,
+            extras = [setup_extra(name, saved) + (pending_extra(name) or [("", "")]) for name in cards] + [[("", "")] * 3]
+            values = {"name": [store.sort_key(name) for name in cards],  # a card with no device sorts last by Device
+                      "device": [row[0][0].strip().casefold() if current_setup(name, saved)[0] else None
+                                 for name, row in zip(cards, extras)]}
+            i = picker.filter_list("💳 Which card?  (Esc = back)", options, extras=extras, columns=CARD_COLUMNS,
+                                   sort=CARDS_SORT, sort_value=lambda x, col: values[col][x] if x < n else None,
+                                   pinned=[False] * n + [True],
                                    hotkeys=(SETUP_KEY, DELETE_KEY, RENAME_KEY, tagui.CLEAR_KEY), hint=tagui.menu_hint(MENU_HINT),
                                    filters=tagui.banner(), cursor=pos)
             if i is None:
                 return
-            pos = (i[1] or 0) if isinstance(i, tuple) else i
+            pos = i[1] if isinstance(i, tuple) else i
             if isinstance(i, tuple):
                 if i[0] == tagui.CLEAR_KEY:
                     tagui.handle_key(tagui.CLEAR_KEY, ())

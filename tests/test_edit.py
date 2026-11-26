@@ -282,6 +282,33 @@ class MenuActions(EditBase):
         self.run_menu([0, (edit.DELETE_KEY, 0), None, 4], confirm=False)
         self.assertIn("c", self.read("cards.json"))
 
+    def test_the_card_list_has_sortable_card_and_device_columns(self):
+        self.write_json("cards.json", {"b": {"layout": "esde", "device": "full"}, "a": {}})
+        seen = []
+        picks = iter([0, None, 4])
+
+        def fake(title, options, *a, **k):
+            seen.append((title, list(options), k))
+            return next(picks)
+        with mock.patch.object(runtime, "BUCKET", "b", create=True), \
+                mock.patch.object(s3, "list_sizes", return_value={}), \
+                mock.patch.object(picker, "filter_list", side_effect=fake), \
+                mock.patch.object(edit, "note"), contextlib.redirect_stdout(io.StringIO()):
+            edit.edit_manifest()
+        title, options, kw = seen[1]
+        self.assertEqual(options, ["💳 a", "💳 b", "➕ New card"])
+        self.assertEqual([(c.id, c.header, c.sortable) for c in kw["columns"]],
+                         [("name", "Card", True), ("device", "Device", True), ("surprise", "Surprise", False),
+                          ("changes", "Changes", False)])
+        self.assertIs(kw["sort"], edit.CARDS_SORT)
+        self.assertEqual(kw["pinned"], [False, False, True])
+        self.assertIsNone(kw["cursor"])  # the top of the sorted list
+        self.assertIsNone(kw["sort_value"](0, "device"))  # no device set: last
+        self.assertEqual(kw["sort_value"](1, "device"), "full · es-de")
+        self.assertEqual(kw["sort_value"](0, "name"), store.sort_key("a"))
+        self.assertIsNone(kw["sort_value"](2, "name"))
+        self.assertTrue(all(len(row) == 3 for row in kw["extras"]))
+
     def test_done_with_no_changes_saves_nothing(self):
         self.assertEqual(self.run_menu([4]), 0)
         self.assertFalse(os.path.exists(self.path("cards.json")))
@@ -381,7 +408,7 @@ class MenuActions(EditBase):
         from sync_roms import cardedit
         self.write_json("cards.json", {x: {"layout": "esde", "device": "full"} for x in "abc"})
         with mock.patch.object(cardedit, "edit_card"):
-            self.assertEqual(self.cursors_of([0, 2, 1, None, 4], "💳 Which"), [0, 2, 1])
+            self.assertEqual(self.cursors_of([0, 2, 1, None, 4], "💳 Which"), [None, 2, 1])  # first: the top
 
     def test_the_device_list_reopens_on_the_row_just_used(self):
         self.assertEqual(self.cursors_of([3, 2, 1, None, 4], "🧩 Which"), [0, 2, 1])
