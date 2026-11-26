@@ -198,7 +198,7 @@ TOPICS = {
 
   Builds each named custom theme style (Pixel Consoles, Pixel Controllers, ToTK - James; all of them
   without names). Pixel Consoles and Pixel Controllers are built in each chosen palette: --palette
-  NAME, repeatable, or --all-palettes for all 28 (Gruvbox, Arcade, Candy, ..., Monochrome). Without
+  NAME, repeatable, or --all-palettes for all 35 (Gruvbox, Arcade, Candy, ..., Monochrome). Without
   either, a terminal shows the palette picker (each palette's six colors as a bar, and a preview
   where the terminal draws images), starting from the saved selection; Enter saves the palettes on
   as custom_theme_palettes and builds them, Esc builds nothing. With --yes or no terminal the saved

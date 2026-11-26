@@ -21,7 +21,8 @@ from sync_roms.custom_themes.pixel import recolor  # noqa: E402
 GRAY = (80, 73, 69)
 NAMES = ["Gruvbox", "Arcade", "Candy", "Mint", "Game Boy", "Pocket", "Virtual Boy", "Famicom", "NES", "SNES", "Genesis",
          "Dreamcast", "PlayStation", "Neo Geo", "PICO-8", "Commodore", "Amber CRT", "Green CRT", "Nord", "Dracula",
-         "Solarized", "Synthwave", "Sunset", "Ocean", "Sakura", "Forest", "Grape", "Monochrome"]
+         "Solarized", "Synthwave", "Sunset", "Ocean", "Sakura", "Forest", "Grape",
+         "Jigglypuff", "Pikachu", "Snorlax", "Bulbasaur", "Charmander", "Squirtle", "Eevee", "Monochrome"]
 
 
 def full_config():
@@ -69,7 +70,7 @@ def palette_base(path):
 
 class Palettes(unittest.TestCase):
     def test_palettes_data(self):
-        self.assertEqual(len(palettes.PALETTES), 28)
+        self.assertEqual(len(palettes.PALETTES), 35)
         self.assertEqual(palettes.names(), NAMES)
         self.assertEqual(list(palettes.PALETTES), NAMES)
         for name, p in palettes.PALETTES.items():
@@ -235,7 +236,7 @@ class Command(helpers.StorageDir):
         with mock.patch.object(custom_themes, "publish", return_value=0) as publish:
             self.assertEqual(commands.run(["themes", "publish", "--all-palettes", "--dry-run"]), 0)
         self.assertIsNone(publish.call_args.args[0])
-        self.assertEqual(len(publish.call_args.args[1]), 28)
+        self.assertEqual(len(publish.call_args.args[1]), 35)
         self.assertTrue(publish.call_args.args[2])
 
     def fails(self, argv):
@@ -349,7 +350,7 @@ class Publish(helpers.StorageDir):
 class Names(unittest.TestCase):
     def test_theme_names_never_collide_with_old_folders(self):
         names = {custom_themes.theme_name(s, p) for s in custom_themes.styles()[:2] for p in palettes.names()}
-        self.assertEqual(len(names), 56)
+        self.assertEqual(len(names), 70)
         self.assertFalse(names & set(custom_themes.styles()))
         self.assertTrue(all(re.fullmatch(r"Pixel (Consoles|Controllers) - .+", n) for n in names))
 
@@ -373,8 +374,8 @@ class PaletteSheet(helpers.StorageDir):
     def test_render_sheet_size(self):
         from sync_roms.custom_themes import palette_sheet
         img = palette_sheet.render_sheet(palettes.PALETTES.values())
-        self.assertEqual(len(palettes.PALETTES), 28)
-        self.assertEqual(img.size, (5 * 320 + 6 * 8, 6 * 240 + 7 * 8))
+        self.assertEqual(len(palettes.PALETTES), 35)
+        self.assertEqual(img.size, (5 * 320 + 6 * 8, 7 * 240 + 8 * 8))
         self.assertEqual(img.getpixel((0, 0)), (28, 28, 28))
 
     def test_write_sheet_creates_png(self):
@@ -522,7 +523,7 @@ class PaletteArgs(helpers.StorageDir):
         self.pp.save(["Candy"])
         self.terminal.return_value = True
         self.assertEqual(self.names(commands.palette_args(self.args(["NES"]))), ["NES"])
-        self.assertEqual(len(commands.palette_args(self.args(all_palettes=True))), 28)
+        self.assertEqual(len(commands.palette_args(self.args(all_palettes=True))), 35)
         self.picked.assert_not_called()
         self.assertEqual(self.pp.saved(), ["Candy"])
 
