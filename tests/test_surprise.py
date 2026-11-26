@@ -360,7 +360,7 @@ class Step(StorageCase):
         self.assertEqual([r[2] for r in rows], [("  2 MB", "dim"), ("  32 KB", "dim"), ("", "dim")])
         self.assertEqual([c.id for c in lists[0]["columns"]], ["name", "system", "year", "size", "tags"])
         self.assertEqual([lists[0]["sort_value"](i, "size") for i in range(3)], [2_000_000, 32_000, None])
-        self.assertEqual(lists[0]["columns"][3], picker.Column("size", "Size", True))
+        self.assertEqual(lists[0]["columns"][3], picker.Column("size", "Size", True, descending=True))
         self.assertEqual([len(r) for r in rows], [4, 4, 4])  # the tag column stays last
 
     def test_rows_show_sizing_while_the_cache_lacks_them(self):

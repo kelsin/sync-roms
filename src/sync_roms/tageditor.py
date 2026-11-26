@@ -184,6 +184,7 @@ def edit_one(tag_id, systems, keys_of):
             pressed = None if i is None else i[0] if isinstance(i, tuple) else ADD_KEY if i == 0 else SETTINGS_KEY
         else:
             entry = {"bucket": "", "games": [{"bucket": k} for k in keys]}
+            # by title, then key: only the order ties keep in the list's sort, whose columns set the order shown
             rows = sorted(((entry, k, names.title(k), names.title(k)) for k in kept), key=lambda r: (store.sort_key(r[2]), r[1]))
             if place.get("added"):  # back from adding: on the first game added
                 at = next(i for i, r in enumerate(rows) if r[1] in place["added"])
@@ -231,7 +232,7 @@ def edit_tags():
 def _tag_list():
     systems = sorted(store.repo_json("systems"), key=lambda s: s["name"].lower())
     keys_of = folder_lister()
-    pos = 0
+    pos = None  # the top of the sorted list until a row was opened
     while True:
         defs = tags.all_tags()
         counts = tagui._count()
@@ -242,7 +243,7 @@ def _tag_list():
                                [_label(defs[x]) for x in ids] + ["➕ New tag"],
                                hotkeys=(tagui.NEW_KEY, tagui.CLEAR_KEY), cursor=pos, filters=tagui.banner(),
                                hint=tagui.menu_hint("/ filter · Enter open · n new tag · Esc back"),
-                               columns=[picker.Column("name", "Tag", True), picker.Column("games", "Games", True)],
+                               columns=[picker.Column("name", "Tag", True), picker.Column("games", "Games", True, descending=True)],
                                extras=[[(str(counts[x]), "")] if counts.get(x) else [("no games", "dim")] for x in ids]
                                + [[("", "")]],
                                sort=TAG_SORT, pinned=[False] * n + [True],
@@ -255,7 +256,7 @@ def _tag_list():
         if isinstance(i, tuple):
             if i[0] == tagui.CLEAR_KEY:
                 tagui.handle_key(tagui.CLEAR_KEY, ())
-                pos = i[1] or 0
+                pos = i[1]
                 continue
             i = n
         pos = i

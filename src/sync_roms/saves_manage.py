@@ -272,7 +272,8 @@ def _show_files(row):
     title = row["rel_dir"] if row["unreadable"] else row["game"]
     picker.filter_list(f"💾 {title} files", [f[0] for f in files], extras=extras, hint="Esc back", sort=FILES_SORT,
                        columns=[picker.Column("name", "File", True), picker.Column("kind", "Kind", True),
-                                picker.Column("size", "Size", True), picker.Column("modified", "Modified", True),
+                                picker.Column("size", "Size", True, descending=True),
+                                picker.Column("modified", "Modified", True, descending=True),
                                 picker.Column("core", "Core", True), picker.Column("mark", "Mark")],
                        sort_value=lambda i, col: values[col][i] if col in values else None)
 
@@ -309,8 +310,8 @@ def _manage(rows, systems, dry_run):
     while rows:
         cols = gamecols.GameColumns(
             [("", r["rel_dir"], None) if r["unreadable"] else (r["system"], r["game"], None) for r in rows],
-            extra_columns=[picker.Column("from", "Card"), picker.Column("stashed", "Stashed", True),
-                           picker.Column("kinds", "Saves"), picker.Column("size", "Size", True),
+            extra_columns=[picker.Column("from", "Card"), picker.Column("stashed", "Stashed", True, descending=True),
+                           picker.Column("kinds", "Saves"), picker.Column("size", "Size", True, descending=True),
                            picker.Column("core", "Core", True), picker.Column("missing", "Missing"),
                            picker.Column("note", "Note")],
             extra_values=lambda i, col: _values(rows[i], col))

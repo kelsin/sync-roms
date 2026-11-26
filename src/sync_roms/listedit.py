@@ -295,8 +295,9 @@ def edit_menu(noun, before, working, state, emoji, art, delete_note, new_item, o
 # --- All systems at once -----------------------------------------------------------------------------
 
 def all_rows(shown, systems, keys_of):
-    """Rows for edit.toggle_games over every system's files, by title then system. Each row's entry is the system's
-    view in shown, so toggles write into it; the system is the list's System column."""
+    """Rows for edit.toggle_games over every system's files, by title then system: the order ties keep in the list's
+    sort (its columns set the order shown). Each row's entry is the system's view in shown, so toggles write into it;
+    the system is the list's System column."""
     rows = []
     for system in systems:
         s = shown[system["bucket"]]

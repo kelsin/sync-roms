@@ -1311,6 +1311,7 @@ class Flow(DataDir):
         self.assertEqual(title, "Variants of Ruby")
         self.assertEqual(labels, ["Red", "x"])
         self.assertFalse(kw.get("multi"))
+        self.assertIsNone(kw["cursor"])  # the top of the sorted list, not the caller's row 0
         self.assertEqual(store.card_games("c"), {"gb": [g("gb/Red.gb")]})
 
     def test_t_in_the_variants_list_edits_that_variants_tags_and_reopens_on_its_row(self):
@@ -1346,7 +1347,7 @@ class Flow(DataDir):
                                        returns((cardedit.SET_KEY, 0)),  # s on Red, which the filter then hides
                                        returns(None), lambda labels, kw: kw["session"]["sel"])
         self.assertEqual([(c[1], c[2]["cursor"]) for c in calls[1:4]],
-                         [(["x", "y"], 0),
+                         [(["x", "y"], None),  # the top of the sorted list
                           (["Red", "x", "y"], 2),  # still on y
                           (["x", "y"], 0)])  # Red hidden: on x, the nearest
 

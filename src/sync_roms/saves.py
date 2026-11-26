@@ -458,7 +458,8 @@ def pick_stash(games, names):
                                initial=[True] * len(rows), esc_asks=False, extras=extras,
                                hint="Space toggle · Enter stash", sort=FILES_SORT,
                                columns=[picker.Column("name", "File", True), picker.Column("kind", "Kind", True),
-                                        picker.Column("size", "Size", True), picker.Column("modified", "Modified", True),
+                                        picker.Column("size", "Size", True, descending=True),
+                                        picker.Column("modified", "Modified", True, descending=True),
                                         picker.Column("core", "Core", True)],
                                sort_value=lambda i, col: values[col](rows[i][1]) if values[col] else None)
     picked = [(k, e) for (k, e), on in zip(rows, state or []) if on]
@@ -541,7 +542,7 @@ def pick_apply(labels, extras, games):
     session = {}
     while True:
         cols = gamecols.GameColumns([(system, stem, None) for system, stem, _ in games],
-                                extra_columns=[picker.Column("from", "From"), picker.Column("stashed", "Stashed", True),
+                                extra_columns=[picker.Column("from", "From"), picker.Column("stashed", "Stashed", True, descending=True),
                                                picker.Column("kinds", "Saves"), picker.Column("core", "Core"),
                                                picker.Column("found", "On card"), picker.Column("note", "Note")],
                                 extra_values=lambda i, col: extras[i][1][0].strip() if col == "stashed" else None)

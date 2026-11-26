@@ -295,7 +295,7 @@ def run_surprise(card_name, setup, chosen_systems, interactive, dry_run, to_fetc
         while True:  # t edits a game's tags, then the list opens again with the same picks
             session = {"sel": list(sel)}
             cols = gamecols.GameColumns([(x["system"], x.get("title") or x["bucket"], x["bucket"]) for x in current],
-                                        extra_columns=[picker.Column("size", "Size", True), picker.Column("tags", "Tags")],
+                                        extra_columns=[picker.Column("size", "Size", True, descending=True), picker.Column("tags", "Tags")],
                                         extra_values=lambda i, col: size_bytes[i] if col == "size" else None)
             states = picker.filter_list("\U0001F381 Surprises: keep ✅ or replace ⬜ (Enter to confirm)",
                                         [x.get("title") or x["bucket"] for x in current],

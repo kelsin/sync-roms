@@ -814,7 +814,7 @@ def _toggle_variant(picks, key, title):
             found = frozen or [v for v in all_found if tagui.FILTER.keep(v["bucket"])]
             frozen = None
             places = [all_found.index(v) for v in found]  # on the same variant after s or c, else the nearest shown
-            cursor = min(range(len(found)), key=lambda j: (abs(places[j] - at), places[j])) if found and at is not None else 0
+            cursor = min(range(len(found)), key=lambda j: (abs(places[j] - at), places[j])) if found and at is not None else None
             cols = gamecols.GameColumns([(v["bucket"].partition("/")[0], names.title(v["bucket"]), v["bucket"]) for v in found],
                                         extra_columns=[picker.Column("note", "Variant"), picker.Column("lang", "Lang"),
                                                        picker.Column("tags", "Tags")],
@@ -887,7 +887,7 @@ def _games_pass(title, shown, picks, sps, files_of, start, work, capacity, to_fe
         return work["costs"][sp_of[i].bucket].get(keys[i]) if col_id == "size" and sp_of[i] else None
     cols = gamecols.GameColumns([(k.partition("/")[0], r[2], k) for k, r in zip(keys, shown)],
                                 extra_columns=[picker.Column("files", "Files"), picker.Column("from", ""),
-                                               picker.Column("lang", "Lang"), picker.Column("size", "Size", True),
+                                               picker.Column("lang", "Lang"), picker.Column("size", "Size", True, descending=True),
                                                picker.Column("variant", ""), picker.Column("tags", "Tags")],
                                 extra_values=size)
 
@@ -1018,10 +1018,11 @@ def edit_all(name, setup, systems, to_fetch=None, card_usages=None, pick_tags=Fa
 
 
 def edit_set(name, game_set, setup, to_fetch=None, card_usages=None, all_games=False, picks=None, pick_tags=False):
-    """A card's games of one collection over every system it can play, in one list (system, then title), toggled as in
-    edit_system; games not in storage are left out, a full system's are on and locked. Saves to cards.json when left;
-    returns whether anything changed. to_fetch, card_usages: as for edit_system. all_games: edit_all's list (its games
-    carry their row label): by title then system, s narrows it by tags (pick_tags: picked before it opens; with none
+    """A card's games of one collection over every system it can play, in one list (its rows given by system, then
+    title, the order ties keep in the list's sort, whose columns set the order shown), toggled as in edit_system; games
+    not in storage are left out, a full system's are on and locked. Saves to cards.json when left; returns whether
+    anything changed. to_fetch, card_usages: as for edit_system. all_games: edit_all's list (its games carry their row
+    label): given by title then system, s narrows it by tags (pick_tags: picked before it opens; with none
     picked it doesn't). picks: the CardPicks to edit, when the caller already made one."""
     cards = store.load_cards()
     picks = picks or cardpicks.CardPicks(name, setup, cards)

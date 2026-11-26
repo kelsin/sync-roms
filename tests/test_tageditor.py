@@ -134,6 +134,8 @@ class Editor(unittest.TestCase):
         self.assertEqual(labels[-1], "➕ New tag")
         self.assertNotIn("o", kw["hotkeys"])
         self.assertIs(kw["sort"], tageditor.TAG_SORT)
+        self.assertIsNone(kw["cursor"])  # the top of the sorted list, not the caller's row 0
+        self.assertTrue(kw["columns"][1].descending)  # o on Games starts with the most
         self.assertEqual(kw["extras"][labels.index("⭕ Aaa")], [("no games", "dim")])
         n = len(labels) - 1
         shmups = next(i for i, l in enumerate(labels) if l.startswith("🚀"))
