@@ -83,6 +83,16 @@ def header_label(collection):
     return f"{themeart.collection_emoji(collection)} {collection['name']}"
 
 
+def restore(collection, originals, before):
+    """Put back the original entry (note, discs) and place of each game switched back on since `before`."""
+    back = [g for g in collection["games"] if g.get("bucket") in originals and g["bucket"] not in before]
+    games = [g for g in collection["games"] if g not in back]
+    for g in sorted(back, key=lambda g: originals[g["bucket"]][0]):
+        index, entry = originals[g["bucket"]]
+        games.insert(min(index, len(games)), entry)
+    collection["games"] = games
+
+
 def edit_one(collection, systems, keys_of):
     """Edit one collection: its games first (a game switched off stays listed, so it can be switched back on), with
     A to add games and S for its settings."""
@@ -94,7 +104,7 @@ def edit_one(collection, systems, keys_of):
         by_bucket = {s["bucket"]: s for s in shown.values()}
         for r in edit.list_rows(collection, shown, lambda s: keys_of(s["bucket"])):
             kept[r[1]] = (r[0]["bucket"], r[2], r[3])
-        originals.update({g["bucket"]: g for g in collection["games"] if g.get("bucket")})
+        originals.update({g["bucket"]: (i, g) for i, g in enumerate(collection["games"]) if g.get("bucket")})
         rows = sorted(((by_bucket[b], key, title, label) for key, (b, title, label) in kept.items()),
                       key=lambda r: (r[0]["name"].lower(), store.sort_key(r[2])))
         before = {g.get("bucket") for g in collection["games"]}
@@ -110,12 +120,16 @@ def edit_one(collection, systems, keys_of):
                                               key_help=[(f"{ADD_KEY} / {ADD_ALIAS}", "add games"), (SETTINGS_KEY, "settings")])
             finally:  # Ctrl-C too: the toggles made are kept
                 collection["games"] = reconcile(collection["games"], shown)
-                collection["games"] = [originals[g["bucket"]] if g.get("bucket") in originals and g["bucket"] not in before
-                                       else g for g in collection["games"]]
+                restore(collection, originals, before)
             if pressed is None:
                 return
         if pressed in (ADD_KEY, ADD_ALIAS):  # Ctrl-C in there keeps its toggles and is raised again
-            listedit.add_from_system(collection, systems, shown, keys_of, header_label(collection), toggle=toggle_filtered)
+            before = {g.get("bucket") for g in collection["games"]}
+            try:
+                listedit.add_from_system(collection, systems, view(collection, systems), keys_of, header_label(collection),
+                                         toggle=toggle_filtered)
+            finally:
+                restore(collection, originals, before)
         elif pressed == SETTINGS_KEY:
             settings_menu(collection)
 

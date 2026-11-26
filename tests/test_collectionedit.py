@@ -368,6 +368,17 @@ class GamesFirst(unittest.TestCase):
                 self.assertIn("gba/Zelda.zip", lists[-1])
                 self.assertEqual([g["bucket"] for g in collection["games"]], ["gba/Ruby.zip", "gba/Zelda.zip"])
 
+    def test_re_adding_a_switched_off_game_from_the_a_list_keeps_its_note(self):
+        collection = {"name": "Favs", "games": [dict(self.OLD), dict(self.FF7)]}
+        self.run_add(collection, "A", [self.off("gba/Ruby.zip", "A"), self.on("gba/Ruby.zip", None), lambda rows: None], [0])
+        self.assertEqual(collection["games"], [self.OLD, self.FF7])
+
+    def test_a_game_switched_off_and_on_returns_to_its_place(self):
+        a, b = dict(self.OLD), dict(self.FF7)
+        collection = {"name": "Favs", "games": [a, b]}
+        self.run_editor(collection, [self.off("gba/Ruby.zip", "S"), self.on("gba/Ruby.zip", None)])
+        self.assertEqual(collection["games"], [self.OLD, self.FF7])
+
     def test_esc_in_the_system_list_returns_to_the_games_list_unchanged(self):
         collection = {"name": "Favs", "games": [dict(self.OLD)]}
         _, lists = self.run_add(collection, "A", [lambda rows: "A", lambda rows: None], [None])
@@ -546,7 +557,7 @@ class AddFromSystem(unittest.TestCase):
 
 
 class AddFromTag(unittest.TestCase):
-    """listedit.add_from_tag: the collection editor's "Add games from a tag"."""
+    """listedit.add_from_tag: the tag editor's "Add games from a tag"."""
 
     def test_adds_the_tags_games_on_known_systems_with_their_files(self):
         tag_games(self, {"gba/Ruby.zip": None, "nes/Gone.nes": None, "psx/FF7.m3u": ["psx/FF7 (Disc 1).chd"]},
