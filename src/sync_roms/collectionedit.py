@@ -53,7 +53,7 @@ def edit_one(collection, systems, keys_of):
         label = f"{themeart.collection_emoji(collection)} {collection['name']}"  # the art may change below
         i = picker.filter_list(f"{label} (Esc = back)",
                                [f"Games in this collection ({len(collection['games'])}): switch some off",
-                                "Add games from a system", "Add games from a tag", "Rename / change the description",
+                                "Add games from a system", "Add games with a tag", "Rename / change the description",
                                 f"{themeart.art_emoji(collection.get('art'))} Theme art: {art_label(collection.get('art'))}",
                                 "Add games matching the current tag filter"], cursor=pos)
         if i is None:

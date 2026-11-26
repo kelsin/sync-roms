@@ -125,8 +125,8 @@ def add_from_system(listing, systems, shown, keys_of, label, toggle=None):
 
 
 def add_from_tag(listing, shown, keys_of, label):
-    """Pick one tag, set the tag filter to it (the filter is sticky, so it stays set afterwards and a note says so;
-    any other tag filter is cleared so nothing hides the tag's games), and toggle its games, across every system, in
+    """Pick one tag, set the tag filter to it while its games are listed (so nothing else hides them; the filter you
+    had is put back when the list closes, Ctrl-C included), and toggle its games, across every system, in
     listing (via shown, a view of it). label is listing's name as shown, with its emoji. New games get their
     record's extra files (the discs of a multi-disc game). Ctrl-C keeps the toggles made, then is raised again."""
     defs, records = tags.all_tags(), tags.load()["games"]
@@ -140,8 +140,6 @@ def add_from_tag(listing, shown, keys_of, label):
     if j is None:
         return
     tag = defs[ids[j]]
-    tagui.FILTER.clear()
-    tagui.FILTER.required.add(ids[j])
     games = [{"system": k.partition("/")[0], "bucket": k, **({"files": records[k]["files"]} if "files" in records[k] else {})}
              for k in games_of[ids[j]]]
     rows = edit.list_rows({"games": games}, shown, lambda s: keys_of(s["bucket"]))
@@ -150,12 +148,15 @@ def add_from_tag(listing, shown, keys_of, label):
         return
     had = {g["bucket"] for s in shown.values() for g in s["games"]}
     interrupted = False
+    saved = tagui.FILTER.state()
+    tagui.FILTER.clear()
+    tagui.FILTER.required.add(ids[j])
     try:
         edit.toggle_games(f"✏️  {tag['emoji']} {tag['name']} — ✅ in {label}, ⬜ not", rows)
     except KeyboardInterrupt:
         interrupted = True
-    if tagui.FILTER.active():
-        edit.note(f"🏷️  The tag filter stays on: {tagui.FILTER.describe()} (c clears it)")
+    finally:
+        tagui.FILTER.restore(saved)
     added = {g["bucket"] for s in shown.values() for g in s["games"]} - had
     listing["games"] = reconcile(listing["games"], shown)
     files = {g["bucket"]: g["files"] for g in games if g.get("files")}
@@ -192,8 +193,8 @@ def add_from_filter(listing, systems, shown, keys_of, label):
     for g in listing["games"]:
         if g.get("bucket") in added and "files" not in g and records.get(g["bucket"], {}).get("files"):
             g["files"] = list(records[g["bucket"]]["files"])
-    for s in options:
-        fold_discs(listing["games"], keys_of(s["bucket"]))
+    for bucket in {s["bucket"] for s, *_ in rows}:
+        fold_discs(listing["games"], keys_of(bucket))
     edit.note(f"✏️  Added {tagui.games(len(rows))} to {label}")
 
 

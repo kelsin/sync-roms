@@ -122,7 +122,7 @@ def edit_one(tag_id, systems, keys_of):
         art = tag.get("art")
         i = picker.filter_list(f"✏️  {_label(tag)} (Esc = back)",
                                [f"Games with this tag ({len(_games_of(tag_id))}): switch some off",
-                                "Add games from a system", "Add games from another tag",
+                                "Add games from a system", "Add games with another tag",
                                 f"Rename ({tag['name']})", f"Emoji ({tag['emoji']})",
                                 f"Description{': ' + tag['description'] if tag.get('description') else ''}",
                                 f"{themeart.art_emoji(art)} Theme art: {themeart.art_choices().get(art, 'none') if art else 'none'}",

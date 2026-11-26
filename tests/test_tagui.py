@@ -241,6 +241,13 @@ class TagFilterTest(unittest.TestCase):
         tags.change_game_tags(self.C, add=["shmups"])
         self.assertTrue(f.keep(self.C))
 
+    def test_a_filter_of_tags_that_no_longer_exist_is_not_active(self):
+        f = tagui.TagFilter()
+        f.required = {"gone"}
+        self.assertFalse(f.active())
+        f.excluded = {"cave"}
+        self.assertTrue(f.active())
+
     def test_describe(self):
         f = tagui.TagFilter()
         self.assertEqual(f.describe(), "")

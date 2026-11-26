@@ -141,7 +141,7 @@ TOPICS = {
 
   The tags are shared by everyone using this storage: they are storage's tags.json. Every change is
   saved as you make it; nothing else in storage or ~/.sync-roms changes. Pick a tag to switch its
-  games off, add games from a system or from another tag, rename it, change its emoji, description
+  games off, add games from a system or with another tag, rename it, change its emoji, description
   or art, merge it into another tag or delete it. n in the list adds a tag.
 
   suggest covers every version of each game (the tagged games, and the full English games of storage

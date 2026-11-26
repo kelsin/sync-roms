@@ -152,7 +152,18 @@ class TagFilter:
         self.untagged = False
 
     def active(self):
-        return bool(self.required or self.excluded or self.untagged)
+        """Whether the filter narrows anything: a required or excluded tag that no longer exists doesn't count."""
+        if self.untagged:
+            return True
+        defs = tags.all_tags()
+        return any(i in defs for i in self.required | self.excluded)
+
+    def state(self):
+        """A copy of the filter's settings, for restore."""
+        return set(self.required), set(self.excluded), self.untagged
+
+    def restore(self, state):
+        self.required, self.excluded, self.untagged = set(state[0]), set(state[1]), state[2]
 
     def keep(self, key):
         """Whether the filter shows the game."""

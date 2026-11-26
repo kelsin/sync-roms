@@ -361,7 +361,7 @@ class AddFromSystem(unittest.TestCase):
 
 
 class AddFromTag(unittest.TestCase):
-    """listedit.add_from_tag: the collection editor's "Add games from a tag"."""
+    """listedit.add_from_tag: the collection editor's "Add games with a tag"."""
 
     def test_adds_the_tags_games_on_known_systems_with_their_files(self):
         tag_games(self, {"gba/Ruby.zip": None, "nes/Gone.nes": None, "psx/FF7.m3u": ["psx/FF7 (Disc 1).chd"]},
@@ -388,19 +388,33 @@ class AddFromTag(unittest.TestCase):
             {"title": "Ruby", "system": "gba", "bucket": "gba/Ruby.zip"},
             {"title": "FF7", "system": "psx", "bucket": "psx/FF7.m3u", "files": ["psx/FF7 (Disc 1).chd"]}])
 
-    def test_the_picked_tag_becomes_the_required_filter_and_a_note_says_it_stays(self):
+    def add_with_filter(self, toggle_raises=False):
         tag_games(self, {"gba/Ruby.zip": None})
-        tagui.FILTER.excluded = {"other"}  # an earlier filter is replaced, so it can't hide the tag's games
+        tagui.FILTER.required, tagui.FILTER.excluded = {"mix"}, {"other"}
         listing = {"name": "Favs", "games": []}
-        seen, notes = [], []
+        seen = []
 
         def toggle(title, rows, **kw):
             seen.append((set(tagui.FILTER.required), set(tagui.FILTER.excluded)))
+            if toggle_raises:
+                raise KeyboardInterrupt
         with mock.patch.object(picker, "filter_list", return_value=0), mock.patch.object(edit, "toggle_games", toggle), \
-                mock.patch.object(edit, "note", notes.append):
-            listedit.add_from_tag(listing, listedit.view(listing, SYSTEMS), lambda b: {"gba/Ruby.zip"}, "💖 Favs")
+                mock.patch.object(edit, "note"):
+            try:
+                listedit.add_from_tag(listing, listedit.view(listing, SYSTEMS), lambda b: {"gba/Ruby.zip"}, "💖 Favs")
+            except KeyboardInterrupt:
+                seen.append("interrupted")
+        return seen
+
+    def test_the_tag_filter_is_preset_while_the_list_is_open_and_restored_after(self):
+        seen = self.add_with_filter()
         self.assertEqual(seen, [({"mix"}, set())])
-        self.assertEqual(notes, ["🏷️  The tag filter stays on: ✅ 🔀 Mix (c clears it)"])
+        self.assertEqual((tagui.FILTER.required, tagui.FILTER.excluded), ({"mix"}, {"other"}))
+
+    def test_the_filter_is_restored_on_ctrl_c_too(self):
+        seen = self.add_with_filter(toggle_raises=True)
+        self.assertEqual(seen, [({"mix"}, set()), "interrupted"])
+        self.assertEqual((tagui.FILTER.required, tagui.FILTER.excluded), ({"mix"}, {"other"}))
 
     def test_esc_or_no_tags_adds_nothing(self):
         tag_games(self, {}, defs={})
@@ -420,7 +434,7 @@ class AddFromTag(unittest.TestCase):
         seen = []
         with mock.patch.object(picker, "filter_list", lambda title, labels, **k: seen.append(labels) or None):
             collectionedit.edit_one({"name": "Favs", "games": []}, SYSTEMS, lambda b: set())
-        self.assertEqual(seen[0][2], "Add games from a tag")
+        self.assertEqual(seen[0][2], "Add games with a tag")
 
 
 class AddFromFilter(unittest.TestCase):
@@ -781,6 +795,7 @@ class AllRows(unittest.TestCase):
             listedit.toggle_all("All", rows)
         self.assertEqual(fake.call_args.kwargs["select_all"], edit.WHEN_FILTERED)
         seen = []
+        tag_games(self, {"gba/Ruby.zip": None})
         with mock.patch.object(picker, "filter_list", lambda t, labels, **k: seen.append(k) or k["session"]["sel"]):
             listedit.toggle_all("All", rows)
             tagui.FILTER.required = {"mix"}

@@ -162,9 +162,18 @@ class Editor(unittest.TestCase):
         def add(listing, shown, keys_of, label):
             listing["games"].append({"system": "nes", "bucket": B, "files": ["nes/B (Disc 2).zip"]})
         with mock.patch.object(tageditor, "add_from_tag", add):
-            self.run_editor(["Cave", "from another tag", None, None])
+            self.run_editor(["Cave", "with another tag", None, None])
         self.assertEqual(tags.tags_of(B), ["cave", "shmups"])
         self.assertEqual(tags.record(B)["files"], ["nes/B (Disc 2).zip"])
+
+    def test_with_another_tag_presets_the_filter_and_restores_yours(self):
+        tagui.FILTER.required, tagui.FILTER.excluded = {"shmups"}, {"cave"}
+        seen = []
+        with mock.patch.object(edit, "toggle_games", lambda *a, **k: seen.append(
+                (set(tagui.FILTER.required), set(tagui.FILTER.excluded)))):
+            self.run_editor(["Cave", "with another tag", "Shmups", None, None])
+        self.assertEqual(seen, [({"shmups"}, set())])
+        self.assertEqual((tagui.FILTER.required, tagui.FILTER.excluded), ({"shmups"}, {"cave"}))
 
     def test_n_creates_a_tag_and_opens_it(self):
         self.run_editor([("n", 0), None, None], asks=["Pixel Art", "🎨"])
