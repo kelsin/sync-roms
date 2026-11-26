@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.6.0](https://github.com/kelsin/sync-roms/compare/v4.5.0...v4.6.0) (2026-11-26)
+
+
+### :video_game: Features
+
+* **collections:** show a flag after the title of fan-translated games ([#642](https://github.com/kelsin/sync-roms/issues/642)) ([7bad9dc](https://github.com/kelsin/sync-roms/commit/7bad9dc00afc6408fc5e5894cfb4e1fa29fddfee))
+
+
+### :bug: Bug Fixes
+
+* **collections:** keep the open row border on the stuck header ([#640](https://github.com/kelsin/sync-roms/issues/640)) ([14fef39](https://github.com/kelsin/sync-roms/commit/14fef3940a9126d1903bb3336fd97fbdd125afa8))
+
 ## [4.5.0](https://github.com/kelsin/sync-roms/compare/v4.4.0...v4.5.0) (2026-11-26)
 
 
