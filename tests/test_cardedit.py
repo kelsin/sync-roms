@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from helpers import DataDir, feed_list, pilot_list, screen_lines, storage_tags  # noqa: E402
 from helpers import VITA_DLC as DLC, VITA_GAME as G, VITA_OTHER as H, VITA_UPDATE as NEW  # noqa: E402
-from sync_roms import budget, cardedit, collections, edit, inventory, picker, previews, s3, store, surprise, tags, tagui, themeart, ui  # noqa: E402
+from sync_roms import budget, cardedit, collections, edit, gamemeta, inventory, picker, previews, s3, store, surprise, tags, tagui, themeart, ui  # noqa: E402
 
 U = budget.Usage
 
@@ -162,7 +162,8 @@ class Flow(DataDir):
                                     "list_folders": lambda: self.folders}),
                               (inventory, {"cached": lambda p: self.cache.get(p)}),
                               (edit, {"note": lambda text: None}),
-                              (cardedit, {"_spawn": lambda fn: None, "_metadata": {}})):  # no metadata read
+                              (cardedit, {"_spawn": lambda fn: None}),
+                              (gamemeta, {"_spawn": lambda fn: None, "_metadata": {}})):  # no metadata read
             for name, new in attrs.items():
                 self.enterContext(mock.patch.object(target, name, new))
 
@@ -1956,7 +1957,7 @@ class MetaFlow(Flow):
             if key not in self.texts:
                 raise FileNotFoundError(key)
             return self.texts[key]
-        for target, name, new in ((cardedit, "_spawn", self.loaders.append), (cardedit, "_metadata", {}),
+        for target, name, new in ((cardedit, "_spawn", self.loaders.append), (gamemeta, "_spawn", self.loaders.append), (gamemeta, "_metadata", {}),
                                   (s3, "get_text", get_text), (edit, "note", self.notes.append)):
             self.enterContext(mock.patch.object(target, name, new))
 
@@ -2609,7 +2610,7 @@ class GameFiltersTest(unittest.TestCase):
     KEYS = ["gba/A.zip", "gba/B.zip", "gba/C.zip"]
 
     def filters(self):
-        with mock.patch.object(cardedit, "_spawn", lambda fn: None), mock.patch.object(cardedit, "_metadata", {"gba": None}):
+        with mock.patch.object(cardedit, "_spawn", lambda fn: None), mock.patch.object(gamemeta, "_spawn", lambda fn: None), mock.patch.object(gamemeta, "_metadata", {"gba": None}):
             return cardedit.GameFilters(self.GBA)
 
     def test_nothing_narrows_the_list_at_first(self):

@@ -404,8 +404,8 @@ class StickyFilter(unittest.TestCase):
         self.addCleanup(tagui.FILTER.clear)
 
     def test_filter_is_shared(self):
-        from sync_roms import cardedit
-        with mock.patch.object(cardedit, "_spawn", lambda fn: None), mock.patch.object(cardedit, "_metadata", {"nes": None}):
+        from sync_roms import cardedit, gamemeta
+        with mock.patch.object(cardedit, "_spawn", lambda fn: None), mock.patch.object(gamemeta, "_spawn", lambda fn: None), mock.patch.object(gamemeta, "_metadata", {"nes": None}):
             self.assertIs(cardedit.GameFilters({"bucket": "nes", "name": "NES"}).tags, tagui.FILTER)
 
     def test_banner_empty_without_filter(self):
