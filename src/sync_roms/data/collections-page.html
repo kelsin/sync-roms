@@ -108,11 +108,6 @@ input:focus-visible, select:focus-visible, button:focus-visible, [role="button"]
 .rtags span { cursor: default; }
 .pics { display: flex; gap: 8px; align-items: center; justify-content: flex-end; height: 120px; }
 .pics img { display: block; height: 100%; width: auto; flex: none; border-radius: 6px; }
-.row.stuck .rhead { padding-top: 8px; padding-bottom: 8px; }
-.row.stuck .pics, .row.stuck .desc, .row.stuck .rtags { display: none; }
-.row.stuck .name { font-size: 16px; }
-.row.stuck .rtext { display: flex; align-items: center; flex-wrap: wrap; gap: 0 12px; }
-.row.stuck .meta { margin-top: 0; white-space: nowrap; }
 .tablewrap { overflow-x: auto; }
 table.games { width: 100%; border-collapse: collapse; }
 .games th, .games td { padding: 8px 14px; text-align: left; vertical-align: middle; }
@@ -144,7 +139,6 @@ table.games { width: 100%; border-collapse: collapse; }
   .games .col-copy { width: 76px; }
   .sys-inline { display: block; }
   .copy, .link { min-height: 36px; }
-  .row.stuck .rhead { padding: 6px 12px; }
 }
 .empty { color: var(--muted); text-align: center; padding: 48px 0; }
 [hidden] { display: none !important; }
@@ -498,7 +492,6 @@ table.games { width: 100%; border-collapse: collapse; }
     var after = entry.row.getBoundingClientRect().top;
     if (!closing && after !== before) window.scrollBy(0, after - before); // keep the row where it was
     if (entry.row.getBoundingClientRect().top < barHeight()) scrollToRow(entry);
-    markStuck();
   }
   function applyHash() {
     var hash = new URLSearchParams(location.hash.slice(1));
@@ -515,22 +508,6 @@ table.games { width: 100%; border-collapse: collapse; }
     current = target ? wanted : null;
     update();
     if (target) scrollToRow(target);
-    markStuck();
-  }
-
-  // The open row's header sticks below the bar; it is compact once the row's top has scrolled past the bar.
-  var stuckQueued = false;
-  function markStuck() {
-    stuckQueued = false;
-    var limit = barHeight() - 0.5;
-    cards.forEach(function (entry) {
-      entry.row.classList.toggle("stuck", entry.collection.id === current && entry.row.getBoundingClientRect().top < limit);
-    });
-  }
-  function queueStuck() {
-    if (stuckQueued) return;
-    stuckQueued = true;
-    window.requestAnimationFrame(markStuck);
   }
 
   function update() {
@@ -570,7 +547,6 @@ table.games { width: 100%; border-collapse: collapse; }
       empty.hidden = true;
     }
     writeHash();
-    queueStuck();
   }
 
   search.addEventListener("input", update);
@@ -584,8 +560,7 @@ table.games { width: 100%; border-collapse: collapse; }
     update();
   });
   window.addEventListener("hashchange", applyHash);
-  window.addEventListener("scroll", queueStuck, {passive: true});
-  window.addEventListener("resize", function () { measureBar(); queueStuck(); });
+  window.addEventListener("resize", function () { measureBar(); });
   if (window.ResizeObserver) new ResizeObserver(measureBar).observe(bar);
   measureBar();
   applyHash();
