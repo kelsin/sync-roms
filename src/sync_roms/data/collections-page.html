@@ -51,9 +51,9 @@ h1 { margin: 0; font-size: 26px; letter-spacing: -.01em; }
 .bar {
   position: sticky; top: 0; z-index: 2;
   background: var(--bg);
-  padding: 12px 0;
+  padding: 12px 4px; /* 4px each side so the bar also covers the open row's 2px outline ring beside it */
   border-bottom: 1px solid var(--border);
-  margin-bottom: 20px;
+  margin: 0 -4px 20px;
 }
 .controls { display: flex; flex-wrap: wrap; gap: 8px; }
 .controls input, .controls select, .controls button, .chip {
@@ -97,6 +97,7 @@ input:focus-visible, select:focus-visible, button:focus-visible, [role="button"]
 .rhead:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 .row.open { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent), var(--shadow); }
 .row.open .rhead { position: sticky; top: var(--bar-h, 0px); z-index: 1; border-bottom: 1px solid var(--border); }
+.row.open.stuck .rhead { box-shadow: inset 0 3px 0 var(--accent); }
 .rtitle { display: flex; align-items: center; gap: 10px; }
 .name { margin: 0; font-size: 28px; line-height: 1.1; overflow-wrap: anywhere; flex: 0 1 auto; min-width: 0; }
 .desc { margin: 4px 0 0; color: var(--muted); overflow-wrap: anywhere; }
@@ -693,6 +694,16 @@ table.games { width: 100%; border-collapse: collapse; }
   window.addEventListener("hashchange", applyHash);
   window.addEventListener("resize", function () { measureBar(); });
   if (window.ResizeObserver) new ResizeObserver(measureBar).observe(bar);
+  // The bar covers the open row's top border while its header is stuck, so the stuck header draws its own.
+  function markStuck() {
+    var open = openEntry();
+    cards.forEach(function (entry) {
+      var stuck = entry === open && entry.row.getBoundingClientRect().top < barHeight() - 1;
+      entry.row.classList.toggle("stuck", stuck);
+    });
+  }
+  window.addEventListener("scroll", markStuck, { passive: true });
+  window.addEventListener("resize", markStuck);
   measureBar();
   applyHash();
 })();
