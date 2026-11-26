@@ -464,8 +464,8 @@ class ListRows(unittest.TestCase):
         self.assertEqual(self.run_list(iter(["/", "x", "space", "y", "enter", "escape", "space", "enter"])), [True, False])  # "x y" matches nothing; Esc clears it
 
     def test_view_cycle_shows_only_changed_rows(self):
-        # toggle row 0, then ^O twice: "changed only" lists just it, and Tab then toggles that row back
-        self.assertEqual(self.run_list(iter(["tab", "ctrl+o", "ctrl+o", "tab", "enter"])), [False, False])
+        # toggle row 0, then V twice: "changed only" lists just it, and Tab then toggles that row back
+        self.assertEqual(self.run_list(iter(["tab", "V", "V", "tab", "enter"])), [False, False])
 
     def test_hotkey_returns_pair(self):
         self.assertEqual(self.run_list(iter(["f"]), multi=False, hotkeys=("f",)), ("f", 0))
@@ -888,7 +888,7 @@ class TextualList(unittest.TestCase):
             await pilot.press("escape", "enter")
         pilot_list(script, "t", self.LABELS, multi=True, hint="Space toggle · Enter done · s set", hotkeys=("s",),
                    key_help=[("s", "narrow the list to a set's games")], on_note=lambda i, t: "")
-        for line in ("a               toggle all shown (all off if all are on)", "o               view: all / on / changed",
+        for line in ("a               toggle all shown (all off if all are on)", "V               view: all / on / changed",
                      "u               revert this list and hidden rows (asks if more than one change)",
                      "w               edit the row's note", "?               this help",
                      "s               narrow the list to a set's games"):
