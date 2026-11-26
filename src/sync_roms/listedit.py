@@ -287,17 +287,21 @@ def all_rows(shown, systems, keys_of):
     return sorted(rows, key=lambda r: (store.sort_key(r[2]), names[r[0]["bucket"]]))
 
 
-def toggle_all(title, rows, place=None):
-    """edit.toggle_games over rows from all_rows, with s narrowing by tags and c clearing that and the / filter."""
+def toggle_all(title, rows, place=None, hotkeys=(), hint=None, key_help=()):
+    """edit.toggle_games over rows from all_rows, with s narrowing by tags and c clearing that and the / filter.
+
+    Keys in hotkeys end the list, and are returned; Enter and Esc return None. hint and key_help add to the hint line
+    and what ? lists."""
     from . import cardedit  # cardedit imports this module
     tag_filter = tagui.TagFilter()
     place = {} if place is None else place
-    key_help = [(cardedit.SET_KEY, "narrow by tags"), (cardedit.CLEAR_KEY, "clear filters")]
+    key_help = [(cardedit.SET_KEY, "narrow by tags"), (cardedit.CLEAR_KEY, "clear filters"), *key_help]
     while True:
         pressed = edit.toggle_games(
             title, [r for r in rows if tag_filter.keep(r[1])],
-            hotkeys=(cardedit.SET_KEY, cardedit.CLEAR_KEY),
-            hint="Space toggle · Enter done · s tag · c clear filters", key_help=key_help, place=place,
+            hotkeys=(cardedit.SET_KEY, cardedit.CLEAR_KEY, *hotkeys),
+            hint="Space toggle · Enter done · s tag · c clear filters" + (f" · {hint}" if hint else ""),
+            key_help=key_help, place=place,
             select_all=False, filters=f"{tag_filter.describe()} (c clear filters)" if tag_filter.describe() else "")
         if pressed == cardedit.CLEAR_KEY:
             tag_filter.clear()
@@ -305,4 +309,4 @@ def toggle_all(title, rows, place=None):
         elif pressed == cardedit.SET_KEY:
             tag_filter.pick({r[1] for r in rows})
         else:
-            return
+            return pressed

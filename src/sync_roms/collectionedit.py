@@ -3,9 +3,11 @@ import copy
 
 from . import collections as colls
 from . import cardedit, edit, picker, store, themeart, ui
-from .listedit import add_from_system, add_from_tag, diff_lists, edit_menu, folder_lister, reconcile, view
+from . import listedit
+from .listedit import diff_lists, edit_menu, folder_lister, reconcile, view
 
 
+ADD_KEY, ADD_ALIAS, SETTINGS_KEY = "A", "+", "S"  # + is a silent alias of A
 GAMES_HINT = "Space toggle · Enter done · a all · s tag · m meta · c clear · p past"
 GAMES_KEYS = [k for k in cardedit.GAMES_KEYS if k[0] != cardedit.VARIANT_KEY]  # what ? lists in a system's games list
 
@@ -45,43 +47,44 @@ def toggle_filtered(s, title, rows):
             return
 
 
+def header(collection):
+    """The games list's title: emoji, name, description and theme art."""
+    desc = f" — {collection['description']}" if collection.get("description") else ""
+    return f"{themeart.collection_emoji(collection)} {collection['name']}{desc}  ·  art: {art_label(collection.get('art'))}"
+
+
 def edit_one(collection, systems, keys_of):
-    """Edit one collection: remove games, add games from a system or a tag, rename."""
-    pos = 0
+    """Edit one collection: its games first (a game switched off stays listed, so it can be switched back on), with
+    A to add games and S for its settings."""
+    kept = {}  # game key -> (system bucket, title, label) of every row listed, so removed games stay on the list
+    originals = {}  # game key -> its entry in the collection, for a game switched back on after it was removed
+    place = {}
     while True:
-        label = f"{themeart.collection_emoji(collection)} {collection['name']}"  # the art may change below
-        i = picker.filter_list(f"{label} (Esc = back)",
-                               [f"Games in this collection ({len(collection['games'])}): switch some off",
-                                "Add games from a system", "Add games from a tag", "Rename / change the description",
-                                f"{themeart.art_emoji(collection.get('art'))} Theme art: {art_label(collection.get('art'))}"], cursor=pos)
-        if i is None:
-            return
-        pos = i
         shown = view(collection, systems)
-        if i == 0:
-            rows = edit.list_rows(collection, shown, lambda s: keys_of(s["bucket"]))
-            if not rows:
-                edit.note(ui.yellow("ℹ️  This collection has no games yet."))
-                continue
+        by_bucket = {s["bucket"]: s for s in shown.values()}
+        for r in edit.list_rows(collection, shown, lambda s: keys_of(s["bucket"])):
+            kept[r[1]] = (r[0]["bucket"], r[2], r[3])
+        originals.update({g["bucket"]: g for g in collection["games"] if g.get("bucket")})
+        rows = sorted(((by_bucket[b], key, title, label) for key, (b, title, label) in kept.items()),
+                      key=lambda r: (r[0]["name"].lower(), store.sort_key(r[2])))
+        before = {g.get("bucket") for g in collection["games"]}
+        if not rows:  # nothing to list: the same actions as a menu
+            i = picker.filter_list(f"{header(collection)} (Esc = back)", ["Add games", "Settings"])
+            pressed = None if i is None else ADD_KEY if i == 0 else SETTINGS_KEY
+            if pressed is None:
+                return
+        else:
             try:
-                edit.toggle_games(f"✏️  {label} — ✅ in the collection, ⬜ remove it", rows)
+                pressed = listedit.toggle_all(header(collection), rows, place, hotkeys=(ADD_KEY, ADD_ALIAS, SETTINGS_KEY),
+                                              hint="A add games · S settings",
+                                              key_help=[(f"{ADD_KEY} / {ADD_ALIAS}", "add games"), (SETTINGS_KEY, "settings")])
             finally:  # Ctrl-C too: the toggles made are kept
                 collection["games"] = reconcile(collection["games"], shown)
-        elif i == 1:
-            add_from_system(collection, systems, shown, keys_of, label, toggle=toggle_filtered)
-        elif i == 2:
-            add_from_tag(collection, shown, keys_of, label)
-        elif i == 4:
-            pick_art(collection)
-        else:
-            name = ui.ask(f"Name [{collection['name']}] (empty keeps it): ").strip()
-            problem = colls.collection_problem(name, ()) if name else None
-            if problem:
-                edit.note(ui.yellow(f"  {problem}"))
-                name = ""
-            desc = ui.ask("Description (empty keeps it): ").strip()
-            collection["name"] = name or collection["name"]  # the id never changes: cards reference it
-            collection["description"] = desc or collection.get("description", "")
+                collection["games"] = [originals[g["bucket"]] if g.get("bucket") in originals and g["bucket"] not in before
+                                       else g for g in collection["games"]]
+            if pressed is None:
+                return
+        # A (or +) and S are filled in by the add and settings steps; for now they list again
 
 
 # --- The editor --------------------------------------------------------------------------------------
