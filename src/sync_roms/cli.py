@@ -1102,8 +1102,9 @@ def sync_card(args):
     # a friend's card: only ROMs, BIOS and scrapes are copied, and only the ROMs deselected this session are deleted.
     # Stays a guest sync for this run even when the card editor turns the flag off
     guest = args.guest or guests.is_guest(store.saved_card(card))
+    interactive = not (ui.ASSUME_YES or args.json) and ui.has_terminal()
     if layout_name == "spruce" and not guest:  # a card without spruceOS is offered the install first
-        code = install.offer(base, card, args.dry_run, not (ui.ASSUME_YES or args.json) and ui.has_terminal())
+        code = install.offer(base, card, args.dry_run, interactive)
         if code:
             return code
     layout = layouts[layout_name]
@@ -1217,7 +1218,6 @@ def sync_card(args):
         return {k for k in keys if downloads.name_key(downloads.rom_rel(k, disc_dir, disc_keys, folders)) in names}
 
     relist()
-    interactive = not (ui.ASSUME_YES or args.json) and ui.has_terminal()
     def reload_changes(stale=()):
         """Pick up the card's games as saved now: refresh the mirror and the listings for the systems that changed.
         stale: system ids whose storage folder changed this run, refreshed too."""

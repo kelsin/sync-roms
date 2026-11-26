@@ -11,7 +11,7 @@ offer it.
   a mounted card root (`install._mounted`) and any of `spruce/`, `App/`, `Emu/` is missing at the card root, sync
   prints that spruceOS isn't on the card and asks to install it now (default yes).
 - Yes: the same flow as `cards install` (download, test, list kept/deleted, confirm, unpack, record `spruce_os`), then
-  the sync goes on with the saved card reloaded.
+  the sync goes on (the steps that read the fields the install changes re-read the saved card).
 - No, `--yes`, `--json` or no terminal: never installs (it deletes files); prints a one-line hint naming
   `sync-roms cards install <card>` and goes on.
 - `--dry-run`: says it would offer the install.
