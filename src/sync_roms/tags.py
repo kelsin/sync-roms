@@ -194,14 +194,24 @@ def owner(key):
     return _owner.get(key, key)
 
 
+def _change_one(data, key, add, remove):
+    rec = data["games"].get(key)
+    if rec is None and not add:
+        return
+    rec = data["games"].setdefault(key, {"tags": []})
+    rec["tags"] = sorted((set(rec["tags"]) | set(add)) - set(remove))
+
+
 def change_game_tags(key, add=(), remove=()):
     """The game gets the tags in add and loses those in remove; the others it has in storage are kept."""
+    return _write(lambda data: _change_one(data, key, add, remove))
+
+
+def change_games_tags(changes):
+    """change_game_tags for every game of {key: (add, remove)}, in one write."""
     def change(data):
-        rec = data["games"].get(key)
-        if rec is None and not add:
-            return
-        rec = data["games"].setdefault(key, {"tags": []})
-        rec["tags"] = sorted((set(rec["tags"]) | set(add)) - set(remove))
+        for key, (add, remove) in changes.items():
+            _change_one(data, key, add, remove)
     return _write(change)
 
 

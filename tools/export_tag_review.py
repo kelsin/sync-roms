@@ -33,7 +33,8 @@ def vocabulary():
 def games(system):
     """[{"key", "title", "tags"}] of the system's games in storage, sorted by key."""
     listing = inventory.files(f"{system}/", sizes=False)
-    return [{"key": k, "title": names.title(k), "tags": tags.tags_of(k)} for k in sorted(listing)]
+    return [{"key": k, "title": names.title(k), "tags": tags.tags_of(k)} for k in sorted(listing)
+            if tags.owner(k) == k]  # a file of another record (a disc) is tagged with its game
 
 
 def export(out_dir, systems):

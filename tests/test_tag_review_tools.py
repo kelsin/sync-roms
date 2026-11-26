@@ -71,7 +71,33 @@ def fixture():
     return vocab, games
 
 
-class Summary(unittest.TestCase):
+class Summary(helpers.StorageFolder):
+    def setUp(self):
+        super().setUp()
+        helpers.storage_tags(self, {"tags": TAGS, "games": {A: {"tags": ["cave"], "files": ["nes/A (Disc 2).zip"]}},
+                                    "declined": {}}, root=self.root.name)
+
+    def test_plan_ignores_and_reports_file_keys(self):
+        vocab, games = fixture()
+        disc = "nes/A (Disc 2).zip"
+        games[disc] = {"title": "A 2", "tags": set()}
+        result = apply_tool.plan(vocab, games, [{"add": {disc: ["shmups"]}}])
+        self.assertEqual((result["changes"], result["file_keys"]), ({}, [disc]))
+        self.assertIn("files of another record", apply_tool.summary_text(vocab, games, result))
+
+    def test_summary_reports_add_and_remove_of_one_tag(self):
+        vocab, games = fixture()
+        result = apply_tool.plan(vocab, games, [{"add": {B: ["cave"]}, "remove": {B: ["cave"]}}])
+        self.assertEqual(result["conflicts"], [(B, "cave")])
+        self.assertIn("add and remove", apply_tool.summary_text(vocab, games, result))
+
+    def test_export_leaves_out_a_records_file_keys(self):
+        self.put(A, 1)
+        self.put("nes/A (Disc 2).zip", 1)
+        out = self.enterContext(tempfile.TemporaryDirectory())
+        export_tool.export(out, ["nes"])
+        self.assertEqual([r["key"] for r in read(os.path.join(out, "systems", "nes-1.json"))], [A])
+
     def test_summary_counts_per_tag(self):
         vocab, games = fixture()
         props = [{"add": {A: ["shmups", "cave"], B: ["shmups"]}, "remove": {C: ["shmups"]}}]
@@ -116,17 +142,16 @@ class Apply(helpers.StorageFolder):
         with open(os.path.join(self.storage, tags.KEY), encoding="utf-8") as f:
             return tags.parse(f.read())["games"]
 
-    def test_apply_calls_change_game_tags_per_game(self):
+    def test_apply_changes_every_game_in_one_write(self):
         write(os.path.join(self.out, "proposals", "nes-1.json"),
               {"add": {B: ["shmups", "cave"]}, "remove": {A: ["cave"]}})
         write(os.path.join(self.out, "proposals", "snes-1.json"), {"add": {C: ["cave"]}})
-        calls = []
-        real = tags.change_game_tags
-        with mock.patch.object(tags, "change_game_tags",
-                               side_effect=lambda k, add=(), remove=(): calls.append((k, list(add), list(remove))) or real(k, add, remove)):
+        with mock.patch.object(tags, "change_games_tags", wraps=tags.change_games_tags) as batch:
             code, _ = self.run_tool("--apply")
         self.assertEqual(code, 0)
-        self.assertEqual(sorted(calls), [(A, [], ["cave"]), (B, ["cave", "shmups"], []), (C, ["cave"], [])])
+        self.assertEqual(batch.call_count, 1)  # one write for every game
+        self.assertEqual(batch.call_args.args[0],
+                         {A: ([], ["cave"]), B: (["cave", "shmups"], []), C: (["cave"], [])})
         games = self.stored()
         self.assertEqual(games[B]["tags"], ["cave", "shmups"])
         self.assertNotIn(A, games)

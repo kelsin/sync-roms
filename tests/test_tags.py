@@ -86,6 +86,20 @@ class Writes(helpers.StorageFolder):
         tags.change_game_tags(B, remove={"shmups"})
         self.assertNotIn(B, self.stored()["games"])
 
+    def test_change_games_tags_is_one_write_with_the_same_semantics(self):
+        helpers.storage_tags(self, sample(), root=self.storage)
+        from unittest import mock
+        with mock.patch.object(tags.shared, "update", wraps=tags.shared.update) as update:
+            tags.change_games_tags({B: ([], {"shmups"}), A: ({"x"}, {"cave"}), C: ({"cave"}, set()),
+                                    "nes/none.zip": ((), {"cave"})})
+        self.assertEqual(update.call_count, 1)
+        games = self.stored()["games"]
+        self.assertNotIn(B, games)
+        self.assertEqual(games[A]["tags"], ["shmups", "x"])
+        self.assertEqual(games[A]["variants"], sample()["games"][A]["variants"])
+        self.assertEqual(games[C]["tags"], ["cave"])
+        self.assertNotIn("nes/none.zip", games)
+
     def test_last_tag_with_variants_keeps_empty_tags(self):
         helpers.storage_tags(self, sample(), root=self.storage)
         tags.change_game_tags(A, remove={"cave", "shmups"})

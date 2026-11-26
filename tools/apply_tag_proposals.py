@@ -6,7 +6,7 @@
 Proposals are OUT_DIR/proposals/*.json: {"add": {key: [tag ids]}, "remove": {key: [tag ids]}, "new_tags": {id: {...}}},
 read in file-name order (a later file overrides an earlier one for the same game and tag). Tag ids not in
 vocabulary.json and keys not in the export are ignored and reported. --summary (the default) is read-only and prints
-the added and removed counts per tag with sample titles. --apply writes the changes through tags.change_game_tags;
+the added and removed counts per tag with sample titles. --apply writes the changes in one write through tags.change_games_tags;
 new_tags are only listed, never created.
 """
 import argparse
@@ -43,12 +43,18 @@ def plan(vocab, games, proposals):
     """What the proposals change: {"changes": {key: (add ids, remove ids)} (only real changes, sorted lists),
     "unknown_tags": sorted ids, "unknown_keys": sorted keys, "new_tags": {id: fields}}."""
     want = collections.defaultdict(dict)  # key -> {tag id: True to add, False to remove}
-    unknown_tags, unknown_keys, new_tags = set(), set(), {}
+    unknown_tags, unknown_keys, new_tags, owned, conflicts = set(), set(), {}, set(), set()
     for proposal in proposals:
+        both = {k for k in proposal.get("add", {}) if k in proposal.get("remove", {})}
+        for key in both:
+            conflicts.update((key, t) for t in set(proposal["add"][key]) & set(proposal["remove"][key]))
         for action, value in (("add", True), ("remove", False)):
             for key, ids in proposal.get(action, {}).items():
                 if key not in games:
                     unknown_keys.add(key)
+                    continue
+                if tags.owner(key) != key:
+                    owned.add(key)
                     continue
                 for tag_id in ids:
                     if tag_id in vocab:
@@ -64,7 +70,7 @@ def plan(vocab, games, proposals):
         if add or remove:
             changes[key] = (add, remove)
     return {"changes": changes, "unknown_tags": sorted(unknown_tags), "unknown_keys": sorted(unknown_keys),
-            "new_tags": new_tags}
+            "file_keys": sorted(owned), "conflicts": sorted(conflicts), "new_tags": new_tags}
 
 
 def summary_text(vocab, games, result):
@@ -87,6 +93,13 @@ def summary_text(vocab, games, result):
     if result["unknown_keys"]:
         lines.append(f"Ignored {len(result['unknown_keys'])} keys not in the export: " +
                      ", ".join(result["unknown_keys"][:SAMPLES]) + (" ..." if len(result["unknown_keys"]) > SAMPLES else ""))
+    if result["file_keys"]:
+        lines.append(f"Ignored {len(result['file_keys'])} keys that are files of another record: " +
+                     ", ".join(result["file_keys"][:SAMPLES]) + (" ..." if len(result["file_keys"]) > SAMPLES else ""))
+    if result["conflicts"]:
+        lines.append("Same tag in add and remove in one file: " +
+                     ", ".join(f"{k} [{t}]" for k, t in result["conflicts"][:SAMPLES]) +
+                     (" ..." if len(result["conflicts"]) > SAMPLES else ""))
     if result["new_tags"]:
         lines.append("Proposed new tags (never created here): " +
                      ", ".join(f"{i} ({f.get('name', '')})" for i, f in sorted(result["new_tags"].items())))
@@ -94,9 +107,9 @@ def summary_text(vocab, games, result):
 
 
 def apply(result):
-    """Write each game's changes through tags.change_game_tags; returns how many games changed."""
-    for key, (add, remove) in result["changes"].items():
-        tags.change_game_tags(key, add=add, remove=remove)
+    """Write all the changes in one tags.change_games_tags write; returns how many games changed."""
+    if result["changes"]:
+        tags.change_games_tags(result["changes"])
     return len(result["changes"])
 
 
