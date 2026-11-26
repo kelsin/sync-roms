@@ -119,6 +119,14 @@ class TagUi(Base):
         with mock.patch.object(tags, "emoji_of", return_value="12345678"):
             self.assertEqual(tagui.column([A]), [("12345678", "")])
 
+    def test_summary_rows(self):
+        tags.define_tag("cave", {"name": "Cave", "emoji": "🐝", "description": "Cave shooters"})
+        tags.change_game_tags(A, add=["cave", "shmups"])
+        summary = tagui.summary([A, B, "nes/None.zip"])
+        self.assertEqual(summary(0), [("🐝", "Cave", "Cave shooters"), ("🚀", "Shmups", "")])
+        self.assertEqual(summary(1), [("🚀", "Shmups", "")])
+        self.assertEqual(summary(2), [])
+
     def test_unknown_key_row(self):
         tags.change_game_tags("nes/Gone.zip", add=["cave"])
         self.assertEqual(tagui.column(["nes/Gone.zip"]), [("🐝", "")])

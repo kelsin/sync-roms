@@ -143,7 +143,7 @@ def _toggle_games(title, rows, hotkeys, hint, place, filters, key_help, select_a
                                    on_note=(lambda i, text: save_note(rows[i][0]["games"], rows[i][1], text)) if notes else None,
                                    hotkeys=(*hotkeys, tagui.TAG_KEY, tagui.REPEAT_KEY), session=session, filters=filters,
                                    row_note=lambda i: variant_line(rows[i][1], variants, parents, system_names),
-                                   select_all=select_all, extras=extras,
+                                   select_all=select_all, extras=extras, tag_info=tagui.summary([r[1] for r in rows]),
                                    **previews.game_pane([key for _, key, _, _ in rows]))
     except KeyboardInterrupt:  # Ctrl-C: the toggles made so far are applied, then the caller gets the Ctrl-C
         interrupted, state = True, session["sel"]

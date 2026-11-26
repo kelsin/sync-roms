@@ -806,6 +806,7 @@ def _toggle_variant(picks, key, title):
                                            for v, tag in zip(found, tagui.column([v["bucket"] for v in found]))],
                                    hotkeys=(tagui.TAG_KEY, *tagui.HOTKEYS), cursor=i if isinstance(i, int) else 0,
                                    key_help=[tagui.KEY_HELP, *tagui.KEYS_HELP],
+                                   tag_info=tagui.summary([v["bucket"] for v in found]),
                                    filters=tagui.banner(len(found), len(all_found)) + (" · no variants match the tag filter" if all_found and not found else ""))
             if not isinstance(i, tuple):
                 break
@@ -897,7 +898,7 @@ def _games_pass(title, shown, picks, sps, files_of, start, work, capacity, to_fe
             on_note=lambda i, text: edit.save_note(
                 sp_of[i].games, keys[i], text,
                 covered=keys[i] in sp_of[i].collected and keys[i] not in sp_of[i].excluded),
-            **previews.game_pane(keys), links=links,
+            **previews.game_pane(keys), links=links, tag_info=tagui.summary(keys),
             locked=[sp is None or k in sp.surprise for k, sp in zip(keys, sp_of)],
             locked_note=[edit.FULL_SYSTEM_NOTE if sp is None else _locked_note(sp, k) for k, sp in zip(keys, sp_of)],
             outside=tuple(outside), on_revert=lambda: reverted.append(True), **list_kw)

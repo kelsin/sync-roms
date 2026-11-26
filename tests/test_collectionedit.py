@@ -23,6 +23,11 @@ def tag_games(test, games, defs=None):
         "games": {k: {"tags": ["mix"], **({"files": files} if files else {})} for k, files in games.items()}})))
 
 
+def add_from_system(collection, keys_of, toggle=None):
+    """The collection editor's add games from a system, without the editor around it."""
+    listedit.add_from_system(collection, SYSTEMS, listedit.view(collection, SYSTEMS), keys_of, "💖 Favs", toggle=toggle)
+
+
 class MenusKeepTheCursor(unittest.TestCase):
     def cursors(self, run, *picks):
         """run() with filter_list answering picks in turn; the cursor each call was opened on."""
@@ -34,14 +39,6 @@ class MenusKeepTheCursor(unittest.TestCase):
         with mock.patch.object(picker, "filter_list", fake):
             run()
         return seen
-
-    def test_the_set_and_collection_menus_reopen_on_the_row_just_used(self):
-        for module in (collectionedit,):
-            with self.subTest(module.__name__), mock.patch.object(module, "add_from_system"), \
-                    mock.patch.object(module, "add_from_tag"):
-                seen = self.cursors(lambda: module.edit_one({"name": "Favs", "games": []}, SYSTEMS, lambda b: set()),
-                                    2, 1, None)
-                self.assertEqual(seen, [0, 2, 1])
 
     def test_the_sets_and_collections_menu_reopens_on_the_row_just_used(self):
         working = {x: {"name": x, "games": [RUBY]} for x in "abc"}
@@ -83,12 +80,13 @@ class Stocked(unittest.TestCase):
                 if extras is not None:
                     extras.extend(k.get("extras") or [[]] * len(labels))
                 return None
-            return 1 if not seen else None  # add from a system, then back
+            return None
 
         with mock.patch.object(inventory, "folders", side_effect=folders), \
                 mock.patch.object(inventory, "cached", lambda p: cache.get(p)), \
                 mock.patch.object(picker, "filter_list", fake):
-            module.edit_one({"name": "Favs", "games": []}, self.SYSTEMS, lambda bucket: set())
+            listedit.add_from_system({"name": "Favs", "games": []}, self.SYSTEMS, listedit.view({"games": []}, self.SYSTEMS),
+                                     lambda bucket: set(), "💖 Favs")
         return seen
 
     def test_add_games_hides_systems_with_a_missing_or_empty_folder(self):
@@ -137,7 +135,7 @@ class Discs(unittest.TestCase):
 
     def test_adding_a_multi_disc_game_from_a_system_stores_its_discs(self):
         collection = {"name": "Favs", "games": []}
-        picks = iter([1, 2, None])  # add from a system, PlayStation (after All systems), back
+        picks = iter([2])  # PlayStation, after All systems
         rows = []
 
         def toggle(title, shown_rows, **k):  # switch on the FF7 row
@@ -147,7 +145,7 @@ class Discs(unittest.TestCase):
 
         with mock.patch.object(picker, "filter_list", lambda *a, **k: next(picks)), \
                 mock.patch.object(edit, "toggle_games", toggle), mock.patch.object(ui, "ask", return_value=""):
-            collectionedit.edit_one(collection, SYSTEMS, lambda bucket: DISCS if bucket == "psx" else set())
+            add_from_system(collection, lambda bucket: DISCS if bucket == "psx" else set())
         self.assertEqual(rows, ["psx/Crash.chd", "psx/FF7.m3u"])
         self.assertEqual(collection["games"], [{"title": "FF7", "system": "psx", "bucket": "psx/FF7.m3u",
                                                 "files": ["psx/FF7 (Disc 1).chd", "psx/FF7 (Disc 2).chd"]}])
@@ -155,7 +153,7 @@ class Discs(unittest.TestCase):
     def test_adding_from_a_tag_spans_systems_and_keeps_discs(self):
         collection = {"name": "Favs", "games": [dict(RUBY)]}
         tag_games(self, {"gba/Ruby.zip": None, "psx/FF7.m3u": ["psx/FF7 (Disc 1).chd"], "nes/Odd.zip": None})
-        picks = iter([2, 0, None])  # add from a tag, Mix, back
+        picks = iter([0])  # Mix
         lists = []
 
         def fake(title, labels, **kw):
@@ -167,7 +165,7 @@ class Discs(unittest.TestCase):
         keys = {"gba": {"gba/Ruby.zip"}, "psx": DISCS}
         with mock.patch.object(picker, "filter_list", fake), mock.patch.object(ui, "ask") as ask, \
                 mock.patch("builtins.print"):
-            collectionedit.edit_one(collection, SYSTEMS, lambda bucket: keys.get(bucket, set()))
+            listedit.add_from_tag(collection, listedit.view(collection, SYSTEMS), lambda bucket: keys.get(bucket, set()), "💖 Favs")
         ask.assert_not_called()  # collections have no categories
         self.assertEqual(lists, [["Game Boy Advance — Ruby", "PlayStation — FF7"]])
         self.assertEqual(collection["games"], [{"title": "FF7", "system": "psx",
@@ -176,7 +174,7 @@ class Discs(unittest.TestCase):
     def test_the_add_games_list_keeps_its_place_when_a_key_lists_the_same_games(self):
         from sync_roms import surprise
         collection = {"name": "Favs", "games": []}
-        picks = iter([1, 1, None])  # add from a system, Game Boy Advance (after All systems), back
+        picks = iter([1])  # Game Boy Advance, after All systems
         place = {"row": 1, "query": "z", "view_mode": 2, "top": 0}
         seen = []
 
@@ -190,13 +188,13 @@ class Discs(unittest.TestCase):
         keys = {"gba/Ruby.zip", "gba/Zelda.zip"}
         with mock.patch.object(picker, "filter_list", fake), mock.patch.object(ui, "ask", return_value=""), \
                 mock.patch.object(surprise, "past_keys", return_value=set()), mock.patch.object(edit, "note"):
-            collectionedit.edit_one(collection, SYSTEMS, lambda bucket: keys if bucket == "gba" else set())
+            add_from_system(collection, lambda bucket: keys if bucket == "gba" else set(), toggle=collectionedit.toggle_filtered)
         self.assertEqual(seen, [dict.fromkeys(place), place])
 
     def test_a_note_typed_on_a_game_just_switched_on_is_saved(self):
         from sync_roms import surprise
         collection = {"name": "Favs", "games": []}
-        picks = iter([1, 1, None])  # add from a system, Game Boy Advance (after All systems), back
+        picks = iter([1])  # Game Boy Advance, after All systems
         said = []
 
         def fake(title, labels, **kw):
@@ -212,7 +210,7 @@ class Discs(unittest.TestCase):
         keys = {"gba/Ruby.zip", "gba/Zelda.zip"}
         with mock.patch.object(picker, "filter_list", fake), mock.patch.object(ui, "ask", return_value=""), \
                 mock.patch.object(surprise, "past_keys", return_value=set()), mock.patch.object(edit, "note"):
-            collectionedit.edit_one(collection, SYSTEMS, lambda bucket: keys if bucket == "gba" else set())
+            add_from_system(collection, lambda bucket: keys if bucket == "gba" else set(), toggle=collectionedit.toggle_filtered)
         self.assertEqual(said, [None, "Note saved"])
         self.assertEqual(collection["games"], [{"title": "Ruby", "system": "gba", "bucket": "gba/Ruby.zip",
                                                 "note": "the good one"}])
@@ -220,7 +218,7 @@ class Discs(unittest.TestCase):
     def test_p_narrows_the_add_games_list_to_past_surprises(self):
         from sync_roms import surprise
         collection = {"name": "Favs", "games": []}
-        picks = iter([1, 1, None])  # add from a system, Game Boy Advance (after All systems), back
+        picks = iter([1])  # Game Boy Advance, after All systems
         lists = []
 
         def fake(title, labels, **kw):
@@ -233,7 +231,7 @@ class Discs(unittest.TestCase):
         keys = {"gba/Ruby.zip", "gba/Zelda.zip"}
         with mock.patch.object(picker, "filter_list", fake), mock.patch.object(ui, "ask", return_value=""), \
                 mock.patch.object(surprise, "past_keys", return_value={"gba/Ruby.zip"}):
-            collectionedit.edit_one(collection, SYSTEMS, lambda bucket: keys if bucket == "gba" else set())
+            add_from_system(collection, lambda bucket: keys if bucket == "gba" else set(), toggle=collectionedit.toggle_filtered)
         self.assertEqual(lists[1][1], ["Ruby.zip"])
         self.assertEqual("🎁 past surprises only · 1 of 2 shown (c clear filters)", lists[1][2])
         self.assertIn("c clear", lists[0][3])
@@ -245,7 +243,7 @@ class Discs(unittest.TestCase):
         from sync_roms import cardedit
         collection = {"name": "Favs", "games": []}
         tag_games(self, {"gba/Zelda.zip": None, "gba/Ruby.zip": None})
-        picks = iter([1, 1, 0, None, None])  # add from a system, Game Boy Advance, Mix required, tags done, back
+        picks = iter([1, 0, None])  # Game Boy Advance, Mix required, tags done
         lists = []
 
         def fake(title, labels, **kw):
@@ -269,11 +267,258 @@ class Discs(unittest.TestCase):
         with mock.patch.object(picker, "filter_list", fake), mock.patch.object(ui, "ask", return_value=""), \
                 mock.patch.object(cardedit, "pick_meta", pick_meta), mock.patch.object(cardedit, "Metadata", Meta), \
                 mock.patch.object(cardedit.metafilter, "matches", lambda m, w: m.get("genre") == w["genre"]):
-            collectionedit.edit_one(collection, SYSTEMS, lambda bucket: keys if bucket == "gba" else set())
+            add_from_system(collection, lambda bucket: keys if bucket == "gba" else set(), toggle=collectionedit.toggle_filtered)
         self.assertEqual(lists[1][1], ["Ruby.zip", "Zelda.zip"])
         self.assertIn("✅ 🔀 Mix", lists[1][2])
         self.assertEqual(lists[2][1], ["Zelda.zip"])
         self.assertEqual(len(lists[3][1]), 3)
+
+
+class GamesFirst(unittest.TestCase):
+    OLD = {"title": "Ruby", "system": "gba", "bucket": "gba/Ruby.zip", "note": "the good one"}
+    FF7 = {"title": "FF7", "system": "psx", "bucket": "psx/FF7.m3u", "files": ["psx/FF7 (Disc 1).chd"]}
+
+    def run_editor(self, collection, script, keys_of=lambda b: {"gba/Ruby.zip", "gba/Zelda.zip", "psx/FF7.m3u"}):
+        calls = []
+
+        def toggle(title, rows, **k):
+            calls.append({"title": title, "keys": [r[1] for r in rows], "ons": {r[1] for r in rows if r[1] in
+                          {g["bucket"] for r in rows for g in r[0]["games"]}}, **k})
+            return script[len(calls) - 1](rows)
+        with mock.patch.object(edit, "toggle_games", toggle), \
+                mock.patch.object(collectionedit, "settings_menu"), \
+                mock.patch.object(picker, "filter_list", side_effect=AssertionError("menu")):
+            collectionedit.edit_one(collection, SYSTEMS, keys_of)
+        return calls
+
+    @staticmethod
+    def off(key, then):
+        def step(rows):
+            for s, k, _, _ in rows:
+                if k == key:
+                    s["games"] = [g for g in s["games"] if g["bucket"] != k]
+            return then
+        return step
+
+    @staticmethod
+    def on(key, then):
+        def step(rows):
+            for s, k, title, _ in rows:
+                if k == key:
+                    s["games"].append({"bucket": k, "title": title})
+            return then
+        return step
+
+    def test_opening_a_collection_lists_its_games_without_a_menu(self):
+        collection = {"name": "Favs", "description": "my best", "games": [dict(self.OLD)]}
+        calls = self.run_editor(collection, [lambda rows: None])
+        self.assertEqual(calls[0]["keys"], ["gba/Ruby.zip"])
+        for part in ("Favs", "my best", "art: none"):
+            self.assertIn(part, calls[0]["title"])
+        self.assertEqual(calls[0]["hotkeys"], ("A", "+", "S"))  # s and c: the sticky tag filter's own, in edit.toggle_games
+        self.assertIs(calls[0]["tag_filter"], True)
+        self.assertIn("A add games", calls[0]["hint"])
+        self.assertIn(("A / +", "add games"), calls[0]["key_help"])
+        self.assertNotIn("+", calls[0]["hint"])
+
+    def test_a_game_switched_off_stays_listed_after_a_hotkey(self):
+        collection = {"name": "Favs", "games": [dict(self.OLD), dict(self.FF7)]}
+        calls = self.run_editor(collection, [self.off("gba/Ruby.zip", "S"), lambda rows: None])
+        self.assertEqual(len(calls), 2)
+        self.assertIn("gba/Ruby.zip", calls[1]["keys"])
+        self.assertNotIn("gba/Ruby.zip", calls[1]["ons"])
+        self.assertEqual(collection["games"], [self.FF7])
+
+    def test_switching_a_removed_game_back_on_restores_its_note_and_discs(self):
+        for entry in (self.OLD, self.FF7):
+            collection = {"name": "Favs", "games": [dict(entry)]}
+            self.run_editor(collection, [self.off(entry["bucket"], "S"), self.on(entry["bucket"], "S"), lambda rows: None])
+            self.assertEqual(collection["games"], [entry])
+
+    def run_add(self, collection, key, script, picks, keys_of=lambda b: {"gba/Ruby.zip", "gba/Zelda.zip", "psx/FF7.m3u"}):
+        """Open the editor, press key on the games list, answer the system list with picks (None = Esc) and script the toggle
+        lists after it; returns the system lists' options and the games lists shown."""
+        options, lists, answers = [], [], iter(picks)
+        steps = iter(script)
+
+        def toggle(title, rows, **k):
+            lists.append([r[1] for r in rows])
+            return next(steps)(rows)
+
+        def pick(title, labels, **k):
+            options.append(labels)
+            return next(answers)
+        with mock.patch.object(edit, "toggle_games", toggle), mock.patch.object(picker, "filter_list", pick), \
+                mock.patch.object(collectionedit.cardedit, "Metadata"), mock.patch.object(inventory, "folders", return_value={"gba", "psx"}), \
+                mock.patch.object(inventory, "cached", return_value=None):
+            collectionedit.edit_one(collection, SYSTEMS, keys_of)
+        return options, lists
+
+    def test_a_opens_the_system_list_with_all_systems_first(self):
+        for key in ("A", "+"):
+            with self.subTest(key=key):
+                options, _ = self.run_add({"name": "Favs", "games": [dict(self.OLD)]}, key,
+                                          [lambda rows: key, lambda rows: None], [None])
+                self.assertEqual(options[0][0], listedit.ALL_SYSTEMS)
+
+    def test_games_added_with_a_appear_in_the_list_on_return(self):
+        for key in ("A", "+"):
+            with self.subTest(key=key):
+                collection = {"name": "Favs", "games": [dict(self.OLD)]}
+                _, lists = self.run_add(collection, key, [lambda rows: key, self.on("gba/Zelda.zip", None), lambda rows: None], [0])
+                self.assertIn("gba/Zelda.zip", lists[-1])
+                self.assertEqual([g["bucket"] for g in collection["games"]], ["gba/Ruby.zip", "gba/Zelda.zip"])
+
+    def test_re_adding_a_switched_off_game_from_the_a_list_keeps_its_note(self):
+        collection = {"name": "Favs", "games": [dict(self.OLD), dict(self.FF7)]}
+        self.run_add(collection, "A", [self.off("gba/Ruby.zip", "A"), self.on("gba/Ruby.zip", None), lambda rows: None], [0])
+        self.assertEqual(collection["games"], [self.FF7, self.OLD])
+
+    def test_games_are_kept_sorted_by_name_not_by_position(self):
+        zelda = {"title": "Zelda", "system": "gba", "bucket": "gba/Zelda.zip"}
+        collection = {"name": "Favs", "games": [dict(zelda), dict(self.FF7), dict(self.OLD)]}
+        self.run_editor(collection, [self.off("gba/Ruby.zip", "S"), self.on("gba/Ruby.zip", None)])
+        self.assertEqual([g["title"] for g in collection["games"]], ["FF7", "Ruby", "Zelda"])
+
+    def test_ordered_sorts_by_title_then_system(self):
+        games = [{"title": "The Zed", "system": "psx", "bucket": "psx/z"}, {"title": "Alpha", "system": "psx", "bucket": "psx/a"},
+                 {"title": "Alpha", "system": "gba", "bucket": "gba/a"}]
+        self.assertEqual([g["bucket"] for g in collectionedit.ordered(games, SYSTEMS)], ["gba/a", "psx/a", "psx/z"])
+
+    def test_a_with_a_tag_filter_set_lists_only_its_games_in_all_systems_with_a_on(self):
+        """What "Add games matching the current tag filter" did: A, All systems, `a` adds every game the filter shows."""
+        tag_games(self, {"gba/Zelda.zip": None, "psx/FF7.m3u": None})
+        tagui.FILTER.required = {"mix"}
+        collection = {"name": "Favs", "games": [dict(self.OLD)]}
+        seen = []
+
+        def inner(title, rows, hotkeys, hint, place, filters, key_help, select_all, notes):
+            seen.append(([r[1] for r in rows], select_all))
+            if len(seen) == 1:
+                return "A", None
+            if len(seen) == 2:  # All systems: every shown game switched on, as `a` does
+                for s, k, t, _ in rows:
+                    s["games"].append({"bucket": k, "title": t})
+            return None, None
+        with mock.patch.object(edit, "_toggle_games", inner), mock.patch.object(picker, "filter_list", return_value=0), \
+                mock.patch.object(inventory, "folders", return_value={"gba", "psx"}), \
+                mock.patch.object(inventory, "cached", return_value=None):
+            collectionedit.edit_one(collection, SYSTEMS, lambda b: {k for k in ("gba/Ruby.zip", "gba/Zelda.zip", "psx/FF7.m3u")
+                                                                    if k.startswith(f"{b}/")})
+        self.assertEqual(seen[0][0], [])  # Ruby isn't tagged: the collection's own list is filtered too
+        self.assertEqual(seen[1], (["psx/FF7.m3u", "gba/Zelda.zip"], True))
+        self.assertEqual([g["bucket"] for g in collection["games"]], ["psx/FF7.m3u", "gba/Ruby.zip", "gba/Zelda.zip"])
+
+    def test_esc_in_the_system_list_returns_to_the_games_list_unchanged(self):
+        collection = {"name": "Favs", "games": [dict(self.OLD)]}
+        _, lists = self.run_add(collection, "A", [lambda rows: "A", lambda rows: None], [None])
+        self.assertEqual(lists[0], lists[1])
+        self.assertEqual(collection["games"], [self.OLD])
+
+    def test_a_from_an_empty_collection_menu_opens_the_system_list(self):
+        seen = []
+
+        def pick(title, labels, **k):
+            seen.append(labels)
+            return 0 if len(seen) == 1 else None
+        with mock.patch.object(picker, "filter_list", pick), mock.patch.object(inventory, "folders", return_value={"gba"}), \
+                mock.patch.object(inventory, "cached", return_value=None):
+            collectionedit.edit_one({"name": "Favs", "games": []}, SYSTEMS, lambda b: set())
+        self.assertEqual(seen[1][0], listedit.ALL_SYSTEMS)
+
+    def test_an_empty_collection_offers_add_and_settings(self):
+        seen = []
+        with mock.patch.object(picker, "filter_list", lambda title, labels, **k: seen.append(labels) or None):
+            collectionedit.edit_one({"name": "Favs", "games": []}, SYSTEMS, lambda b: set())
+        self.assertEqual(seen, [["Add games", "Settings"]])
+
+    def test_header_omits_an_empty_description(self):
+        self.assertEqual(collectionedit.header({"name": "Favs", "description": "", "games": []}).split(" ", 1)[1],
+                         "Favs  ·  art: none")
+
+
+class SettingsMenu(unittest.TestCase):
+    def run_menu(self, collection, picks, answers=(), others=()):
+        seen = []
+
+        def pick(title, labels, **k):
+            seen.append({"title": title, "labels": labels, **k})
+            return picks[len(seen) - 1] if len(seen) <= len(picks) else None
+        with mock.patch.object(picker, "filter_list", pick), mock.patch.object(ui, "ask", side_effect=list(answers)), \
+                mock.patch.object(ui, "yellow", lambda t: t):
+            collectionedit.settings_menu(collection, others)
+        return seen
+
+    def test_rows_and_art_preview(self):
+        c = {"name": "Favs", "description": "", "art": "sonic", "games": []}
+        seen = self.run_menu(c, [])
+        self.assertEqual(seen[0]["labels"][:2], ["Name: Favs", "Description: none"])
+        self.assertIn("Theme art:", seen[0]["labels"][2])
+        self.assertEqual(seen[0]["preview"](0), themeart.art_png("sonic"))
+
+    def test_rename_sets_name_and_reopens_on_the_row(self):
+        c = {"name": "Favs", "games": []}
+        seen = self.run_menu(c, [0], ["Best"])
+        self.assertEqual(c["name"], "Best")
+        self.assertEqual(seen[1]["cursor"], 0)
+
+    def test_invalid_name_keeps_the_old_one(self):
+        c = {"name": "Favs", "games": []}
+        with mock.patch.object(collections, "collection_problem", return_value="bad"):
+            self.run_menu(c, [0], ["!!!"])
+        self.assertEqual(c["name"], "Favs")
+
+    def test_empty_description_keeps_the_old_one(self):
+        c = {"name": "Favs", "description": "old", "games": []}
+        self.run_menu(c, [1], [""])
+        self.assertEqual(c["description"], "old")
+        self.run_menu(c, [1], ["new"])
+        self.assertEqual(c["description"], "new")
+
+    def test_x_clears_the_description_on_its_row_only(self):
+        c = {"name": "Favs", "description": "old", "games": []}
+        seen = self.run_menu(c, [("x", 0), ("x", 1)])
+        self.assertEqual(c["name"], "Favs")
+        self.assertEqual(c["description"], "")
+        self.assertEqual(seen[2]["labels"][1], "Description: none")
+        self.assertIn("x", seen[0]["hotkeys"])
+        self.assertIn("clear", seen[0]["hint"])
+
+    def test_rename_to_another_collections_name_is_refused(self):
+        c = {"name": "Favs", "games": []}
+        self.run_menu(c, [0], ["Best"], others=("best",))
+        self.assertEqual(c["name"], "Favs")
+
+    def test_renaming_to_its_own_name_or_case_is_fine(self):
+        c = {"name": "Favs", "games": []}
+        self.run_menu(c, [0], ["FAVS"], others=("best",))
+        self.assertEqual(c["name"], "FAVS")
+
+    def test_art_row_calls_pick_art(self):
+        c = {"name": "Favs", "games": []}
+        with mock.patch.object(collectionedit, "pick_art") as pa:
+            self.run_menu(c, [2])
+        pa.assert_called_once_with(c)
+
+    def test_s_in_edit_one_opens_it_and_refreshes_the_title(self):
+        c = {"name": "Favs", "games": [{"title": "Ruby", "system": "gba", "bucket": "gba/Ruby.zip"}]}
+        titles = []
+
+        def toggle(title, rows, *a, **k):
+            titles.append(title)
+            return "S" if len(titles) == 1 else None
+
+        def settings(coll, others=()):
+            coll["name"] = "Renamed"
+        with mock.patch.object(listedit, "toggle_all", toggle), mock.patch.object(collectionedit, "settings_menu", settings):
+            collectionedit.edit_one(c, SYSTEMS, lambda b: {"gba/Ruby.zip"})
+        self.assertIn("Renamed", titles[1])
+
+    def test_empty_menu_settings_row_opens_it(self):
+        with mock.patch.object(picker, "filter_list", side_effect=[1, None]), \
+                mock.patch.object(collectionedit, "settings_menu") as sm:
+            collectionedit.edit_one({"name": "Favs", "games": []}, SYSTEMS, lambda b: set())
+        sm.assert_called_once()
 
 
 class AddFromSystem(unittest.TestCase):
@@ -361,7 +606,7 @@ class AddFromSystem(unittest.TestCase):
 
 
 class AddFromTag(unittest.TestCase):
-    """listedit.add_from_tag: the collection editor's "Add games with a tag"."""
+    """listedit.add_from_tag: the tag editor's "Add games with another tag"."""
 
     def test_adds_the_tags_games_on_known_systems_with_their_files(self):
         tag_games(self, {"gba/Ruby.zip": None, "nes/Gone.nes": None, "psx/FF7.m3u": ["psx/FF7 (Disc 1).chd"]},
@@ -430,69 +675,6 @@ class AddFromTag(unittest.TestCase):
         toggle.assert_not_called()
         self.assertEqual(listing["games"], [])
 
-    def test_the_collection_menu_offers_add_from_a_tag(self):
-        seen = []
-        with mock.patch.object(picker, "filter_list", lambda title, labels, **k: seen.append(labels) or None):
-            collectionedit.edit_one({"name": "Favs", "games": []}, SYSTEMS, lambda b: set())
-        self.assertEqual(seen[0][2], "Add games with a tag")
-
-
-class AddFromFilter(unittest.TestCase):
-    """listedit.add_from_filter: the collection editor's "Add games matching the current tag filter"."""
-
-    def run_add(self, listing, confirm=True, keys=None):
-        notes = []
-        keys = keys or {"gba": {"gba/Ruby.zip", "gba/Sapphire.zip"}, "psx": DISCS}
-        with mock.patch.object(listedit, "stocked", lambda systems: systems), \
-                mock.patch.object(edit, "note", notes.append), \
-                mock.patch.object(ui, "confirm", return_value=confirm) as asked:
-            listedit.add_from_filter(listing, SYSTEMS, listedit.view(listing, SYSTEMS), lambda b: keys[b], "💖 Favs")
-        return notes, asked
-
-    def test_adds_the_games_the_filter_shows_with_their_files_after_a_count_confirm(self):
-        tag_games(self, {"gba/Ruby.zip": None, "psx/FF7.m3u": ["psx/FF7 (Disc 1).chd"]})
-        tagui.FILTER.required = {"mix"}
-        listing = {"name": "Favs", "games": []}
-        notes, asked = self.run_add(listing)
-        self.assertEqual(asked.call_args.args[0], "✏️  Add 2 games matching ✅ 🔀 Mix to 💖 Favs?")
-        self.assertEqual([(g["bucket"], g.get("files")) for g in listing["games"]], [
-            ("gba/Ruby.zip", None), ("psx/FF7.m3u", ["psx/FF7 (Disc 1).chd"])])
-        self.assertEqual(notes, ["✏️  Added 2 games to 💖 Favs"])
-
-    def test_skips_games_already_in_the_list_and_declined_adds_nothing(self):
-        tag_games(self, {"gba/Ruby.zip": None, "gba/Sapphire.zip": None})
-        tagui.FILTER.required = {"mix"}
-        listing = {"name": "Favs", "games": [dict(RUBY)]}
-        _, asked = self.run_add(listing, confirm=False)
-        self.assertEqual(asked.call_args.args[0], "✏️  Add 1 game matching ✅ 🔀 Mix to 💖 Favs?")
-        self.assertEqual(listing["games"], [RUBY])
-
-    def test_no_match_is_a_note_and_no_filter_asks_for_one(self):
-        tag_games(self, {"nes/Gone.nes": None})
-        tagui.FILTER.required = {"mix"}
-        notes, asked = self.run_add({"name": "Favs", "games": []})
-        asked.assert_not_called()
-        self.assertIn("No games in storage match", notes[0])
-        tagui.FILTER.clear()
-        listing = {"name": "Favs", "games": []}
-        with mock.patch.object(tagui.FILTER, "pick") as pick:
-            notes, asked = self.run_add(listing)
-        pick.assert_called_once()
-        asked.assert_not_called()
-        self.assertEqual(listing["games"], [])
-
-    def test_the_collection_menu_offers_it(self):
-        seen = []
-        with mock.patch.object(picker, "filter_list", lambda title, labels, **k: seen.append(labels) or None):
-            collectionedit.edit_one({"name": "Favs", "games": []}, SYSTEMS, lambda b: set())
-        self.assertEqual(seen[0][5], "Add games matching the current tag filter")
-        called = []
-        answers = iter([5, None])
-        with mock.patch.object(picker, "filter_list", lambda *a, **k: next(answers)), \
-                mock.patch.object(collectionedit, "add_from_filter", lambda *a: called.append(a[-1])):
-            collectionedit.edit_one({"name": "Favs", "games": []}, SYSTEMS, lambda b: set())
-        self.assertEqual(len(called), 1)
-
 
 class FolderLister(unittest.TestCase):
     def test_each_folder_is_listed_once(self):
@@ -530,7 +712,7 @@ class Editor(DataDir):
                 mock.patch.object(ui, "confirm", lambda text, **k: confirms.append(text) or answer(confirm)), \
                 mock.patch.object(ui, "choose", lambda question, *a, **k: self.asked.append(question) or next(choose, "s")), \
                 mock.patch.object(listedit, "print_changes", lambda found: self.reviewed.append(found)), \
-                mock.patch.object(collectionedit, "edit_one", edit_one or (lambda c, systems, keys_of: c["games"].append(dict(RUBY)))), \
+                mock.patch.object(collectionedit, "edit_one", edit_one or (lambda c, systems, keys_of, others=(): c["games"].append(dict(RUBY)))), \
                 mock.patch("subprocess.run") as run:
             code = collectionedit.edit_collections()
         run.assert_not_called()  # no git, no gh
@@ -554,6 +736,16 @@ class Editor(DataDir):
         self.assertEqual(self.asked, ["💾 Save these changes?"] * 2)
         self.assertFalse(os.path.exists(self.path("collections")))
         self.assertIn("Not saved", str(note.call_args_list))
+
+    def test_a_file_in_another_order_is_no_change_and_opens_with_the_other_ids(self):
+        zed = {"title": "Zed", "system": "gba", "bucket": "gba/Zed.zip"}
+        collections.save_collection({"id": "favs", "name": "Favs", "games": [zed, RUBY]})
+        collections.save_collection({"id": "best", "name": "Best", "games": []})
+        seen = []
+        code, _, note = self.run_editor([1, None], edit_one=lambda c, s, k, others=(): seen.append((c["name"], sorted(others))))
+        self.assertEqual((code, self.asked), (0, []))
+        self.assertEqual(seen, [("Favs", ["best"])])
+        self.assertIn("No changes, nothing saved", str(note.call_args_list))
 
     def test_esc_without_changes_saves_nothing(self):
         collections.save_collection({"id": "favs", "name": "Favs", "games": [RUBY]})
@@ -594,7 +786,7 @@ class Editor(DataDir):
         self.assertTrue(os.path.exists(self.path("collections/favs.json")))
 
     def test_an_empty_collection_is_saved_on_done(self):
-        self.run_editor([0, 2], asks=["Empty", ""], edit_one=lambda c, s, k: None)
+        self.run_editor([0, 2], asks=["Empty", ""], edit_one=lambda c, s, k, o=(): None)
         self.assertEqual(self.read("collections/empty.json"), {"name": "Empty", "games": []})
 
     def test_ctrl_c_asks_and_saves_the_changes(self):
@@ -609,7 +801,7 @@ class Editor(DataDir):
 
     def test_ctrl_c_saves_an_empty_collection(self):
         with mock.patch("builtins.print"), self.assertRaises(KeyboardInterrupt):
-            self.run_editor([0, KeyboardInterrupt], asks=["Empty", ""], edit_one=lambda c, s, k: None)
+            self.run_editor([0, KeyboardInterrupt], asks=["Empty", ""], edit_one=lambda c, s, k, o=(): None)
         self.assertEqual(self.read("collections/empty.json"), {"name": "Empty", "games": []})
         self.assertIn("Saved to", str(self.note.call_args_list))
 
@@ -661,57 +853,56 @@ class Editor(DataDir):
         self.assertEqual(len(confirms), 1)
         self.assertEqual(self.read("collections/favs.json")["games"], [zelda])
 
-    def test_ctrl_c_keeps_the_add_games_lists_toggles(self):
-        # PlayStation: switch Crash on and press c, then switch FF7 on and Ctrl-C
-        confirms, ask = self.interrupted([RUBY], [0, 1, 2], [({"Crash.chd"}, "c"), ({"FF7.m3u"}, KeyboardInterrupt)])
-        ask.assert_not_called()
-        self.assertEqual(len(confirms), 1)
-        self.assertEqual(self.read("collections/favs.json")["games"], [
-            RUBY, {"title": "Crash", "system": "psx", "bucket": "psx/Crash.chd"},
-            {"title": "FF7", "system": "psx", "bucket": "psx/FF7.m3u", "files": ["psx/FF7 (Disc 1).chd", "psx/FF7 (Disc 2).chd"]}])
-
     MIX = {"gba/Ruby.zip": None, "psx/FF7.m3u": ["psx/FF7 (Disc 1).chd"]}
 
-    def test_ctrl_c_keeps_the_add_from_a_tag_lists_toggles(self):
-        confirms, ask = self.interrupted([RUBY], [0, 2, 0], [({"Game Boy Advance — Ruby", "PlayStation — FF7"}, KeyboardInterrupt)],
-                                         tagged=self.MIX)
-        ask.assert_not_called()
-        self.assertEqual(len(confirms), 1)
-        self.assertEqual(self.read("collections/favs.json")["games"], [
-            {"title": "FF7", "system": "psx", "bucket": "psx/FF7.m3u", "files": ["psx/FF7 (Disc 1).chd"]}])
-
     def test_ctrl_c_in_a_list_with_nothing_toggled_asks_nothing(self):
-        for picks in ([0, 0], [0, 1, 2], [0, 2, 0]):
+        for picks in ([0, 0],):
             with self.subTest(picks=picks):
                 confirms, _ = self.interrupted([RUBY], picks, [(set(), KeyboardInterrupt)], tagged={"gba/Ruby.zip": None})
                 self.assertEqual(confirms, [])
                 self.assertEqual(self.read("collections/favs.json")["games"], [RUBY])
+
+    def test_ctrl_c_keeps_the_add_games_lists_toggles(self):
+        # open the collection, A, PlayStation: switch Crash on and press c, then switch FF7 on and Ctrl-C
+        for key in ("A", "+"):
+            with self.subTest(key=key):
+                confirms, ask = self.interrupted([RUBY], [0, 2], [(set(), key), ({"Crash.chd"}, "c"), ({"FF7.m3u"}, KeyboardInterrupt)])
+                ask.assert_not_called()
+                self.assertEqual(len(confirms), 1)
+                self.assertEqual(self.read("collections/favs.json")["games"], [
+                    {"title": "Crash", "system": "psx", "bucket": "psx/Crash.chd"},
+                    {"title": "FF7", "system": "psx", "bucket": "psx/FF7.m3u", "files": ["psx/FF7 (Disc 1).chd", "psx/FF7 (Disc 2).chd"]},
+                    RUBY])
+
+    def test_ctrl_c_in_the_all_systems_list_keeps_its_toggles(self):
+        confirms, ask = self.interrupted([RUBY], [0, 0], [(set(), "A"), ({"PlayStation — FF7.m3u"}, KeyboardInterrupt)])
+        ask.assert_not_called()
+        self.assertEqual(len(confirms), 1)
+        self.assertEqual(self.read("collections/favs.json")["games"], [
+            {"title": "FF7", "system": "psx", "bucket": "psx/FF7.m3u", "files": ["psx/FF7 (Disc 1).chd", "psx/FF7 (Disc 2).chd"]}, RUBY])
 
     def test_ctrl_c_in_the_tag_or_meta_picker_keeps_the_games_lists_toggles(self):
         ff7 = {"title": "FF7", "system": "psx", "bucket": "psx/FF7.m3u", "files": ["psx/FF7 (Disc 1).chd", "psx/FF7 (Disc 2).chd"]}
         crash = {"title": "Crash", "system": "psx", "bucket": "psx/Crash.chd"}
         for key, target, picker_name in (("s", tagui.TagFilter, "pick"), ("m", collectionedit.cardedit, "pick_meta")):
             with self.subTest(key=key), mock.patch.object(target, picker_name, side_effect=KeyboardInterrupt):
-                # PlayStation: Crash on, c; FF7 on, then the key whose picker gets Ctrl-C
-                confirms, ask = self.interrupted([RUBY], [0, 1, 2], [({"Crash.chd"}, "c"), ({"FF7.m3u"}, key)])
+                # open, A, PlayStation: Crash on, c; FF7 on, then the key whose picker gets Ctrl-C
+                confirms, ask = self.interrupted([RUBY], [0, 2], [(set(), "A"), ({"Crash.chd"}, "c"), ({"FF7.m3u"}, key)])
                 ask.assert_not_called()
                 self.assertEqual(len(confirms), 1)
-                self.assertEqual(self.read("collections/favs.json")["games"], [RUBY, crash, ff7])
-            with self.subTest(key=key, toggled=False), \
-                    mock.patch.object(target, picker_name, side_effect=KeyboardInterrupt):
-                confirms, _ = self.interrupted([RUBY], [0, 1, 2], [(set(), key)])
+                self.assertEqual(self.read("collections/favs.json")["games"], [crash, ff7, RUBY])
+            with self.subTest(key=key, toggled=False), mock.patch.object(target, picker_name, side_effect=KeyboardInterrupt):
+                confirms, _ = self.interrupted([RUBY], [0, 2], [(set(), "A"), (set(), key)])
                 self.assertEqual(confirms, [])
                 self.assertEqual(self.read("collections/favs.json")["games"], [RUBY])
 
     def test_adding_games_asks_no_category(self):
-        for picks, flip, ff7 in (([0, 1, 2], {"FF7.m3u"}, ["psx/FF7 (Disc 1).chd", "psx/FF7 (Disc 2).chd"]),
-                                 ([0, 2, 0], {"PlayStation — FF7"}, ["psx/FF7 (Disc 1).chd"])):
-            with self.subTest(picks=picks):  # FF7 on, Enter, then Ctrl-C at the add menu
-                confirms, ask = self.interrupted([RUBY], picks + [KeyboardInterrupt], [(flip, None)], tagged=self.MIX)
-                ask.assert_not_called()
-                self.assertEqual(len(confirms), 1)
-                self.assertEqual(self.read("collections/favs.json")["games"],
-                                 [RUBY, {"title": "FF7", "system": "psx", "bucket": "psx/FF7.m3u", "files": ff7}])
+        # FF7 on, Enter, then Ctrl-C at the next list of the collection
+        confirms, ask = self.interrupted([RUBY], [0, 2], [(set(), "A"), ({"FF7.m3u"}, None), (set(), KeyboardInterrupt)])
+        ask.assert_not_called()
+        self.assertEqual(len(confirms), 1)
+        self.assertEqual(self.read("collections/favs.json")["games"],
+                         [{"title": "FF7", "system": "psx", "bucket": "psx/FF7.m3u", "files": ["psx/FF7 (Disc 1).chd", "psx/FF7 (Disc 2).chd"]}, RUBY])
 
     def test_ctrl_c_without_changes_asks_nothing(self):
         confirms = []

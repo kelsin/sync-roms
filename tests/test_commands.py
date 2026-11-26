@@ -91,12 +91,6 @@ class CheckTagsTest(StorageDir):
         self.assertEqual(problems, ["tags.json: gba/A.zip: 'files' must be a list of bucket keys",
                                     "tags.json: gba/B.zip: each variant needs a bucket key"])
 
-    def test_unknown_art_is_a_problem(self):
-        art = list(themeart.art_choices())[0]
-        problems, _, _ = self.check({"tags": {"a": {"name": "A", "emoji": "🛸", "art": "nope"},
-                                              "b": {"name": "B", "emoji": "🎲", "art": art}}, "games": {}})
-        self.assertEqual(problems, ["tags.json: tag 'a': unknown art 'nope'"])
-
     def test_keys_not_in_storage_are_problems_with_bucket_keys(self):
         storage_tags(self, {"tags": TAG_DEFS, "games": {"gba/A.zip": {"tags": ["rpg"], "variants": [
             {"bucket": "gba/A DX.zip", "note": ""}]}}, "declined": {}}, self.root)

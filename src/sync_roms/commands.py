@@ -886,11 +886,9 @@ def check_tags(problems, systems):
         for field in ("name", "emoji"):
             if not (isinstance(t, dict) and isinstance(t.get(field), str) and t[field]):
                 problems.append(f"{where}: tag {tag_id!r} has no {field}")
-    art, by_emoji = themeart.art_choices(), {}
+    by_emoji = {}
     for tag_id, t in sorted(data["tags"].items()):
         by_emoji.setdefault(t["emoji"], []).append(tag_id)
-        if t.get("art") and t["art"] not in art:
-            problems.append(f"{where}: tag {tag_id!r}: unknown art {t['art']!r}")
     problems.extend(f"{where}: tags {', '.join(map(repr, ids))} share the emoji {e}"
                     for e, ids in by_emoji.items() if len(ids) > 1)
     listed = []
@@ -1395,7 +1393,7 @@ def collections_page_cmd(args):
 def collections_share_cmd(args):
     link, built, started = tailshare.share()
     if built:
-        print(f"Built {collections_page.DEFAULT_PATH()}")
+        print(f"Rebuilt {collections_page.DEFAULT_PATH()}")
     line = f"{'Sharing' if started else 'Already shared'} at {link}"
     print(line + (" 📋" if tailshare.copy_to_clipboard(link) else ""))
     return 0

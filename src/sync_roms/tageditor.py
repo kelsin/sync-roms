@@ -1,6 +1,5 @@
 """`sync-roms tags edit`: edit the tags in storage. Every change is saved as it is made."""
-from . import edit, names, picker, previews, s3, store, tags, tagui, themeart, ui
-from .collectionedit import pick_art
+from . import edit, names, picker, s3, store, tags, tagui, ui
 from .listedit import add_from_system, add_from_tag, folder_lister, view
 
 
@@ -108,13 +107,6 @@ def change_emoji(tag_id, tag):
     edit.note(ui.yellow(f"⚠️  {problem}; nothing was changed."))
 
 
-def change_art(tag_id, tag):
-    picked = {"name": tag["name"], "art": tag.get("art")}
-    pick_art(picked)
-    if picked.get("art") != tag.get("art"):
-        _save(tags.define_tag, tag_id, {"art": picked.get("art")})
-
-
 def merge(tag_id, tag):
     """Merge the tag into another one picked from a list; returns whether it is gone."""
     defs = tags.all_tags()
@@ -149,20 +141,18 @@ def delete(tag_id, tag):
 
 
 def edit_one(tag_id, systems, keys_of):
-    """The menu of one tag: its games, adding games, name, emoji, description, art, merging, deleting."""
+    """The menu of one tag: its games, adding games, name, emoji, description, merging, deleting."""
     system_names = {s["bucket"]: s["name"] for s in systems}
     pos = 0
     while True:
         tag = tags.all_tags().get(tag_id)
         if tag is None:
             return
-        art = tag.get("art")
         i = picker.filter_list(f"✏️  {_label(tag)} (Esc = back)",
                                [f"Games with this tag ({len(_games_of(tag_id))}): switch some off, + adds",
                                 "Add games from a system", "Add games with another tag",
                                 f"Rename ({tag['name']})", f"Emoji ({tag['emoji']})",
                                 f"Description{': ' + tag['description'] if tag.get('description') else ''}",
-                                f"{themeart.art_emoji(art)} Theme art: {themeart.art_choices().get(art, 'none') if art else 'none'}",
                                 "Merge into another tag", "Delete this tag"], cursor=pos, hotkeys=(QUIT_KEY,),
                                hint=f"Enter open · {QUIT_HINT} · Esc back")
         if i is None:
@@ -190,8 +180,6 @@ def edit_one(tag_id, systems, keys_of):
             text = ui.ask("Description (empty clears it): ").strip()
             _save(tags.define_tag, tag_id, {"description": text or None})
         elif i == 6:
-            change_art(tag_id, tag)
-        elif i == 7:
             if merge(tag_id, tag):
                 return
         elif delete(tag_id, tag):
@@ -230,8 +218,7 @@ def _tag_list():
                                key_help=[("Enter", "open the tag"), (tagui.NEW_KEY, "add a new tag"),
                                          (SORT_KEY, f"sort by {'name' if by_count else 'game count'} instead"),
                                          (tagui.CLEAR_KEY, "clear the tag filter")],
-                               row_note=tagui.described(defs, ids),
-                               preview=lambda k: previews.collection(defs[ids[k]].get("art")) if k < n else None)
+                               row_note=tagui.described(defs, ids))
         if i is None:
             return 0
         if isinstance(i, tuple):

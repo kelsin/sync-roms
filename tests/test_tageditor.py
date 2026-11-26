@@ -98,13 +98,6 @@ class Editor(unittest.TestCase):
         self.run_editor(["Shmups", "Description", None, None], asks=["Shoot them up"])
         self.assertEqual(tags.all_tags()["shmups"]["description"], "Shoot them up")
 
-    def test_art_picks_through_the_collection_picker(self):
-        def pick(collection):
-            collection["art"] = "surprise"
-        with mock.patch.object(tageditor, "pick_art", pick):
-            self.run_editor(["Shmups", "art", None, None])
-        self.assertEqual(tags.all_tags()["shmups"]["art"], "surprise")
-
     def test_merge_into_another_tag(self):
         self.run_editor(["Shmups", "Merge", "Cave"], confirms=[True])
         self.assertNotIn("shmups", tags.all_tags())

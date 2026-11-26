@@ -1,6 +1,6 @@
 """Tags on games: tags.json at the root of storage, one record per tagged game plus the tag definitions.
 
-{"tags": {id: {"name", "emoji", "description"?, "art"?}},
+{"tags": {id: {"name", "emoji", "description"?}},
  "games": {bucket key: {"tags": [ids], "files"?: [keys], "variants"?: [{"bucket", "note", "files"?}]}},
  "declined": {bucket key: [tag ids]}}
 
@@ -41,7 +41,7 @@ def _tag(t):
     if not (isinstance(t, dict) and isinstance(t.get("name"), str) and isinstance(t.get("emoji"), str)
             and t["name"] and t["emoji"]):
         return None
-    return {k: t[k] for k in ("name", "emoji", "description", "art") if isinstance(t.get(k), str) and t[k]}
+    return {k: t[k] for k in ("name", "emoji", "description") if isinstance(t.get(k), str) and t[k]}
 
 
 def _game(g):
@@ -133,10 +133,16 @@ def tags_of(key):
 def emoji_of(key):
     """The emoji of the game's tags, joined with no separator, in tag-name order; a file of a record counts as
     its game."""
+    return "".join(t["emoji"] for t in defs_of(key))
+
+
+def defs_of(key):
+    """The definitions ({"name", "emoji", "description"?, ...}) of the game's tags, in tag-name order; a file of a
+    record counts as its game."""
     data = load()
     rec = data["games"].get(key) or data["games"].get(_owner.get(key))
     defs = [data["tags"][i] for i in (rec["tags"] if rec else ()) if i in data["tags"]]
-    return "".join(t["emoji"] for t in sorted(defs, key=lambda t: t["name"].casefold()))
+    return sorted(defs, key=lambda t: t["name"].casefold())
 
 
 def games_with(required, excluded):

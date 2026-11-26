@@ -61,6 +61,7 @@ def page_data():
                           "system": system,
                           "paths": [bucket, *game.get("files", ())],
                           "tags": [t for t in tags.tags_of(bucket) if t in defined] if defined else []})
+        games.sort(key=lambda g: store.sort_key(g["title"]))
         art_id = collection.get("art") or collection["id"]
         out.append({"id": collection["id"], "name": collection["name"], "description": collection["description"],
                     "art": _art(art_id), "games": games})
@@ -77,11 +78,30 @@ def DEFAULT_PATH():
     return os.path.join(store.data_dir(), "share", "collections", "index.html")
 
 
-def write_page(path):
-    """Write the page, the template with page_data() in its data block, to path (folders made, atomically)."""
+def render():
+    """The page: the template with page_data() in its data block."""
     with open(TEMPLATE, encoding="utf-8") as f:
         html = f.read()
     block = json.dumps(page_data()).replace("<", "\\u003c")
-    html = html.replace('id="page-data">{}<', f'id="page-data">{block}<', 1)
+    return html.replace('id="page-data">{}<', f'id="page-data">{block}<', 1)
+
+
+def write_page(path):
+    """Write the page to path (folders made, atomically)."""
+    html = render()
     os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
     store.write_text(path, html)
+
+
+def update_page(path):
+    """Write the page unless path already holds exactly it. True when written (missing or out of date)."""
+    html = render()
+    try:
+        with open(path, encoding="utf-8") as f:
+            if f.read() == html:
+                return False
+    except (OSError, ValueError):
+        pass
+    os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
+    store.write_text(path, html)
+    return True

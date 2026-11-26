@@ -512,15 +512,15 @@ class Keys(unittest.TestCase):
         self.assertEqual(run_list(["G", "g", "enter"], self.LABELS), 0)
 
     def test_page_and_half_page_movement(self):
-        labels = [f"row {i}" for i in range(50)]  # the list model shows 20 rows until a screen sizes it
-        self.assertEqual(run_list(["ctrl+d", "enter"], labels), 10)
-        self.assertEqual(run_list(["ctrl+f", "enter"], labels), 20)
+        labels = [f"row {i}" for i in range(50)]  # the list model shows 19 rows until a screen sizes it
+        self.assertEqual(run_list(["ctrl+d", "enter"], labels), 9)
+        self.assertEqual(run_list(["ctrl+f", "enter"], labels), 19)
         self.assertEqual(run_list(["ctrl+f", "ctrl+u", "enter"], labels), 10)
-        self.assertEqual(run_list(["ctrl+f", "ctrl+f", "ctrl+b", "enter"], labels), 20)
-        self.assertEqual(run_list(["ctrl+f", "ctrl+f", "ctrl+d", "enter"], labels), 49)  # stops on the last row
+        self.assertEqual(run_list(["ctrl+f", "ctrl+f", "ctrl+b", "enter"], labels), 19)
+        self.assertEqual(run_list(["ctrl+f", "ctrl+f", "ctrl+d", "ctrl+d", "enter"], labels), 49)  # stops on the last row
         self.assertEqual(run_list(["ctrl+d", "ctrl+b", "enter"], labels), 0)  # and on the first
         self.assertEqual(run_list(["ctrl+u", "enter"], labels), 0)
-        self.assertEqual(run_list(["ctrl+d", "ctrl+d", "ctrl+u", "ctrl+f", "enter"], labels), 30)
+        self.assertEqual(run_list(["ctrl+d", "ctrl+d", "ctrl+u", "ctrl+f", "enter"], labels), 28)
 
     def test_a_hotkey_wins_over_a_movement_key(self):
         self.assertEqual(run_list(["j", "g"], self.LABELS, hotkeys=("g",)), ("g", 1))
@@ -1066,6 +1066,11 @@ class NarrowRows(unittest.TestCase):
         self.assertEqual([(row.plain[s.start:s.end], str(s.style)) for s in row.spans][-1], ("  1.2 GB", "reverse dim"))
         self.assertTrue(all("reverse" in str(s.style) for s in row.spans) and row.style == "reverse")
 
+    def test_a_border_line_separates_the_list_from_the_status_row(self):
+        lines, width = self.rendered()
+        self.assertEqual(lines[-2].rstrip(), "─" * width)
+        self.assertNotIn("─", lines[-3] + lines[-1])
+
     def test_filters_show_on_the_filter_line(self):
         lines, _ = self.rendered(filters="📦 Shmups only (c clear filters)")
         self.assertEqual(lines[0].rstrip(), "t")
@@ -1077,7 +1082,7 @@ class NarrowRows(unittest.TestCase):
         with mock.patch.object(picker, "_run", seen.append):
             picker.filter_list("t", [str(i) for i in range(30)], multi=True, session=session)
         m = seen[0]
-        self.assertEqual((m.view, len(m.vis), m.vis[m.cur], m.top), (20, 25, 22, 5))  # rows 5..24: no blank rows
+        self.assertEqual((m.view, len(m.vis), m.vis[m.cur], m.top), (19, 25, 22, 6))  # rows 6..24: no blank rows
 
 
 class TagColumn(DataDir):

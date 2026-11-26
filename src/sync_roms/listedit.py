@@ -176,37 +176,6 @@ def add_from_tag(listing, shown, keys_of, label, hotkeys=(), hint=None):
     return pressed
 
 
-def add_from_filter(listing, systems, shown, keys_of, label):
-    """Add every game in storage the tag filter shows (a game once, by its lead key) that listing doesn't have yet,
-    after a count confirm; asks for a filter first when none is set. New games get their record's extra files and a
-    multi-disc game's discs."""
-    if not tagui.FILTER.active():
-        tagui.FILTER.pick(set(tags.load()["games"]))
-        if not tagui.FILTER.active():
-            return
-    options = stocked(systems)
-    had = {g["bucket"] for s in shown.values() for g in s["games"]}
-    rows = [r for r in all_rows(shown, options, keys_of)
-            if r[1] not in had and tags.owner(r[1]) == r[1] and tagui.FILTER.keep(r[1])]
-    line = tagui.FILTER.describe()
-    if not rows:
-        edit.note(ui.yellow(f"ℹ️  No games in storage match {line} that {label} doesn't have."))
-        return
-    if not ui.confirm(f"✏️  Add {tagui.games(len(rows))} matching {line} to {label}?", default=False):
-        return
-    records = tags.load()["games"]
-    for s, key, name, _ in rows:
-        s["games"].append({"title": name, "bucket": key})
-    listing["games"] = reconcile(listing["games"], shown)
-    added = {r[1] for r in rows}
-    for g in listing["games"]:
-        if g.get("bucket") in added and "files" not in g and records.get(g["bucket"], {}).get("files"):
-            g["files"] = list(records[g["bucket"]]["files"])
-    for bucket in {s["bucket"] for s, *_ in rows}:
-        fold_discs(listing["games"], keys_of(bucket))
-    edit.note(f"✏️  Added {tagui.games(len(rows))} to {label}")
-
-
 # --- What changed ------------------------------------------------------------------------------------
 
 def game_line(game):
@@ -336,8 +305,9 @@ def all_rows(shown, systems, keys_of):
     return sorted(rows, key=lambda r: (store.sort_key(r[2]), names[r[0]["bucket"]]))
 
 
-def toggle_all(title, rows, place=None, tag_filter=True, hotkeys=(), hint=None):
+def toggle_all(title, rows, place=None, tag_filter=True, hotkeys=(), hint=None, key_help=None):
     """edit.toggle_games over rows from all_rows (s and c, the sticky tag filter, are its own). `a` toggles every shown
-    game only while a tag filter is set: the unfiltered list is every file in storage. Returns the hotkey pressed."""
+    game only while a tag filter is set: the unfiltered list is every file in storage. Keys in hotkeys end the list and
+    are returned (Enter and Esc return None); hint and key_help add to the hint line and what ? lists."""
     return edit.toggle_games(title, rows, hotkeys=hotkeys, hint=hint, place=place, select_all=edit.WHEN_FILTERED,
-                             tag_filter=tag_filter)
+                             tag_filter=tag_filter, key_help=key_help)

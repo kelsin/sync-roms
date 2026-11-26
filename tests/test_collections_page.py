@@ -28,6 +28,12 @@ class Page(helpers.DataDir):
     def save(self, **fields):
         collections.save_collection({"id": "mario", "name": "Mario", "description": "d", "games": [], **fields})
 
+    def test_games_sorted_by_title_not_system(self):
+        self.save(games=[{"system": "snes", "bucket": SMW, "title": "b"},
+                         {"system": "zzz", "bucket": "zzz/x.zip", "title": "A"}])
+        games = collections_page.page_data()["collections"][0]["games"]
+        self.assertEqual([g["title"] for g in games], ["A", "b"])
+
     def test_games_titles_tags_paths(self):
         self.save(games=[
             {"system": "snes", "bucket": SMW, "title": "Super </script> World"},
