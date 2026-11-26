@@ -950,7 +950,7 @@ def edit_system(name, system, setup, to_fetch=None, card_usages=None):
                 if result[1] is not None:
                     tagui.edit_game_tags(*shown[result[1]][1:3])
             elif result[0] == tagui.BULK_KEY:
-                tagui.bulk_tag([r[1] for r in shown])
+                tagui.bulk_tag([r[1] for r in picker.on_screen(place, shown)])
             elif result[0] == VARIANT_KEY:
                 variant = result[1] is not None and _toggle_variant(picks, *shown[result[1]][1:3])
                 if variant:
@@ -1052,7 +1052,7 @@ def edit_set(name, game_set, setup, to_fetch=None, card_usages=None, all_games=F
                     tagui.edit_game_tags(*shown[result[1]][1:3])
                 frozen = shown
             elif result[0] == tagui.BULK_KEY:
-                tagui.bulk_tag([r[1] for r in shown])
+                tagui.bulk_tag([r[1] for r in picker.on_screen(place, shown)])
                 frozen = shown
             elif tagui.handle_key(result[0], {r[1] for r in listed}, place):
                 pass

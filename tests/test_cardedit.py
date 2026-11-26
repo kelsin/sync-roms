@@ -2229,6 +2229,33 @@ class SetFlow(Flow):
             self.run_all(returns(("T", None)), lambda labels, kw: kw["session"]["sel"])
         self.assertEqual(asked, [["gb/Red.gb", "gba/Ruby.sav", "gba/Ruby.zip"]])
 
+    def test_t_in_the_all_games_list_tags_only_the_rows_on_screen(self):
+        self.card()
+        self.tag_pokemon()
+        cardedit.tagui.FILTER.required = {"pk"}
+        asked = []
+
+        def searched(labels, kw):
+            kw["session"]["visible"] = [0]  # a / search leaves only the first row
+            return ("T", None)
+        with mock.patch.object(cardedit.tagui, "bulk_tag", side_effect=lambda keys: asked.append(keys)):
+            self.run_all(searched, lambda labels, kw: kw["session"]["sel"])
+        self.assertEqual(asked, [["gb/Red.gb"]])
+
+    def test_t_in_a_systems_games_tags_only_the_rows_on_screen(self):
+        self.card()
+        asked = []
+
+        def searched(labels, kw):
+            kw["session"]["visible"] = [1]
+            self.labels = labels
+            return ("T", None)
+        with mock.patch.object(cardedit.tagui, "bulk_tag", side_effect=lambda keys: asked.append(keys)):
+            self.run_system(searched, lambda labels, kw: kw["session"]["sel"])
+        self.assertEqual(len(asked), 1)
+        self.assertEqual(len(asked[0]), 1)
+        self.assertIn(asked[0][0].split("/", 1)[1], self.labels[1])
+
     def test_t_in_the_all_games_list_edits_that_rows_tags(self):
         self.card()
         asked = []

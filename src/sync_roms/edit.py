@@ -98,7 +98,7 @@ def toggle_games(title, rows, hotkeys=(), hint=None, place=None, filters="", key
                 tagui.repeat_last(shown[i][1], shown[i][2])
             frozen = shown
         elif pressed == tagui.BULK_KEY and pressed in own:
-            tagui.bulk_tag([r[1] for r in shown])
+            tagui.bulk_tag([r[1] for r in picker.on_screen(place, shown)])
             frozen = shown
         elif pressed in own:
             tagui.handle_key(pressed, [r[1] for r in rows], place)

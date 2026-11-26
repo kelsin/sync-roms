@@ -577,6 +577,14 @@ class Keys(unittest.TestCase):
         self.assertEqual(run_list(["enter"], labels, session=session), 40)
         self.assertEqual(session["top"], 30)  # the row stays where it was on the screen
 
+    def test_session_names_the_rows_on_screen(self):
+        session = {}
+        run_list(["/", "t", "a", "enter", "enter"], self.LABELS, multi=True, session=session)
+        self.assertEqual(session["visible"], [1, 3])  # beta and delta have "ta"
+        session = {"sel": [True, False, True, False], "view_mode": 1}
+        run_list(["enter"], self.LABELS, multi=True, session=session)
+        self.assertEqual(session["visible"], [0, 2])  # the o view: only rows that are on
+
     def test_filter_line_editing(self):
         self.assertEqual(run_list(["/", "x", "y", "ctrl+u", "d", "e", "enter", "enter"], self.LABELS), 3)  # ^U clears
         self.assertEqual(run_list(["/", "g", "a", "space", "x", "ctrl+w", "ctrl+w", "d", "enter", "enter"], self.LABELS), 3)  # ^W kills words
@@ -1146,6 +1154,19 @@ class TagColumn(DataDir):
         self.assertEqual(len(seen), 3)  # reopened after the bulk tag
         self.assertNotIn("T", seen[2]["hotkeys"])
         self.assertNotIn("T tag", seen[2]["hint"])
+
+    def test_t_bulk_tags_only_the_rows_the_search_and_view_leave_on_screen(self):
+        tagui = edit.tagui
+        bulk = []
+        answers = iter([("T", None)])
+
+        def fake(title, labels, **kw):
+            kw["session"]["visible"] = [1]  # a / search (or an o view) leaves only B
+            return next(answers, None) or kw["session"]["sel"]
+        with mock.patch.object(picker, "filter_list", fake), \
+                mock.patch.object(tagui, "bulk_tag", side_effect=lambda keys: bulk.append(keys)):
+            edit.toggle_games("t", self.ROWS)
+        self.assertEqual(bulk, [["nes/B (USA).zip"]])
 
     def test_when_filtered_turns_a_on_only_while_a_tag_filter_is_set(self):
         tagui = edit.tagui
