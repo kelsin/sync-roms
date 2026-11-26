@@ -6,13 +6,12 @@ description: Use when new ROMs were uploaded to storage and the tagged games' va
 # Update variants
 
 Variants live on the game records of storage's `tags.json` (see "Data files" in CLAUDE.md): a record's `variants`
-list other versions of the same game that add something. This skill finds new ROMs in storage that are variants of
-tagged games (games with a record) and adds them, after the user approves. The scripts read and write `tags.json`
-in storage, never in the repo.
+are notes on related versions of the same game that add something. This skill finds new ROMs in storage that are
+variants of tagged games (games with a record) and adds those notes, after the user approves. The scripts read and
+write `tags.json` in storage, never in the repo.
 
-**It only edits `variants`.** It never adds, removes or retags game records, and never changes which version is the
-tagged one: the user edits tags with `sync-roms tags edit`. When a new ROM looks like a better main version than the
-tagged game, say so in the report and leave the record alone.
+**It only edits `variants`.** It never adds, removes or retags game records. Every version of a game is tagged on its
+own, variant or not: the user tags them with `sync-roms tags edit` or `sync-roms tags suggest`, never this skill.
 
 Run every command from the repo root.
 
@@ -24,8 +23,10 @@ uv run --frozen python .claude/skills/update-variants/scripts/find_candidates.py
 ```
 
 The output has:
-- `matches`: tagged games (`game`, `title`, `system`, `tags`, existing `variants`) with `candidates`, ROMs no game
-  record lists (as its key, an extra file or a variant) whose title or arcade clone family matches. A multi-disc candidate's discs
+- `matches`: tagged games (`game`, `title`, `system`, `tags`, existing `variants`) with `candidates`, ROMs
+  whose title or arcade clone family matches and that are not a file or variant of any record. A ROM tagged on its own (a
+  record key) is still offered for another game it is a version of, never for itself, its own files or a game that
+  already lists it as a variant. A multi-disc candidate's discs
   are in its `files`.
 - `stale`: variants whose ROM is no longer in storage.
 - `unmatched`: how many new ROMs matched no tagged game. They are not judged or recorded; mention the count.
@@ -47,7 +48,6 @@ else is **not a variant**, with a short reason:
 | Same game, nothing added (straight port, re-release, regional copy, revision, Classic NES Series, Neo Geo CD copy) | not a variant: "same game, adds nothing" |
 | Plays substantially differently (other developer or design, demake, new-engine remake like Pokemon FireRed) | not a variant: "different game" |
 | Only shares the title | not a variant: "different game" |
-| Would win as the main version under the CLAUDE.md order (arcade original over a port, the lead platform, English for a text-heavy game) | not a variant; report it |
 | Can't tell from its name and what you know | leave it out of the decisions; list it for the user |
 
 A variant's note starts with the system's common name and a colon, says what it adds in plain words, under 80
@@ -59,9 +59,9 @@ and the CLAUDE.md rules; collect their verdicts as the decisions file below.
 ## 3. Show the proposal and wait
 
 Show the user one table of the proposed variants (tagged game, new variant, note), the stale variants to remove, the
-number of ROMs judged not variants with a few examples, the ROMs you couldn't judge, and the unmatched count. Report
-any "better main version" findings separately. Write nothing until the user approves, even when no variant is
-proposed (approval then records the judged ROMs as checked); apply their corrections.
+number of ROMs judged not variants with a few examples, the ROMs you couldn't judge, and the unmatched count. Write
+nothing until the user approves, even when no variant is proposed (approval then records the judged ROMs as checked);
+apply their corrections.
 
 ## 4. Apply
 
@@ -86,5 +86,7 @@ mounted. Rejected candidates go in `checked` so later runs skip them; candidates
 left out. There is nothing to commit: report the games it changed (the last line of its output), any skipped games
 and any problems `sync-roms check` shows.
 
-`find_candidates.py --baseline` marks every ROM no game record lists as checked without judging it. Use it only when the user
+`find_candidates.py --baseline` marks every ROM that is no record's file or variant as checked without judging it. Use it only when the user
 asks to skip the backlog.
+
+Tagged ROMs are candidates too, so the tagged records not yet in `variants-checked.json` come up once, a one-time backlog: judge them as any others.

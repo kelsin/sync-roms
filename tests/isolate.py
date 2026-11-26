@@ -6,6 +6,7 @@ import os
 import shutil
 import sys
 import tempfile
+import unittest
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
 
@@ -40,11 +41,26 @@ if not os.environ.get(TEST_HOME_VAR):
     os.environ["AWS_SHARED_CREDENTIALS_FILE"] = os.path.join(_home, ".aws", "credentials")
 
 from sync_roms import store  # noqa: E402  (after the environment is cleared: runtime reads ROMS_* at import)
-from sync_roms import ignore, names, tags  # noqa: E402
+from sync_roms import ignore, names, tags, tagui  # noqa: E402
 
 ignore._keys = frozenset()  # no test reads the ignore list from storage unless it calls ignore.reset()
 names._scraped = {s: {} for s in names.SYSTEMS}  # no test reads scraped names from storage unless it calls names.reset()
 tags._set(tags._empty())  # no tags: tests that need some put them in storage (helpers.storage_tags)
+
+# The tag filter, recent tags and `.` are process-wide: every test starts without them. TestCase.run is the one place
+# every test goes through: unittest has no public per-test hook, many setUp overrides don't call super(), and
+# _callSetUp is private.
+if not getattr(unittest.TestCase, "_sync_roms_filter_reset", False):
+    _run = unittest.TestCase.run
+
+    def _run_without_tag_filter(self, result=None):
+        tagui.FILTER.clear()
+        tagui.RECENT.clear()
+        tagui.LAST.clear()
+        return _run(self, result)
+
+    unittest.TestCase.run = _run_without_tag_filter
+    unittest.TestCase._sync_roms_filter_reset = True
 
 TEST_HOME = os.environ[TEST_HOME_VAR]
 FORBIDDEN = [_norm(p) for p in os.environ[REAL_VAR].split(os.pathsep) if p]

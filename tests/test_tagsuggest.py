@@ -9,7 +9,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import helpers  # noqa: E402
-from sync_roms import commands, picker, shared, store, tags, tagsuggest, ui  # noqa: E402
+from sync_roms import commands, ignore, inventory, picker, shared, store, tags, tagsuggest, ui  # noqa: E402
 
 SYSTEMS = [{"name": "Nintendo NES", "bucket": "nes", "bios": {"files": []}}]
 GENRES = {"Shoot'em Up": ["shmups"], "Sports": ["sports"], "Sports / Football (Soccer)": ["sports", "soccer"],
@@ -32,6 +32,8 @@ METADATA = {
 }
 TAG_DEFS = {"hero": {"name": "Hero", "emoji": "🦸"}, "platformers": {"name": "Platformers", "emoji": "🏃"},
             "shmups": {"name": "Shmups", "emoji": "🛸"}, "sports": {"name": "Sports", "emoji": "⚽"}}  # no "soccer"
+ALL_SUGGESTED = {HERO: ["platformers"], HERO_DX: ["platformers"], HERO_EU: ["platformers"], SHMUP: ["shmups"],
+                 KICK: ["sports"], KICK_WORLD: ["sports"]}
 
 
 class Suggest(unittest.TestCase):
@@ -54,17 +56,34 @@ class Suggest(unittest.TestCase):
         self.addCleanup(tagsuggest.reset)
         return root
 
-    def test_pool_has_one_version_of_each_untagged_game(self):
-        self.assertEqual(tagsuggest.pool(SYSTEMS[0]), {SHMUP: "Shmup", KICK: "Kick"})
-        self.assertEqual(tagsuggest.untagged(SYSTEMS[0]), 2)
+    def test_pool_includes_every_version_of_a_game(self):
+        pool = tagsuggest.pool(SYSTEMS[0])
+        self.assertEqual({k: pool[k] for k in (KICK, KICK_WORLD)}, {KICK: "Kick", KICK_WORLD: "Kick"})
+        self.assertEqual(set(pool), {HERO_DX, HERO_EU, SHMUP, KICK, KICK_WORLD})  # a Beta isn't a candidate
+        self.assertEqual(tagsuggest.untagged(SYSTEMS[0]), 5)
+
+    def test_pool_skips_tagged_and_ignored_games_and_suggestions_skip_declined_ones(self):
+        self.assertNotIn(HERO, tagsuggest.pool(SYSTEMS[0]))  # tagged
+        helpers.touch(os.path.join(self.root, ignore.KEY), json.dumps({"nes": ["Kick (World).zip"]}))
+        ignore.reset()
+        inventory.reset()
+        self.addCleanup(setattr, ignore, "_keys", frozenset())  # no ignore list, as isolate leaves it
+        self.assertNotIn(KICK_WORLD, tagsuggest.pool(SYSTEMS[0]))
+        self.assertNotIn(KICK_WORLD, tagsuggest.suggestions(SYSTEMS))
+        self.start({SHMUP: ["shmups"]}, self.root)
+        self.assertNotIn(SHMUP, tagsuggest.suggestions(SYSTEMS))
 
     def test_suggestions_are_mapped_tags_the_game_lacks(self):
-        self.assertEqual(tagsuggest.suggestions(SYSTEMS),
-                         {HERO: ["platformers"], SHMUP: ["shmups"], KICK: ["sports"]})  # no soccer tag
+        self.assertEqual(tagsuggest.suggestions(SYSTEMS), {
+            HERO: ["platformers"],  # tagged hero already; its genre's part before " / " maps to platformers
+            HERO_DX: ["platformers"], HERO_EU: ["platformers"],
+            SHMUP: ["shmups"],  # SHMUP_BETA isn't in the pool
+            KICK: ["sports"],  # its genre maps to sports and soccer, and there is no soccer tag
+            KICK_WORLD: ["sports"]})
 
     def test_a_declined_pair_is_not_suggested(self):
         self.start({SHMUP: ["shmups"]}, self.root)
-        self.assertEqual(tagsuggest.suggestions(SYSTEMS), {HERO: ["platformers"], KICK: ["sports"]})
+        self.assertEqual(tagsuggest.suggestions(SYSTEMS), {k: v for k, v in ALL_SUGGESTED.items() if k != SHMUP})
 
     def test_an_existing_tag_is_not_suggested(self):
         tags.change_game_tags(SHMUP, add=["shmups"])
@@ -87,15 +106,17 @@ class Suggest(unittest.TestCase):
     def test_review_adds_checked_and_declines_unchecked_in_one_write_each(self):
         code, shown, writes, out = self.run_review("Shmup")
         self.assertEqual(code, 0)
-        self.assertEqual(shown, ["🏃 Platformers — Nintendo NES — Hero", "🛸 Shmups — Nintendo NES — Shmup",
-                                 "⚽ Sports — Nintendo NES — Kick"])
+        # the two "Hero" rows are HERO_EU then HERO: one title, ordered by key
+        self.assertEqual(shown, ["🏃 Platformers — Nintendo NES — Hero", "🏃 Platformers — Nintendo NES — Hero",
+                                 "🏃 Platformers — Nintendo NES — Hero DX", "🛸 Shmups — Nintendo NES — Shmup",
+                                 "⚽ Sports — Nintendo NES — Kick", "⚽ Sports — Nintendo NES — Kick"])
         self.assertEqual(writes, 2)
         tags.reset()
         self.assertEqual(tags.tags_of(HERO), ["hero", "platformers"])
         self.assertEqual(tags.tags_of(KICK), ["sports"])
         self.assertEqual(tags.tags_of(SHMUP), [])
         self.assertEqual(tags.load()["declined"], {SHMUP: ["shmups"]})
-        self.assertIn("2", out)
+        self.assertIn("Added 5 tag(s) to 5 game(s); turned down 1", out)
 
     def test_review_offers_no_notes(self):
         with mock.patch.object(tagsuggest.edit, "toggle_games") as toggle, \

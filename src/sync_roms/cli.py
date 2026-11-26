@@ -29,7 +29,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "sync": ("[CARD]", "download the ROMs, BIOS and scraped data for a card (this is what plain `sync-roms CARD` does)"),
     "edit": ("", "interactive editor: cards, tags, collections, device systems"),
     "games": ("list|add|remove|full|export|import", "edit a card's games, interactively or from scripts"),
-    "tags": ("edit|suggest", "edit the tags in storage by hand (games, names, emoji, art, merging, deleting), or add tags from scraped genres"),
+    "tags": ("edit|suggest", "edit the tags in storage by hand (games, names, emoji, merging, deleting), or add tags from scraped genres"),
     "collections": ("edit|page|share|unshare", "edit your collections of favourite games (saved in ~/.sync-roms/collections/), write a shareable HTML page of them, or share it on your tailnet"),
     "themes": ("update|pick|build|publish|palettes", "copy the latest Art Book Next for ES-DE and the PyUI themes for spruce from GitHub into storage; build and publish custom spruce themes"),
     "download": ("pico8", "add the PICO-8 BBS Featured carts storage doesn't have, and newer revisions of those it has"),
@@ -134,18 +134,20 @@ TOPICS = {
   its keys.
 """,
     "tags": """
-  sync-roms tags edit                         edit the tags in storage (games, names, emoji, art,
+  sync-roms tags edit                         edit the tags in storage (games, names, emoji,
                                               new, merged and deleted tags)
   sync-roms tags suggest [SYSTEM ...]         tags for games from their scraped ScreenScraper genre,
                                               to review (all systems by default)
 
   The tags are shared by everyone using this storage: they are storage's tags.json. Every change is
-  saved as you make it; nothing else in storage or ~/.sync-roms changes. Pick a tag to switch its
-  games off, add games from a system or from another tag, rename it, change its emoji, description
-  or art, merge it into another tag or delete it. n in the list adds a tag.
+  saved as you make it; nothing else in storage or ~/.sync-roms changes. Pick a tag to list its
+  games: Space switches one off, / finds a game, A adds games (after a search, from all systems
+  with it) and S opens its settings: rename it, change its emoji or description, add the games of
+  another tag, merge it into another tag or delete it. n in the list adds a tag. Q in a tag leaves
+  the editor, with what you toggled saved.
 
-  suggest covers one version of each game (the tagged games, and the full English games of storage
-  that aren't one of their versions, files or variants) and lists each tag the game's genre maps
+  suggest covers every version of each game (the tagged games, and the full English games of storage
+  that aren't one of their files) and lists each tag the game's genre maps
   to (src/sync_roms/data/genre-tags.json) and it lacks, all checked. Enter adds the checked ones;
   the unchecked ones are remembered in tags.json and not suggested again.
 """,

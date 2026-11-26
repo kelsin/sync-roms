@@ -86,6 +86,20 @@ class Writes(helpers.StorageFolder):
         tags.change_game_tags(B, remove={"shmups"})
         self.assertNotIn(B, self.stored()["games"])
 
+    def test_change_games_tags_is_one_write_with_the_same_semantics(self):
+        helpers.storage_tags(self, sample(), root=self.storage)
+        from unittest import mock
+        with mock.patch.object(tags.shared, "update", wraps=tags.shared.update) as update:
+            tags.change_games_tags({B: ([], {"shmups"}), A: ({"x"}, {"cave"}), C: ({"cave"}, set()),
+                                    "nes/none.zip": ((), {"cave"})})
+        self.assertEqual(update.call_count, 1)
+        games = self.stored()["games"]
+        self.assertNotIn(B, games)
+        self.assertEqual(games[A]["tags"], ["shmups", "x"])
+        self.assertEqual(games[A]["variants"], sample()["games"][A]["variants"])
+        self.assertEqual(games[C]["tags"], ["cave"])
+        self.assertNotIn("nes/none.zip", games)
+
     def test_last_tag_with_variants_keeps_empty_tags(self):
         helpers.storage_tags(self, sample(), root=self.storage)
         tags.change_game_tags(A, remove={"cave", "shmups"})
@@ -206,6 +220,92 @@ class Writes(helpers.StorageFolder):
                                                 {"bucket": "nes/B2.zip", "note": "n", "files": ["nes/B2 (Disc 2).zip"]}])
         tags.edit_variants(add=[], remove=[{"game": B, "bucket": "nes/B Theirs.zip"}])
         self.assertEqual([v["bucket"] for v in self.stored()["games"][B]["variants"]], ["nes/B2.zip"])
+
+    PLAYLIST = ["psx/FF7.m3u", "psx/FF7 (Disc 1).chd", "psx/FF7 (Disc 2).chd"]
+    LOOSE = ["psx/MGS (Disc 1).chd", "psx/MGS (Disc 2).chd"]  # discs with no playlist: a row each in the lists
+
+    def discs_in_storage(self):
+        for key in self.PLAYLIST + self.LOOSE + ["psx/Solo.chd"]:
+            self.put(key, 1)
+        helpers.storage_tags(self, {"tags": json.loads(json.dumps(TAGS)), "games": {}, "declined": {}},
+                             root=self.storage)
+
+    def assert_one_owner_each(self):
+        """No record lists a file that is another record's key, or a file another record lists too."""
+        games = self.stored()["games"]
+        files = [f for rec in games.values() for f in rec.get("files", ())]
+        self.assertEqual(set(files) & set(games), set())
+        self.assertEqual(len(files), len(set(files)))
+
+    def assert_files(self):
+        games = self.stored()["games"]
+        self.assertEqual(games[self.PLAYLIST[0]]["files"], self.PLAYLIST[1:])
+        for disc in self.LOOSE:
+            self.assertEqual(games[disc], {"tags": ["cave"]})
+            self.assertEqual(tags.owner(disc), disc)
+        self.assert_one_owner_each()
+
+    def test_a_playlist_tagged_again_after_its_last_tag_went_gets_its_discs_back_and_loose_discs_none(self):
+        """Untagging a game's last tag drops its record and files; every way of tagging it again restores a playlist's
+        discs. Loose discs, every one of them tagged, stay records of their own with no files."""
+        self.discs_in_storage()
+        leads = [self.PLAYLIST[0], *self.LOOSE]
+        writes = {"change_game_tags": lambda: [tags.change_game_tags(k, add={"cave"}) for k in leads],
+                  "change_games_tags": lambda: tags.change_games_tags({k: ({"cave"}, ()) for k in leads}),
+                  "add_tags": lambda: tags.add_tags({k: ["cave"] for k in leads}),
+                  "retag_games": lambda: tags.retag_games("cave", add=leads)}
+        for name, write in writes.items():
+            with self.subTest(name):
+                write()
+                self.assert_files()
+                tags.change_games_tags({k: ((), {"cave"}) for k in leads})
+                self.assertEqual(self.stored()["games"], {})
+                write()
+                self.assert_files()
+                for k in leads:  # untagged row by row
+                    tags.change_game_tags(k, remove={"cave"})
+                    self.assertNotIn(k, self.stored()["games"])
+
+    def test_a_disc_tagged_alone_gets_no_files_and_a_mixed_batch_owns_each_file_once(self):
+        self.discs_in_storage()
+        tags.change_game_tags(self.LOOSE[1], add={"cave"})
+        self.assertEqual(self.stored()["games"], {self.LOOSE[1]: {"tags": ["cave"]}})
+        tags.change_games_tags({k: ({"shmups"}, ()) for k in [*self.PLAYLIST, *self.LOOSE, "psx/Solo.chd"]})
+        self.assert_one_owner_each()
+        games = self.stored()["games"]
+        self.assertEqual(games[self.PLAYLIST[1]], {"tags": ["shmups"]})  # a disc of its own: no files
+        self.assertEqual(games[self.PLAYLIST[0]], {"tags": ["shmups"]})  # its discs are records: not its files
+
+    def test_a_game_with_one_disc_gets_no_files_and_an_existing_record_keeps_its_own(self):
+        self.discs_in_storage()
+        tags.change_game_tags("psx/Solo.chd", add={"cave"})
+        tags.change_game_tags(self.PLAYLIST[0], add={"cave"})
+        tags.retag_games("shmups", add=[self.PLAYLIST[0]], files={self.PLAYLIST[0]: ["psx/Other.chd"]})
+        games = self.stored()["games"]
+        self.assertEqual(games["psx/Solo.chd"], {"tags": ["cave"]})
+        self.assertEqual(games[self.PLAYLIST[0]]["files"], self.PLAYLIST[1:])
+
+    def test_files_given_to_retag_games_win_over_the_discs(self):
+        self.discs_in_storage()
+        tags.retag_games("cave", add=[self.PLAYLIST[0]], files={self.PLAYLIST[0]: ["psx/FF7 (Disc 2).chd"]})
+        self.assertEqual(self.stored()["games"][self.PLAYLIST[0]]["files"], ["psx/FF7 (Disc 2).chd"])
+
+    def test_storage_that_cannot_be_listed_gives_no_files(self):
+        self.discs_in_storage()
+        from unittest import mock
+        with mock.patch.object(tags.store, "folder_keys", side_effect=SystemExit(3)):
+            tags.change_game_tags(self.PLAYLIST[0], add={"cave"})
+        self.assertEqual(self.stored()["games"][self.PLAYLIST[0]], {"tags": ["cave"]})
+
+    def test_only_a_playlist_lists_its_folder_once_per_write(self):
+        self.discs_in_storage()
+        from unittest import mock
+        with mock.patch.object(tags.store, "folder_keys", wraps=tags.store.folder_keys) as lister:
+            tags.change_game_tags("psx/Solo.chd", add={"cave"})
+            tags.change_games_tags({k: ({"cave"}, ()) for k in self.LOOSE})
+            self.assertEqual(lister.call_count, 0)  # no playlist: nothing to list
+            tags.change_games_tags({k: ({"cave"}, ()) for k in [self.PLAYLIST[0], "psx/Other.m3u"]})
+        self.assertEqual([c.args for c in lister.call_args_list], [("psx",)])
 
     def test_retarget(self):
         helpers.storage_tags(self, sample(), root=self.storage)

@@ -8,8 +8,8 @@ from . import budget, cardpicks, collections as colls, edit, guest, inventory, l
 
 FULL_KEY = "f"
 OFF_KEY = "x"
-SET_KEY = "s"
-CLEAR_KEY = "c"
+SET_KEY = tagui.SET_KEY
+CLEAR_KEY = tagui.CLEAR_KEY
 CLEAR_ALL_KEY = "D"
 COLLECTIONS_KEY = "l"
 SETTINGS_KEY = "S"
@@ -19,16 +19,17 @@ PAST_SURPRISE_KEY = "p"
 META_KEY = "m"
 VARIANT_KEY = "v"
 ALL_KEY = "a"
-LIST_HINT = "Enter · a all games · f full · s tag · l colls · S settings"
-GAMES_HINT = "Space toggle · Enter done · a all · s tag · m meta · v variant · t tags"
+LIST_HINT = "a all games · f full · s tag · c clear · l colls · S settings"
+GAMES_HINT = "Space toggle · Enter done · m meta · p past · v variant"
 META_HINT = "Enter list its values · Esc back"
 VALUES_HINT = "Enter narrow to it · Esc back · / filter"
 COLLECTIONS_HINT = "Enter show its games · Space/Tab toggle the collection · / filter"
-ALL_GAMES_HINT = "Space toggle · Enter done · v variant · t tags · s tag · c clear"
+ALL_GAMES_HINT = "Space toggle · Enter done · v variant"
 LIST_KEYS = [("Enter", "the system's games"), ("f", "full system: every file in its folder (again to undo)"),
              ("x", "turn the system off on this card: nothing of it syncs, its picks stay (again to turn it back on)"),
              ("a", "every game across this card's systems"),
-             ("s", "every game across this card's systems with the tags picked first"), ("l", "collections on this card"),
+             ("s", "narrow every game to tags (the filter stays on in every list), then list them"),
+             ("c", "clear the tag filter"), ("l", "collections on this card"),
              ("S", "settings menu: Surprise, theme, collections and RAOfflineProxy on or off, and the systems Surprise may use"),
              ("F", "guest card: a friend's card; syncs only copy ROMs, BIOS and scrapes (again to undo)"),
              ("D", "clear every pick and full system from the card")]
@@ -37,11 +38,11 @@ KEEP_KEYS = [("K", "pick every card file that matches a storage game")]
 TAGS_HELP = ("s", "narrow by tags: games with every ✅ tag and no 🚫 one")
 GAMES_KEYS = [TAGS_HELP, ("m", "narrow by scraped metadata (developer, genre, year...)"),
               ("p", "only the games that were surprises lately"), ("v", "the game's variants on other systems"),
-              tagui.KEY_HELP, ("c", "clear the search, tag, metadata and surprise filters")]
-COLLECTION_GAMES_HINT = "Space toggle · Enter done · a all · v variant · t tags"
-COLLECTION_GAMES_KEYS = [("v", "the game's variants on other systems"), tagui.KEY_HELP]
-ALL_GAMES_KEYS = [("v", "the game's variants on other systems"), tagui.KEY_HELP, TAGS_HELP,
-                  ("c", "clear the search and tag filters")]
+              tagui.KEY_HELP, tagui.REPEAT_HELP, tagui.BULK_HELP, ("c", "clear the search, tag, metadata and surprise filters")]
+COLLECTION_GAMES_HINT = "Space toggle · Enter done · v variant"
+COLLECTION_GAMES_KEYS = [("v", "the game's variants on other systems"), tagui.KEY_HELP, tagui.REPEAT_HELP, tagui.BULK_HELP,
+                         *tagui.KEYS_HELP]
+ALL_GAMES_KEYS = COLLECTION_GAMES_KEYS
 SIZING = "…"
 
 
@@ -87,11 +88,50 @@ def status_of(usage, capacity, fetch=None, count=True):
     return (text, "red" if over or share >= FULL_AT else "yellow" if share >= WARN_AT else "green")
 
 
-def system_labels(card, systems, recommended, usages, full_sizes):
+def shown_rows(sp, keep):
+    """The rows of a SystemPicks a games list shows for keep(key): a shown playlist hides its discs."""
+    kept = {r[1] for r in sp.rows if keep(r[1])}
+    return [r for r in sp.rows if r[1] in kept and sp.playlist_of.get(r[1]) not in kept]
+
+
+def _picks_stamp(name):
+    """What of a card's saved picks its systems' rows depend on: each system's full flag and the keys it lists (a pick
+    missing from storage, a Vita DLC or update, is a row of its own)."""
+    out = []
+    for bucket, entry in sorted(store.card_games(name).items()):
+        full = isinstance(entry, dict) and bool(entry.get("full_system"))
+        listed = entry if isinstance(entry, list) else []
+        out.append((bucket, full, frozenset(g.get("bucket") for g in listed if isinstance(g, dict))))
+    return tuple(out)
+
+
+def match_counts(name, setup, systems, memo):
+    """{system bucket: rows its games list shows} while a tag filter is on, else None; None for a system that is full
+    or can't be listed. Counted as the list groups its rows (discs and records under their lead), so it equals the
+    list's own count. memo: a dict the caller keeps; the counts are worked out again only when the filter, the tags,
+    the card's picks (_picks_stamp) or the storage cache changed."""
+    if not tagui.FILTER.describe():
+        return None
+    data = tags.load()  # kept in the memo and compared with `is`: an id could be reused by a replacement
+    stamp = (inventory.version(), frozenset(tagui.FILTER.required), frozenset(tagui.FILTER.excluded), tagui.FILTER.untagged,
+             _picks_stamp(name))
+    if memo.get("stamp") != stamp or memo.get("tags") is not data:
+        picks, out = cardpicks.CardPicks(name, setup), {}
+        for s in systems:
+            try:
+                out[s["bucket"]] = None if picks.full(s["bucket"]) else len(shown_rows(picks.system(s), tagui.FILTER.keep))
+            except s3.ERRORS:
+                out[s["bucket"]] = None
+        memo["stamp"], memo["tags"], memo["counts"] = stamp, data, out
+    return memo["counts"]
+
+
+def system_labels(card, systems, recommended, usages, full_sizes, matches=None):
     """(labels, extras) for the system list, in the given order: recommended systems get a ⭐; each picked system
     shows its count and size (… while not sized), then each system its size as a full system (full_sizes: {bucket:
     budget.full_usage}, a missing one not worked out yet; an empty folder shows none). A full system shows its files
-    and full size instead of its picks, then 🗂️. The first column starts with the state: 🟢 full system, 🟡 some games picked, ⚪ none."""
+    and full size instead of its picks, then 🗂️. The first column starts with the state: 🟢 full system, 🟡 some games picked, ⚪ none.
+    matches: {bucket: games the tag filter shows} (match_counts), a last column "N match" while a filter is on."""
     games = card.get("games") or {}
     off = store.systems_off(card)
     labels, extras = [], []
@@ -115,6 +155,9 @@ def system_labels(card, systems, recommended, usages, full_sizes):
                 row[:2] = [(f"  🟡 {u.count or SIZING} picked", "green"), (f"  {SIZING if u.partial else size_text(u.bytes)}", "dim")]
             if unknown or f.count:
                 row[2] = (f"  🗂️  {SIZING if unknown else size_text(f.bytes)} full", "dim")
+        if matches is not None:
+            n = matches.get(s["bucket"])
+            row.append(("", "dim") if n is None else (f"  {n} match", "cyan" if n else "dim"))
         extras.append(row)
     return labels, extras
 
@@ -300,6 +343,7 @@ def edit_card(name, setup=None, to_fetch=None, card_match=None, on_guest=None):
                if budget.picked(usages[s["bucket"]]) or s["bucket"] in stocked]
     full = FullSizes({"layout": setup[1]}, systems)  # each system's size as a full system, kept for the session
     pos = 0
+    match_memo = {}  # match_counts' memo: kept across passes
     changed = None  # what the last pass changed: one system, ALL (any system may have) or None
     while True:
         card = card_entry(name, setup)
@@ -310,29 +354,32 @@ def edit_card(name, setup=None, to_fetch=None, card_match=None, on_guest=None):
         changed = None
         capacity = budget.card_capacity(card)
         view = {}
+        matches = match_counts(name, setup, systems, match_memo)  # while a tag filter is on, each system's games it shows
         full.update()
 
         def work_out():
             card = card_entry(name, setup)
             view["total"] = budget.card_usage(card, systems, usages)
             view["fetch"] = budget.card_fetch_bytes(card, systems, to_fetch) if to_fetch else None
-            return system_labels(card, systems, recommended, usages, full.sizes)
+            return system_labels(card, systems, recommended, usages, full.sizes, matches)
 
         labels, extras = work_out()
 
         def poll():
             """Fill in the full sizes as the worker hands them over."""
             if full.update():
-                extras[:] = system_labels(card_entry(name, setup), systems, recommended, usages, full.sizes)[1]
+                extras[:] = system_labels(card_entry(name, setup), systems, recommended, usages, full.sizes, matches)[1]
 
         def on_hotkey(key, idx):
             """f and x switch full system and off in place, so the screen isn't torn down and redrawn."""
+            nonlocal matches
             if key not in (FULL_KEY, OFF_KEY) or idx is None:
                 return False
             if key == FULL_KEY and systems[idx]["bucket"] in store.systems_off(card_entry(name, setup)):
                 return "This system is off on the card: turn it on with x first"
             (toggle_full if key == FULL_KEY else toggle_off)(name, systems[idx]["bucket"])
             usages[systems[idx]["bucket"]] = budget.system_usage(card_entry(name, setup), systems[idx])
+            matches = match_counts(name, setup, systems, match_memo)  # a full system has no count
             extras[:] = work_out()[1]
             return True
 
@@ -342,8 +389,8 @@ def edit_card(name, setup=None, to_fetch=None, card_match=None, on_guest=None):
         i = picker.filter_list(f"💳 {name} — its systems (⭐ for the device) · 🎁 Surprise {'on' if on else 'off'}"
                                + (f" · 🎨 {spruce_themes.current(name) or 'one theme: none picked'}" if one_theme else "")
                                + (" · 👤 guest" if guest.is_guest(saved) else ""),
-                               labels, extras=extras, cursor=pos,
-                               hotkeys=(FULL_KEY, OFF_KEY, ALL_KEY, SET_KEY, COLLECTIONS_KEY, SETTINGS_KEY, GUEST_KEY,
+                               labels, extras=extras, cursor=pos, filters=tagui.banner(),
+                               hotkeys=(FULL_KEY, OFF_KEY, ALL_KEY, SET_KEY, CLEAR_KEY, COLLECTIONS_KEY, SETTINGS_KEY, GUEST_KEY,
                                         CLEAR_ALL_KEY, *((KEEP_KEY,) if card_match else ())),
                                hint=LIST_HINT + (KEEP_HINT if card_match else ""),
                                key_help=LIST_KEYS + (KEEP_KEYS if card_match else []),
@@ -360,6 +407,8 @@ def edit_card(name, setup=None, to_fetch=None, card_match=None, on_guest=None):
             elif key == SET_KEY:
                 edit_all(name, setup, systems, to_fetch, usages, pick_tags=True)
                 changed = ALL
+            elif key == CLEAR_KEY:
+                tagui.handle_key(CLEAR_KEY, ())
             elif key == COLLECTIONS_KEY:
                 chosen = pick_collections(name, {s["bucket"] for s in can_play(catalog["systems"], setup)},
                                           lambda: card_status(name, setup, systems, to_fetch), setup)
@@ -597,13 +646,11 @@ def pick_collections(name, playable, card_status=None, setup=None):
     entry = store.saved_card(name)
     saved = entry.get("collections")
     ids = [i for i in saved if isinstance(i, str)] if isinstance(saved, list) else []
-    labels, counts, playable_games = [], [], []
+    labels, not_playable, playable_games = [], [], []
     for c in found:
         playable_games.append([g for g in colls.collection_games(c) if g.get("system") in playable])
-        p = len(playable_games[-1])
-        n = len(colls.collection_games(c)) - p
+        not_playable.append(len(colls.collection_games(c)) - len(playable_games[-1]))
         labels.append(f"{themeart.art_emoji(c.get('art'))} {c['name']}")
-        counts.append((f"  {p} playable" + (f", {n} not playable" if n else ""), "dim"))
     extras = [[] for _ in found]
     shown = {}
 
@@ -613,13 +660,18 @@ def pick_collections(name, playable, card_status=None, setup=None):
         def have_text(games):
             have = sum(1 for g in games if picks.on_card(g["bucket"]))
             return "  ✅" if have == len(games) > 0 else f"  {have}/{len(games)}"
+        def count_text(games, n):
+            text = f"  {len(games)} playable" + (f", {n} not playable" if n else "")
+            if tagui.FILTER.describe():  # the tag filter applies when the collection's games open
+                text += f", {sum(1 for g in games if tagui.FILTER.keep(g['bucket']))} match"
+            return (text, "dim")
         extras[:] = [[("  ✅ on the card" if c["id"] in ids else "", "green"),
-                      *([(have_text(games), "cyan")] if picks else []), count]
-                     for c, count, games in zip(found, counts, playable_games)]
+                      *([(have_text(games), "cyan")] if picks else []), count_text(games, n)]
+                     for c, games, n in zip(found, playable_games, not_playable)]
         shown["status"] = card_status() if card_status else None
 
-    def on_hotkey(_key, idx):
-        if idx is None:
+    def on_hotkey(key, idx):
+        if idx is None or key == CLEAR_KEY:
             return False
         cid = found[idx]["id"]
         ids.remove(cid) if cid in ids else ids.append(cid)
@@ -627,14 +679,21 @@ def pick_collections(name, playable, card_status=None, setup=None):
         mark()
         return True
 
-    mark()
-    i = picker.filter_list(f"💖 Collections on {name} (Space toggles · Enter opens)", labels, extras=extras,
-                       hotkeys=(" ", "\t"), on_hotkey=on_hotkey, hint=COLLECTIONS_HINT,
-                       key_help=[("Space/Tab", "put the collection on the card or take it off"),
-                                 ("Enter", "show its games to pick them one by one")],
-                       status=(lambda _state: shown["status"]) if card_status else None,
-                       preview=lambda i: previews.card_collection(found[i].get("art"), entry) if i < len(found) else None)
-    return found[i] if isinstance(i, int) and i < len(found) else None
+    pos = 0
+    while True:
+        mark()
+        i = picker.filter_list(f"💖 Collections on {name} (Space toggles · Enter opens)", labels, extras=extras,
+                           hotkeys=(" ", "\t", CLEAR_KEY), on_hotkey=on_hotkey, hint=tagui.menu_hint(COLLECTIONS_HINT),
+                           filters=tagui.banner(), cursor=pos,
+                           key_help=[("Space/Tab", "put the collection on the card or take it off"),
+                                     ("Enter", "show its games to pick them one by one"), tagui.KEYS_HELP[1]],
+                           status=(lambda _state: shown["status"]) if card_status else None,
+                           preview=lambda i: previews.card_collection(found[i].get("art"), entry) if i < len(found) else None)
+        if isinstance(i, tuple) and i[0] == CLEAR_KEY:
+            tagui.handle_key(CLEAR_KEY, ())
+            pos = i[1] or 0
+            continue
+        return found[i] if isinstance(i, int) and i < len(found) else None
 
 
 class GameFilters:
@@ -645,7 +704,7 @@ class GameFilters:
     def __init__(self, system):
         self.system = system
         self.meta = Metadata(system["bucket"])
-        self.tags = tagui.TagFilter()  # the tags the list is narrowed to
+        self.tags = tagui.FILTER  # the tags every list is narrowed to
         self.meta_filt = {}  # {metadata field: value} the list is narrowed to as well
         self.past = None  # bucket keys of the past surprises the list is narrowed to
 
@@ -656,21 +715,21 @@ class GameFilters:
                 and (self.past is None or key in self.past)
                 and (not wanted or metafilter.matches(self.meta.get().get(key, {}), wanted)))
 
-    def describe(self):
-        """The filters line of the list: what it is narrowed to, or empty."""
+    def describe(self, shown=None, total=None):
+        """The filters line of the list: what it is narrowed to (with "N of M shown" when shown is fewer than total),
+        or empty."""
         parts = ([self.tags.describe()] if self.tags.describe() else []) \
             + (["🎁 past surprises only"] if self.past is not None else []) \
             + ([metafilter.describe(self.meta_filt)] if self.meta_filt else [])
-        return f"{' · '.join(parts)} (c clear filters)" if parts else ""
+        return f"{' · '.join(parts)}{tagui.counts(shown, total)} (c clear filters)" if parts else ""
 
     def handle(self, pressed, keys, place):
         """Apply a filter hotkey; returns whether pressed was one. keys: every row's bucket key; place: the list's
         picker.carry_place (c clears its / filter too)."""
         if pressed == CLEAR_KEY:
-            self.tags.clear()
+            tagui.handle_key(pressed, keys, place)  # the tags and the / filter
             self.past = None
             self.meta_filt.clear()
-            place.get("session", {}).pop("query", None)  # the / filter too
         elif pressed == PAST_SURPRISE_KEY:
             self.past = surprise.past_keys(self.system["bucket"]) or None
             if self.past is None:
@@ -678,7 +737,7 @@ class GameFilters:
         elif pressed == META_KEY:
             pick_meta(self.system, self.meta, self.meta_filt, lambda field: [k for k in keys if self.keep(k, field)])
         elif pressed == SET_KEY:
-            self.tags.pick(keys)
+            tagui.handle_key(pressed, keys, place)
         else:
             return False
         return True
@@ -752,18 +811,29 @@ def _toggle_variant(picks, key, title):
     bucket, or None when none was."""
     found = picks.variants.get(key, [])
     if len(found) > 1:
-        i = 0
+        all_found, frozen, at = found, None, None  # at: the highlighted variant's place in all_found
         while True:  # t edits the highlighted variant's tags, then the list opens again on its row
+            found = frozen or [v for v in all_found if tagui.FILTER.keep(v["bucket"])]
+            frozen = None
+            places = [all_found.index(v) for v in found]  # on the same variant after s or c, else the nearest shown
+            cursor = min(range(len(found)), key=lambda j: (abs(places[j] - at), places[j])) if found and at is not None else 0
             i = picker.filter_list(f"Variants of {title}",
                                    [f"{'✅' if picks.on_card(v['bucket']) else '⬜'} {v['note']}" for v in found],
                                    extras=[[languages.column(v["bucket"]), tag]
                                            for v, tag in zip(found, tagui.column([v["bucket"] for v in found]))],
-                                   hotkeys=(tagui.TAG_KEY,), cursor=i if isinstance(i, int) else 0,
-                                   tag_info=tagui.summary([v["bucket"] for v in found]))
+                                   hotkeys=(*tagui.TAG_KEYS, *tagui.HOTKEYS), cursor=cursor,
+                                   key_help=[tagui.KEY_HELP, tagui.REPEAT_HELP, *tagui.KEYS_HELP],
+                                   tag_info=tagui.summary([v["bucket"] for v in found]),
+                                   filters=tagui.banner(len(found), len(all_found)) + (" · no variants match the tag filter" if all_found and not found else ""))
             if not isinstance(i, tuple):
                 break
-            i = i[1]
-            tagui.edit_game_tags(found[i]["bucket"], found[i]["note"])
+            pressed, i = i
+            at = places[i] if i is not None else at
+            if pressed in tagui.TAG_KEYS:
+                tagui.tag_key(pressed, *((found[i]["bucket"], found[i]["note"]) if i is not None else (None, None)))
+                frozen = found
+            else:
+                tagui.handle_key(pressed, [v["bucket"] for v in all_found])
         found = [] if i is None else [found[i]]
     if not found:
         return None
@@ -885,17 +955,18 @@ def edit_system(name, system, setup, to_fetch=None, card_usages=None):
     off_note = " · 🚫 off on this card" if bucket in store.systems_off(store.saved_card(name, cards)) else ""
     try:
         while True:
-            kept = {r[1] for r in sp.rows if filters.keep(r[1])}
-            shown = [r for r in sp.rows if r[1] in kept and sp.playlist_of.get(r[1]) not in kept]  # a shown playlist hides its discs
+            shown = shown_rows(sp, filters.keep)
+            total = len(shown_rows(sp, lambda _key: True))
             result = _games_pass(
                 f"✏️  {system['name']} on {name} — ✅ synced, ⬜ not{off_note}", shown, picks, {bucket: sp}, {},
-                start, work, capacity, to_fetch, place, hint=GAMES_HINT, hotkeys=(*GameFilters.KEYS, VARIANT_KEY, tagui.TAG_KEY),
-                key_help=GAMES_KEYS, filters=filters.describe())
+                start, work, capacity, to_fetch, place, hint=tagui.games_hint(GAMES_HINT), hotkeys=(*GameFilters.KEYS, VARIANT_KEY, *tagui.TAG_KEYS, tagui.BULK_KEY),
+                key_help=GAMES_KEYS, filters=filters.describe(len(shown), total))
             if not isinstance(result, tuple):
                 break
-            if result[0] == tagui.TAG_KEY:
-                if result[1] is not None:
-                    tagui.edit_game_tags(*shown[result[1]][1:3])
+            if result[0] in tagui.TAG_KEYS:
+                tagui.tag_key(result[0], *(shown[result[1]][1:3] if result[1] is not None else (None, None)))
+            elif result[0] == tagui.BULK_KEY:
+                tagui.bulk_tag([r[1] for r in picker.on_screen(place, shown)])
             elif result[0] == VARIANT_KEY:
                 variant = result[1] is not None and _toggle_variant(picks, *shown[result[1]][1:3])
                 if variant:
@@ -910,7 +981,7 @@ def edit_system(name, system, setup, to_fetch=None, card_usages=None):
 
 def edit_all(name, setup, systems, to_fetch=None, card_usages=None, pick_tags=False):
     """Every file of the systems' storage folders (from the storage cache) in one list, by title then system, toggled
-    as in edit_set (a full system's on and locked) and narrowed by tags with s. pick_tags: the tags are picked before
+    as in edit_set (a full system's on and locked) and narrowed by the tag filter. pick_tags: the tags are picked before
     the list opens, which then doesn't open when none is. Returns whether anything changed."""
     picks = cardpicks.CardPicks(name, setup)  # handed to edit_set, so each folder is listed once
     games = []
@@ -960,10 +1031,9 @@ def edit_set(name, game_set, setup, to_fetch=None, card_usages=None, all_games=F
                       key=lambda r: (store.sort_key(r[2]), r[0]["name"].lower()))
     listed = [r for r in rows if r[0]["bucket"] not in sps  # a shown playlist hides its discs
               or sps[r[0]["bucket"]].playlist_of.get(r[1]) not in files_of]
-    tag_filter = tagui.TagFilter()  # all_games: the tags the list is narrowed to
     if pick_tags:
-        tag_filter.pick({r[1] for r in listed})
-        if not tag_filter.required and not tag_filter.excluded:
+        tagui.FILTER.pick({r[1] for r in listed})
+        if not tagui.FILTER.active():
             return False
     others = [x for x in playable.values() if x["bucket"] not in sps]
     capacity = budget.card_capacity(card_entry(name, setup, cards))
@@ -972,31 +1042,35 @@ def edit_set(name, game_set, setup, to_fetch=None, card_usages=None, all_games=F
     opened = {b: sp.states() for b, sp in sps.items()}
     start = {key: s["bucket"] not in sps or opened[s["bucket"]][key] for s, key, _, _ in rows}
     place = {}  # picker.carry_place's: the last pass's row, filter text, view and scroll
+    frozen = None  # the rows of the pass `t` was pressed in: shown again as they were, so the cursor stays put
     try:
         while True:
-            shown = [r for r in listed if tag_filter.keep(r[1])]
+            shown = frozen or [r for r in listed if tagui.FILTER.keep(r[1])]
+            frozen = None
+            filters = tagui.banner(len(shown), len(listed))
+            if not shown and listed:
+                filters += " · no games match the tag filter"
             if all_games:
-                emoji, hint, hotkeys, key_help = "🌐", ALL_GAMES_HINT, (VARIANT_KEY, tagui.TAG_KEY, SET_KEY, CLEAR_KEY), ALL_GAMES_KEYS
-                filters = f"{tag_filter.describe()} (c clear filters)" if tag_filter.describe() else ""
+                emoji, hint, hotkeys, key_help = "🌐", tagui.games_hint(ALL_GAMES_HINT, select_all=tagui.FILTER.active()), (VARIANT_KEY, *tagui.TAG_KEYS, tagui.BULK_KEY, *tagui.HOTKEYS), ALL_GAMES_KEYS
                 origin = ""
             else:
-                emoji, hint, hotkeys, key_help = (themeart.collection_emoji(game_set), COLLECTION_GAMES_HINT,
-                                                  (VARIANT_KEY, tagui.TAG_KEY), COLLECTION_GAMES_KEYS)
-                filters, origin = "", ", 💖 from a collection"
+                emoji, hint, hotkeys, key_help = (themeart.collection_emoji(game_set), tagui.games_hint(COLLECTION_GAMES_HINT),
+                                                  (VARIANT_KEY, *tagui.TAG_KEYS, tagui.BULK_KEY, *tagui.HOTKEYS), COLLECTION_GAMES_KEYS)
+                origin = ", 💖 from a collection"
             result = _games_pass(
                 f"{emoji} {game_set['name']} on {name} — ✅ synced, ⬜ not{origin}", shown, picks, sps, files_of,
                 start, work, capacity, to_fetch, place, hint=hint, hotkeys=hotkeys, key_help=key_help, filters=filters,
-                select_all=not all_games)
+                select_all=not all_games or tagui.FILTER.active())
             if not isinstance(result, tuple):
                 break
-            if result[0] == tagui.TAG_KEY:
-                if result[1] is not None:
-                    tagui.edit_game_tags(*shown[result[1]][1:3])
-            elif result[0] == CLEAR_KEY:
-                tag_filter.clear()
-                place.get("session", {}).pop("query", None)  # the / filter too
-            elif result[0] == SET_KEY:
-                tag_filter.pick({r[1] for r in listed})
+            if result[0] in tagui.TAG_KEYS:
+                tagui.tag_key(result[0], *(shown[result[1]][1:3] if result[1] is not None else (None, None)))
+                frozen = shown
+            elif result[0] == tagui.BULK_KEY:
+                tagui.bulk_tag([r[1] for r in picker.on_screen(place, shown)])
+                frozen = shown
+            elif tagui.handle_key(result[0], {r[1] for r in listed}, place):
+                pass
             elif result[1] is not None:
                 variant = _toggle_variant(picks, *shown[result[1]][1:3])
                 if variant:

@@ -151,7 +151,7 @@ Old personal sets in `sets/` (and any `sets/` folder in storage) are left on dis
 
 Tags come only from storage: `tags.json` at the storage root, read through `tags.py` (`shared.load`, once per run) and written only with `shared.update`, so machines merge; `~/.sync-roms/storage/` mirrors it. A tag put on a game by another machine appears after `sync-roms cache update`. `sync-roms check` validates the file.
 
-`tags.json` is `{"tags", "games", "declined"}`. `tags` maps a tag id (a lowercase slug) to `{"name", "emoji", "description"?}`: name and emoji are required and an emoji belongs to one tag. `games` maps a bucket key (`<system>/<file>`) to `{"tags": [ids], "files"?, "variants"?}`: `files` are the other storage keys toggled with the game (a multi-disc game's discs), `variants` are `[{"bucket", "note"}]`. The system is the key's folder and titles come from `names.title`, so neither is stored. A record with no tags and no variants is removed. `declined` is `{key: [tag ids]}`: genre suggestions turned down. Tags only help find games: a tag never puts a game on a card.
+`tags.json` is `{"tags", "games", "declined"}`. `tags` maps a tag id (a lowercase slug) to `{"name", "emoji", "description"?}`: name and emoji are required and an emoji belongs to one tag. `games` maps a bucket key (`<system>/<file>`) to `{"tags": [ids], "files"?, "variants"?}`: `files` are the other storage keys toggled with the game (a multi-disc game's discs; every write that creates a record for a playlist finds its discs in storage with `tags.discs`, as the lists fold them into the playlist's row (`listedit.playlist_groups`), so a game tagged again after losing its last tag gets them back; discs with no playlist are a row and a record each, with no files, and no file is ever another record's key), `variants` are `[{"bucket", "note"}]`. The system is the key's folder and titles come from `names.title`, so neither is stored. A record with no tags and no variants is removed. `declined` is `{key: [tag ids]}`: genre suggestions turned down. Tags only help find games: a tag never puts a game on a card.
 
 A collection file (see Personal data) is `{"name", "description"?, "art"?, "games"}` (its games may carry a `note`) with its own loader and schema.
 
@@ -159,15 +159,17 @@ While `custom_collections` is on, sync writes every collection with a game on th
 
 Rules for tagged games:
 
-- A game is tagged once across all tags: one version per game (arcade original over home ports; else the original lead platform, then the lighter one to emulate; English for text-heavy games), and every tag that applies to the game goes on that version.
-- A later version of the same game that adds something (extra content or modes, an HD or handheld remaster) goes in that game's `variants`, `[{"bucket", "note"}]`, the note saying in a few words what it adds. Variants aren't synced with the game's tags; the editors show them on the game's highlighted row, and `v` in the card editor adds one to the card.
-- A version that plays substantially differently is its own game. A compilation is tagged only when it holds a game no tag covers on its own.
-- The Retro Oddities, Handheld Greatest Hits and System Essentials tags keep their own versions and only lose straight re-releases.
+- Every version of a game gets every tag that applies to it (regional releases, revisions, remasters, ports), so a tag filter finds each version. A game no tag fits stays untagged.
+- A game's `variants`, `[{"bucket", "note"}]`, are related versions, the note saying in a few words what one adds. They're a note for the editors, which show them on the game's highlighted row, and `v` in the card editor adds one to the card; they're tagged like any other game.
+- A compilation is tagged only when it holds a game no tag covers on its own.
 - Tags are flat: no groups, categories or series. Make a group a tag of its own (`cave` and `shmups` are both tags).
 - Every game list shows a game's tag emoji as its last column. `t` edits the highlighted game's tags (`n` adds a tag), `s` opens the tag filter (`Enter` cycles a tag off, required ✅, excluded 🚫; `c` clears it), and the card editor's own `s` opens all games narrowed by tags first. They live in `tagui.py` and `cardedit.py`.
-- `sync-roms tags edit` (`tageditor.py`) edits tags and `sync-roms tags suggest [system ...]` (`tagsuggest.py`, `data/genre-tags.json`) suggests tags from scraped genres for one version per game, saving the unchecked ones to `declined`. `tools/migrate_sets_to_tags.py` is the one-time script that made `tags.json` from the old set files.
+- `sync-roms tags edit` (`tageditor.py`) edits tags and `sync-roms tags suggest [system ...]` (`tagsuggest.py`, `data/genre-tags.json`) suggests tags from scraped genres for every version of a game, saving the unchecked ones to `declined`. `tools/migrate_sets_to_tags.py` is the one-time script that made `tags.json` from the old set files.
+- `tagui.FILTER` is the one process-wide tag filter, sticky across lists and never cleared but by `c` (`listedit.add_from_tag` sets it to its tag alone while its list is open, then restores the user's with `state`/`restore`, Ctrl-C included); tags deleted or merged leave it (`prune`, `retarget`).
+- A list whose hidden rows would be acted on unseen opts out of it with `tag_filter=False` (the tag editor's own games and its add-from-a-system lists, a collection's own games, the `tags suggest` review) and says `tag filter paused here`.
+- `T` bulk-tags the rows on screen: those the tag filter, the `/` search and the `o` view leave (`picker.on_screen`).
 - Surprise picks only games with any of the tags in the `surprise_tags` setting, or in a card's own `surprise_tags` (card editor S menu), which wins; with neither it has no limit.
-- `sync-roms check` notes tags with no games, each system's untagged games (the same one-version pool `tags suggest` uses), `genre-tags.json` ids that aren't tags and a card's leftover `"sets"` key.
+- `sync-roms check` notes tags with no games, one count per system of its untagged games (the pool `tags suggest` uses), `genre-tags.json` ids that aren't tags and a card's leftover `"sets"` key.
 
 ### Scraped names and metadata
 

@@ -339,6 +339,13 @@ class MenuActions(EditBase):
             self.assertEqual(self.run_menu([1, 4]), 0)
         run.assert_called_once()
 
+    def test_q_in_the_tag_editor_goes_straight_to_the_review_and_ends_the_editor(self):
+        from sync_roms import tageditor
+        out = io.StringIO()
+        with mock.patch.object(tageditor, "edit_tags", side_effect=tageditor.Quit) as run, contextlib.redirect_stdout(out):
+            self.assertEqual(self.run_menu([1]), 0)  # the top menu isn't shown again
+        run.assert_called_once_with(quit_raises=True)
+
     def test_choosing_collections_opens_the_collection_editor(self):
         from sync_roms import collectionedit
         with mock.patch.object(collectionedit, "edit_collections", return_value=0) as run:
@@ -569,6 +576,14 @@ class Keys(unittest.TestCase):
         session = {"row": 40, "top": 30}
         self.assertEqual(run_list(["enter"], labels, session=session), 40)
         self.assertEqual(session["top"], 30)  # the row stays where it was on the screen
+
+    def test_session_names_the_rows_on_screen(self):
+        session = {}
+        run_list(["/", "t", "a", "enter", "enter"], self.LABELS, multi=True, session=session)
+        self.assertEqual(session["visible"], [1, 3])  # beta and delta have "ta"
+        session = {"sel": [True, False, True, False], "view_mode": 1}
+        run_list(["enter"], self.LABELS, multi=True, session=session)
+        self.assertEqual(session["visible"], [0, 2])  # the o view: only rows that are on
 
     def test_filter_line_editing(self):
         self.assertEqual(run_list(["/", "x", "y", "ctrl+u", "d", "e", "enter", "enter"], self.LABELS), 3)  # ^U clears
@@ -1095,16 +1110,186 @@ class TagColumn(DataDir):
         seen, asked = [], []
 
         def fake(title, labels, **kw):
-            seen.append(kw)
-            return ("t", 1) if len(seen) == 1 else kw["session"]["sel"]
+            seen.append((list(labels), dict(kw["session"]), kw))
+            if len(seen) == 1:
+                kw["session"].update(row=1, top=0)  # where the picker leaves the cursor
+                return "t", 1
+            return kw["session"]["sel"]
         with mock.patch.object(picker, "filter_list", fake), \
                 mock.patch.object(edit.tagui, "edit_game_tags", side_effect=lambda *a: asked.append(a)):
             self.assertIsNone(edit.toggle_games("t", self.ROWS))
+        self.assertEqual(seen[1][0], seen[0][0])  # the same rows
+        self.assertEqual(seen[1][1]["row"], 1)  # the cursor on the row t was pressed on
+        self.assertEqual(seen[1][0][seen[1][1]["row"]], "B")
+        seen = [kw for *_, kw in seen]
         self.assertEqual([e[-1] for e in seen[0]["extras"]], [("", ""), ("🐝", "")])
         self.assertIn("t", seen[0]["hotkeys"])
         self.assertIn("t tags", seen[0]["hint"])
         self.assertEqual(asked, [("nes/B (USA).zip", "B")])
         self.assertEqual(len(seen), 2)
+
+    def test_t_on_an_empty_list_says_there_is_no_game_and_dot_repeats(self):
+        notes, repeated = [], []
+        answers = iter([("t", None), (".", 1)])
+
+        def fake(title, labels, **kw):
+            return next(answers, None) or kw["session"]["sel"]
+        with mock.patch.object(picker, "filter_list", fake), mock.patch.object(edit, "note", notes.append), \
+                mock.patch.object(edit.tagui, "repeat_last", side_effect=lambda *a: repeated.append(a)):
+            edit.toggle_games("t", self.ROWS)
+        self.assertEqual(notes, ["ℹ️  No game under the cursor"])
+        self.assertEqual(repeated, [("nes/B (USA).zip", "B")])
+
+    def test_t_bulk_tags_every_shown_row_and_only_where_the_filter_applies(self):
+        tagui = edit.tagui
+        tagui.FILTER.clear()
+        self.addCleanup(tagui.FILTER.clear)
+        tagui.FILTER.required = {"x"}
+        seen, bulk = [], []
+        answers = iter([("T", None)])
+
+        def fake(title, labels, **kw):
+            seen.append(kw)
+            return next(answers, None) or kw["session"]["sel"]
+        with mock.patch.object(picker, "filter_list", fake), \
+                mock.patch.object(tagui, "bulk_tag", side_effect=lambda keys: bulk.append(keys)):
+            edit.toggle_games("t", self.ROWS)
+            edit.toggle_games("t", self.ROWS, tag_filter=False)
+        self.assertIn("T", seen[0]["hotkeys"])
+        self.assertIn("T tag all shown", seen[0]["hint"])
+        self.assertEqual(bulk, [["nes/B (USA).zip"]])  # the shown rows only
+        self.assertEqual(len(seen), 3)  # reopened after the bulk tag
+        self.assertNotIn("T", seen[2]["hotkeys"])
+        self.assertNotIn("T tag", seen[2]["hint"])
+
+    def test_t_bulk_tags_only_the_rows_the_search_and_view_leave_on_screen(self):
+        tagui = edit.tagui
+        bulk = []
+        answers = iter([("T", None)])
+
+        def fake(title, labels, **kw):
+            kw["session"]["visible"] = [1]  # a / search (or an o view) leaves only B
+            return next(answers, None) or kw["session"]["sel"]
+        with mock.patch.object(picker, "filter_list", fake), \
+                mock.patch.object(tagui, "bulk_tag", side_effect=lambda keys: bulk.append(keys)):
+            edit.toggle_games("t", self.ROWS)
+        self.assertEqual(bulk, [["nes/B (USA).zip"]])
+
+    def test_when_filtered_turns_a_on_only_while_a_tag_filter_is_set(self):
+        tagui = edit.tagui
+        tagui.FILTER.clear()
+        self.addCleanup(tagui.FILTER.clear)
+        seen = []
+        answers = iter([("s", None), ("c", None)])
+
+        def fake(title, labels, **kw):
+            seen.append((kw["select_all"], "a all shown" in kw["hint"]))
+            return next(answers, None) or kw["session"]["sel"]
+
+        def pick(row_keys):
+            tagui.FILTER.required = {"x"}
+        with mock.patch.object(picker, "filter_list", fake), mock.patch.object(tagui.FILTER, "pick", pick):
+            edit.toggle_games("t", self.ROWS, select_all=edit.WHEN_FILTERED)
+        self.assertEqual(seen, [(False, False), (True, True), (False, False)])
+
+    def test_toggle_games_hides_rows_the_filter_rejects(self):
+        self.tags.change_game_tags("nes/A (USA).zip", add=["x"])
+        tagui = edit.tagui
+        tagui.FILTER.clear()
+        self.addCleanup(tagui.FILTER.clear)
+        tagui.FILTER.required = {"x"}
+        seen = []
+        with mock.patch.object(picker, "filter_list", side_effect=lambda t, l, **kw: seen.append((l, kw)) or kw["session"]["sel"]):
+            edit.toggle_games("t", self.ROWS)
+        self.assertEqual(seen[0][0], ["A", "B"])
+        tagui.FILTER.required = {"x"}
+        self.tags.change_game_tags("nes/A (USA).zip", remove=["x"])
+        seen.clear()
+        with mock.patch.object(picker, "filter_list", side_effect=lambda t, l, **kw: seen.append((l, kw)) or kw["session"]["sel"]):
+            edit.toggle_games("t", self.ROWS, filters="mine")
+        self.assertEqual(seen[0][0], ["B"])
+        self.assertIn("✅ 🐝 X · 1 of 2 shown (c clear filters)", seen[0][1]["filters"])
+        self.assertIn("mine", seen[0][1]["filters"])
+        self.assertIn("s", seen[0][1]["hotkeys"])
+        self.assertIn("c", seen[0][1]["hotkeys"])
+
+    def test_toggle_games_s_and_c_handled_inside(self):
+        tagui = edit.tagui
+        tagui.FILTER.clear()
+        self.addCleanup(tagui.FILTER.clear)
+        calls, seen = [], []
+        answers = iter([("s", 0), ("c", 0)])
+
+        def fake(title, labels, **kw):
+            seen.append(kw["session"])
+            kw["session"]["query"] = "q"
+            return next(answers, None) or kw["session"]["sel"]
+        place = {}
+        with mock.patch.object(picker, "filter_list", fake), \
+                mock.patch.object(tagui, "handle_key", side_effect=lambda *a: calls.append(a) or True):
+            self.assertIsNone(edit.toggle_games("t", self.ROWS, place=place))
+        self.assertEqual([c[0] for c in calls], ["s", "c"])
+        self.assertEqual(calls[0][1], ["nes/A (USA).zip", "nes/B (USA).zip"])
+        self.assertIs(calls[0][2], place)
+        self.assertEqual(len(seen), 3)
+
+    def test_toggle_games_no_matches_shows_banner_and_message(self):
+        tagui = edit.tagui
+        tagui.FILTER.clear()
+        self.addCleanup(tagui.FILTER.clear)
+        tagui.FILTER.required = {"x"}
+        self.tags.change_game_tags("nes/B (USA).zip", remove=["x"])
+        seen = []
+        answers = iter([("c", None)])
+
+        def fake(title, labels, **kw):
+            seen.append((labels, kw["filters"]))
+            return next(answers, None) or kw["session"]["sel"]
+        with mock.patch.object(picker, "filter_list", fake):
+            edit.toggle_games("t", self.ROWS)
+        self.assertEqual(seen[0][0], [])
+        self.assertIn("✅ 🐝 X · 0 of 2 shown (c clear filters)", seen[0][1])
+        self.assertIn("no games match the tag filter", seen[0][1])
+        self.assertEqual(seen[1], (["A", "B"], ""))
+
+    def test_the_banner_is_left_to_a_caller_that_takes_s_whatever_its_filters_line_says(self):
+        tagui = edit.tagui
+        tagui.FILTER.required = {"x"}
+        seen = []
+        with mock.patch.object(picker, "filter_list", side_effect=lambda t, l, **kw: seen.append(kw["filters"]) or kw["session"]["sel"]):
+            edit.toggle_games("t", self.ROWS, hotkeys=("s", "c"), filters="mine")  # the caller names the filter
+            edit.toggle_games("t", self.ROWS, filters="mine: ✅ 🐝 X")  # it doesn't: a lookalike line isn't the banner
+        self.assertEqual(seen[0], "mine")
+        self.assertEqual(seen[1], "mine: ✅ 🐝 X · ✅ 🐝 X · 1 of 2 shown (c clear filters)")
+
+    def test_a_list_the_callers_own_filters_emptied_says_so(self):
+        seen = []
+        with mock.patch.object(picker, "filter_list", side_effect=lambda t, l, **kw: seen.append(kw["filters"]) or kw["session"]["sel"]):
+            edit.toggle_games("t", [], hotkeys=("s", "c"), filters="🎁 past surprises only", before=3)
+            edit.toggle_games("t", [], before=0)
+        self.assertEqual(seen, ["🎁 past surprises only · no games match the filters", ""])
+
+    def test_tag_filter_false_shows_every_row_without_s_c_or_banner(self):
+        tagui = edit.tagui
+        tagui.FILTER.required = {"x"}
+        self.tags.change_game_tags("nes/B (USA).zip", remove=["x"])
+        seen = []
+        with mock.patch.object(picker, "filter_list", side_effect=lambda t, l, **kw: seen.append((l, kw)) or kw["session"]["sel"]):
+            edit.toggle_games("t", self.ROWS, tag_filter=False)
+            edit.toggle_games("t", self.ROWS)
+        self.assertEqual(seen[0][0], ["A", "B"])
+        self.assertNotIn("s", seen[0][1]["hotkeys"])
+        self.assertNotIn("c", seen[0][1]["hotkeys"])
+        self.assertEqual(seen[0][1]["filters"], tagui.PAUSED)  # a filter is set: say it is paused here
+        self.assertEqual(seen[1][0], [])
+        self.assertIn("s filter by tag", seen[1][1]["hint"])  # default callers: s and c are in the hint ? lists
+
+    def test_a_caller_with_key_help_still_gets_s_t_c_and_the_live_keys_in_the_hint(self):
+        seen = []
+        with mock.patch.object(picker, "filter_list", side_effect=lambda t, l, **kw: seen.append(kw) or kw["session"]["sel"]):
+            edit.toggle_games("t", self.ROWS, key_help=[("m", "meta")], hint="Space toggle · Enter done · m meta")
+        self.assertEqual(seen[0]["hint"], "Space toggle · Enter done · s filter by tag · t edit tags · T tag all shown · c clear filters"
+                                          " · / filter · w note · a all shown · m meta")
 
     def test_notes_off_drops_w(self):
         seen = []

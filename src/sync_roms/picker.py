@@ -347,7 +347,7 @@ class _ListModel:
         elif self.cur >= self.top + self.view:
             self.top = self.cur - self.view + 1
         self.session.update(sel=self.state, view_mode=self.view_mode, revealed=self.revealed,
-                            row=vis[self.cur] if vis else None, query=self.query, top=self.top)
+                            row=vis[self.cur] if vis else None, query=self.query, top=self.top, visible=list(vis))
         self.line = self.status_line()
 
     def linked(self, rows):
@@ -1563,6 +1563,13 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
 
 
 PLACE = ("row", "query", "view_mode", "top")  # the session entries carry_place keeps
+
+
+def on_screen(place, items):
+    """The items (one per row) of the rows the last list of place (picker.carry_place's) showed, after its / search
+    and o view; all of them when the list didn't say."""
+    visible = (place.get("session") or {}).get("visible")
+    return items if visible is None else [items[i] for i in visible]
 
 
 def carry_place(place, keys, session):

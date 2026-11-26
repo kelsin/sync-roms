@@ -8,7 +8,7 @@ from .listedit import diff_lists, edit_menu, folder_lister, reconcile, view
 
 
 ADD_KEY, ADD_ALIAS, SETTINGS_KEY = "A", "+", "S"  # + is a silent alias of A
-GAMES_HINT = "Space toggle · Enter done · a all · s tag · m meta · c clear · p past"
+GAMES_HINT = "Space toggle · Enter done · a all · m meta · p past"
 GAMES_KEYS = [k for k in cardedit.GAMES_KEYS if k[0] != cardedit.VARIANT_KEY]  # what ? lists in a system's games list
 
 
@@ -77,9 +77,10 @@ def toggle_filtered(s, title, rows):
     filters = cardedit.GameFilters(s)
     place = {}  # where the list was left, kept while a key lists the same games
     while True:
-        pressed = edit.toggle_games(title, [r for r in rows if filters.keep(r[1])], hotkeys=cardedit.GameFilters.KEYS,
+        shown = [r for r in rows if filters.keep(r[1])]
+        pressed = edit.toggle_games(title, shown, hotkeys=cardedit.GameFilters.KEYS,
                                     hint=GAMES_HINT, key_help=GAMES_KEYS, place=place,
-                                    filters=filters.describe())
+                                    filters=filters.describe(len(shown), len(rows)), before=len(rows))
         if not filters.handle(pressed, [r[1] for r in rows], place):
             return
 
@@ -112,8 +113,9 @@ def restore(collection, originals, before, systems):
 
 
 def edit_one(collection, systems, keys_of, others=()):
-    """Edit one collection: its games first (a game switched off stays listed, so it can be switched back on), with
-    A to add games and S for its settings (others: the other collections' ids)."""
+    """Edit one collection: its games first, every one of them whatever the tag filter (a game switched off leaves
+    the collection, so none is hidden; it stays listed, so it can be switched back on), with A to add games (those lists
+    follow the filter) and S for its settings (others: the other collections' ids)."""
     kept = {}  # game key -> (system bucket, title, label) of every row listed, so removed games stay on the list
     originals = {}  # game key -> its entry in the collection, for a game switched back on after it was removed
     place = {}
@@ -133,7 +135,9 @@ def edit_one(collection, systems, keys_of, others=()):
                 return
         else:
             try:
-                pressed = listedit.toggle_all(header(collection), rows, place, hotkeys=(ADD_KEY, ADD_ALIAS, SETTINGS_KEY),
+                pressed = listedit.toggle_all(header(collection), rows, place, tag_filter=False,  # off hides nothing
+                                              select_all=True, bulk=True,  # its rows are its games, all on screen
+                                              hotkeys=(ADD_KEY, ADD_ALIAS, SETTINGS_KEY),
                                               hint="A add games · S settings",
                                               key_help=[(f"{ADD_KEY} / {ADD_ALIAS}", "add games"), (SETTINGS_KEY, "settings")])
             finally:  # Ctrl-C too: the toggles made are kept

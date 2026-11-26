@@ -81,40 +81,44 @@ def reconcile(games, shown):
 ALL_SYSTEMS = "🌐 All systems"
 
 
-def add_from_system(listing, systems, shown, keys_of, label, toggle=None):
+def add_from_system(listing, systems, shown, keys_of, label, toggle=None, tag_filter=True, query="", hotkeys=(),
+                    hint=None):
     """Pick one of systems with files in storage and toggle its games in listing (via shown, a view of it).
-    label is listing's name as shown, with its emoji.
+    label is listing's name as shown, with its emoji. Returns the hotkey that closed the games list, or None.
 
     toggle(s, title, rows) shows the system's rows (s is its entry in shown) instead of a plain edit.toggle_games.
+    tag_filter=False: the games list ignores the sticky tag filter. query: no system is asked for: the all-systems list
+    opens with that / filter. hotkeys/hint: the games list's own extra keys and hint, as edit.toggle_games takes them.
     New games get the discs of a multi-disc game whose playlist is in storage. Ctrl-C keeps the toggles made, then is
     raised again."""
     options = stocked(systems)
-    j = picker.filter_list("✏️  Add games from which system?", [ALL_SYSTEMS] + [s["name"] for s in options],
-                           extras=[[]] + file_counts(options),
-                           preview=lambda k: previews.system(options[k - 1]) if 0 < k <= len(options) else None)
+    j = 0 if query else picker.filter_list(
+        "✏️  Add games from which system?", [ALL_SYSTEMS] + [s["name"] for s in options], extras=[[]] + file_counts(options),
+        preview=lambda k: previews.system(options[k - 1]) if 0 < k <= len(options) else None)
     if j is None:
-        return
+        return None
     everywhere = j == 0
     if everywhere:
         picked = options
         rows = all_rows(shown, options, keys_of)
         if not rows:
             edit.note(ui.yellow("ℹ️  No games in storage."))
-            return
+            return None
         title = f"✏️  All systems — ✅ in {label}, ⬜ in storage only"
     else:
         s = shown[options[j - 1]["bucket"]]
         picked = [options[j - 1]]
         rows = system_rows(s, keys_of(s["bucket"]))
         title = f"✏️  {s['name']} — ✅ in {label}, ⬜ in storage only"
-    interrupted = False
+    place = {"keys": [r[1] for r in rows], "session": {"query": query}} if query else None
+    interrupted, pressed = False, None
     try:
         if everywhere:
-            toggle_all(title, rows)
+            pressed = toggle_all(title, rows, place, tag_filter, hotkeys, hint)
         elif toggle:
             toggle(s, title, rows)
         else:
-            edit.toggle_games(title, rows)
+            pressed = edit.toggle_games(title, rows, hotkeys=hotkeys, hint=hint, place=place, tag_filter=tag_filter)
     except KeyboardInterrupt:  # Ctrl-C in the list or a picker it opens: the toggles made are kept
         interrupted = True
     listing["games"] = reconcile(listing["games"], shown)
@@ -122,35 +126,45 @@ def add_from_system(listing, systems, shown, keys_of, label, toggle=None):
         fold_discs(listing["games"], keys_of(p["bucket"]))
     if interrupted:
         raise KeyboardInterrupt
+    return pressed
 
 
-def add_from_tag(listing, shown, keys_of, label):
-    """Pick one tag and toggle its games, across every system, in listing (via shown, a view of it).
-    label is listing's name as shown, with its emoji. New games get their record's extra files (the discs of a
-    multi-disc game). Ctrl-C keeps the toggles made, then is raised again."""
+def add_from_tag(listing, shown, keys_of, label, hotkeys=(), hint=None):
+    """Pick one tag, set the tag filter to it while its games are listed (so nothing else hides them; the filter you
+    had is put back when the list closes, Ctrl-C included), and toggle its games, across every system, in
+    listing (via shown, a view of it). label is listing's name as shown, with its emoji. New games get their
+    record's extra files (the discs of a multi-disc game). hotkeys/hint: the games list's own, as edit.toggle_games
+    takes them; returns the hotkey that closed it, or None. Ctrl-C keeps the toggles made, then is raised again."""
     defs, records = tags.all_tags(), tags.load()["games"]
     if not defs:
         edit.note(ui.yellow("ℹ️  No tags yet."))
-        return
+        return None
     ids = sorted(defs, key=lambda i: defs[i]["name"].casefold())
     games_of = {i: [k for k, rec in records.items() if i in rec["tags"]] for i in ids}
-    j = picker.filter_list("✏️  Add games from which tag?",
-                           [f"{defs[i]['emoji']} {defs[i]['name']}  ({len(games_of[i])} games)" for i in ids])
+    j = picker.filter_list("✏️  Add games with which tag?",
+                           [f"{defs[i]['emoji']} {defs[i]['name']}  ({len(games_of[i])} games)" for i in ids],
+                           row_note=tagui.described(defs, ids))
     if j is None:
-        return
+        return None
     tag = defs[ids[j]]
     games = [{"system": k.partition("/")[0], "bucket": k, **({"files": records[k]["files"]} if "files" in records[k] else {})}
              for k in games_of[ids[j]]]
     rows = edit.list_rows({"games": games}, shown, lambda s: keys_of(s["bucket"]))
     if not rows:
         edit.note(ui.yellow(f"ℹ️  {tag['emoji']} {tag['name']} has no games on known systems."))
-        return
+        return None
     had = {g["bucket"] for s in shown.values() for g in s["games"]}
-    interrupted = False
+    interrupted, pressed = False, None
+    saved = tagui.FILTER.state()
+    tagui.FILTER.clear()
+    tagui.FILTER.required.add(ids[j])
     try:
-        edit.toggle_games(f"✏️  {tag['emoji']} {tag['name']} — ✅ in {label}, ⬜ not", rows)
+        pressed = edit.toggle_games(f"✏️  {tag['emoji']} {tag['name']} — ✅ in {label}, ⬜ not", rows, hotkeys=hotkeys,
+                                    hint=hint)
     except KeyboardInterrupt:
         interrupted = True
+    finally:
+        tagui.FILTER.restore(saved)
     added = {g["bucket"] for s in shown.values() for g in s["games"]} - had
     listing["games"] = reconcile(listing["games"], shown)
     files = {g["bucket"]: g["files"] for g in games if g.get("files")}
@@ -159,6 +173,7 @@ def add_from_tag(listing, shown, keys_of, label):
             g["files"] = list(files[g["bucket"]])
     if interrupted:
         raise KeyboardInterrupt
+    return pressed
 
 
 # --- What changed ------------------------------------------------------------------------------------
@@ -227,11 +242,14 @@ def edit_menu(noun, before, working, state, emoji, art, delete_note, new_item, o
                   + [f"➕ New {noun}", "✅ Done (review & save)", "🚪 Quit without saving"])
         extras = [[("  " + ("new" if x not in before else "edited"), "cyan")] if x in edited else [] for x in ids] + [[], [], []]
         i = n + 1 if state["review"] else picker.filter_list(f"✏️  Which {noun}?  (Esc = review & save)", labels, extras=extras,
-                                                    hotkeys=(edit.DELETE_KEY,), hint="/ filter · Enter open · d delete · Esc review", cursor=pos,
+                                                    hotkeys=(edit.DELETE_KEY, tagui.CLEAR_KEY), cursor=pos, filters=tagui.banner(),
+                                                    hint=tagui.menu_hint("/ filter · Enter open · d delete · Esc review"),
                                                     preview=lambda k: previews.collection(art({**working[ids[k]], "id": ids[k]})) if k < n else None)
         if isinstance(i, tuple):
-            pos = i[1]
-            if i[1] < n:
+            pos = i[1] or 0
+            if i[0] == tagui.CLEAR_KEY:
+                tagui.handle_key(tagui.CLEAR_KEY, ())
+            elif i[1] < n:
                 x = ids[i[1]]
                 if ui.confirm(f"🗑️  Delete {noun} {emoji({**working[x], 'id': x})} {working[x]['name']}?{delete_note(x)}", default=False):
                     del working[x]
@@ -287,26 +305,11 @@ def all_rows(shown, systems, keys_of):
     return sorted(rows, key=lambda r: (store.sort_key(r[2]), names[r[0]["bucket"]]))
 
 
-def toggle_all(title, rows, place=None, hotkeys=(), hint=None, key_help=()):
-    """edit.toggle_games over rows from all_rows, with s narrowing by tags and c clearing that and the / filter.
-
-    Keys in hotkeys end the list, and are returned; Enter and Esc return None. hint and key_help add to the hint line
-    and what ? lists."""
-    from . import cardedit  # cardedit imports this module
-    tag_filter = tagui.TagFilter()
-    place = {} if place is None else place
-    key_help = [(cardedit.SET_KEY, "narrow by tags"), (cardedit.CLEAR_KEY, "clear filters"), *key_help]
-    while True:
-        pressed = edit.toggle_games(
-            title, [r for r in rows if tag_filter.keep(r[1])],
-            hotkeys=(cardedit.SET_KEY, cardedit.CLEAR_KEY, *hotkeys),
-            hint="Space toggle · Enter done · s tag · c clear filters" + (f" · {hint}" if hint else ""),
-            key_help=key_help, place=place,
-            select_all=False, filters=f"{tag_filter.describe()} (c clear filters)" if tag_filter.describe() else "")
-        if pressed == cardedit.CLEAR_KEY:
-            tag_filter.clear()
-            place.get("session", {}).pop("query", None)
-        elif pressed == cardedit.SET_KEY:
-            tag_filter.pick({r[1] for r in rows})
-        else:
-            return pressed
+def toggle_all(title, rows, place=None, tag_filter=True, hotkeys=(), hint=None, key_help=None,
+               select_all=edit.WHEN_FILTERED, bulk=None):
+    """edit.toggle_games over rows from all_rows (s and c, the sticky tag filter, are its own). `a` toggles every shown
+    game only while a tag filter is set: the unfiltered list is every file in storage (select_all: as toggle_games
+    takes it, for rows that aren't). Keys in hotkeys end the list and are returned (Enter and Esc return None); hint
+    and key_help add to the hint line and what ? lists; bulk: as toggle_games takes it."""
+    return edit.toggle_games(title, rows, hotkeys=hotkeys, hint=hint, place=place, select_all=select_all,
+                             tag_filter=tag_filter, key_help=key_help, bulk=bulk)

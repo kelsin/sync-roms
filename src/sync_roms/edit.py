@@ -61,16 +61,54 @@ def save_note(games, key, text, covered=False):
 FULL_SYSTEM_NOTE = "Full system: every file in its folder is synced, so it can't be toggled"
 
 
-def toggle_games(title, rows, hotkeys=(), hint=None, place=None, filters="", key_help=None, select_all=True, notes=True):
-    """_toggle_games, reopened in the same place after `t` edited a game's tags (the toggles made so far are applied
-    first); the other keys are returned as it does."""
+WHEN_FILTERED = "filtered"  # select_all value: `a` is on only while a tag filter is set (lists too long to toggle whole)
+
+
+def toggle_games(title, rows, hotkeys=(), hint=None, place=None, filters="", key_help=None, select_all=True, notes=True,
+                 tag_filter=True, before=None, retagged=None, bulk=None):
+    """_toggle_games over the rows tagui.FILTER keeps, reopened after `t` edited a game's tags (the same rows, in the
+    same place) or `s`/`c` changed the tag filter (the new rows; the / search and cursor stay only when they are the
+    same rows), the toggles made so far applied first; the other keys are returned as it does.
+    A caller that lists s in hotkeys handles the tag filter itself, and names it in its own filters line. tag_filter=False:
+    every row is shown, with no s/c and no banner, for lists whose hidden rows would be acted on unseen (a suggestion
+    review, a tag's own games). select_all: True, False, or WHEN_FILTERED (on only while a tag filter is set, judged on
+    each pass). before: how many rows there were before the caller's own filters left out some, so a list they emptied
+    says no game matches. retagged(key, had): called after t or . wrote the tags of the row of key (had: its tag ids
+    before), before the list opens again (a tag's own games make its check follow the tag). bulk: whether T (tag the rows on screen) is offered;
+    by default with the tag filter, and safe without it too, since T never reaches a row that isn't shown."""
     place = {} if place is None else place
+    bulk = tag_filter if bulk is None else bulk
+    own = tuple(k for k in (*(tagui.HOTKEYS if tag_filter else ()), *((tagui.BULK_KEY,) if bulk else ()))
+                if k not in hotkeys)
+    names_filter = tagui.SET_KEY in own  # else the caller's filters line names the tag filter
+    base_hint = hint or GAMES_HINT
+    helps = [h for h in (*tagui.KEYS_HELP, tagui.BULK_HELP) if h[0] in own]
+    frozen = None  # the rows of the pass `t` was pressed in: shown again as they were, so the cursor stays put
     while True:
-        pressed, i = _toggle_games(title, rows, hotkeys, hint, place, filters, key_help, select_all, notes)
-        if pressed != tagui.TAG_KEY:
+        shown = frozen or ([r for r in rows if tagui.FILTER.keep(r[1])] if tag_filter else rows)
+        frozen = None
+        every = (tag_filter and tagui.FILTER.active()) if select_all == WHEN_FILTERED else select_all
+        hint = tagui.games_hint(base_hint, tag_filter, notes, every, tagui.BULK_KEY in own)
+        line = tagui.FILTER.describe() if tag_filter else ""
+        banner = tagui.banner(len(shown), len(rows)) if line and names_filter else tagui.paused() if not tag_filter else ""
+        empty = ("no games match the tag filter" if line else "no games match the filters" if filters else "") \
+            if not shown and (rows or before) else ""
+        pressed, i = _toggle_games(title, shown, (*hotkeys, *own), hint, place,
+                                   " · ".join(x for x in (filters, banner, empty) if x),
+                                   None if key_help is None else [*key_help, *(h for h in helps if h not in key_help)],
+                                   every, notes)
+        if pressed in tagui.TAG_KEYS:
+            had = set(tags.tags_of(tags.owner(shown[i][1]))) if i is not None else set()
+            if tagui.tag_key(pressed, *(shown[i][1:3] if i is not None else (None, None))) and retagged:
+                retagged(shown[i][1], had)
+            frozen = shown
+        elif pressed == tagui.BULK_KEY and pressed in own:
+            tagui.bulk_tag([r[1] for r in picker.on_screen(place, shown)])
+            frozen = shown
+        elif pressed in own:
+            tagui.handle_key(pressed, [r[1] for r in rows], place)
+        else:
             return pressed
-        if i is not None:
-            tagui.edit_game_tags(rows[i][1], rows[i][2])
 
 
 def _toggle_games(title, rows, hotkeys, hint, place, filters, key_help, select_all, notes):
@@ -86,8 +124,8 @@ def _toggle_games(title, rows, hotkeys, hint, place, filters, key_help, select_a
     Ctrl-C applies the toggles made so far, then raises KeyboardInterrupt.
     """
     hint = hint or (GAMES_HINT if notes else GAMES_HINT.replace(" · w note", ""))
-    hint += "" if " t tags" in hint else " · t tags"
-    key_help = key_help if key_help is None or any(k == tagui.TAG_KEY for k, _ in key_help) else [*key_help, tagui.KEY_HELP]
+    hint += "" if " t tags" in hint or " t edit tags" in hint else " · t edit tags"
+    key_help = key_help if key_help is None or any(k == tagui.TAG_KEY for k, _ in key_help) else [*key_help, tagui.KEY_HELP, tagui.REPEAT_HELP]
     locked = [bool(s.get("full_system")) for s, *_ in rows]
     have = {}  # system bucket -> keys of its listed games, kept current as games are added and removed
 
@@ -108,7 +146,7 @@ def _toggle_games(title, rows, hotkeys, hint, place, filters, key_help, select_a
                                    locked_note=[FULL_SYSTEM_NOTE if lock else "" for lock in locked], hint=hint, key_help=key_help,
                                    note_text=(lambda i: note_text(rows[i][0]["games"], rows[i][1])) if notes else None,
                                    on_note=(lambda i, text: save_note(rows[i][0]["games"], rows[i][1], text)) if notes else None,
-                                   hotkeys=(*hotkeys, tagui.TAG_KEY), session=session, filters=filters,
+                                   hotkeys=(*hotkeys, tagui.TAG_KEY, tagui.REPEAT_KEY), session=session, filters=filters,
                                    row_note=lambda i: variant_line(rows[i][1], variants, parents, system_names),
                                    select_all=select_all, extras=extras, tag_info=tagui.summary([r[1] for r in rows]),
                                    **previews.game_pane([key for _, key, _, _ in rows]))
@@ -396,12 +434,15 @@ def edit_manifest():
             options = [f"💳 {name}" for name in cards] + ["➕ New card"]
             extras = [setup_extra(name, saved) + pending_extra(name) for name in cards] + [[]]
             i = picker.filter_list("💳 Which card?  (Esc = back)", options, extras=extras,
-                                   hotkeys=(SETUP_KEY, DELETE_KEY, RENAME_KEY), hint=MENU_HINT, cursor=pos)
+                                   hotkeys=(SETUP_KEY, DELETE_KEY, RENAME_KEY, tagui.CLEAR_KEY), hint=tagui.menu_hint(MENU_HINT),
+                                   filters=tagui.banner(), cursor=pos)
             if i is None:
                 return
-            pos = i[1] if isinstance(i, tuple) else i
+            pos = (i[1] or 0) if isinstance(i, tuple) else i
             if isinstance(i, tuple):
-                if i[1] < n:
+                if i[0] == tagui.CLEAR_KEY:
+                    tagui.handle_key(tagui.CLEAR_KEY, ())
+                elif i[1] < n:
                     {SETUP_KEY: change_setup, DELETE_KEY: delete_card, RENAME_KEY: rename_card}[i[0]](cards[i[1]])
             elif i < n:
                 open_card(cards[i])
@@ -409,12 +450,16 @@ def edit_manifest():
                 add_card()
 
     def edit_tags():
-        """The tags in storage, saved as they are changed; a failure (SystemExit) returns here instead of ending the editor."""
+        """The tags in storage, saved as they are changed; a failure (SystemExit) returns here instead of ending the editor.
+        Returns True when Q left the tag editor: the editor goes straight to its review."""
         from . import tageditor
         try:
-            tageditor.edit_tags()
+            tageditor.edit_tags(quit_raises=True)
         except SystemExit:
             pass  # the reason is a note, on the menu
+        except tageditor.Quit:
+            return True
+        return False
 
     def edit_collections():
         from . import collectionedit
@@ -428,13 +473,18 @@ def edit_manifest():
                 extras = [[("  " + str(len(targets)) + " pending", "cyan")] if targets else [],
                           [], [], [("  " + str(len(overlay_pending)) + " edited", "cyan")] if overlay_pending else [], [], []]
                 i = picker.filter_list("✏️  What do you want to edit?  (Esc = review & save)", options, extras=extras,
-                                       hint="Enter open · Esc review & save")
+                                       hint=tagui.menu_hint("Enter open · Esc review & save"), filters=tagui.banner(),
+                                       hotkeys=(tagui.CLEAR_KEY,))
+                if isinstance(i, tuple):
+                    tagui.handle_key(tagui.CLEAR_KEY, ())
+                    continue
                 if i is None or i == 4:
                     return True
                 if i == 0:
                     edit_cards()
                 elif i == 1:
-                    edit_tags()
+                    if edit_tags():
+                        return True
                 elif i == 2:
                     edit_collections()
                 elif i == 3:
