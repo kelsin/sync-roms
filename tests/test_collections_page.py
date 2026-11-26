@@ -332,6 +332,12 @@ class TemplateTest(unittest.TestCase):
         self.assertIn("All users", js)
         self.assertIn("hasPaths", js)
 
+    def test_box_art_column_popover_and_credit(self):
+        js = self.files["page.js"]
+        for text in ("hasArt", "art-pop", "-s.webp", "-l.webp", "data.credit"):
+            self.assertIn(text, js)
+        self.assertIn('id="credit"', self.files["page.html"])
+
     def test_no_external_urls(self):
         self.assertNotIn("http://", self.html)
         self.assertNotIn("https://", self.html)
