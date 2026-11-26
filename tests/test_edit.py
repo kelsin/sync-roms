@@ -609,7 +609,7 @@ class Keys(unittest.TestCase):
         self.assertEqual(session["visible"], [1, 3])  # beta and delta have "ta"
         session = {"sel": [True, False, True, False], "view_mode": 1}
         run_list(["enter"], self.LABELS, multi=True, session=session)
-        self.assertEqual(session["visible"], [0, 2])  # the o view: only rows that are on
+        self.assertEqual(session["visible"], [0, 2])  # the V view: only rows that are on
 
     def test_filter_line_editing(self):
         self.assertEqual(run_list(["/", "x", "y", "ctrl+u", "d", "e", "enter", "enter"], self.LABELS), 3)  # ^U clears
@@ -1199,7 +1199,7 @@ class TagColumn(DataDir):
         answers = iter([("T", None)])
 
         def fake(title, labels, **kw):
-            kw["session"]["visible"] = [1]  # a / search (or an o view) leaves only B
+            kw["session"]["visible"] = [1]  # a / search (or a V view) leaves only B
             return next(answers, None) or kw["session"]["sel"]
         with mock.patch.object(picker, "filter_list", fake), \
                 mock.patch.object(tagui, "bulk_tag", side_effect=lambda keys: bulk.append(keys)):

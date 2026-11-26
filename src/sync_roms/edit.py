@@ -270,7 +270,7 @@ SETUP_KEY = "v"
 DELETE_KEY = "d"
 RENAME_KEY = "r"
 MENU_HINT = "Enter open · Esc back · v device · r rename · d delete"
-GAMES_HINT = "Space toggle · Enter done · / filter · w note · a all · o view · t tags"
+GAMES_HINT = "Space toggle · Enter done · / filter · w note · a all · V view · t tags"
 
 
 def new_target(label, raw, setup=None):
