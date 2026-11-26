@@ -546,5 +546,40 @@ class TagPickerErgonomics(Base):
         self.assertEqual(kw["row_note"](next(i for i, x in enumerate(labels) if "Zed" in x)), "sleepy picks")
 
 
+class DiscsComeBack(Base):
+    """A multi-disc game whose last tag went loses its record and files; t, . and T tag it again with its discs."""
+    PLAYLIST = ["psx/FF7.m3u", "psx/FF7 (Disc 1).chd", "psx/FF7 (Disc 2).chd"]
+    LOOSE = ["psx/MGS (Disc 1).chd", "psx/MGS (Disc 2).chd"]  # discs with no playlist
+
+    def setUp(self):
+        super().setUp()
+        from sync_roms import inventory, runtime
+        for key in self.PLAYLIST + self.LOOSE:
+            helpers.touch(os.path.join(runtime.ROOT, key))
+        inventory.reset()
+
+    def files(self):
+        return {k: (tags.record(k) or {}).get("files") for k in (self.PLAYLIST[0], self.LOOSE[0])}
+
+    def untag(self):
+        for lead in (self.PLAYLIST[0], self.LOOSE[0]):
+            self.pick_tags(lead, set())
+        self.assertEqual(self.files(), {self.PLAYLIST[0]: None, self.LOOSE[0]: None})
+
+    def test_t_dot_and_T_restore_the_discs(self):
+        want = {self.PLAYLIST[0]: self.PLAYLIST[1:], self.LOOSE[0]: self.LOOSE[1:]}
+        for lead in want:
+            self.pick_tags(lead, {"cave"})
+        self.assertEqual(self.files(), want)
+        self.untag()
+        tagui.LAST[:] = [(frozenset({"cave"}), frozenset())]
+        for lead in want:
+            self.assertTrue(tagui.repeat_last(lead, lead))
+        self.assertEqual(self.files(), want)
+        self.untag()
+        self.bulk(list(want), {"cave"})
+        self.assertEqual(self.files(), want)
+
+
 if __name__ == "__main__":
     unittest.main()

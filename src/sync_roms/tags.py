@@ -11,7 +11,7 @@ import copy
 import json
 import threading
 
-from . import names, shared, store, usersettings
+from . import m3u, names, s3, shared, store, usersettings
 
 KEY = "tags.json"
 _lock = threading.RLock()
@@ -200,44 +200,77 @@ def owner(key):
     return _owner.get(key, key)
 
 
-def _change_one(data, key, add, remove):
+def discs(keys):
+    """{key: the other files of its multi-disc game} for those of keys that have no record and are one, grouped as the
+    game lists group them (m3u.file_groups: a playlist and its discs, or the discs of a game with none), each system's
+    storage folder listed once. A folder that can't be listed gives none."""
+    load()
+    wanted = [k for k in keys if k not in _data["games"] and k not in _owner]
+    out = {}
+    for system in sorted({k.partition("/")[0] for k in wanted}):
+        try:
+            groups = m3u.file_groups(store.folder_keys(system, say=False))
+        except (*s3.ERRORS, SystemExit):  # storage can't be listed (ui.fail raises SystemExit): no files
+            continue
+        out.update({k: [f for f in groups[k] if f != k] for k in wanted if k.partition("/")[0] == system and k in groups})
+    return out
+
+
+def _record(data, key, files):
+    """The game's record, created when it has none: a new one gets files.get(key) (its other discs) as its files."""
     rec = data["games"].get(key)
-    if rec is None and not add:
+    if rec is None:
+        rec = data["games"][key] = {"tags": []}
+        if files.get(key):
+            rec["files"] = list(files[key])
+    return rec
+
+
+def _change_one(data, key, add, remove, files):
+    if key not in data["games"] and not add:
         return
-    rec = data["games"].setdefault(key, {"tags": []})
+    rec = _record(data, key, files)
     rec["tags"] = sorted((set(rec["tags"]) | set(add)) - set(remove))
 
 
 def change_game_tags(key, add=(), remove=()):
-    """The game gets the tags in add and loses those in remove; the others it has in storage are kept."""
-    return _write(lambda data: _change_one(data, key, add, remove))
+    """The game gets the tags in add and loses those in remove; the others it has in storage are kept. A record made
+    for a multi-disc game gets its other discs as files (discs)."""
+    files = discs([key]) if add else {}
+    return _write(lambda data: _change_one(data, key, add, remove, files))
 
 
 def change_games_tags(changes):
     """change_game_tags for every game of {key: (add, remove)}, in one write."""
+    files = discs([k for k, (add, _) in changes.items() if add])
+
     def change(data):
         for key, (add, remove) in changes.items():
-            _change_one(data, key, add, remove)
+            _change_one(data, key, add, remove, files)
     return _write(change)
 
 
 def add_tags(pairs):
-    """One write: each game of {key: [tag ids]} gets the ids, on top of the tags it has."""
+    """One write: each game of {key: [tag ids]} gets the ids, on top of the tags it has (a new record its discs)."""
+    files = discs(pairs)
+
     def change(data):
         for key, ids in pairs.items():
-            rec = data["games"].setdefault(key, {"tags": []})
+            rec = _record(data, key, files)
             rec["tags"] = sorted({*rec["tags"], *ids})
     return _write(change)
 
 
 def retag_games(tag_id, add=(), remove=(), files=None):
-    """One write: the tag goes on the games in add (files: {key: the extra files its record gets}) and off those in
-    remove."""
+    """One write: the tag goes on the games in add (files: {key: the extra files its record gets}; a key it doesn't
+    name gets its discs when its record is new) and off those in remove."""
+    files = {**discs([k for k in add if not (files or {}).get(k)]), **{k: v for k, v in (files or {}).items() if v}}
+
     def change(data):
         for key in add:
-            rec = data["games"].setdefault(key, {"tags": []})
+            rec = _record(data, key, files)
             rec["tags"] = sorted({*rec["tags"], tag_id})
-            if files and files.get(key) and "files" not in rec:
+            if files.get(key) and "files" not in rec:
                 rec["files"] = list(files[key])
         for key in remove:
             if key in data["games"]:

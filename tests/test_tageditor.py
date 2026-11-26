@@ -190,6 +190,20 @@ class Editor(unittest.TestCase):
         self.assertEqual(tags.tags_of("nes/New.zip"), ["cave"])
         self.assertEqual(tags.tags_of(A), ["shmups"])
 
+    def test_a_multi_disc_game_added_again_gets_its_discs_back(self):
+        """Its last tag gone, its record and files went; A gives the new record the discs, playlist or not."""
+        from sync_roms import inventory
+        loose = ["nes/D (Disc 1).chd", "nes/D (Disc 2).chd"]
+        for key in loose:
+            helpers.touch(os.path.join(self.root, key))
+        inventory.reset()
+
+        def add(listing, systems, shown, keys_of, label, **kw):
+            listing["games"].append({"system": "nes", "bucket": loose[0], "title": "D"})
+        with mock.patch.object(tageditor, "add_from_system", add):
+            self.run_editor(["Cave", ("A", None)])
+        self.assertEqual(tags.record(loose[0]), {"tags": ["cave"], "files": loose[1:]})
+
     def test_add_from_a_tag_tags_the_added_games(self):
         def add(listing, shown, keys_of, label, **kw):
             listing["games"].append({"system": "nes", "bucket": B, "files": ["nes/B (Disc 2).zip"]})
