@@ -3,6 +3,8 @@
 Rules that keep lines clean: draw one half and `mirror()` it, use `rrect`/`ellipse`/`line` (regular steps),
 never hand-place single odd pixels on an outline. `render` adds the 1px outline and the light/dark edges.
 """
+from functools import lru_cache
+
 from PIL import Image
 
 INK = "#1b1530"  # outline
@@ -19,6 +21,7 @@ COLORS = {
 FLAT = {"white", "dark", "black", "screen", "sky", "cream"}
 
 
+@lru_cache(maxsize=None)
 def _rgb(h):
     h = h.lstrip("#")
     return tuple(int(h[i:i + 2], 16) for i in (0, 2, 4))
@@ -133,14 +136,20 @@ def render(sprite, scale=4, state="sel", palette=None):
                 elif at(x, y + 1) is None:
                     rgb = dark(rgb)
             out[y + pad][x + pad] = rgb
-    img = Image.new("RGBA", (len(out[0]), len(out)), (0, 0, 0, 0))
-    for y, row in enumerate(out):
-        for x, rgb in enumerate(row):
-            if rgb:
-                if state == "n":
+    dim = {}
+    data = bytearray()
+    for row in out:
+        for rgb in row:
+            if not rgb:
+                data += b"\0\0\0\0"
+                continue
+            if state == "n":
+                if rgb not in dim:
                     gray = round(sum(rgb) / 3)
-                    rgb = tuple(round((v * 0.5 + gray * 0.5) * 0.62) for v in rgb)
-                img.putpixel((x, y), rgb + (255,))
+                    dim[rgb] = tuple(round((v * 0.5 + gray * 0.5) * 0.62) for v in rgb)
+                rgb = dim[rgb]
+            data += bytes(rgb) + b"\xff"
+    img = Image.frombytes("RGBA", (len(out[0]), len(out)), bytes(data))
     return img.resize((img.width * scale, img.height * scale), Image.NEAREST)
 
 
