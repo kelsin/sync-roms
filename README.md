@@ -374,16 +374,16 @@ Tags live in storage's `tags.json`, shared by everyone using that storage (each 
 `tags.json` is `{"tags": {...}, "games": {...}, "declined": {...}}`:
 
 ```json
-{ "tags": { "shmups": { "name": "Shmups", "emoji": "🚀", "description": "...", "art": "shmups" } },
+{ "tags": { "shmups": { "name": "Shmups", "emoji": "🚀", "description": "..." } },
   "games": { "gba/Game.zip": { "tags": ["shmups"], "files": [], "variants": [{ "bucket": "gb/Game.gb", "note": "adds a mode" }] } },
   "declined": { "gba/Other.zip": ["sports"] } }
 ```
 
-A tag has an id (a lowercase slug, never changed), a `name` and an `emoji` (both required; an emoji belongs to one tag), and optionally a `description` and an `art` picking its [theme art](#theme-art) (without it a tag uses the art under its own id). A game is a storage key (`<system>/<file>`) with its `tags`; titles come from the scraped names and the system from the key, so neither is stored. A multi-disc game adds `"files": [...]` with its other storage keys (the discs); the key is the playlist (`.m3u`) or disc 1. A game may also have `variants` (`[{"bucket", "note"}]`: later versions of the game that add something, shown by the editors, never synced with its tags). `declined` holds the genre suggestions you turned down, so they aren't suggested again.
+A tag has an id (a lowercase slug, never changed), a `name` and an `emoji` (both required; an emoji belongs to one tag), and optionally a `description`. A game is a storage key (`<system>/<file>`) with its `tags`; titles come from the scraped names and the system from the key, so neither is stored. A multi-disc game adds `"files": [...]` with its other storage keys (the discs); the key is the playlist (`.m3u`) or disc 1. A game may also have `variants` (`[{"bucket", "note"}]`: later versions of the game that add something, shown by the editors, never synced with its tags). `declined` holds the genre suggestions you turned down, so they aren't suggested again.
 
 In the card editor, the collection editor and every other list of games, each row ends with the game's tag emoji, `t` edits its tags and `s` filters by tags (see [Editing a card's games](#editing-a-cards-games-edit-games)).
 
-`sync-roms tags edit` lists them with their emoji, name and game count; `n` adds one (a name and an emoji; an emoji another tag uses is refused). Pick a tag to switch its games off, add games from a system or from another tag, rename it (its id never changes), change its emoji, description or [theme art](#theme-art), merge it into another tag or delete it (both ask first; deleting says how many games lose it). Every change is saved to storage as it is made, and a storage error shows as a note on the screen.
+`sync-roms tags edit` lists them with their emoji, name and game count; `n` adds one (a name and an emoji; an emoji another tag uses is refused). Pick a tag to switch its games off, add games from a system or from another tag, rename it (its id never changes), change its emoji or description, merge it into another tag or delete it (both ask first; deleting says how many games lose it). Every change is saved to storage as it is made, and a storage error shows as a note on the screen.
 
 `sync-roms tags suggest [SYSTEM ...]` suggests tags from the genres in `scrapes/<system>/metadata.json` (the first part of a genre, so `Sports / Baseball` is `Sports`; which tag each genre suggests is in `genre-tags.json`). It covers one version of each game: scraped games of those systems (all of them without arguments), except variants, discs and other versions (same scraped name) of a tagged game, and pairs already on the game or declined. The review lists the suggestions grouped by tag, all checked; the checked ones are added to the games (a game with no tags gets its first) and the unchecked ones are remembered in `declined`.
 
@@ -399,7 +399,7 @@ Add one to a card with `l` in the card editor; a sync then writes it as a custom
 
 #### Theme art
 
-In the collection editor, **Theme art** picks one of the pictures listed in `art.json` (one for each tag, under the tag's id, and more for genres and the usual kinds of personal collection), drawn in the Outline style of the [Art Book Next](https://github.com/anthonycaccese/art-book-next-es-de) theme (`src/sync_roms/data/themes/art-book-next/art/`; the collection file, or a tag's record, gets `"art": "<id>"`). `tools/gen_theme_art.py` draws them. When an ES-DE, EmuDeck, Knulli or ROCKNIX card using that theme gets the collection, it shows on its own in the system carousel with that art and a logo of its name, drawn with the theme's logo font (Changa One, SIL Open Font License: `OFL.txt` there). A collection named like a system or one of the frontend's own collections gets no art, and a name the font can't draw (accents are dropped first) gets no logo, so the frontend shows it as text.
+In the collection editor, **Theme art** picks one of the pictures listed in `art.json` (one for each tag id, and more for genres and the usual kinds of personal collection), drawn in the Outline style of the [Art Book Next](https://github.com/anthonycaccese/art-book-next-es-de) theme (`src/sync_roms/data/themes/art-book-next/art/`; the collection file gets `"art": "<id>"`). `tools/gen_theme_art.py` draws them. When an ES-DE, EmuDeck, Knulli or ROCKNIX card using that theme gets the collection, it shows on its own in the system carousel with that art and a logo of its name, drawn with the theme's logo font (Changa One, SIL Open Font License: `OFL.txt` there). A collection named like a system or one of the frontend's own collections gets no art, and a name the font can't draw (accents are dropped first) gets no logo, so the frontend shows it as text.
 
 ### Surprise
 

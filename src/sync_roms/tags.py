@@ -1,6 +1,6 @@
 """Tags on games: tags.json at the root of storage, one record per tagged game plus the tag definitions.
 
-{"tags": {id: {"name", "emoji", "description"?, "art"?}},
+{"tags": {id: {"name", "emoji", "description"?}},
  "games": {bucket key: {"tags": [ids], "files"?: [keys], "variants"?: [{"bucket", "note", "files"?}]}},
  "declined": {bucket key: [tag ids]}}
 
@@ -41,7 +41,7 @@ def _tag(t):
     if not (isinstance(t, dict) and isinstance(t.get("name"), str) and isinstance(t.get("emoji"), str)
             and t["name"] and t["emoji"]):
         return None
-    return {k: t[k] for k in ("name", "emoji", "description", "art") if isinstance(t.get(k), str) and t[k]}
+    return {k: t[k] for k in ("name", "emoji", "description") if isinstance(t.get(k), str) and t[k]}
 
 
 def _game(g):
