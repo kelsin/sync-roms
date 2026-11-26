@@ -1409,7 +1409,7 @@ def collections_publish_cmd(args):
     rule = "use lowercase letters, digits, '-' and '_', starting with a letter or digit, at most 39 (pick one with --user NAME)"
     try:
         user = args.user or getpass.getuser()
-    except OSError:
+    except (OSError, KeyError, ImportError):  # what getpass.getuser raises without a login name, by Python version
         ui.fail(f"Couldn't find your login name to use as the user name on the site: {rule}", 2)
     if not pages_site.valid_user(user):
         ui.fail(f"{user!r} can't be a user name on the site: {rule}", 2)

@@ -1,3 +1,5 @@
+import contextlib
+import io
 import os
 import shutil
 import subprocess
@@ -7,7 +9,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import helpers  # noqa: E402
-from sync_roms import collections, inventory, pages_site, scrape_plan, tags, usersettings  # noqa: E402
+from sync_roms import collections, inventory, pages_site, runtime, scrape_plan, tags, usersettings  # noqa: E402
 
 GIT_ENV = {"GIT_AUTHOR_NAME": "Test", "GIT_AUTHOR_EMAIL": "test@example.com",
            "GIT_COMMITTER_NAME": "Test", "GIT_COMMITTER_EMAIL": "test@example.com"}
@@ -103,10 +105,11 @@ class Site(helpers.Cmd):
             pages_site.build(self.tmpdir(), "../x")
 
     def test_login_name_unavailable(self):
-        with mock.patch("getpass.getuser", side_effect=OSError("no login")):
-            code, _, err = self.run_cmd("collections", "publish")
-        self.assertEqual(code, 2)
-        self.assertIn("--user", err)
+        for error in (OSError("no login"), KeyError("no login"), ImportError("no pwd")):
+            with mock.patch("getpass.getuser", side_effect=error):
+                code, _, err = self.run_cmd("collections", "publish")
+            self.assertEqual(code, 2, error)
+            self.assertIn("--user", err)
 
     def test_dirty_clone_is_reset(self):
         pages_site.publish("kelsin")
@@ -121,15 +124,47 @@ class Site(helpers.Cmd):
         self.assertEqual(git_ls_tree(self.bare, "main"), [])
 
     def test_failed_first_push_is_retried(self):
-        hook = os.path.join(self.bare, "hooks", "pre-receive")
-        with open(hook, "w") as f:
-            f.write("#!/bin/sh\nexit 1\n")
-        os.chmod(hook, 0o755)
+        hook = self.reject_pushes()
         code, _, _ = self.run_cmd("collections", "publish", "--user", "kelsin")
         self.assertEqual(code, 1)
         os.remove(hook)
         self.assertTrue(pages_site.publish("kelsin")[0])
         self.assertIn("collections/kelsin/index.html", git_ls_tree(self.bare, "main"))
+
+    def reject_pushes(self):
+        hook = os.path.join(self.bare, "hooks", "pre-receive")
+        with open(hook, "w") as f:
+            f.write("#!/bin/sh\nexit 1\n")
+        os.chmod(hook, 0o755)
+        return hook
+
+    def test_failed_later_push_is_retried(self):
+        pages_site.publish("kelsin")
+        hook = self.reject_pushes()
+        self.save_collection("Another")
+        self.assertEqual(self.run_cmd("collections", "publish", "--user", "kelsin")[0], 1)
+        os.remove(hook)
+        self.assertTrue(pages_site.publish("kelsin")[0])
+        page = subprocess.run(["git", "-C", self.bare, "show", "main:collections/kelsin/index.html"],
+                              capture_output=True, text=True).stdout
+        self.assertIn("Another", page)
+
+    def test_unreachable_storage_publishes_nothing(self):
+        pages_site.publish("kelsin")
+        before = subprocess.run(["git", "-C", self.bare, "rev-parse", "main"], capture_output=True, text=True).stdout
+        self.save_collection("Another")
+        with mock.patch.object(tags, "load", side_effect=SystemExit(3)):
+            code, _, err = self.run_cmd("collections", "publish", "--user", "kelsin")
+        self.assertEqual(code, 1)
+        self.assertIn("Storage isn't reachable", err)
+        after = subprocess.run(["git", "-C", self.bare, "rev-parse", "main"], capture_output=True, text=True).stdout
+        self.assertEqual(before, after)
+
+    def test_unmounted_storage_folder_publishes_nothing(self):
+        self.enterContext(mock.patch.object(runtime, "ROOT", os.path.join(self.tmp.name, "unmounted")))
+        with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):
+            pages_site.publish("kelsin")
+        self.assertEqual(git_ls_tree(self.bare, "main"), [])
 
     def test_push_failure_exits_nonzero(self):
         pages_site.publish("kelsin")

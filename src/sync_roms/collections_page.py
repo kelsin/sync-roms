@@ -58,10 +58,12 @@ def _art(art_id, art_dir=None):
     return out
 
 
-def _tag_definitions():
+def _tag_definitions(strict=False):
     try:
         return tags.all_tags()
     except (SystemExit, *s3.ERRORS):
+        if strict:
+            raise
         ui.warn("Storage isn't reachable, so the page has no tags.")
         return {}
 
@@ -80,20 +82,27 @@ def _system_sizes(system):
     return roms, art
 
 
-def _sizes(systems):
-    """{system: _system_sizes}; {} (every size unknown) when storage isn't reachable."""
+def _sizes(systems, strict=False):
+    """{system: _system_sizes}; {} (every size unknown) when storage isn't reachable, or with strict the error raised."""
     try:
         return {s: _system_sizes(s) for s in sorted(systems)}
     except (SystemExit, *s3.ERRORS):
+        if strict:
+            raise
         ui.warn("Storage isn't reachable, so the page has no sizes.")
         return {}
 
 
-def _metadata(systems):
-    """{system: scraped metadata.json}; {} when storage isn't reachable."""
+def _metadata(systems, strict=False):
+    """{system: scraped metadata.json}; {} when storage isn't reachable (with strict, the error raised) or a file is
+    malformed."""
     try:
         return {system: scrape_plan.load_metadata(system) for system in sorted(systems)}
-    except (SystemExit, ValueError, *s3.ERRORS):
+    except (SystemExit, *s3.ERRORS):
+        if strict:
+            raise
+        return {}  # the tags and sizes already warned about unreachable storage
+    except ValueError:
         return {}  # the tags and sizes already warned about unreachable storage
 
 
@@ -115,14 +124,18 @@ def _game_size(paths, listed):
     return {"rom": sum(roms[p] for p in found), "art": sum(art.get(os.path.splitext(p)[0], 0) for p in found)}
 
 
-def page_data(public=False, art_dir=None):
+def page_data(public=False, art_dir=None, strict=False):
     """{"tags", "systems", "collections"} for the page, collections in load_collections() order. public leaves the
-    games' storage paths out; art_dir writes the pictures there as files (see _art) instead of embedding them."""
-    defined = _tag_definitions()
+    games' storage paths out; art_dir writes the pictures there as files (see _art) instead of embedding them. Storage
+    that can't be reached leaves tags, sizes and scraped names out with a warning, or with strict raises (SystemExit
+    or one of s3.ERRORS)."""
+    if strict:
+        s3.check_root()
+    defined = _tag_definitions(strict)
     system_names = {s["bucket"]: store.short_name(s) for s in store.repo_json("systems")}
     loaded = collections.load_collections()
-    sizes = _sizes({g["bucket"].partition("/")[0] for c in loaded for g in c["games"]})
-    metadata = _metadata({g["bucket"].partition("/")[0] for c in loaded for g in c["games"]})
+    sizes = _sizes({g["bucket"].partition("/")[0] for c in loaded for g in c["games"]}, strict)
+    metadata = _metadata({g["bucket"].partition("/")[0] for c in loaded for g in c["games"]}, strict)
     years = _years(metadata)
     used, out = set(), []
     for collection in loaded:
@@ -213,11 +226,12 @@ def update_page(path):
 
 def write_public(out_dir, home="/"):
     """Build the public page in out_dir, emptied first: index.html (the template's page with its data, no game paths
-    and a link to home), page.css, page.js and art/*.webp."""
+    and a link to home), page.css, page.js and art/*.webp. Raises (see page_data's strict) when storage can't be
+    reached, rather than writing a page with its tags, sizes or scraped names missing."""
     shutil.rmtree(out_dir, ignore_errors=True)
     os.makedirs(out_dir)
     files = template_files()
-    data = page_data(public=True, art_dir=os.path.join(out_dir, "art"))
+    data = page_data(public=True, art_dir=os.path.join(out_dir, "art"), strict=True)
     data["home"] = home
     store.write_text(os.path.join(out_dir, "index.html"), fill(files["page.html"], data))
     for name in ("page.css", "page.js"):

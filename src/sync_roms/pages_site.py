@@ -4,7 +4,7 @@ import os
 import re
 import subprocess
 
-from . import collections_page, store, ui, usersettings
+from . import collections_page, s3, store, ui, usersettings
 
 DOMAIN = "sync-roms.games"
 DEFAULT_REPO = "git@github.com:kelsin/sync-roms.games.git"
@@ -85,7 +85,11 @@ def publish(user, dry_run=False):
         git("update-ref", "-d", "refs/heads/main", cwd=clone)
         git("read-tree", "--empty", cwd=clone)
     git("clean", "-q", "-fdx", cwd=clone)
-    build(clone, user)
+    try:
+        build(clone, user)
+    except (SystemExit, *s3.ERRORS) as e:  # the clone is reset at the next publish
+        detail = f": {e}" if not isinstance(e, SystemExit) else ""
+        ui.fail(f"Storage isn't reachable, so nothing was published (the page would lack tags, sizes and scraped names){detail}", 1)
     git("add", "-A", cwd=clone)
     if not changes():
         return False, url(user)

@@ -181,13 +181,14 @@ TOPICS = {
   page to refresh the served page. The server stops with unshare, which also turns off just that
   path, or a restart: run share again after a restart.
 
-  collections publish puts a public copy of the page (no file names or storage paths, but your game
-  lists) in a clone of the Pages repo (the pages_repo setting, default
-  git@github.com:kelsin/sync-roms.games.git; kept in ~/.sync-roms/cache/pages/), in
-  collections/<user>/ (your login name, or --user NAME: lowercase letters, digits, - and _), with
-  the site's list of users at its root, then commits and pushes when anything changed. Only your
-  own folder is replaced. --dry-run lists what would change and pushes nothing. Setting up the
-  repo and domain: docs/github-pages.md.
+  collections publish puts a public copy of the page (no storage paths, but your game lists; a game
+  with no scraped name or saved title shows its file name) in a clone of the Pages repo (the
+  pages_repo setting, default git@github.com:kelsin/sync-roms.games.git; kept in
+  ~/.sync-roms/cache/pages/), in collections/<user>/ (your login name, or --user NAME: lowercase
+  letters, digits, - and _), with the site's list of users at its root, then commits and pushes
+  when anything changed. Only your own folder is replaced. When storage can't be reached it
+  publishes nothing. --dry-run lists what would change and pushes nothing. Setting up the repo and
+  domain: docs/github-pages.md.
 """,
     "themes": """
   sync-roms themes update [--dry-run]         put the latest Art Book Next for ES-DE and the PyUI

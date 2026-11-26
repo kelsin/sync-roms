@@ -2,7 +2,7 @@
 
 `sync-roms collections publish` puts a public copy of your collections page at `https://sync-roms.games/collections/<user>/`, with a list of every user's page at `https://sync-roms.games/`. The site is a GitHub repo served by GitHub Pages. These are the one-time steps to set it up.
 
-The public page has no file names or storage paths, but it does list your games. Each publish replaces only your own `collections/<user>/` folder; other users' folders stay as they are.
+The public page has no storage paths, but it does list your games; a game with no scraped name or saved title shows its file name (without the extension). The Pages repo is public and its history keeps every earlier publish, so games you remove stay readable there, and each commit carries your git author name and email. Each publish replaces only your own `collections/<user>/` folder; other users' folders stay as they are.
 
 ## 1. Create the repo
 
