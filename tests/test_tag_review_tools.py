@@ -130,6 +130,21 @@ class Summary(helpers.StorageFolder):
         with mock.patch.object(apply_tool.shared, "load", side_effect=OSError("boom")), self.assertRaises(OSError):
             apply_tool.plan(vocab, games, [{"add": {B: ["cave"]}}])
 
+    def test_plan_reads_storages_tags_once_and_strictly(self):
+        vocab, games = fixture()
+        self.addCleanup(tags._set, tags._empty())
+        strict = {"tags": {"cave": TAGS["cave"]}, "games": {C: {"tags": ["cave"], "files": [B]}}, "declined": {}}
+        loads = []
+
+        def load(key, parse, empty, fallback=True):
+            loads.append(fallback)
+            return strict if not fallback else {"tags": TAGS, "games": {}, "declined": {}}  # the local copy
+        with mock.patch.object(apply_tool.shared, "load", load), mock.patch.object(tags.shared, "load", load):
+            result = apply_tool.plan(vocab, games, [{"add": {A: ["shmups"], B: ["cave"]}}])
+        self.assertEqual(loads, [False])
+        self.assertEqual(result["deleted_tags"], ["shmups"])  # storage has no shmups now
+        self.assertEqual(result["file_keys"], [B])  # a file of storage's record of C
+
     def test_export_leaves_out_a_records_file_keys(self):
         self.put(A, 1)
         self.put("nes/A (Disc 2).zip", 1)

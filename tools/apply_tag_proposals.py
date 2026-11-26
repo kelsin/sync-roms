@@ -47,9 +47,9 @@ def live_tags():
     """The tags in storage's tags.json, read from storage itself: raises (s3.ERRORS, OSError, ValueError) when it
     can't be read, where tags.load() would warn and use the local copy."""
     s3.check_root()
-    tags.reset()
-    shared.load(tags.KEY, tags.parse, {"tags": {}, "games": {}, "declined": {}}, fallback=False)
-    return tags.all_tags()
+    data = shared.load(tags.KEY, tags.parse, tags._empty(), fallback=False)
+    tags._set(data)  # what tags.owner and the rest read: never a second load, which could fall back to the local copy
+    return data["tags"]
 
 
 def plan(vocab, games, proposals, no_removals=False, skip_tags=()):
