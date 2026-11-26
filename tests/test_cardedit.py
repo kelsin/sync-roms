@@ -497,7 +497,8 @@ class Flow(DataDir):
                 mock.patch.dict(DEVICE, systems=["gba", "gb", "nds"]):
             calls = self.run_card(returns((cardedit.COLLECTIONS_KEY, 0)), returns((" ", 0)), returns(None), returns(None))
         self.assertEqual(calls[1][1], ["💖 Favs"])
-        self.assertEqual(calls[1][2]["extras"], [[("  ✅ on the card", "green"), ("  ✅", "cyan"), ("  2 playable, 2 not playable", "dim")]])
+        self.assertEqual(calls[1][2]["extras"], [[("  ✅ on the card", "green"), ("  ✅", "cyan"), ("  …", "dim"), ("  🎮 2", "dim"), ("", "dim"),
+                                                    ("  📵 2", "dim")]])
         self.assertEqual(self.read("cards.json")["c"]["collections"], ["favs"])
 
     def test_collections_hotkey_skips_malformed_games(self):
@@ -505,7 +506,54 @@ class Flow(DataDir):
         self.card()
         with contextlib.redirect_stderr(io.StringIO()):
             calls = self.run_card(returns((cardedit.COLLECTIONS_KEY, 0)), returns(None), returns(None))
-        self.assertEqual(calls[1][2]["extras"][0][2], ("  2 playable, 1 not playable", "dim"))
+        self.assertEqual(calls[1][2]["extras"][0][3:], [("  🎮 2", "dim"), ("", "dim"), ("  📵 1", "dim")])
+
+    def collections_kw(self, colls_, setup=True, **card):
+        self.card(**card)
+        seen = {}
+
+        def look(labels, kw):
+            seen.update(kw)
+            return None
+        args = ("c", {"gba", "gb"}, None, (DEVICE, "esde")) if setup else ("c", {"gba", "gb"})
+        with mock.patch.object(collections, "load_collections", lambda: colls_), \
+                mock.patch.object(picker, "filter_list", Script(look)), contextlib.redirect_stdout(io.StringIO()):
+            cardedit.pick_collections(*args)
+        return seen
+
+    def test_collections_list_counts_off_systems(self):
+        favs = {"id": "favs", "name": "Favs", "games": [{"system": "gba", "bucket": "gba/Ruby.zip", "title": "Ruby"},
+                                                         {"system": "gb", "bucket": "gb/Red.gb", "title": "Red"},
+                                                         {"system": "psx", "bucket": "psx/FF7.chd", "title": "FF7"}]}
+        self.cache = {"gba/": self.files["gba/"], "gb/": self.files["gb/"], "scrapes/gba/": {}, "scrapes/gb/": {},
+                      "BIOS/": {}}
+        kw = self.collections_kw([favs], systems_off=["gb"])
+        self.assertEqual(kw["extras"][0][1:],
+                         [("  0/1", "cyan"), (f"  {cardedit.size_text(self.files['gba/']['gba/Ruby.zip'])}", "dim"),
+                          ("  🎮 1", "dim"), ("  🚫 1", "dim"), ("  📵 1", "dim")])
+
+    def test_collections_list_aligns_counts(self):
+        many = {"id": "many", "name": "Many", "games": [{"system": "gba", "bucket": f"gba/{n}.zip", "title": str(n)}
+                                                        for n in range(12)]}
+        few = {"id": "few", "name": "Few", "games": many["games"][:3]}
+        kw = self.collections_kw([many, few], setup=False)
+        self.assertEqual([row[1] for row in kw["extras"]], [("  🎮 12", "dim"), ("  🎮  3", "dim")])
+
+    def test_collections_list_size_is_sizing_without_cache(self):
+        favs = {"id": "favs", "name": "Favs", "games": [{"system": "gba", "bucket": "gba/Ruby.zip", "title": "Ruby"}]}
+        kw = self.collections_kw([favs])
+        self.assertEqual(kw["extras"][0][2], ("  …", "dim"))
+
+    def test_collections_list_explains_the_counts(self):
+        favs = {"id": "favs", "name": "Favs", "games": [{"system": "gba", "bucket": "gba/Ruby.zip", "title": "Ruby"},
+                                                         {"system": "gb", "bucket": "gb/Red.gb", "title": "Red"},
+                                                         {"system": "psx", "bucket": "psx/FF7.chd", "title": "FF7"}]}
+        kw = self.collections_kw([favs], systems_off=["gb"])
+        self.assertEqual(kw["tag_info"](0), [
+            ("🎮", "Playable", "1 game on systems this card syncs"),
+            ("🚫", "Off", "1 game on systems turned off on this card (x)"),
+            ("📵", "Not playable", "1 game on systems this device can't run")])
+        self.assertEqual(kw["tag_info"](1), [])
 
     def test_space_toggles_a_collection_off_again(self):
         self.favs()
@@ -823,7 +871,7 @@ class Flow(DataDir):
                 mock.patch.object(picker, "filter_list", Script(look((cardedit.CLEAR_KEY, 0)), look(None))), \
                 contextlib.redirect_stdout(io.StringIO()):
             cardedit.pick_collections("c", {"gba"})
-        self.assertEqual(seen, [("✅ 🔴 Pokemon (c clear filters)", "  2 playable, 1 match"), ("", "  2 playable")])
+        self.assertEqual(seen, [("✅ 🔴 Pokemon (c clear filters)", "  1 match"), ("", "")])
 
     def run_system(self, *steps, bucket="gba"):
         script = Script(*steps)

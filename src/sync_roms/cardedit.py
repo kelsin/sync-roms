@@ -654,11 +654,25 @@ def pick_collections(name, playable, card_status=None, setup=None):
     entry = store.saved_card(name)
     saved = entry.get("collections")
     ids = [i for i in saved if isinstance(i, str)] if isinstance(saved, list) else []
-    labels, not_playable, playable_games = [], [], []
+    off = store.systems_off(entry)
+    systems = {s["bucket"]: s for s in store.load_catalog()["systems"]}
+    card = card_entry(name, setup) if setup else None
+    labels, not_playable, playable_games, off_counts, sizes = [], [], [], [], []
     for c in found:
-        playable_games.append([g for g in colls.collection_games(c) if g.get("system") in playable])
-        not_playable.append(len(colls.collection_games(c)) - len(playable_games[-1]))
+        games = colls.collection_games(c)
+        on_card = [g for g in games if g.get("system") in playable]  # the systems the card syncs
+        playable_games.append([g for g in on_card if g.get("system") not in off])
+        off_counts.append(len(on_card) - len(playable_games[-1]))
+        not_playable.append(len(games) - len(on_card))
         labels.append(f"{themeart.art_emoji(c.get('art'))} {c['name']}")
+        if card:
+            by_system, total, partial = {}, 0, False
+            for g in playable_games[-1]:
+                by_system.setdefault(g["system"], []).append(g["bucket"])
+            for bucket, keys in by_system.items():
+                costs, part = budget.game_costs(card, systems[bucket], keys) if bucket in systems else ({}, True)
+                total, partial = total + sum(costs.values()), partial or part
+            sizes.append(SIZING if partial else size_text(total))
     extras = [[] for _ in found]
     shown = {}
 
@@ -668,15 +682,27 @@ def pick_collections(name, playable, card_status=None, setup=None):
         def have_text(games):
             have = sum(1 for g in games if picks.on_card(g["bucket"]))
             return "  ✅" if have == len(games) > 0 else f"  {have}/{len(games)}"
-        def count_text(games, n):
-            text = f"  {len(games)} playable" + (f", {n} not playable" if n else "")
-            if tagui.FILTER.describe():  # the tag filter applies when the collection's games open
-                text += f", {sum(1 for g in games if tagui.FILTER.keep(g['bucket']))} match"
-            return (text, "dim")
+        def count(emoji, n, width):
+            return (f"  {emoji} {n:>{width}}" if n else "", "dim")
+        widths = [max(len(str(n)) for n in col) for col in (map(len, playable_games), off_counts, not_playable)]
         extras[:] = [[("  ✅ on the card" if c["id"] in ids else "", "green"),
-                      *([(have_text(games), "cyan")] if picks else []), count_text(games, n)]
-                     for c, games, n in zip(found, playable_games, not_playable)]
+                      *([(have_text(games), "cyan"), (f"  {sizes[i]}", "dim")] if picks else []),
+                      count("🎮", len(games), widths[0]), count("🚫", offn, widths[1]), count("📵", n, widths[2]),
+                      # the tag filter applies when the collection's games open
+                      *([(f"  {sum(1 for g in games if tagui.FILTER.keep(g['bucket']))} match", "dim")]
+                        if tagui.FILTER.describe() else [])]
+                     for i, (c, games, offn, n) in enumerate(zip(found, playable_games, off_counts, not_playable))]
         shown["status"] = card_status() if card_status else None
+
+    def legend(i):
+        """The highlighted collection's three counts explained, as the footer block game lists use for tags."""
+        if i >= len(found):
+            return []
+        def line(emoji, title, n, text):
+            return (emoji, title, f"{n} {'game' if n == 1 else 'games'} {text}")
+        return [line("🎮", "Playable", len(playable_games[i]), "on systems this card syncs"),
+                line("🚫", "Off", off_counts[i], "on systems turned off on this card (x)"),
+                line("📵", "Not playable", not_playable[i], "on systems this device can't run")]
 
     def on_hotkey(key, idx):
         if idx is None or key == CLEAR_KEY:
@@ -692,7 +718,7 @@ def pick_collections(name, playable, card_status=None, setup=None):
         mark()
         i = picker.filter_list(f"💖 Collections on {name} (Space toggles · Enter opens)", labels, extras=extras,
                            hotkeys=(" ", "\t", CLEAR_KEY), on_hotkey=on_hotkey, hint=tagui.menu_hint(COLLECTIONS_HINT),
-                           filters=tagui.banner(), cursor=pos,
+                           filters=tagui.banner(), cursor=pos, tag_info=legend,
                            key_help=[("Space/Tab", "put the collection on the card or take it off"),
                                      ("Enter", "show its games to pick them one by one"), tagui.KEYS_HELP[1]],
                            status=(lambda _state: shown["status"]) if card_status else None,
