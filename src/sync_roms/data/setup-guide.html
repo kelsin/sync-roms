@@ -32,7 +32,7 @@
   }
 }
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; --hdr: 120px; --tocbar: 0px; }
+html { --hdr: 120px; --tocbar: 0px; }
 body {
   margin: 0;
   background: var(--bg);
@@ -1834,8 +1834,10 @@ document.getElementById("toc").addEventListener("click", e => {
   const a = e.target.closest("a");
   if (!a) return;
   e.preventDefault();
-  document.getElementById(a.getAttribute("href").slice(1)).scrollIntoView();
-  setActive(a.getAttribute("href").slice(1));
+  const id = a.getAttribute("href").slice(1);
+  locked = true;
+  document.getElementById(id).scrollIntoView();
+  setActive(id);
 });
 
 // Keep the sticky header and section bar heights in CSS so anchors land below them.
@@ -1866,9 +1868,15 @@ function setActive(id) {
     }
   }
 }
+// After a jump the clicked section stays highlighted (the last, short sections can't reach the top) until the reader scrolls by hand.
+let locked = false;
+for (const ev of ["wheel", "touchstart", "keydown", "mousedown"]) {
+  window.addEventListener(ev, e => { if (!(e.target.closest && e.target.closest("#toc"))) locked = false; }, { passive: true });
+}
 let ticking = false;
 function track() {
   ticking = false;
+  if (locked) return;
   const secs = [...document.querySelectorAll("section.step")];
   if (!secs.length) return;
   const line = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--hdr")) + (parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--tocbar")) || 0) + 24;
