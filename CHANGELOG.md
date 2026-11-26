@@ -1,5 +1,19 @@
 # Changelog
 
+## [4.9.0](https://github.com/kelsin/sync-roms/compare/v4.8.0...v4.9.0) (2026-11-26)
+
+
+### :video_game: Features
+
+* **surprise:** replace every surprise unless kept, and show each one's size ([#652](https://github.com/kelsin/sync-roms/issues/652)) ([aa12c0c](https://github.com/kelsin/sync-roms/commit/aa12c0cfae07dd2ec0f933c699a5fff7d0ca4baa))
+* **theme:** add seven Pokémon palettes for the Pixel themes ([#651](https://github.com/kelsin/sync-roms/issues/651)) ([537237e](https://github.com/kelsin/sync-roms/commit/537237e6c31f5de0a041ac73ddaaf49668e29a34))
+* **themes:** add the ToTK - Kelsin custom theme ([#650](https://github.com/kelsin/sync-roms/issues/650)) ([c2deeed](https://github.com/kelsin/sync-roms/commit/c2deeed4f436c4d998e2a0e3f46c6a9ffddd141d))
+
+
+### :zap: Performance Improvements
+
+* speed up the test suite ([#648](https://github.com/kelsin/sync-roms/issues/648)) ([5f913c5](https://github.com/kelsin/sync-roms/commit/5f913c58e40007e54af7de0f430cc288676bf5e5))
+
 ## [4.8.0](https://github.com/kelsin/sync-roms/compare/v4.7.0...v4.8.0) (2026-11-26)
 
 
