@@ -4,7 +4,7 @@ import io
 import json
 import os
 
-from . import collections, inventory, names, s3, scrape_plan, store, tags, themeart, ui
+from . import collections, inventory, metafilter, names, s3, scrape_plan, store, tags, themeart, ui
 
 QUALITY = 80
 BAND_WIDTH = 150
@@ -68,6 +68,20 @@ def _sizes(systems):
         return {}
 
 
+def _years(systems):
+    """{system: {ROM path in the system folder: release year}} from each system's scraped metadata.json (games with no
+    year are left out); {} when storage isn't reachable."""
+    out = {}
+    try:
+        for system in sorted(systems):
+            meta = scrape_plan.load_metadata(system)
+            out[system] = {rom: next(iter(v["year"])) for rom, entry in meta.items()
+                           if (v := metafilter.values(entry)).get("year")}
+    except (SystemExit, ValueError, *s3.ERRORS):
+        return {}  # the tags and sizes already warned about unreachable storage
+    return out
+
+
 def _game_size(paths, listed):
     """{"rom", "art"} bytes of a game's files (listed: _system_sizes of its system), or None when storage has none of them."""
     if listed is None:
@@ -85,6 +99,7 @@ def page_data():
     system_names = {s["bucket"]: s["name"] for s in store.repo_json("systems")}
     loaded = collections.load_collections()
     sizes = _sizes({g["bucket"].partition("/")[0] for c in loaded for g in c["games"]})
+    years = _years({g["bucket"].partition("/")[0] for c in loaded for g in c["games"]})
     used, out = set(), []
     for collection in loaded:
         games = []
@@ -100,6 +115,9 @@ def page_data():
             size = _game_size(paths, sizes.get(system))
             if size:
                 entry["size"] = size
+            year = years.get(system, {}).get(bucket.partition("/")[2])
+            if year:
+                entry["year"] = year
             games.append(entry)
         games.sort(key=lambda g: store.sort_key(g["title"]))
         art_id = collection.get("art") or collection["id"]
