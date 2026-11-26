@@ -55,20 +55,20 @@ def add_games(tag_id, systems, keys_of, add):
 
 
 def rename(tag_id, tag):
-    name = ui.ask(f"Name [{tag['name']}] (empty cancels): ").strip()
+    name = ui.ask(f"   Name ({tag['name']}; empty keeps it): ").strip()
     if not name:
-        edit.note(ui.yellow("⚠️  A tag needs a name; nothing was changed."))
-    elif any(i != tag_id and tags.slug(t["name"]) == tags.slug(name) for i, t in tags.all_tags().items()):
+        return
+    if any(i != tag_id and tags.slug(t["name"]) == tags.slug(name) for i, t in tags.all_tags().items()):
         edit.note(ui.yellow(f"⚠️  There is already a tag named {name}; nothing was changed."))
     else:
         _save(tags.define_tag, tag_id, {"name": name})  # the id never changes
 
 
 def change_emoji(tag_id, tag):
-    emoji = ui.ask(f"Emoji [{tag['emoji']}] (empty cancels): ").strip()
+    emoji = ui.ask(f"   Emoji ({tag['emoji']}; empty keeps it): ").strip()
     if not emoji:
-        problem = "a tag needs an emoji"
-    elif any(i != tag_id and t["emoji"] == emoji for i, t in tags.all_tags().items()):
+        return
+    if any(i != tag_id and t["emoji"] == emoji for i, t in tags.all_tags().items()):
         problem = f"{emoji} is already another tag's emoji"
     else:
         _save(tags.define_tag, tag_id, {"emoji": emoji})
@@ -147,7 +147,7 @@ def settings_menu(tag_id, systems, keys_of):
         elif i == 1:
             change_emoji(tag_id, tag)
         elif i == 2:
-            text = ui.ask("One-line description (empty keeps it): ").strip()
+            text = ui.ask("   One-line description (empty keeps it): ").strip()
             if text:
                 _save(tags.define_tag, tag_id, {"description": text})
         elif i == 3:
@@ -180,9 +180,11 @@ def edit_one(tag_id, systems, keys_of):
         kept.update(keys)
         query = ""
         if not kept:  # nothing to list: the same actions as a menu
-            i = picker.filter_list(f"{header(tag)} (Esc = back)", ["Add games", "Settings"], hotkeys=(QUIT_KEY,),
-                                   hint=f"Enter open · {QUIT_HINT} · Esc back")
-            pressed = None if i is None else QUIT_KEY if isinstance(i, tuple) else ADD_KEY if i == 0 else SETTINGS_KEY
+            i = picker.filter_list(f"{header(tag)} (Esc = back)", ["Add games", "Settings"],
+                                   hotkeys=(ADD_KEY, ADD_ALIAS, SETTINGS_KEY, QUIT_KEY),
+                                   hint=f"Enter open · A add games · S settings · {QUIT_HINT} · Esc back",
+                                   key_help=[("Enter", "open the row"), *GAMES_HELP, ("Esc", "back")])
+            pressed = None if i is None else i[0] if isinstance(i, tuple) else ADD_KEY if i == 0 else SETTINGS_KEY
         else:
             entry = {"bucket": "", "games": [{"bucket": k} for k in keys]}
             rows = sorted(((entry, k, names.title(k), f"{system_names.get(k.partition('/')[0], k.partition('/')[0])} — {names.title(k)}")
@@ -190,16 +192,19 @@ def edit_one(tag_id, systems, keys_of):
             if place.get("added"):  # back from adding: on the first game added
                 at = next(i for i, r in enumerate(rows) if r[1] in place["added"])
                 place = {"keys": [r[1] for r in rows], "session": {"row": at}}
+            def follow(key):  # t or . changed the row's tags: its check follows whether it has this tag now
+                entry["games"] = [g for g in entry["games"] if g["bucket"] != key] + (
+                    [{"bucket": key}] if tag_id in tags.tags_of(tags.owner(key)) else [])
             try:
                 pressed = edit.toggle_games(header(tag), rows, hotkeys=(ADD_KEY, ADD_ALIAS, SETTINGS_KEY, QUIT_KEY),
                                             hint=GAMES_HINT, key_help=GAMES_HELP, place=place, notes=False,
-                                            tag_filter=False)
+                                            tag_filter=False, retagged=follow)
             finally:  # Ctrl-C too: the toggles made are saved
                 now = {g["bucket"] for g in entry["games"]}
                 gone, back = set(keys) - now, sorted(now - set(keys))
                 if gone or back:
                     _save(tags.retag_games, tag_id, add=back, remove=gone, files={k: files[k] for k in back if k in files})
-            query = place.get("session", {}).get("query", "")
+            query = place.get("session", {}).get("query", "").strip()  # spaces alone are no search
         if pressed == QUIT_KEY:
             raise Quit
         if pressed is None:

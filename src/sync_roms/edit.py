@@ -65,7 +65,7 @@ WHEN_FILTERED = "filtered"  # select_all value: `a` is on only while a tag filte
 
 
 def toggle_games(title, rows, hotkeys=(), hint=None, place=None, filters="", key_help=None, select_all=True, notes=True,
-                 tag_filter=True, before=None):
+                 tag_filter=True, before=None, retagged=None):
     """_toggle_games over the rows tagui.FILTER keeps, reopened after `t` edited a game's tags (the same rows, in the
     same place) or `s`/`c` changed the tag filter (the new rows; the / search and cursor stay only when they are the
     same rows), the toggles made so far applied first; the other keys are returned as it does.
@@ -73,7 +73,8 @@ def toggle_games(title, rows, hotkeys=(), hint=None, place=None, filters="", key
     every row is shown, with no s/c and no banner, for lists whose hidden rows would be acted on unseen (a suggestion
     review, a tag's own games). select_all: True, False, or WHEN_FILTERED (on only while a tag filter is set, judged on
     each pass). before: how many rows there were before the caller's own filters left out some, so a list they emptied
-    says no game matches."""
+    says no game matches. retagged(key): called after t or . wrote the tags of the row of key, before the list opens
+    again (a tag's own games make its check follow the tag)."""
     place = {} if place is None else place
     own = tuple(k for k in (*tagui.HOTKEYS, tagui.BULK_KEY) if k not in hotkeys) if tag_filter else ()
     names_filter = tagui.SET_KEY in own  # else the caller's filters line names the tag filter
@@ -94,7 +95,8 @@ def toggle_games(title, rows, hotkeys=(), hint=None, place=None, filters="", key
                                    None if key_help is None else [*key_help, *(h for h in helps if h not in key_help)],
                                    every, notes)
         if pressed in tagui.TAG_KEYS:
-            tagui.tag_key(pressed, *(shown[i][1:3] if i is not None else (None, None)))
+            if tagui.tag_key(pressed, *(shown[i][1:3] if i is not None else (None, None))) and retagged:
+                retagged(shown[i][1])
             frozen = shown
         elif pressed == tagui.BULK_KEY and pressed in own:
             tagui.bulk_tag([r[1] for r in picker.on_screen(place, shown)])

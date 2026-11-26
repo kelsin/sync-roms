@@ -46,6 +46,7 @@ class Editor(unittest.TestCase):
         with mock.patch.object(picker, "filter_list", fake), mock.patch.object(ui, "ask", side_effect=list(asks)), \
                 mock.patch.object(ui, "confirm", side_effect=list(confirms)) as confirm:
             self.assertEqual(tageditor.edit_tags(), 0)
+            self.asked = [c.args[0] for c in ui.ask.call_args_list]
         return confirm
 
     def test_list_shows_emoji_name_and_count(self):
@@ -76,11 +77,14 @@ class Editor(unittest.TestCase):
         self.assertEqual(tags.tags_of(B), ["shmups"])
         self.assertNotIn("shoot-em-ups", tags.all_tags())
 
-    def test_empty_name_is_refused(self):
+    def test_an_empty_name_or_emoji_keeps_it_silently_as_the_collection_editor_does(self):
         before = self.disk()
-        self.run_editor(["Shmups", ("S", None), "Name"], asks=[""])
+        self.run_editor(["Shmups", ("S", None), "Name", "Emoji", "Description"], asks=["", "", ""])
         self.assertEqual(self.disk(), before)
-        self.assertTrue(self.notes)
+        self.assertEqual(self.notes, [])
+        self.assertEqual(self.asked,
+                         ["   Name (Shmups; empty keeps it): ", "   Emoji (🚀; empty keeps it): ",
+                          "   One-line description (empty keeps it): "])
 
     def test_emoji_changes(self):
         self.run_editor(["Shmups", ("S", None), "Emoji"], asks=["🛸"])
@@ -91,12 +95,6 @@ class Editor(unittest.TestCase):
         self.run_editor(["Shmups", ("S", None), "Emoji"], asks=["🐝"])
         self.assertEqual(self.disk(), before)
         self.assertIn("🐝", self.notes[-1])
-
-    def test_empty_emoji_is_refused(self):
-        before = self.disk()
-        self.run_editor(["Shmups", ("S", None), "Emoji"], asks=[""])
-        self.assertEqual(self.disk(), before)
-        self.assertTrue(self.notes)
 
     def test_description(self):
         self.run_editor(["Shmups", ("S", None), "Description"], asks=["Shoot them up"])
@@ -249,6 +247,25 @@ class Editor(unittest.TestCase):
             self.run_editor(["Shmups", ("S", None), "Emoji"], asks=["🛸"])
         self.assertIn("unmounted", self.notes[-1])
         self.assertEqual(tags.all_tags()["shmups"]["emoji"], "🚀")
+
+    def test_t_on_a_row_of_the_tags_own_games_moves_its_check_with_the_tag(self):
+        """t takes this tag off B: B shows unchecked, and t putting it back shows it checked, with nothing undone on
+        leaving."""
+        seen = []
+
+        def fake(title, labels, **kw):
+            seen.append(list(kw["initial"]))
+            at = labels.index("Nintendo NES — B (USA)")
+            return ("t", at) if len(seen) < 3 else kw["session"]["sel"]
+
+        def edit_tags(key, title):
+            (tags.change_game_tags(key, remove={"shmups"}) if "shmups" in tags.tags_of(key)
+             else tags.change_game_tags(key, add={"shmups"}))
+            return True
+        with mock.patch.object(picker, "filter_list", fake), mock.patch.object(tagui, "edit_game_tags", edit_tags):
+            tageditor.edit_one("shmups", SYSTEMS, lambda b: set())
+        self.assertEqual(seen, [[True, True], [True, False], [True, True]])
+        self.assertEqual(tags.tags_of(B), ["shmups"])
 
     def test_its_games_offer_no_notes_and_ignore_the_sticky_filter(self):
         with mock.patch.object(edit, "toggle_games", return_value=None) as toggle:
@@ -474,6 +491,11 @@ class Walkthrough(unittest.TestCase):
                 self.assertEqual(len(titles), 4)  # the tags, Shmups's games, all systems, its games again (Q)
                 self.assertIn("All systems", titles[2])
 
+    def test_a_after_a_search_of_spaces_alone_picks_a_system(self):
+        titles = self.walk([self.pick("Shmups"), self.search_then("A", "   "), self.esc,
+                            lambda labels, kw: kw["initial"], self.esc])
+        self.assertIn("which system", titles[2])
+
     def test_a_with_no_search_picks_a_system(self):
         titles = self.add_missing("Nintendo NES")
         self.assertEqual(len(titles), 5)
@@ -550,9 +572,11 @@ class RealKeys(unittest.TestCase):
 
         def run(model):
             titles.append(model.title)
-            for k in next(screens):
+            keys = list(next(screens))
+            for n, k in enumerate(keys, 1):
                 got = model.key(k)
                 if got is not picker.KEEP:
+                    self.assertEqual(keys[n:], [], f"{model.title} closed before these keys")
                     return got
             self.fail(f"{model.title} was still open")
         with mock.patch.object(picker, "_run", run), mock.patch.object(picker, "_draws_images", return_value=False), \
@@ -561,7 +585,20 @@ class RealKeys(unittest.TestCase):
                 mock.patch.object(tageditor, "folder_lister", lambda: lambda bucket: {A, B, C}), \
                 mock.patch.object(ui, "ask", side_effect=list(asks)), mock.patch("builtins.print"):
             self.assertEqual(tageditor.edit_tags(), 0)
+        self.assertEqual(list(screens), [], "screens left over")
         return titles
+
+    def test_a_or_plus_on_a_tag_with_no_games_adds_its_first(self):
+        for key in ("A", "+"):
+            with self.subTest(key=key):
+                tags.define_tag("new", {"name": "New", "emoji": "🆕"})
+                titles = self.press([["/", *"new", "enter", "enter"], [key], ["enter"],
+                                     ["/", *"c (usa)", "enter", "space", "Q"]])
+                self.assertEqual(len(titles), 4)
+                self.assertIn("which system", titles[2])
+                self.assertIn("All systems", titles[3])
+                self.assertEqual(tags.tags_of(C), ["new"])
+                tags.retag_games("new", remove=[C])
 
     def test_a_search_with_no_match_then_a_space_q(self):
         tagui.FILTER.required = {"cave"}
