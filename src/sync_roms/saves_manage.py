@@ -4,7 +4,7 @@ import json
 import os
 import shutil
 
-from . import muos_saves, picker, saves, store, ui
+from . import gamecols, muos_saves, picker, saves, store, ui
 
 
 def _real(path):
@@ -218,18 +218,29 @@ def _label(row):
     return row["game"] + (f" · {rel}" if rel else "")
 
 
-def _extras(row, names):
-    return [("  " + text, color) for text, color in _columns(row, names)]  # two spaces between columns, as the card editor
+def _extras(row):
+    return [("  " + text, color) for text, color in _columns(row)]  # two spaces between columns, as the card editor
 
 
-def _columns(row, names):
+def _columns(row):
+    """A stash's cells after Name, System and Year: card, stashed, counts, size, core, missing, note."""
     if row["unreadable"]:
-        return [("", "dim"), ("", ""), ("", "dim"), ("", ""), (ui.human_size(row["size"]), ""), ("", "cyan"),
-                ("unreadable", "red"), ("", "dim")]
-    return [(names.get(row["system"], row["system"]), "dim"), (f"from {row['card']}", ""),
-            (row["stashed"][:16].replace("T", " "), "dim"), (saves._counts([f["kind"] for f in row["files"]]), ""),
-            (ui.human_size(row["size"]), ""), (row["core"] or "", "cyan"),
-            (f"{len(row['missing'])} missing" if row["missing"] else "", "red"), (row.get("note", ""), "dim")]
+        return [("", ""), ("", "dim"), ("", ""), (ui.human_size(row["size"]), ""), ("", "cyan"), ("unreadable", "red"),
+                ("", "dim")]
+    return [(f"from {row['card']}", ""), (row["stashed"][:16].replace("T", " "), "dim"),
+            (saves._counts([f["kind"] for f in row["files"]]), ""), (ui.human_size(row["size"]), ""),
+            (row["core"] or "", "cyan"), (f"{len(row['missing'])} missing" if row["missing"] else "", "red"),
+            (row.get("note", ""), "dim")]
+
+
+def _values(row, col):
+    """A stash's sort value for a column of the list: None when it has none."""
+    if row["unreadable"]:
+        return row["size"] if col == "size" else None
+    return {"stashed": row["stashed"], "size": row["size"], "core": row["core"] or None}.get(col)
+
+
+FILES_SORT = picker.Sort(("name",))  # the files list's sort, for the run
 
 
 def _file_rows(row):
@@ -243,16 +254,28 @@ def _file_rows(row):
 
 def _show_files(row):
     files = _file_rows(row)
-    extras = []
+    extras, sizes, whens = [], [], []
+    core = "" if row["unreadable"] else row["core"] or ""
     for _, kind, path, mark in files:
         try:
             st = os.stat(path)
-            size, when = ui.human_size(st.st_size), datetime.datetime.fromtimestamp(st.st_mtime).strftime("%Y-%m-%d %H:%M")
+            sizes.append(st.st_size)
+            whens.append(datetime.datetime.fromtimestamp(st.st_mtime).strftime("%Y-%m-%d %H:%M"))
         except OSError:
-            size = when = ""
-        extras.append([(kind, "dim"), (size, ""), (when, "dim"), (mark, "red" if mark == "missing" else "dim")])
+            sizes.append(None)
+            whens.append(None)
+        extras.append([("  " + text, color) for text, color in
+                       ((kind, "dim"), (ui.human_size(sizes[-1]) if sizes[-1] is not None else "", ""),
+                        (whens[-1] or "", "dim"), (core, "cyan"), (mark, "red" if mark == "missing" else "dim"))])
+    values = {"kind": [f[1] or None for f in files], "size": sizes, "modified": whens,
+              "core": [core or None] * len(files)}
     title = row["rel_dir"] if row["unreadable"] else row["game"]
-    picker.filter_list(f"💾 {title} files", [f[0] for f in files], extras=extras, hint="Esc back")
+    picker.filter_list(f"💾 {title} files", [f[0] for f in files], extras=extras, hint="Esc back", sort=FILES_SORT,
+                       columns=[picker.Column("name", "File", True), picker.Column("kind", "Kind", True),
+                                picker.Column("size", "Size", True, descending=True),
+                                picker.Column("modified", "Modified", True, descending=True),
+                                picker.Column("core", "Core", True), picker.Column("mark", "Mark")],
+                       sort_value=lambda i, col: values[col][i] if col in values else None)
 
 
 def _describe(row, names):
@@ -280,18 +303,28 @@ def _manage(rows, systems, dry_run):
         if not changed:
             return f"Label unchanged: {row['game']}"
         labelled.add(id(row))
-        extras[i] = _extras(row, names)
+        cols.shown[i][2:] = _extras(row)
         what = f"labelled {text.strip()!r}" if text.strip() else "label removed"
         return f"{'Would be ' if dry_run else ''}{what}: {row['game']}"
 
     while rows:
-        extras = [_extras(r, names) for r in rows]
+        cols = gamecols.GameColumns(
+            [("", r["rel_dir"], None) if r["unreadable"] else (r["system"], r["game"], None) for r in rows],
+            extra_columns=[picker.Column("from", "Card"), picker.Column("stashed", "Stashed", True, descending=True),
+                           picker.Column("kinds", "Saves"), picker.Column("size", "Size", True, descending=True),
+                           picker.Column("core", "Core", True), picker.Column("missing", "Missing"),
+                           picker.Column("note", "Note")],
+            extra_values=lambda i, col: _values(rows[i], col))
+        kwargs = cols.kwargs([_extras(r) for r in rows])
+        for r, cells in zip(rows, kwargs["extras"]):
+            if r["unreadable"]:  # no known system or game: nothing to show or look up
+                cells[:2] = [("", "dim"), ("", "dim")]
         state = picker.filter_list(
             "🗂️ Stashed saves", [_label(r) for r in rows], multi=True, initial=[False] * len(rows), esc_asks=False,
-            extras=extras, session=session, hotkeys=("enter", "m", "p", "d"),
+            session=session, hotkeys=("enter", "m", "p", "d"),
             on_note=on_note, note_text=lambda i: rows[i].get("note", ""),
             hint=HINT,
-            key_help=KEY_HELP)
+            key_help=KEY_HELP, **kwargs)
         if not isinstance(state, tuple):
             break
         key, i = state

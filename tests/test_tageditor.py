@@ -52,7 +52,7 @@ class Editor(unittest.TestCase):
     def test_list_shows_emoji_name_and_count(self):
         self.run_editor([None])
         title, labels = self.shown[0]
-        self.assertEqual(labels[:2], ["🐝 Cave  (1 games)", "🚀 Shmups  (2 games)"])
+        self.assertEqual(labels[:2], ["🐝 Cave", "🚀 Shmups"])
         self.assertIn("New tag", labels[2])
 
     def test_c_on_the_tag_list_clears_the_sticky_filter_and_the_banner_shows_while_it_is_on(self):
@@ -68,7 +68,7 @@ class Editor(unittest.TestCase):
             self.assertEqual(tageditor.edit_tags(), 0)
         self.assertEqual(banners[0][0], "✅ 🚀 Shmups (c clear filters)")
         self.assertIn("c clear filters", banners[0][1])
-        self.assertEqual(banners[1], ("", "/ filter · Enter open · n new tag · o sort · Esc back"))
+        self.assertEqual(banners[1], ("", "/ filter · Enter open · n new tag · Esc back"))
         self.assertEqual(tagui.FILTER.describe(), "")
 
     def test_rename_changes_the_name_not_the_id(self):
@@ -118,20 +118,30 @@ class Editor(unittest.TestCase):
         self.assertEqual(self.disk(), before)
         self.assertIn("already a tag named cave", self.notes[-1])
 
-    def test_o_toggles_the_sort_to_game_count_and_dims_empty_tags(self):
+    def test_tag_list_columns(self):
         tags.define_tag("empty", {"name": "Aaa", "emoji": "⭕"})
         seen = []
-        script = iter([("o", 0), None])
 
         def fake(title, labels, **kw):
             seen.append((labels, kw))
-            return next(script)
+            return None
         with mock.patch.object(picker, "filter_list", fake):
             self.assertEqual(tageditor.edit_tags(), 0)
-        self.assertEqual(seen[0][0][0][:5], "⭕ Aaa")  # by name first
-        self.assertEqual(seen[1][0][0][:8], "🚀 Shmups")  # then most games first
-        self.assertIn(("no games", "dim"), seen[0][1]["extras"][0])
-        self.assertIn("o sort", seen[0][1]["hint"])
+        labels, kw = seen[0]
+        self.assertEqual([c.id for c in kw["columns"]], ["name", "games"])
+        self.assertTrue(all(c.sortable for c in kw["columns"]))
+        self.assertEqual(kw["pinned"], [False] * (len(labels) - 1) + [True])
+        self.assertEqual(labels[-1], "➕ New tag")
+        self.assertNotIn("o", kw["hotkeys"])
+        self.assertIs(kw["sort"], tageditor.TAG_SORT)
+        self.assertIsNone(kw["cursor"])  # the top of the sorted list, not the caller's row 0
+        self.assertTrue(kw["columns"][1].descending)  # o on Games starts with the most
+        self.assertEqual(kw["extras"][labels.index("⭕ Aaa")], [("no games", "dim")])
+        n = len(labels) - 1
+        shmups = next(i for i, l in enumerate(labels) if l.startswith("🚀"))
+        self.assertEqual(kw["sort_value"](shmups, "games"), int(kw["extras"][shmups][0][0]))
+        self.assertEqual(kw["sort_value"](shmups, "name"), store.sort_key("Shmups"))
+        self.assertIsNone(kw["sort_value"](n, "games"))
 
     def test_merge_declined_writes_nothing(self):
         before = self.disk()
@@ -158,7 +168,7 @@ class Editor(unittest.TestCase):
         self.run_editor(["Cave", ("S", None), "Delete"], confirms=[True])
         self.assertEqual(tagui.FILTER.state(), (set(), set(), False))
 
-    def test_its_games_lists_titles_with_systems_and_unchecked_ones_lose_the_tag(self):
+    def test_its_games_lists_titles_and_unchecked_ones_lose_the_tag(self):
         seen = []
 
         def toggle(title, rows, **kw):
@@ -168,7 +178,7 @@ class Editor(unittest.TestCase):
             return None
         with mock.patch.object(edit, "toggle_games", toggle):
             self.run_editor(["Shmups"])
-        self.assertEqual(seen, [[(A, "A (USA)", "Nintendo NES — A (USA)"), (B, "B (USA)", "Nintendo NES — B (USA)")]])
+        self.assertEqual(seen, [[(A, "A (USA)", "A (USA)"), (B, "B (USA)", "B (USA)")]])
         self.assertEqual(tags.tags_of(A), ["cave", "shmups"])
         self.assertEqual(tags.tags_of(B), [])
 
@@ -258,7 +268,7 @@ class Editor(unittest.TestCase):
 
         def fake(title, labels, **kw):
             seen.append(list(kw["initial"]))
-            at = labels.index("Nintendo NES — B (USA)")
+            at = labels.index("B (USA)")
             return ("t", at) if len(seen) < 3 else kw["session"]["sel"]
 
         def edit_tags(key, title):
@@ -275,7 +285,7 @@ class Editor(unittest.TestCase):
 
         def fake(title, labels, **kw):
             seen.append(list(kw["initial"]))
-            at = labels.index("Nintendo NES — B (USA)")
+            at = labels.index("B (USA)")
             if len(seen) == 1:
                 kw["session"]["sel"] = [True, False]  # B unchecked, then t on it
                 return "t", at
@@ -311,7 +321,7 @@ class GamesFirst(unittest.TestCase):
         self.assertIn("🚀 Shmups", title)
         self.assertEqual([r[1] for r in rows], [A, B])
         self.assertEqual(kw["hotkeys"], ("A", "+", "S", "Q"))
-        for part in ("A add games", "S settings", "Q quit the editor", "o view"):
+        for part in ("A add games", "S settings", "Q quit the editor", "V view"):
             self.assertIn(part, kw["hint"])
         self.assertNotIn(" + ", kw["hint"])  # + is a silent alias, as in the collection editor
         self.assertIn(("A / +", "add games"), kw["key_help"])

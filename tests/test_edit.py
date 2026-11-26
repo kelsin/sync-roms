@@ -14,7 +14,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from helpers import DataDir  # noqa: E402,F401  (re-exported: other test modules still import it from here)
 from helpers import feed_list, pilot_list, screen_lines, screen_text, shown_preview  # noqa: E402
 from helpers import VITA_DLC as DLC, VITA_GAME as G, VITA_UPDATE as NEW  # noqa: E402
-from sync_roms import edit, names, picker, runtime, s3, store, ui  # noqa: E402
+from sync_roms import edit, gamemeta, names, picker, runtime, s3, store, ui  # noqa: E402
 import textual._wait  # noqa: E402
 
 _GRANULARITY = textual._wait.SLEEP_GRANULARITY
@@ -102,7 +102,7 @@ class Helpers(unittest.TestCase):
                            {"title": "A", "system": "gba", "bucket": "gba/A.zip", "category": "Second"}]}
         rows = edit.list_rows(games, list_systems(), lambda s: set())
         self.assertEqual([r[1] for r in rows], ["gba/A.zip", "gba/Z.zip"])
-        self.assertTrue(rows[0][3].startswith("Game Boy Advance — A"))
+        self.assertEqual(rows[0][3], "A  ⚠️ not in storage")
 
 
 class Saving(DataDir):
@@ -282,6 +282,33 @@ class MenuActions(EditBase):
         self.run_menu([0, (edit.DELETE_KEY, 0), None, 4], confirm=False)
         self.assertIn("c", self.read("cards.json"))
 
+    def test_the_card_list_has_sortable_card_and_device_columns(self):
+        self.write_json("cards.json", {"b": {"layout": "esde", "device": "full"}, "a": {}})
+        seen = []
+        picks = iter([0, None, 4])
+
+        def fake(title, options, *a, **k):
+            seen.append((title, list(options), k))
+            return next(picks)
+        with mock.patch.object(runtime, "BUCKET", "b", create=True), \
+                mock.patch.object(s3, "list_sizes", return_value={}), \
+                mock.patch.object(picker, "filter_list", side_effect=fake), \
+                mock.patch.object(edit, "note"), contextlib.redirect_stdout(io.StringIO()):
+            edit.edit_manifest()
+        title, options, kw = seen[1]
+        self.assertEqual(options, ["💳 a", "💳 b", "➕ New card"])
+        self.assertEqual([(c.id, c.header, c.sortable) for c in kw["columns"]],
+                         [("name", "Card", True), ("device", "Device", True), ("surprise", "Surprise", False),
+                          ("changes", "Changes", False)])
+        self.assertIs(kw["sort"], edit.CARDS_SORT)
+        self.assertEqual(kw["pinned"], [False, False, True])
+        self.assertIsNone(kw["cursor"])  # the top of the sorted list
+        self.assertIsNone(kw["sort_value"](0, "device"))  # no device set: last
+        self.assertEqual(kw["sort_value"](1, "device"), "full · es-de")
+        self.assertEqual(kw["sort_value"](0, "name"), store.sort_key("a"))
+        self.assertIsNone(kw["sort_value"](2, "name"))
+        self.assertTrue(all(len(row) == 3 for row in kw["extras"]))
+
     def test_done_with_no_changes_saves_nothing(self):
         self.assertEqual(self.run_menu([4]), 0)
         self.assertFalse(os.path.exists(self.path("cards.json")))
@@ -381,7 +408,7 @@ class MenuActions(EditBase):
         from sync_roms import cardedit
         self.write_json("cards.json", {x: {"layout": "esde", "device": "full"} for x in "abc"})
         with mock.patch.object(cardedit, "edit_card"):
-            self.assertEqual(self.cursors_of([0, 2, 1, None, 4], "💳 Which"), [0, 2, 1])
+            self.assertEqual(self.cursors_of([0, 2, 1, None, 4], "💳 Which"), [None, 2, 1])  # first: the top
 
     def test_the_device_list_reopens_on_the_row_just_used(self):
         self.assertEqual(self.cursors_of([3, 2, 1, None, 4], "🧩 Which"), [0, 2, 1])
@@ -420,6 +447,26 @@ class ListRows(unittest.TestCase):
         self.assertEqual(by["ful"]["games"], [])
         self.assertEqual([g["bucket"] for g in by["gba"]["games"]], ["gba/Gone.zip"])
         self.assertEqual([g["bucket"] for g in by["gen"]["games"]], ["gen/Zed.zip"])
+
+    def test_toggle_games_columns(self):
+        listing = {"name": "Mix", "games": [{"title": "A", "system": "gba", "bucket": "gba/A.zip"},
+                                            {"title": "Zed", "system": "gen", "bucket": "gen/Zed.zip"}]}
+        rows = edit.list_rows(listing, list_systems(), lambda s: {"gba/A.zip", "gen/Zed.zip"})
+        systems = [{"bucket": "gba", "name": "Game Boy Advance", "short": "GBA"}, {"bucket": "gen", "name": "Genesis"}]
+        with mock.patch.object(gamemeta, "_spawn", lambda fn: None), \
+                mock.patch.object(gamemeta.Metadata, "get", lambda self: {"gba/A.zip": {"year": {"2001"}}} if self.bucket == "gba" else None), \
+                mock.patch.object(store, "repo_json", lambda name: systems), \
+                mock.patch.object(picker, "filter_list", return_value=[False, False]) as fl:
+            edit.toggle_games("t", rows)
+        kw = fl.call_args.kwargs
+        self.assertEqual([c.id for c in kw["columns"]][:3], ["name", "system", "year"])
+        self.assertEqual(fl.call_args.args[1], ["A", "Zed"])
+        self.assertIs(kw["sort"], picker.GAMES_SORT)
+        self.assertEqual(len(kw["columns"]), 5)
+        self.assertEqual(kw["extras"][0][:2], [("  GBA", "dim"), ("  2001", "dim")])
+        self.assertEqual(kw["extras"][1][:2], [("  Genesis", "dim"), ("  —", "dim")])
+        self.assertEqual([len(e) for e in kw["extras"]], [4, 4])  # then language and tag
+        self.assertEqual(kw["sort_value"](1, "year"), None)
 
     def test_toggle_games_shows_variant_notes(self):
         by = list_systems()
@@ -464,8 +511,8 @@ class ListRows(unittest.TestCase):
         self.assertEqual(self.run_list(iter(["/", "x", "space", "y", "enter", "escape", "space", "enter"])), [True, False])  # "x y" matches nothing; Esc clears it
 
     def test_view_cycle_shows_only_changed_rows(self):
-        # toggle row 0, then ^O twice: "changed only" lists just it, and Tab then toggles that row back
-        self.assertEqual(self.run_list(iter(["tab", "ctrl+o", "ctrl+o", "tab", "enter"])), [False, False])
+        # toggle row 0, then V twice: "changed only" lists just it, and Tab then toggles that row back
+        self.assertEqual(self.run_list(iter(["tab", "V", "V", "tab", "enter"])), [False, False])
 
     def test_hotkey_returns_pair(self):
         self.assertEqual(self.run_list(iter(["f"]), multi=False, hotkeys=("f",)), ("f", 0))
@@ -589,7 +636,7 @@ class Keys(unittest.TestCase):
         self.assertEqual(session["visible"], [1, 3])  # beta and delta have "ta"
         session = {"sel": [True, False, True, False], "view_mode": 1}
         run_list(["enter"], self.LABELS, multi=True, session=session)
-        self.assertEqual(session["visible"], [0, 2])  # the o view: only rows that are on
+        self.assertEqual(session["visible"], [0, 2])  # the V view: only rows that are on
 
     def test_filter_line_editing(self):
         self.assertEqual(run_list(["/", "x", "y", "ctrl+u", "d", "e", "enter", "enter"], self.LABELS), 3)  # ^U clears
@@ -888,7 +935,7 @@ class TextualList(unittest.TestCase):
             await pilot.press("escape", "enter")
         pilot_list(script, "t", self.LABELS, multi=True, hint="Space toggle · Enter done · s set", hotkeys=("s",),
                    key_help=[("s", "narrow the list to a set's games")], on_note=lambda i, t: "")
-        for line in ("a               toggle all shown (all off if all are on)", "o               view: all / on / changed",
+        for line in ("a               toggle all shown (all off if all are on)", "V               view: all / on / changed",
                      "u               revert this list and hidden rows (asks if more than one change)",
                      "w               edit the row's note", "?               this help",
                      "s               narrow the list to a set's games"):
@@ -1179,7 +1226,7 @@ class TagColumn(DataDir):
         answers = iter([("T", None)])
 
         def fake(title, labels, **kw):
-            kw["session"]["visible"] = [1]  # a / search (or an o view) leaves only B
+            kw["session"]["visible"] = [1]  # a / search (or a V view) leaves only B
             return next(answers, None) or kw["session"]["sel"]
         with mock.patch.object(picker, "filter_list", fake), \
                 mock.patch.object(tagui, "bulk_tag", side_effect=lambda keys: bulk.append(keys)):

@@ -177,7 +177,7 @@ class Hints(unittest.TestCase):
             lines = picker.help_lines(True, hint, key_help=keys, select_all=select_all, has_note=True)
             # a is dead in the all-games list: neither hint nor help offers it there
             self.assertEqual(any(line.startswith("a ") for line in lines), select_all, hint)
-            for key in ("w", "o", "/", *(k for k, _ in keys)):
+            for key in ("w", "V", "/", *(k for k, _ in keys)):
                 self.assertTrue(any(line.startswith(key + " ") for line in lines), (hint, key))
 
 
@@ -198,9 +198,9 @@ class MultiPickerKeys(unittest.TestCase):
         self.assertEqual(self.run_keys(["end", "space", "enter"]), [2])
         self.assertEqual(self.run_keys(["end", "home", "space", "enter"]), [0])
 
-    def test_o_shows_only_selected_rows(self):
-        # select a and c, press o: b is hidden, so Down from a lands on c; space unselects it
-        keys = ["space", "end", "space", "o", "home", "down", "space", "enter"]
+    def test_V_shows_only_selected_rows(self):
+        # select a and c, press V: b is hidden, so Down from a lands on c; space unselects it
+        keys = ["space", "end", "space", "V", "home", "down", "space", "enter"]
         self.assertEqual(self.run_keys(keys), [0])
 
 

@@ -2,7 +2,7 @@
 import os
 from collections import defaultdict
 
-from . import languages, names, picker, previews, runtime, s3, store, surprise, tags, tagui, ui, vita
+from . import gamecols, languages, names, picker, previews, runtime, s3, store, surprise, tags, tagui, ui, vita
 
 
 QUIT_KEY = "Q"  # in an editor's games lists, settings and add lists: leave the editor, what was toggled saved
@@ -74,7 +74,8 @@ WHEN_FILTERED = "filtered"  # select_all value: `a` is on only while a tag filte
 
 
 def toggle_games(title, rows, hotkeys=(), hint=None, place=None, filters="", key_help=None, select_all=True, notes=True,
-                 tag_filter=True, before=None, retagged=None, bulk=None):
+                 tag_filter=True, before=None, retagged=None, bulk=None, extra_columns=(), extra_cells=None,
+                 extra_values=None):
     """_toggle_games over the rows tagui.FILTER keeps, reopened after `t` edited a game's tags (the same rows, in the
     same place) or `s`/`c` changed the tag filter (the new rows; the / search and cursor stay only when they are the
     same rows), the toggles made so far applied first; the other keys are returned as it does.
@@ -84,7 +85,9 @@ def toggle_games(title, rows, hotkeys=(), hint=None, place=None, filters="", key
     each pass). before: how many rows there were before the caller's own filters left out some, so a list they emptied
     says no game matches. retagged(key, had): called after t or . wrote the tags of the row of key (had: its tag ids
     before), before the list opens again (a tag's own games make its check follow the tag). bulk: whether T (tag the rows on screen) is offered;
-    by default with the tag filter, and safe without it too, since T never reaches a row that isn't shown."""
+    by default with the tag filter, and safe without it too, since T never reaches a row that isn't shown.
+    extra_columns: picker Columns of the caller's own, shown after Year (before language and tags), extra_cells their
+    (text, color) parts per row and extra_values(row index, column id) their sort values (indexes into rows)."""
     place = {} if place is None else place
     bulk = tag_filter if bulk is None else bulk
     own = tuple(k for k in (*(tagui.HOTKEYS if tag_filter else ()), *((tagui.BULK_KEY,) if bulk else ()))
@@ -92,9 +95,10 @@ def toggle_games(title, rows, hotkeys=(), hint=None, place=None, filters="", key
     names_filter = tagui.SET_KEY in own  # else the caller's filters line names the tag filter
     base_hint = hint or GAMES_HINT
     helps = [h for h in (*tagui.KEYS_HELP, tagui.BULK_HELP) if h[0] in own]
-    frozen = None  # the rows of the pass `t` was pressed in: shown again as they were, so the cursor stays put
+    frozen = None  # the row indexes of the pass `t` was pressed in: shown again as they were, so the cursor stays put
     while True:
-        shown = frozen or ([r for r in rows if tagui.FILTER.keep(r[1])] if tag_filter else rows)
+        at = frozen or [i for i, r in enumerate(rows) if not tag_filter or tagui.FILTER.keep(r[1])]
+        shown = [rows[i] for i in at]
         frozen = None
         every = (tag_filter and tagui.FILTER.active()) if select_all == WHEN_FILTERED else select_all
         hint = tagui.games_hint(base_hint, tag_filter, notes, every, tagui.BULK_KEY in own)
@@ -105,22 +109,25 @@ def toggle_games(title, rows, hotkeys=(), hint=None, place=None, filters="", key
         pressed, i = _toggle_games(title, shown, (*hotkeys, *own), hint, place,
                                    " · ".join(x for x in (filters, banner, empty) if x),
                                    None if key_help is None else [*key_help, *(h for h in helps if h not in key_help)],
-                                   every, notes)
+                                   every, notes, extra_columns,
+                                   [extra_cells[i] for i in at] if extra_cells else None,
+                                   (lambda i, col: extra_values(at[i], col)) if extra_values else None)
         if pressed in tagui.TAG_KEYS:
             had = set(tags.tags_of(tags.owner(shown[i][1]))) if i is not None else set()
             if tagui.tag_key(pressed, *(shown[i][1:3] if i is not None else (None, None))) and retagged:
                 retagged(shown[i][1], had)
-            frozen = shown
+            frozen = at
         elif pressed == tagui.BULK_KEY and pressed in own:
             tagui.bulk_tag([r[1] for r in picker.on_screen(place, shown)])
-            frozen = shown
+            frozen = at
         elif pressed in own:
             tagui.handle_key(pressed, [r[1] for r in rows], place)
         else:
             return pressed
 
 
-def _toggle_games(title, rows, hotkeys, hint, place, filters, key_help, select_all, notes):
+def _toggle_games(title, rows, hotkeys, hint, place, filters, key_help, select_all, notes, extra_columns=(),
+                  extra_cells=None, extra_values=None):
     """Multi-select over rows of (system, bucket key, game title, label); adds/removes games in each system in place.
     Returns (key pressed or None, its row's index).
 
@@ -129,7 +136,8 @@ def _toggle_games(title, rows, hotkeys, hint, place, filters, key_help, select_a
     lists). The toggles made so far are applied, and the key pressed is returned (None on Enter). place: a dict the caller keeps across calls, so a list of the same rows
     opens where the last one was left (picker.carry_place). filters: the caller's filters, for the filter line.
     select_all: False turns the list's `a` (toggle all shown) off. notes: False turns `w` off, for lists whose rows
-    keep no notes.
+    keep no notes. extra_columns/extra_cells/extra_values: the caller's own columns, as toggle_games takes them (indexes
+    into these rows).
     Ctrl-C applies the toggles made so far, then raises KeyboardInterrupt.
     """
     hint = hint or (GAMES_HINT if notes else GAMES_HINT.replace(" · w note", ""))
@@ -148,7 +156,11 @@ def _toggle_games(title, rows, hotkeys, hint, place, filters, key_help, select_a
     system_names = {s["bucket"]: store.short_name(s) for s in store.repo_json("systems")}
     session = {"sel": list(initial)}
     picker.carry_place(place, [key for _, key, _, _ in rows], session)
-    extras = [[languages.column(key), tag] for (_, key, _, _), tag in zip(rows, tagui.column([r[1] for r in rows]))]
+    extras = [[*(extra_cells[i] if extra_cells else ()), languages.column(key), tag]
+              for i, ((_, key, _, _), tag) in enumerate(zip(rows, tagui.column([r[1] for r in rows])))]
+    cols = gamecols.GameColumns([(key.partition("/")[0], name, key) for _, key, name, _ in rows],
+                                extra_columns=[*extra_columns, picker.Column("lang", "Lang"), picker.Column("tags", "Tags")],
+                                extra_values=extra_values)
     interrupted = False
     try:
         state = picker.filter_list(title, [label for *_, label in rows], multi=True, initial=initial, locked=locked,
@@ -157,7 +169,7 @@ def _toggle_games(title, rows, hotkeys, hint, place, filters, key_help, select_a
                                    on_note=(lambda i, text: save_note(rows[i][0]["games"], rows[i][1], text)) if notes else None,
                                    hotkeys=(*hotkeys, tagui.TAG_KEY, tagui.REPEAT_KEY), session=session, filters=filters,
                                    row_note=lambda i: variant_line(rows[i][1], variants, parents, system_names),
-                                   select_all=select_all, extras=extras, tag_info=tagui.summary([r[1] for r in rows]),
+                                   select_all=select_all, **cols.kwargs(extras), tag_info=tagui.summary([r[1] for r in rows]),
                                    **previews.game_pane([key for _, key, _, _ in rows]))
     except KeyboardInterrupt:  # Ctrl-C: the toggles made so far are applied, then the caller gets the Ctrl-C
         interrupted, state = True, session["sel"]
@@ -205,7 +217,8 @@ def edit_card_system(card, bucket, setup):
 
 
 def list_rows(listing, by_bucket, bucket_keys):
-    """Rows for one games list (a collection, a tag's games), sorted by system and title.
+    """Rows for one games list (a collection, a tag's games), by system and title: the order ties keep in the list's
+    sort (its columns set the order shown).
 
     Entries for unknown systems are skipped."""
     rows, seen = [], set()
@@ -219,7 +232,7 @@ def list_rows(listing, by_bucket, bucket_keys):
         have = bucket_keys(s)
         warn = "" if s.get("full_system") or all(k in have for k in [key] + list(g.get("files", []))) \
             else "  ⚠️ not in storage"
-        rows.append((s, key, title, f"{s['name']} — {title}{warn}"))
+        rows.append((s, key, title, f"{title}{warn}"))
     return sorted(rows, key=lambda r: (r[0]["name"].lower(), store.sort_key(r[2])))
 
 
@@ -258,7 +271,10 @@ SETUP_KEY = "v"
 DELETE_KEY = "d"
 RENAME_KEY = "r"
 MENU_HINT = "Enter open · Esc back · v device · r rename · d delete"
-GAMES_HINT = "Space toggle · Enter done · / filter · w note · a all · o view · t tags"
+CARD_COLUMNS = [picker.Column("name", "Card", True), picker.Column("device", "Device", True),
+                picker.Column("surprise", "Surprise"), picker.Column("changes", "Changes")]
+CARDS_SORT = picker.Sort(("name", "device"))  # the card list's sort, for the run
+GAMES_HINT = "Space toggle · Enter done · / filter · w note · a all · V view · t tags"
 
 
 def new_target(label, raw, setup=None):
@@ -382,11 +398,15 @@ def edit_manifest():
             t["label"] = f"💳 {new}"
             targets[new] = t
 
-    def setup_extra(name, cards):
-        """The card's device and firmware as a row suffix (cards: cards.json already loaded); a pending change in cyan."""
+    def current_setup(name, cards):
+        """(the card's device and firmware, pending change first, or None; whether it is a pending change)."""
         t = targets.get(name)
         pending = bool(t and t["setup"])
-        setup = t["setup"] if pending else saved_setup(name, cards)
+        return (t["setup"] if pending else saved_setup(name, cards)), pending
+
+    def setup_extra(name, cards):
+        """The card's device and firmware as a row suffix (cards: cards.json already loaded); a pending change in cyan."""
+        setup, pending = current_setup(name, cards)
         gift = f"  🎁 {'on' if surprise.enabled(cards.get(name)) else 'off'}"
         if not setup:
             return [("  ⚠️  no device set", "red"), (gift, "dim")]
@@ -434,20 +454,26 @@ def edit_manifest():
         return True
 
     def edit_cards():
-        """The card list: open a card, add one, or change/rename/delete the highlighted one. Esc goes back."""
-        pos = 0
+        """The card list (Card, Device, Surprise and Changes columns, sorted by card or device): open a card, add one,
+        or change/rename/delete the highlighted one. Esc goes back."""
+        pos = None  # the top of the sorted list until a row was used
         while True:
             saved = store.load_cards()
             cards = sorted(set(saved) | {k for k in targets if k is not None})
             n = len(cards)
             options = [f"💳 {name}" for name in cards] + ["➕ New card"]
-            extras = [setup_extra(name, saved) + pending_extra(name) for name in cards] + [[]]
-            i = picker.filter_list("💳 Which card?  (Esc = back)", options, extras=extras,
+            extras = [setup_extra(name, saved) + (pending_extra(name) or [("", "")]) for name in cards] + [[("", "")] * 3]
+            values = {"name": [store.sort_key(name) for name in cards],  # a card with no device sorts last by Device
+                      "device": [row[0][0].strip().casefold() if current_setup(name, saved)[0] else None
+                                 for name, row in zip(cards, extras)]}
+            i = picker.filter_list("💳 Which card?  (Esc = back)", options, extras=extras, columns=CARD_COLUMNS,
+                                   sort=CARDS_SORT, sort_value=lambda x, col: values[col][x] if x < n else None,
+                                   pinned=[False] * n + [True],
                                    hotkeys=(SETUP_KEY, DELETE_KEY, RENAME_KEY, tagui.CLEAR_KEY), hint=tagui.menu_hint(MENU_HINT),
                                    filters=tagui.banner(), cursor=pos)
             if i is None:
                 return
-            pos = (i[1] or 0) if isinstance(i, tuple) else i
+            pos = i[1] if isinstance(i, tuple) else i
             if isinstance(i, tuple):
                 if i[0] == tagui.CLEAR_KEY:
                     tagui.handle_key(tagui.CLEAR_KEY, ())

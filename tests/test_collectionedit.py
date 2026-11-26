@@ -167,7 +167,7 @@ class Discs(unittest.TestCase):
                 mock.patch("builtins.print"):
             listedit.add_from_tag(collection, listedit.view(collection, SYSTEMS), lambda bucket: keys.get(bucket, set()), "💖 Favs")
         ask.assert_not_called()  # collections have no categories
-        self.assertEqual(lists, [["Game Boy Advance — Ruby", "PlayStation — FF7"]])
+        self.assertEqual(lists, [["Ruby", "FF7"]])
         self.assertEqual(collection["games"], [{"title": "FF7", "system": "psx",
                                                 "bucket": "psx/FF7.m3u", "files": ["psx/FF7 (Disc 1).chd"]}])
 
@@ -440,7 +440,7 @@ class GamesFirst(unittest.TestCase):
         collection = {"name": "Favs", "games": [dict(self.OLD)]}
         seen = []
 
-        def inner(title, rows, hotkeys, hint, place, filters, key_help, select_all, notes):
+        def inner(title, rows, hotkeys, hint, place, filters, key_help, select_all, notes, *_):
             seen.append(([r[1] for r in rows], select_all, filters))
             if len(seen) == 1:
                 return "A", None
@@ -677,7 +677,7 @@ class AddFromTag(unittest.TestCase):
                 mock.patch.object(edit, "note"):
             listedit.add_from_tag(listing, shown, lambda bucket: keys[bucket], "💖 Favs")
         self.assertEqual(offered, [["🐝 Cave  (0 games)", "🔀 Mix  (3 games)"]])
-        self.assertEqual(toggled, [("✏️  🔀 Mix — ✅ in 💖 Favs, ⬜ not", ["Game Boy Advance — Ruby", "PlayStation — FF7"])])
+        self.assertEqual(toggled, [("✏️  🔀 Mix — ✅ in 💖 Favs, ⬜ not", ["Ruby", "FF7"])])
         self.assertEqual(listing["games"], [
             {"title": "Ruby", "system": "gba", "bucket": "gba/Ruby.zip"},
             {"title": "FF7", "system": "psx", "bucket": "psx/FF7.m3u", "files": ["psx/FF7 (Disc 1).chd"]}])
@@ -907,7 +907,7 @@ class Editor(DataDir):
 
     def test_ctrl_c_keeps_the_open_lists_removals(self):
         zelda = {"title": "Zelda", "system": "gba", "bucket": "gba/Zelda.zip"}
-        confirms, _ = self.interrupted([RUBY, zelda], [0, 0], [({"Game Boy Advance — Ruby"}, KeyboardInterrupt)])
+        confirms, _ = self.interrupted([RUBY, zelda], [0, 0], [({"Ruby"}, KeyboardInterrupt)])
         self.assertEqual(len(confirms), 1)
         self.assertEqual(self.read("collections/favs.json")["games"], [zelda])
 
@@ -933,7 +933,7 @@ class Editor(DataDir):
                     RUBY])
 
     def test_ctrl_c_in_the_all_systems_list_keeps_its_toggles(self):
-        confirms, ask = self.interrupted([RUBY], [0, 0], [(set(), "A"), ({"PlayStation — FF7.m3u"}, KeyboardInterrupt)])
+        confirms, ask = self.interrupted([RUBY], [0, 0], [(set(), "A"), ({"FF7.m3u"}, KeyboardInterrupt)])
         ask.assert_not_called()
         self.assertEqual(len(confirms), 1)
         self.assertEqual(self.read("collections/favs.json")["games"], [
@@ -1002,10 +1002,10 @@ class AllRows(unittest.TestCase):
         keys = {"gba": set(gba), "psx": DISCS}
         return shown, listedit.all_rows(shown, SYSTEMS, lambda bucket: keys[bucket])
 
-    def test_all_rows_span_systems_with_system_prefixed_labels(self):
+    def test_all_rows_span_systems_with_plain_labels(self):
         shown, rows = self.rows()
         labels = [r[3] for r in rows]
-        self.assertEqual(labels, ["PlayStation — Crash.chd", "PlayStation — FF7.m3u", "Game Boy Advance — Ruby.zip"])
+        self.assertEqual(labels, ["Crash.chd", "FF7.m3u", "Ruby.zip"])
         self.assertFalse(any("FF7 (Disc 1).chd" in label for label in labels))
         self.assertEqual([r[0] for r in rows], [shown["psx"], shown["psx"], shown["gba"]])
 
@@ -1036,7 +1036,7 @@ class AllRows(unittest.TestCase):
 
         with mock.patch.object(picker, "filter_list", lambda t, labels, **k: seen.append((labels, k["filters"])) or k["session"]["sel"]):
             listedit.toggle_all("All", rows)
-        self.assertEqual(seen, [(["Game Boy Advance — Ruby.zip"], "✅ 🔀 Mix · 1 of 3 shown (c clear filters)")])
+        self.assertEqual(seen, [(["Ruby.zip"], "✅ 🔀 Mix · 1 of 3 shown (c clear filters)")])
 
     def test_toggle_all_turns_select_all_on_only_while_a_tag_filter_is_set(self):
         _, rows = self.rows()

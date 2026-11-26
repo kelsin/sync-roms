@@ -3,7 +3,7 @@ from . import edit, names, picker, s3, store, tags, tagui, ui
 from .listedit import add_from_system, add_from_tag, folder_lister, view
 
 
-SORT_KEY = "o"
+TAG_SORT = picker.Sort(("name", "games"))  # the tag list's sort, kept for the run
 ADD_KEY, ADD_ALIAS, SETTINGS_KEY = "A", "+", "S"  # in a tag's games, as in the collection editor; + is a silent alias of A
 CLEAR_KEY = "x"  # in a tag's settings: clear its description
 QUIT_KEY, QUIT_HINT = edit.QUIT_KEY, edit.QUIT_HINT  # in a tag's games, its settings and its add lists
@@ -164,7 +164,6 @@ def edit_one(tag_id, systems, keys_of):
     the list is left keeping the changes, by Enter, A, S, Q or Ctrl-C, or by Esc, which asks first whether to keep or
     revert them; it stays listed while the tag is open, so it can be switched back on), with A (or +) to add games,
     the list's / search carried into All systems, and S for its settings. Q raises Quit once the toggles are saved."""
-    system_names = {s["bucket"]: s["name"] for s in systems}
     kept = set()  # every game listed while the tag is open
     files = {}  # game key -> its record's extra files, put back on a game switched back on
     place = {}
@@ -185,8 +184,8 @@ def edit_one(tag_id, systems, keys_of):
             pressed = None if i is None else i[0] if isinstance(i, tuple) else ADD_KEY if i == 0 else SETTINGS_KEY
         else:
             entry = {"bucket": "", "games": [{"bucket": k} for k in keys]}
-            rows = sorted(((entry, k, names.title(k), f"{system_names.get(k.partition('/')[0], k.partition('/')[0])} — {names.title(k)}")
-                           for k in kept), key=lambda r: (store.sort_key(r[2]), r[1]))
+            # by title, then key: only the order ties keep in the list's sort, whose columns set the order shown
+            rows = sorted(((entry, k, names.title(k), names.title(k)) for k in kept), key=lambda r: (store.sort_key(r[2]), r[1]))
             if place.get("added"):  # back from adding: on the first game added
                 at = next(i for i, r in enumerate(rows) if r[1] in place["added"])
                 place = {"keys": [r[1] for r in rows], "session": {"row": at}}
@@ -233,20 +232,23 @@ def edit_tags():
 def _tag_list():
     systems = sorted(store.repo_json("systems"), key=lambda s: s["name"].lower())
     keys_of = folder_lister()
-    pos, by_count = 0, False
+    pos = None  # the top of the sorted list until a row was opened
     while True:
         defs = tags.all_tags()
         counts = tagui._count()
-        ids = sorted(defs, key=(lambda i: (-counts.get(i, 0), defs[i]["name"].casefold())) if by_count
-                     else lambda i: defs[i]["name"].casefold())
+        ids = sorted(defs, key=lambda i: defs[i]["name"].casefold())
         n = len(ids)
+        values = {"name": lambda x: store.sort_key(defs[ids[x]]["name"]), "games": lambda x: counts.get(ids[x], 0)}
         i = picker.filter_list("🏷️  Which tag?  (Esc = back)",
-                               [f"{_label(defs[x])}  ({counts.get(x, 0)} games)" for x in ids] + ["➕ New tag"],
-                               hotkeys=(tagui.NEW_KEY, tagui.CLEAR_KEY, SORT_KEY), cursor=pos, filters=tagui.banner(),
-                               hint=tagui.menu_hint("/ filter · Enter open · n new tag · o sort · Esc back"),
-                               extras=[[("no games", "dim")] if not counts.get(x) else [("", "")] for x in ids] + [[("", "")]],
+                               [_label(defs[x]) for x in ids] + ["➕ New tag"],
+                               hotkeys=(tagui.NEW_KEY, tagui.CLEAR_KEY), cursor=pos, filters=tagui.banner(),
+                               hint=tagui.menu_hint("/ filter · Enter open · n new tag · Esc back"),
+                               columns=[picker.Column("name", "Tag", True), picker.Column("games", "Games", True, descending=True)],
+                               extras=[[(str(counts[x]), "")] if counts.get(x) else [("no games", "dim")] for x in ids]
+                               + [[("", "")]],
+                               sort=TAG_SORT, pinned=[False] * n + [True],
+                               sort_value=lambda x, col: values[col](x) if x < n else None,
                                key_help=[("Enter", "open the tag's games"), (tagui.NEW_KEY, "add a new tag"),
-                                         (SORT_KEY, f"sort by {'name' if by_count else 'game count'} instead"),
                                          (tagui.CLEAR_KEY, "clear the tag filter")],
                                row_note=tagui.described(defs, ids))
         if i is None:
@@ -254,10 +256,7 @@ def _tag_list():
         if isinstance(i, tuple):
             if i[0] == tagui.CLEAR_KEY:
                 tagui.handle_key(tagui.CLEAR_KEY, ())
-                pos = i[1] or 0
-                continue
-            if i[0] == SORT_KEY:
-                by_count, pos = not by_count, i[1] or 0
+                pos = i[1]
                 continue
             i = n
         pos = i

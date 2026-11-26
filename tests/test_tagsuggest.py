@@ -107,9 +107,7 @@ class Suggest(unittest.TestCase):
         code, shown, writes, out = self.run_review("Shmup")
         self.assertEqual(code, 0)
         # the two "Hero" rows are HERO_EU then HERO: one title, ordered by key
-        self.assertEqual(shown, ["🏃 Platformers — Nintendo NES — Hero", "🏃 Platformers — Nintendo NES — Hero",
-                                 "🏃 Platformers — Nintendo NES — Hero DX", "🛸 Shmups — Nintendo NES — Shmup",
-                                 "⚽ Sports — Nintendo NES — Kick", "⚽ Sports — Nintendo NES — Kick"])
+        self.assertEqual(shown, ["Hero", "Hero", "Hero DX", "Shmup", "Kick", "Kick"])
         self.assertEqual(writes, 2)
         tags.reset()
         self.assertEqual(tags.tags_of(HERO), ["hero", "platformers"])
@@ -117,6 +115,41 @@ class Suggest(unittest.TestCase):
         self.assertEqual(tags.tags_of(SHMUP), [])
         self.assertEqual(tags.load()["declined"], {SHMUP: ["shmups"]})
         self.assertIn("Added 5 tag(s) to 5 game(s); turned down 1", out)
+
+    def test_suggested_tag_column(self):
+        seen = {}
+
+        def fake(title, labels, **kw):
+            seen.update(kw, labels=list(labels))
+            return [True] * len(labels)
+        with mock.patch.object(picker, "filter_list", fake), mock.patch.object(ui, "confirm", return_value=False), \
+                contextlib.redirect_stdout(io.StringIO()):
+            commands.run(["tags", "suggest", "nes"])
+        self.assertEqual(seen["labels"], ["Hero", "Hero", "Hero DX", "Shmup", "Kick", "Kick"])
+        cols = seen["columns"]
+        self.assertEqual([c.id for c in cols][:4], ["name", "system", "year", "tag"])
+        self.assertEqual(cols[3], picker.Column("tag", "Tag", True, searchable=True))
+        self.assertEqual(seen["extras"][3][2], ("  🛸 Shmups", ""))
+        self.assertEqual(seen["sort_value"](3, "tag"), "shmups")
+        self.assertEqual(seen["sort_value"](0, "tag"), "platformers")
+
+    def test_slash_finds_a_suggested_tag_by_name(self):
+        seen = {}
+
+        def fake(title, labels, **kw):
+            m = picker._ListModel(title, labels, True, kw["initial"], "", None, kw["extras"], None, "", (), None, None,
+                                  True, None, None, True, None, None, None, None, columns=kw["columns"],
+                                  sort_value=kw["sort_value"], sort=picker.Sort(("year", "name", "system")))
+            m.resize(30, 120)
+            m.key("/")
+            for c in "shmups":
+                m.key(c)
+            seen["vis"] = [labels[i] for i in m.vis]
+            return kw["initial"]
+        with mock.patch.object(picker, "filter_list", fake), mock.patch.object(ui, "confirm", return_value=False), \
+                contextlib.redirect_stdout(io.StringIO()):
+            commands.run(["tags", "suggest", "nes"])
+        self.assertEqual(seen["vis"], ["Shmup"])
 
     def test_review_offers_no_notes(self):
         with mock.patch.object(tagsuggest.edit, "toggle_games") as toggle, \

@@ -4,7 +4,7 @@ The repo's genre-tags.json maps a genre to tag ids: a ROM's `genre` in its syste
 in full, else by its part before " / " ("Sports / Darts" is "Sports"). Suggestions cover every version of a game: the
 tagged games, and the pool, which is every full English game in storage (surprise.is_candidate) that isn't a tagged
 game or one of its files. A suggestion the user turned down is in tags.json's `declined` and isn't made again."""
-from . import edit, inventory, names, s3, scrape_plan, store, surprise, tags, ui
+from . import edit, inventory, names, picker, s3, scrape_plan, store, surprise, tags, ui
 
 _metadata = {}  # {system bucket: its parsed metadata.json}, read once per run
 
@@ -100,11 +100,12 @@ def suggest_command(args):
         title = _title(key)
         for i in ids:
             rows.append(((defs[i]["name"].casefold(), s["name"].casefold(), store.sort_key(title), key),
-                         ({"bucket": str(len(rows)), "games": [{"bucket": key}]}, key, title,
-                          f"{defs[i]['emoji']} {defs[i]['name']} — {s['name']} — {title}"), i))
+                         ({"bucket": str(len(rows)), "games": [{"bucket": key}]}, key, title, title), i))
     rows.sort(key=lambda r: r[0])  # each row has its own listing (named by its number, as the toggler keys them)
     edit.toggle_games("🏷️  Suggested tags — ✅ add it, ⬜ don't suggest it again", [r[1] for r in rows],
-                      notes=False, tag_filter=False)
+                      notes=False, tag_filter=False, extra_columns=[picker.Column("tag", "Tag", True, searchable=True)],
+                      extra_cells=[[(f"  {defs[i]['emoji']} {defs[i]['name']}", "")] for *_, i in rows],
+                      extra_values=lambda n, col: defs[rows[n][2]]["name"].casefold() if col == "tag" else None)
     accepted, declined = {}, {}
     for _, (entry, key, _, _), i in rows:
         (accepted if entry["games"] else declined).setdefault(key, []).append(i)

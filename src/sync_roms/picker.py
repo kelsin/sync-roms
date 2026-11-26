@@ -11,6 +11,7 @@ import signal
 import sys
 import threading
 import time
+from dataclasses import dataclass
 
 from . import ui
 
@@ -82,7 +83,9 @@ def choose_setup(manifest, current=None):
 
 
 SINGLE_HINT = "Enter select · Esc back · j/k ^N/^P move · / filter"
-MULTI_HINT = "Space toggle · Enter done · / filter · a all · o view · u revert"
+MULTI_HINT = "Space toggle · Enter done · / filter · a all · V view · u revert"
+SORT_HINT = " · o sort · O reverse"  # after the hint of a list with sortable columns
+SORT_MENU_HINT = "Enter sort by it · Esc back · j/k move"  # while the o menu is up
 HELP_HINT = "? help · "  # starts every hint line, so a narrow list cuts it last
 TYPING_HINT = "Enter keep filter · Esc clear · ^N/^P move · ^A/^E ^B/^F ^K ^W ^U edit"
 HELP_FOOTER = "j/k ↑/↓ PgUp/PgDn scroll · Esc/q/? close"
@@ -94,18 +97,21 @@ QUIT_AFTER = 1  # seconds after that Ctrl-C from which another one quits; sooner
 
 
 def help_lines(multi, hint, hidden_count=False, has_note=False, key_help=None, select_all=True, esc_asks=False,
-               has_locked=False):
+               has_locked=False, sortable=False):
     """Every key a filter_list accepts, then this screen's own keys: key_help's (keys, what they do) pairs, or else
-    the hint's entries (less the ones this list already describes). A key key_help describes is listed only there."""
+    the hint's entries (less the ones this list already describes). A key key_help describes is listed only there.
+    sortable: the list has sortable columns (o and O)."""
     lines = ["j/k ↑/↓ ^N/^P   move", "g/G             top / bottom", "^D/^U           half page",
              "^F/^B PgDn/PgUp page",
              "/               filter (Enter or Tab keeps it, Esc clears it)",
              "Enter           " + ("done" if multi else "pick"), "Esc/q/^G        clear the filter, then go back"
              + (" (asks whether to keep changes)" if multi and esc_asks else "")]
+    if sortable:
+        lines += ["o               sort by a column", "O               reverse the order"]
     if multi:
         lines += ["Space/Tab       toggle the row",
                   *(["a               toggle all shown (all off if all are on)"] if select_all else []),
-                  "o               view: all / on / changed",
+                  "V               view: all / on / changed",
                   "u               revert this list and hidden rows (asks if more than one change)"]
         if has_note:
             lines.append("w               edit the row's note")
@@ -164,6 +170,82 @@ def extras_widths(extras):
             elif n > widths[j]:
                 widths[j] = n
     return widths
+
+
+@dataclass(frozen=True)
+class Column:
+    """A list column: its id (what sort_value is asked for), its header, whether the list sorts by it, whether `/`
+    matches its cells (as it does the label) and whether picking it with o starts it largest (or newest) first."""
+    id: str
+    header: str
+    sortable: bool = False
+    searchable: bool = False
+    descending: bool = False
+
+
+class Sort:
+    """How lists sort: the column the user put first with o (None: the default order) and whether O reversed it.
+    Kept for the run by whoever shares it (GAMES_SORT for every game list), never saved."""
+
+    def __init__(self, default):
+        self.default = tuple(default)
+        self.first = None
+        self.reverse = False
+
+    def order(self, available):
+        """The sort columns of a list with the sortable column ids available: the first one, then the default
+        order, then the rest. A first column the list lacks is left out (the list sorts by default) but kept."""
+        rest = [c for c in self.default if c != self.first and c in available]
+        rest += [c for c in available if c not in self.default and c != self.first]
+        return [self.first] + rest if self.first in available else rest
+
+
+GAMES_SORT = Sort(("year", "name", "system"))  # every game list's: Year, then Name, then System
+
+
+def _ranks(values):
+    """Each value's rank among the known (not None) ones, equal values sharing one; None for unknown."""
+    known = sorted((i for i, v in enumerate(values) if v is not None), key=values.__getitem__)
+    ranks, rank, prev = [None] * len(values), -1, None
+    for i in known:
+        if rank < 0 or values[i] != prev:
+            rank, prev = rank + 1, values[i]
+        ranks[i] = rank
+    return ranks
+
+
+def sorted_positions(columns, reverse):
+    """Each row's place in the order that sorts by columns (each a list of every row's values, None unknown), then
+    by row index; reverse flips every known value's order and the index's, unknown values staying last."""
+    n = len(columns[0]) if columns else 0
+    sign = -1 if reverse else 1
+    ranks = [_ranks(values) for values in columns]
+    def key(i):
+        return tuple((r[i] is None, sign * r[i] if r[i] is not None else 0) for r in ranks) + (sign * i,)
+    positions = [0] * n
+    for at, i in enumerate(sorted(range(n), key=key)):
+        positions[i] = at
+    return positions
+
+
+def header_row(m, width):
+    """The header line of a list with columns (m: its _ListModel), width cells wide and laid out as its rows: each
+    header dim, the first sort column's bold and marked ▲ (▼ reversed)."""
+    from rich.text import Text
+    first = m.sort.order(m.sortable)[0] if m.sort else None
+    mark = " ▼" if m.sort and m.reversed() else " ▲"
+
+    def cell(column):
+        on = column.id == first
+        return Text(column.header + (mark if on else ""), "bold" if on else "dim")
+
+    label = Text("   " if m.multi or any(m.locked) else "", "dim").append_text(cell(m.columns[0]))
+    extras = Text()
+    for j, w in enumerate(m.column_widths(), 1):
+        part = Text(" " * m.lead(j), "dim").append_text(cell(m.columns[j])) if j < len(m.columns) else Text()
+        extras.append_text(part)
+        extras.append(" " * max(0, w - part.cell_len), "dim")
+    return fit_row(label, extras, width, m.label_width)
 
 
 def line_key(text, pos, k):
@@ -229,6 +311,8 @@ MIN_LIST_WIDTH = 40  # a fixed-width picture (preview_width) is left out when it
 _preview_lock = threading.Lock()  # one picture loads at a time: the preview callables' caches aren't shared safely
 NOTE_PROMPT = "Note (empty clears, Esc cancels): "
 KEEP = object()  # _ListModel.key: the list stays open
+UNCHANGED = object()  # _ListModel.tick: the list stays open and nothing it shows changed (no redraw)
+COLUMN_GAP = 2  # blanks before every extras column of a list with columns, counting those its cells start with
 HOTKEY_CHARS = {"space": " ", "tab": "\t"}  # keys callers name in hotkeys by their character
 
 
@@ -283,7 +367,7 @@ class _ListModel:
     def __init__(self, title, labels, multi, initial, hint, cursor, extras, locked, locked_note, hotkeys, note_text,
                  on_note, esc_asks, hidden, status, diff_marks, session, poll, links, on_hotkey, preview=None, row_note=None,
                  key_help=None, filters="", preview_width=None, select_all=True, outside=(0, 0), on_revert=None,
-                 tag_info=None):
+                 tag_info=None, columns=None, sort_value=None, sort=None, pinned=None):
         self.tag_info, self.width, self.scroll, self.scroll_row = tag_info, 80, 0, None
         self.tag_block, self.tag_line = [], ""  # the highlighted game's tags: a line each, or all on one scrolling line
         self.preview, self.row_note, self.key_help, self.filters = preview, row_note, key_help, filters
@@ -293,13 +377,24 @@ class _ListModel:
         self.locked_note, self.hotkeys, self.note_text, self.on_note = locked_note, hotkeys, note_text, on_note
         self.esc_asks, self.status, self.diff_marks, self.poll = esc_asks, status, diff_marks, poll
         self.links, self.on_hotkey = links, on_hotkey
-        self.lowered = [l.casefold() for l in labels]
+        self.columns, self.sort_value = columns, sort_value
+        self.sortable = [c.id for c in columns or () if c.sortable]
+        self.sort = (sort or Sort(self.sortable)) if self.sortable else None
+        self.pinned = pinned or [False] * len(labels)
+        self.sort_menu = None  # the o menu's highlighted entry (of sort_columns) while it is up
+        self.sorted = None  # (what the order was worked out from, each row's place in it, the rows in that order)
+        self.laid_out = None  # layout's (gaps, leads, widths), until extras may have changed
+        self.name_keys = {}  # row -> store.sort_key of its label, for the rows sort_value gives no name
+        searched = [j - 1 for j, c in enumerate(columns or ()) if j and c.searchable]
+        self.lowered = ["\n".join([l, *(extras[i][j][0].strip() for j in searched if extras and len(extras[i]) > j)])
+                        .casefold() for i, l in enumerate(labels)]
         self.start = list(initial) if initial is not None else [False] * len(labels)
         self.locked = locked or [False] * len(labels)
         self.hidden = hidden or [False] * len(labels)
         self.hidden_count = sum(self.hidden)
         marked = multi or any(self.locked)  # each label then follows a 3-cell mark (✅ or 🔒 and a space)
-        self.label_width = max((ui.cell_width(l) for l in labels), default=0) + (3 if marked else 0)
+        self.label_width = max([ui.cell_width(l) for l in labels] + ([self.header_width(0)] if columns else []),
+                               default=0) + (3 if marked else 0)
         self.session = {} if session is None else session
         self.state = list(self.session["sel"]) if "sel" in self.session else list(self.start)
         self.view_mode = self.session.get("view_mode", 0)  # multi: 0 all rows, 1 only rows that are on, 2 only rows changed
@@ -307,7 +402,7 @@ class _ListModel:
         self.restore = self.session.get("row")
         self.query = self.session.get("query", "")
         self.qpos, self.typing = len(self.query), False
-        self.cur, self.top = cursor, self.session.get("top", 0)
+        self.cur, self.top = cursor or 0, self.session.get("top", 0)
         self.notice = ""  # or (text, color)
         self.asking = False  # multi-mode Esc: waiting for keep or revert
         self.reverting = False  # multi-mode u with several changes: waiting for y
@@ -315,7 +410,94 @@ class _ListModel:
         self.note_row = None
         self.help = None  # the help lines while they are shown
         self.height = 24  # screen rows; the app sets it
+        self.vis = list(range(len(labels)))  # a sorted list starts on row cursor, wherever it sorts (None: the top)
+        self.reset = cursor is None  # the cursor was put on the top: update doesn't follow a row
         self.update()
+
+    def header_width(self, j):
+        """Cells of column j's header, with room for the sort mark of a sortable one."""
+        column = self.columns[j]
+        return ui.cell_width(column.header) + (2 if column.sortable else 0)
+
+    def lead(self, j):
+        """The blanks column j's header starts after: those its non-empty cells start with (the fewest), and the gap."""
+        return self.layout()[1][j - 1]
+
+    def gap(self, j):
+        """The blanks drawn before each of column j's cells, so at least COLUMN_GAP separate it from the one before."""
+        return self.layout()[0][j - 1]
+
+    def column_widths(self):
+        """Cells of each extras column, its gap included: its widest cell, or its header after its lead."""
+        return self.layout()[2]
+
+    def layout(self):
+        """(gaps, leads, widths) of the extras columns, worked out from every row again only after extras may have
+        changed (a key, a poll that changed something): see gap, lead and column_widths."""
+        if self.laid_out is None:
+            widths = extras_widths(self.extras)
+            count = len(self.columns or ())
+            widths += [0] * (count - 1 - len(widths))
+            gaps, leads = [0] * len(widths), [0] * len(widths)
+            for j in range(1, count):
+                cells = [parts[j - 1][0] for parts in self.extras or ()
+                         if j - 1 < len(parts) and parts[j - 1][0].strip()]
+                lead = min((len(c) - len(c.lstrip(" ")) for c in cells), default=0)
+                if cells or self.columns[j].header:  # an empty column with no header takes no room
+                    gaps[j - 1] = max(0, COLUMN_GAP - lead)
+                leads[j - 1] = gaps[j - 1] + lead
+                widths[j - 1] = gaps[j - 1] + max(widths[j - 1], lead + self.header_width(j))
+            self.laid_out = gaps, leads, widths
+        return self.laid_out
+
+    def sort_columns(self):
+        """The sortable columns, in display order: the o menu's entries."""
+        return [c for c in self.columns or () if c.sortable]
+
+    def sort_menu_lines(self):
+        """The o menu: each sortable column's header (the first sort column's marked ▲, or ▼ reversed) and whether
+        it is highlighted."""
+        first = self.sort.order(self.sortable)[0]
+        mark = " ▼" if self.reversed() else " ▲"
+        return [(c.header + (mark if c.id == first else ""), at == self.sort_menu)
+                for at, c in enumerate(self.sort_columns())]
+
+    def falls_back(self):
+        """Whether the sort's first column (picked in another list sharing it) isn't this list's: it then sorts in
+        its default order and direction, leaving the sort's first column and direction for the lists that have it."""
+        return self.sort.first is not None and self.sort.first not in self.sortable
+
+    def reversed(self):
+        """Whether this list's order is reversed: the sort's direction, unless the list falls back (falls_back)."""
+        return self.sort.reverse and not self.falls_back()
+
+    def sort_hint(self):
+        """What a list with sortable columns adds to its hint."""
+        return SORT_HINT if self.sortable else ""
+
+    def positions(self):
+        """Each row's place in the list's sort, worked out again only when the values or the sort changed (None:
+        unknown; a name the caller doesn't give sorts as store.sort_key does)."""
+        order = self.sort.order(self.sortable)
+        rows, given = range(len(self.labels)), self.sort_value
+        values = []
+        for c in order:
+            column = [given(i, c) for i in rows] if given else [None] * len(rows)
+            if c == "name" and None in column:
+                from . import store
+                for i, v in enumerate(column):
+                    if v is None and i not in self.name_keys:
+                        self.name_keys[i] = store.sort_key(self.labels[i])
+                column = [self.name_keys[i] if v is None else v for i, v in enumerate(column)]
+            values.append(column)
+        basis = (order, self.reversed(), values)
+        if self.sorted is None or self.sorted[0] != basis:
+            place = sorted_positions(values, self.reversed())
+            ordered = [0] * len(place)
+            for i, at in enumerate(place):
+                ordered[at] = i
+            self.sorted = basis, place, ordered
+        return self.sorted[1]
 
     def update(self):
         """Work out the shown rows (vis), keep the cursor on one and in view, save the session and work out the
@@ -323,11 +505,19 @@ class _ListModel:
         terms = self.query.casefold().split()
         vis = [i for i, l in enumerate(self.lowered) if (self.revealed or not self.hidden[i]) and all(t in l for t in terms)
                and (self.view_mode == 0 or (self.state[i] if self.view_mode == 1 else self.state[i] != self.start[i]))]
-        vis.sort(key=lambda i: self.hidden[i])  # revealed rows go last; stable within each group
-        try:
-            self.cur = vis.index(self.restore)
-        except ValueError:
-            pass
+        follow = None  # a sorted list keeps its highlighted row when the order changes, unless the cursor went to the top
+        if self.sort:
+            if not self.reset and 0 <= self.cur < len(self.vis):
+                follow = self.vis[self.cur]
+            self.positions()
+            shown = set(vis)  # in the sort's order, without sorting again: pinned rows last, as given
+            vis = [i for i in self.sorted[2] if i in shown and not self.pinned[i]] + [i for i in vis if self.pinned[i]]
+        self.reset = False
+        if self.revealed and self.hidden_count:
+            vis.sort(key=lambda i: self.hidden[i])  # revealed rows go last; stable within each group
+        target = self.restore if self.restore is not None else follow
+        if target is not None and target in vis:
+            self.cur = vis.index(target)
         self.restore = None
         self.cur = max(0, min(self.cur, len(vis) - 1))
         self.vis = vis
@@ -341,7 +531,7 @@ class _ListModel:
                 self.tag_block = lines
             elif self.height - 7 >= 3:
                 self.tag_line = tag_names(infos)
-        self.view = max(1, self.height - 6 - (len(self.tag_block) or bool(self.tag_line)))
+        self.view = max(1, self.height - 6 - (len(self.tag_block) or bool(self.tag_line)) - bool(self.columns))
         self.top = max(0, min(self.top, len(vis) - self.view))  # a restored scroll leaves no blank rows below the list
         if self.cur < self.top:
             self.top = self.cur
@@ -411,11 +601,17 @@ class _ListModel:
         self.notice = "Reverted this list to how it was when opened"
 
     def tick(self):
-        """Call poll, unless help or a prompt is up (those wait for a key). Returns KEEP."""
-        if self.poll and not self.help and not self.asking and not self.reverting and self.note is None:
-            self.poll()
-            self.update()
-        return KEEP
+        """Call poll, unless help, the o menu or a prompt is up (those wait for a key). Returns KEEP when poll may have
+        changed what the list shows (it returned None or a true value: the list is updated and redrawn), else
+        UNCHANGED."""
+        if (self.poll and not self.help and not self.asking and not self.reverting and self.note is None
+                and self.sort_menu is None):
+            changed = self.poll()
+            if changed is None or changed:
+                self.laid_out = None
+                self.update()
+                return KEEP
+        return UNCHANGED
 
     def scroll_advance(self):
         """Move the one-line tag summary on a cell, unless it fits or a prompt, note or notice has the screen. Whether
@@ -446,6 +642,7 @@ class _ListModel:
         Returns the list's result once it is done, else KEEP."""
         self.notice = ""
         got = self.act(k)
+        self.laid_out = None  # a hotkey or a note may have changed extras in place
         self.update()
         return got
 
@@ -477,6 +674,18 @@ class _ListModel:
             else:
                 self.note = line_key(*self.note, k) or self.note
             return KEEP
+        if self.sort_menu is not None:
+            last = len(self.sort_columns()) - 1
+            moved = move_key(k, self.sort_menu, last, last + 1)
+            if moved is not None:
+                self.sort_menu = moved
+            elif k == "enter":
+                column = self.sort_columns()[self.sort_menu]
+                self.sort.first, self.sort.reverse = column.id, column.descending
+                self.sort_menu = None
+            elif k in ("escape", "q", "o", "ctrl+g"):
+                self.sort_menu = None
+            return KEEP
         vis, cur = self.vis, self.cur
         if self.typing:
             edited = line_key(self.query, self.qpos, k)
@@ -485,9 +694,11 @@ class _ListModel:
             elif k in ("escape", "ctrl+g"):
                 self.query, self.qpos, self.typing = "", 0, False
                 self.cur = self.top = 0
+                self.reset = True
             elif edited:
                 if edited[0] != self.query:
                     self.cur = self.top = 0
+                    self.reset = True
                 self.query, self.qpos = edited
             else:
                 moved = move_key(k, cur, len(vis) - 1, self.view)
@@ -508,11 +719,12 @@ class _ListModel:
             self.typing, self.qpos = True, len(self.query)
         elif k == "?":
             self.help = help_lines(self.multi, self.hint, self.hidden_count, bool(self.on_note), self.key_help,
-                                   self.select_all, self.esc_asks, any(self.locked))
+                                   self.select_all, self.esc_asks, any(self.locked), bool(self.sortable))
         elif k in ("escape", "q", "ctrl+g"):
             if self.query:
                 self.query, self.qpos = "", 0
                 self.cur = self.top = 0
+                self.reset = True
                 return KEEP
             if not self.multi or not self.esc_asks:
                 return None
@@ -526,6 +738,14 @@ class _ListModel:
                 return vis[cur]
         elif k == "z" and self.hidden_count:
             self.revealed = not self.revealed
+        elif k == "o" and self.sortable:
+            first = self.sort.order(self.sortable)[0]
+            self.sort_menu = next(at for at, c in enumerate(self.sort_columns()) if c.id == first)
+        elif k == "O" and self.sortable:
+            if self.falls_back():  # this list's own default order, reversed (the first column then is this list's)
+                self.sort.first, self.sort.reverse = self.sort.order(self.sortable)[0], True
+            else:
+                self.sort.reverse = not self.sort.reverse
         elif not self.multi:
             pass
         elif k == "u":
@@ -533,9 +753,10 @@ class _ListModel:
                 self.reverting = True
             else:
                 self.revert()
-        elif k in ("o", "ctrl+o"):
+        elif k == "V":
             self.view_mode = (self.view_mode + 1) % 3
             self.cur = self.top = 0
+            self.reset = True
         elif k in ("tab", "space") and vis:
             if not self.locked[vis[cur]]:
                 target = not self.state[vis[cur]]
@@ -632,16 +853,23 @@ def _app_class():
             parts = m.extras[i] if m.extras else []
             for j, w in enumerate(columns):  # every column padded, so the next one lines up
                 part, color = parts[j] if j < len(parts) else ("", "")
+                gap = m.gap(j + 1)
+                extras.append(" " * gap, " ".join(style))
                 extras.append(part, " ".join(style + [color]))
-                extras.append(" " * (w - cell_len(part)), " ".join(style))
+                extras.append(" " * (w - gap - cell_len(part)), " ".join(style))
             if self.size.width < 1:  # not laid out yet
                 return text.append_text(extras)
             return fit_row(text, extras, self.size.width, m.label_width)
 
         def render(self):
             m = self.app.model
-            columns = extras_widths(m.extras)  # every row's, not just the shown ones: columns stay put while filtering
-            return Text("\n").join([self.row(m, pos, columns) for pos in range(m.top, min(len(m.vis), m.top + m.view))])
+            columns = m.column_widths()  # every row's, not just the shown ones: columns stay put while filtering
+            lines = [header_row(m, self.size.width)] if m.columns and self.size.width > 0 else []
+            if m.sort_menu is not None:  # the o menu, in place of the rows
+                return Text("\n").join(lines + [Text(f"  {text}", "reverse" if on else "")
+                                                for text, on in m.sort_menu_lines()])
+            rows = [self.row(m, pos, columns) for pos in range(m.top, min(len(m.vis), m.top + m.view))]
+            return Text("\n").join(lines + rows)
 
 
     class _ListHeader(Widget):
@@ -652,8 +880,10 @@ def _app_class():
             query = Text("🔎 " + m.query)
             if m.typing:
                 hint = TYPING_HINT
+            elif m.sort_menu is not None:
+                hint = SORT_MENU_HINT
             else:
-                hint = HELP_HINT + (m.hint or (MULTI_HINT if m.multi else SINGLE_HINT))
+                hint = HELP_HINT + (m.hint or (MULTI_HINT if m.multi else SINGLE_HINT)) + m.sort_hint()
             if m.typing:
                 _with_cursor(query, 2 + m.qpos)
             if m.filters:
@@ -1024,6 +1254,8 @@ def _app_class():
             except BaseException as error:
                 self.error = error
                 return self.finish(None)
+            if got is UNCHANGED:
+                return
             if got is not KEEP:
                 return self.finish(got)
             if self.model.help and not isinstance(self.screen, _HelpScreen):
@@ -1536,20 +1768,23 @@ def _draws_images():
     return True
 
 
-def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, extras=None, locked=None, locked_note="",
+def filter_list(title, labels, multi=False, initial=None, hint="", cursor=None, extras=None, locked=None, locked_note="",
                 hotkeys=(), note_text=None, on_note=None, esc_asks=True, hidden=None, status=None, diff_marks=True,
                 session=None, poll=None, links=None, on_hotkey=None, preview=None, row_note=None, key_help=None, filters="",
-                preview_width=None, select_all=True, outside=(0, 0), on_revert=None, tag_info=None):
+                preview_width=None, select_all=True, outside=(0, 0), on_revert=None, tag_info=None, columns=None,
+                sort_value=None, sort=None, pinned=None):
     """Modal list: vim keys for moving and acting, Emacs keys for editing the filter.
 
     Normal mode: j/k ↑/↓ ^N/^P move · g/G top/bottom · ^D/^U half page · ^F/^B/PgUp/PgDn/^V page · / filter ·
     Enter picks · Esc/q/^G clears the filter, then goes back · ? help. Multi mode adds Space/Tab toggle · a all/none
-    shown · o view (all / on / changed) · u revert · w note. After `/`, typed text filters (every
-    space-separated term must appear in a label, case-insensitive); Enter or Tab keeps the filter, Esc clears it.
+    shown · V view (all / on / changed) · u revert · w note. A list with sortable columns adds o (a menu of them: the
+    one picked sorts first, the others follow in the sort's default order) and O (reverses the whole order; unknown
+    values stay last). After `/`, typed text filters (every space-separated term must appear in a label or in the
+    row's searchable column cells, case-insensitive); Enter or Tab keeps the filter, Esc clears it.
 
     Single mode returns the chosen index, or None on Esc. Multi mode returns the list of on/off states on Enter;
     Esc asks whether to keep or revert pending changes (esc_asks=False: it just returns None).
-    cursor: index the highlight starts on.
+    cursor: index of the label the highlight starts on (None: the top row).
     extras: per label, a list of (text, color) drawn after it (color: green, red, cyan or dim); the rows are a
     left-aligned table, each part a column by position, so a row without a column's part passes ("", color); a long
     label is cut with "…" to leave them room. They are not matched by the filter.
@@ -1566,8 +1801,9 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
     filter line after the typed text. diff_marks: show ➕/➖ against `initial` (else ✅/⬜ only).
     session: a dict the caller keeps so selection, view, revealed rows, filter text, cursor and scroll survive reopening
     the list (carry_place keeps them across passes that list the same rows).
-    poll: optional callable, called on the list's thread every POLL_MS while it waits for a key; the list is then redrawn,
-    so poll can update extras in place (and status can read what it changed).
+    poll: optional callable, called on the list's thread every POLL_MS while it waits for a key; unless it returns a
+    false value other than None (nothing changed), the list is then updated and redrawn, so poll can update extras in
+    place (and status can read what it changed).
     links: optional per-label lists of the label indexes switched together with it (multi mode): Space/Tab and `a`
     set them all to the toggled row's new state (locked ones excepted).
     on_hotkey: optional callable(key, label index) -> bool, tried first for a hotkey; True (or a message to show) means it
@@ -1586,6 +1822,20 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
     tag_info: optional callable(label index) -> [(emoji, name, description)], the tags of the highlighted row's game
     (tagui.summary). They show above the status row: a line each when the list keeps TAG_MIN_ROWS rows, else one line
     of emoji and names that scrolls a cell at a time when it is wider than the screen.
+    columns: optional list of Column; columns[0] is the label's, columns[1:] the extras parts' by position (every row
+    then has len(columns) - 1 parts). A header line names them above the rows (the first sort column bold, ▲ or ▼).
+    Each extras column starts COLUMN_GAP blanks after the one before, header and cells alike (blanks its cells start
+    with count).
+    sort_value: optional callable(label index, column id) -> a value to sort by, or None when unknown (sorted last
+    both ways); called on every redraw, so values that come later (from poll) re-sort the list, the highlighted row
+    staying highlighted. A "name" column with no value sorts by store.sort_key of the label.
+    sort: the Sort the list uses and changes with o and O (share one, like GAMES_SORT, to keep it across lists; a list
+    without its first column sorts in its default order and direction, and O there reverses that order); by
+    default a new one whose default order is the sortable columns in display order. Without sortable columns the rows
+    stay in the caller's order. Indexes (cursor, states, the result, the session's row and visible) are always the
+    caller's; only the order rows are shown in changes.
+    pinned: optional per-label flags; those rows (actions like "➕ New tag") go after all others, in the caller's order,
+    whatever the sort.
     """
     if preview and not _in_session():  # a session asks the terminal once, before its app starts
         _app_class()  # first: it sets up Textual's environment
@@ -1593,7 +1843,8 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
             preview = None
     return _run(_ListModel(title, labels, multi, initial, hint, cursor, extras, locked, locked_note, hotkeys, note_text,
                            on_note, esc_asks, hidden, status, diff_marks, session, poll, links, on_hotkey, preview, row_note,
-                           key_help, filters, preview_width, select_all, outside, on_revert, tag_info))
+                           key_help, filters, preview_width, select_all, outside, on_revert, tag_info, columns,
+                           sort_value, sort, pinned))
 
 
 PLACE = ("row", "query", "view_mode", "top")  # the session entries carry_place keeps
@@ -1601,7 +1852,7 @@ PLACE = ("row", "query", "view_mode", "top")  # the session entries carry_place 
 
 def on_screen(place, items):
     """The items (one per row) of the rows the last list of place (picker.carry_place's) showed, after its / search
-    and o view; all of them when the list didn't say."""
+    and V view, in the order it showed them (its sort); all of them, as given, when the list didn't say."""
     visible = (place.get("session") or {}).get("visible")
     return items if visible is None else [items[i] for i in visible]
 

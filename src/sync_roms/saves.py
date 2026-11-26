@@ -422,25 +422,46 @@ def _rel_prefix(entry):
     return f"{entry['rel']}/" if entry.get("rel") else ""
 
 
+FILES_SORT = picker.Sort(("name",))  # the files lists' sort, for the run
+
+
+def _pad(cells):
+    """A row's extras with the two spaces between columns the lists use."""
+    return [("  " + text, color) for text, color in cells]
+
+
+def _when(mtime):
+    return datetime.datetime.fromtimestamp(mtime).strftime("%Y-%m-%d %H:%M")
+
+
 @picker.one_app
 def pick_stash(games, names):
     """The entries to stash, picked as games (none on) then their files (all on); None on Esc or nothing picked."""
+    from . import gamecols  # gamecols imports modules that import this one
     keys = sorted(games, key=lambda k: (store.sort_key(k[1]), names.get(k[0], k[0])))
-    extras = [[(names.get(system, system), "dim"), (_counts([e["kind"] for e in games[(system, stem)]]), ""),
-               (", ".join(sorted({e["core"] for e in games[(system, stem)] if e["core"]})), "cyan")]
-              for system, stem in keys]
+    cores = [", ".join(sorted({e["core"] for e in games[k] if e["core"]})) for k in keys]
+    cols = gamecols.GameColumns([(system, stem, None) for system, stem in keys],
+                                extra_columns=[picker.Column("kinds", "Saves"), picker.Column("core", "Core", True)],
+                                extra_values=lambda i, col: cores[i] or None if col == "core" else None)
+    extras = [_pad([(_counts([e["kind"] for e in games[k]]), ""), (core, "cyan")]) for k, core in zip(keys, cores)]
     state = picker.filter_list("💾 Games to stash", [stem for _, stem in keys], multi=True, initial=[False] * len(keys),
-                               esc_asks=False, extras=extras, hint="Space toggle · Enter pick their files")
+                               esc_asks=False, hint="Space toggle · Enter pick their files", **cols.kwargs(extras))
     chosen = [k for k, on in zip(keys, state or []) if on]
     if not chosen:
         return None
     rows = [(k, e) for k in chosen for e in games[k]]
-    extras = [[(e["kind"], "dim"), (ui.human_size(e["size"]), ""),
-               (datetime.datetime.fromtimestamp(e["mtime"]).strftime("%Y-%m-%d %H:%M"), "dim"), (e["core"] or "", "cyan")]
+    extras = [_pad([(e["kind"], "dim"), (ui.human_size(e["size"]), ""), (_when(e["mtime"]), "dim"), (e["core"] or "", "cyan")])
               for _, e in rows]
+    values = {"name": None, "kind": lambda e: e["kind"], "size": lambda e: e["size"], "modified": lambda e: _when(e["mtime"]),
+              "core": lambda e: e["core"] or None}
     state = picker.filter_list("💾 Files to stash", [f"{k[1]} · {_rel_prefix(e)}{e['name']}" for k, e in rows], multi=True,
                                initial=[True] * len(rows), esc_asks=False, extras=extras,
-                               hint="Space toggle · Enter stash")
+                               hint="Space toggle · Enter stash", sort=FILES_SORT,
+                               columns=[picker.Column("name", "File", True), picker.Column("kind", "Kind", True),
+                                        picker.Column("size", "Size", True, descending=True),
+                                        picker.Column("modified", "Modified", True, descending=True),
+                                        picker.Column("core", "Core", True)],
+                               sort_value=lambda i, col: values[col](rows[i][1]) if values[col] else None)
     picked = [(k, e) for (k, e), on in zip(rows, state or []) if on]
     return picked or None
 
@@ -517,10 +538,16 @@ def _target_system(stash, by_id, layouts, stems):
 def pick_apply(labels, extras, games):
     """Indexes of the picked stashes; picking two of one game (`games`, per row) keeps the list open. None on Esc or
     nothing picked."""
+    from . import gamecols  # gamecols imports modules that import this one
     session = {}
     while True:
+        cols = gamecols.GameColumns([(system, stem, None) for system, stem, _ in games],
+                                extra_columns=[picker.Column("from", "From"), picker.Column("stashed", "Stashed", True, descending=True),
+                                               picker.Column("kinds", "Saves"), picker.Column("core", "Core"),
+                                               picker.Column("found", "On card"), picker.Column("note", "Note")],
+                                extra_values=lambda i, col: extras[i][1][0].strip() if col == "stashed" else None)
         state = picker.filter_list("📥 Saves to apply", labels, multi=True, initial=[False] * len(labels),
-                                   esc_asks=False, extras=extras, session=session, hint="Space toggle · Enter apply")
+                                   esc_asks=False, session=session, hint="Space toggle · Enter apply", **cols.kwargs(extras))
         chosen = [i for i, on in enumerate(state or []) if on]
         twice = sorted({games[i][1] for i in chosen if sum(games[j] == games[i] for j in chosen) > 1})
         if not twice:
@@ -576,11 +603,11 @@ def _apply(args, base, card, layout_name, layout, device, catalog, session):
     if not rows:
         print(ui.yellow(f"↩️  No stashed saves for the systems {card} syncs (in {stash_root()})"))
         return 0
-    extras = [[(system.get("name", system["bucket"]), "dim"), (f"from {stash['card']}", ""),
+    extras = [_pad([(f"from {stash['card']}", ""),
                (stash["stashed"][:16].replace("T", " "), "dim"), (_counts([f["kind"] for f in stash["files"]]), ""),
                (stash["core"] or "", "cyan"),
                ("" if system["bucket"] in stems.get(stash["game"], ()) else "not on card", "red"),
-               (stash.get("note", ""), "dim")]
+               (stash.get("note", ""), "dim")])
               for stash, system in rows]
     rels = [muos_saves.stash_rel(stash) for stash, _ in rows]  # None: RetroArch; a game per ROM dir on muOS
     chosen = pick_apply([stash["game"] + (f" · {rel}" if rel else "") for (stash, _), rel in zip(rows, rels)], extras,
