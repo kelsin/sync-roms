@@ -6,7 +6,7 @@ from . import cardedit, edit, picker, store, themeart, ui
 from .listedit import add_from_system, add_from_tag, diff_lists, edit_menu, folder_lister, reconcile, view
 
 
-GAMES_HINT = "Space toggle · Enter done · a all · s tag · m meta · c clear · p past"
+GAMES_HINT = "Space toggle · Enter done · a all · m meta · p past"
 GAMES_KEYS = [k for k in cardedit.GAMES_KEYS if k[0] != cardedit.VARIANT_KEY]  # what ? lists in a system's games list
 
 
@@ -38,9 +38,10 @@ def toggle_filtered(s, title, rows):
     filters = cardedit.GameFilters(s)
     place = {}  # where the list was left, kept while a key lists the same games
     while True:
-        pressed = edit.toggle_games(title, [r for r in rows if filters.keep(r[1])], hotkeys=cardedit.GameFilters.KEYS,
+        shown = [r for r in rows if filters.keep(r[1])]
+        pressed = edit.toggle_games(title, shown, hotkeys=cardedit.GameFilters.KEYS,
                                     hint=GAMES_HINT, key_help=GAMES_KEYS, place=place,
-                                    filters=filters.describe())
+                                    filters=filters.describe(len(shown), len(rows)))
         if not filters.handle(pressed, [r[1] for r in rows], place):
             return
 

@@ -235,7 +235,7 @@ class Discs(unittest.TestCase):
                 mock.patch.object(surprise, "past_keys", return_value={"gba/Ruby.zip"}):
             collectionedit.edit_one(collection, SYSTEMS, lambda bucket: keys if bucket == "gba" else set())
         self.assertEqual(lists[1][1], ["Ruby.zip"])
-        self.assertEqual("🎁 past surprises only (c clear filters)", lists[1][2])
+        self.assertEqual("🎁 past surprises only · 1 of 2 shown (c clear filters)", lists[1][2])
         self.assertIn("c clear", lists[0][3])
         self.assertEqual([k for k, _ in lists[0][4]], ["s", "m", "p", "t", "c"])  # what ? lists
         self.assertNotIn("past surprises", lists[1][0])
@@ -682,7 +682,9 @@ class AllRows(unittest.TestCase):
         seen = []
         with mock.patch.object(picker, "filter_list", lambda t, labels, **k: seen.append(k) or [False]):
             listedit.toggle_all("t", [({**SYSTEMS[0], "games": []}, "gba/Ruby.zip", "Ruby", "Ruby")])
-        self.assertEqual(seen[0]["hint"].count("s tag"), 1)
+        self.assertEqual(seen[0]["hint"].count("s filter by tag"), 1)
+        self.assertEqual(seen[0]["hint"].count("c clear filters"), 1)
+        self.assertIn("/ filter", seen[0]["hint"])
 
     def test_toggle_all_leaves_s_and_c_to_the_sticky_filter(self):
         _, rows = self.rows()
@@ -699,7 +701,7 @@ class AllRows(unittest.TestCase):
 
         with mock.patch.object(picker, "filter_list", lambda t, labels, **k: seen.append((labels, k["filters"])) or k["session"]["sel"]):
             listedit.toggle_all("All", rows)
-        self.assertEqual(seen, [(["Game Boy Advance — Ruby.zip"], "✅ 🔀 Mix (c clear filters)")])
+        self.assertEqual(seen, [(["Game Boy Advance — Ruby.zip"], "✅ 🔀 Mix · 1 of 3 shown (c clear filters)")])
 
     def test_toggle_all_turns_select_all_off(self):
         _, rows = self.rows()

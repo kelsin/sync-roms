@@ -227,11 +227,14 @@ def edit_menu(noun, before, working, state, emoji, art, delete_note, new_item, o
                   + [f"➕ New {noun}", "✅ Done (review & save)", "🚪 Quit without saving"])
         extras = [[("  " + ("new" if x not in before else "edited"), "cyan")] if x in edited else [] for x in ids] + [[], [], []]
         i = n + 1 if state["review"] else picker.filter_list(f"✏️  Which {noun}?  (Esc = review & save)", labels, extras=extras,
-                                                    hotkeys=(edit.DELETE_KEY,), hint="/ filter · Enter open · d delete · Esc review", cursor=pos,
+                                                    hotkeys=(edit.DELETE_KEY, tagui.CLEAR_KEY), cursor=pos, filters=tagui.banner(),
+                                                    hint=tagui.menu_hint("/ filter · Enter open · d delete · Esc review"),
                                                     preview=lambda k: previews.collection(art({**working[ids[k]], "id": ids[k]})) if k < n else None)
         if isinstance(i, tuple):
             pos = i[1]
-            if i[1] < n:
+            if i[0] == tagui.CLEAR_KEY:
+                tagui.handle_key(tagui.CLEAR_KEY, ())
+            elif i[1] < n:
                 x = ids[i[1]]
                 if ui.confirm(f"🗑️  Delete {noun} {emoji({**working[x], 'id': x})} {working[x]['name']}?{delete_note(x)}", default=False):
                     del working[x]
@@ -289,4 +292,4 @@ def all_rows(shown, systems, keys_of):
 
 def toggle_all(title, rows, place=None):
     """edit.toggle_games over rows from all_rows (s and c, the sticky tag filter, are its own)."""
-    edit.toggle_games(title, rows, hint="Space toggle · Enter done · s tag · c clear filters", place=place, select_all=False)
+    edit.toggle_games(title, rows, place=place, select_all=False)

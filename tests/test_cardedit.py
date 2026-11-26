@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from helpers import DataDir, feed_list, pilot_list, screen_lines, storage_tags  # noqa: E402
 from helpers import VITA_DLC as DLC, VITA_GAME as G, VITA_OTHER as H, VITA_UPDATE as NEW  # noqa: E402
-from sync_roms import budget, cardedit, collections, edit, inventory, picker, previews, s3, store, surprise, tags, themeart, ui  # noqa: E402
+from sync_roms import budget, cardedit, collections, edit, inventory, picker, previews, s3, store, surprise, tags, tagui, themeart, ui  # noqa: E402
 
 U = budget.Usage
 
@@ -338,7 +338,7 @@ class Flow(DataDir):
             _, calls = self.run_system(returns((cardedit.PAST_SURPRISE_KEY, 0)), returns((cardedit.CLEAR_KEY, 0)),
                                        lambda labels, kw: [False] * len(labels))
         self.assertEqual(calls[1][1], ["Ruby.zip"])
-        self.assertEqual(calls[1][2]["filters"], "🎁 past surprises only (c clear filters)")  # on the filter line
+        self.assertEqual(calls[1][2]["filters"], "🎁 past surprises only · 1 of 4 shown (c clear filters)")  # on the filter line
         self.assertNotIn("past surprises", calls[1][0])
         self.assertEqual(len(calls[2][1]), len(calls[0][1]))
 
@@ -707,7 +707,7 @@ class Flow(DataDir):
         filter_list = picker.filter_list  # the real list, driven by keys without a screen
 
         def take_all(labels, kw):
-            self.assertEqual(kw["filters"], "✅ 🔴 Pokemon (c clear filters)")
+            self.assertEqual(kw["filters"], "✅ 🔴 Pokemon · 2 of 4 shown (c clear filters)")
             self.assertNotIn("Pokemon", calls[-1][0])
             with mock.patch.object(picker, "_run", lambda model: [model.key(k) for k in ("a", "enter")][-1]), \
                     mock.patch.object(picker, "_draws_images", return_value=False):
@@ -771,7 +771,7 @@ class Flow(DataDir):
         self.assertEqual(calls[2][1], ["✅ 🔴 Pokemon (3)"])
         self.assertTrue(calls[3][0].startswith("🌐 All games on c"))
         self.assertEqual(calls[3][1], ["Game Boy — Red.gb", "Game Boy Advance — Ruby.sav", "Game Boy Advance — Ruby.zip"])
-        self.assertEqual(calls[3][2]["filters"], "✅ 🔴 Pokemon (c clear filters)")
+        self.assertEqual(calls[3][2]["filters"], "✅ 🔴 Pokemon · 3 of 5 shown (c clear filters)")
         self.assertEqual(store.card_games("c"), {"gb": [g("gb/Red.gb")]})
 
     def test_s_says_when_no_tag_has_games_here(self):
@@ -793,6 +793,37 @@ class Flow(DataDir):
         calls = self.run_card(returns((cardedit.SET_KEY, 0)), returns(None), returns(None))
         self.assertEqual(len(calls), 3)
         self.assertIn("its systems", calls[2][0])
+
+    def test_the_system_list_shows_the_tag_filter_counts_matches_and_c_clears_it(self):
+        self.card()
+        self.tag_pokemon()
+        tagui.FILTER.required.add("pk")
+        self.addCleanup(tagui.FILTER.clear)
+        calls = self.run_card(returns((cardedit.CLEAR_KEY, 0)), returns(None))
+        self.assertEqual(calls[0][2]["filters"], "✅ 🔴 Pokemon (c clear filters)")
+        self.assertIn(cardedit.CLEAR_KEY, calls[0][2]["hotkeys"])
+        matches = {label.strip(" ⭐"): row[-1][0].strip() for label, row in zip(calls[0][1], calls[0][2]["extras"])}
+        self.assertEqual(matches, {"Game Boy": "1 match", "Game Boy Advance": "2 match"})
+        self.assertEqual(calls[1][2]["filters"], "")  # cleared: no banner and no match column
+        self.assertFalse(any("match" in cell[0] for row in calls[1][2]["extras"] for cell in row))
+        self.assertEqual(tagui.FILTER.describe(), "")
+
+    def test_the_collections_list_shows_the_tag_filter_and_c_clears_it(self):
+        favs = {"id": "favs", "name": "Favs", "games": [{"system": "gba", "bucket": "gba/Ruby.zip", "title": "Ruby"},
+                                                        {"system": "gba", "bucket": "gba/Zelda.zip", "title": "Zelda"}]}
+        self.card()
+        self.tag_pokemon()
+        tagui.FILTER.required.add("pk")
+        self.addCleanup(tagui.FILTER.clear)
+        seen = []  # the list's extras are edited in place, so read them as each screen is drawn
+
+        def look(value):
+            return lambda labels, kw: seen.append((kw["filters"], kw["extras"][0][-1][0])) or value
+        with mock.patch.object(collections, "load_collections", lambda: [favs]), \
+                mock.patch.object(picker, "filter_list", Script(look((cardedit.CLEAR_KEY, 0)), look(None))), \
+                contextlib.redirect_stdout(io.StringIO()):
+            cardedit.pick_collections("c", {"gba"})
+        self.assertEqual(seen, [("✅ 🔴 Pokemon (c clear filters)", "  2 playable, 1 match"), ("", "  2 playable")])
 
     def run_system(self, *steps, bucket="gba"):
         script = Script(*steps)
@@ -1018,12 +1049,13 @@ class Flow(DataDir):
         def step(labels, kw):
             self.assertEqual(kw["row_note"](labels.index("Ruby.zip")), "↳ Variant: GB: the original (v adds it)")
             self.assertEqual(kw["row_note"](labels.index("Zelda.zip")), "")
-            self.assertEqual(kw["hint"], cardedit.GAMES_HINT)
+            self.assertEqual(kw["hint"], tagui.games_hint(cardedit.GAMES_HINT))
             self.assertIn(cardedit.VARIANT_KEY, kw["hotkeys"])
             return kw["session"]["sel"]
         self.run_system(step)
-        self.assertEqual(cardedit.GAMES_HINT,
-                         "Space toggle · Enter done · a all · s tag · m meta · v variant · t tags")
+        self.assertEqual(tagui.games_hint(cardedit.GAMES_HINT),
+                         "Space toggle · Enter done · s filter by tag · t edit tags · c clear filters · / filter · w note"
+                         " · a all shown · m meta · p past · v variant")
 
     def test_the_tag_column_is_last_and_t_edits_the_rows_tags(self):
         self.card()
@@ -1219,7 +1251,7 @@ class Flow(DataDir):
             self.assertEqual(kw["session"]["sel"], [False, False, True, False])  # kept across the filter
             return kw["session"]["sel"]
         _, calls = self.run_system(returns((cardedit.SET_KEY, 0)), pick_first_tag, returns(None), filtered, everything)
-        self.assertEqual(calls[3][2]["filters"], "✅ 🔴 Pokemon (c clear filters)")
+        self.assertEqual(calls[3][2]["filters"], "✅ 🔴 Pokemon · 2 of 4 shown (c clear filters)")
         self.assertEqual(store.card_games("c"), {"gba": [g("gba/Ruby.zip")]})
 
     def test_r_is_not_a_key_of_any_games_list(self):
@@ -1770,9 +1802,9 @@ class MetaFlow(Flow):
         _, calls = self.run_system(self.opens_meta, fields, genres, platform, fields_again, years, both, returns(0),
                                    returns(None), with_tag, everything)
         filters = [c[2].get("filters", "") for c in calls]
-        self.assertEqual("genre: Platform (c clear filters)", filters[3])
-        self.assertEqual("genre: Platform · year: 2001 (c clear filters)", filters[6])
-        self.assertEqual("✅ 🔴 Pokemon · genre: Platform · year: 2001 (c clear filters)", filters[9])
+        self.assertEqual("genre: Platform · 2 of 4 shown (c clear filters)", filters[3])
+        self.assertEqual("genre: Platform · year: 2001 · 1 of 4 shown (c clear filters)", filters[6])
+        self.assertEqual("✅ 🔴 Pokemon · genre: Platform · year: 2001 · 0 of 4 shown (c clear filters)", filters[9])
         self.assertEqual("", filters[10])
         self.assertNotIn("genre", calls[9][0])
         self.assertEqual(store.card_games("c"), {"gba": [g("gba/Zelda.zip")]})
@@ -1843,7 +1875,7 @@ class SetFlow(Flow):
         _, calls = self.run_set(returns([False]))
         title, labels, kw = calls[0]
         self.assertEqual(labels, ["Game Boy Advance — Ruby"])
-        self.assertEqual(kw["filters"], "✅ 🔴 Pokemon (c clear filters)")
+        self.assertEqual(kw["filters"], "✅ 🔴 Pokemon · 1 of 2 shown (c clear filters)")
         self.assertIn(cardedit.SET_KEY, kw["hotkeys"])
         self.assertIn(cardedit.CLEAR_KEY, kw["hotkeys"])
         self.assertIn(("s", "narrow by tags (stays on in every list)"), kw["key_help"])
@@ -1884,7 +1916,7 @@ class SetFlow(Flow):
                                    returns(None), lambda labels, kw: kw["session"]["sel"])
         title, labels, kw = calls[1]
         self.assertEqual(labels, ["⬜ PS1: x"])
-        self.assertEqual(kw["filters"], "✅ 🔴 Pokemon (c clear filters)")
+        self.assertEqual(kw["filters"], "✅ 🔴 Pokemon · 1 of 2 shown (c clear filters)")
         self.assertIn("s", kw["hotkeys"])
 
     def test_toggling_a_game_with_files_picks_its_files_too(self):
@@ -1943,7 +1975,7 @@ class SetFlow(Flow):
         self.assertTrue(title.startswith(cardedit.themeart.collection_emoji(collection)))
         self.assertIn("💖 from a collection", title)
         self.assertEqual(kw["hotkeys"], (cardedit.VARIANT_KEY, "t", cardedit.SET_KEY, cardedit.CLEAR_KEY))
-        self.assertEqual(kw["hint"], cardedit.COLLECTION_GAMES_HINT)
+        self.assertEqual(kw["hint"], tagui.games_hint(cardedit.COLLECTION_GAMES_HINT))
 
     def test_select_all(self):
         self.card()
@@ -2162,7 +2194,7 @@ class SetFlow(Flow):
                                 lambda labels, kw: kw["session"]["sel"])
         self.assertEqual(calls[1][1], ["⬜ 🔴 Pokemon (3)"])  # the tag list
         self.assertEqual(calls[3][1], ["Game Boy — Red.gb", "Game Boy Advance — Ruby.sav", "Game Boy Advance — Ruby.zip"])
-        self.assertEqual(calls[3][2]["filters"], "✅ 🔴 Pokemon (c clear filters)")
+        self.assertEqual(calls[3][2]["filters"], "✅ 🔴 Pokemon · 3 of 5 shown (c clear filters)")
         self.assertEqual(calls[4][1], self.ALL_LABELS)
         self.assertEqual(calls[4][2]["filters"], "")
         self.assertNotIn("query", calls[4][2]["session"])  # c clears the / filter too
@@ -2353,6 +2385,6 @@ class GameFiltersTest(unittest.TestCase):
 
 class DeadHints(unittest.TestCase):
     def test_the_lists_that_turn_a_off_do_not_hint_at_it_and_the_systems_hint_says_all_games(self):
-        self.assertNotIn("a all", cardedit.ALL_GAMES_HINT)
-        self.assertIn("a all", cardedit.COLLECTION_GAMES_HINT)
+        self.assertNotIn("a all", tagui.games_hint(cardedit.ALL_GAMES_HINT, select_all=False))
+        self.assertIn("a all shown", tagui.games_hint(cardedit.COLLECTION_GAMES_HINT))
         self.assertIn("a all games", cardedit.LIST_HINT)

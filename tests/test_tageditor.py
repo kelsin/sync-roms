@@ -6,7 +6,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import helpers  # noqa: E402
-from sync_roms import cli, commands, edit, picker, store, tageditor, tags, ui  # noqa: E402
+from sync_roms import cli, commands, edit, picker, store, tageditor, tags, tagui, ui  # noqa: E402
 
 A, B = "nes/A (USA).zip", "nes/B (USA).zip"
 SYSTEMS = [{"name": "Nintendo NES", "bucket": "nes"}]
@@ -49,6 +49,22 @@ class Editor(unittest.TestCase):
         title, labels = self.shown[0]
         self.assertEqual(labels[:2], ["🐝 Cave  (1 games)", "🚀 Shmups  (2 games)"])
         self.assertIn("New tag", labels[2])
+
+    def test_c_on_the_tag_list_clears_the_sticky_filter_and_the_banner_shows_while_it_is_on(self):
+        tagui.FILTER.required = {"shmups"}
+        self.addCleanup(tagui.FILTER.clear)
+        banners = []
+        script = iter([(tagui.CLEAR_KEY, 0), None])
+
+        def fake(title, labels, **kw):
+            banners.append((kw["filters"], kw["hint"]))
+            return next(script)
+        with mock.patch.object(picker, "filter_list", fake):
+            self.assertEqual(tageditor.edit_tags(), 0)
+        self.assertEqual(banners[0][0], "✅ 🚀 Shmups (c clear filters)")
+        self.assertIn("c clear filters", banners[0][1])
+        self.assertEqual(banners[1], ("", "/ filter · Enter open · n new tag · Esc back"))
+        self.assertEqual(tagui.FILTER.describe(), "")
 
     def test_rename_changes_the_name_not_the_id(self):
         self.run_editor(["Shmups", "Rename", None, None], asks=["Shoot-em-ups"])

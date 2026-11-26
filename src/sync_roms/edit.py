@@ -69,16 +69,14 @@ def toggle_games(title, rows, hotkeys=(), hint=None, place=None, filters="", key
     banner, for lists whose hidden rows would be acted on unseen (a suggestion review, a tag's own games)."""
     place = {} if place is None else place
     own = tuple(k for k in tagui.HOTKEYS if k not in hotkeys) if tag_filter else ()
-    if own and key_help is None:  # the hint is what ? lists then: name s and c there
-        hint = hint or (GAMES_HINT if notes else GAMES_HINT.replace(" · w note", ""))
-        hint += "" if " s tag" in hint else " · s tag · c clear filters"
+    hint = tagui.games_hint(hint or GAMES_HINT, tag_filter, notes, select_all)
     helps = [h for h in tagui.KEYS_HELP if h[0] in own]
     frozen = None  # the rows of the pass `t` was pressed in: shown again as they were, so the cursor stays put
     while True:
         shown = frozen or ([r for r in rows if tagui.FILTER.keep(r[1])] if tag_filter else rows)
         frozen = None
         line = tagui.FILTER.describe() if tag_filter else ""
-        banner = tagui.banner() if line and line not in filters else ""
+        banner = tagui.banner(len(shown), len(rows)) if line and line not in filters else tagui.paused() if not tag_filter else ""
         if line and not shown and rows:
             banner += " · no games match the tag filter"
         pressed, i = _toggle_games(title, shown, (*hotkeys, *own), hint, place,
@@ -107,7 +105,7 @@ def _toggle_games(title, rows, hotkeys, hint, place, filters, key_help, select_a
     Ctrl-C applies the toggles made so far, then raises KeyboardInterrupt.
     """
     hint = hint or (GAMES_HINT if notes else GAMES_HINT.replace(" · w note", ""))
-    hint += "" if " t tags" in hint else " · t tags"
+    hint += "" if " t tags" in hint or " t edit tags" in hint else " · t edit tags"
     key_help = key_help if key_help is None or any(k == tagui.TAG_KEY for k, _ in key_help) else [*key_help, tagui.KEY_HELP]
     locked = [bool(s.get("full_system")) for s, *_ in rows]
     have = {}  # system bucket -> keys of its listed games, kept current as games are added and removed
@@ -417,12 +415,15 @@ def edit_manifest():
             options = [f"💳 {name}" for name in cards] + ["➕ New card"]
             extras = [setup_extra(name, saved) + pending_extra(name) for name in cards] + [[]]
             i = picker.filter_list("💳 Which card?  (Esc = back)", options, extras=extras,
-                                   hotkeys=(SETUP_KEY, DELETE_KEY, RENAME_KEY), hint=MENU_HINT, cursor=pos)
+                                   hotkeys=(SETUP_KEY, DELETE_KEY, RENAME_KEY, tagui.CLEAR_KEY), hint=tagui.menu_hint(MENU_HINT),
+                                   filters=tagui.banner(), cursor=pos)
             if i is None:
                 return
             pos = i[1] if isinstance(i, tuple) else i
             if isinstance(i, tuple):
-                if i[1] < n:
+                if i[0] == tagui.CLEAR_KEY:
+                    tagui.handle_key(tagui.CLEAR_KEY, ())
+                elif i[1] < n:
                     {SETUP_KEY: change_setup, DELETE_KEY: delete_card, RENAME_KEY: rename_card}[i[0]](cards[i[1]])
             elif i < n:
                 open_card(cards[i])
@@ -449,7 +450,11 @@ def edit_manifest():
                 extras = [[("  " + str(len(targets)) + " pending", "cyan")] if targets else [],
                           [], [], [("  " + str(len(overlay_pending)) + " edited", "cyan")] if overlay_pending else [], [], []]
                 i = picker.filter_list("✏️  What do you want to edit?  (Esc = review & save)", options, extras=extras,
-                                       hint="Enter open · Esc review & save")
+                                       hint=tagui.menu_hint("Enter open · Esc review & save"), filters=tagui.banner(),
+                                       hotkeys=(tagui.CLEAR_KEY,))
+                if isinstance(i, tuple):
+                    tagui.handle_key(tagui.CLEAR_KEY, ())
+                    continue
                 if i is None or i == 4:
                     return True
                 if i == 0:

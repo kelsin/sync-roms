@@ -157,12 +157,45 @@ class TagFilter:
 FILTER = TagFilter()  # the one tag filter every game list shares; only c clears it
 SET_KEY = "s"
 HOTKEYS = (SET_KEY, CLEAR_KEY)
-KEYS_HELP = [(SET_KEY, "narrow by tags (stays on in every list)"), (CLEAR_KEY, "clear filters")]
+KEYS_HELP = [(SET_KEY, "narrow by tags (stays on in every list)"),
+             (CLEAR_KEY, "clear the / search and the filters")]
+TAGS_HINT = "s filter by tag · t edit tags · c clear filters"
+PAUSED = "🏷️ tag filter paused here"
 
 
-def banner():
-    """The filters line's tag part for a list: what FILTER shows, or "" with no filter."""
-    return f"{FILTER.describe()} (c clear filters)" if FILTER.describe() else ""
+def counts(shown, total):
+    """" · N of M shown" when a list shows fewer rows than it has, else ""."""
+    if shown is None or total is None or shown >= total:
+        return ""
+    return f" · {shown} of {total} shown"
+
+
+def banner(shown=None, total=None):
+    """The filters line's tag part for a list: what FILTER shows (with "N of M shown" when shown is fewer than
+    total), or "" with no filter."""
+    line = FILTER.describe()
+    return f"{line}{counts(shown, total)} (c clear filters)" if line else ""
+
+
+def paused():
+    """The filters line's part for a list that ignores FILTER, or "" with no filter set."""
+    return PAUSED if FILTER.describe() else ""
+
+
+def games_hint(base, filtering=True, notes=True, select_all=True):
+    """The hint of a games list: base (its own keys, starting "Space toggle · Enter done") with s, t and c named the
+    same way everywhere, then / and w and a where the list has them. filtering False: a list that ignores the tag
+    filter names only t."""
+    drop = {"Space", "Enter", "s", "t", "c", "/", "w", "a"}
+    rest = [p for p in base.split(" · ") if p.split(" ", 1)[0] not in drop]
+    tag = TAGS_HINT if filtering else TAGS_HINT.split(" · ")[1]
+    keys = ["/ filter"] + (["w note"] if notes else []) + (["a all shown"] if select_all else [])
+    return " · ".join(["Space toggle", "Enter done", tag, *keys, *rest])
+
+
+def menu_hint(hint):
+    """A menu's hint, naming c while a tag filter is on."""
+    return f"{hint} · c clear filters" if FILTER.describe() else hint
 
 
 def handle_key(pressed, row_keys, place=None):

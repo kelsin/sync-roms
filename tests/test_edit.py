@@ -1117,7 +1117,7 @@ class TagColumn(DataDir):
         with mock.patch.object(picker, "filter_list", side_effect=lambda t, l, **kw: seen.append((l, kw)) or kw["session"]["sel"]):
             edit.toggle_games("t", self.ROWS, filters="mine")
         self.assertEqual(seen[0][0], ["B"])
-        self.assertIn("✅ 🐝 X (c clear filters)", seen[0][1]["filters"])
+        self.assertIn("✅ 🐝 X · 1 of 2 shown (c clear filters)", seen[0][1]["filters"])
         self.assertIn("mine", seen[0][1]["filters"])
         self.assertIn("s", seen[0][1]["hotkeys"])
         self.assertIn("c", seen[0][1]["hotkeys"])
@@ -1157,7 +1157,7 @@ class TagColumn(DataDir):
         with mock.patch.object(picker, "filter_list", fake):
             edit.toggle_games("t", self.ROWS)
         self.assertEqual(seen[0][0], [])
-        self.assertIn("✅ 🐝 X (c clear filters)", seen[0][1])
+        self.assertIn("✅ 🐝 X · 0 of 2 shown (c clear filters)", seen[0][1])
         self.assertIn("no games match the tag filter", seen[0][1])
         self.assertEqual(seen[1], (["A", "B"], ""))
 
@@ -1172,9 +1172,16 @@ class TagColumn(DataDir):
         self.assertEqual(seen[0][0], ["A", "B"])
         self.assertNotIn("s", seen[0][1]["hotkeys"])
         self.assertNotIn("c", seen[0][1]["hotkeys"])
-        self.assertEqual(seen[0][1]["filters"], "")
+        self.assertEqual(seen[0][1]["filters"], tagui.PAUSED)  # a filter is set: say it is paused here
         self.assertEqual(seen[1][0], [])
-        self.assertIn("s tag", seen[1][1]["hint"])  # default callers: s and c are in the hint ? lists
+        self.assertIn("s filter by tag", seen[1][1]["hint"])  # default callers: s and c are in the hint ? lists
+
+    def test_a_caller_with_key_help_still_gets_s_t_c_and_the_live_keys_in_the_hint(self):
+        seen = []
+        with mock.patch.object(picker, "filter_list", side_effect=lambda t, l, **kw: seen.append(kw) or kw["session"]["sel"]):
+            edit.toggle_games("t", self.ROWS, key_help=[("m", "meta")], hint="Space toggle · Enter done · m meta")
+        self.assertEqual(seen[0]["hint"], "Space toggle · Enter done · s filter by tag · t edit tags · c clear filters"
+                                          " · / filter · w note · a all shown · m meta")
 
     def test_notes_off_drops_w(self):
         seen = []

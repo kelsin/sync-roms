@@ -234,6 +234,28 @@ class StickyFilter(unittest.TestCase):
     def test_banner_empty_without_filter(self):
         self.assertEqual(tagui.banner(), "")
 
+    def test_banner_counts_the_hidden_rows_only_when_some_are_hidden(self):
+        tagui.FILTER.required = {"shmups"}
+        self.assertEqual(tagui.banner(1, 3), "✅ 🚀 Shmups · 1 of 3 shown (c clear filters)")
+        self.assertEqual(tagui.banner(3, 3), "✅ 🚀 Shmups (c clear filters)")
+        tagui.FILTER.clear()
+        self.assertEqual(tagui.banner(0, 3), "")
+
+    def test_paused_names_the_filter_only_when_one_is_set(self):
+        self.assertEqual(tagui.paused(), "")
+        tagui.FILTER.required = {"shmups"}
+        self.assertIn("paused", tagui.paused())
+
+    def test_games_hint_names_s_t_c_and_the_live_keys_once(self):
+        hint = tagui.games_hint("Space toggle · Enter done · a all · s tag · m meta · c clear · t tags · v variant")
+        self.assertEqual(hint, "Space toggle · Enter done · s filter by tag · t edit tags · c clear filters · / filter"
+                               " · w note · a all shown · m meta · v variant")
+        self.assertNotIn("w note", tagui.games_hint("Space toggle · Enter done", notes=False))
+        self.assertNotIn("a all", tagui.games_hint("Space toggle · Enter done", select_all=False))
+        paused = tagui.games_hint("Space toggle · Enter done", filtering=False)
+        self.assertIn("t edit tags", paused)
+        self.assertNotIn("s filter", paused)
+
     def test_banner_lists_required_and_excluded(self):
         tagui.FILTER.required, tagui.FILTER.excluded = {"shmups"}, {"cave"}
         self.assertEqual(tagui.banner(), "✅ 🚀 Shmups · 🚫 🐝 Cave (c clear filters)")

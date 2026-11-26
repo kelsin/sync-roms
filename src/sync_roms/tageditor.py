@@ -168,11 +168,16 @@ def edit_tags():
         counts = tagui._count()
         i = picker.filter_list("🏷️  Which tag?  (Esc = back)",
                                [f"{_label(defs[x])}  ({counts.get(x, 0)} games)" for x in ids] + ["➕ New tag"],
-                               hotkeys=(tagui.NEW_KEY,), hint="/ filter · Enter open · n new tag · Esc back", cursor=pos,
+                               hotkeys=(tagui.NEW_KEY, tagui.CLEAR_KEY), cursor=pos, filters=tagui.banner(),
+                               hint=tagui.menu_hint("/ filter · Enter open · n new tag · Esc back"),
                                preview=lambda k: previews.collection(defs[ids[k]].get("art")) if k < n else None)
         if i is None:
             return 0
         if isinstance(i, tuple):
+            if i[0] == tagui.CLEAR_KEY:
+                tagui.handle_key(tagui.CLEAR_KEY, ())
+                pos = i[1] or 0
+                continue
             i = n
         pos = i
         if i < n:
