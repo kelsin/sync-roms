@@ -1,15 +1,20 @@
 """The data of the collections page (`sync-roms collections page`): collections, their games, tags and pictures."""
 import base64
+import concurrent.futures
+import hashlib
 import io
 import json
 import os
 import shutil
 
-from . import collections, inventory, languages, metafilter, names, s3, scrape_plan, store, tags, themeart, ui
+from . import collections, inventory, languages, metafilter, names, previews, s3, scrape_plan, store, tags, themeart, ui
 
 QUALITY = 80
 BAND_WIDTH = 150
 BAND_CROP = (50, 600, 343, 1050)  # the band's plain colour around the drawing in y 600..1050
+GAME_WIDTHS = (("s", 96), ("l", 300))  # the published game pictures' suffixes and widths
+CREDIT_TEXT = "Game art from ScreenScraper"
+CREDIT_URL = "https://www.screenscraper.fr/"
 
 
 def webp_bytes(path, width=None, crop=None):
@@ -56,6 +61,32 @@ def _art(art_id, art_dir=None):
                 f.write(data)
             out[kind] = f"art/{name}"
     return out
+
+
+def _game_art(bucket, art_dir):
+    """The game's picture name `art/games/<hash>` (files `<hash>-s.webp` and `-l.webp` written in art_dir/games), or
+    None when it has no scraped picture. The name is a hash of the bucket key, so it tells nothing of the ROM."""
+    path = previews.game_thumb(bucket)
+    if not path:
+        return None
+    name = hashlib.sha1(bucket.encode()).hexdigest()[:16]
+    datas = [(suffix, webp_bytes(path, width)) for suffix, width in GAME_WIDTHS]
+    if any(data is None for _, data in datas):
+        return None
+    folder = os.path.join(art_dir, "games")
+    os.makedirs(folder, exist_ok=True)
+    for suffix, data in datas:
+        with open(os.path.join(folder, f"{name}-{suffix}.webp"), "wb") as f:
+            f.write(data)
+    return f"art/games/{name}"
+
+
+def _game_arts(buckets, art_dir):
+    """{bucket: _game_art} for the distinct buckets, made in parallel."""
+    buckets = sorted(set(buckets))
+    print(f"🖼️  Game art for {len(buckets)} games…", flush=True)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool:
+        return dict(zip(buckets, pool.map(lambda b: _game_art(b, art_dir), buckets)))
 
 
 def _tag_definitions(strict=False):
@@ -137,6 +168,7 @@ def page_data(public=False, art_dir=None, strict=False):
     sizes = _sizes({g["bucket"].partition("/")[0] for c in loaded for g in c["games"]}, strict)
     metadata = _metadata({g["bucket"].partition("/")[0] for c in loaded for g in c["games"]}, strict)
     years = _years(metadata)
+    game_art = _game_arts([g["bucket"] for c in loaded for g in c["games"]], art_dir) if art_dir else {}
     used, out = set(), []
     for collection in loaded:
         games = []
@@ -159,6 +191,8 @@ def page_data(public=False, art_dir=None, strict=False):
             year = years.get(system, {}).get(bucket.partition("/")[2])
             if year:
                 entry["year"] = year
+            if game_art.get(bucket):
+                entry["img"] = game_art[bucket]
             games.append(entry)
         games.sort(key=lambda g: store.sort_key(g["title"]))
         art_id = collection.get("art") or collection["id"]
@@ -233,6 +267,7 @@ def write_public(out_dir, home="/"):
     files = template_files()
     data = page_data(public=True, art_dir=os.path.join(out_dir, "art"), strict=True)
     data["home"] = home
+    data["credit"] = {"text": CREDIT_TEXT, "url": CREDIT_URL}
     store.write_text(os.path.join(out_dir, "index.html"), fill(files["page.html"], data))
     for name in ("page.css", "page.js"):
         store.write_text(os.path.join(out_dir, name), files[name])
