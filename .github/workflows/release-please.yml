@@ -48,16 +48,21 @@ jobs:
   bump-tap:
     needs: [release-please, build-assets]
     if: ${{ needs.release-please.outputs.release_created }}
-    runs-on: ubuntu-latest
+    # macOS, since Homebrew's Linux sandbox (Landlock) warns on every pip run that it can't fully isolate writes.
+    runs-on: macos-latest
     steps:
       # bump-formula-pr can't refresh the Python resources of a formula whose url isn't on PyPI, so it only writes the
       # new url, update-python-resources resolves the resources from it, and the tap's script points them back at
       # wheels before the PR is opened and merged.
       - uses: Homebrew/actions/setup-homebrew@main
-      - run: |
+      # bash explicitly for pipefail, so a failed download stops the job instead of hashing nothing.
+      - shell: bash
+        run: |
           brew tap kelsin/tap
           brew trust kelsin/tap
-          brew bump-formula-pr --write-only --version "$VERSION" \
+          sha256=$(gh release download "$TAG" --repo kelsin/sync-roms --pattern "sync_roms-$VERSION.tar.gz" --output - \
+            | shasum -a 256 | cut -d' ' -f1)
+          brew bump-formula-pr --write-only --version "$VERSION" --sha256 "$sha256" \
             --url "https://github.com/kelsin/sync-roms/releases/download/$TAG/sync_roms-$VERSION.tar.gz" \
             kelsin/tap/sync-roms
           brew update-python-resources kelsin/tap/sync-roms
