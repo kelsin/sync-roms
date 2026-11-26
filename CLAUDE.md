@@ -9,7 +9,7 @@ Always use `uv`; never bare `python`, `pip`, `pyenv` shims or a system interpret
 ```bash
 uv sync                                      # create/update .venv
 uv run python -m unittest discover -s tests  # tests
-uv run python tools/run_tests.py   # tests, one process per module in parallel
+uv run python tools/run_tests.py   # tests, in parallel processes (slow modules sharded, small ones batched)
 uv run sync-roms ...                         # the CLI
 ```
 
@@ -20,6 +20,7 @@ CI tests on Python 3.12 to 3.15 (`requires-python`), so code must run on 3.12 to
 ## Tests
 
 - A test module that imports `sync_roms` must import `isolate` first, directly or through `helpers`: it redirects HOME, XDG and the AWS settings to a throwaway folder and fails any test touching the real data folder or `~/.aws`.
+- `tools/run_tests.py` batches small modules into one process each (and shards the slowest across several): modules in a batch share a process and its throwaway HOME, like the single-process `unittest discover` run.
 - Tests start with no tags, ignore list or scraped names. Tags come from `helpers.storage_tags`.
 
 ## Storage access
