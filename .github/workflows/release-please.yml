@@ -62,7 +62,7 @@ jobs:
           brew trust kelsin/tap
           sha256=$(gh release download "$TAG" --repo kelsin/sync-roms --pattern "sync_roms-$VERSION.tar.gz" --output - \
             | shasum -a 256 | cut -d' ' -f1)
-          brew bump-formula-pr --write-only --version "$VERSION" --sha256 "$sha256" \
+          brew bump-formula-pr --write-only --sha256 "$sha256" \
             --url "https://github.com/kelsin/sync-roms/releases/download/$TAG/sync_roms-$VERSION.tar.gz" \
             kelsin/tap/sync-roms
           brew update-python-resources kelsin/tap/sync-roms
