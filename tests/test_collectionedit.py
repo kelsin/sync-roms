@@ -237,7 +237,7 @@ class Discs(unittest.TestCase):
         self.assertEqual(lists[1][1], ["Ruby.zip"])
         self.assertEqual("🎁 past surprises only · 1 of 2 shown (c clear filters)", lists[1][2])
         self.assertIn("c clear", lists[0][3])
-        self.assertEqual([k for k, _ in lists[0][4]], ["s", "m", "p", "t", "c"])  # what ? lists
+        self.assertEqual([k for k, _ in lists[0][4]], ["s", "m", "p", "t", "T", "c"])  # what ? lists
         self.assertNotIn("past surprises", lists[1][0])
         self.assertEqual(len(lists[2][1]), 2)
 

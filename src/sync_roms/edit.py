@@ -68,9 +68,9 @@ def toggle_games(title, rows, hotkeys=(), hint=None, place=None, filters="", key
     A caller that lists s or c in hotkeys handles them itself. tag_filter=False: every row is shown, with no s/c and no
     banner, for lists whose hidden rows would be acted on unseen (a suggestion review, a tag's own games)."""
     place = {} if place is None else place
-    own = tuple(k for k in tagui.HOTKEYS if k not in hotkeys) if tag_filter else ()
+    own = tuple(k for k in (*tagui.HOTKEYS, tagui.BULK_KEY) if k not in hotkeys) if tag_filter else ()
     hint = tagui.games_hint(hint or GAMES_HINT, tag_filter, notes, select_all)
-    helps = [h for h in tagui.KEYS_HELP if h[0] in own]
+    helps = [h for h in (*tagui.KEYS_HELP, tagui.BULK_HELP) if h[0] in own]
     frozen = None  # the rows of the pass `t` was pressed in: shown again as they were, so the cursor stays put
     while True:
         shown = frozen or ([r for r in rows if tagui.FILTER.keep(r[1])] if tag_filter else rows)
@@ -81,10 +81,14 @@ def toggle_games(title, rows, hotkeys=(), hint=None, place=None, filters="", key
             banner += " · no games match the tag filter"
         pressed, i = _toggle_games(title, shown, (*hotkeys, *own), hint, place,
                                    " · ".join(x for x in (filters, banner) if x),
-                                   None if key_help is None else [*key_help, *helps], select_all, notes)
+                                   None if key_help is None else [*key_help, *(h for h in helps if h not in key_help)],
+                                   select_all, notes)
         if pressed == tagui.TAG_KEY:
             if i is not None:
                 tagui.edit_game_tags(shown[i][1], shown[i][2])
+            frozen = shown
+        elif pressed == tagui.BULK_KEY and pressed in own:
+            tagui.bulk_tag([r[1] for r in shown])
             frozen = shown
         elif pressed in own:
             tagui.handle_key(pressed, [r[1] for r in rows], place)

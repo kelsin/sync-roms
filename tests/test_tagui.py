@@ -21,6 +21,47 @@ class TagUi(unittest.TestCase):
         self.notes = []
         self.enterContext(mock.patch.object(edit, "note", self.notes.append))
 
+    def bulk(self, keys, checked, confirm=True):
+        """bulk_tag(keys) with the checklist answered by checked (tag ids on); returns the checklist's (labels, initial)."""
+        seen = []
+
+        def fake(title, labels, **kw):
+            seen.append((labels, kw["initial"], title))
+            defs = tags.all_tags()
+            return [i in checked for i in sorted(defs, key=lambda i: defs[i]["name"].casefold())]
+        with mock.patch.object(picker, "filter_list", fake), mock.patch.object(ui, "confirm", return_value=confirm) as c:
+            self.result = tagui.bulk_tag(keys)
+        self.asked = [a[0][0] for a in c.call_args_list]
+        return seen[0] if seen else None
+
+    def test_bulk_tag_adds_the_checked_tags_to_every_game_after_a_count_confirm(self):
+        seen = self.bulk([A, B], {"cave", "shmups"})
+        self.assertEqual(seen[0], ["🐝 Cave", "🚀 Shmups"])
+        self.assertEqual(seen[1], [False, False])  # B has shmups, A doesn't: not on all of them
+        self.assertEqual(self.asked, ["🏷️  Tag 2 games?"])
+        self.assertEqual((tags.tags_of(A), tags.tags_of(B)), (["cave", "shmups"], ["cave", "shmups"]))
+        self.assertEqual(self.notes[-1], "🏷️  Tagged 2 games")
+
+    def test_bulk_tag_checks_the_tags_all_games_have_and_unchecking_removes_only_those(self):
+        tags.change_game_tags(A, add=["shmups", "cave"])
+        seen = self.bulk([A, B], {"cave"})
+        self.assertEqual(seen[1], [False, True])  # Shmups is on both
+        self.assertEqual((tags.tags_of(A), tags.tags_of(B)), (["cave"], ["cave"]))
+
+    def test_bulk_tag_declined_or_unchanged_writes_nothing(self):
+        self.bulk([A, B], {"cave"}, confirm=False)
+        self.assertFalse(self.result)
+        self.assertEqual((tags.tags_of(A), tags.tags_of(B)), ([], ["shmups"]))
+        self.bulk([A], set())
+        self.assertEqual(self.asked, [])
+        self.assertIn("No tag changed", self.notes[-1])
+
+    def test_bulk_tag_counts_a_record_and_its_files_once(self):
+        tags.change_game_tags(A, add=["cave"])
+        with mock.patch.object(tags, "owner", lambda k: A if k == "nes/A.sav" else k):
+            self.bulk([A, "nes/A.sav"], {"cave", "shmups"})
+        self.assertEqual(self.asked, ["🏷️  Tag 1 games?"])
+
     def test_column_rows(self):
         self.assertEqual(tagui.column([A, B]), [("", ""), ("🚀", "")])
         tags.change_game_tags(A, add=["cave", "shmups"])
@@ -186,13 +227,48 @@ class TagFilterTest(unittest.TestCase):
             return next(answers)
         with mock.patch.object(picker, "filter_list", fake):
             self.assertIsNone(f.pick({A, B, self.C}))
-        self.assertEqual(seen[0][0], ["⬜ 🐝 Cave (1)", "⬜ 🚀 Shmups (2)"])  # RPG has no game among the rows
-        self.assertEqual(seen[1][0], ["⬜ 🐝 Cave (1)", "✅ 🚀 Shmups (2)"])
-        self.assertEqual(seen[2][0], ["⬜ 🐝 Cave (1)", "🚫 🚀 Shmups (2)"])
-        self.assertEqual(seen[3][0], ["⬜ 🐝 Cave (1)", "⬜ 🚀 Shmups (2)"])
+        none = "⬜ 🈳 No tags at all (1)"
+        self.assertEqual(seen[0][0], ["⬜ 🐝 Cave (1)", "⬜ 🚀 Shmups (2)", none])  # RPG has no game among the rows
+        self.assertEqual(seen[1][0], ["⬜ 🐝 Cave (1)", "✅ 🚀 Shmups (2)", "⬜ 🈳 No tags at all (0)"])
+        self.assertEqual(seen[2][0], ["⬜ 🐝 Cave (0)", "🚫 🚀 Shmups (0)", none])  # the rows stay, the counts follow
+        self.assertEqual(seen[3][0], ["⬜ 🐝 Cave (1)", "⬜ 🚀 Shmups (2)", none])
         self.assertEqual([s[1] for s in seen[1:]], [1, 1, 1])
         self.assertEqual([(s[2], s[3]) for s in seen[1:]], [({"shmups"}, set()), (set(), {"shmups"}), (set(), set())])
         self.assertEqual((f.required, f.excluded), (set(), set()))
+
+    def test_untagged_keeps_only_games_with_no_tags_and_excludes_required_tags(self):
+        f = tagui.TagFilter()
+        f.untagged = True
+        self.assertEqual([k for k in (A, B, self.C, "nes/A.sav") if f.keep(k)], [self.C])
+        self.assertEqual(f.describe(), "✅ " + tagui.NO_TAGS)
+        f.clear()
+        self.assertFalse(f.untagged)
+        self.assertFalse(f.active())
+
+    def test_pick_untagged_and_required_tags_clear_each_other(self):
+        f, seen = tagui.TagFilter(), []
+        answers = iter([2, 0, None])  # no tags, then Cave required (clears it)
+
+        def fake(title, labels, **kw):
+            seen.append((list(labels), f.untagged, set(f.required)))
+            return next(answers)
+        with mock.patch.object(picker, "filter_list", fake):
+            f.pick({A, B, self.C})
+        self.assertEqual(seen[1][1:], (True, set()))
+        self.assertEqual(seen[1][0][0], "⬜ 🐝 Cave (1)")  # the tags stay listed with the untagged filter on
+        self.assertEqual(seen[2][1:], (False, {"cave"}))
+
+    def test_pick_lists_a_required_tag_with_no_game_here_and_counts_the_narrowed_rows(self):
+        f, seen = tagui.TagFilter(), []
+        f.required = {"rpg"}
+        with mock.patch.object(picker, "filter_list", lambda t, labels, **kw: seen.append(labels)):
+            f.pick({A, B})
+        self.assertEqual(seen, [["✅ 🐉 RPG (0)"]])
+        f.required = {"cave"}
+        seen.clear()
+        with mock.patch.object(picker, "filter_list", lambda t, labels, **kw: seen.append(labels)):
+            f.pick({A, B, self.C})
+        self.assertEqual(seen, [["✅ 🐝 Cave (1)", "⬜ 🚀 Shmups (1)"]])  # only B is left, and it has Shmups too
 
     def test_pick_c_clears_and_reopens(self):
         f, calls = tagui.TagFilter(), []
@@ -248,7 +324,7 @@ class StickyFilter(unittest.TestCase):
 
     def test_games_hint_names_s_t_c_and_the_live_keys_once(self):
         hint = tagui.games_hint("Space toggle · Enter done · a all · s tag · m meta · c clear · t tags · v variant")
-        self.assertEqual(hint, "Space toggle · Enter done · s filter by tag · t edit tags · c clear filters · / filter"
+        self.assertEqual(hint, "Space toggle · Enter done · s filter by tag · t edit tags · T tag all shown · c clear filters · / filter"
                                " · w note · a all shown · m meta · v variant")
         self.assertNotIn("w note", tagui.games_hint("Space toggle · Enter done", notes=False))
         self.assertNotIn("a all", tagui.games_hint("Space toggle · Enter done", select_all=False))

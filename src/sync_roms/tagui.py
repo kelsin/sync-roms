@@ -83,6 +83,51 @@ def edit_game_tags(key, title):
         return False
 
 
+def bulk_tag(keys):
+    """Tags every game of keys (a file of a record counts as its record, once): a checklist of the tags, checked where
+    all the games have it; checking adds a tag to every game, unchecking one they all have removes it. Asks "Tag N
+    games?" before it writes. Returns whether tags were written."""
+    try:
+        owners = list(dict.fromkeys(tags.owner(k) for k in keys))
+        if not owners:
+            note(ui.yellow("ℹ️  No games shown to tag."))
+            return False
+        start = {i for i in tags.all_tags() if all(i in tags.tags_of(o) for o in owners)}
+        picked = set(start)
+        while True:
+            defs = tags.all_tags()
+            ids = sorted(defs, key=lambda i: defs[i]["name"].casefold())
+            labels = [f"{defs[i]['emoji']} {defs[i]['name']}" for i in ids]
+            session = {"sel": [i in picked for i in ids]}
+            result = picker.filter_list(f"🏷️  Tag {len(owners)} games (n adds a new tag)", labels, multi=True,
+                                        initial=[i in start for i in ids], hotkeys=(NEW_KEY,), session=session,
+                                        hint="Space toggle · Enter done · n new tag",
+                                        key_help=[(NEW_KEY, "add a new tag, checked for these games")])
+            if result is None:
+                return False
+            if isinstance(result, tuple):
+                picked = {i for i, on in zip(ids, session["sel"]) if on}
+                made = _new_tag()
+                if made:
+                    picked.add(made)
+                continue
+            chosen = {i for i, on in zip(ids, result) if on}
+            break
+        add, remove = chosen - start, start - chosen
+        if not add and not remove:
+            note(ui.yellow("ℹ️  No tag changed."))
+            return False
+        if not ui.confirm(f"🏷️  Tag {len(owners)} games?", default=False):
+            return False
+        tags.change_games_tags({o: (add, remove) for o in owners})
+        note(f"🏷️  Tagged {len(owners)} games")
+        return True
+    except (*s3.ERRORS, SystemExit, ValueError) as e:
+        note(ui.yellow(f"⚠️  Couldn't save the tags in storage: {e}"))
+        return False
+
+
+NO_TAGS = "🈳 No tags at all"
 STATES = ("⬜", "✅", "🚫")  # off, required, excluded
 CLEAR_KEY = "c"
 
@@ -93,14 +138,21 @@ class TagFilter:
 
     def __init__(self):
         self.required, self.excluded = set(), set()
+        self.untagged = False  # only games with no tags at all (never together with required tags)
         self._worked = None  # (tags data, required, excluded, keys with every required tag or None, keys to leave out)
 
     def clear(self):
         self.required.clear()
         self.excluded.clear()
+        self.untagged = False
+
+    def active(self):
+        return bool(self.required or self.excluded or self.untagged)
 
     def keep(self, key):
         """Whether the filter shows the game."""
+        if self.untagged and tags.tags_of(tags.owner(key)):
+            return False
         if not self.required and not self.excluded:
             return True
         data, required, excluded = tags.load(), frozenset(self.required), frozenset(self.excluded)
@@ -114,26 +166,35 @@ class TagFilter:
     def describe(self):
         """The filter line's part: "✅ 🚀 Shmups · 🚫 🐝 Cave", required tags first, or "" with no filter."""
         defs = tags.all_tags()
-        parts = []
+        parts = [f"✅ {NO_TAGS}"] if self.untagged else []
         for mark, ids in (("✅", self.required), ("🚫", self.excluded)):
             for i in sorted((i for i in ids if i in defs), key=lambda i: defs[i]["name"].casefold()):
                 parts.append(f"{mark} {defs[i]['emoji']} {defs[i]['name']}")
         return " · ".join(parts)
 
     def pick(self, row_keys):
-        """A list of the tags with games among row_keys: Enter cycles a tag off → required → excluded → off, c clears,
-        Esc returns. Notes when no tag has a game there."""
+        """A list of the tags with games among row_keys that the filter still shows (plus the tags already required or
+        excluded, and "No tags at all"): Enter cycles a tag off → required → excluded → off, c clears, Esc returns.
+        Notes when nothing is there to pick."""
         row_keys = set(row_keys)
         defs = tags.all_tags()
-        counts = {i: len(row_keys & tags.games_with({i}, ())) for i in defs}
-        ids = sorted((i for i, n in counts.items() if n), key=lambda i: defs[i]["name"].casefold())
-        if not ids:
-            note(ui.yellow("ℹ️  No tag has games among these."))
-            return
-        cursor = 0
+        cursor, entries = 0, None  # the rows are chosen once, so the cursor keeps its row while the counts change
         while True:
-            labels = [f"{STATES[(i in self.required) + 2 * (i in self.excluded)]} {defs[i]['emoji']} {defs[i]['name']}"
-                      f" ({counts[i]})" for i in ids]
+            untagged, self.untagged = self.untagged, False  # the tags to pick from are those the other filters leave
+            narrowed = {k for k in row_keys if self.keep(k)}
+            self.untagged = untagged
+            counts = {i: len(narrowed & tags.games_with({i}, ())) for i in defs}
+            none = sum(1 for k in narrowed if not tags.tags_of(tags.owner(k)))
+            if entries is None:
+                ids = sorted((i for i, n in counts.items() if n or i in self.required or i in self.excluded),
+                             key=lambda i: defs[i]["name"].casefold())
+                entries = ids + ([None] if ids and (none or self.untagged) else [])
+            if not entries:
+                note(ui.yellow("ℹ️  No tag has games among these."))
+                return
+            labels = [f"{'✅' if self.untagged else '⬜'} {NO_TAGS} ({none})" if i is None else
+                      f"{STATES[(i in self.required) + 2 * (i in self.excluded)]} {defs[i]['emoji']} {defs[i]['name']}"
+                      f" ({counts[i]})" for i in entries]
             result = picker.filter_list("🏷️  Narrow to games with ✅ tags and without 🚫 ones", labels, cursor=cursor,
                                         hotkeys=(CLEAR_KEY,), hint="Enter ⬜ → ✅ → 🚫 → ⬜ · c clear · Esc done",
                                         key_help=[("Enter", "cycle the tag: ⬜ off, ✅ needed, 🚫 left out"),
@@ -144,14 +205,19 @@ class TagFilter:
                 self.clear()
                 cursor = result[1] or 0
                 continue
-            i, cursor = ids[result], result
-            if i in self.required:
+            i, cursor = entries[result], result
+            if i is None:
+                self.untagged = not self.untagged
+                if self.untagged:
+                    self.required.clear()
+            elif i in self.required:
                 self.required.discard(i)
                 self.excluded.add(i)
             elif i in self.excluded:
                 self.excluded.discard(i)
             else:
                 self.required.add(i)
+                self.untagged = False
 
 
 FILTER = TagFilter()  # the one tag filter every game list shares; only c clears it
@@ -159,7 +225,9 @@ SET_KEY = "s"
 HOTKEYS = (SET_KEY, CLEAR_KEY)
 KEYS_HELP = [(SET_KEY, "narrow by tags (stays on in every list)"),
              (CLEAR_KEY, "clear the / search and the filters")]
-TAGS_HINT = "s filter by tag · t edit tags · c clear filters"
+BULK_KEY = "T"
+BULK_HELP = (BULK_KEY, "tag every shown game: check the tags to add (✅ already on all of them), uncheck to remove")
+TAGS_HINT = "s filter by tag · t edit tags · T tag all shown · c clear filters"
 PAUSED = "🏷️ tag filter paused here"
 
 

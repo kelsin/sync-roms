@@ -1101,6 +1101,28 @@ class TagColumn(DataDir):
         self.assertEqual(asked, [("nes/B (USA).zip", "B")])
         self.assertEqual(len(seen), 2)
 
+    def test_t_bulk_tags_every_shown_row_and_only_where_the_filter_applies(self):
+        tagui = edit.tagui
+        tagui.FILTER.clear()
+        self.addCleanup(tagui.FILTER.clear)
+        tagui.FILTER.required = {"x"}
+        seen, bulk = [], []
+        answers = iter([("T", None)])
+
+        def fake(title, labels, **kw):
+            seen.append(kw)
+            return next(answers, None) or kw["session"]["sel"]
+        with mock.patch.object(picker, "filter_list", fake), \
+                mock.patch.object(tagui, "bulk_tag", side_effect=lambda keys: bulk.append(keys)):
+            edit.toggle_games("t", self.ROWS)
+            edit.toggle_games("t", self.ROWS, tag_filter=False)
+        self.assertIn("T", seen[0]["hotkeys"])
+        self.assertIn("T tag all shown", seen[0]["hint"])
+        self.assertEqual(bulk, [["nes/B (USA).zip"]])  # the shown rows only
+        self.assertEqual(len(seen), 3)  # reopened after the bulk tag
+        self.assertNotIn("T", seen[2]["hotkeys"])
+        self.assertNotIn("T tag", seen[2]["hint"])
+
     def test_toggle_games_hides_rows_the_filter_rejects(self):
         self.tags.change_game_tags("nes/A (USA).zip", add=["x"])
         tagui = edit.tagui
@@ -1180,7 +1202,7 @@ class TagColumn(DataDir):
         seen = []
         with mock.patch.object(picker, "filter_list", side_effect=lambda t, l, **kw: seen.append(kw) or kw["session"]["sel"]):
             edit.toggle_games("t", self.ROWS, key_help=[("m", "meta")], hint="Space toggle · Enter done · m meta")
-        self.assertEqual(seen[0]["hint"], "Space toggle · Enter done · s filter by tag · t edit tags · c clear filters"
+        self.assertEqual(seen[0]["hint"], "Space toggle · Enter done · s filter by tag · t edit tags · T tag all shown · c clear filters"
                                           " · / filter · w note · a all shown · m meta")
 
     def test_notes_off_drops_w(self):

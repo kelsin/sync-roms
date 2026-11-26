@@ -767,8 +767,8 @@ class Flow(DataDir):
         self.tag_pokemon()
         calls = self.run_card(returns((cardedit.SET_KEY, 0)), returns(0), returns(None),
                               toggle("Game Boy — Red.gb"), returns(None))
-        self.assertEqual(calls[1][1], ["⬜ 🔴 Pokemon (3)"])
-        self.assertEqual(calls[2][1], ["✅ 🔴 Pokemon (3)"])
+        self.assertEqual(calls[1][1], ["⬜ 🔴 Pokemon (3)", "⬜ 🈳 No tags at all (2)"])
+        self.assertEqual(calls[2][1], ["✅ 🔴 Pokemon (3)", "⬜ 🈳 No tags at all (0)"])
         self.assertTrue(calls[3][0].startswith("🌐 All games on c"))
         self.assertEqual(calls[3][1], ["Game Boy — Red.gb", "Game Boy Advance — Ruby.sav", "Game Boy Advance — Ruby.zip"])
         self.assertEqual(calls[3][2]["filters"], "✅ 🔴 Pokemon · 3 of 5 shown (c clear filters)")
@@ -1054,7 +1054,7 @@ class Flow(DataDir):
             return kw["session"]["sel"]
         self.run_system(step)
         self.assertEqual(tagui.games_hint(cardedit.GAMES_HINT),
-                         "Space toggle · Enter done · s filter by tag · t edit tags · c clear filters · / filter · w note"
+                         "Space toggle · Enter done · s filter by tag · t edit tags · T tag all shown · c clear filters · / filter · w note"
                          " · a all shown · m meta · p past · v variant")
 
     def test_the_tag_column_is_last_and_t_edits_the_rows_tags(self):
@@ -1236,7 +1236,7 @@ class Flow(DataDir):
         self.tag_pokemon()
 
         def pick_first_tag(labels, kw):
-            self.assertEqual(labels, ["⬜ 🔴 Pokemon (2)"])  # Ruby and its save, on this system only
+            self.assertEqual(labels, ["⬜ 🔴 Pokemon (2)", "⬜ 🈳 No tags at all (2)"])  # Ruby and its save, on this system only
             return 0
 
         def filtered(labels, kw):
@@ -1955,7 +1955,7 @@ class SetFlow(Flow):
         def untag(*a):
             storage_tags(self, {"tags": {"pk": {"name": "Pokemon", "emoji": "🔴"}}, "games": {}, "declined": {}})
         with mock.patch.object(cardedit.tagui, "edit_game_tags", side_effect=untag):
-            _, calls = self.run_set(returns(("t", 1)), returns((cardedit.SET_KEY, None)),
+            _, calls = self.run_set(returns(("t", 1)), returns((cardedit.SET_KEY, None)), returns(None),
                                     lambda labels, kw: kw["session"]["sel"])
         self.assertEqual(calls[0][1], ["Game Boy — Red", "Game Boy Advance — Ruby"])
         self.assertEqual(calls[1][1], calls[0][1])  # the edited game stays until the next pass
@@ -2030,7 +2030,7 @@ class SetFlow(Flow):
         title, _labels, kw = script.calls[0]
         self.assertTrue(title.startswith(cardedit.themeart.collection_emoji(collection)))
         self.assertIn("💖 from a collection", title)
-        self.assertEqual(kw["hotkeys"], (cardedit.VARIANT_KEY, "t", cardedit.SET_KEY, cardedit.CLEAR_KEY))
+        self.assertEqual(kw["hotkeys"], (cardedit.VARIANT_KEY, "t", "T", cardedit.SET_KEY, cardedit.CLEAR_KEY))
         self.assertEqual(kw["hint"], tagui.games_hint(cardedit.COLLECTION_GAMES_HINT))
 
     def test_select_all(self):
@@ -2204,7 +2204,7 @@ class SetFlow(Flow):
         title, labels, kw = calls[0]
         self.assertEqual(labels, self.ALL_LABELS)
         self.assertEqual(title, "🌐 All games on c — ✅ synced, ⬜ not")
-        self.assertEqual(kw["hotkeys"], (cardedit.VARIANT_KEY, "t", cardedit.SET_KEY, cardedit.CLEAR_KEY))
+        self.assertEqual(kw["hotkeys"], (cardedit.VARIANT_KEY, "t", "T", cardedit.SET_KEY, cardedit.CLEAR_KEY))
         self.assertIs(kw["select_all"], False)
 
     def test_t_in_the_all_games_list_edits_that_rows_tags(self):
@@ -2248,7 +2248,7 @@ class SetFlow(Flow):
         _, calls = self.run_all(returns((cardedit.SET_KEY, None)), returns(0), returns(None),
                                 lambda labels, kw: kw["session"].update(query="red") or (cardedit.CLEAR_KEY, None),
                                 lambda labels, kw: kw["session"]["sel"])
-        self.assertEqual(calls[1][1], ["⬜ 🔴 Pokemon (3)"])  # the tag list
+        self.assertEqual(calls[1][1], ["⬜ 🔴 Pokemon (3)", "⬜ 🈳 No tags at all (2)"])  # the tag list
         self.assertEqual(calls[3][1], ["Game Boy — Red.gb", "Game Boy Advance — Ruby.sav", "Game Boy Advance — Ruby.zip"])
         self.assertEqual(calls[3][2]["filters"], "✅ 🔴 Pokemon · 3 of 5 shown (c clear filters)")
         self.assertEqual(calls[4][1], self.ALL_LABELS)
