@@ -336,11 +336,11 @@ class _ListModel:
             self.scroll, self.scroll_row = 0, vis[self.cur]
         if infos:
             lines = tag_lines(infos, self.width)
-            if self.height - 5 - len(lines) >= TAG_MIN_ROWS:
+            if self.height - 6 - len(lines) >= TAG_MIN_ROWS:
                 self.tag_block = lines
-            elif self.height - 6 >= 3:
+            elif self.height - 7 >= 3:
                 self.tag_line = tag_names(infos)
-        self.view = max(1, self.height - 5 - (len(self.tag_block) or bool(self.tag_line)))
+        self.view = max(1, self.height - 6 - (len(self.tag_block) or bool(self.tag_line)))
         self.top = max(0, min(self.top, len(vis) - self.view))  # a restored scroll leaves no blank rows below the list
         if self.cur < self.top:
             self.top = self.cur
@@ -433,7 +433,7 @@ class _ListModel:
         return self.tag_block
 
     def resize(self, height, width=None):
-        """The screen is now height rows and width cells (the list's, beside a picture) big. Returns KEEP."""
+        """The screen is now height rows and width cells big. Returns KEEP."""
         self.height = height
         if width:
             self.width = width
@@ -596,16 +596,16 @@ def _app_class():
     from textual import events
     from textual._time import get_time  # the clock Textual stamps events with (pinned by TextualPrintHook tests)
     from textual.app import App
-    from textual.containers import VerticalScroll
+    from textual.containers import Horizontal, VerticalScroll
     from textual.screen import Screen
     from textual.widget import Widget
     from textual.widgets import Static
 
     class _ListLines(Widget):
-        """The list screen: title, filter, hint, the shown rows, and the status on the bottom row."""
+        """The list screen's middle: the shown rows, between the borders (a picture sits beside them)."""
 
         def on_resize(self, event):
-            self.app.step(self.app.model.resize, event.size.height, event.size.width)
+            self.app.step(self.app.model.resize, self.screen.size.height, self.screen.size.width)
             if self.app.model.preview and self.screen is self.app.list_screen:
                 self.app.fit_preview()  # the terminal's size changed, or the picture's column came or went
 
@@ -639,6 +639,15 @@ def _app_class():
 
         def render(self):
             m = self.app.model
+            columns = extras_widths(m.extras)  # every row's, not just the shown ones: columns stay put while filtering
+            return Text("\n").join([self.row(m, pos, columns) for pos in range(m.top, min(len(m.vis), m.top + m.view))])
+
+
+    class _ListHeader(Widget):
+        """The list screen's top: title, filter, hint and the border under them, always full width."""
+
+        def render(self):
+            m = self.app.model
             query = Text("🔎 " + m.query)
             if m.typing:
                 hint = TYPING_HINT
@@ -648,9 +657,15 @@ def _app_class():
                 _with_cursor(query, 2 + m.qpos)
             if m.filters:
                 query.append("  " + m.filters, "cyan")
-            lines = [Text(m.title, "bold cyan"), query, Text(hint, "dim")]
-            columns = extras_widths(m.extras)  # every row's, not just the shown ones: columns stay put while filtering
-            lines += [self.row(m, pos, columns) for pos in range(m.top, min(len(m.vis), m.top + m.view))]
+            lines = [Text(m.title, "bold cyan"), query, Text(hint, "dim"), Text("─" * self.size.width, "dim")]
+            return Text("\n").join(lines)
+
+
+    class _ListFooter(Widget):
+        """The list screen's bottom: the border, the highlighted game's tags and the status row, always full width."""
+
+        def render(self):
+            m = self.app.model
             text, color, at = m.line
             status = Text(text, f"bold {color}" if color else "bold")
             for position in (m.position(), m.position(compact=True)):  # on the right, the first form the status leaves room for
@@ -658,8 +673,7 @@ def _app_class():
                     status.append(" " * (self.size.width - status.cell_len - len(position)) + position, "bold")
                     break
             area = m.tag_area() if hasattr(m, "tag_area") else []
-            lines += [Text()] * max(0, self.size.height - len(lines) - 2 - len(area))
-            lines += [Text("─" * self.size.width, "dim")] + [Text(a, "dim") for a in area]  # the border, always: list above, info below
+            lines = [Text("─" * self.size.width, "dim")] + [Text(a, "dim") for a in area]  # the border, always
             lines += [status if at is None else _with_cursor(status, at)]
             return Text("\n").join(lines)
 
@@ -668,11 +682,14 @@ def _app_class():
         """The list; every key goes to the app's model."""
 
         def compose(self):
-            yield _ListLines(id="lines")
-            if self.app.model.preview:
-                from textual_image.widget import Image  # already imported (and the terminal probed) by filter_list
-                fixed = "fixed" if self.app.model.preview_width else None  # sized by the app (fit_preview)
-                yield Image(None, id="preview", classes=fixed)  # the app loads the picture (follow_preview)
+            yield _ListHeader(id="header")
+            with Horizontal(id="body"):  # between the borders: the rows and, beside them, the picture
+                yield _ListLines(id="lines")
+                if self.app.model.preview:
+                    from textual_image.widget import Image  # already imported (and the terminal probed) by filter_list
+                    fixed = "fixed" if self.app.model.preview_width else None  # sized by the app (fit_preview)
+                    yield Image(None, id="preview", classes=fixed)  # the app loads the picture (follow_preview)
+            yield _ListFooter(id="footer")
 
         def on_mount(self):
             if self.app.model.preview and self is self.app.list_screen:
@@ -760,7 +777,9 @@ def _app_class():
         ENABLE_COMMAND_PALETTE = False
         CSS = """
         _ListLines { width: 1fr; height: 1fr; text-wrap: nowrap; text-overflow: clip; }
-        _ListScreen { layout: horizontal; }
+        _ListHeader { dock: top; width: 100%; height: 4; text-wrap: nowrap; text-overflow: clip; }
+        _ListFooter { dock: bottom; width: 100%; height: auto; text-wrap: nowrap; text-overflow: clip; }
+        _ListScreen #body { width: 100%; height: 1fr; }
         _ListScreen #preview { width: auto; max-width: 34%; height: 100%; }
         _ListScreen #preview.fixed { max-width: 100%; height: auto; }
         _HelpScreen { align: center middle; }
@@ -1011,6 +1030,9 @@ def _app_class():
             elif not self.model.help and isinstance(self.screen, _HelpScreen):
                 self.pop_screen()
             self.list_screen.query_one("#lines").refresh(layout=isinstance(self.model, _PromptModel))  # it may wrap
+            if not isinstance(self.model, _PromptModel):
+                self.list_screen.query_one("#header").refresh()
+                self.list_screen.query_one("#footer").refresh(layout=True)  # its height follows the tag lines
             if self.model.preview:
                 self.follow_preview()
 
@@ -1079,27 +1101,28 @@ def _app_class():
                 self.fit_preview()
 
         def fit_preview(self):
-            """A fixed-width picture (preview_width) gets a column of its own at the top right, as many cells wide as it
+            """A fixed-width picture (preview_width) gets a column of its own at the right between the borders, as many cells wide as it
             needs. Without room for it (the list would get fewer than MIN_LIST_WIDTH cells, or the picture is taller than
-            the rows above the status line) there is no column and the list takes the whole width. Any other picture is
-            fit, keeping its shape, in PREVIEW_SHARE of the width and the whole height."""
+            the rows between the borders) there is no column and the list takes the whole width. Any other picture is
+            fit, keeping its shape, in PREVIEW_SHARE of the width and the rows between the borders."""
             from textual_image._terminal import get_cell_size  # cached: textual-image measured it on import
             cell = get_cell_size()
             pane = self.list_screen.query_one("#preview")
+            room = self.list_screen.query_one("#body").size.height or self.size.height - 6  # the rows between the borders
             if not self.model.preview_width:
                 if pane.image is None:
                     pane.styles.width = pane.styles.height = None  # back to the CSS
                     return
                 width, height = pane.image.size
                 scale = min(self.size.width * PREVIEW_SHARE // 100 * cell.width / width,
-                            self.size.height * cell.height / height)
+                            room * cell.height / height)
                 pane.styles.width = max(1, round(width * scale / cell.width))
                 pane.styles.height = max(1, round(height * scale / cell.height))
                 return
             columns = math.ceil(self.model.preview_width / cell.width)
             rows = math.ceil(pane.image.height / cell.height) if pane.image is not None else 0
             pane.styles.width = columns
-            shown = self.size.width - columns >= MIN_LIST_WIDTH and rows <= self.size.height - 1
+            shown = self.size.width - columns >= MIN_LIST_WIDTH and rows <= room
             if shown and not pane.display:  # textual-image sizes its height from its width as last laid out (none while
                 self.call_after_refresh(pane.refresh, layout=True)  # hidden): lay it out again once it has one
             pane.display = shown
@@ -1542,7 +1565,7 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
     image pane showing the highlighted row's image (blank when there is none), updated as the cursor and filter change.
     Only in a terminal that draws real images (Kitty graphics or Sixel), and not inside tmux; elsewhere there is no pane.
     preview_width: with preview, the image is shown preview_width px wide (games' pictures) in a column of its own at the
-    top right instead, and not at all when the terminal has no room for it.
+    right between the borders instead, and not at all when the terminal has no room for it.
     row_note: optional callable(label index) -> text; when non-empty for the highlighted row it replaces the status
     line (below a notice and a locked row's note).
     select_all: False turns `a` (toggle all shown) off.

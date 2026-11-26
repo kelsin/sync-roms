@@ -8,7 +8,7 @@ import tempfile
 from . import inventory, mirroring, runtime, s3, scrape_plan, store, themeart
 
 GAME_MEDIA = ("covers", "miximages", "titlescreens", "screenshots")
-GAME_WIDTH = 300  # px: a game's picture is drawn this wide, at the top right of its list (filter_list preview_width)
+GAME_WIDTH = 300  # px: a game's picture is drawn this wide, at the right of its list, between the borders (filter_list preview_width)
 _indexes = {}  # system -> scrape_index of its scrapes/ folder
 OUTLINES = "_inc/systems/artwork-outline/"
 _outlines = []  # [folder or None] once resolved this run

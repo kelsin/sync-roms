@@ -98,14 +98,22 @@ async def shown_preview(pilot, path=None):
 
 def screen_lines(app):
     """The list screen's rows as [(text, Rich style)] runs of non-blank text."""
-    lines = app.screen_stack[0].query_one("_ListLines")
-    return [[(s.text, str(s.style)) for s in strip if s.text.strip()] for strip in lines.render_lines(lines.region)]
+    screen, out = app.screen_stack[0], []
+    for name in ("_ListHeader", "_ListLines", "_ListFooter"):
+        widget = screen.query_one(name)
+        out += [[(s.text, str(s.style)) for s in strip if s.text.strip()] for strip in widget.render_lines(widget.region.at_offset((0, 0)))]
+    return out
 
 
 def screen_text(app):
-    """The list screen's rows as plain text, each as wide as the list (trailing blanks kept)."""
-    lines = app.screen_stack[0].query_one("_ListLines")
-    return ["".join(s.text for s in strip) for strip in lines.render_lines(lines.region)]
+    """The list screen as plain text: the header and its border, the rows between the borders (as wide as the list, trailing
+    blanks kept), then the bottom border, the tag lines and the status row."""
+    screen = app.screen_stack[0]
+    out = []
+    for name in ("_ListHeader", "_ListLines", "_ListFooter"):
+        widget = screen.query_one(name)
+        out += ["".join(s.text for s in strip) for strip in widget.render_lines(widget.region.at_offset((0, 0)))]
+    return out
 
 
 def script_for(shell):
