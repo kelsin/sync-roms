@@ -231,7 +231,7 @@ def edit_menu(noun, before, working, state, emoji, art, delete_note, new_item, o
                                                     hint=tagui.menu_hint("/ filter · Enter open · d delete · Esc review"),
                                                     preview=lambda k: previews.collection(art({**working[ids[k]], "id": ids[k]})) if k < n else None)
         if isinstance(i, tuple):
-            pos = i[1]
+            pos = i[1] or 0
             if i[0] == tagui.CLEAR_KEY:
                 tagui.handle_key(tagui.CLEAR_KEY, ())
             elif i[1] < n:

@@ -87,17 +87,29 @@ def status_of(usage, capacity, fetch=None, count=True):
     return (text, "red" if over or share >= FULL_AT else "yellow" if share >= WARN_AT else "green")
 
 
-def match_counts(systems):
-    """{system bucket: files in its storage folder the tag filter shows} while a tag filter is on, else None."""
+def shown_rows(sp, keep):
+    """The rows of a SystemPicks a games list shows for keep(key): a shown playlist hides its discs."""
+    kept = {r[1] for r in sp.rows if keep(r[1])}
+    return [r for r in sp.rows if r[1] in kept and sp.playlist_of.get(r[1]) not in kept]
+
+
+def match_counts(name, setup, systems, memo):
+    """{system bucket: rows its games list shows} while a tag filter is on, else None; None for a system that is full
+    or can't be listed. Counted as the list groups its rows (discs and records under their lead), so it equals the
+    list's own count. memo: a dict the caller keeps; the counts are worked out again only when the filter, the tags or
+    the storage cache changed."""
     if not tagui.FILTER.describe():
         return None
-    out = {}
-    for s in systems:
-        try:
-            out[s["bucket"]] = sum(1 for key in store.folder_keys(s["bucket"], say=False) if tagui.FILTER.keep(key))
-        except s3.ERRORS:
-            out[s["bucket"]] = 0
-    return out
+    stamp = (inventory.version(), frozenset(tagui.FILTER.required), frozenset(tagui.FILTER.excluded), id(tags.load()))
+    if memo.get("stamp") != stamp:
+        picks, out = cardpicks.CardPicks(name, setup), {}
+        for s in systems:
+            try:
+                out[s["bucket"]] = None if picks.full(s["bucket"]) else len(shown_rows(picks.system(s), tagui.FILTER.keep))
+            except s3.ERRORS:
+                out[s["bucket"]] = None
+        memo["stamp"], memo["counts"] = stamp, out
+    return memo["counts"]
 
 
 def system_labels(card, systems, recommended, usages, full_sizes, matches=None):
@@ -130,8 +142,8 @@ def system_labels(card, systems, recommended, usages, full_sizes, matches=None):
             if unknown or f.count:
                 row[2] = (f"  🗂️  {SIZING if unknown else size_text(f.bytes)} full", "dim")
         if matches is not None:
-            n = matches.get(s["bucket"], 0)
-            row.append((f"  {n} match", "cyan" if n else "dim"))
+            n = matches.get(s["bucket"])
+            row.append(("", "dim") if n is None else (f"  {n} match", "cyan" if n else "dim"))
         extras.append(row)
     return labels, extras
 
@@ -317,6 +329,7 @@ def edit_card(name, setup=None, to_fetch=None, card_match=None, on_guest=None):
                if budget.picked(usages[s["bucket"]]) or s["bucket"] in stocked]
     full = FullSizes({"layout": setup[1]}, systems)  # each system's size as a full system, kept for the session
     pos = 0
+    match_memo = {}  # match_counts' memo: kept across passes
     changed = None  # what the last pass changed: one system, ALL (any system may have) or None
     while True:
         card = card_entry(name, setup)
@@ -327,7 +340,7 @@ def edit_card(name, setup=None, to_fetch=None, card_match=None, on_guest=None):
         changed = None
         capacity = budget.card_capacity(card)
         view = {}
-        matches = match_counts(systems)  # while a tag filter is on, each system's games it shows
+        matches = match_counts(name, setup, systems, match_memo)  # while a tag filter is on, each system's games it shows
         full.update()
 
         def work_out():
@@ -923,12 +936,12 @@ def edit_system(name, system, setup, to_fetch=None, card_usages=None):
     off_note = " · 🚫 off on this card" if bucket in store.systems_off(store.saved_card(name, cards)) else ""
     try:
         while True:
-            kept = {r[1] for r in sp.rows if filters.keep(r[1])}
-            shown = [r for r in sp.rows if r[1] in kept and sp.playlist_of.get(r[1]) not in kept]  # a shown playlist hides its discs
+            shown = shown_rows(sp, filters.keep)
+            total = len(shown_rows(sp, lambda _key: True))
             result = _games_pass(
                 f"✏️  {system['name']} on {name} — ✅ synced, ⬜ not{off_note}", shown, picks, {bucket: sp}, {},
                 start, work, capacity, to_fetch, place, hint=tagui.games_hint(GAMES_HINT), hotkeys=(*GameFilters.KEYS, VARIANT_KEY, tagui.TAG_KEY),
-                key_help=GAMES_KEYS, filters=filters.describe(len(kept), len(sp.rows)))
+                key_help=GAMES_KEYS, filters=filters.describe(len(shown), total))
             if not isinstance(result, tuple):
                 break
             if result[0] == tagui.TAG_KEY:

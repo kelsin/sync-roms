@@ -419,7 +419,7 @@ def edit_manifest():
                                    filters=tagui.banner(), cursor=pos)
             if i is None:
                 return
-            pos = i[1] if isinstance(i, tuple) else i
+            pos = (i[1] or 0) if isinstance(i, tuple) else i
             if isinstance(i, tuple):
                 if i[0] == tagui.CLEAR_KEY:
                     tagui.handle_key(tagui.CLEAR_KEY, ())

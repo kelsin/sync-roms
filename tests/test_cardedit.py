@@ -1702,6 +1702,47 @@ class DiscFlow(Flow):
         self.psx(toggle("A (USA).m3u"))  # the playlist on: the whole game is on
         self.assertEqual(sorted(x["bucket"] for x in store.card_games("c")["psx"]), sorted(DISCS))
 
+    def test_the_systems_match_count_equals_the_games_lists_shown_count(self):
+        self.card()
+        storage_tags(self, {"tags": {"pk": {"name": "Pokemon", "emoji": "🔴"}},
+                            "games": {DISCS[0]: {"tags": ["pk"], "files": DISCS[1:]}}, "declined": {}})
+        tagui.FILTER.required.add("pk")
+        self.addCleanup(tagui.FILTER.clear)
+        seen = {}
+
+        def systems(labels, kw):
+            at = next(i for i, label in enumerate(labels) if "PlayStation" in label)
+            seen["count"] = kw["extras"][at][-1][0].strip()
+            return at
+
+        def games(labels, kw):
+            seen["rows"], seen["banner"] = list(labels), kw["filters"]
+            return kw["session"]["sel"]
+        self.run_card(systems, games, returns(None), returns(None), setup=(PSX_DEVICE, "esde"))
+        self.assertEqual(seen["rows"], ["A (USA).m3u"])  # the playlist is the game's one row; the discs fold into it
+        self.assertEqual(seen["count"], f"{len(seen['rows'])} match")
+        self.assertEqual(seen["banner"], "✅ 🔴 Pokemon · 1 of 2 shown (c clear filters)")  # B is hidden; its discs aren't counted
+
+    def test_match_counts_are_worked_out_once_until_the_filter_changes(self):
+        self.card()
+        self.tag_pokemon()
+        self.addCleanup(tagui.FILTER.clear)
+        memo, setup, built = {}, (DEVICE, "esde"), []
+        real = cardedit.cardpicks.CardPicks.__init__
+
+        def counting(self, *a, **k):
+            built.append(1)
+            real(self, *a, **k)
+        with mock.patch.object(cardedit.cardpicks.CardPicks, "__init__", counting):
+            self.assertIsNone(cardedit.match_counts("c", setup, [GBA, GB], memo))  # no filter: nothing counted
+            tagui.FILTER.required.add("pk")
+            first = cardedit.match_counts("c", setup, [GBA, GB], memo)
+            self.assertIs(cardedit.match_counts("c", setup, [GBA, GB], memo), first)
+            self.assertEqual(len(built), 1)
+            tagui.FILTER.excluded.add("nope")
+            cardedit.match_counts("c", setup, [GBA, GB], memo)
+            self.assertEqual(len(built), 2)
+
     def test_a_tag_filter_showing_one_disc_still_switches_the_whole_game(self):
         self.card()
         self.tag_pokemon([DISCS[1]])
