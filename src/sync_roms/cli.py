@@ -30,7 +30,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "edit": ("", "interactive editor: cards, tags, collections, device systems"),
     "games": ("list|add|remove|full|export|import", "edit a card's games, interactively or from scripts"),
     "tags": ("edit|suggest", "edit the tags in storage by hand (games, names, emoji, merging, deleting), or add tags from scraped genres"),
-    "collections": ("edit|page|share|unshare", "edit your collections of favourite games (saved in ~/.sync-roms/collections/), write a shareable HTML page of them, or share it on your tailnet"),
+    "collections": ("edit|page|retitle|share|unshare", "edit your collections of favourite games (saved in ~/.sync-roms/collections/), write a shareable HTML page of them, set their titles to the scraped names, or share the page on your tailnet"),
     "themes": ("update|pick|build|publish|palettes", "copy the latest Art Book Next for ES-DE and the PyUI themes for spruce from GitHub into storage; build and publish custom spruce themes"),
     "download": ("pico8", "add the PICO-8 BBS Featured carts storage doesn't have, and newer revisions of those it has"),
     "ports": ("search|download|done|needed", "put PortMaster ports and the runtimes they need in storage, from PortMaster's catalogue"),
@@ -45,7 +45,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "upload": ("[DIR]", "upload ROMs to the storage folder of a system you pick"),
     "diff": ("[DIR]", "list the ROMs in only DIR or only storage, ignoring renames"),
     "scrape": ("[SYSTEM | match SYSTEM ROM GAME | review [SYSTEM] | missing [SYSTEM] | art [SYSTEM] | clean]", "scrape the ROMs that have no metadata from ScreenScraper into storage's scrapes/ folder"),
-    "refresh": ("", "after changing storage: update the cache, scrape every missing ROM, clean the scrapes, make the box art"),
+    "refresh": ("", "after changing storage: update the cache, scrape every missing ROM, clean the scrapes, retitle your collections, make the box art"),
     "playlist": ("[DIR]", "create or fix the .m3u playlist of every multi-disc game"),
     "prepare": ("[DIR]", "unzip archives and convert disc images to verified .chd"),
     "install": ("", "brew install the 7z, unar and chdman that `prepare` needs"),
@@ -154,6 +154,7 @@ TOPICS = {
     "collections": """
   sync-roms collections edit                  edit your collections of favourite games
   sync-roms collections page [--out FILE]     write an HTML page of your collections and open it
+  sync-roms collections retitle [--dry-run]   set each game's title to its scraped name
   sync-roms collections share                 share that page on your tailnet with tailscale serve
   sync-roms collections unshare               stop serving it
 
@@ -167,6 +168,10 @@ TOPICS = {
   collections page writes one self-contained HTML page (your games, tags and collection pictures, no
   network needed) to ~/.sync-roms/share/collections/index.html, or to FILE, and opens it. It holds
   your game lists and storage paths, so share it only if you're fine with that.
+
+  collections retitle rewrites the title saved with each game to its scraped name (else its file
+  name) and only touches collections where one changed; --dry-run lists the changes and writes
+  nothing. `refresh` runs it. The page already shows scraped names first.
 
   collections share builds the page when it isn't there yet, runs a small local server for only its
   folder, and has tailscale serve forward https://<machine>.<tailnet>.ts.net/collections/ to it
@@ -642,6 +647,7 @@ TOPICS = {
     sync-roms cache update
     sync-roms scrape --all --yes
     sync-roms scrape clean --yes
+    sync-roms collections retitle
     sync-roms scrape art --for both
 """,
     "doctor": """

@@ -68,18 +68,19 @@ def _sizes(systems):
         return {}
 
 
-def _years(systems):
-    """{system: {ROM path in the system folder: release year}} from each system's scraped metadata.json (games with no
-    year are left out); {} when storage isn't reachable."""
-    out = {}
+def _metadata(systems):
+    """{system: scraped metadata.json}; {} when storage isn't reachable."""
     try:
-        for system in sorted(systems):
-            meta = scrape_plan.load_metadata(system)
-            out[system] = {rom: next(iter(v["year"])) for rom, entry in meta.items()
-                           if (v := metafilter.values(entry)).get("year")}
+        return {system: scrape_plan.load_metadata(system) for system in sorted(systems)}
     except (SystemExit, ValueError, *s3.ERRORS):
         return {}  # the tags and sizes already warned about unreachable storage
-    return out
+
+
+def _years(metadata):
+    """{system: {ROM path in the system folder: release year}} from the metadata (games with no year are left out)."""
+    return {system: {rom: next(iter(v["year"])) for rom, entry in meta.items()
+                     if (v := metafilter.values(entry)).get("year")}
+            for system, meta in metadata.items()}
 
 
 def _game_size(paths, listed):
@@ -99,7 +100,8 @@ def page_data():
     system_names = {s["bucket"]: store.short_name(s) for s in store.repo_json("systems")}
     loaded = collections.load_collections()
     sizes = _sizes({g["bucket"].partition("/")[0] for c in loaded for g in c["games"]})
-    years = _years({g["bucket"].partition("/")[0] for c in loaded for g in c["games"]})
+    metadata = _metadata({g["bucket"].partition("/")[0] for c in loaded for g in c["games"]})
+    years = _years(metadata)
     used, out = set(), []
     for collection in loaded:
         games = []
@@ -109,7 +111,7 @@ def page_data():
             used.add(system)
             title = game.get("title")
             paths = [bucket, *game.get("files", ())]
-            entry = {"title": title if isinstance(title, str) and title else names.title(bucket),
+            entry = {"title": names.scraped_name(metadata, bucket) or (title if isinstance(title, str) and title else names.title(bucket)),
                      "system": system, "paths": paths,
                      "tags": [t for t in tags.tags_of(bucket) if t in defined] if defined else []}
             if languages.translated(bucket):

@@ -173,6 +173,7 @@ Every mode is a command (plain `sync-roms [CARD]` syncs a card). A command's ali
 | `tags edit\|suggest` | edit the [tags](#tags-tags-edit-tags-suggest) in storage by hand, or add tags from scraped genres | `tag` |
 | `collections edit` | edit your [collections](#collections-collections-edit) of favourite games | `collection` |
 | `collections page` | write a shareable HTML page of your collections and open it | `collection` |
+| `collections retitle` | set each game's title in your collections to its scraped name (else its file name); `--dry-run` lists the changes | |
 | `collections share\|unshare` | share that page on your tailnet through a local server and `tailscale serve`, or stop | `collection` |
 | `themes update` | put the latest Art Book Next for ES-DE (for collections' [theme art](#theme-art)) and every [PyUI theme](#spruce) (needs `7z`) in storage | `theme` |
 | `themes build [STYLE...] [--palette NAME\|--all-palettes] [--out DIR]` | build the custom spruce theme styles (Pixel Consoles, Pixel Controllers, ToTK - James) in each chosen palette (without a flag: picked in a list, or the saved `custom_theme_palettes`; `ToTK - James` has no palette and is built once, from the ToTK theme in storage, so naming only it asks for none) from the SPRUCE base theme in storage into the cache, or into `DIR` with `--out`; writes nothing to storage | |
@@ -202,7 +203,7 @@ Every mode is a command (plain `sync-roms [CARD]` syncs a card). A command's ali
 | `mirror [DIR]` / `mirror use DIR` / `mirror clear` | [local mirror](#local-mirror-mirror) | |
 | `cache [update [--full]]` | show the [storage cache](#storage-cache-cache), or read all of storage into it | |
 | `config show\|path` / `config set NAME VALUE` / `config unset NAME` / `config apply [CARD]` | effective [settings](#settings-config) and where each came from, or the data folder's path; change or remove a setting; apply the saved settings to a spruce or Knulli card or an Android device | |
-| `refresh` | run `cache update`, `scrape --all --yes`, `scrape clean --yes` and `scrape art --for both` in order, stopping at the first failure | |
+| `refresh` | run `cache update`, `scrape --all --yes`, `scrape clean --yes`, `collections retitle` and `scrape art --for both` in order, stopping at the first failure | |
 | `guide` | open the device setup guide in a browser | |
 | `doctor [--fix]` | check AWS profile, storage, tools and data files; `--fix` runs `install` when tools are missing | |
 | `check` | validate your JSON data files (`cards.json`, `surprises.json`, the device overlay, storage's tags and your collections) | |

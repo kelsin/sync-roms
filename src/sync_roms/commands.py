@@ -11,7 +11,7 @@ import sys
 import webbrowser
 
 from . import collections as colls
-from . import bezels, budget, cardedit, cardshare, collectionedit, collections_page, external, guest, inventory, knulli_conf, m3u, names, picker, runtime, s3, shared, spruce_settings, store, surprise, tageditor, tags, tailshare, tagsuggest, themeart, ui, usersettings
+from . import bezels, budget, cardedit, cardshare, collection_retitle, collectionedit, collections_page, external, guest, inventory, knulli_conf, m3u, names, picker, runtime, s3, shared, spruce_settings, store, surprise, tageditor, tags, tailshare, tagsuggest, themeart, ui, usersettings
 
 
 UNKNOWN_SHOWN = 8  # device ids named in an "unknown device" error
@@ -778,7 +778,7 @@ def config_cmd(args):
     return 0
 
 
-REFRESH_STEPS = (["cache", "update"], ["scrape", "--all", "--yes"], ["scrape", "clean", "--yes"], ["scrape", "art", "--for", "both"])
+REFRESH_STEPS = (["cache", "update"], ["scrape", "--all", "--yes"], ["scrape", "clean", "--yes"], ["collections", "retitle"], ["scrape", "art", "--for", "both"])
 
 
 def refresh_cmd(args):
@@ -1390,6 +1390,11 @@ def collections_page_cmd(args):
     return 0
 
 
+def collections_retitle_cmd(args):
+    collection_retitle.retitle(args.dry_run)
+    return 0
+
+
 def collections_share_cmd(args):
     link, built, started = tailshare.share()
     if built:
@@ -1813,6 +1818,7 @@ def build_parser():
     p.set_defaults(fn=collections_edit)
     p = colsub.add_parser("page", allow_abbrev=False); common(p, card=False); p.add_argument("--out", metavar="FILE")
     p.set_defaults(fn=collections_page_cmd)
+    p = colsub.add_parser("retitle", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=collections_retitle_cmd)
     p = colsub.add_parser("share", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=collections_share_cmd)
     p = colsub.add_parser("unshare", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=collections_unshare_cmd)
 
