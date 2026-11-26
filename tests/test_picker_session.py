@@ -13,6 +13,18 @@ from unittest import mock
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from sync_roms import picker, ui  # noqa: E402
+import textual._wait  # noqa: E402
+
+_GRANULARITY = textual._wait.SLEEP_GRANULARITY
+
+
+def setUpModule():
+    # Pilot.press waits for idle with two sleeps of this length per key; halving it halves the cost of every key.
+    textual._wait.SLEEP_GRANULARITY = 0.01
+
+
+def tearDownModule():
+    textual._wait.SLEEP_GRANULARITY = _GRANULARITY
 
 
 async def wait_for(pilot, cond):
