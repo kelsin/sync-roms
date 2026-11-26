@@ -1,9 +1,11 @@
 """Imported first by every test module: makes the run hermetic. HOME, XDG and AWS settings point into a throwaway
 folder, SYNC_ROMS_*/ROMS_* variables are cleared, and an audit hook fails any test that touches the real data folder
-or the real ~/.aws (REAL_DATA_DIR is only a path here; nothing in it is ever read)."""
+or the real ~/.aws, resolving symlinks with a per-directory cache that renames and symlinks empty (REAL_DATA_DIR is
+only a path here; nothing in it is ever read)."""
 import atexit
 import os
 import shutil
+import stat
 import sys
 import tempfile
 import unittest
@@ -72,8 +74,47 @@ _EVENTS = {"open", "os.listdir", "os.scandir", "os.mkdir", "os.rename", "os.remo
            "shutil.rmtree", "glob.glob", "os.walk"}
 
 
+_cache = {}  # absolute directory -> _norm(directory); emptied by _audit whenever a directory could resolve differently
+_generation = 0  # bumped with every emptying, so a lookup that raced one isn't stored
+
+
+_FORGET = {"os.symlink", "os.rename", "os.link", "shutil.move"}
+
+
+def _norm_cached(path):
+    """_norm(path) with the parent directory's resolution cached: only the last component is checked each time."""
+    path = os.path.abspath(path)
+    parent, name = os.path.split(path)
+    if not name:
+        return _norm(path)
+    resolved = _cache.get(parent)
+    if resolved is None:
+        generation = _generation
+        resolved = _norm(parent)
+        if generation == _generation:
+            _cache[parent] = resolved
+    joined = os.path.join(resolved, name)
+    if os.path.islink(joined):  # a symlink as the last component can point anywhere
+        return _norm(path)
+    return os.path.normcase(joined)
+
+
+def _forget_directories(event, args):
+    """Empties the cache before an event that can change what a cached directory resolves to: any symlink, and a
+    rename, link or move of anything but a regular file (renaming a file can't, and atomic writes do it all the time)."""
+    global _generation
+    if event != "os.symlink":
+        try:
+            if all(fd == -1 for fd in args[2:4]) and stat.S_ISREG(os.lstat(args[0]).st_mode):
+                return
+        except Exception:  # can't be stat'ed: empty it
+            pass
+    _generation += 1
+    _cache.clear()
+
+
 def _inside(path):
-    p = _norm(path)
+    p = _norm_cached(path)
     return any(p == f or p.startswith(f + os.sep) for f in FORBIDDEN)
 
 
@@ -83,6 +124,8 @@ VIOLATIONS = []  # every blocked access, so a test that swallows the error still
 def _audit(event, args):
     if event not in _EVENTS:
         return
+    if event in _FORGET:
+        _forget_directories(event, args)
     paths = args[:2] if event in _TWO_PATHS else args[:1]  # later args (an open mode, flags) aren't paths
     for a in paths:
         if isinstance(a, (str, bytes, os.PathLike)) and _inside(os.fsdecode(a)):
