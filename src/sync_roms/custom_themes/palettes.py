@@ -42,6 +42,13 @@ _DATA = {
     "Sakura":       ("#FFF0F5", "#F4C7D8", "#FFFFFF", "#FF7FB8", "#9A6B80", "#7A3A5A"),
     "Forest":       ("#E8F4DC", "#A8D08D", "#FFFFFF", "#FFD43F", "#5E7F4A", "#2D5A2D"),
     "Grape":        ("#F0E6FF", "#C4A8F0", "#FFFFFF", "#FFD43F", "#7A5CAE", "#5B2A9E"),
+    "Jigglypuff":   ("#FFE8F2", "#F4B8D0", "#FFFFFF", "#5CC8D8", "#9A6880", "#B8487A"),
+    "Pikachu":      ("#FFF4C0", "#F0D060", "#FFFFFF", "#F04838", "#8C7428", "#B08A00"),
+    "Snorlax":      ("#F4E8C8", "#D8C8A0", "#FFFFFF", "#F0E0B8", "#4F7A88", "#1F5068"),
+    "Bulbasaur":    ("#E0F8E8", "#90D8B0", "#FFFFFF", "#E85050", "#4F8A70", "#2E7058"),
+    "Charmander":   ("#FFF0D8", "#F8C890", "#FFFFFF", "#FFD030", "#9A5A30", "#C04E18"),
+    "Squirtle":     ("#E8F6FF", "#A0D8F0", "#FFFFFF", "#E89A48", "#5080A0", "#2E78A8"),
+    "Eevee":        ("#FFF4E0", "#E8C8A0", "#FFFFFF", "#F8E0B0", "#8A6040", "#7A4A20"),
     "Monochrome":   ("#FFFFFF", "#BBBBBB", "#FFFFFF", "#FFFFFF", "#666666", "#333333"),
 }
 
