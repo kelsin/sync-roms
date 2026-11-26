@@ -529,7 +529,7 @@ def prototypes(p):  # traffic cone
     p.rr(-37, 34, 37, 44, 3)
 
 
-def skate(p):  # skateboard
+def tony_hawk(p):  # skateboard
     mid = rounded([(-46, -11), (-31, 0), (31, 0), (46, -11)], 9, False)
 
     def side(d):
@@ -1502,6 +1502,800 @@ def bomberman(p):  # the series' round bomb with its fuse lit
 
 
 # id: (drawing, band colour, rotation in degrees, scale, offset in px)
+
+
+def atelier(p):  # an alchemy cauldron, bubbles rising and a ladle leaning in it
+    for s in (-1, 1):
+        p.pg([(s * 14, 34), (s * 22, 46), (s * 30, 46), (s * 28, 30)], 2)
+    body = arc(0, -6, 38, 44, 6, 174)
+    p.path(body, True, opaque=True)
+    p.l([(6, -6), (38, -52)], 0)
+    p.rr(34, -57, 42, -47, 2, rot=34, opaque=True)
+    p.o(0, -8, 44, 10, opaque=True)
+    p.o(0, -8, 35, 5)
+    p.o(-12, -30, 4.5)
+    p.o(-1, -41, 3.2)
+    p.o(-15, -52, 5.5)
+
+
+def batman(p):  # a batarang spinning through the air
+    half = ([(0, -7), (4, -7), (6.5, -19), (9.5, -6)]
+            + spline([(9.5, -6), (20, -7), (33, -11), (43, -17), (50, -26)])
+            + spline([(50, -26), (47, -11), (42, 2)])
+            + spline([(42, 2), (37, 10), (30, 6)]) + spline([(30, 6), (24, 15), (17, 11)])
+            + spline([(17, 11), (8, 17), (0, 30)]))
+    p.path(half + mirror(half[::-1])[1:-1], True)
+    p.o(0, 6, 3.5)
+    for r, a0, a1 in ((55, 160, 200), (62, 167, 193)):
+        p.path(arc(0, 2, r, r * 0.55, a0, a1))
+
+
+def bubble_bobble(p):  # bub the bubble dragon inside a big bubble, two small bubbles rising
+    p.o(0, 6, 38)
+    p.path(arc(0, 6, 31, 31, 200, 248))
+    for x in (-6, 8):
+        p.o(x, 33, 6, 3.5, opaque=True)
+    for y in (-14, -4, 6):
+        p.pg([(-10, y - 5), (-20, y), (-10, y + 5)], 1)
+    p.o(0, 18, 13, 13, opaque=True)
+    head = spline([(-1, -24), (9, -22), (16, -15), (19, -9), (25, -7), (27, -1), (24, 3), (14, 5), (4, 6),
+                   (-7, 3), (-13, -5), (-14, -14), (-9, -21)], closed=True)
+    p.path(head, True, opaque=True)
+    p.o(6, -12, 4.5, 6)
+    p.o(7.5, -11, 2.2)
+    p.o(7.5, -11, 0.8)
+    p.o(36, -40, 5.5)
+    p.o(45, -52, 3.5)
+
+
+def crash_spyro(p):  # a carved tribal mask under a fan of five feathers
+    for a in (-56, -28, 0, 28, 56):
+        feather = turn(arc(0, -42, 6.5, 18, 0, 360), a, 0, -6)
+        p.path(feather, True, opaque=True)
+        with p.inside(feather):
+            p.l(turn([(0, -6), (0, -70)], a, 0, -6))
+    half = [(0, -24), (14, -23), (23, -16), (25, -2), (23, 14), (16, 28), (7, 37), (0, 39)]
+    mask = spline(half + mirror(half[::-1])[1:-1], closed=True)
+    p.path(mask, True, opaque=True)
+    with p.inside(mask):
+        p.c([(-40, -8), (-20, -13), (0, -10), (20, -13), (40, -8)])
+    for s in (-1, 1):
+        p.o(s * 10, 1, 6.5, 4)
+    p.pg([(0, 6), (5, 17), (-5, 17)], 1.5)
+    p.rr(-9, 22, 9, 29, 2)
+    for x in (-3, 3):
+        p.l([(x, 22), (x, 29)], 0)
+
+
+def digimon(p):  # the digivice: a handheld with a round screen, side grips, three buttons and a lanyard loop
+    p.rr(-22, -50, -6, -30, 7)
+    for s in (-1, 1):
+        p.o(s * 28, 2, 8, 14)
+    body = rounded([(-28, -36), (28, -36), (24, 40), (-24, 40)], 14)
+    p.path(body, True, opaque=True)
+    p.o(0, -8, 20)
+    p.o(0, -8, 13)
+    for x in (-12, 0, 12):
+        p.o(x, 26, 3.6)
+
+
+def doom_id_tech(p):  # a cacodemon: a round floating one-eyed demon with horns, spikes and a toothy maw
+    for s in (1, -1):
+        horn = (spline([(s * 22, -22), (s * 33, -34), (s * 34, -54)], n=10)
+                + spline([(s * 34, -54), (s * 24, -40), (s * 11, -30)], n=10)[1:])
+        p.path(horn, True)
+        p.pg([(s * 2, -30), (s * 8, -44), (s * 14, -30)], 1.2)
+    p.path(arc(0, 0, 34, 33, 0, 360), True, opaque=True)
+    p.path(arc(0, -11, 15, 11, 0, 360), True)
+    p.o(0, -11, 6.5)
+    p.o(0, -11, 2.2)
+    p.o(0, -11, 0.8)
+    mouth = arc(0, 8, 25, 20, 0, 180)
+    p.path(mouth, True)
+    with p.inside(mouth):
+        p.l([(-30, 8), (-24, 8), (-18, 17), (-12, 8), (-6, 17), (0, 8), (6, 17), (12, 8), (18, 17), (24, 8), (30, 8)], 0.6)
+        p.l([(-18, 36), (-12, 21), (-6, 36), (0, 21), (6, 36), (12, 21), (18, 36)], 0.6)
+
+
+def doraemon(p):  # the cat bell hanging from its collar
+    strap = arc(0, -78, 60, 60, 45, 135) + arc(0, -78, 50, 50, 135, 45)
+    p.path(strap, True)
+    p.o(0, -17, 5.5, 5.5, opaque=True)
+    bell = arc(0, 14, 26, 26, 0, 360)
+    p.path(bell, True, opaque=True)
+    with p.inside(bell):
+        for y in (10, 16):
+            p.path(arc(0, y - 14, 34, 14, 20, 160))
+        p.l([(0, 29), (0, 44)], 0)
+    p.o(0, 25, 4)
+    p.path(arc(0, 14, 19, 19, 215, 255))
+
+
+def dynasty_warriors(p):  # a guan dao: a long polearm with a curved crescent blade, its tassel and a war banner
+    p.l([(-2.5, -18), (-2.5, 52), (0, 60), (2.5, 52), (2.5, -18)], 1)
+    blade = ([(-3, -22), (-3, -34), (-10, -39), (-3, -42), (-3, -50)]
+             + spline([(-3, -50), (-5, -62), (-12, -73)])[1:]
+             + spline([(-12, -73), (6, -66), (18, -54), (21, -40), (14, -28), (3, -22)])[1:-1])
+    p.pg(blade, 1.5)
+    p.o(8, -42, 3.4)
+    p.rr(-6, -24, 6, -17, 2, opaque=True)
+    p.l([(6, -20), (11, -8)], 0)
+    p.pg([(9, -8), (13, -8), (16, 6), (6, 6)], 1.5)
+    p.l([(-2.5, -12), (-34, -8), (-27, 4), (-36, 16), (-2.5, 20)], 1.5)
+    p.o(-16, 4, 5)
+
+
+def ganbare_goemon(p):  # goemon's kiseru pipe crossed behind a koban, the oval gold coin
+    a = -35
+    p.pg(turn([(-42, -2), (40, -2), (40, 2), (-42, 2)], a), 1)
+    p.pg(turn([(34, -3.5), (50, -2.5), (50, 2.5), (34, 3.5)], a), 1.5, opaque=True)
+    bowl = [(-40, -3.5), (-51, -3.5), (-53, -8), (-50, -14), (-63, -14), (-60, -8), (-60, -1), (-56, 3.5),
+            (-40, 3.5)]
+    p.pg(turn(bowl, a), 2, opaque=True)
+    t = 12
+    p.path(arc(-2, 6, 25, 34, 0, 360, t), True, opaque=True)
+    rim = arc(-2, 6, 19, 28, 0, 360, t)
+    p.path(rim, True)
+    with p.inside(rim):
+        for y in range(-22, 40, 8):
+            p.l(turn([(-30, y), (26, y)], t, -2, 6), 0)
+    p.pg(turn([(-7, -18), (3, -18), (3, -7), (-7, -7)], t, -2, 6), 1.5, opaque=True)
+    p.pg(turn([(-6, 19), (2, 19), (2, 27), (-6, 27)], t, -2, 6), 1.5, opaque=True)
+    p.sparkle(30, -36, 7)
+
+
+def grand_theft_auto(p):  # a neon palm tree on an islet against a striped setting sun, its glow on the water
+    sun = arc(14, 22, 34, 34, 180, 360)
+    p.path(sun, True)
+    with p.inside(sun):
+        for y in (6, 14):
+            p.l([(-30, y), (60, y)], 0)
+    p.l([(-30, 22), (58, 22)], 0)
+    for y, x0, x1 in ((30, -2, 34), (37, 6, 24)):
+        p.l([(x0, y), (x1, y)], 0)
+    trunk = spline([(-24, 24), (-25, 4), (-22, -16), (-15, -32)], n=10)
+    shape = [(x - 3.2, y) for x, y in trunk] + [(x + 3.2, y) for x, y in trunk][::-1]
+    p.path(shape, True, opaque=True)
+    with p.inside(shape):
+        for y in (12, 1, -10, -21):
+            p.l([(-40, y + 2), (-20, y - 2), (0, y + 2)], 0)
+    p.path(arc(-24, 28, 20, 9, 180, 360), True, opaque=True)
+    crown = (-15, -33)
+
+    def frond(mid, tip, w=5):
+        pts = spline([crown, mid, tip], n=12)
+        up, dn = [], []
+        for i, (x, y) in enumerate(pts):
+            a, b = pts[max(0, i - 1)], pts[min(len(pts) - 1, i + 1)]
+            d = math.dist(a, b)
+            nx, ny = -(b[1] - a[1]) / d, (b[0] - a[0]) / d
+            k = math.sin(math.pi * i / (len(pts) - 1)) ** 0.8
+            up.append((x + w * k * nx, y + w * k * ny))
+            dn.append((x - w * k * nx, y - w * k * ny))
+        p.path(up + dn[::-1][1:-1], True, opaque=True)
+
+    frond((-30, -44), (-46, -26))
+    frond((4, -46), (20, -30))
+    frond((-26, -40), (-44, -12), 4.5)
+    frond((-2, -40), (14, -14), 4.5)
+
+
+def gundam(p):  # a beam saber crossed behind the mobile suit's shield with its v-fin crest
+    def saber(pts):
+        return [(x - 2, y + 12) for x, y in turn(pts, 42)]
+    p.l(saber([(-5, 20), (-5, -80), (5, -80), (5, 20)]), 5)
+    p.l(saber([(0, 14), (0, -74)]), 0)
+    p.pg(saber([(-7, 20), (7, 20), (7, 26), (-7, 26)]), 1.5, opaque=True)
+    grip = saber([(-4.5, 26), (4.5, 26), (4.5, 50), (-4.5, 50)])
+    p.pg(grip, 1.5, opaque=True)
+    with p.inside(grip):
+        for y in (32, 38, 44):
+            p.l(saber([(-6, y), (6, y)]), 0)
+    half = [(0, -40), (20, -40), (22, 12), (0, 42)]
+    shield = rounded(half + mirror(half[::-1])[1:-1], 4)
+    p.path(shield, True, opaque=True)
+    p.pg([(-14, -29), (-8, -29), (0, -16), (8, -29), (14, -29), (0, -5)], 1)
+    p.o(0, 12, 5)
+
+
+def harry_potter(p):  # round glasses with a lightning-bolt scar above them
+    for s in (1, -1):
+        p.o(s * 21, 10, 16)
+        p.l([(s * 37, 10), (s * 50, 5)], 0)
+    p.path(arc(0, 10, 5, 6, 180, 360))
+    p.pg([(4, -44), (-7, -25), (-1, -25), (-6, -10), (8, -31), (1, -31), (6, -44)], 0.8)
+
+
+def indiana_jones(p):  # the fedora with its band, resting on a coiled bullwhip whose lash trails out
+    cx, cy = -10, 16
+    for rx, ry in ((32, 14), (25.5, 10.5), (19, 7)):
+        p.o(cx, cy, rx, ry)
+    p.c([(cx + 31, cy + 4), (34, 30), (48, 24), (60, 34), (78, 28)])
+    p.rr(-56, 24, -36, 32, 2.5, rot=-28, opaque=True)
+    p.o(-58.6, 34.6, 3.4, opaque=True)
+    brim = arc(4, 0, 42, 11, 0, 360)
+    p.path(brim, True, opaque=True)
+    top = spline([(-14, -26), (-7, -31), (4, -27), (15, -31), (22, -26)])
+    crown = rounded([(-18, 0)] + top + [(26, 0)] + arc(4, 0, 22, 6, 0, 180)[1:-1], 3)
+    p.path(crown, True, opaque=True)
+    with p.inside(crown):
+        for y in (-11, -5):
+            p.path(arc(4, y, 30, 6, 0, 180))
+        p.c([(4, -30), (3, -23), (4, -16)])
+
+
+def james_bond_007(p):  # the gun-barrel view: rifling spiralling in to the bore, 007 inside it
+    p.o(0, 0, 44)
+    with p.inside(arc(0, 0, 44, 44, 0, 360)):
+        for k in range(8):
+            p.path([(r * math.cos(math.radians(45 * k + (48 - r) * 2.2)), r * math.sin(math.radians(45 * k + (48 - r) * 2.2)))
+                    for r in [48 - i * 0.5 for i in range(60)]])
+    p.o(0, 0, 22, opaque=True)
+    for x in (-12, -1):
+        p.o(x, 0, 3.4, 6.5)
+    p.l([(7, -6.5), (15, -6.5), (9, 6.5)], 0.8)
+
+
+def kunio_kun(p):  # kunio's face front on: spiky short hair, a headband, angry brows, a set mouth
+    for s in (1, -1):
+        p.o(s * 31, 4, 6, 9)
+    half = [(0, -32), (18, -30), (29, -20), (31, -4), (29, 14), (22, 28), (11, 36), (0, 38)]
+    head = spline(half + mirror(half[::-1])[1:-1], closed=True)
+    p.path(head, True, opaque=True)
+    hhalf = [(0, -50), (8, -41), (17, -51), (22, -39), (32, -43), (29, -32), (35, -28), (29.5, -20)]
+    p.pg(hhalf + mirror(hhalf[::-1])[1:-1], 1.2, opaque=True)
+    with p.inside(head):
+        p.l([(-40, -10), (40, -10)], 0)
+    for s in (1, -1):
+        p.pg([(s * 5, -2), (s * 22, -7), (s * 21, -3), (s * 6, 1)], 1)
+        p.o(s * 13, 7, 2.2)
+        p.o(s * 13, 7, 0.8)
+    p.l([(-11, 26), (-4, 23.5), (4, 23.5), (11, 26)], 3)
+
+
+def lego(p):  # a 2x4 brick in three-quarter view, its eight studs on top
+    s, ox, oy = 1.5, -22, -4
+    ax, ay = math.cos(math.radians(20)), math.sin(math.radians(20))
+    bx, by = 0.8 * math.cos(math.radians(140)), 0.8 * math.sin(math.radians(140))
+
+    def pt(a, b, h):
+        return (ox + (a * ax + b * bx) * s, oy + (a * ay + b * by - h) * s)
+
+    def hull(pts):
+        pts = sorted(set(pts))
+        def half(seq):
+            out = []
+            for q in seq:
+                while len(out) > 1 and ((out[-1][0] - out[-2][0]) * (q[1] - out[-2][1])
+                                        - (out[-1][1] - out[-2][1]) * (q[0] - out[-2][0])) <= 0:
+                    out.pop()
+                out.append(q)
+            return out
+        return half(pts)[:-1] + half(pts[::-1])[:-1]
+
+    L, D, T = 40, 20, 12
+    p.pg([pt(0, 0, T), pt(L, 0, T), pt(L, 0, 0), pt(L, D, 0), pt(0, D, 0), pt(0, D, T)], 1.5)
+    p.l([pt(0, D, T), pt(L, D, T), pt(L, 0, T)], 0)
+    p.l([pt(L, D, T), pt(L, D, 0)], 0)
+    r, hs = 3.1, 3.6
+    for a, b in sorted(((a, b) for a in (5, 15, 25, 35) for b in (5, 15)), key=lambda q: pt(*q, 0)[1]):
+        ring = [(a + r * math.cos(math.radians(t)), b + r * math.sin(math.radians(t))) for t in range(0, 360, 6)]
+        top = [pt(x, y, T + hs) for x, y in ring]
+        p.path(hull(top + [pt(x, y, T) for x, y in ring]), True, opaque=True)
+        p.path(top, True)
+
+
+def looney_tunes(p):  # the acme anvil falling, motion dashes trailing above it
+    horn = spline([(-14, -28), (-31, -27), (-48, -21)]) + spline([(-48, -21), (-32, -17), (-18, -12), (-12, -4)])[1:]
+    left = [(-12, 8)] + arc(-22, 8, 10, 10, 0, 90)[1:] + rounded([(-22, 18), (-29, 18), (-29, 30), (-8, 30)], 2.5, False)[1:]
+    right = (rounded([(8, 30), (29, 30), (29, 18), (22, 18)], 2.5, False)[1:] + arc(22, 8, 10, 10, 90, 180)[1:]
+             + [(12, -4)] + rounded([(12, -4), (18, -12), (37, -13), (37, -28), (-14, -28)], 2.5, False)[1:-1])
+    p.path(horn + left + arc(0, 30, 8, 7, 180, 360)[1:] + right, True)
+    p.l([(-22, 18), (22, 18)], 0)
+    p.o(2, 47, 26, 3.6, 6)  # level on the ground once ENTRY turns the picture
+    for x, y0, y1 in ((-6, -54, -38), (10, -60, -38), (26, -52, -38)):
+        p.l([(x, y0), (x, y1)], 0)
+
+
+def marvel(p):  # the infinity gauntlet: a stone on each finger's knuckle and a big one on the back of the hand
+    thumb = [(x - 31, y + 2) for x, y in turn([(-6.5, -20), (6.5, -20), (6.5, 18), (-6.5, 18)], -40)]
+    p.pg(thumb, 6.5)
+    tx, ty = turn([(0, -9)], -40)[0]
+    p.o(tx - 31, ty + 2, 3, 3.6, -40)
+    xs, tops = [-26, -13, 0, 13, 26], [-44, -50, -47, -40]
+    hand = [(-26, 26)]
+    for i, top in enumerate(tops):
+        hand += arc(xs[i] + 6.5, top + 6.5, 6.5, 6.5, 180, 360)
+    p.path(hand + [(26, 26)], True, opaque=True)
+    for i in (1, 2, 3):
+        p.l([(xs[i], max(tops[i - 1], tops[i]) + 6.5), (xs[i], -12)])
+    p.l([(-26, -12), (26, -12)])
+    for i in range(4):
+        p.l([(xs[i], -29), (xs[i + 1], -29)])
+        p.o(xs[i] + 6.5, -20.5, 3, 3.6)
+    p.o(0, 7, 12, 13)
+    p.o(0, 7, 5.5, 6.5)
+    p.l([(-26, 26), (-31, 48), (31, 48), (26, 26)], 2)
+    p.l([(-28, 35), (28, 35)])
+
+
+def monster_hunter(p):  # a hunting horn: a big curved horn with a mouthpiece, side ports and a carry strap
+    cx, cy, R = 34, 40, 66
+
+    def at(a):  # centre line point and its outward normal at angle a
+        ux, uy = math.cos(math.radians(a)), math.sin(math.radians(a))
+        return (cx + R * ux, cy + R * uy), (ux, uy)
+
+    def width(a):
+        t = (a - 182) / (262 - 182)
+        return 4.5 + 7 * t + 9 * t ** 6
+
+    angles = [182 + i * 2 for i in range(41)]
+    outer, inner = [], []
+    for a in angles:
+        (x, y), (ux, uy) = at(a)
+        w = width(a)
+        outer.append((x + w * ux, y + w * uy))
+        inner.append((x - w * ux, y - w * uy))
+    body = outer + inner[::-1]
+    # the carry strap, slung between two rings and hidden where it runs behind the horn
+    p.c([(-22, 8), (-14, 30), (2, 38), (16, 28), (16, -20)])
+    p.c([(-27, 11), (-19, 35), (2, 44), (21, 32), (21, -19)])
+    p.path(body, True, opaque=True)
+    with p.inside(body):
+        for a in (204, 210, 236, 242):
+            (x, y), (ux, uy) = at(a)
+            p.l([(x - 20 * ux, y - 20 * uy), (x + 20 * ux, y + 20 * uy)], 0)
+    for a in (219, 227):
+        (x, y), _ = at(a)
+        p.o(x, y, 2.2)
+    (ex, ey), (ux, uy) = at(262)
+    w = width(262)
+    rot = math.degrees(math.atan2(uy, ux))
+    p.path(arc(ex, ey, w + 1, 6, 0, 360, rot), True, opaque=True)
+    p.path(arc(ex - 1.5 * uy, ey + 1.5 * ux, w - 6, 2.6, 0, 360, rot), True)
+    (sx, sy), _ = at(182)
+    p.rr(sx - 2.6, sy + 2, sx + 2.6, sy + 12, 1, opaque=True)
+    p.o(sx, sy + 14, 5.5, 2.6, opaque=True)
+
+
+def mystery_dungeon(p):  # a tiled dungeon floor seen from above, a staircase going down through it
+    def at(x, y, z=0):  # z is depth below the floor; the eye is above the front of the floor
+        f = 40 / (40 + z)
+        return (x * f, 46 + (y - 46) * f)
+
+    p.rr(-42, -42, 42, 42, 3)
+    for t in (-21, 0, 21):
+        p.l([(t, -42), (t, 42)], 0)
+        p.l([(-42, t), (42, t)], 0)
+    hole = [at(-21, -21), at(21, -21), at(21, 21), at(-21, 21)]
+    p.path(hole, True, opaque=True)
+    run, rise = 16, 10  # the second tread runs on out of sight under the front edge
+    with p.inside(hole):
+        for i in range(2):
+            y = -21 + i * run
+            p.l([at(-21, y, i * rise), at(21, y, i * rise)], 0)
+            p.l([at(-21, y, (i + 1) * rise), at(21, y, (i + 1) * rise)], 0)
+        for s in (1, -1):
+            prof = [at(s * 21, -21)]
+            for i in range(2):
+                y = -21 + i * run
+                prof += [at(s * 21, y, (i + 1) * rise), at(s * 21, y + run, (i + 1) * rise)]
+            p.path(prof)
+
+
+def naruto(p):  # the shinobi forehead protector: a metal plate with a leaf-swirl mark on its cloth band
+    band = (spline([(-50, -4), (-42, -10), (-22, -14), (0, -15), (22, -14), (42, -10), (50, -4)])
+            + spline([(50, 8), (42, 13), (22, 16), (0, 17), (-22, 16), (-42, 13), (-50, 8)]))
+    p.pg(band, 2.5)
+    plate = [(-30, -19), (30, -19), (30, 19), (-30, 19)]
+    p.rr(-30, -19, 30, 19, 4, opaque=True)
+    for x in (-24, 24):
+        for y in (-13, 13):
+            p.o(x, y, 2.2)
+            p.o(x, y, 0.8)
+    leaf = arc(2, 2, 12, 12, -100, 190) + [(-15, -12)]
+    p.pg(leaf, 1.2)
+    with p.inside(leaf):
+        p.path([(2 + (1 + 11.5 * t / 1.8) * math.cos(math.radians(-100 - 360 * t)),
+                 2 + (1 + 11.5 * t / 1.8) * math.sin(math.radians(-100 - 360 * t))) for t in [i / 90 * 2 for i in range(91)]])
+
+
+def nickelodeon(p):  # a slime splat: a blob flung out in round-tipped fingers, drips hanging off it, droplets around
+    R, cy, f = 30, -6, 3.5
+    fingers = [(-164, 38, 5.5), (-122, 42, 6.5), (-80, 37, 5), (-36, 42, 6.5)]
+
+    def reach(t, a, d, w):  # how far a ray from the centre at angle t runs inside a round-tipped finger
+        s, c = math.sin(math.radians(t - a)), math.cos(math.radians(t - a))
+        if d * abs(s) <= w:
+            return d * c + math.sqrt(w * w - d * d * s * s)
+        return w / abs(s) if c > 0 else 0
+
+    def r(t):  # a smooth union of the body and the fingers, so each finger meets the body in a fillet
+        k = 2.2
+        return k * math.log(math.exp(R / k) + sum(math.exp(reach(t, *g) / k) for g in fingers))
+
+    def bottom(x):
+        return cy + (R ** 3 - abs(x) ** 3) ** (1 / 3)
+
+    def bend(s, c, e):
+        return [((1 - u) ** 2 * s[0] + 2 * u * (1 - u) * c[0] + u * u * e[0],
+                 (1 - u) ** 2 * s[1] + 2 * u * (1 - u) * c[1] + u * u * e[1]) for u in (i / 8 for i in range(9))]
+
+    drips = [(15, 3.5, 36), (0, 4.5, 52), (-15, 3.5, 43)]
+    top = [(r(t) * math.cos(math.radians(t)), cy + r(t) * math.sin(math.radians(t))) for t in range(-180, 0, 2)]
+    outline, x = [], r(0)
+    for cx, w, yb in drips:
+        while x > cx + w + f:
+            outline.append((x, bottom(min(x, R))))
+            x -= 1
+        cr, cl = (cx + w, bottom(cx + w)), (cx - w, bottom(cx - w))
+        outline += bend((cx + w + f, bottom(cx + w + f)), cr, (cx + w, cr[1] + f))
+        outline += arc(cx, yb - w, w, w, 0, 180)
+        outline += bend((cx - w, cl[1] + f), cl, (cx - w - f, bottom(cx - w - f)))
+        x = cx - w - f - 1
+    while x > -R:
+        outline.append((x, bottom(x)))
+        x -= 1
+    p.path(outline + top, True)
+    p.path(arc(-2, cy, 19, 19, 200, 245))
+    for a, d, rr in ((-160, 52, 3.6), (-98, 50, 0), (-74, 52, 3.6), (-140, 54, 0), (-8, 43, 0)):
+        x, y = d * math.cos(math.radians(a)), cy + d * math.sin(math.radians(a))
+        if rr:
+            p.o(x, y, rr)
+        else:
+            p.o(x, y, 2.2)
+            p.o(x, y, 0.8)
+
+
+def nintendo_wars(p):  # the medium tank, three-quarter front: track block, hull, turret and a long gun to the right
+    R, F, O = (0.78, -0.3), (0.66, 0.36), (-14, 12)
+
+    def at(x, y, z):
+        return (O[0] + x * R[0] + z * F[0], O[1] - y + x * R[1] + z * F[1])
+
+    def hull(pts):
+        pts = sorted(set(pts))
+        def side(seq):
+            out = []
+            for q in seq:
+                while len(out) > 1 and ((out[-1][0] - out[-2][0]) * (q[1] - out[-2][1])
+                                        - (out[-1][1] - out[-2][1]) * (q[0] - out[-2][0])) <= 0:
+                    out.pop()
+                out.append(q)
+            return out
+        return side(pts)[:-1] + side(pts[::-1])[:-1]
+
+    def block(w, prof, r=1.5):
+        pts = [at(s * w, y, z) for s in (-1, 1) for z, y in prof]
+        shape = rounded(hull(pts), r)
+        p.path(shape, True, opaque=True)
+        return shape
+
+    def long(a, b, e=6):  # a to b, run on past b so it is cut at the outline
+        n = math.dist(a, b)
+        return [a, (b[0] + (b[0] - a[0]) * e / n, b[1] + (b[1] - a[1]) * e / n)]
+
+    # track block: wheels on the near side, the two track ends at the front
+    track = [(-31, 18), (31, 18), (31, 10), (23, 0), (-23, 0), (-31, 10)]
+    shape = block(24, track)
+    with p.inside(shape):
+        p.path([at(-24, 18, -40), at(-24, 18, 31), at(-24, 10, 31)] + long(at(-24, 10, 31), at(-24, 0, 23)))
+        for y in (18, 10):
+            p.path(long(at(-24, y, 31), at(30, y, 31)))
+        for x in (-12, 12):
+            p.path([at(x, 18, 31), at(x, 10, 31)] + long(at(x, 10, 31), at(x, 0, 23)))
+    for z in (-18, 0, 18):
+        p.path([at(-24, 9 + 5.2 * math.sin(math.radians(a)), z + 5.2 * math.cos(math.radians(a)))
+                for a in range(0, 360, 10)], True)
+    # hull with its sloped front
+    shape = block(18, [(-26, 18), (26, 18), (19, 29), (-26, 29)])
+    with p.inside(shape):
+        p.path([at(-18, 29, -40), at(-18, 29, 19)] + long(at(-18, 29, 19), at(-18, 18, 26)))
+        p.path(long(at(-18, 29, 19), at(24, 29, 19)))
+    # turret, hatch on top
+    tz = (-17, 5)
+    shape = block(12, [(tz[0], 29), (tz[1], 29), (tz[1], 39), (tz[0], 39)], 3)
+    with p.inside(shape):
+        p.path([at(-12, 39, -30), at(-12, 39, tz[1])] + long(at(-12, 39, tz[1]), at(-12, 29, tz[1])))
+        p.path(long(at(-12, 39, tz[1]), at(20, 39, tz[1])))
+    p.path([at(-1 + 4.5 * math.cos(math.radians(a)), 39, -7 + 4.5 * math.sin(math.radians(a)))
+            for a in range(0, 360, 10)], True)
+    # gun: barrel, muzzle brake, mantlet over its root
+    root = at(1, 34, tz[1])
+    d = (0.99, 0.14)
+    n = (-d[1], d[0])
+
+    def bar(s0, s1, h, r):
+        return rounded([(root[0] + d[0] * s + n[0] * t, root[1] + d[1] * s + n[1] * t)
+                        for s, t in ((s0, -h), (s1, -h), (s1, h), (s0, h))], r)
+    p.path(bar(0, 48, 3, 1), True, opaque=True)
+    p.path(bar(42, 54, 4.8, 1.5), True, opaque=True)
+    p.path(rounded([at(-6, 30.5, tz[1] + 1.5), at(7, 30.5, tz[1] + 1.5), at(7, 37.5, tz[1] + 1.5),
+                    at(-6, 37.5, tz[1] + 1.5)], 1.5), True, opaque=True)
+
+
+def one_piece(p):  # the straw hat with its ribbon band
+    crown = arc(0, 12, 26, 40, 180, 360) + arc(0, 12, 26, 7, 0, 180)[1:-1]
+    p.o(0, 14, 48, 15)
+    p.o(0, 14, 40, 10)
+    p.path(crown, True, opaque=True)
+    with p.inside(crown):
+        p.path(arc(0, 3, 30, 7, 0, 180))
+
+
+def pixar(p):  # the luxo desk lamp, side on, bending its head down to look at the star ball
+    p.pg([(-48, 44), (-14, 44), (-18, 37), (-44, 37)], 2)
+    base, elbow, joint = (-31, 32), (-22, -14), (6, -32)
+
+    def rod(a, b, w=2.8):
+        ang = math.degrees(math.atan2(b[1] - a[1], b[0] - a[0]))
+        p.pg([(a[0] + x, a[1] + y) for x, y in turn([(0, -w), (math.dist(a, b), -w), (math.dist(a, b), w), (0, w)], ang)], 2)
+
+    rod(base, elbow)
+    rod(elbow, joint)
+    p.o(*base, 4.5, opaque=True)
+    p.o(*elbow, 4.5, opaque=True)
+    d, length, mouth = 78, 26, 15
+    ux, uy = math.cos(math.radians(d)), math.sin(math.radians(d))
+
+    def head(pts):
+        return [(joint[0] + x * ux - y * uy, joint[1] + x * uy + y * ux) for x, y in pts]
+
+    p.path(head([(length, -mouth), (8, -5), (0, -5), (0, 5), (8, 5), (length, mouth)]), True, opaque=True)
+    p.o(*head([(length, 0)])[0], mouth, 3.6, d + 90, opaque=True)
+    p.o(*joint, 4.5, opaque=True)
+    p.o(19, 35, 10)
+    p.pg(star(19, 35, 5, 2.2), 0.6)
+
+
+def puyo_puyo(p):  # a puyo blob with big eyes and a shine, a smaller puyo linked to it as a falling pair
+    def blob(cx, cy, s):
+        half = [(0, -26), (12, -24.5), (21, -19), (27, -9), (28, 3), (25, 13), (17, 20), (8, 22.5), (0, 23)]
+        return spline([(cx + x * s, cy + y * s) for x, y in half + mirror(half[::-1])[1:-1]], closed=True)
+
+    p.path(blob(12, -24, 0.68), True)
+    for x in (6, 18):
+        p.o(x, -27, 3.4, 4.4)
+        p.o(x + 0.8, -26, 0.8)
+    big = blob(-6, 14, 1.15)
+    p.path(big, True, opaque=True)
+    for x in (-16, 6):
+        p.o(x, 14, 7.5, 9)
+        p.o(x + 2, 17, 2.2)
+        p.o(x + 2, 17, 0.8)
+    p.path(arc(-6, 14, 23, 21, 218, 250))
+
+
+def rayman(p):  # Rayman's big puffy white glove giving the peace sign: two fat tapered fingers in a V, a bulky fist
+    for s, rot in ((-1, -17), (1, 17)):
+        bx, by = s * 8, 8
+        p.pg(turn([(bx - 7.5, by - 33), (bx + 7.5, by - 33), (bx + 8.5, by), (bx - 8.5, by)], rot, bx, by), 7)
+    p.pg([(-20, 3), (20, 3), (22, 35), (-22, 35)], 13, opaque=True)
+    p.rr(4, 10, 21, 19, 4.5, opaque=True)
+    p.rr(5, 16, 21, 28, 4.5, opaque=True)
+    p.rr(-25, 12, -1, 28, 8, rot=14, opaque=True)
+
+
+def sailor_moon(p):  # the moon stick: a heart-and-crescent-topped wand with small wings
+    top = spline([(16, -36), (24, -44), (34, -49), (44, -50)])
+    feathers = []
+    for a, b in [((44, -50), (40, -41)), ((40, -41), (32, -34)), ((32, -34), (22, -29))]:
+        mx, my = (a[0] + b[0]) / 2, (a[1] + b[1]) / 2
+        r = math.dist(a, b) / 2
+        ang = math.degrees(math.atan2(b[1] - a[1], b[0] - a[0]))
+        feathers += arc(mx, my, r, r, ang - 180, ang)[1:]
+    wing = top + feathers
+    for s in (1, -1):
+        p.path([(s * x, y) for x, y in wing], True)
+    p.rr(-3, -6, 3, 46, 2, opaque=True)
+    p.o(0, 50, 5, opaque=True)
+    p.rr(-6, 4, 6, 10, 2, opaque=True)
+    moon = arc(0, -30, 25, 25, 15, 165) + arc(0, -38, 22, 22, 160, 20)
+    p.path(moon, True, opaque=True)
+    p.o(0, -4, 5, opaque=True)
+    lobe = math.degrees(math.atan2(-math.sqrt(21 ** 2 - 19 ** 2), 19)) + 360
+    side = math.degrees(math.atan2(56, 19) + math.acos(21 / math.hypot(19, 56)))
+    half = arc(-19, -12, 21, 21, lobe, side) + [(0, 44)]
+    heart = half + mirror(half)[-2:0:-1]
+    p.path([(x * 0.36, y * 0.36 - 34) for x, y in heart], True, opaque=True)
+    p.sparkle(36, -64, 5.5)
+
+
+def shining_force(p):  # a cavalry lance with a swallowtail pennant, crossed behind a round shield with a star boss
+    lance = lambda pts: turn([(x, y) for x, y in pts], 40)
+    p.pg(lance([(-2.5, -34), (-30, -30), (-20, -25), (-30, -18), (-2.5, -22)]), 1.5)
+    p.pg(lance([(-2.5, -40), (2.5, -40), (2.5, 52), (-2.5, 52)]), 1, opaque=True)
+    p.pg(lance([(-5.5, -38), (0, -66), (5.5, -38)]), 1.5, opaque=True)
+    p.o(-8, 14, 30, opaque=True)
+    p.o(-8, 14, 23)
+    p.pg(star(-8, 14, 13, 5.5), 1)
+
+
+def spider_man(p):  # spider-man's mask from the front: the web over it and the big angled eyes
+    half = [(0, -46), (18, -42), (30, -30), (35, -12), (33, 6), (27, 26), (15, 40), (0, 47)]
+    head = spline(half + mirror(half[::-1])[1:-1], closed=True)
+    p.path(head, True)
+
+    def at(a, f):  # the point f of the way from the web's centre to the head's outline
+        dx, dy = math.cos(math.radians(a)), math.sin(math.radians(a))
+        reach = min(t for (x0, y0), (x1, y1) in zip(head, head[1:] + head[:1])
+                    for d in [dx * (y1 - y0) - dy * (x1 - x0)] if d
+                    for t, s in [((x0 * (y1 - y0) - y0 * (x1 - x0)) / d, (x0 * dy - y0 * dx) / d)]
+                    if t > 0 and 0 <= s <= 1)
+        return f * reach * dx, f * reach * dy
+
+    angles = [90 + 45 * k for k in range(8)]
+    with p.inside(head):
+        for a in angles:
+            p.l([(0, 0), at(a, 1.2)], 0)
+        for f in (0.3, 0.57, 0.84):
+            for a in angles:
+                p.c([at(a, f), at(a + 22.5, f * 0.86), at(a + 45, f)])
+    eye = [(4, -5), (8, -18), (15, -26), (25, -27), (26.5, -16), (22, -8), (13, -4)]
+    p.pg(eye, 5, opaque=True)
+    p.pg(mirror(eye), 5, opaque=True)
+
+
+def star_trek(p):  # the arrowhead delta badge in front of an orbit ring, a star on it
+    p.o(0, 6, 48, 14, -18)
+    p.pg([(0, -46), (30, 40), (0, 24), (-30, 40)], 2.5, opaque=True)
+    p.pg(star(0, 6, 10, 4.2), 0.8)
+    p.sparkle(-36, -30, 6)
+    p.sparkle(34, -38, 5)
+
+
+def super_robot_wars(p):  # the rocket punch: a robot forearm and gauntlet launched forward, exhaust rings behind it
+    for y in (-8, 8):
+        p.l([(-56, y), (-48, y)], 0)
+    p.l([(-54, 0), (-44, 0)], 0)
+    for x, ry in ((-40, 9), (-31, 13)):
+        p.o(x, 0, 3, ry)
+    arm = [(-24, -11), (12, -15), (12, 15), (-24, 11)]
+    p.pg(arm, 2)
+    with p.inside(rounded(arm, 2)):
+        for x in (-12, 0):
+            p.l([(x, -20), (x, 20)], 0)
+    p.pg([(-24, -8), (-28, -11), (-28, 11), (-24, 8)], 1, opaque=True)
+    p.rr(9, -19, 17, 19, 2, opaque=True)
+    fist = rounded([(17, -18), (48, -18), (48, 18), (17, 18)], 7)
+    p.path(fist, True, opaque=True)
+    with p.inside(fist):
+        p.l([(38, -30), (38, 30)], 0)
+        for y in (-9, 0, 9):
+            p.l([(38, y), (60, y)], 0)
+    p.rr(20, -11, 33, -2, 4.5, opaque=True)
+
+
+def tales_of(p):  # an exsphere: a faceted gem in an ornate hexagonal setting, a key-crest below and a short chain above
+    cy = 6
+    hexa = lambda r: [(r * math.cos(math.radians(a)), cy + r * math.sin(math.radians(a))) for a in range(-90, 270, 60)]
+    for y in (-44, -34):
+        p.o(0, y, 4, 7, opaque=True)
+    p.pg(hexa(36), 3, opaque=True)
+    p.pg(hexa(28), 2.5)
+    gem = arc(0, cy, 18, 18, 0, 360)
+    p.path(gem, True)
+    table = hexa(8)
+    p.pg(table, 0)
+    with p.inside(gem):
+        for x, y in table:
+            p.l([(x, y), (x + (x - 0) * 3, cy + (y - cy) * 3)], 0)
+    p.pg([(0, 34), (9, 44), (0, 54), (-9, 44)], 2, opaque=True)
+    p.o(0, 44, 2.2)
+    p.o(0, 44, 0.8)
+
+
+def tomb_raider(p):  # a stepped temple: stairs up its front to a shrine doorway, lit by two braziers
+    half = [(-50, 44), (-45, 32), (-39, 32), (-35, 20), (-29, 20), (-25, 8)]
+    p.pg(half + mirror(half[::-1]), 1.2)
+    for y, hw in ((32, 39), (20, 29)):
+        p.l([(-hw, y), (hw, y)], 0)
+    for s in (1, -1):
+        p.l([(s * 6, 44), (s * 6, 8)], 0)
+    for y in (38, 26, 14):
+        p.l([(-6, y), (6, y)], 0)
+    p.rr(-8, -12, 8, 8, 1.2, opaque=True)
+    p.rr(-11, -18, 11, -12, 1.5, opaque=True)
+    p.path([(-4, 8)] + arc(0, -1, 4, 4, 180, 360) + [(4, 8)])
+    for s in (1, -1):
+        p.cc([(s * (18 + x), y) for x, y in [(0, 4), (-4.5, 0), (-5, -5), (-2.5, -9), (-1, -15), (1.5, -9), (3.5, -11),
+                                           (5, -5), (4.5, 0)]])
+        p.pg([(s * 14.5, 2), (s * 21.5, 2), (s * 20, 8), (s * 16, 8)], 0.8, opaque=True)
+
+
+
+
+def transformers(p):  # a semi-truck cab from the front: grille, twin exhaust stacks, windscreen and headlights
+    for s in (1, -1):
+        p.rr(s * 30, 32, s * 42, 50, 2.5)
+        p.rr(s * 35, -52, s * 41, 22, 2.5)
+        p.l([(s * 30, -20), (s * 35, -20)], 0)
+        p.l([(s * 30, 10), (s * 35, 10)], 0)
+    for x in (-12, 0, 12):
+        p.rr(x - 3.5, -49, x + 3.5, -45, 2)
+    p.l([(-30, 28), (-30, -36), (-26, -42), (26, -42), (30, -36), (30, 28)], 3)
+    p.rr(-24, -35, -2.5, -15, 2.5)
+    p.rr(2.5, -35, 24, -15, 2.5)
+    grille = rounded([(-12, -8), (12, -8), (12, 26), (-12, 26)], 2.5)
+    p.path(grille, True)
+    with p.inside(grille):
+        for y in (1, 9, 17):
+            p.l([(-14, y), (14, y)], 0)
+    for s in (1, -1):
+        p.o(s * 22, 4, 4)
+    p.rr(-44, 28, 44, 37, 3, opaque=True)
+
+
+def wizardry(p):  # a tall wizard's hat: its tip curled over, a buckled band and stars
+    p.o(0, 30, 50, 12)
+    cone = (spline([(-26, 28), (-19, 4), (-11, -22), (-1, -40), (12, -50), (26, -50), (36, -42), (38, -32)])
+            + spline([(38, -32), (30, -36), (20, -38), (12, -30), (10, -10), (16, 10), (26, 28)])[1:]
+            + arc(0, 28, 26, 6, 0, 180)[1:-1])
+    p.path(cone, True, opaque=True)
+    with p.inside(cone):
+        for y in (12, 22):
+            p.path(arc(0, y - 6, 40, 6, 0, 180))
+    p.rr(-8, 7, 8, 26, 2, opaque=True)
+    p.rr(-3, 12, 3, 21, 1)
+    p.pg(star(-3, -8, 6, 2.6), 0.8)
+    p.pg(star(4, -32, 4.5, 2), 0.6)
+    p.sparkle(-34, -26, 6)
+    p.sparkle(30, -4, 5)
+
+
+def worms(p):  # an ornate holy grenade: an orb with a jewelled band, a cross on top and rays of light
+    cx, cy, r = 0, 14, 28
+    orb = arc(cx, cy, r, r, 0, 360)
+    p.path(orb, True)
+    with p.inside(orb):
+        p.l([(-40, cy - 5), (40, cy - 5)], 0)
+        p.l([(-40, cy + 5), (40, cy + 5)], 0)
+        p.l([(-4, -20), (-4, cy - 5)], 0)
+        p.l([(4, -20), (4, cy - 5)], 0)
+    p.rr(-9, -21, 9, -13, 2.5, opaque=True)
+    p.pg([(-4, -49), (4, -49), (4, -41), (12, -41), (12, -33), (4, -33), (4, -21), (-4, -21), (-4, -33), (-12, -33),
+          (-12, -41), (-4, -41)], 1.2)
+    for a in (-140, -40, 40, 140):
+        p.l(turn([(cx + r + 8, cy), (cx + r + 15, cy)], a, cx, cy), 0)
+
+
+def wwe(p):  # a wrestling ring corner: the turnbuckle post with its three padded ropes and the ring bell on the post
+    for y in (-34, -16, 2):
+        p.l([(-24, y), (70, y + 10)], 0)
+    p.l([(-24, 13), (-38, 13), (-38, 20)], 2)
+    p.path(arc(-38, 33, 11, 11, 180, 360) + [(-27, 33), (-49, 33)], True, opaque=True)
+    p.rr(-53, 33, -23, 38, 2, opaque=True)
+    p.o(-38, 20, 2.2, opaque=True)
+    p.rr(-26, -48, -16, 46, 2.5, opaque=True)
+    p.rr(-30, -52, -12, -48, 1.5, opaque=True)
+    for y in (-34, -16, 2):
+        p.rr(-30, y - 5.5, -12, y + 5.5, 4, opaque=True)
+
+
+def x_men(p):  # the X-Men badge: a double ring, and a heavy X across it that splits the field into four wedges
+    inner = arc(0, 0, 40, 40, 0, 360)
+    c, t = 14.1, 60
+    x = [(0, -c), (t, -c - t), (t + c, -t), (c, 0), (c + t, t), (t, t + c), (0, c), (-t, c + t), (-t - c, t),
+         (-c, 0), (-c - t, -t), (-t, -t - c)]
+    p.path(arc(0, 0, 47, 47, 0, 360), True)
+    p.path(inner, True)
+    with p.inside(inner):
+        p.path(x, True)
+
+
+def yu_gi_oh(p):  # the millennium puzzle: an upside-down golden pyramid on its cord, the eye on its face
+    p.path(arc(0, -42, 13, 15, 105, 435))
+    top = [(-36, -18), (-27, -28), (27, -28), (36, -18)]
+    p.pg(top, 1.5, opaque=True)
+    p.pg([(-36, -18), (36, -18), (0, 46)], 1.5, opaque=True)
+    p.o(0, -23, 4.2, opaque=True)
+    eye = arc(0, 12, 17, 15, 213, 327) + arc(0, -4, 17, 15, 33, 147)[1:-1]
+    p.path(eye, True)
+    p.o(0, 4, 2.2)
+    p.o(0, 4, 0.8)
+
+
 ART = {
     "adventure": (adventure, (44, 146, 118), -6, 1.0, (0, 0)),
     "fighting": (fighting, (232, 112, 42), -8, 0.92, (-22, 0)),
@@ -1538,7 +2332,6 @@ ART = {
     "sci-fi": (sci_fi, (20, 90, 110), -8, 1.0, (-6, 0)),
     "halloween": (halloween, (98, 50, 130), -5, 1.0, (-4, 0)),
     "prototypes": (prototypes, (40, 92, 170), -6, 1.0, (-8, 0)),
-    "skate": (skate, (226, 140, 36), -20, 1.08, (0, 0)),
     "wrestling": (wrestling, (160, 40, 56), -8, 0.9, (-14, 0)),
     "donkey-kong": (donkey_kong, (134, 84, 48), 10, 1.0, (-12, 0)),
     "yoshi": (yoshi, (90, 180, 70), 12, 1.0, (0, 0)),
@@ -1618,6 +2411,47 @@ ART = {
     "teenage-mutant-ninja-turtles": (teenage_mutant_ninja_turtles, (128, 56, 112), -6, 0.9, (-36, 0)),
     "bomberman": (bomberman, (70, 64, 176), -6, 1.0, (-26, 0)),
     "pokemon-spin-offs": (pokemon_spin_offs, (60, 128, 196), -6, 0.9, (-6, 0)),
+    "atelier": (atelier, (196, 120, 60), -6, 1.0, (-26, 0)),
+    "batman": (batman, (70, 80, 110), -8, 0.95, (-4, 0)),
+    "bubble-bobble": (bubble_bobble, (110, 140, 200), -6, 1.0, (-14, 12)),
+    "crash-spyro": (crash_spyro, (90, 70, 40), -6, 1.0, (-10, 0)),
+    "digimon": (digimon, (28, 120, 170), -6, 1.0, (-14, 0)),
+    "doom-id-tech": (doom_id_tech, (90, 32, 40), -6, 1.0, (-10, 0)),
+    "doraemon": (doraemon, (20, 150, 240), -6, 1.0, (-12, 0)),
+    "dynasty-warriors": (dynasty_warriors, (168, 44, 40), 20, 1.0, (-12, 6)),
+    "ganbare-goemon": (ganbare_goemon, (120, 30, 170), 0, 1.0, (-4, 0)),
+    "grand-theft-auto": (grand_theft_auto, (214, 64, 200), -6, 1.0, (-10, 0)),
+    "gundam": (gundam, (52, 96, 132), -4, 0.95, (-30, 10)),
+    "harry-potter": (harry_potter, (90, 20, 30), -6, 1.0, (-14, 0)),
+    "indiana-jones": (indiana_jones, (70, 50, 20), -6, 1.0, (-10, 0)),
+    "james-bond-007": (james_bond_007, (18, 18, 22), -6, 1.0, (-14, 0)),
+    "kunio-kun": (kunio_kun, (180, 40, 150), -6, 1.0, (-10, 0)),
+    "lego": (lego, (250, 200, 10), -4, 1.1, (-10, 8)),
+    "looney-tunes": (looney_tunes, (214, 150, 96), -6, 1.0, (-14, 0)),
+    "marvel": (marvel, (226, 32, 40), -6, 1.0, (-16, 0)),
+    "monster-hunter": (monster_hunter, (110, 140, 40), -6, 1.0, (0, -45)),
+    "mystery-dungeon": (mystery_dungeon, (130, 160, 110), -6, 1.0, (-2, 0)),
+    "naruto": (naruto, (240, 136, 44), -6, 1.0, (-24, 0)),
+    "nickelodeon": (nickelodeon, (150, 206, 20), -6, 1.0, (-20, 0)),
+    "nintendo-wars": (nintendo_wars, (176, 56, 48), -4, 1.0, (4, 0)),
+    "one-piece": (one_piece, (196, 60, 40), -8, 1.0, (-24, 0)),
+    "pixar": (pixar, (26, 62, 80), -4, 1.0, (-14, 0)),
+    "puyo-puyo": (puyo_puyo, (20, 180, 90), -6, 1.0, (-14, 14)),
+    "rayman": (rayman, (150, 80, 200), -8, 1.3, (-8, 0)),
+    "sailor-moon": (sailor_moon, (150, 120, 210), -10, 0.92, (-14, 18)),
+    "shining-force": (shining_force, (200, 150, 50), -6, 1.0, (-6, 0)),
+    "spider-man": (spider_man, (16, 40, 120), -6, 1.0, (-10, 0)),
+    "star-trek": (star_trek, (40, 56, 140), -6, 1.0, (-14, 0)),
+    "super-robot-wars": (super_robot_wars, (196, 70, 36), -6, 0.88, (-34, 0)),
+    "tales-of": (tales_of, (188, 70, 92), -6, 1.0, (-6, -8)),
+    "tomb-raider": (tomb_raider, (196, 150, 90), -6, 1.0, (-16, -34)),
+    "tony-hawk": (tony_hawk, (226, 140, 36), -20, 1.08, (0, 0)),
+    "transformers": (transformers, (178, 52, 64), -5, 0.95, (-30, 0)),
+    "wizardry": (wizardry, (78, 62, 150), -6, 1.0, (-10, 0)),
+    "worms": (worms, (100, 150, 40), -6, 1.0, (-22, 0)),
+    "wwe": (wwe, (210, 50, 20), -4, 1.0, (-6, 0)),
+    "x-men": (x_men, (70, 20, 110), 0, 1.0, (-20, 0)),
+    "yu-gi-oh": (yu_gi_oh, (150, 118, 32), -6, 1.0, (-12, 0)),
 }
 
 
