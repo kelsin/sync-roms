@@ -33,7 +33,9 @@ def _template(name):
 
 def build(site_dir, user):
     """Write user's public page into site_dir/collections/<user>/ and the site's shared files: CNAME, .nojekyll, the
-    `collections/` redirect to the root, and the root list of every user with a page."""
+    `collections/` redirect to the root, and the root list of every user with a page. ValueError for an invalid user."""
+    if not valid_user(user):
+        raise ValueError(f"invalid user name: {user!r}")
     collections_dir = os.path.join(site_dir, "collections")
     collections_page.write_public(os.path.join(collections_dir, user), home="/")
     store.write_text(os.path.join(site_dir, "CNAME"), DOMAIN + "\n")
@@ -45,13 +47,16 @@ def build(site_dir, user):
     store.write_text(os.path.join(site_dir, "index.html"), _template("index.html").replace("<!-- users -->", items, 1))
 
 
-def git(*args, cwd=None):
-    """Run git with args; its stdout. Exits 1 when it fails or isn't installed."""
+def git(*args, cwd=None, check=True):
+    """Run git with args; its stdout. Exits 1 when it isn't installed or, with check, when it fails; without check,
+    None when it fails."""
     try:
         result = subprocess.run(["git", *args], cwd=cwd, capture_output=True, text=True)
     except FileNotFoundError:
         ui.fail("git isn't installed", 1)
     if result.returncode:
+        if not check:
+            return None
         ui.fail(f"git {' '.join(args)} failed: {result.stderr.strip()}", 1)
     return result.stdout
 
@@ -69,9 +74,9 @@ def publish(user, dry_run=False):
     if not os.path.isdir(os.path.join(clone, ".git")):
         os.makedirs(os.path.dirname(clone), exist_ok=True)
         git("clone", "-q", "--", repo, clone)
-    git("fetch", "-q", "origin", cwd=clone)
-    has_main = subprocess.run(["git", "rev-parse", "-q", "--verify", "refs/remotes/origin/main"], cwd=clone,
-                              capture_output=True).returncode == 0
+    git("remote", "set-url", "origin", repo, cwd=clone)  # pages_repo may have changed since the clone was made
+    git("fetch", "-q", "--prune", "origin", cwd=clone)  # --prune: a former repo's main isn't taken for this one's
+    has_main = git("rev-parse", "-q", "--verify", "refs/remotes/origin/main", cwd=clone, check=False) is not None
     if has_main:
         git("checkout", "-q", "-B", "main", "origin/main", cwd=clone)
         git("reset", "-q", "--hard", "origin/main", cwd=clone)

@@ -27,6 +27,7 @@ class PageSetup(helpers.DataDir):
     def setUp(self):
         super().setUp()
         self.enterContext(mock.patch.object(tags, "load", tag_data))
+        self.enterContext(mock.patch.object(scrape_plan, "load_metadata", lambda system, fresh=False: {}))
         self.listing({})
 
     def save(self, **fields):

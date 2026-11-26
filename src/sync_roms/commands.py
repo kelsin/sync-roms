@@ -1406,10 +1406,13 @@ def collections_share_cmd(args):
 
 
 def collections_publish_cmd(args):
-    user = args.user or getpass.getuser()
+    rule = "use lowercase letters, digits, '-' and '_', starting with a letter or digit, at most 39 (pick one with --user NAME)"
+    try:
+        user = args.user or getpass.getuser()
+    except OSError:
+        ui.fail(f"Couldn't find your login name to use as the user name on the site: {rule}", 2)
     if not pages_site.valid_user(user):
-        ui.fail(f"{user!r} can't be a user name on the site: use lowercase letters, digits, '-' and '_', starting with a "
-                "letter or digit, at most 39 (pick one with --user NAME)", 2)
+        ui.fail(f"{user!r} can't be a user name on the site: {rule}", 2)
     changed, link = pages_site.publish(user, args.dry_run)
     if args.dry_run:
         print(f"Would publish {link}" if changed else "Nothing to publish")

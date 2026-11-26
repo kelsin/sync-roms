@@ -87,6 +87,27 @@ class Site(helpers.Cmd):
         root = subprocess.run(["git", "-C", self.bare, "show", "main:index.html"], capture_output=True, text=True).stdout
         self.assertIn('href="collections/alice/"', root)
 
+    def test_changed_repo_setting_is_used(self):
+        pages_site.publish("alice")
+        second = os.path.join(self.tmpdir(), "second.git")
+        subprocess.run(["git", "init", "-q", "--bare", "-b", "main", second], check=True)
+        usersettings.save_settings({"pages_repo": second})
+        self.assertTrue(pages_site.publish("kelsin")[0])
+        files = git_ls_tree(second, "main")
+        self.assertIn("collections/kelsin/index.html", files)
+        self.assertNotIn("collections/alice/index.html", files)  # the old repo's main isn't carried over
+        self.assertNotIn("collections/kelsin/index.html", git_ls_tree(self.bare, "main"))
+
+    def test_build_refuses_invalid_user(self):
+        with self.assertRaises(ValueError):
+            pages_site.build(self.tmpdir(), "../x")
+
+    def test_login_name_unavailable(self):
+        with mock.patch("getpass.getuser", side_effect=OSError("no login")):
+            code, _, err = self.run_cmd("collections", "publish")
+        self.assertEqual(code, 2)
+        self.assertIn("--user", err)
+
     def test_dirty_clone_is_reset(self):
         pages_site.publish("kelsin")
         open(os.path.join(pages_site.CLONE_DIR(), "junk.txt"), "w").close()
