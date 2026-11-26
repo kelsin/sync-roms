@@ -7,12 +7,25 @@ import signal
 import subprocess
 import sys
 import threading
+import time
 import unittest
 from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from sync_roms import picker, ui  # noqa: E402
+import textual._wait  # noqa: E402
+
+_GRANULARITY = textual._wait.SLEEP_GRANULARITY
+
+
+def setUpModule():
+    # Pilot.press waits for idle with two sleeps of this length per key; halving it halves the cost of every key.
+    textual._wait.SLEEP_GRANULARITY = 0.01
+
+
+def tearDownModule():
+    textual._wait.SLEEP_GRANULARITY = _GRANULARITY
 
 
 async def wait_for(pilot, cond):
@@ -1302,9 +1315,11 @@ class Session(unittest.TestCase):
                     threads[0].join(10)
                 self.assertEqual(self.events, ["app closed"])
 
-    def kicks(self):
+    def kicks(self, to_main=True):
         """A function that sends the main thread SIGINT from the editor's thread, as the terminal's Ctrl-C does while
-        the app has not taken it (no list yet, or suspended), and waits for the session's handler to have run."""
+        the app has not taken it (no list yet, or suspended), and waits for the session's handler to have run. With
+        to_main False the signal goes to the editor's own thread, where CPython only marks it for the main thread:
+        as one that came just before the main thread's wait slept, the wait does not end for it."""
         handled = threading.Semaphore(0)
         handle = picker._Session.on_sigint
 
@@ -1315,7 +1330,7 @@ class Session(unittest.TestCase):
                 handled.release()
 
         def kick():
-            signal.pthread_kill(threading.main_thread().ident, signal.SIGINT)
+            signal.pthread_kill((threading.main_thread() if to_main else threading.current_thread()).ident, signal.SIGINT)
             if not handled.acquire(timeout=10):
                 raise AssertionError("timed out")
         self.enterContext(mock.patch.object(picker._Session, "on_sigint", on_sigint))
@@ -1327,6 +1342,19 @@ class Session(unittest.TestCase):
         def editor():
             kick()
             kick()  # a double press: within a second of the first it is the same gesture
+            try:
+                picker.filter_list("A", ["a0"])
+            except KeyboardInterrupt:
+                return "interrupted"
+        self.assertEqual(self.run_editor(editor, None), "interrupted")
+        self.assertEqual(self.runs, [])
+
+    def test_a_ctrl_c_the_main_threads_wait_missed_still_interrupts(self):
+        kick = self.kicks(to_main=False)
+
+        def editor():
+            time.sleep(0.5)  # the main thread waits for the first request by now (if not, the test proves nothing)
+            kick()  # times out unless the main thread's wait wakes on its own to run the handler
             try:
                 picker.filter_list("A", ["a0"])
             except KeyboardInterrupt:

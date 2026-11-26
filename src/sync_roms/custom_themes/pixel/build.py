@@ -5,7 +5,7 @@ import os
 import posixpath
 import shutil
 
-from PIL import Image
+from PIL import Image, ImageChops
 
 from ... import store
 from . import (app_icons, arcade, extras, frames, handhelds, menu, nintendo_sega, others, recolor, ui_settings, ui_status,
@@ -75,7 +75,11 @@ def blacken(path):
         return
     with Image.open(path) as im:
         img = im.convert("RGBA")
-    img.putdata([BLACK if px[:3] == (40, 40, 40) and px[3] else px for px in img.get_flattened_data()])
+    r, g, b, a = img.split()
+    is_40 = lambda band: band.point(lambda v: 255 if v == 40 else 0)  # noqa: E731
+    solid = a.point(lambda v: 255 if v else 0)
+    mask = ImageChops.multiply(ImageChops.multiply(is_40(r), is_40(g)), ImageChops.multiply(is_40(b), solid))
+    img.paste(BLACK, mask=mask)
     img.save(path)
 
 

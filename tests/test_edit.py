@@ -15,6 +15,19 @@ from helpers import DataDir  # noqa: E402,F401  (re-exported: other test modules
 from helpers import feed_list, pilot_list, screen_lines, screen_text, shown_preview  # noqa: E402
 from helpers import VITA_DLC as DLC, VITA_GAME as G, VITA_UPDATE as NEW  # noqa: E402
 from sync_roms import edit, names, picker, runtime, s3, store, ui  # noqa: E402
+import textual._wait  # noqa: E402
+
+_GRANULARITY = textual._wait.SLEEP_GRANULARITY
+
+
+def setUpModule():
+    # Pilot.press waits for idle with two sleeps of this length per key; halving it halves the cost of every key.
+    textual._wait.SLEEP_GRANULARITY = 0.01
+
+
+def tearDownModule():
+    textual._wait.SLEEP_GRANULARITY = _GRANULARITY
+
 
 def list_systems():
     return {

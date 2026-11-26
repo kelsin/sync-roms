@@ -89,6 +89,7 @@ HELP_FOOTER = "j/k ↑/↓ PgUp/PgDn scroll · Esc/q/? close"
 # under "Working..." in an editor session, after a Ctrl-C the editor has not got yet; the second line once it is true
 STOPPING = "🛑 Ctrl-C: stopping when this step ends."
 QUIT_NOW = "   Press Ctrl-C again to quit now: unsaved changes in the open editor are lost."
+REQUEST_WAIT = 0.1  # longest the session's main thread waits for the worker in one go (_Session.next_request)
 QUIT_AFTER = 1  # seconds after that Ctrl-C from which another one quits; sooner, it is the same press (a double tap, a held key)
 
 
@@ -1234,7 +1235,7 @@ class _Session:
         sys.stdout, sys.stderr = _Output(self, sys.stdout), _Output(self, sys.stderr)
         try:
             threading.Thread(target=self.work, args=(fn, args, kwargs), name="editor", daemon=True).start()
-            while (request := self.prompts(self.requests.get())) is not None:
+            while (request := self.prompts(self.next_request())) is not None:
                 self.serve(*request[1:])
         finally:
             signal.signal(signal.SIGINT, handler)
@@ -1266,8 +1267,18 @@ class _Session:
                 self.answer(reply, (None, error))  # Ctrl-C while it asked: as in the list
             else:
                 self.answer(reply, _outcome(lambda: self.at_terminal(payload)))
-            request = self.requests.get()
+            request = self.next_request()
         return None
+
+    def next_request(self):
+        """On the main thread: the worker's next request, waited for in steps of REQUEST_WAIT. CPython runs a signal
+        handler only once the thread is back in Python code, so a SIGINT that came as one wait started (before it
+        slept) would run on_sigint only when the worker's next request came; this way it runs within REQUEST_WAIT."""
+        while True:
+            try:
+                return self.requests.get(timeout=REQUEST_WAIT)
+            except queue.Empty:
+                pass
 
     def deliver(self, reply):
         """On the main thread: answer reply with the Ctrl-C that waits for the worker's next request, if one does."""

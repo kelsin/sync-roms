@@ -6,7 +6,7 @@ import unittest
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import helpers  # noqa: E402,F401  (imports isolate first)
-from PIL import Image  # noqa: E402
+from PIL import Image, ImageChops, ImageDraw  # noqa: E402
 from test_custom_themes import make_base as make_theme_base  # noqa: E402
 
 from sync_roms.custom_themes import palettes  # noqa: E402
@@ -259,6 +259,15 @@ class Kit(unittest.TestCase):
 
 
 class Frames(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        # GRUVBOX built once, read-only for the tests that use `self.gruvbox`; a test that writes copies it first
+        cls.shared = tempfile.TemporaryDirectory()
+        cls.addClassCleanup(cls.shared.cleanup)
+        theme = os.path.join(cls.shared.name, "theme")
+        make_base(theme)
+        cls.gruvbox = theme, frames.apply(theme, GRUVBOX)
+
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
@@ -340,7 +349,7 @@ class Frames(unittest.TestCase):
         self.assertEqual(names, SPEC_FILES - NOT_DRAWN)
 
     def test_selected_and_unselected_share_geometry(self):
-        theme, written = self.build(GRUVBOX)
+        theme, written = self.gruvbox
         folders = sorted({rel.split("/", 1)[0] for rel in written})
         checked = 0
         for folder in folders:
@@ -358,7 +367,7 @@ class Frames(unittest.TestCase):
     def test_hint_letters_centered(self):
         """The letter or word of a button hint is centered in its button: equal ink margins left/right and top/bottom,
         on odd (13-cell) and even (14-cell) grids alike."""
-        theme, written = self.build(GRUVBOX)
+        theme, written = self.gruvbox
         ink = frames.shades(GRUVBOX).ink
         hints = [rel for rel in written if rel.split("/", 1)[1].startswith("context-")]
         self.assertGreaterEqual(len(hints), 7 + 5)
@@ -380,7 +389,7 @@ class Frames(unittest.TestCase):
                 self.assertEqual(top, canvas.rows - 1 - bottom)
 
     def test_animation_frames_keep_positions(self):
-        theme, written = self.build(GRUVBOX)
+        theme, written = self.gruvbox
         s = frames.shades(GRUVBOX)
         for kind in ("app_loading_0", "charging-0"):
             for folder in sorted({rel.split("/", 1)[0] for rel in written}):
@@ -550,7 +559,7 @@ class Frames(unittest.TestCase):
             self.assertEqual(frames.FRAMES[f"skin/{name}.png"].background, (0, 0, 0), name)
 
     def test_progress_pieces_tile(self):
-        theme, _ = self.build(GRUVBOX)
+        theme, _ = self.gruvbox
         for folder, cell in (("skin", 2), ("skin_1280x720", 3)):
             with self.subTest(folder):
                 left, mid, right = (load(os.path.join(theme, folder, f"{n}.png")) for n in PROGRESS)
@@ -585,7 +594,7 @@ class Frames(unittest.TestCase):
                         self.assertEqual(px[x, y], px[x - x % cell, y - y % cell], (x, y))
 
     def test_full_screen_backgrounds_stay_opaque_black_inside(self):
-        theme, written = self.build(GRUVBOX)
+        theme, written = self.gruvbox
         files = [rel for rel in written if rel.split("/", 1)[1][:-len(".png")] in FULL_SCREEN]
         self.assertGreaterEqual(len(files), len(FULL_SCREEN) + 4)
         for rel in files:
@@ -595,20 +604,28 @@ class Frames(unittest.TestCase):
                 base_size = BASE[rel.split("/", 1)[1]][0]
                 canvas = frames.Canvas(img.size, frames.cell_for(img.size, base_size), (0, 0) + img.size)
                 logo = rel.endswith("bg-title.png")
-                colored = 0
-                px = img.load()
-                for y in range(img.height):
-                    for x in range(img.width):
-                        rgba = px[x, y]
-                        self.assertEqual(rgba[3], 255, (x, y))
-                        cx, cy = (x - canvas.ox) // canvas.cell, (y - canvas.oy) // canvas.cell
-                        on_grid = 0 <= cx < canvas.cols and 0 <= cy < canvas.rows
-                        edge = on_grid and min(cx, canvas.cols - 1 - cx, cy, canvas.rows - 1 - cy) < 2
-                        slot = logo and on_grid and cx < canvas.rows  # bg-title's logo, at the left
-                        if not (edge or slot):
-                            self.assertEqual(rgba, (0, 0, 0, 255), (x, y))
-                        colored += rgba != (0, 0, 0, 255)
-                self.assertGreater(colored, 0)
+                black = Image.new("RGBA", img.size, (0, 0, 0, 255))
+                self.assertEqual(img.getchannel("A").getextrema(), (255, 255))  # opaque everywhere
+                # black everywhere but the 2-cell edge ring of the grid and, on bg-title, the logo's slot at the left
+                exempt = Image.new("L", img.size, 0)
+                draw = ImageDraw.Draw(exempt)
+                gx0, gy0 = canvas.ox, canvas.oy
+                gx1, gy1 = gx0 + canvas.cols * canvas.cell, gy0 + canvas.rows * canvas.cell
+                draw.rectangle((gx0, gy0, gx1 - 1, gy1 - 1), fill=255)
+                inner = (gx0 + 2 * canvas.cell, gy0 + 2 * canvas.cell, gx1 - 2 * canvas.cell, gy1 - 2 * canvas.cell)
+                if inner[0] < inner[2] and inner[1] < inner[3]:
+                    draw.rectangle((inner[0], inner[1], inner[2] - 1, inner[3] - 1), fill=0)
+                if logo:
+                    draw.rectangle((gx0, gy0, gx0 + min(canvas.rows, canvas.cols) * canvas.cell - 1, gy1 - 1), fill=255)
+                checked = img.copy()
+                checked.paste(black, mask=exempt)
+                diff = ImageChops.difference(checked, black)
+                bad = diff.getbbox(alpha_only=False)
+                if bad:
+                    first = next(i for i, v in enumerate(diff.crop(bad).getdata()) if v != (0, 0, 0, 0))
+                    xy = (bad[0] + first % (bad[2] - bad[0]), bad[1] + first // (bad[2] - bad[0]))
+                    self.fail(f"not opaque black outside the edge ring: bbox {bad}, first pixel {xy} is {img.getpixel(xy)}")
+                self.assertIsNotNone(ImageChops.difference(img, black).getbbox(alpha_only=False))  # some colored pixel
                 self.assertEqual(spec.background, (0, 0, 0))
 
     def test_border_brackets_have_equal_arms(self):
@@ -641,7 +658,7 @@ class Frames(unittest.TestCase):
                 self.assertIn(arms.pop(), (3, 4, 5))
 
     def test_title_tree_is_centered_in_its_slot(self):
-        theme, written = self.build(GRUVBOX)
+        theme, written = self.gruvbox
         accent, trunk = frames.shades(GRUVBOX).accent, frames.shades(GRUVBOX).hi
         for rel in sorted(r for r in written if r.endswith("bg-title.png")):
             with self.subTest(rel):
@@ -662,7 +679,7 @@ class Frames(unittest.TestCase):
                     self.assertEqual(min(xs) - left, right - max(xs), y)
 
     def test_non_uniform_copy_uses_min_ratio_cell(self):
-        theme, _ = self.build(GRUVBOX)
+        theme, _ = self.gruvbox
         img = load(os.path.join(theme, "skin_1280x720", "bg-game-item-f.png"))
         canvas = frames.Canvas((231, 255), 6, (9, 0, 216, 230))  # min(231/154, 255/170) = 1.5: cell 6
         self.assertEqual((canvas.cols, canvas.rows, canvas.ox, canvas.oy), (34, 38, 10, 1))
@@ -724,7 +741,7 @@ class Frames(unittest.TestCase):
         with open(os.path.join(sizes, "config_1280x720.json"), "w") as f:  # its own fonts: 36 px (48 high), 24 px (32)
             json.dump({"list": {"size": 36}, "grid": {"grid3x4": 24}}, f)
         self.assertEqual(frames_select.row_height(True)(sizes, "skin_1280x720"), 7 + 48 + 32 + 15)
-        theme, _ = self.build(GRUVBOX)
+        theme, _ = self.gruvbox
         hi = frames.shades(GRUVBOX).hi
         for file, height in (("bg-list-l.png", 63), ("bg-list-s.png", 42)):
             with self.subTest(file):

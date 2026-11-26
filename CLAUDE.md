@@ -9,6 +9,7 @@ Always use `uv`; never bare `python`, `pip`, `pyenv` shims or a system interpret
 ```bash
 uv sync                                      # create/update .venv
 uv run python -m unittest discover -s tests  # tests
+uv run python tools/run_tests.py   # tests, one process per module in parallel
 uv run sync-roms ...                         # the CLI
 ```
 
