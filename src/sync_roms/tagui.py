@@ -232,12 +232,30 @@ class TagFilter:
         defs = tags.all_tags()
         return any(i in defs for i in self.required | self.excluded)
 
+    def prune(self, defs=None):
+        """Drop the required and excluded tags that no longer exist (deleted or merged, here or on another machine)."""
+        defs = tags.all_tags() if defs is None else defs
+        self.required.intersection_update(defs)
+        self.excluded.intersection_update(defs)
+
+    def retarget(self, old, new):
+        """A merged tag (new is its destination) or a deleted one (new None): the filter follows it."""
+        for ids in (self.required, self.excluded):
+            if old in ids:
+                ids.discard(old)
+                if new is not None:
+                    ids.add(new)
+        if new in self.required:  # both sides of a merge were in the filter, one required: required wins
+            self.excluded.discard(new)
+
     def state(self):
         """A copy of the filter's settings, for restore."""
+        self.prune()
         return set(self.required), set(self.excluded), self.untagged
 
     def restore(self, state):
         self.required, self.excluded, self.untagged = set(state[0]), set(state[1]), state[2]
+        self.prune()
 
     def keep(self, key):
         """Whether the filter shows the game."""
@@ -245,9 +263,10 @@ class TagFilter:
             return False
         if not self.required and not self.excluded:
             return True
-        data, required, excluded = tags.load(), frozenset(self.required), frozenset(self.excluded)
-        w = self._worked
-        if w is None or w[0] is not data or w[1:3] != (required, excluded):  # worked out again after a tag change
+        data, w = tags.load(), self._worked
+        if w is None or w[0] is not data or w[1:3] != (self.required, self.excluded):  # worked out again after a tag change
+            self.prune(data["tags"])
+            required, excluded = frozenset(self.required), frozenset(self.excluded)
             allowed = tags.games_with(required, excluded) if required else None
             left_out = set().union(*(tags.games_with({i}, ()) for i in excluded))
             w = self._worked = (data, required, excluded, allowed, left_out)
@@ -268,6 +287,7 @@ class TagFilter:
         Notes when nothing is there to pick."""
         row_keys = set(row_keys)
         defs = tags.all_tags()
+        self.prune(defs)
         cursor, entries = 0, None  # the rows are chosen once, so the cursor keeps its row while the counts change
         while True:
             untagged, self.untagged = self.untagged, False  # the tags to pick from are those the other filters leave

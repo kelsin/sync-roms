@@ -93,6 +93,7 @@ def merge(tag_id, tag):
                       f"{tag['name']} is deleted.", default=False):
         return False
     if _save(tags.merge_tag, tag_id, ids[j]):
+        tagui.FILTER.retarget(tag_id, ids[j])
         edit.note(f"🔀 Merged {n} game{'' if n == 1 else 's'} into {_label(into)}")
         return True
     return False
@@ -104,6 +105,7 @@ def delete(tag_id, tag):
     if not ui.confirm(f"🗑️  Delete {_label(tag)}? {n} game(s) lose it.", default=False):
         return False
     if _save(tags.delete_tag, tag_id):
+        tagui.FILTER.retarget(tag_id, None)
         edit.note(f"🗑️  Deleted {_label(tag)}")
         return True
     return False

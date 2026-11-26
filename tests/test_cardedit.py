@@ -1937,9 +1937,8 @@ class SetFlow(Flow):
         self.assertIn(("s", "narrow by tags (stays on in every list)"), kw["key_help"])
 
     def test_set_list_with_no_match_says_so_and_c_clears(self):
-        self.tag_pokemon(("gba/Ruby.zip",))
+        self.tag_pokemon()
         cardedit.tagui.FILTER.excluded.add("pk")
-        cardedit.tagui.FILTER.required.add("nope")
         self.card()
         _, calls = self.run_set(returns((cardedit.CLEAR_KEY, None)), lambda labels, kw: kw["session"]["sel"])
         self.assertEqual(calls[0][1], [])

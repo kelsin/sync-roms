@@ -634,7 +634,7 @@ class AddFromTag(unittest.TestCase):
             {"title": "FF7", "system": "psx", "bucket": "psx/FF7.m3u", "files": ["psx/FF7 (Disc 1).chd"]}])
 
     def add_with_filter(self, toggle_raises=False):
-        tag_games(self, {"gba/Ruby.zip": None})
+        tag_games(self, {"gba/Ruby.zip": None}, {"mix": {"name": "Mix", "emoji": "🔀"}, "other": {"name": "Other", "emoji": "🅾️"}})
         tagui.FILTER.required, tagui.FILTER.excluded = {"mix"}, {"other"}
         listing = {"name": "Favs", "games": []}
         seen = []

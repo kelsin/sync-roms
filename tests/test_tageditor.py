@@ -152,6 +152,14 @@ class Editor(unittest.TestCase):
         self.run_editor(["Shmups", ("S", None), "Delete"], confirms=[False])
         self.assertEqual(self.disk(), before)
 
+    def test_merge_moves_the_tag_filter_to_the_destination_and_delete_drops_it(self):
+        tagui.FILTER.required = {"shmups"}
+        self.run_editor(["Shmups", ("S", None), "Merge", "Cave"], confirms=[True])
+        self.assertEqual(tagui.FILTER.required, {"cave"})
+        tagui.FILTER.excluded, tagui.FILTER.required = {"cave"}, set()
+        self.run_editor(["Cave", ("S", None), "Delete"], confirms=[True])
+        self.assertEqual(tagui.FILTER.state(), (set(), set(), False))
+
     def test_its_games_lists_titles_with_systems_and_unchecked_ones_lose_the_tag(self):
         seen = []
 

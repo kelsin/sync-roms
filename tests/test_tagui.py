@@ -277,6 +277,35 @@ class TagFilterTest(unittest.TestCase):
         f.excluded = {"cave"}
         self.assertTrue(f.active())
 
+    def test_a_deleted_filter_tag_stops_hiding_games(self):
+        f = tagui.TagFilter()
+        f.required = {"shmups"}
+        self.assertFalse(f.keep(self.C))
+        tags.delete_tag("shmups")
+        self.assertTrue(f.keep(self.C))  # every row hidden by a tag no banner names was the bug
+        self.assertEqual((f.describe(), f.active(), f.required), ("", False, set()))
+
+    def test_state_restore_and_pick_drop_tags_that_no_longer_exist(self):
+        f = tagui.TagFilter()
+        f.restore(({"gone", "shmups"}, {"lost"}, False))
+        self.assertEqual(f.state(), ({"shmups"}, set(), False))
+        f.required, f.excluded = {"gone"}, {"cave", "lost"}
+        seen = []
+        with mock.patch.object(picker, "filter_list", lambda title, labels, **kw: seen.append(labels)):
+            f.pick({A, B, self.C})
+        self.assertEqual((f.required, f.excluded), (set(), {"cave"}))
+        self.assertEqual(seen[0][0], "🚫 🐝 Cave (0)")
+
+    def test_retarget_follows_a_merge_and_a_delete(self):
+        f = tagui.TagFilter()
+        f.required, f.excluded = {"shmups"}, {"rpg"}
+        f.retarget("shmups", "cave")
+        self.assertEqual((f.required, f.excluded), ({"cave"}, {"rpg"}))
+        f.retarget("rpg", "cave")  # already required: required wins
+        self.assertEqual((f.required, f.excluded), ({"cave"}, set()))
+        f.retarget("cave", None)
+        self.assertEqual((f.required, f.excluded), (set(), set()))
+
     def test_describe(self):
         f = tagui.TagFilter()
         self.assertEqual(f.describe(), "")
@@ -429,10 +458,6 @@ class StickyFilter(unittest.TestCase):
         self.assertEqual([k for k, _ in tagui.KEYS_HELP], ["s", "c"])
 
 
-if __name__ == "__main__":
-    unittest.main()
-
-
 class TagPickerErgonomics(Base):
     def setUp(self):
         super().setUp()
@@ -519,3 +544,7 @@ class TagPickerErgonomics(Base):
         self.assertEqual(kw["row_note"](0), "")
         labels, kw = seen[1]
         self.assertEqual(kw["row_note"](next(i for i, x in enumerate(labels) if "Zed" in x)), "sleepy picks")
+
+
+if __name__ == "__main__":
+    unittest.main()
