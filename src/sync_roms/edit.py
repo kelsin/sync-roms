@@ -93,13 +93,8 @@ def toggle_games(title, rows, hotkeys=(), hint=None, place=None, filters="", key
                                    " · ".join(x for x in (filters, banner, empty) if x),
                                    None if key_help is None else [*key_help, *(h for h in helps if h not in key_help)],
                                    every, notes)
-        if pressed in (tagui.TAG_KEY, tagui.REPEAT_KEY):
-            if i is None:
-                note("ℹ️  No game under the cursor")
-            elif pressed == tagui.TAG_KEY:
-                tagui.edit_game_tags(shown[i][1], shown[i][2])
-            else:
-                tagui.repeat_last(shown[i][1], shown[i][2])
+        if pressed in tagui.TAG_KEYS:
+            tagui.tag_key(pressed, *(shown[i][1:3] if i is not None else (None, None)))
             frozen = shown
         elif pressed == tagui.BULK_KEY and pressed in own:
             tagui.bulk_tag([r[1] for r in picker.on_screen(place, shown)])

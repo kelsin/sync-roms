@@ -489,9 +489,18 @@ class TagPickerErgonomics(Base):
 
     def test_repeat_applies_the_last_add_and_remove_to_another_game(self):
         self.pick_tags(B, {"cave"})
+        tags.change_game_tags(A, add={"shmups"})
         self.assertTrue(tagui.repeat_last(A, "A"))
         self.assertEqual(tags.tags_of(A), ["cave"])
         self.assertEqual(self.notes[-1], "🏷️  Tagged A: +1 −1")
+
+    def test_the_note_counts_only_what_changed_and_repeat_keeps_what_it_repeats(self):
+        self.pick_tags(B, {"cave"})  # shmups off, cave on
+        self.assertTrue(tagui.repeat_last(A, "A"))  # A lacked shmups: nothing to take off
+        self.assertEqual(self.notes[-1], "🏷️  Tagged A: +1 −0")
+        self.assertTrue(tagui.repeat_last(A, "A"))  # A has cave now
+        self.assertEqual(self.notes[-1], "🏷️  Tagged A: +0 −0")
+        self.assertEqual(tagui.LAST, [(frozenset({"cave"}), frozenset({"shmups"}))])
 
     def test_repeat_with_nothing_to_repeat_says_so(self):
         self.assertFalse(tagui.repeat_last(A, "A"))

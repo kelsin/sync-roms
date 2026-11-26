@@ -58,11 +58,16 @@ def described(defs, ids):
     return lambda j: defs[ids[j]].get("description", "") if j < len(ids) and ids[j] in defs else ""
 
 
-def _applied(title, add, remove):
-    """Remember what was just written to a game and say so."""
+def _write(key, title, add, remove, remember=True):
+    """Give the game the tags in add, take those in remove and say how many it gained and lost (the tags it already
+    had, or lacked, don't count). remember: what `.` repeats becomes add and remove."""
+    before = set(tags.tags_of(key))
+    tags.change_game_tags(key, add=add, remove=remove)
+    after = set(tags.tags_of(key))
     _used(add)
-    LAST[:] = [(frozenset(add), frozenset(remove))]
-    note(f"🏷️  Tagged {title}: +{len(add)} −{len(remove)}")
+    if remember:
+        LAST[:] = [(frozenset(add), frozenset(remove))]
+    note(f"🏷️  Tagged {title}: +{len(after & set(add) - before)} −{len(before & set(remove) - after)}")
 
 
 def _unapplied(made):
@@ -79,11 +84,8 @@ def repeat_last(key, title):
         note(ui.yellow("ℹ️  Nothing to repeat yet: tag a game with t first"))
         return False
     try:
-        key = tags.owner(key)
         add, remove = LAST[0]
-        add = {i for i in add if i in tags.all_tags()}
-        tags.change_game_tags(key, add=add, remove=remove)
-        _applied(title, add, remove)
+        _write(tags.owner(key), title, {i for i in add if i in tags.all_tags()}, remove, remember=False)
         return True
     except (*s3.ERRORS, SystemExit, ValueError) as e:
         note(ui.yellow(f"⚠️  Couldn't save the tags in storage: {e}"))
@@ -144,12 +146,23 @@ def edit_game_tags(key, title):
             chosen = {i for i, on in zip(ids, result) if on}
             if chosen == start:
                 return False
-            tags.change_game_tags(key, add=chosen - start, remove=start - chosen)
-            _applied(title, chosen - start, start - chosen)
+            _write(key, title, chosen - start, start - chosen)
             return True
     except (*s3.ERRORS, SystemExit, ValueError) as e:  # ValueError: tags.json in storage isn't valid JSON
         note(ui.yellow(f"⚠️  Couldn't save the tags in storage: {e}"))
         return False
+
+
+TAG_KEYS = (TAG_KEY, REPEAT_KEY)
+
+
+def tag_key(pressed, key, title):
+    """t (edit the game's tags) or . (repeat the last t) on the row of key, titled title; key None: no row is under
+    the cursor, which a note says. Returns whether tags were written."""
+    if key is None:
+        note("ℹ️  No game under the cursor")
+        return False
+    return edit_game_tags(key, title) if pressed == TAG_KEY else repeat_last(key, title)
 
 
 def games(n):

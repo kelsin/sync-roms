@@ -1078,6 +1078,30 @@ class Flow(DataDir):
             self.run_system(press_t, changed)
         self.assertEqual(asked, [("gba/Ruby.zip", "Ruby")])
 
+    def test_dot_and_t_with_no_row_behave_as_in_every_games_list(self):
+        """The system's games and the variants list (the collection and all-games lists: SetFlow): . repeats the last
+        t on the highlighted row, and t or . with no row under the cursor says so."""
+        self.with_variants(self.RED, {"bucket": "psx/x.chd", "note": "PS1: x"})
+        self.card()
+        notes, done = [], []
+        tag_key = cardedit.tagui.tag_key
+
+        def spy(pressed, key, title):
+            done.append((pressed, key))
+            return tag_key(pressed, key, title)
+        with mock.patch.object(cardedit.tagui, "tag_key", spy), mock.patch.object(edit, "note", notes.append), \
+                mock.patch.object(cardedit.tagui, "repeat_last", return_value=True), \
+                mock.patch.object(cardedit.tagui, "edit_game_tags", return_value=True):
+            _, calls = self.run_system(lambda labels, kw: (".", labels.index("Ruby.zip")), returns(("t", None)),
+                                       lambda labels, kw: (cardedit.VARIANT_KEY, labels.index("Ruby.zip")),
+                                       returns((".", 1)), returns(("t", None)), returns(None),
+                                       lambda labels, kw: kw["session"]["sel"])
+        self.assertEqual(done, [(".", "gba/Ruby.zip"), ("t", None), (".", "psx/x.chd"), ("t", None)])
+        self.assertEqual(notes.count("ℹ️  No game under the cursor"), 2)
+        for kw in (calls[0][2], calls[3][2]):
+            self.assertIn(".", kw["hotkeys"])
+            self.assertIn(".", [k for k, _ in kw["key_help"]])
+
     def test_a_game_with_its_variant_on_the_card_is_marked_in_the_list(self):
         self.with_variants(self.RED)
         self.card(games={"gba": [g("gba/Zelda.zip")], "psx": [g("psx/x.chd")]}, excluded={"gba": ["gba/Ruby.zip"]})
@@ -1968,6 +1992,20 @@ class SetFlow(Flow):
             changed = cardedit.edit_set("c", game_set, (device, "esde"), to_fetch)
         return changed, script.calls
 
+    def test_dot_and_t_with_no_row_in_the_collection_and_all_games_lists(self):
+        self.card()
+        notes, done = [], []
+        with mock.patch.object(cardedit.tagui, "repeat_last", side_effect=lambda *a: done.append(a) or True), \
+                mock.patch.object(edit, "note", notes.append):
+            enter = lambda labels, kw: kw["session"]["sel"]  # noqa: E731
+            _, calls = self.run_set(returns((".", 1)), returns(("t", None)), enter)
+            _, all_calls = self.run_all(returns((".", 0)), enter)
+        self.assertEqual(done, [("gba/Ruby.zip", "Ruby"), ("gba/Emerald.zip", "Emerald")])  # each list's highlighted row
+        self.assertEqual(notes, ["ℹ️  No game under the cursor"])
+        for kw in (calls[0][2], all_calls[0][2]):
+            self.assertIn(".", kw["hotkeys"])
+            self.assertIn(".", [k for k, _ in kw["key_help"]])
+
     def test_lists_the_sets_games_from_every_system(self):
         self.card()
         _, calls = self.run_set(returns([False, False]))
@@ -2090,7 +2128,7 @@ class SetFlow(Flow):
         title, _labels, kw = script.calls[0]
         self.assertTrue(title.startswith(cardedit.themeart.collection_emoji(collection)))
         self.assertIn("💖 from a collection", title)
-        self.assertEqual(kw["hotkeys"], (cardedit.VARIANT_KEY, "t", "T", cardedit.SET_KEY, cardedit.CLEAR_KEY))
+        self.assertEqual(kw["hotkeys"], (cardedit.VARIANT_KEY, "t", ".", "T", cardedit.SET_KEY, cardedit.CLEAR_KEY))
         self.assertEqual(kw["hint"], tagui.games_hint(cardedit.COLLECTION_GAMES_HINT))
 
     def test_select_all(self):
@@ -2264,7 +2302,7 @@ class SetFlow(Flow):
         title, labels, kw = calls[0]
         self.assertEqual(labels, self.ALL_LABELS)
         self.assertEqual(title, "🌐 All games on c — ✅ synced, ⬜ not")
-        self.assertEqual(kw["hotkeys"], (cardedit.VARIANT_KEY, "t", "T", cardedit.SET_KEY, cardedit.CLEAR_KEY))
+        self.assertEqual(kw["hotkeys"], (cardedit.VARIANT_KEY, "t", ".", "T", cardedit.SET_KEY, cardedit.CLEAR_KEY))
         self.assertIs(kw["select_all"], False)
 
     def test_a_works_in_the_all_games_list_only_while_a_tag_filter_is_set(self):

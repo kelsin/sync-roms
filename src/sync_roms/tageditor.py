@@ -49,9 +49,9 @@ def add_games(tag_id, systems, keys_of, add):
         now = {g["bucket"]: g for g in listing["games"] if g.get("bucket")}
         gained = [k for k in now if k not in keys]
         lost = [k for k in keys if k not in now]
-        if gained or lost:
-            _save(tags.retag_games, tag_id, add=gained, remove=lost,
-                  files={k: now[k]["files"] for k in gained if now[k].get("files")})
+        if (gained or lost) and _save(tags.retag_games, tag_id, add=gained, remove=lost,
+                                      files={k: now[k]["files"] for k in gained if now[k].get("files")}) and gained:
+            tagui._used({tag_id})  # first in the t pickers, as a tag just put on games there is
 
 
 def rename(tag_id, tag):

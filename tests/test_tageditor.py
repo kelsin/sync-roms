@@ -204,6 +204,15 @@ class Editor(unittest.TestCase):
             self.run_editor(["Cave", ("A", None)])
         self.assertEqual(tags.record(loose[0]), {"tags": ["cave"], "files": loose[1:]})
 
+    def test_adding_games_to_a_tag_puts_it_first_among_the_recent_tags(self):
+        tagui.RECENT[:] = ["shmups"]
+
+        def add(listing, systems, shown, keys_of, label, **kw):
+            listing["games"].append({"system": "nes", "bucket": "nes/New.zip", "title": "New"})
+        with mock.patch.object(tageditor, "add_from_system", add):
+            self.run_editor(["Cave", ("A", None)])
+        self.assertEqual(tagui.RECENT, ["cave", "shmups"])
+
     def test_add_from_a_tag_tags_the_added_games(self):
         def add(listing, shown, keys_of, label, **kw):
             listing["games"].append({"system": "nes", "bucket": B, "files": ["nes/B (Disc 2).zip"]})
