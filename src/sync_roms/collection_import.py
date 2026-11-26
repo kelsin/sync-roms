@@ -36,11 +36,19 @@ def differences(mine, theirs):
 
 def merged(mine, theirs):
     """mine with the file's games it lacks appended; its name, description, art and notes kept."""
-    return {**mine, "games": [*mine["games"], *differences(mine, theirs)[0]]}
+    games = list(mine["games"])
+    have = {g["bucket"] for g in games}
+    for g in differences(mine, theirs)[0]:
+        if g["bucket"] not in have:
+            have.add(g["bucket"])
+            games.append(g)
+    return {**mine, "games": games}
 
 
 def _show(heading, games, short):
     if games:
+        games = sorted(games, key=lambda g: (short.get(g["system"], g["system"]),
+                                             store.sort_key(g.get("title") or os.path.basename(g["bucket"]))))
         print(f"{heading} ({len(games)}):")
         for g in games:
             print(f"  {short.get(g['system'], g['system'])}: {g.get('title') or os.path.basename(g['bucket'])}")
@@ -65,6 +73,7 @@ def run(paths, dry_run):
 
     def save(collection, done, would):
         if not dry_run:
+            store.backup(os.path.join(collections.collections_dir(), collection["id"] + ".json"))
             collections.save_collection(collection)
         existing[collection["id"]] = collection
         print(ui.yellow(f"🧪 Would {would}") if dry_run else ui.green(done))
@@ -100,12 +109,12 @@ def run(paths, dry_run):
             print(skipped)
             continue
         answer = ui.choose(f"{name} exists: merge, replace, rename or skip?", "mrns", "m")
-        if answer == "m":
+        if answer == "m" and not only_file:
+            print(ui.yellow(f"↩️  Nothing to add to {mine['name']}"))
+        elif answer == "m":
             save(merged(mine, theirs), f"🔀 Merged {len(only_file)} games into {mine['name']}",
                  f"merge {len(only_file)} games into {mine['name']}")
         elif answer == "r":
-            if not dry_run:
-                store.backup(os.path.join(collections.collections_dir(), cid + ".json"))
             save({"id": cid, **theirs}, f"💾 Replaced {name}", f"replace {name}")
         elif answer == "n" and (new := _new_name(existing)):
             save({**theirs, "id": store.slug(new), "name": new}, f"💾 Imported {new}", f"import {new}")

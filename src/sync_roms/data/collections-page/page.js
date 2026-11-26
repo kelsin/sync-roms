@@ -211,7 +211,7 @@
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      setTimeout(function () { URL.revokeObjectURL(url); }, 0);
     });
     button.addEventListener("keydown", function (event) { event.stopPropagation(); });
     return button;

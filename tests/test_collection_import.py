@@ -59,6 +59,12 @@ class MergeTest(unittest.TestCase):
         self.assertEqual(json.dumps([mine, theirs]), before)
 
 
+    def test_merged_appends_a_repeated_bucket_once(self):
+        mine = {"id": "m", "name": "M", "games": [RUBY]}
+        theirs = {"name": "T", "games": [FF7, {**FF7, "note": "again"}]}
+        self.assertEqual(collection_import.merged(mine, theirs)["games"], [RUBY, FF7])
+
+
 class ImportCmdTest(Cmd):
     def setUp(self):
         super().setUp()
@@ -90,6 +96,40 @@ class ImportCmdTest(Cmd):
         self.assertIn("Merged 1 games into Couch", out)
         self.assertEqual(self.read("collections/couch.json"),
                          {"name": "Couch", "description": "my desc", "games": [{**RUBY, "note": "keep"}, EMERALD, FF7]})
+
+    def test_unreadable_existing_file_backed_up_on_import(self):
+        os.makedirs(self.path("collections"))
+        write(self.path("collections/couch.json"), "{not json")
+        code, out, _ = self.run_cmd("collections", "import", self.file)
+        self.assertEqual(code, 0)
+        self.assertIn("Imported Couch", out)
+        with open(self.path("collections/couch.json.bak"), encoding="utf-8") as f:
+            self.assertEqual(f.read(), "{not json")
+
+    def test_merge_with_nothing_to_add_writes_nothing(self):
+        collections.save_collection({"id": "couch", "name": "Couch", "games": [RUBY, EMERALD, FF7]})
+        path = self.path("collections/couch.json")
+        def state():
+            with open(path, encoding="utf-8") as f:
+                return f.read(), os.stat(path).st_mtime_ns
+        before = state()
+        for extra in ((), ("--dry-run",)):
+            code, out, _ = self.run_cmd("collections", "import", self.file, "--yes", *extra)
+            self.assertEqual(code, 0)
+            self.assertIn("Nothing to add to Couch", out)
+            self.assertNotIn("Merged", out)
+            self.assertNotIn("Would merge", out)
+        self.assertEqual(state(), before)
+
+    def test_difference_lists_grouped_by_system(self):
+        write(self.file, {"name": "Couch", "games": [
+            {"title": "Zelda", "system": "snes", "bucket": "snes/Zelda.zip"}, FF7, EMERALD,
+            {"title": "Aladdin", "system": "snes", "bucket": "snes/Aladdin.zip"}, RUBY]})
+        collections.save_collection({"id": "couch", "name": "Couch", "games": []})
+        _, out, _ = self.run_cmd("collections", "import", self.file, "--yes", "--dry-run")
+        lines = [ln.strip() for ln in out.splitlines() if ln.startswith("  ")]
+        titles = [ln.split(": ", 1)[1] for ln in lines]
+        self.assertEqual(titles, ["Emerald", "Ruby", "FF7", "Aladdin", "Zelda"])
 
     def test_taken_replace_keeps_backup(self):
         self.mine()
