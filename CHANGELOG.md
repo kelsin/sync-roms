@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.8.0](https://github.com/kelsin/sync-roms/compare/v4.7.0...v4.8.0) (2026-11-26)
+
+
+### :video_game: Features
+
+* **art:** add art for 41 new collections ([#645](https://github.com/kelsin/sync-roms/issues/645)) ([ef62f57](https://github.com/kelsin/sync-roms/commit/ef62f572f9d300c033f4d08712d7ff825c6c7b79))
+* **theme:** redraw mario, puzzle, pokemon and mega man art ([#647](https://github.com/kelsin/sync-roms/issues/647)) ([94ebfd1](https://github.com/kelsin/sync-roms/commit/94ebfd16c85515f7d96c5df19321a0539a5869d3))
+
 ## [4.7.0](https://github.com/kelsin/sync-roms/compare/v4.6.0...v4.7.0) (2026-11-26)
 
 
