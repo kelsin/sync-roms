@@ -8,7 +8,6 @@ import time
 import unicodedata
 from concurrent.futures import ThreadPoolExecutor
 
-from botocore.config import Config
 from botocore.exceptions import BotoCoreError, ClientError, ProfileNotFound
 
 from . import runtime, ui
@@ -192,6 +191,7 @@ def s3_client(profile=None, connections=None):
     connections = connections or runtime.WORKERS * DOWNLOAD_PARTS
     if key not in _s3:
         import boto3  # slow to import, and a folder or a mirror never needs it
+        from botocore.config import Config
         try:
             session = boto3.Session(profile_name=profile)
         except ProfileNotFound:

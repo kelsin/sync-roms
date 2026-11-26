@@ -28,5 +28,14 @@ class StandaloneImportTest(unittest.TestCase):
         self.assertFalse(failed, "\n" + "\n".join(failed))
 
 
+class LazyBotoTest(unittest.TestCase):
+    def test_cli_import_leaves_boto_and_botocore_config_unloaded(self):
+        """Only a bucket client needs boto3 and botocore.config (about 34 ms): importing the CLI must not load them."""
+        code = "import sys, sync_roms.cli; print([m for m in ('boto3', 'botocore.config') if m in sys.modules])"
+        out = subprocess.run([sys.executable, "-c", code], env={**os.environ, "PYTHONPATH": SRC}, stdin=subprocess.DEVNULL,
+                             capture_output=True, text=True, check=True).stdout
+        self.assertEqual(out.strip(), "[]")
+
+
 if __name__ == "__main__":
     unittest.main()
