@@ -267,9 +267,6 @@ class Run(CardSetup):
         self.assertNotIn("spruce_os", self.entry())
 
 
-if __name__ == "__main__":
-    unittest.main()
-
 
 class Offer(CardSetup):
     def offer(self, dry_run=False, interactive=True, confirm=True):
@@ -328,3 +325,7 @@ class Offer(CardSetup):
         self.assertTrue(install.missing(self.card))
         os.makedirs(self.cp("Emu"))
         self.assertFalse(install.missing(self.card))
+
+
+if __name__ == "__main__":
+    unittest.main()
