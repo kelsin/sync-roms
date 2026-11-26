@@ -126,6 +126,11 @@ def device_defaults(systems=None):
             for dev, e in data["devices"].items()}
 
 
+def short_name(system):
+    """The short name editors and the collections page show for a system (its full name when it has none)."""
+    return system.get("short") or system["name"]
+
+
 def system_sort_key(system):
     """Sort key for system lists in the editors: company, then system name, case-insensitive."""
     return (system.get("company", "").lower(), system["name"].lower())

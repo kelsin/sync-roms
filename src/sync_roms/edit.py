@@ -136,7 +136,7 @@ def _toggle_games(title, rows, hotkeys, hint, place, filters, key_help, select_a
 
     initial = [lock or key in listed(s) for lock, (s, key, _, _) in zip(locked, rows)]
     variants, parents = tags.variant_index()
-    system_names = {s["bucket"]: s["name"] for s in store.repo_json("systems")}
+    system_names = {s["bucket"]: store.short_name(s) for s in store.repo_json("systems")}
     session = {"sel": list(initial)}
     picker.carry_place(place, [key for _, key, _, _ in rows], session)
     extras = [[languages.column(key), tag] for (_, key, _, _), tag in zip(rows, tagui.column([r[1] for r in rows]))]
