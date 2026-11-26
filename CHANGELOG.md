@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.11.0](https://github.com/kelsin/sync-roms/compare/v4.10.0...v4.11.0) (2026-11-26)
+
+
+### :video_game: Features
+
+* **collections:** export from the share page and import with sync-roms ([#664](https://github.com/kelsin/sync-roms/issues/664)) ([20bb4b9](https://github.com/kelsin/sync-roms/commit/20bb4b9115431edf587d88c719b7d2e171206c7c))
+* **collections:** game box art on the published collections site ([#663](https://github.com/kelsin/sync-roms/issues/663)) ([f59d341](https://github.com/kelsin/sync-roms/commit/f59d341b28ad1f2f944cf0b77f3da71df94f044b))
+
+
+### :gear: Continuous Integration
+
+* **release:** pass the tarball sha256 to bump-formula-pr and bump the tap on macOS ([#661](https://github.com/kelsin/sync-roms/issues/661)) ([9184658](https://github.com/kelsin/sync-roms/commit/9184658b1df98f7f1c58d0d7d214fc180bbe3cad))
+
 ## [4.10.0](https://github.com/kelsin/sync-roms/compare/v4.9.0...v4.10.0) (2026-11-26)
 
 
