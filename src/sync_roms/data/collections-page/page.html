@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ROM Collections</title>
+<link rel="stylesheet" href="page.css">
+</head>
+<body>
+<div class="wrap">
+  <header><h1>ROM Collections</h1></header>
+  <div class="bar">
+    <div class="controls">
+      <input id="search" type="search" placeholder="Search collections and games" aria-label="Search">
+      <select id="system" aria-label="System"></select>
+      <button id="clear" type="button">Clear</button>
+      <div class="tagbox">
+        <span class="chips" id="chips"></span>
+        <input id="tag-input" type="text" list="tag-options" placeholder="Filter by tag" aria-label="Filter by tag" autocomplete="off">
+        <datalist id="tag-options"></datalist>
+      </div>
+    </div>
+    <div class="count" id="count"></div>
+  </div>
+  <main class="list" id="grid"></main>
+  <p class="empty" id="empty" hidden></p>
+</div>
+<!-- The page's data, filled in by `sync-roms collections page`; empty in the repo. -->
+<script type="application/json" id="page-data">{}</script>
+<script src="page.js"></script>
+</body>
+</html>

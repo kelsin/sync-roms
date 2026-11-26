@@ -177,17 +177,37 @@ class Page(helpers.DataDir):
         self.assertEqual(collections_page.page_data()["systems"]["zzz"], "zzz")
 
 
-TEMPLATE = os.path.join(os.path.dirname(collections_page.__file__), "data", "collections-page.html")
 DATA_BLOCK = '<script type="application/json" id="page-data">{}</script>'
 
 
 class TemplateTest(unittest.TestCase):
     def setUp(self):
-        with open(TEMPLATE, encoding="utf-8") as f:
-            self.html = f.read()
+        self.files = collections_page.template_files()
+        self.html = "\n".join(self.files.values())
 
     def test_empty_data_block(self):
-        self.assertEqual(self.html.count(DATA_BLOCK), 1)
+        self.assertEqual(self.files["page.html"].count(DATA_BLOCK), 1)
+
+    def test_page_html_links_its_files(self):
+        html = self.files["page.html"]
+        self.assertIn('<link rel="stylesheet" href="page.css">', html)
+        self.assertIn('<script src="page.js"></script>', html)
+
+    def test_no_closing_script_in_js(self):
+        self.assertNotIn("</script>", self.files["page.js"])
+
+    def test_render_is_self_contained(self):
+        html = collections_page.render({"tags": {}, "systems": {}, "collections": []})
+        self.assertNotIn('href="page.css"', html)
+        self.assertNotIn('src="page.js"', html)
+        self.assertIn(self.files["page.css"].strip()[:40], html)
+        self.assertIn("<style>", html)
+
+    def test_back_link_and_copy_column_are_conditional(self):
+        js = self.files["page.js"]
+        self.assertIn("data.home", js)
+        self.assertIn("All users", js)
+        self.assertIn("hasPaths", js)
 
     def test_no_external_urls(self):
         self.assertNotIn("http://", self.html)
@@ -246,10 +266,10 @@ class CommandTest(helpers.Cmd):
     def test_script_tag_escaped(self):
         self.save("</script><b>")
         self.page()
-        with open(collections_page.DEFAULT_PATH(), encoding="utf-8") as f, \
-                open(collections_page.TEMPLATE, encoding="utf-8") as t:
-            html, template = f.read(), t.read()
-        self.assertEqual(html.count("</script>"), template.count("</script>"))
+        with open(collections_page.DEFAULT_PATH(), encoding="utf-8") as f:
+            html = f.read()
+        empty = collections_page.render({"tags": {}, "systems": {}, "collections": []})
+        self.assertEqual(html.count("</script>"), empty.count("</script>"))
         self.assertNotIn("<b>", html.split('id="page-data">')[1].split("</script>")[0])
 
     def test_dry_run_refused(self):

@@ -133,7 +133,8 @@ def page_data():
             "collections": out}
 
 
-TEMPLATE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "collections-page.html")
+TEMPLATE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "collections-page")
+TEMPLATE_FILES = ("page.html", "page.css", "page.js")
 
 
 def DEFAULT_PATH():
@@ -141,12 +142,28 @@ def DEFAULT_PATH():
     return os.path.join(store.data_dir(), "share", "collections", "index.html")
 
 
-def render():
-    """The page: the template with page_data() in its data block."""
-    with open(TEMPLATE, encoding="utf-8") as f:
-        html = f.read()
-    block = json.dumps(page_data()).replace("<", "\\u003c")
+def template_files():
+    """{"page.html", "page.css", "page.js": text}: the page's template files."""
+    files = {}
+    for name in TEMPLATE_FILES:
+        with open(os.path.join(TEMPLATE_DIR, name), encoding="utf-8") as f:
+            files[name] = f.read()
+    return files
+
+
+def fill(html, data):
+    """html with data (JSON, `<` escaped) in its empty page-data block."""
+    block = json.dumps(data).replace("<", "\\u003c")
     return html.replace('id="page-data">{}<', f'id="page-data">{block}<', 1)
+
+
+def render(data=None):
+    """The self-contained page: the template with its style and script inlined and data (default page_data()) in its data block."""
+    files = template_files()
+    html = files["page.html"]
+    html = html.replace('<link rel="stylesheet" href="page.css">', f"<style>\n{files['page.css']}</style>", 1)
+    html = html.replace('<script src="page.js"></script>', f"<script>\n{files['page.js']}</script>", 1)
+    return fill(html, page_data() if data is None else data)
 
 
 def write_page(path):

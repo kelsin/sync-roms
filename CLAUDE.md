@@ -91,7 +91,7 @@ Only one storage layout is supported; don't add support for others. Repo data an
 - `syncthing.json`: `note`, `cores` ({system id: libretro core}), `retroarch` ({retroarch.cfg key: value}), `esde_labels` ({core: ES-DE label}) and `spruce.settings` ({section: {key: value}} for `spruce-config.json`), the settings that let Syncthing sync saves between devices, and `spruce.folders` ({`saves`, `states`}: the folder names under `Saves/` that `spruce_syncthing` shares with the server).
 - `retroarch.json`: `note` and `settings` ({retroarch.cfg key: value}), the RetroArch preferences on every device whether or not Syncthing is on: save states in numbered slots (`savestate_auto_index`, `savestate_max_keep`) and netplay off the public lobby and relay on the default port. Spruce cards get them from sync and `config apply`, Android from `config apply`.
 - `hotkeys.json`: the hotkey scheme (spruceOS's defaults, quit on Start): `scheme` (action, button, RetroArch key), `android` (button to Android keycode) and `android_clear` (RetroArch hotkeys `config apply` unbinds on Android).
-- `collections-page.html`: the template of `collections page` (one self-contained page, no external URLs; its empty `page-data` block is filled from `collections_page.page_data()`).
+- `collections-page/` (`page.html`, `page.css`, `page.js`): the template of `collections page`, inlined by `collections_page.render` into one self-contained page (no external URLs; its empty `page-data` block is filled from `collections_page.page_data()`).
 - `cards.schema.json`, `games.schema.json`, `collections.schema.json`: JSON schemas.
 - `themes/fusion-pixel/`: the Fusion Pixel 12px font (proportional, Japanese variant, OFL) of the Pixel themes and the palette previews, with its licenses.
 
