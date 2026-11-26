@@ -658,6 +658,17 @@ class Flow(DataDir):
         with mock.patch.object(previews, "system", side_effect=lambda s: "art-" + s["bucket"]):
             self.assertEqual([kw["preview"](i) for i in range(3)], ["art-gb", "art-gba", None])
 
+    def test_collections_with_no_playable_games_are_hidden_unless_on_the_card(self):
+        found = [{"id": "gba", "name": "GBA", "games": [{"title": "Ruby", "system": "gba", "bucket": "gba/Ruby.zip"}]},
+                 {"id": "psx", "name": "PSX", "games": [{"title": "FF7", "system": "psx", "bucket": "psx/FF7.chd"}]},
+                 {"id": "kept", "name": "Kept", "games": []}]
+        self.card(collections=["kept"])
+        script = Script(returns(None))
+        with mock.patch.object(collections, "load_collections", lambda: found), \
+                mock.patch.object(picker, "filter_list", script), contextlib.redirect_stdout(io.StringIO()):
+            cardedit.pick_collections("c", {"gba"})
+        self.assertEqual(script.calls[0][2]["hidden"], [False, True, False])
+
     def test_collections_list_previews_each_collection_art(self):
         favs = {"id": "favs", "name": "Favs", "art": "surprise", "games": []}
         self.card(layout="spruce", spruce_theme="ToTK")

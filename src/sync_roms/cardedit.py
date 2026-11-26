@@ -645,7 +645,8 @@ def pick_collections(name, playable, card_status=None, setup=None):
     """Toggle the collections a card includes (Space/Tab, in place), saving each toggle at once; returns the
     collection Enter was pressed on (to open its games), or None. Each is shown with how many of its games are on
     systems in playable (system buckets the card syncs) and, with setup (device, layout), how many are on the card.
-    card_status(): the card's size status, worked out again after each toggle."""
+    card_status(): the card's size status, worked out again after each toggle. Collections with no playable games
+    are hidden until z, unless they're on the card."""
     found = colls.load_collections()
     if not found:
         edit.note(ui.yellow("ℹ️  No collections yet: make one in sync-roms collections edit "
@@ -693,6 +694,7 @@ def pick_collections(name, playable, card_status=None, setup=None):
         i = picker.filter_list(f"💖 Collections on {name} (Space toggles · Enter opens)", labels, extras=extras,
                            hotkeys=(" ", "\t", CLEAR_KEY), on_hotkey=on_hotkey, hint=tagui.menu_hint(COLLECTIONS_HINT),
                            filters=tagui.banner(), cursor=pos,
+                           hidden=[not games and c["id"] not in ids for c, games in zip(found, playable_games)],
                            key_help=[("Space/Tab", "put the collection on the card or take it off"),
                                      ("Enter", "show its games to pick them one by one"), tagui.KEYS_HELP[1]],
                            status=(lambda _state: shown["status"]) if card_status else None,
