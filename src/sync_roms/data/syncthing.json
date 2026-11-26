@@ -11,6 +11,7 @@
   "retroarch": {"autosave_interval": "10", "sort_savefiles_enable": "true", "sort_savestates_enable": "true",
                 "sort_savefiles_by_content_enable": "false", "sort_savestates_by_content_enable": "false",
                 "savefiles_in_content_dir": "false", "savestates_in_content_dir": "false"},
+  "folder": {"ignore_permissions": true, "max_conflicts": 0, "versioning": {"type": "simple", "keep": 5}},
   "spruce": {"settings": {"Emulator Settings": {"raAutoSave": "True", "raAutoLoad": "True", "keepSavesBetweenCores": "Always"},
                           "Network Settings": {"enableSyncthing": "True"}},
             "folders": {"saves": {"path": "Saves/saves", "label": "RetroArch saves"},

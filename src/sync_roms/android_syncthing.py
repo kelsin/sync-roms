@@ -52,6 +52,34 @@ def folder_paths(srv):
     return [(folder_id, label, PATHS[role]) for role, folder_id, label, _ in srv["folders"]]
 
 
+def _wanted_folder():
+    """The REST fields every shared folder gets (ignore permissions, no conflict files, simple versioning)."""
+    ignore, conflicts, kind, keep = spruce_syncthing.folder_settings()
+    return {"ignorePerms": ignore, "maxConflicts": conflicts,
+            "versioning": {"type": kind, "params": {"keep": str(keep)}, "cleanupIntervalS": 3600, "fsPath": "", "fsType": "basic"}}
+
+
+def _settings_entries(folder_id, found):
+    """Entries for the three folder settings, `found` being the folder's current config (None: not there yet)."""
+    wanted = _wanted_folder()
+    kind, keep = wanted["versioning"]["type"], wanted["versioning"]["params"]["keep"]
+    old = (found or {}).get("versioning") or {}
+    old_versioning = spruce_syncthing.versioning_text(old["type"], (old.get("params") or {}).get("keep")) if old.get("type") else None
+    return [applied.Entry(WHERE, f"folder {folder_id} ignorePerms", None if found is None else str(found.get("ignorePerms", False)).lower(),
+                          str(wanted["ignorePerms"]).lower(), False),
+            applied.Entry(WHERE, f"folder {folder_id} maxConflicts", None if found is None else str(found.get("maxConflicts")),
+                          str(wanted["maxConflicts"]), False),
+            applied.Entry(WHERE, f"folder {folder_id} versioning", old_versioning, spruce_syncthing.versioning_text(kind, keep), False)]
+
+
+def _settings_differ(found):
+    wanted = _wanted_folder()
+    old = found.get("versioning") or {}
+    return (found.get("ignorePerms") != wanted["ignorePerms"] or found.get("maxConflicts") != wanted["maxConflicts"]
+            or old.get("type") != wanted["versioning"]["type"]
+            or (old.get("params") or {}).get("keep") != wanted["versioning"]["params"]["keep"])
+
+
 def plan(config, srv, defaults_device, defaults_folder):
     """(entries, REST calls (method, path, body), warnings) to add the server and its folders to `config`."""
     server = srv["id"]
@@ -68,21 +96,23 @@ def plan(config, srv, defaults_device, defaults_folder):
         if found is not None:
             if found["path"].rstrip("/") != path:
                 warnings.append(f"Syncthing-Fork folder {folder_id} is at {found['path']}, not {path}; left as it is")
-            elif any(d["deviceID"].upper() == server for d in found.get("devices", [])):
-                entries.append(applied.Entry(WHERE, f"folder {folder_id}", want, want, False))
             else:
-                entries.append(applied.Entry(WHERE, f"folder {folder_id}", f"{path}, not shared with the server", want, False))
-                calls.append(("PUT", f"/rest/config/folders/{folder_id}",
-                              {**found, "devices": found.get("devices", []) + [{"deviceID": server}]}))
+                shared = any(d["deviceID"].upper() == server for d in found.get("devices", []))
+                entries.append(applied.Entry(WHERE, f"folder {folder_id}", want if shared else f"{path}, not shared with the server", want, False))
+                entries += _settings_entries(folder_id, found)
+                if not shared or _settings_differ(found):
+                    devices = found.get("devices", []) + ([] if shared else [{"deviceID": server}])
+                    calls.append(("PUT", f"/rest/config/folders/{folder_id}", {**found, **_wanted_folder(), "devices": devices}))
             continue
         other = next((f for f in folders if f["path"].rstrip("/") == path), None)
         if other is not None:
             warnings.append(f"Syncthing-Fork folder {other['id']} is already at {path}, so {folder_id} isn't added there; left as it is")
             continue
         entries.append(applied.Entry(WHERE, f"folder {folder_id}", None, want, False))
+        entries += _settings_entries(folder_id, None)
         calls.append(("PUT", f"/rest/config/folders/{folder_id}",
                       {**defaults_folder, "id": folder_id, "label": label, "path": path, "type": "sendreceive",
-                       "devices": [{"deviceID": server}]}))
+                       **_wanted_folder(), "devices": [{"deviceID": server}]}))
     return entries, calls, warnings
 
 
