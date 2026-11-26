@@ -1,5 +1,26 @@
 # Changelog
 
+## [4.10.0](https://github.com/kelsin/sync-roms/compare/v4.9.0...v4.10.0) (2026-11-26)
+
+
+### :video_game: Features
+
+* **cards:** hide collections with no playable games in the card editor ([#655](https://github.com/kelsin/sync-roms/issues/655)) ([980bee1](https://github.com/kelsin/sync-roms/commit/980bee11f2ca16051cb736f44eb34be3b0806826))
+* **cards:** show collections' playable size and off counts ([#656](https://github.com/kelsin/sync-roms/issues/656)) ([821224c](https://github.com/kelsin/sync-roms/commit/821224cf454140255e6c2c8425da3ca542ff8f58))
+* **collections:** publish the collections page to github pages ([#658](https://github.com/kelsin/sync-roms/issues/658)) ([4c7e136](https://github.com/kelsin/sync-roms/commit/4c7e13687d9f2cd32adaf63e8cec9230c91bd3c1))
+* **editor:** name, system and year columns with sortable game lists ([#659](https://github.com/kelsin/sync-roms/issues/659)) ([ffed1e9](https://github.com/kelsin/sync-roms/commit/ffed1e9e36e5974e6c3ee2d1df38eccab96a2ccb))
+* **sync:** offer to install spruceOS on a card without it ([#657](https://github.com/kelsin/sync-roms/issues/657)) ([2335f85](https://github.com/kelsin/sync-roms/commit/2335f85495fa52393e81cc28e2749b8a46b34fd3))
+
+
+### :zap: Performance Improvements
+
+* cut test suite time and cli import time ([#653](https://github.com/kelsin/sync-roms/issues/653)) ([b83d771](https://github.com/kelsin/sync-roms/commit/b83d77100b14f8f1d6d8d211a3ccfeb45308645e))
+
+
+### :book: Documentation
+
+* **guide:** fix spruceOS network time setting path ([#660](https://github.com/kelsin/sync-roms/issues/660)) ([d5d8043](https://github.com/kelsin/sync-roms/commit/d5d8043803c7297cf1702ff8ca310138152a5b2f))
+
 ## [4.9.0](https://github.com/kelsin/sync-roms/compare/v4.8.0...v4.9.0) (2026-11-26)
 
 
