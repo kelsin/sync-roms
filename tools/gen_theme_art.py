@@ -861,25 +861,27 @@ def light_gun(p):  # light gun
     p.c([(32, 38), (32, 47), (40, 53), (52, 50), (66, 54)])
 
 
-def mario(p):  # mushroom
-    cap = (spline([(-41, 4), (-39, -24), (-17, -45), (17, -45), (39, -24), (41, 4)])
-           + spline([(41, 4), (21, 10), (0, 11), (-21, 10), (-41, 4)])[1:])
-    p.path(cap, True)
-    p.c([(-18, 10), (-23, 32), (-13, 45), (13, 45), (23, 32), (18, 10)])
-    p.o(0, -22, 11.5)
-    with p.inside(cap):
-        p.o(-41, -8, 13)
-        p.o(41, -8, 13)
+def mario(p):  # question block
+    p.rr(-38, -38, 38, 38, 8)
+    for x in (-1, 1):
+        for y in (-1, 1):
+            p.o(31 * x, 31 * y, 2.2)
+            p.o(31 * x, 31 * y, 0.8)
+    hook = arc(0, -12, 10, 10, 170, 395)
+    p.path(hook + spline([hook[-1], (3, -1), (0, 3), (0, 8)])[1:])
+    p.o(0, 20, 2.2)
+    p.o(0, 20, 0.8)
 
 
-def mega_man(p):  # gear
-    pts = []
-    for i in range(8):
-        for d, r in ((-15, 31), (-9, 43), (9, 43), (15, 31)):
-            a = math.radians(i * 45 + d)
-            pts.append((r * math.cos(a), r * math.sin(a)))
-    p.pg(pts, 2)
-    p.o(0, 0, 14)
+def mega_man(p):  # the helmet
+    head = arc(0, 0, 40, 38, 0, 360)
+    p.path(head, True)
+    for x in (-1, 1):
+        p.o(40 * x, 12, 6, 10, opaque=True)
+    p.rr(-8, -47, 8, -31, 3, opaque=True)
+    p.rr(-8, -26, 8, -10, 3, opaque=True)
+    p.path(spline([(-29, 26.2), (-30, 10), (-22, -6), (-12, -3), (0, 14), (12, -3), (22, -6), (30, 10), (29, 26.2),
+                   (15, 35.1), (0, 38), (-15, 35.1)], closed=True), True, opaque=True)
 
 
 def metroid(p):  # ringed planet
@@ -919,26 +921,13 @@ def pinball(p):  # flippers, bumpers and a ball
     p.o(8, 4, 8.5)
 
 
-def pokemon(p):  # pikachu
-    p.pg([(52, -6), (34, 20), (40, 28), (16, 44), (49, 36), (43, 29), (65, 4)], 1.5)
-    p.o(-21, 19, 4.5, 7, 33, opaque=True)
-    p.o(21, 19, 4.5, 7, -33, opaque=True)
-    p.pg([(-17, 0), (17, 0), (24, 32), (18, 46), (-18, 46), (-24, 32)], 8, opaque=True)
-    ear = spline([(-20, -14), (-31, -32), (-36, -50)]) + spline([(-36, -50), (-24, -36), (-11, -22)])[1:]
-    for flip in (False, True):
-        side = mirror if flip else list
-        p.path(side(ear), True)
-        with p.inside(side(ear)):
-            p.l(side([(-36.3, -32.4), (-19.7, -43.5)]))
-        p.path(side(arc(-13, 47, 8, 3.5, 0, 354)), True, opaque=True)
-    p.path(spline([(0, -26), (14, -24), (24, -16), (27, -6), (21, 6), (0, 10), (-21, 6), (-27, -6), (-24, -16),
-                   (-14, -24)], closed=True), True, opaque=True)
-    for x in (-1, 1):
-        p.o(12 * x, -10, 2.2)
-        p.o(12 * x, -10, 0.8)
-        p.o(18 * x, -1, 4.5)
-    p.l([(-0.6, -5.5), (0.6, -5.5)])
-    p.c([(-5, -2.5), (-2.5, 0.5), (0, -2), (2.5, 0.5), (5, -2.5)])
+def pokemon(p):  # poke ball
+    ball = arc(0, 0, 40, 40, 0, 360)
+    p.path(ball, True)
+    with p.inside(ball):
+        p.l([(-48, 0), (48, 0)], 0)
+    p.o(0, 0, 12.5, opaque=True)
+    p.o(0, 0, 5.5)
 
 
 def pokemon_spin_offs(p):  # the snap camera, its lens a poke ball
@@ -2388,7 +2377,7 @@ ART = {
     "metroidvanias": (metroidvanias, (84, 76, 150), -6, 1.0, (0, 0)),
     "pinball": (pinball, (170, 70, 170), -6, 1.0, (-14, 0)),
     "platformers": (platformers, (68, 148, 220), -5, 1.0, (0, 0)),
-    "pokemon": (pokemon, (236, 180, 30), -4, 0.86, (-74, 0)),
+    "pokemon": (pokemon, (236, 180, 30), -4, 1.0, (-14, 0)),
     "resident-evil": (resident_evil, (140, 40, 44), 16, 1.0, (0, 0)),
     "retro-oddities": (retro_oddities, (176, 112, 52), -6, 1.0, (6, 0)),
     "rpg-series": (rpg_series, (132, 72, 148), -10, 1.0, (0, 0)),
