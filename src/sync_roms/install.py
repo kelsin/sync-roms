@@ -9,6 +9,7 @@ import tempfile
 
 from . import convert, downloads, external, flash, inventory, runtime, saves, spruce_os, store, ui
 
+CORE = ("spruce", "App", "Emu")  # spruceOS's root folders
 KEEP = frozenset({"roms", ".spotlight-v100", ".trashes", ".fseventsd", "system volume information"})
 
 
@@ -18,6 +19,11 @@ def _kept(name):
 
 def _mounted(path):
     return os.path.ismount(path)
+
+
+def missing(base):
+    """True when any of spruceOS's root folders isn't on the card."""
+    return not all(os.path.isdir(os.path.join(base, d)) for d in CORE)
 
 
 def plan(base):
@@ -96,6 +102,11 @@ def run(args):
         ui.fail(f"{base} isn't a mounted card: cards install only runs on an SD card's root", 2)
     if layout != "spruce":
         ui.fail(f"cards install supports only spruce cards; {name} is {layout}", 2)
+    return install_card(base, name, args.dry_run, args.yes)
+
+
+def install_card(base, name, dry_run, yes):
+    """Install storage's newest spruceOS onto the card at base: 0 done or declined, 1, 2 or 3 on a failure."""
     listing = inventory.files(runtime.SPRUCE_PREFIX)
     key = inventory.newest(listing, runtime.SPRUCE_PREFIX, spruce_os.PATTERN)
     if not key:
@@ -111,10 +122,10 @@ def run(args):
         print(ui.bold("Deleted:"))
         for path in deleted:
             print(f"  {os.path.relpath(path, base)}  {ui.dim(ui.human_size(sizes[path]))}")
-    if args.dry_run:
+    if dry_run:
         print(ui.yellow("🧪 Dry run: nothing downloaded, deleted or unpacked"))
         return 0
-    if not args.yes and not ui.has_terminal():
+    if not yes and not ui.has_terminal():
         ui.fail("Pass --yes to install without a terminal to confirm on", 2)
     if not external.find_tool("7z"):
         ui.fail("7z isn't installed, so spruceOS can't be unpacked; run `sync-roms install`", 3)
@@ -142,7 +153,7 @@ def run(args):
             ui.failure(ui.red(f"❌ not enough room on {name}: spruceOS needs {ui.human_size(total + spruce_os.MARGIN)}, "
                               f"the card would have {ui.human_size(free)} free"))
             return 1
-        if not args.yes and not ui.confirm(f"Delete {len(deleted)} items from {base} and install spruceOS {release}?"):
+        if not yes and not ui.confirm(f"Delete {len(deleted)} items from {base} and install spruceOS {release}?"):
             print(ui.yellow("↩️  Kept everything as it was"))
             return 0
         if deleted:
@@ -173,3 +184,19 @@ def run(args):
         return 3
     print(ui.green(f"✅ spruceOS {release} installed on {name}") + ui.dim("  (run a sync to fill in the rest)"))
     return 0
+
+
+def offer(base, name, dry_run, interactive):
+    """Offer to install spruceOS on a card that lacks it: 0 when nothing was offered, declined or installed, else the
+    install's failure code."""
+    if not _mounted(base) or not missing(base):
+        return 0
+    print(ui.bold(f"🌲 spruceOS isn't on {name}"))
+    if dry_run:
+        print(ui.yellow("🧪 Would offer to install spruceOS first"))
+        return 0
+    hint = ui.dim(f"  run `sync-roms cards install {name}` to install it")
+    if not interactive or not ui.confirm("Install spruceOS on it now? (a clean install: everything but Roms/ is deleted)"):
+        print(hint)
+        return 0
+    return install_card(base, name, False, False)

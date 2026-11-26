@@ -1161,6 +1161,36 @@ class SyncSmokeTest(DataDir):
                 if not dry_run:
                     self.assertIn("Surprise-v0.1.0.zip", self.out.getvalue())
 
+    def offer_patches(self, layout, offer):
+        layouts = {layout: {"label": layout, "roms_dir": "Roms", "bios_dir": "BIOS"}}
+        manifest = {**MANIFEST, "layouts": layouts, "systems": [{**SYSTEM, "folders": {layout: "GBA"}}]}
+        return ((store, {"load_manifest": lambda names=(), m=manifest: m}),
+                (cli.picker, {"saved_setup": lambda *a: (None, layout)}),
+                (cli.install, {"offer": offer}),
+                (cli.downloads, {"run_downloads": mock.Mock(return_value=0)}))
+
+    def test_spruce_sync_offers_install(self):
+        for dry_run in (False, True):
+            with self.subTest(dry_run=dry_run):
+                offer = mock.Mock(return_value=0)
+                found = []
+                self.assertEqual(self.run_sync(dry_run, patches=self.offer_patches("spruce", offer),
+                                               after=lambda card: found.append(os.path.basename(card))), 0)
+                offer.assert_called_once()
+                self.assertEqual(offer.call_args.args[1:], (found[0], dry_run, False))
+
+    def test_spruce_sync_stops_when_install_fails(self):
+        patches = self.offer_patches("spruce", mock.Mock(return_value=3))
+        self.assertEqual(self.run_sync(False, patches=patches), 3)
+        patches[3][1]["run_downloads"].assert_not_called()
+
+    def test_guest_and_other_layouts_get_no_offer(self):
+        for layout, args in (("esde", ()), ("spruce", ("--guest",))):
+            with self.subTest(layout=layout, args=args):
+                offer = mock.Mock(return_value=0)
+                self.run_sync(False, patches=self.offer_patches(layout, offer), args=args)
+                offer.assert_not_called()
+
     def test_spruce_sync_stages_spruceos(self):
         layouts = {"spruce": {"label": "Spruce", "roms_dir": "Roms", "bios_dir": "BIOS"}}
         files = inventory.files

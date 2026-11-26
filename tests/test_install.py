@@ -108,7 +108,7 @@ class ExitCodes(helpers.CardDir):
         self.assertEqual(self.unpack_with(2)[0], "WARNING: attributes")
 
 
-class Run(helpers.CardDir):
+class CardSetup(helpers.CardDir):
     def setUp(self):
         super().setUp()
         store.update_card("card", device="full", layout="spruce", boot_logos=["a.png"],
@@ -131,6 +131,8 @@ class Run(helpers.CardDir):
             return self.tmpdir
         self.enterContext(mock.patch.object(install.tempfile, "mkdtemp", side_effect=mkdtemp))
 
+
+class Run(CardSetup):
     def run_cmd(self, dry_run=False, yes=True, terminal=False):
         args = argparse.Namespace(card=self.card, dry_run=dry_run, yes=yes)
         self.out, self.err = io.StringIO(), io.StringIO()
@@ -263,6 +265,66 @@ class Run(helpers.CardDir):
         self.assertIn("busy", self.err.getvalue())
         self.unpack.assert_not_called()
         self.assertNotIn("spruce_os", self.entry())
+
+
+
+class Offer(CardSetup):
+    def offer(self, dry_run=False, interactive=True, confirm=True):
+        self.out, self.err = io.StringIO(), io.StringIO()
+        with mock.patch.object(install.ui, "confirm", return_value=confirm) as self.confirm, \
+                mock.patch.object(install.ui, "has_terminal", return_value=True), \
+                contextlib.redirect_stdout(self.out), contextlib.redirect_stderr(self.err):
+            return install.offer(self.card, "card", dry_run, interactive)
+
+    def make_core(self):
+        for d in install.CORE:
+            os.makedirs(self.cp(d), exist_ok=True)
+
+    def test_offer_nothing_when_spruce_folders_exist(self):
+        self.make_core()
+        self.assertEqual(self.offer(), 0)
+        self.confirm.assert_not_called()
+        self.assertEqual(self.out.getvalue(), "")
+
+    def test_offer_nothing_when_not_mounted(self):
+        self.mounted.return_value = False
+        self.assertEqual(self.offer(), 0)
+        self.confirm.assert_not_called()
+        self.assertEqual(self.out.getvalue(), "")
+
+    def test_offer_dry_run_only_says_so(self):
+        self.assertEqual(self.offer(dry_run=True), 0)
+        self.assertIn("Would offer to install spruceOS", self.out.getvalue())
+        self.confirm.assert_not_called()
+        self.downloads.assert_not_called()
+
+    def test_offer_without_terminal_hints(self):
+        self.assertEqual(self.offer(interactive=False), 0)
+        self.assertIn("cards install card", self.out.getvalue())
+        self.confirm.assert_not_called()
+        self.downloads.assert_not_called()
+
+    def test_offer_declined_hints(self):
+        self.assertEqual(self.offer(confirm=False), 0)
+        self.assertIn("cards install card", self.out.getvalue())
+        self.downloads.assert_not_called()
+
+    def test_offer_accepted_installs(self):
+        self.assertEqual(self.offer(), 0)
+        self.assertEqual(self.confirm.call_count, 2)
+        self.unpack.assert_called_once()
+        self.assertEqual(store.load_cards()["card"]["spruce_os"], V46)
+
+    def test_offer_returns_install_failure(self):
+        self.unpack.return_value = "boom"
+        self.assertEqual(self.offer(), 3)
+
+    def test_missing_checks_each_core_folder(self):
+        for d in ("spruce", "App"):
+            os.makedirs(self.cp(d), exist_ok=True)
+        self.assertTrue(install.missing(self.card))
+        os.makedirs(self.cp("Emu"))
+        self.assertFalse(install.missing(self.card))
 
 
 if __name__ == "__main__":

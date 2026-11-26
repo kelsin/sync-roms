@@ -10,7 +10,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError
 
-from . import __version__, bezels, budget, cardedit, cardfs, clean, commands, downloads, drivers, frontend, inventory, m3u, mirroring, picker, runtime, s3, scrape_plan, store
+from . import __version__, bezels, budget, cardedit, cardfs, clean, commands, downloads, drivers, frontend, install, inventory, m3u, mirroring, picker, runtime, s3, scrape_plan, store
 from . import knulli_conf, muos_collections, nextui_folders, onion_surprise, pico8, portmaster, raofflineproxy, rocknix_collections, saves, spruce_collections, spruce_bootlogo, spruce_emu, spruce_os, spruce_fixes, spruce_hotkeys, spruce_retroarch, spruce_settings, spruce_splore, spruce_syncthing, spruce_themes, spruce_wifi, splore, surprise, themeart, ui, usersettings, vita
 from . import collections as colls
 from . import guest as guests
@@ -1102,6 +1102,11 @@ def sync_card(args):
     # a friend's card: only ROMs, BIOS and scrapes are copied, and only the ROMs deselected this session are deleted.
     # Stays a guest sync for this run even when the card editor turns the flag off
     guest = args.guest or guests.is_guest(store.saved_card(card))
+    interactive = not (ui.ASSUME_YES or args.json) and ui.has_terminal()
+    if layout_name == "spruce" and not guest:  # a card without spruceOS is offered the install first
+        code = install.offer(base, card, args.dry_run, interactive)
+        if code:
+            return code
     layout = layouts[layout_name]
     disc_dir = layout.get("disc_dir")  # multi-disc games' discs go in this hidden folder, their playlist beside it (Onion)
     disc_folders = layout.get("disc_folders")  # each disc game goes in a folder of its own (NextUI)
@@ -1213,7 +1218,6 @@ def sync_card(args):
         return {k for k in keys if downloads.name_key(downloads.rom_rel(k, disc_dir, disc_keys, folders)) in names}
 
     relist()
-    interactive = not (ui.ASSUME_YES or args.json) and ui.has_terminal()
     def reload_changes(stale=()):
         """Pick up the card's games as saved now: refresh the mirror and the listings for the systems that changed.
         stale: system ids whose storage folder changed this run, refreshed too."""
