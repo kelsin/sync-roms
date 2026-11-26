@@ -30,7 +30,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "edit": ("", "interactive editor: cards, tags, collections, device systems"),
     "games": ("list|add|remove|full|export|import", "edit a card's games, interactively or from scripts"),
     "tags": ("edit|suggest", "edit the tags in storage by hand (games, names, emoji, merging, deleting), or add tags from scraped genres"),
-    "collections": ("edit|page|publish|retitle|share|unshare", "edit your collections of favourite games (saved in ~/.sync-roms/collections/), write a shareable HTML page of them, publish it to sync-roms.games, set their titles to the scraped names, or share the page on your tailnet"),
+    "collections": ("edit|import|page|publish|retitle|share|unshare", "edit your collections of favourite games (saved in ~/.sync-roms/collections/), import ones exported from a share page, write a shareable HTML page of them, publish it to sync-roms.games, set their titles to the scraped names, or share the page on your tailnet"),
     "themes": ("update|pick|build|publish|palettes", "copy the latest Art Book Next for ES-DE and the PyUI themes for spruce from GitHub into storage; build and publish custom spruce themes"),
     "download": ("pico8", "add the PICO-8 BBS Featured carts storage doesn't have, and newer revisions of those it has"),
     "ports": ("search|download|done|needed", "put PortMaster ports and the runtimes they need in storage, from PortMaster's catalogue"),
@@ -153,6 +153,8 @@ TOPICS = {
 """,
     "collections": """
   sync-roms collections edit                  edit your collections of favourite games
+  sync-roms collections import FILE... [--dry-run] [--yes]
+                                              add collections exported from a share page
   sync-roms collections page [--out FILE]     write an HTML page of your collections and open it
   sync-roms collections publish [--user NAME] [--dry-run]
                                               publish that page to https://sync-roms.games/
@@ -169,7 +171,16 @@ TOPICS = {
 
   collections page writes one self-contained HTML page (your games, tags and collection pictures, no
   network needed) to ~/.sync-roms/share/collections/index.html, or to FILE, and opens it. It holds
-  your game lists and storage paths, so share it only if you're fine with that.
+  your game lists and storage paths, so share it only if you're fine with that. Its Export button
+  downloads a collection as <id>.json.
+
+  collections import adds such files to your collections, under the id of the collection's name
+  (never the file name). When that id is taken it lists the games only in the file and only in
+  yours, then asks: merge (the default, and what --yes does: your collection gets the file's games
+  it lacks, keeping your name, description, art and notes), replace (the old file is kept as
+  <id>.json.bak), rename (asks for a new name) or skip. Without a terminal and without --yes a
+  taken id is skipped. --dry-run says what each file would do and writes nothing. Exits 2 when no
+  file could be read.
 
   collections retitle rewrites the title saved with each game to its scraped name (else its file
   name) and only touches collections where one changed; --dry-run lists the changes and writes

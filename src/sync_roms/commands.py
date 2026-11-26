@@ -12,7 +12,7 @@ import sys
 import webbrowser
 
 from . import collections as colls
-from . import bezels, budget, cardedit, cardshare, collection_retitle, collectionedit, collections_page, external, guest, inventory, knulli_conf, m3u, names, pages_site, picker, runtime, s3, shared, spruce_settings, store, surprise, tageditor, tags, tailshare, tagsuggest, themeart, ui, usersettings
+from . import bezels, budget, cardedit, cardshare, collection_import, collection_retitle, collectionedit, collections_page, external, guest, inventory, knulli_conf, m3u, names, pages_site, picker, runtime, s3, shared, spruce_settings, store, surprise, tageditor, tags, tailshare, tagsuggest, themeart, ui, usersettings
 
 
 UNKNOWN_SHOWN = 8  # device ids named in an "unknown device" error
@@ -1382,6 +1382,10 @@ def collections_edit(args):
     return collectionedit.edit_collections()
 
 
+def collections_import_cmd(args):
+    return collection_import.run(args.files, args.dry_run)
+
+
 def collections_page_cmd(args):
     path = os.path.abspath(os.path.expanduser(args.out)) if args.out else collections_page.DEFAULT_PATH()
     collections_page.write_page(path)
@@ -1835,6 +1839,8 @@ def build_parser():
     colsub = collections.add_subparsers(dest="action", required=True)
     p = colsub.add_parser("edit", allow_abbrev=False)
     p.set_defaults(fn=collections_edit)
+    p = colsub.add_parser("import", allow_abbrev=False); common(p, card=False); p.add_argument("files", nargs="+", metavar="FILE")
+    p.set_defaults(fn=collections_import_cmd)
     p = colsub.add_parser("page", allow_abbrev=False); common(p, card=False); p.add_argument("--out", metavar="FILE")
     p.set_defaults(fn=collections_page_cmd)
     p = colsub.add_parser("publish", allow_abbrev=False); common(p, card=False); p.add_argument("--user", metavar="NAME")
