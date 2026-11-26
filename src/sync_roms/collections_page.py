@@ -3,6 +3,7 @@ import base64
 import io
 import json
 import os
+import shutil
 
 from . import collections, inventory, languages, metafilter, names, s3, scrape_plan, store, tags, themeart, ui
 
@@ -11,8 +12,8 @@ BAND_WIDTH = 150
 BAND_CROP = (50, 600, 343, 1050)  # the band's plain colour around the drawing in y 600..1050
 
 
-def webp_uri(path, width=None, crop=None):
-    """A `data:` URI of the picture as WebP, cropped to crop when given, then shrunk to width (never enlarged) when given; None when path is missing."""
+def webp_bytes(path, width=None, crop=None):
+    """The picture as WebP bytes, cropped to crop when given, then shrunk to width (never enlarged) when given; None when path is missing."""
     from PIL import Image
     if not os.path.exists(path):
         return None
@@ -24,17 +25,37 @@ def webp_uri(path, width=None, crop=None):
             image = image.resize((width, max(1, round(image.height * width / image.width))), Image.LANCZOS)
         out = io.BytesIO()
         image.save(out, "WEBP", quality=QUALITY)
-    return "data:image/webp;base64," + base64.b64encode(out.getvalue()).decode("ascii")
+    return out.getvalue()
 
 
-def _art(art_id):
-    """The collection's pictures by kind; a kind with no file is left out."""
+def webp_uri(path, width=None, crop=None):
+    """A `data:` URI of the picture as WebP (see webp_bytes); None when path is missing."""
+    data = webp_bytes(path, width, crop)
+    return None if data is None else "data:image/webp;base64," + base64.b64encode(data).decode("ascii")
+
+
+def _art(art_id, art_dir=None):
+    """The collection's pictures by kind; a kind with no file is left out. Each is a `data:` URI, or with art_dir a
+    file `<art_id>-<kind>.webp` written there and named `art/<art_id>-<kind>.webp`."""
     band = themeart.art_png(art_id)
     box = themeart.art_png(art_id, "art-box/Imgs_med")
-    found = {"band": webp_uri(band, BAND_WIDTH, BAND_CROP) if band else None,
-             "box": webp_uri(box) if box else None,
-             "totk": webp_uri(os.path.join(themeart.ZELDA_ART, "Imgs_med", f"{art_id}.png"))}
-    return {kind: uri for kind, uri in found.items() if uri}
+    found = {"band": (band, BAND_WIDTH, BAND_CROP) if band else None,
+             "box": (box, None, None) if box else None,
+             "totk": (os.path.join(themeart.ZELDA_ART, "Imgs_med", f"{art_id}.png"), None, None)}
+    out = {}
+    for kind, spec in found.items():
+        data = webp_bytes(*spec) if spec else None
+        if data is None:
+            continue
+        if art_dir is None:
+            out[kind] = "data:image/webp;base64," + base64.b64encode(data).decode("ascii")
+        else:
+            name = f"{art_id}-{kind}.webp"
+            os.makedirs(art_dir, exist_ok=True)
+            with open(os.path.join(art_dir, name), "wb") as f:
+                f.write(data)
+            out[kind] = f"art/{name}"
+    return out
 
 
 def _tag_definitions():
@@ -94,8 +115,9 @@ def _game_size(paths, listed):
     return {"rom": sum(roms[p] for p in found), "art": sum(art.get(os.path.splitext(p)[0], 0) for p in found)}
 
 
-def page_data():
-    """{"tags", "systems", "collections"} for the page, collections in load_collections() order."""
+def page_data(public=False, art_dir=None):
+    """{"tags", "systems", "collections"} for the page, collections in load_collections() order. public leaves the
+    games' storage paths out; art_dir writes the pictures there as files (see _art) instead of embedding them."""
     defined = _tag_definitions()
     system_names = {s["bucket"]: store.short_name(s) for s in store.repo_json("systems")}
     loaded = collections.load_collections()
@@ -112,8 +134,10 @@ def page_data():
             title = game.get("title")
             paths = [bucket, *game.get("files", ())]
             entry = {"title": names.scraped_name(metadata, bucket) or (title if isinstance(title, str) and title else names.title(bucket)),
-                     "system": system, "paths": paths,
+                     "system": system,
                      "tags": [t for t in tags.tags_of(bucket) if t in defined] if defined else []}
+            if not public:
+                entry["paths"] = paths
             if languages.translated(bucket):
                 entry["flag"] = languages.flag(bucket)
             size = _game_size(paths, sizes.get(system))
@@ -126,7 +150,7 @@ def page_data():
         games.sort(key=lambda g: store.sort_key(g["title"]))
         art_id = collection.get("art") or collection["id"]
         out.append({"id": collection["id"], "name": collection["name"], "description": collection["description"],
-                    "art": _art(art_id), "size": {k: sum(g.get("size", {}).get(k, 0) for g in games) for k in ("rom", "art")},
+                    "art": _art(art_id, art_dir), "size": {k: sum(g.get("size", {}).get(k, 0) for g in games) for k in ("rom", "art")},
                     "games": games})
     return {"tags": {i: {"name": t["name"], "emoji": t["emoji"]} for i, t in defined.items()},
             "systems": {s: system_names.get(s, s) for s in sorted(used)},
@@ -185,3 +209,16 @@ def update_page(path):
     os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
     store.write_text(path, html)
     return True
+
+
+def write_public(out_dir, home="/"):
+    """Build the public page in out_dir, emptied first: index.html (the template's page with its data, no game paths
+    and a link to home), page.css, page.js and art/*.webp."""
+    shutil.rmtree(out_dir, ignore_errors=True)
+    os.makedirs(out_dir)
+    files = template_files()
+    data = page_data(public=True, art_dir=os.path.join(out_dir, "art"))
+    data["home"] = home
+    store.write_text(os.path.join(out_dir, "index.html"), fill(files["page.html"], data))
+    for name in ("page.css", "page.js"):
+        store.write_text(os.path.join(out_dir, name), files[name])

@@ -1,5 +1,6 @@
 import base64
 import io
+import json
 import os
 import pathlib
 import sys
@@ -175,6 +176,58 @@ class Page(helpers.DataDir):
     def test_unknown_system_name_falls_back(self):
         self.save(games=[{"system": "zzz", "bucket": "zzz/x.zip", "title": "X"}])
         self.assertEqual(collections_page.page_data()["systems"]["zzz"], "zzz")
+
+
+def page_json(path):
+    """The parsed page-data block of a written page."""
+    with open(path, encoding="utf-8") as f:
+        html = f.read()
+    return json.loads(html.split('id="page-data">', 1)[1].split("</script>", 1)[0])
+
+
+class Public(Page):
+    def test_public_data_has_no_paths_and_a_home(self):
+        self.save(games=[{"system": "snes", "bucket": SMW, "title": "x"}])
+        out = self.enterContext(tempfile.TemporaryDirectory())
+        collections_page.write_public(out, home="/")
+        data = page_json(os.path.join(out, "index.html"))
+        self.assertEqual(data["home"], "/")
+        self.assertNotIn("paths", data["collections"][0]["games"][0])
+        with open(os.path.join(out, "index.html"), encoding="utf-8") as f:
+            self.assertNotIn("Super Mario World (USA).zip", f.read())
+
+    def test_public_writes_separate_files(self):
+        self.save(art="mario")
+        out = self.enterContext(tempfile.TemporaryDirectory())
+        collections_page.write_public(out)
+        self.assertEqual(sorted(f for f in os.listdir(out) if os.path.isfile(os.path.join(out, f))),
+                         ["index.html", "page.css", "page.js"])
+        art = page_json(os.path.join(out, "index.html"))["collections"][0]["art"]
+        self.assertEqual(art["band"], "art/mario-band.webp")
+        self.assertTrue(os.path.isfile(os.path.join(out, "art", "mario-band.webp")))
+        with open(os.path.join(out, "index.html"), encoding="utf-8") as f:
+            self.assertNotIn("data:image", f.read())
+
+    def test_public_shared_art_written_once(self):
+        self.save(art="mario")
+        collections.save_collection({"id": "other", "name": "Other", "description": "d", "games": [], "art": "mario"})
+        out = self.enterContext(tempfile.TemporaryDirectory())
+        collections_page.write_public(out)
+        arts = [c["art"] for c in page_json(os.path.join(out, "index.html"))["collections"]]
+        self.assertEqual(arts[0], arts[1])
+
+    def test_public_removes_stale_files(self):
+        out = self.enterContext(tempfile.TemporaryDirectory())
+        os.makedirs(os.path.join(out, "art"))
+        open(os.path.join(out, "art", "gone-band.webp"), "wb").close()
+        collections_page.write_public(out)
+        self.assertFalse(os.path.exists(os.path.join(out, "art", "gone-band.webp")))
+
+    def test_local_data_unchanged(self):
+        self.save(games=[{"system": "snes", "bucket": SMW, "title": "x"}])
+        data = collections_page.page_data()
+        self.assertNotIn("home", data)
+        self.assertEqual(data["collections"][0]["games"][0]["paths"], [SMW])
 
 
 DATA_BLOCK = '<script type="application/json" id="page-data">{}</script>'

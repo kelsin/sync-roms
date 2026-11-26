@@ -376,7 +376,7 @@
     if (!rows.length) {
       var none = el("tr", "nomatch");
       var cell = el("td", "", "No games match the filters");
-      cell.colSpan = 6;
+      cell.colSpan = hasPaths ? 6 : 5;
       none.appendChild(cell);
       entry.tbody.appendChild(none);
     }
