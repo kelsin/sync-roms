@@ -102,13 +102,14 @@ main { max-width: 1140px; margin: 0 auto; padding: 24px 16px 80px; }
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-bottom: 28px;
+  flex: 1 1 100%;
+  margin: 0;
 }
 .chip {
   background: var(--chip);
   border-radius: 999px;
-  padding: 3px 12px;
-  font-size: .82rem;
+  padding: 1px 12px;
+  font-size: .8rem;
   color: var(--muted);
 }
 .chip b { color: var(--ink); font-weight: 600; }
@@ -289,11 +290,11 @@ code.copy.copied::after { content: "✓ copied"; color: var(--accent); }
       <label class="pick">Device <select id="device"></select></label>
       <label class="pick">Layout <select id="layout"></select></label>
     </div>
+    <div class="device" id="facts"></div>
   </div>
 </header>
 
 <main>
-  <div class="device" id="facts"></div>
   <div class="layout">
     <nav class="toc" id="toc" aria-label="Sections"></nav>
     <div id="steps"></div>
