@@ -4,10 +4,13 @@ from .listedit import add_from_system, add_from_tag, folder_lister, view
 
 
 SORT_KEY = "o"
-ADD_KEY = "+"  # in a tag's games: add games to it, the / search carried into the games list
-QUIT_KEY = "Q"  # in a tag's menu, its games and its add lists: leave the editor, what was toggled saved
+ADD_KEY, ADD_ALIAS, SETTINGS_KEY = "A", "+", "S"  # in a tag's games, as in the collection editor; + is a silent alias of A
+CLEAR_KEY = "x"  # in a tag's settings: clear its description
+QUIT_KEY = "Q"  # in a tag's games, its settings and its add lists: leave the editor, what was toggled saved
 QUIT_HINT = "Q quit the editor"
 ADD_HINT = f"{edit.GAMES_HINT} · {QUIT_HINT}"  # the hint of the tag's add lists
+GAMES_HINT = f"{edit.GAMES_HINT} · A add games · S settings · {QUIT_HINT}"  # the tag's own games
+GAMES_HELP = [(f"{ADD_KEY} / {ADD_ALIAS}", "add games"), (SETTINGS_KEY, "settings"), (QUIT_KEY, "quit the editor")]
 
 
 class Quit(Exception):
@@ -34,40 +37,6 @@ def _save(write, *args, **kwargs):
 
 
 # --- One tag -----------------------------------------------------------------------------------------
-
-def switch_games_off(tag_id, label, system_names, add=None):
-    """The tag's games as a list to toggle: the ones unchecked lose the tag (saved even after Ctrl-C). With add, `+`
-    saves that, calls add(the list's / search) and lists the tag's games again on the first one it added, even when
-    the tag has none yet. Q (also when add returns it) raises Quit once that is saved."""
-    place = {}
-    while True:
-        keys = _games_of(tag_id)
-        if not keys and not add:
-            edit.note(ui.yellow("ℹ️  No game has this tag yet."))
-            return
-        entry = {"bucket": "", "games": [{"bucket": k} for k in keys]}
-        rows = sorted(((entry, k, names.title(k), f"{system_names.get(k.partition('/')[0], k.partition('/')[0])} — {names.title(k)}")
-                       for k in keys), key=lambda r: (store.sort_key(r[2]), r[1]))
-        if place.get("added"):
-            at = next(i for i, r in enumerate(rows) if r[1] in place["added"])
-            place = {"keys": [r[1] for r in rows], "session": {"row": at}}
-        try:
-            pressed = edit.toggle_games(
-                f"✏️  {label} — ✅ has the tag, ⬜ remove it", rows, hotkeys=(ADD_KEY, QUIT_KEY) if add else (QUIT_KEY,),
-                hint=f"{edit.GAMES_HINT} · " + ("+ add games · " if add else "") + QUIT_HINT, place=place, notes=False,
-                tag_filter=False)
-        finally:
-            gone = set(keys) - {g["bucket"] for g in entry["games"]}
-            if gone:
-                _save(tags.retag_games, tag_id, remove=gone)
-        if pressed == QUIT_KEY:
-            raise Quit
-        if pressed != ADD_KEY:
-            return
-        if add(place.get("session", {}).get("query", "")) == QUIT_KEY:
-            raise Quit
-        place["added"] = set(_games_of(tag_id)) - set(keys)
-
 
 def add_games(tag_id, systems, keys_of, add):
     """add(listing, shown) lets the user toggle games into a listing of the tag's games (shown is a view of it); the
@@ -140,49 +109,104 @@ def delete(tag_id, tag):
     return False
 
 
+def header(tag):
+    """The tag's games list's title: emoji, name and description."""
+    return f"{_label(tag)}{' — ' + tag['description'] if tag.get('description') else ''}"
+
+
+def settings_menu(tag_id, systems, keys_of):
+    """The tag's name, emoji and description, adding the games of another tag, merging and deleting; Esc returns, x
+    clears the description, Q raises Quit. Returns whether the tag is gone (merged or deleted)."""
+    cursor = 0
+    while True:
+        tag = tags.all_tags().get(tag_id)
+        if tag is None:
+            return True
+        rows = [f"Name: {tag['name']}", f"Emoji: {tag['emoji']}", f"Description: {tag.get('description') or 'none'}",
+                "Add games with another tag", "Merge into another tag", "Delete this tag"]
+        i = picker.filter_list(f"{header(tag)}: settings (Esc = back)", rows, cursor=cursor, hotkeys=(CLEAR_KEY, QUIT_KEY),
+                               hint=f"Enter edit · x clear description · {QUIT_HINT} · Esc back",
+                               key_help=[("Enter", "edit the row"), (CLEAR_KEY, "clear the description"),
+                                         (QUIT_KEY, "quit the editor"), ("Esc", "back")])
+        if i is None:
+            return False
+        if isinstance(i, tuple):
+            if i[0] == QUIT_KEY:
+                raise Quit
+            cursor = i[1] or 0
+            if i[1] == 2 and tag.get("description"):
+                _save(tags.define_tag, tag_id, {"description": None})
+            continue
+        cursor = i
+        if i == 0:
+            rename(tag_id, tag)
+        elif i == 1:
+            change_emoji(tag_id, tag)
+        elif i == 2:
+            text = ui.ask("One-line description (empty keeps it): ").strip()
+            if text:
+                _save(tags.define_tag, tag_id, {"description": text})
+        elif i == 3:
+            if add_games(tag_id, systems, keys_of, lambda listing, shown: add_from_tag(
+                    listing, shown, keys_of, _label(tag), hotkeys=(QUIT_KEY,), hint=ADD_HINT)) == QUIT_KEY:
+                raise Quit
+        elif i == 4:
+            if merge(tag_id, tag):
+                return True
+        elif delete(tag_id, tag):
+            return True
+
+
 def edit_one(tag_id, systems, keys_of):
-    """The menu of one tag: its games, adding games, name, emoji, description, merging, deleting."""
+    """One tag: its games first, as the collection editor lists a collection's (a game switched off loses the tag at
+    once but stays listed, so it can be switched back on), with A (or +) to add games, the list's / search carried
+    into All systems, and S for its settings. Q raises Quit once the toggles are saved."""
     system_names = {s["bucket"]: s["name"] for s in systems}
-    pos = 0
+    kept = set()  # every game listed while the tag is open
+    files = {}  # game key -> its record's extra files, put back on a game switched back on
+    place = {}
     while True:
         tag = tags.all_tags().get(tag_id)
         if tag is None:
             return
-        i = picker.filter_list(f"✏️  {_label(tag)} (Esc = back)",
-                               [f"Games with this tag ({len(_games_of(tag_id))}): switch some off, + adds",
-                                "Add games from a system", "Add games with another tag",
-                                f"Rename ({tag['name']})", f"Emoji ({tag['emoji']})",
-                                f"Description{': ' + tag['description'] if tag.get('description') else ''}",
-                                "Merge into another tag", "Delete this tag"], cursor=pos, hotkeys=(QUIT_KEY,),
-                               hint=f"Enter open · {QUIT_HINT} · Esc back")
-        if i is None:
-            return
-        if isinstance(i, tuple):
+        records = tags.load()["games"]
+        keys = [k for k, rec in records.items() if tag_id in rec["tags"]]
+        files.update({k: records[k]["files"] for k in keys if records[k].get("files")})
+        kept.update(keys)
+        query = ""
+        if not kept:  # nothing to list: the same actions as a menu
+            i = picker.filter_list(f"{header(tag)} (Esc = back)", ["Add games", "Settings"], hotkeys=(QUIT_KEY,),
+                                   hint=f"Enter open · {QUIT_HINT} · Esc back")
+            pressed = None if i is None else QUIT_KEY if isinstance(i, tuple) else ADD_KEY if i == 0 else SETTINGS_KEY
+        else:
+            entry = {"bucket": "", "games": [{"bucket": k} for k in keys]}
+            rows = sorted(((entry, k, names.title(k), f"{system_names.get(k.partition('/')[0], k.partition('/')[0])} — {names.title(k)}")
+                           for k in kept), key=lambda r: (store.sort_key(r[2]), r[1]))
+            if place.get("added"):  # back from adding: on the first game added
+                at = next(i for i, r in enumerate(rows) if r[1] in place["added"])
+                place = {"keys": [r[1] for r in rows], "session": {"row": at}}
+            try:
+                pressed = edit.toggle_games(header(tag), rows, hotkeys=(ADD_KEY, ADD_ALIAS, SETTINGS_KEY, QUIT_KEY),
+                                            hint=GAMES_HINT, key_help=GAMES_HELP, place=place, notes=False,
+                                            tag_filter=False)
+            finally:  # Ctrl-C too: the toggles made are saved
+                now = {g["bucket"] for g in entry["games"]}
+                gone, back = set(keys) - now, sorted(now - set(keys))
+                if gone or back:
+                    _save(tags.retag_games, tag_id, add=back, remove=gone, files={k: files[k] for k in back if k in files})
+            query = place.get("session", {}).get("query", "")
+        if pressed == QUIT_KEY:
             raise Quit
-        pos = i
-        from_system = (lambda query="": add_games(tag_id, systems, keys_of, lambda listing, shown: add_from_system(
-            listing, systems, shown, keys_of, _label(tag), tag_filter=False, query=query, hotkeys=(QUIT_KEY,),
-            hint=ADD_HINT)))  # the tag's own lists
-        if i == 0:
-            switch_games_off(tag_id, _label(tag), system_names, from_system)
-        elif i == 1:
-            if from_system() == QUIT_KEY:
+        if pressed is None:
+            return
+        if pressed in (ADD_KEY, ADD_ALIAS):
+            before = set(_games_of(tag_id))
+            if add_games(tag_id, systems, keys_of, lambda listing, shown: add_from_system(
+                    listing, systems, shown, keys_of, _label(tag), tag_filter=False, query=query, hotkeys=(QUIT_KEY,),
+                    hint=ADD_HINT)) == QUIT_KEY:
                 raise Quit
-        elif i == 2:
-            if add_games(tag_id, systems, keys_of, lambda listing, shown: add_from_tag(
-                    listing, shown, keys_of, _label(tag), hotkeys=(QUIT_KEY,), hint=ADD_HINT)) == QUIT_KEY:
-                raise Quit
-        elif i == 3:
-            rename(tag_id, tag)
-        elif i == 4:
-            change_emoji(tag_id, tag)
-        elif i == 5:
-            text = ui.ask("Description (empty clears it): ").strip()
-            _save(tags.define_tag, tag_id, {"description": text or None})
-        elif i == 6:
-            if merge(tag_id, tag):
-                return
-        elif delete(tag_id, tag):
+            place["added"] = set(_games_of(tag_id)) - before
+        elif settings_menu(tag_id, systems, keys_of):
             return
 
 
@@ -190,7 +214,7 @@ def edit_one(tag_id, systems, keys_of):
 
 @picker.one_app
 def edit_tags(quit_raises=False):
-    """The list of tags; Enter opens one, n adds a new one. Returns the exit code. Q (in a tag) leaves it: with
+    """The list of tags; Enter opens one's games, n adds a new one. Returns the exit code. Q (in a tag) leaves it: with
     quit_raises, by raising Quit for the caller (`sync-roms edit` goes to its review)."""
     try:
         return _tag_list()
@@ -215,7 +239,7 @@ def _tag_list():
                                hotkeys=(tagui.NEW_KEY, tagui.CLEAR_KEY, SORT_KEY), cursor=pos, filters=tagui.banner(),
                                hint=tagui.menu_hint("/ filter · Enter open · n new tag · o sort · Esc back"),
                                extras=[[("no games", "dim")] if not counts.get(x) else [("", "")] for x in ids] + [[("", "")]],
-                               key_help=[("Enter", "open the tag"), (tagui.NEW_KEY, "add a new tag"),
+                               key_help=[("Enter", "open the tag's games"), (tagui.NEW_KEY, "add a new tag"),
                                          (SORT_KEY, f"sort by {'name' if by_count else 'game count'} instead"),
                                          (tagui.CLEAR_KEY, "clear the tag filter")],
                                row_note=tagui.described(defs, ids))
