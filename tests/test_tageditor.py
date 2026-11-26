@@ -287,6 +287,7 @@ class GamesFirst(unittest.TestCase):
         tags.define_tag("shmups", {"description": "Shoot them up"})
         self.run_editor(["Shmups", ("S", None), ("x", 0)])
         self.assertEqual(tags.all_tags()["shmups"]["description"], "Shoot them up")
+        self.assertEqual(self.notes[-1], "ℹ️  x clears the description: press it on the Description row")
         self.run_editor(["Shmups", ("S", None), ("x", 2)])
         self.assertNotIn("description", tags.all_tags()["shmups"])
         self.assertEqual(self.shown[-3][1][2], "Description: none")

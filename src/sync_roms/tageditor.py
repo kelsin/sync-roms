@@ -138,6 +138,8 @@ def settings_menu(tag_id, systems, keys_of):
             cursor = i[1] or 0
             if i[1] == 2 and tag.get("description"):
                 _save(tags.define_tag, tag_id, {"description": None})
+            elif i[1] != 2:
+                edit.note("ℹ️  x clears the description: press it on the Description row")
             continue
         cursor = i
         if i == 0:
