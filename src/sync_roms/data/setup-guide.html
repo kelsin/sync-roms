@@ -108,6 +108,8 @@ main { max-width: 1140px; margin: 0 auto; padding: 24px 16px 80px; }
   border-top: 1px solid var(--line);
 }
 .facts-title { font-weight: 700; font-size: .95rem; align-self: center; margin-right: 4px; }
+.facts-title .dev { font-weight: 400; color: var(--muted); }
+.facts-title .dot { color: var(--muted); font-weight: 400; margin: 0 .4em; }
 .chip {
   background: var(--chip);
   border-radius: 999px;
@@ -1757,8 +1759,8 @@ function render() {
   history.replaceState(null, "", `#device=${device.id}&layout=${ctx.layout}`);
 
   const screen = device.screen ? device.screen + (device.screen2 ? ` + ${device.screen2}` : "") : null;
-  const title = $card.value || device.name;
-  document.getElementById("facts").innerHTML = `<span class="facts-title">${esc(title)}</span>` + [
+  const title = $card.value ? `${esc($card.value)}<span class="dot">·</span><span class="dev">${esc(device.name)}</span>` : esc(device.name);
+  document.getElementById("facts").innerHTML = `<span class="facts-title">${title}</span>` + [
     ["Platform", PLATFORMS[ctx.platform]],
     ["Layout", LAYOUTS[ctx.layout]],
     ["SoC", device.soc],
