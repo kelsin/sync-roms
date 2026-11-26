@@ -777,7 +777,7 @@ class AllRows(unittest.TestCase):
         with mock.patch.object(edit, "toggle_games", return_value=None) as fake:
             listedit.toggle_all("All", rows, place={})
         self.assertEqual(fake.call_args.args[1], rows)
-        self.assertNotIn("hotkeys", fake.call_args.kwargs)
+        self.assertEqual(fake.call_args.kwargs["hotkeys"], ())  # s and c are toggle_games's own
 
     def test_toggle_all_shows_only_what_the_sticky_filter_keeps(self):
         tag_games(self, {"gba/Ruby.zip": None})

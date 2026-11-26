@@ -339,6 +339,13 @@ class MenuActions(EditBase):
             self.assertEqual(self.run_menu([1, 4]), 0)
         run.assert_called_once()
 
+    def test_q_in_the_tag_editor_goes_straight_to_the_review_and_ends_the_editor(self):
+        from sync_roms import tageditor
+        out = io.StringIO()
+        with mock.patch.object(tageditor, "edit_tags", side_effect=tageditor.Quit) as run, contextlib.redirect_stdout(out):
+            self.assertEqual(self.run_menu([1]), 0)  # the top menu isn't shown again
+        run.assert_called_once_with(quit_raises=True)
+
     def test_choosing_collections_opens_the_collection_editor(self):
         from sync_roms import collectionedit
         with mock.patch.object(collectionedit, "edit_collections", return_value=0) as run:

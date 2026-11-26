@@ -6,6 +6,13 @@ from .listedit import add_from_system, add_from_tag, folder_lister, view
 
 SORT_KEY = "o"
 ADD_KEY = "+"  # in a tag's games: add games to it, the / search carried into the games list
+QUIT_KEY = "Q"  # in a tag's menu, its games and its add lists: leave the editor, what was toggled saved
+QUIT_HINT = "Q quit the editor"
+ADD_HINT = f"{edit.GAMES_HINT} · {QUIT_HINT}"  # the hint of the tag's add lists
+
+
+class Quit(Exception):
+    """Q: leave the tag editor at once (and, under `sync-roms edit`, go to its review); every change is already saved."""
 
 
 def _label(tag):
@@ -31,11 +38,12 @@ def _save(write, *args, **kwargs):
 
 def switch_games_off(tag_id, label, system_names, add=None):
     """The tag's games as a list to toggle: the ones unchecked lose the tag (saved even after Ctrl-C). With add, `+`
-    saves that, calls add(the list's / search) and lists the tag's games again on the first one it added."""
+    saves that, calls add(the list's / search) and lists the tag's games again on the first one it added, even when
+    the tag has none yet. Q (also when add returns it) raises Quit once that is saved."""
     place = {}
     while True:
         keys = _games_of(tag_id)
-        if not keys:
+        if not keys and not add:
             edit.note(ui.yellow("ℹ️  No game has this tag yet."))
             return
         entry = {"bucket": "", "games": [{"bucket": k} for k in keys]}
@@ -45,25 +53,30 @@ def switch_games_off(tag_id, label, system_names, add=None):
             at = next(i for i, r in enumerate(rows) if r[1] in place["added"])
             place = {"keys": [r[1] for r in rows], "session": {"row": at}}
         try:
-            pressed = edit.toggle_games(f"✏️  {label} — ✅ has the tag, ⬜ remove it", rows, hotkeys=(ADD_KEY,) if add else (),
-                                        hint="+ add games" if add else None, place=place, notes=False, tag_filter=False)
+            pressed = edit.toggle_games(
+                f"✏️  {label} — ✅ has the tag, ⬜ remove it", rows, hotkeys=(ADD_KEY, QUIT_KEY) if add else (QUIT_KEY,),
+                hint=f"{edit.GAMES_HINT} · " + ("+ add games · " if add else "") + QUIT_HINT, place=place, notes=False,
+                tag_filter=False)
         finally:
             gone = set(keys) - {g["bucket"] for g in entry["games"]}
             if gone:
                 _save(tags.retag_games, tag_id, remove=gone)
+        if pressed == QUIT_KEY:
+            raise Quit
         if pressed != ADD_KEY:
             return
-        add(place.get("session", {}).get("query", ""))
+        if add(place.get("session", {}).get("query", "")) == QUIT_KEY:
+            raise Quit
         place["added"] = set(_games_of(tag_id)) - set(keys)
 
 
 def add_games(tag_id, systems, keys_of, add):
     """add(listing, shown) lets the user toggle games into a listing of the tag's games (shown is a view of it); the
-    games it gained get the tag, and those it lost lose it (saved even after Ctrl-C)."""
+    games it gained get the tag, and those it lost lose it (saved even after Ctrl-C). Returns what add returned."""
     keys = _games_of(tag_id)
     listing = {"games": [{"system": k.partition("/")[0], "bucket": k} for k in keys]}
     try:
-        add(listing, view(listing, systems))
+        return add(listing, view(listing, systems))
     finally:
         now = {g["bucket"]: g for g in listing["games"] if g.get("bucket")}
         gained = [k for k in now if k not in keys]
@@ -150,18 +163,25 @@ def edit_one(tag_id, systems, keys_of):
                                 f"Rename ({tag['name']})", f"Emoji ({tag['emoji']})",
                                 f"Description{': ' + tag['description'] if tag.get('description') else ''}",
                                 f"{themeart.art_emoji(art)} Theme art: {themeart.art_choices().get(art, 'none') if art else 'none'}",
-                                "Merge into another tag", "Delete this tag"], cursor=pos)
+                                "Merge into another tag", "Delete this tag"], cursor=pos, hotkeys=(QUIT_KEY,),
+                               hint=f"Enter open · {QUIT_HINT} · Esc back")
         if i is None:
             return
+        if isinstance(i, tuple):
+            raise Quit
         pos = i
         from_system = (lambda query="": add_games(tag_id, systems, keys_of, lambda listing, shown: add_from_system(
-            listing, systems, shown, keys_of, _label(tag), tag_filter=False, query=query)))  # the tag's own lists
+            listing, systems, shown, keys_of, _label(tag), tag_filter=False, query=query, hotkeys=(QUIT_KEY,),
+            hint=ADD_HINT)))  # the tag's own lists
         if i == 0:
             switch_games_off(tag_id, _label(tag), system_names, from_system)
         elif i == 1:
-            from_system()
+            if from_system() == QUIT_KEY:
+                raise Quit
         elif i == 2:
-            add_games(tag_id, systems, keys_of, lambda listing, shown: add_from_tag(listing, shown, keys_of, _label(tag)))
+            if add_games(tag_id, systems, keys_of, lambda listing, shown: add_from_tag(
+                    listing, shown, keys_of, _label(tag), hotkeys=(QUIT_KEY,), hint=ADD_HINT)) == QUIT_KEY:
+                raise Quit
         elif i == 3:
             rename(tag_id, tag)
         elif i == 4:
@@ -181,8 +201,18 @@ def edit_one(tag_id, systems, keys_of):
 # --- The list ----------------------------------------------------------------------------------------
 
 @picker.one_app
-def edit_tags():
-    """The list of tags; Enter opens one, n adds a new one. Returns the exit code."""
+def edit_tags(quit_raises=False):
+    """The list of tags; Enter opens one, n adds a new one. Returns the exit code. Q (in a tag) leaves it: with
+    quit_raises, by raising Quit for the caller (`sync-roms edit` goes to its review)."""
+    try:
+        return _tag_list()
+    except Quit:
+        if quit_raises:
+            raise
+        return 0
+
+
+def _tag_list():
     systems = sorted(store.repo_json("systems"), key=lambda s: s["name"].lower())
     keys_of = folder_lister()
     pos, by_count = 0, False

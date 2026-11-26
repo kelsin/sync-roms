@@ -186,7 +186,7 @@ class Editor(unittest.TestCase):
         self.assertEqual(tags.tags_of(A), ["shmups"])
 
     def test_add_from_a_tag_tags_the_added_games(self):
-        def add(listing, shown, keys_of, label):
+        def add(listing, shown, keys_of, label, **kw):
             listing["games"].append({"system": "nes", "bucket": B, "files": ["nes/B (Disc 2).zip"]})
         with mock.patch.object(tageditor, "add_from_tag", add):
             self.run_editor(["Cave", "with another tag", None, None])
@@ -282,45 +282,99 @@ class Walkthrough(unittest.TestCase):
 
     esc = staticmethod(lambda labels, kw: None)
 
-    def add_missing(self, system_row):
-        """Flow A: Shmups, its games, / C finds nothing, + adds, then system_row, Space on C (the search carried), Enter."""
+    quit = staticmethod(lambda labels, kw: (tageditor.QUIT_KEY, None))
+
+    def add_missing(self, system_row=None, then_quit_in_the_add_list=False):
+        """Flow A: Shmups, its games, / C finds nothing and + goes to all systems with the search (system_row: no
+        search, + picks that system), Space on C, then Enter and Q in the tag's games, or Q in the add list."""
         tagui.FILTER.required = {"cave"}  # a sticky filter that would hide C
         seen = {}
 
         def add_list(labels, kw):
             seen["add"] = (list(labels), kw["session"].get("query"), kw["filters"])
-            return self.toggle("C (USA)")(labels, kw)
+            on = self.toggle("C (USA)")(labels, kw)
+            if then_quit_in_the_add_list:
+                kw["session"]["sel"] = on
+                return tageditor.QUIT_KEY, None
+            return on
 
         def back_in_its_games(labels, kw):
             seen["back"] = (list(labels), kw["session"].get("row"))
-            return list(kw["initial"])  # Enter
-        titles = self.walk([self.pick("Shmups"), self.pick("Games with this tag"), self.search_then("+", "C (USA)"),
-                            self.pick(system_row), add_list, back_in_its_games, self.esc, self.esc])
+            return tageditor.QUIT_KEY, None
+        steps = [self.pick("Shmups"), self.pick("Games with this tag")]
+        steps += [self.search_then("+", "C (USA)")] if system_row is None else [self.search_then("+", ""), self.pick(system_row)]
+        steps += [add_list] + ([] if then_quit_in_the_add_list else [back_in_its_games])
+        titles = self.walk(steps)
         self.assertEqual(tags.tags_of(C), ["shmups"])
         self.assertEqual(tags.tags_of(A), ["cave", "shmups"])
         labels, query, filters = seen["add"]
         self.assertTrue(any("C (USA)" in label for label in labels))  # the sticky filter doesn't hide it here
-        self.assertEqual(query, "C (USA)")  # the search typed in the tag's games is already applied
+        self.assertEqual(query or "", "" if system_row else "C (USA)")  # the search typed in the tag's games is applied
         self.assertIn("paused", filters)
-        labels, row = seen["back"]
-        self.assertIn("C (USA)", labels[row])  # back in the tag's games, on the game just added
+        if not then_quit_in_the_add_list:
+            labels, row = seen["back"]
+            self.assertIn("C (USA)", labels[row])  # back in the tag's games, on the game just added
         self.assertEqual({"cave"}, tagui.FILTER.required)  # the user's filter is untouched
         return titles
 
-    def test_a_add_a_missing_game_from_all_systems_in_the_tags_games_list(self):
-        titles = self.add_missing("All systems")
-        self.assertEqual(len(titles), 8)
+    def test_a_plus_after_a_search_goes_straight_to_all_systems_with_it(self):
+        titles = self.add_missing()
+        self.assertEqual(len(titles), 5)  # the tags, Shmups, its games, all systems, its games again (Q)
+        self.assertIn("All systems", titles[3])
 
-    def test_a_add_a_missing_game_from_one_system_in_the_tags_games_list(self):
+    def test_a_plus_with_no_search_picks_a_system(self):
         titles = self.add_missing("Nintendo NES")
-        self.assertEqual(len(titles), 8)
+        self.assertEqual(len(titles), 6)
+        self.assertIn("which system", titles[3])
+        self.assertIn("Nintendo NES", titles[4])
 
-    def test_b_remove_a_game_from_the_tags_games_list(self):
+    def test_a_q_in_the_all_systems_list_saves_the_game_and_leaves(self):
+        self.assertEqual(len(self.add_missing(then_quit_in_the_add_list=True)), 4)
+
+    def test_a_q_in_a_systems_list_saves_the_game_and_leaves(self):
+        self.assertEqual(len(self.add_missing("Nintendo NES", then_quit_in_the_add_list=True)), 5)
+
+    def test_b_remove_a_game_and_q_leaves_with_it_saved(self):
+        def off_then_q(labels, kw):
+            kw["session"]["sel"] = self.toggle("B (USA)")(labels, kw)
+            return tageditor.QUIT_KEY, None
+        titles = self.walk([self.pick("Shmups"), self.pick("Games with this tag"), off_then_q])
+        self.assertEqual(len(titles), 3)
+        self.assertEqual(tags.tags_of(B), [])
+        self.assertEqual(tags.tags_of(A), ["cave", "shmups"])
+
+    def test_b_remove_a_game_with_enter_and_esc(self):
         titles = self.walk([self.pick("Shmups"), self.pick("Games with this tag"), self.toggle("B (USA)"),
                             self.esc, self.esc])
         self.assertEqual(len(titles), 5)
         self.assertEqual(tags.tags_of(B), [])
-        self.assertEqual(tags.tags_of(A), ["cave", "shmups"])
+
+    def test_q_in_the_tag_menu_leaves_the_tag_editor(self):
+        hints = []
+
+        def menu(labels, kw):
+            hints.append((kw["hint"], kw["hotkeys"]))
+            return tageditor.QUIT_KEY, 0
+        self.assertEqual(len(self.walk([self.pick("Shmups"), menu])), 2)
+        self.assertIn("Q quit the editor", hints[0][0])
+        self.assertIn(tageditor.QUIT_KEY, hints[0][1])
+
+    def test_q_raises_for_the_top_editor_when_asked(self):
+        with mock.patch.object(picker, "filter_list", side_effect=[0, (tageditor.QUIT_KEY, 0)]):
+            with self.assertRaises(tageditor.Quit):
+                tageditor.edit_tags(quit_raises=True)
+
+    def test_plus_on_a_tag_with_no_games_adds_its_first(self):
+        tags.define_tag("new", {"name": "New", "emoji": "🆕"})
+        seen = []
+
+        def empty(labels, kw):
+            seen.append(list(labels))
+            return "+", None
+        self.walk([self.pick("New"), self.pick("Games with this tag"), empty, self.pick("All systems"),
+                   self.toggle("C (USA)"), self.quit])
+        self.assertEqual(seen, [[]])
+        self.assertEqual(tags.tags_of(C), ["new"])
 
     def test_the_tags_games_list_names_plus(self):
         hints = []
@@ -329,7 +383,8 @@ class Walkthrough(unittest.TestCase):
             hints.append(kw["hint"])
             return list(kw["initial"])
         self.walk([self.pick("Shmups"), self.pick("Games with this tag"), games, self.esc, self.esc])
-        self.assertIn("+ add games", hints[0])
+        for part in ("+ add games", "Q quit the editor", "o view"):
+            self.assertIn(part, hints[0])
 
     def test_the_menus_add_from_a_system_ignores_the_sticky_filter(self):
         tagui.FILTER.required = {"cave"}
@@ -341,6 +396,66 @@ class Walkthrough(unittest.TestCase):
         self.walk([self.pick("Shmups"), self.pick("from a system"), self.pick("All systems"), add_list,
                    self.esc, self.esc])
         self.assertTrue(any("C (USA)" in label for label in seen))
+
+
+    def test_q_in_the_menus_add_lists_saves_and_leaves(self):
+        def on_then_q(labels, kw):
+            kw["session"]["sel"] = self.toggle("C (USA)")(labels, kw)
+            return tageditor.QUIT_KEY, None
+        self.assertEqual(len(self.walk([self.pick("Shmups"), self.pick("from a system"), self.pick("All systems"),
+                                        on_then_q])), 4)
+        self.assertEqual(tags.tags_of(C), ["shmups"])
+
+        def b_on_then_q(labels, kw):
+            kw["session"]["sel"] = self.toggle("B (USA)")(labels, kw)
+            return tageditor.QUIT_KEY, None
+        self.assertEqual(len(self.walk([self.pick("Cave"), self.pick("with another tag"), self.pick("Shmups"),
+                                        b_on_then_q])), 4)
+        self.assertEqual(tags.tags_of(B), ["cave", "shmups"])
+
+
+class RealKeys(unittest.TestCase):
+    """The flows with real keys fed to the picker's list model (picker._run), not answers made up per screen."""
+    setUp = Editor.setUp
+
+    def press(self, screens):
+        """edit_tags() with each list answered by the next key sequence; returns the titles."""
+        screens = iter(screens)
+        titles = []
+
+        def run(model):
+            titles.append(model.title)
+            for k in next(screens):
+                got = model.key(k)
+                if got is not picker.KEEP:
+                    return got
+            self.fail(f"{model.title} was still open")
+        with mock.patch.object(picker, "_run", run), mock.patch.object(picker, "_draws_images", return_value=False), \
+                mock.patch.object(listedit, "stocked", lambda s: s), \
+                mock.patch.object(listedit, "file_counts", lambda s: [[] for _ in s]), \
+                mock.patch.object(tageditor, "folder_lister", lambda: lambda bucket: {A, B, C}), \
+                mock.patch("builtins.print"):
+            self.assertEqual(tageditor.edit_tags(), 0)
+        return titles
+
+    def test_a_search_with_no_match_then_plus_space_q(self):
+        tagui.FILTER.required = {"cave"}
+        titles = self.press([["/", *"shmups", "enter", "enter"], ["enter"], ["/", *"c (usa)", "enter", "+"],
+                             ["space", tageditor.QUIT_KEY]])
+        self.assertEqual(len(titles), 4)
+        self.assertIn("All systems", titles[3])
+        self.assertEqual(tags.tags_of(C), ["shmups"])
+
+    def test_b_search_space_q(self):
+        titles = self.press([["/", *"shmups", "enter", "enter"], ["enter"], ["/", *"b (usa)", "enter", "space",
+                                                                             tageditor.QUIT_KEY]])
+        self.assertEqual(len(titles), 3)
+        self.assertEqual(tags.tags_of(B), [])
+
+    def test_plus_and_q_while_typing_are_text(self):
+        titles = self.press([["/", *"shmups", "enter", "enter"], ["enter"], ["/", "+", "Q", "escape", "escape"],
+                             ["escape"], ["escape"]])
+        self.assertEqual(len(titles), 5)  # back out through the menu and the tag list: nothing was added or quit
 
 
 class Retag(unittest.TestCase):

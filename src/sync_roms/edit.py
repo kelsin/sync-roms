@@ -445,12 +445,16 @@ def edit_manifest():
                 add_card()
 
     def edit_tags():
-        """The tags in storage, saved as they are changed; a failure (SystemExit) returns here instead of ending the editor."""
+        """The tags in storage, saved as they are changed; a failure (SystemExit) returns here instead of ending the editor.
+        Returns True when Q left the tag editor: the editor goes straight to its review."""
         from . import tageditor
         try:
-            tageditor.edit_tags()
+            tageditor.edit_tags(quit_raises=True)
         except SystemExit:
             pass  # the reason is a note, on the menu
+        except tageditor.Quit:
+            return True
+        return False
 
     def edit_collections():
         from . import collectionedit
@@ -474,7 +478,8 @@ def edit_manifest():
                 if i == 0:
                     edit_cards()
                 elif i == 1:
-                    edit_tags()
+                    if edit_tags():
+                        return True
                 elif i == 2:
                     edit_collections()
                 elif i == 3:
