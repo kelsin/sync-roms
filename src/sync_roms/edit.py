@@ -5,6 +5,15 @@ from collections import defaultdict
 from . import languages, names, picker, previews, runtime, s3, store, surprise, tags, tagui, ui, vita
 
 
+QUIT_KEY = "Q"  # in an editor's games lists, settings and add lists: leave the editor, what was toggled saved
+QUIT_HINT = "Q quit the editor"
+QUIT_HELP = (QUIT_KEY, "quit the editor")
+
+
+class Quit(Exception):
+    """Q: leave the editor at once; every toggle made is already saved or kept."""
+
+
 def note(text):
     """Say something: on an editor session's worker, on the session's next list's status line; else outside the list
     screen, waiting so the next redraw doesn't erase it."""
@@ -450,16 +459,12 @@ def edit_manifest():
                 add_card()
 
     def edit_tags():
-        """The tags in storage, saved as they are changed; a failure (SystemExit) returns here instead of ending the editor.
-        Returns True when Q left the tag editor: the editor goes straight to its review."""
+        """The tags in storage, saved as they are changed; a failure (SystemExit) returns here instead of ending the editor."""
         from . import tageditor
         try:
-            tageditor.edit_tags(quit_raises=True)
+            tageditor.edit_tags()
         except SystemExit:
             pass  # the reason is a note, on the menu
-        except tageditor.Quit:
-            return True
-        return False
 
     def edit_collections():
         from . import collectionedit
@@ -483,8 +488,7 @@ def edit_manifest():
                 if i == 0:
                     edit_cards()
                 elif i == 1:
-                    if edit_tags():
-                        return True
+                    edit_tags()
                 elif i == 2:
                     edit_collections()
                 elif i == 3:
