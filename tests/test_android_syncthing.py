@@ -34,6 +34,10 @@ def export(config_xml="<configuration><gui><address>127.0.0.1:8385</address><api
     return buf.getvalue()
 
 
+SETTLED = {"ignorePerms": True, "maxConflicts": 0,
+           "versioning": {"type": "simple", "params": {"keep": "5"}, "cleanupIntervalS": 3600, "fsPath": "", "fsType": "basic"}}
+
+
 def plan(config):
     return android_syncthing.plan(config, SRV, DD, DF)
 
@@ -82,7 +86,8 @@ class Plan(unittest.TestCase):
     def test_plan_empty_config_adds_device_and_folders(self):
         entries, calls, warns = plan({"devices": [], "folders": []})
         self.assertEqual(warns, [])
-        self.assertEqual([e.old for e in entries], [None, None, None])
+        self.assertEqual(len(entries), 9)
+        self.assertEqual([e.new for e in entries if e.key == "folder ra-saves versioning"], ["simple, keep 5"])
         self.assertEqual(len(calls), 3)
         method, path, body = calls[0]
         self.assertEqual((method, path), ("PUT", f"/rest/config/devices/{SID}"))
@@ -96,6 +101,8 @@ class Plan(unittest.TestCase):
         self.assertEqual(body["rescanIntervalS"], 3600)
         self.assertEqual(body["devices"], [{"deviceID": SID}])
         self.assertEqual(calls[2][2]["path"], android.DEFAULT_STATES)
+        for key, value in SETTLED.items():
+            self.assertEqual(body[key], value)
 
     def test_plan_existing_device_other_case_left(self):
         config = {"devices": [{"deviceID": SID.lower()}], "folders": []}
@@ -131,12 +138,20 @@ class Plan(unittest.TestCase):
 
     def test_plan_all_set_is_unchanged(self):
         config = {"devices": [{"deviceID": SID}],
-                  "folders": [folder("ra-saves", android.DEFAULT_SAVES, [SID]),
-                              folder("ra-states", android.DEFAULT_STATES, [SID])]}
+                  "folders": [{**folder("ra-saves", android.DEFAULT_SAVES, [SID]), **SETTLED},
+                              {**folder("ra-states", android.DEFAULT_STATES, [SID]), **SETTLED}]}
         entries, calls, warns = plan(config)
         self.assertEqual((calls, warns), ([], []))
-        self.assertEqual(len(entries), 3)
+        self.assertEqual(len(entries), 9)
         self.assertTrue(all(not applied.changed(e) for e in entries))
+
+    def test_plan_shared_folder_gets_settings(self):
+        config = {"devices": [{"deviceID": SID}], "folders": [folder("ra-saves", android.DEFAULT_SAVES, [SID])]}
+        entries, calls, _ = plan(config)
+        body = next(c[2] for c in calls if c[1] == "/rest/config/folders/ra-saves")
+        for key, value in SETTLED.items():
+            self.assertEqual(body[key], value)
+        self.assertEqual(body["devices"], [{"deviceID": SID}])
 
 
 class Apply(unittest.TestCase):

@@ -76,6 +76,47 @@ def _insert(root, element, after):
     root.insert(index + 1, element)
 
 
+def folder_settings():
+    """(ignore permissions, max conflicts, versioning type, versions kept) wanted on every shared folder."""
+    wanted = data()["folder"]
+    return wanted["ignore_permissions"], wanted["max_conflicts"], wanted["versioning"]["type"], wanted["versioning"]["keep"]
+
+
+def versioning_text(kind, keep):
+    return f"{kind}, keep {keep}"
+
+
+def _versioning(folder):
+    """The folder's versioning as `versioning_text`, None when it has none."""
+    element = folder.find("versioning")
+    if element is None or not element.get("type"):
+        return None
+    param = next((p for p in element.findall("param") if p.get("key") == "keep"), None)
+    return versioning_text(element.get("type"), None if param is None else param.get("val"))
+
+
+def _apply_folder_settings(folder, label, lines):
+    """Set ignorePerms, maxConflicts and versioning on a config.xml folder element; one line per change."""
+    ignore, conflicts, kind, keep = folder_settings()
+    for tag, value in (("ignorePerms", str(ignore).lower()), ("maxConflicts", str(conflicts))):
+        element = folder.find(tag)
+        if element is None:
+            element = ET.SubElement(folder, tag)
+        if element.text != value:
+            element.text = value
+            lines.append(f"   config.xml: {label} {tag} = {value}")
+    if _versioning(folder) != versioning_text(kind, str(keep)):
+        old = folder.find("versioning")
+        if old is not None:
+            folder.remove(old)
+        element = ET.SubElement(folder, "versioning", {"type": kind})
+        ET.SubElement(element, "cleanupIntervalS").text = "3600"
+        ET.SubElement(element, "fsPath")
+        ET.SubElement(element, "fsType").text = "basic"
+        ET.SubElement(element, "param", {"key": "keep", "val": str(keep)})
+        lines.append(f"   config.xml: {label} versioning = {versioning_text(kind, keep)}")
+
+
 def _server_device(srv):
     device = ET.Element("device", {"id": srv["id"], "name": "server", "compression": "metadata", "introducer": "false"})
     ET.SubElement(device, "address").text = srv["address"]
@@ -89,6 +130,7 @@ def _new_folder(srv, folder_id, label, path):
     ET.SubElement(folder, "filesystemType").text = "basic"
     ET.SubElement(folder, "device", {"id": srv["id"], "introducedBy": ""})
     ET.SubElement(folder, "modTimeWindowS").text = "2"
+    _apply_folder_settings(folder, label, [])
     return folder
 
 
@@ -143,6 +185,7 @@ def merge_config(old, srv):
         if window.text != "2":
             window.text = "2"
             lines.append(f"   config.xml: {label} modTimeWindowS = 2")
+        _apply_folder_settings(found, label, lines)
     if old is not None and ET.tostring(root, encoding="unicode") == before:
         return None, [], warnings
     if old is None:
@@ -272,6 +315,11 @@ def _config_entries(base, srv):
         result.append(applied.Entry(where, f"{label} shared with server", shared, "yes", False))
         window = None if folder is None else folder.findtext("modTimeWindowS")
         result.append(applied.Entry(where, f"{label} modTimeWindowS", window, "2", False))
+        ignore, conflicts, kind, keep = folder_settings()
+        for tag, value in (("ignorePerms", str(ignore).lower()), ("maxConflicts", str(conflicts))):
+            result.append(applied.Entry(where, f"{label} {tag}", None if folder is None else folder.findtext(tag), value, False))
+        result.append(applied.Entry(where, f"{label} versioning", None if folder is None else _versioning(folder),
+                                    versioning_text(kind, keep), False))
     return result
 
 

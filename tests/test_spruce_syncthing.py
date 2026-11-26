@@ -115,6 +115,10 @@ class Config(helpers.DataDir):
             self.assertEqual(f.get("type"), "sendreceive")
             self.assertEqual([d.get("id") for d in f.findall("device")], [SERVER])
             self.assertEqual(f.findtext("modTimeWindowS"), "2")
+            self.assertEqual(f.findtext("ignorePerms"), "true")
+            self.assertEqual(f.findtext("maxConflicts"), "0")
+            self.assertEqual(f.find("versioning").get("type"), "simple")
+            self.assertEqual(f.find("versioning/param").attrib, {"key": "keep", "val": "5"})
         self.assertEqual(folders[0].get("path"), "/mnt/SDCARD/Saves/saves")
         self.assertEqual(folders[0].get("label"), "RetroArch saves")
         self.assertEqual(lines[0], "   config.xml: new config")
@@ -149,6 +153,12 @@ class Config(helpers.DataDir):
         self.assertEqual(len(folder.findall("modTimeWindowS")), 1)
         self.assertNotIn("   config.xml: folder RetroArch saves at /mnt/SDCARD/Saves/saves", lines)
         self.assertIn("   config.xml: RetroArch saves modTimeWindowS = 2", lines)
+        self.assertIn("   config.xml: RetroArch saves ignorePerms = true", lines)
+        self.assertIn("   config.xml: RetroArch saves maxConflicts = 0", lines)
+        self.assertIn("   config.xml: RetroArch saves versioning = simple, keep 5", lines)
+        again, lines, _ = spruce_syncthing.merge_config(text, self.server())
+        self.assertIsNone(again)
+        self.assertEqual(len(ET.fromstring(text).findall("folder")[0].findall("versioning")), 1)
         self.assertEqual(warnings, [])
 
     def test_merge_folder_at_other_path_warns(self):
