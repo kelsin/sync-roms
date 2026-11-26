@@ -1836,6 +1836,57 @@ class SetFlow(Flow):
         self.assertEqual(title, f"{themeart.collection_emoji(SET)} Pokemon on c — ✅ synced, ⬜ not, 💖 from a collection")
         self.assertEqual(kw["initial"], [False, False])
 
+    def test_set_list_applies_tag_filter(self):
+        self.tag_pokemon(("gba/Ruby.zip",))
+        cardedit.tagui.FILTER.required.add("pk")
+        self.card()
+        _, calls = self.run_set(returns([False]))
+        title, labels, kw = calls[0]
+        self.assertEqual(labels, ["Game Boy Advance — Ruby"])
+        self.assertEqual(kw["filters"], "✅ 🔴 Pokemon (c clear filters)")
+        self.assertIn(cardedit.SET_KEY, kw["hotkeys"])
+        self.assertIn(cardedit.CLEAR_KEY, kw["hotkeys"])
+        self.assertIn(("s", "narrow by tags (stays on in every list)"), kw["key_help"])
+
+    def test_set_list_with_no_match_says_so_and_c_clears(self):
+        self.tag_pokemon(("gba/Ruby.zip",))
+        cardedit.tagui.FILTER.excluded.add("pk")
+        cardedit.tagui.FILTER.required.add("nope")
+        self.card()
+        _, calls = self.run_set(returns((cardedit.CLEAR_KEY, None)), lambda labels, kw: kw["session"]["sel"])
+        self.assertEqual(calls[0][1], [])
+        self.assertIn("no games match the tag filter", calls[0][2]["filters"])
+        self.assertEqual(calls[1][1], ["Game Boy — Red", "Game Boy Advance — Ruby"])
+        self.assertEqual(calls[1][2]["filters"], "")
+
+    def test_t_removing_the_required_tag_keeps_the_cursor_until_refresh(self):
+        self.tag_pokemon(("gba/Ruby.zip", "gb/Red.gb"))
+        cardedit.tagui.FILTER.required.add("pk")
+        self.card()
+
+        def untag(*a):
+            storage_tags(self, {"tags": {"pk": {"name": "Pokemon", "emoji": "🔴"}}, "games": {}, "declined": {}})
+        with mock.patch.object(cardedit.tagui, "edit_game_tags", side_effect=untag):
+            _, calls = self.run_set(returns(("t", 1)), returns((cardedit.SET_KEY, None)),
+                                    lambda labels, kw: kw["session"]["sel"])
+        self.assertEqual(calls[0][1], ["Game Boy — Red", "Game Boy Advance — Ruby"])
+        self.assertEqual(calls[1][1], calls[0][1])  # the edited game stays until the next pass
+
+    def test_the_variants_list_applies_the_tag_filter(self):
+        self.with_variants(self.RED, {"bucket": "psx/x.chd", "note": "PS1: x"})
+        storage_tags(self, {"tags": {"pk": {"name": "Pokemon", "emoji": "🔴"}}, "declined": {},
+                            "games": {"gba/Ruby.zip": {"tags": ["pk"], "variants": [
+                                self.RED, {"bucket": "psx/x.chd", "note": "PS1: x"}]},
+                                      "psx/x.chd": {"tags": ["pk"]}}})
+        cardedit.tagui.FILTER.required.add("pk")
+        self.card()
+        _, calls = self.run_system(lambda labels, kw: (cardedit.VARIANT_KEY, labels.index("Ruby.zip")),
+                                   returns(None), lambda labels, kw: kw["session"]["sel"])
+        title, labels, kw = calls[1]
+        self.assertEqual(labels, ["⬜ PS1: x"])
+        self.assertEqual(kw["filters"], "✅ 🔴 Pokemon (c clear filters)")
+        self.assertIn("s", kw["hotkeys"])
+
     def test_toggling_a_game_with_files_picks_its_files_too(self):
         self.card()
         changed, _ = self.run_set(toggle("Game Boy Advance — Ruby"))
@@ -1882,7 +1933,7 @@ class SetFlow(Flow):
             self.run_set(interrupted)
         self.assertIn("gba/Ruby.zip", {x["bucket"] for x in self.read("cards.json")["c"]["games"]["gba"]})
 
-    def test_a_collection_view_has_its_emoji_and_no_filter_keys(self):
+    def test_a_collection_view_has_its_emoji_and_the_sticky_tag_keys(self):
         self.card()
         script = Script(lambda labels, kw: kw["session"]["sel"])
         collection = {**SET, "art": "rpg"}
@@ -1891,7 +1942,7 @@ class SetFlow(Flow):
         title, _labels, kw = script.calls[0]
         self.assertTrue(title.startswith(cardedit.themeart.collection_emoji(collection)))
         self.assertIn("💖 from a collection", title)
-        self.assertEqual(kw["hotkeys"], (cardedit.VARIANT_KEY, "t"))
+        self.assertEqual(kw["hotkeys"], (cardedit.VARIANT_KEY, "t", cardedit.SET_KEY, cardedit.CLEAR_KEY))
         self.assertEqual(kw["hint"], cardedit.COLLECTION_GAMES_HINT)
 
     def test_select_all(self):

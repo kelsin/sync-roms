@@ -71,10 +71,12 @@ def toggle_games(title, rows, hotkeys=(), hint=None, place=None, filters="", key
     own = tuple(k for k in tagui.HOTKEYS if k not in hotkeys) if tag_filter else ()
     if own and key_help is None:  # the hint is what ? lists then: name s and c there
         hint = hint or (GAMES_HINT if notes else GAMES_HINT.replace(" · w note", ""))
-        hint += " · s tag · c clear filters"
+        hint += "" if " s tag" in hint else " · s tag · c clear filters"
     helps = [h for h in tagui.KEYS_HELP if h[0] in own]
+    frozen = None  # the rows of the pass `t` was pressed in: shown again as they were, so the cursor stays put
     while True:
-        shown = [r for r in rows if tagui.FILTER.keep(r[1])] if tag_filter else rows
+        shown = frozen or ([r for r in rows if tagui.FILTER.keep(r[1])] if tag_filter else rows)
+        frozen = None
         line = tagui.FILTER.describe() if tag_filter else ""
         banner = tagui.banner() if line and line not in filters else ""
         if line and not shown and rows:
@@ -85,6 +87,7 @@ def toggle_games(title, rows, hotkeys=(), hint=None, place=None, filters="", key
         if pressed == tagui.TAG_KEY:
             if i is not None:
                 tagui.edit_game_tags(shown[i][1], shown[i][2])
+            frozen = shown
         elif pressed in own:
             tagui.handle_key(pressed, [r[1] for r in rows], place)
         else:

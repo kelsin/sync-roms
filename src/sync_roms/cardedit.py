@@ -38,8 +38,8 @@ TAGS_HELP = ("s", "narrow by tags: games with every ✅ tag and no 🚫 one")
 GAMES_KEYS = [TAGS_HELP, ("m", "narrow by scraped metadata (developer, genre, year...)"),
               ("p", "only the games that were surprises lately"), ("v", "the game's variants on other systems"),
               tagui.KEY_HELP, ("c", "clear the search, tag, metadata and surprise filters")]
-COLLECTION_GAMES_HINT = "Space toggle · Enter done · a all · v variant · t tags"
-COLLECTION_GAMES_KEYS = [("v", "the game's variants on other systems"), tagui.KEY_HELP]
+COLLECTION_GAMES_HINT = "Space toggle · Enter done · a all · v variant · t tags · s tag"
+COLLECTION_GAMES_KEYS = [("v", "the game's variants on other systems"), tagui.KEY_HELP, *tagui.KEYS_HELP]
 ALL_GAMES_KEYS = [("v", "the game's variants on other systems"), tagui.KEY_HELP, *tagui.KEYS_HELP]
 SIZING = "…"
 
@@ -750,17 +750,26 @@ def _toggle_variant(picks, key, title):
     bucket, or None when none was."""
     found = picks.variants.get(key, [])
     if len(found) > 1:
-        i = 0
+        i, all_found, frozen = 0, found, None
         while True:  # t edits the highlighted variant's tags, then the list opens again on its row
+            found = frozen or [v for v in all_found if tagui.FILTER.keep(v["bucket"])]
+            frozen = None
             i = picker.filter_list(f"Variants of {title}",
                                    [f"{'✅' if picks.on_card(v['bucket']) else '⬜'} {v['note']}" for v in found],
                                    extras=[[languages.column(v["bucket"]), tag]
                                            for v, tag in zip(found, tagui.column([v["bucket"] for v in found]))],
-                                   hotkeys=(tagui.TAG_KEY,), cursor=i if isinstance(i, int) else 0)
+                                   hotkeys=(tagui.TAG_KEY, *tagui.HOTKEYS), cursor=i if isinstance(i, int) else 0,
+                                   key_help=[tagui.KEY_HELP, *tagui.KEYS_HELP],
+                                   filters=tagui.banner() + (" · no variants match the tag filter" if all_found and not found else ""))
             if not isinstance(i, tuple):
                 break
-            i = i[1]
-            tagui.edit_game_tags(found[i]["bucket"], found[i]["note"])
+            pressed, i = i
+            if pressed == tagui.TAG_KEY:
+                if i is not None:
+                    tagui.edit_game_tags(found[i]["bucket"], found[i]["note"])
+                frozen = found
+            else:
+                tagui.handle_key(pressed, [v["bucket"] for v in all_found])
         found = [] if i is None else [found[i]]
     if not found:
         return None
@@ -968,19 +977,21 @@ def edit_set(name, game_set, setup, to_fetch=None, card_usages=None, all_games=F
     opened = {b: sp.states() for b, sp in sps.items()}
     start = {key: s["bucket"] not in sps or opened[s["bucket"]][key] for s, key, _, _ in rows}
     place = {}  # picker.carry_place's: the last pass's row, filter text, view and scroll
+    frozen = None  # the rows of the pass `t` was pressed in: shown again as they were, so the cursor stays put
     try:
         while True:
-            shown = [r for r in listed if not all_games or tagui.FILTER.keep(r[1])]
+            shown = frozen or [r for r in listed if tagui.FILTER.keep(r[1])]
+            frozen = None
+            filters = tagui.banner()
+            if not shown and listed:
+                filters += " · no games match the tag filter"
             if all_games:
                 emoji, hint, hotkeys, key_help = "🌐", ALL_GAMES_HINT, (VARIANT_KEY, tagui.TAG_KEY, *tagui.HOTKEYS), ALL_GAMES_KEYS
-                filters = tagui.banner()
-                if not shown and listed:
-                    filters += " · no games match the tag filter"
                 origin = ""
             else:
                 emoji, hint, hotkeys, key_help = (themeart.collection_emoji(game_set), COLLECTION_GAMES_HINT,
-                                                  (VARIANT_KEY, tagui.TAG_KEY), COLLECTION_GAMES_KEYS)
-                filters, origin = "", ", 💖 from a collection"
+                                                  (VARIANT_KEY, tagui.TAG_KEY, *tagui.HOTKEYS), COLLECTION_GAMES_KEYS)
+                origin = ", 💖 from a collection"
             result = _games_pass(
                 f"{emoji} {game_set['name']} on {name} — ✅ synced, ⬜ not{origin}", shown, picks, sps, files_of,
                 start, work, capacity, to_fetch, place, hint=hint, hotkeys=hotkeys, key_help=key_help, filters=filters,
@@ -990,6 +1001,7 @@ def edit_set(name, game_set, setup, to_fetch=None, card_usages=None, all_games=F
             if result[0] == tagui.TAG_KEY:
                 if result[1] is not None:
                     tagui.edit_game_tags(*shown[result[1]][1:3])
+                frozen = shown
             elif tagui.handle_key(result[0], {r[1] for r in listed}, place):
                 pass
             elif result[1] is not None:

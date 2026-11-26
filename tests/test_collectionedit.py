@@ -678,6 +678,12 @@ class AllRows(unittest.TestCase):
         _, rows = self.rows(gba=frozenset())
         self.assertFalse([r for r in rows if r[1].startswith("gba/")])
 
+    def test_toggle_all_hint_names_s_and_c_once(self):
+        seen = []
+        with mock.patch.object(picker, "filter_list", lambda t, labels, **k: seen.append(k) or [False]):
+            listedit.toggle_all("t", [({**SYSTEMS[0], "games": []}, "gba/Ruby.zip", "Ruby", "Ruby")])
+        self.assertEqual(seen[0]["hint"].count("s tag"), 1)
+
     def test_toggle_all_leaves_s_and_c_to_the_sticky_filter(self):
         _, rows = self.rows()
         with mock.patch.object(edit, "toggle_games", return_value=None) as fake:
