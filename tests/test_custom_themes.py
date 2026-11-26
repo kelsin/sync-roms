@@ -96,7 +96,10 @@ def _cached(real):
 
 
 class CachedBuilds:
-    """Mixin: cache_builds() swaps each style's real build (covered by Build and PublishRealBuild) for copies of one build."""
+    """Mixin: cache_builds() swaps each style's real build (covered by Build and PublishRealBuild) for copies of one build.
+
+    Patching a build internal (pixel_build.preview, a helper, the font) while the cache is active would silently get
+    stale cached output, so such tests belong in a real-build class like PublishRealBuild."""
 
     def cache_builds(self):
         for module in custom_themes.STYLES.values():
