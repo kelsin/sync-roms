@@ -9,7 +9,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import helpers  # noqa: E402
-from sync_roms import ignore, tags  # noqa: E402
+from sync_roms import ignore, runtime, tags  # noqa: E402
 
 TOOLS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tools")
 export_tool = helpers.load_script(os.path.join(TOOLS, "export_tag_review.py"))
@@ -107,6 +107,29 @@ class Summary(helpers.StorageFolder):
         self.assertEqual(result["conflicts"], [(B, "cave")])
         self.assertIn("add and remove", apply_tool.summary_text(vocab, games, result))
 
+    def test_conflicts_only_for_keys_that_survive_the_checks(self):
+        vocab, games = fixture()
+        disc = "nes/A (Disc 2).zip"
+        games[disc] = {"title": "A 2", "tags": set()}
+        both = lambda k: {"add": {k: ["cave"]}, "remove": {k: ["cave"]}}  # noqa: E731
+        for key in (disc, "nes/Z.zip"):
+            self.assertEqual(apply_tool.plan(vocab, games, [both(key)])["conflicts"], [])
+        self.assertEqual(apply_tool.plan(vocab, games, [both(B)])["conflicts"], [(B, "cave")])
+        self.assertEqual(apply_tool.plan(vocab, games, [both(B)], skip_tags={"cave"})["conflicts"], [])
+
+    def test_tag_deleted_since_the_export_is_ignored_and_reported(self):
+        vocab, games = fixture()
+        vocab["gone"] = {"name": "Gone", "description": ""}
+        result = apply_tool.plan(vocab, games, [{"add": {B: ["gone", "cave"]}}])
+        self.assertEqual((result["changes"], result["deleted_tags"], result["unknown_tags"]),
+                         ({B: (["cave"], [])}, ["gone"], []))
+        self.assertIn("deleted since the export: gone", apply_tool.summary_text(vocab, games, result))
+
+    def test_plan_fails_when_storage_tags_cant_be_read(self):
+        vocab, games = fixture()
+        with mock.patch.object(apply_tool.shared, "load", side_effect=OSError("boom")), self.assertRaises(OSError):
+            apply_tool.plan(vocab, games, [{"add": {B: ["cave"]}}])
+
     def test_export_leaves_out_a_records_file_keys(self):
         self.put(A, 1)
         self.put("nes/A (Disc 2).zip", 1)
@@ -181,9 +204,16 @@ class Apply(helpers.StorageFolder):
                     apply_tool.main([self.out, flag])
             setup.assert_called_once()
         with mock.patch.object(apply_tool.usersettings, "apply_settings"), \
-                mock.patch.object(apply_tool.runtime, "ROOT", os.path.join(self.out, "missing")), \
+                mock.patch.object(runtime, "ROOT", os.path.join(self.out, "missing")), \
                 self.assertRaises(SystemExit):
             apply_tool.main([self.out, "--summary"])
+
+    def test_main_exits_1_when_storage_tags_cant_be_read(self):
+        write(os.path.join(self.out, "proposals", "nes-1.json"), {"add": {B: ["cave"]}})
+        with mock.patch.object(apply_tool.shared, "load", side_effect=OSError("boom")), \
+                contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as cm:
+            self.run_tool("--summary")
+        self.assertEqual(cm.exception.code, 1)
 
     def test_summary_writes_nothing(self):
         write(os.path.join(self.out, "proposals", "nes-1.json"), {"add": {B: ["cave"]}})

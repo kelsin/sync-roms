@@ -23,8 +23,10 @@ uv run --frozen python .claude/skills/update-variants/scripts/find_candidates.py
 ```
 
 The output has:
-- `matches`: tagged games (`game`, `title`, `system`, `tags`, existing `variants`) with `candidates`, ROMs no game
-  record lists (as its key, an extra file or a variant) whose title or arcade clone family matches. A multi-disc candidate's discs
+- `matches`: tagged games (`game`, `title`, `system`, `tags`, existing `variants`) with `candidates`, ROMs
+  whose title or arcade clone family matches and that are not a file or variant of any record. A ROM tagged on its own (a
+  record key) is still offered for another game it is a version of, never for itself, its own files or a game that
+  already lists it as a variant. A multi-disc candidate's discs
   are in its `files`.
 - `stale`: variants whose ROM is no longer in storage.
 - `unmatched`: how many new ROMs matched no tagged game. They are not judged or recorded; mention the count.
@@ -84,5 +86,5 @@ mounted. Rejected candidates go in `checked` so later runs skip them; candidates
 left out. There is nothing to commit: report the games it changed (the last line of its output), any skipped games
 and any problems `sync-roms check` shows.
 
-`find_candidates.py --baseline` marks every ROM no game record lists as checked without judging it. Use it only when the user
+`find_candidates.py --baseline` marks every ROM that is no record's file or variant as checked without judging it. Use it only when the user
 asks to skip the backlog.
