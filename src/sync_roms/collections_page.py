@@ -4,7 +4,7 @@ import io
 import json
 import os
 
-from . import collections, names, s3, store, tags, themeart, ui
+from . import collections, inventory, names, s3, scrape_plan, store, tags, themeart, ui
 
 QUALITY = 80
 BAND_WIDTH = 150
@@ -45,26 +45,67 @@ def _tag_definitions():
         return {}
 
 
+def _system_sizes(system):
+    """(ROM sizes {key: bytes}, art bytes per ROM {key without extension: bytes}) of one system, from one listing of
+    its folder and one of scrapes/<system>/ (inventory's, so the cache when there is one). Art is the scraped media
+    only: not the Onion or Spruce pictures made from it, not metadata or state files."""
+    roms = {k: v for k, v in inventory.files(f"{system}/").items() if isinstance(v, int)}
+    art = {}
+    for key, size in scrape_plan.scrape_listing(system).items():
+        entry = scrape_plan.media_entry(key)
+        if entry and entry[1] in scrape_plan.MEDIA_TYPES and isinstance(size, int):
+            stem = f"{system}/{entry[0]}"
+            art[stem] = art.get(stem, 0) + size
+    return roms, art
+
+
+def _sizes(systems):
+    """{system: _system_sizes}; {} (every size unknown) when storage isn't reachable."""
+    try:
+        return {s: _system_sizes(s) for s in sorted(systems)}
+    except (SystemExit, *s3.ERRORS):
+        ui.warn("Storage isn't reachable, so the page has no sizes.")
+        return {}
+
+
+def _game_size(paths, listed):
+    """{"rom", "art"} bytes of a game's files (listed: _system_sizes of its system), or None when storage has none of them."""
+    if listed is None:
+        return None
+    roms, art = listed
+    found = [p for p in paths if p in roms]
+    if not found:
+        return None
+    return {"rom": sum(roms[p] for p in found), "art": sum(art.get(os.path.splitext(p)[0], 0) for p in found)}
+
+
 def page_data():
     """{"tags", "systems", "collections"} for the page, collections in load_collections() order."""
     defined = _tag_definitions()
     system_names = {s["bucket"]: s["name"] for s in store.repo_json("systems")}
+    loaded = collections.load_collections()
+    sizes = _sizes({g["bucket"].partition("/")[0] for c in loaded for g in c["games"]})
     used, out = set(), []
-    for collection in collections.load_collections():
+    for collection in loaded:
         games = []
         for game in collection["games"]:
             bucket = game["bucket"]
             system = bucket.partition("/")[0]
             used.add(system)
             title = game.get("title")
-            games.append({"title": title if isinstance(title, str) and title else names.title(bucket),
-                          "system": system,
-                          "paths": [bucket, *game.get("files", ())],
-                          "tags": [t for t in tags.tags_of(bucket) if t in defined] if defined else []})
+            paths = [bucket, *game.get("files", ())]
+            entry = {"title": title if isinstance(title, str) and title else names.title(bucket),
+                     "system": system, "paths": paths,
+                     "tags": [t for t in tags.tags_of(bucket) if t in defined] if defined else []}
+            size = _game_size(paths, sizes.get(system))
+            if size:
+                entry["size"] = size
+            games.append(entry)
         games.sort(key=lambda g: store.sort_key(g["title"]))
         art_id = collection.get("art") or collection["id"]
         out.append({"id": collection["id"], "name": collection["name"], "description": collection["description"],
-                    "art": _art(art_id), "games": games})
+                    "art": _art(art_id), "size": {k: sum(g.get("size", {}).get(k, 0) for g in games) for k in ("rom", "art")},
+                    "games": games})
     return {"tags": {i: {"name": t["name"], "emoji": t["emoji"]} for i, t in defined.items()},
             "systems": {s: system_names.get(s, s) for s in sorted(used)},
             "collections": out}

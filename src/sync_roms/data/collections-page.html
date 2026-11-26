@@ -108,6 +108,9 @@ input:focus-visible, select:focus-visible, button:focus-visible, [role="button"]
 .rtags span { cursor: default; }
 .pics { display: flex; gap: 8px; align-items: center; justify-content: flex-end; height: 120px; }
 .pics img { display: block; height: 100%; width: auto; flex: none; border-radius: 6px; }
+.pills { margin: 8px 0 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.pill { border: 1px solid var(--border); background: var(--surface-2); border-radius: 999px; padding: 1px 10px; font-size: 13px; color: var(--muted); white-space: nowrap; }
+.pill b { color: var(--text); font-weight: 600; }
 .tablewrap { overflow-x: auto; }
 table.games { width: 100%; border-collapse: collapse; }
 .games th, .games td { padding: 8px 14px; text-align: left; vertical-align: middle; }
@@ -118,6 +121,17 @@ table.games { width: 100%; border-collapse: collapse; }
 .games td { border-top: 1px solid var(--border); }
 .games tbody tr:nth-child(even) { background: var(--surface-2); }
 .games .col-system { width: 22%; color: var(--muted); }
+.games .col-size { width: 96px; text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.games th.col-size { text-align: right; }
+.size-val { cursor: help; border-bottom: 1px dotted var(--muted); }
+.size-none { color: var(--muted); }
+.size-pop {
+  position: fixed; z-index: 5; background: var(--surface); color: var(--text); border: 1px solid var(--border);
+  border-radius: 8px; box-shadow: var(--shadow); padding: 8px 12px; font-size: 13px; pointer-events: none;
+  display: grid; grid-template-columns: auto auto; gap: 2px 14px; text-align: right; font-variant-numeric: tabular-nums;
+}
+.size-pop span:nth-child(odd) { text-align: left; color: var(--muted); }
+.size-pop .sum { border-top: 1px solid var(--border); padding-top: 3px; margin-top: 2px; color: var(--text); font-weight: 600; }
 .games .col-tags { width: 150px; }
 .games .col-copy { width: 90px; text-align: right; }
 .games .title { overflow-wrap: anywhere; }
@@ -135,6 +149,8 @@ table.games { width: 100%; border-collapse: collapse; }
   .name { font-size: 20px; }
   .games th, .games td { padding: 8px 10px; }
   .games .col-system { display: none; }
+  .games .col-size { width: 74px; }
+  .pill { font-size: 12px; padding: 0 8px; }
   .games .col-tags { width: 84px; }
   .games .col-copy { width: 76px; }
   .sys-inline { display: block; }
@@ -184,6 +200,35 @@ table.games { width: 100%; border-collapse: collapse; }
   }
   function plural(n, word) { return n + " " + word + (n === 1 ? "" : "s"); }
   function byName(a, b) { return a.name.localeCompare(b.name); }
+  function formatSize(n) {
+    var units = ["B", "KB", "MB", "GB", "TB"], i = 0;
+    while (n >= 1024 && i < units.length - 1) { n /= 1024; i++; }
+    return (i === 0 ? String(n) : n.toFixed(n < 10 ? 2 : n < 100 ? 1 : 0)) + " " + units[i];
+  }
+  function sizeTotal(game) { return game.size ? game.size.rom + game.size.art : -1; }
+
+  var pop = el("div", "size-pop");
+  pop.hidden = true;
+  document.body.appendChild(pop);
+  function showPop(target, size) {
+    pop.textContent = "";
+    [["ROM", size.rom], ["Art data", size.art], ["Total", size.rom + size.art]].forEach(function (r) {
+      var cls = r[0] === "Total" ? "sum" : "";
+      pop.appendChild(el("span", cls, r[0]));
+      pop.appendChild(el("span", cls, formatSize(r[1])));
+    });
+    pop.hidden = false;
+    var box = target.getBoundingClientRect(), width = pop.offsetWidth, height = pop.offsetHeight;
+    var left = Math.max(8, Math.min(box.right - width, window.innerWidth - width - 8));
+    var top = box.bottom + 6 + height > window.innerHeight ? box.top - height - 6 : box.bottom + 6;
+    pop.style.left = left + "px";
+    pop.style.top = Math.max(8, top) + "px";
+  }
+  function hidePop() { pop.hidden = true; }
+  window.addEventListener("scroll", hidePop, {passive: true});
+  document.addEventListener("click", function (event) {
+    if (!event.target.classList || !event.target.classList.contains("size-val")) hidePop();
+  });
 
   var select = document.getElementById("system");
   var all = el("option", "", "All systems");
@@ -293,6 +338,22 @@ table.games { width: 100%; border-collapse: collapse; }
     name.appendChild(el("div", "sys-inline", systems[game.system] || game.system));
     row.appendChild(name);
     row.appendChild(el("td", "col-system", systems[game.system] || game.system));
+    var sizeCell = el("td", "col-size");
+    if (game.size) {
+      var val = el("span", "size-val", formatSize(sizeTotal(game)));
+      val.tabIndex = 0;
+      val.setAttribute("aria-label", "Size " + formatSize(sizeTotal(game)) + ": ROM " + formatSize(game.size.rom) +
+        ", art data " + formatSize(game.size.art));
+      val.addEventListener("mouseenter", function () { showPop(val, game.size); });
+      val.addEventListener("mouseleave", hidePop);
+      val.addEventListener("focus", function () { showPop(val, game.size); });
+      val.addEventListener("blur", hidePop);
+      val.addEventListener("click", function () { showPop(val, game.size); });
+      sizeCell.appendChild(val);
+    } else {
+      sizeCell.appendChild(el("span", "size-none", "\u2014"));
+    }
+    row.appendChild(sizeCell);
     var tagCell = el("td", "col-tags cell-tags");
     (game.tags || []).forEach(function (id) {
       var def = tagDefs[id];
@@ -344,6 +405,15 @@ table.games { width: 100%; border-collapse: collapse; }
     if (c.description) text.appendChild(el("p", "desc", c.description));
     var meta = el("p", "meta");
     text.appendChild(meta);
+    if (c.size && (c.games || []).some(function (g) { return g.size; })) {
+      var pills = el("div", "pills");
+      [["Total", c.size.rom + c.size.art], ["ROMs", c.size.rom], ["Art data", c.size.art]].forEach(function (p) {
+        var pill = el("span", "pill", p[0] + " ");
+        pill.appendChild(el("b", "", formatSize(p[1])));
+        pills.appendChild(pill);
+      });
+      text.appendChild(pills);
+    }
     var tagBox = el("div", "rtags");
     tagsOf(c).forEach(function (t) {
       var span = el("span", "", t.emoji);
@@ -387,7 +457,7 @@ table.games { width: 100%; border-collapse: collapse; }
     var table = el("table", "games");
     var tr = el("tr");
     entry.ths = {};
-    [["name", "Name", ""], ["system", "System", "col-system"], [null, "Tags", "col-tags"], [null, "", "col-copy"]]
+    [["name", "Name", ""], ["system", "System", "col-system"], ["size", "Size", "col-size"], [null, "Tags", "col-tags"], [null, "", "col-copy"]]
       .forEach(function (col) {
         var th = el("th", col[2]);
         th.scope = "col";
@@ -396,7 +466,7 @@ table.games { width: 100%; border-collapse: collapse; }
           button.type = "button";
           button.addEventListener("click", function () {
             if (sortKey === col[0]) sortDir = -sortDir;
-            else { sortKey = col[0]; sortDir = 1; }
+            else { sortKey = col[0]; sortDir = col[0] === "size" ? -1 : 1; }
             cards.forEach(function (other) { if (other.body) renderTable(other); });
           });
           th.appendChild(button);
@@ -428,6 +498,11 @@ table.games { width: 100%; border-collapse: collapse; }
     var rows = entry.matching.slice();
     rows.sort(function (a, b) {
       var order = 0;
+      if (sortKey === "size") {  // no known size sorts last in either direction
+        var sa = sizeTotal(a.game), sb = sizeTotal(b.game);
+        if ((sa < 0) !== (sb < 0)) return sa < 0 ? 1 : -1;
+        return (sa - sb) * sortDir || a.index - b.index;
+      }
       if (sortKey === "system") {
         order = (systems[a.game.system] || a.game.system).localeCompare(systems[b.game.system] || b.game.system);
       }
@@ -441,7 +516,7 @@ table.games { width: 100%; border-collapse: collapse; }
     if (!rows.length) {
       var none = el("tr", "nomatch");
       var cell = el("td", "", "No games match the filters");
-      cell.colSpan = 4;
+      cell.colSpan = 5;
       none.appendChild(cell);
       entry.tbody.appendChild(none);
     }
