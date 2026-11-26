@@ -16,16 +16,22 @@ DATA = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
 
 def build(base_dir, out_dir, palette=None):
     """Write <out_dir>/ToTK - James/ (replacing it): the base with the art laid over it. Returns that path."""
-    dest = os.path.join(out_dir, STYLE)
+    return build_named(base_dir, out_dir, STYLE, "bg-title.png")
+
+
+def build_named(base_dir, out_dir, style, title):
+    """Write <out_dir>/<style>/ (replacing it): the base with the cards and DATA's title picture `title` laid over it,
+    named style. Returns that path."""
+    dest = os.path.join(out_dir, style)
     if os.path.lexists(dest):
         shutil.rmtree(dest)
     shutil.copytree(base_dir, dest)
     skin = os.path.join(dest, "skin")
     os.makedirs(skin, exist_ok=True)
-    shutil.copyfile(os.path.join(DATA, "bg-title.png"), os.path.join(skin, "bg-title.png"))
+    shutil.copyfile(os.path.join(DATA, title), os.path.join(skin, "bg-title.png"))
     preview = os.path.join(dest, "preview.png")
     if os.path.isfile(preview):  # the base's preview is a screenshot with its bg-title.png drawn at the top left
-        with Image.open(preview) as shot, Image.open(os.path.join(DATA, "bg-title.png")) as title:
+        with Image.open(preview) as shot, Image.open(os.path.join(DATA, title)) as title:
             mode, shot = shot.mode, shot.convert("RGBA")
             shot.paste(title.convert("RGBA"), (0, 0))
             shot.convert(mode).save(preview)
@@ -40,7 +46,7 @@ def build(base_dir, out_dir, palette=None):
         if name.startswith("config") and name.endswith(".json") and os.path.isfile(path):
             with open(path, encoding="utf-8-sig") as f:
                 config = json.load(f)
-            config["name"] = STYLE
+            config["name"] = style
             config["mainMenuTitle"] = ""
             config["collectionsEnabled"] = True  # PyUI's Show Collections, off when the theme doesn't set it
             with open(path, "w", encoding="utf-8") as f:

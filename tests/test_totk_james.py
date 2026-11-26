@@ -9,7 +9,7 @@ import helpers  # noqa: E402,F401  (imports isolate first)
 from PIL import Image  # noqa: E402
 
 import sync_roms  # noqa: E402
-from sync_roms.custom_themes import totk_james  # noqa: E402
+from sync_roms.custom_themes import totk_james, totk_kelsin  # noqa: E402
 
 DATA = os.path.join(os.path.dirname(sync_roms.__file__), "data", "themes", "totk-james")
 
@@ -23,8 +23,9 @@ class ArtData(unittest.TestCase):
                     self.assertEqual(im.mode, "RGBA")
 
     def test_title_size(self):
-        with Image.open(os.path.join(DATA, "bg-title.png")) as im:
-            self.assertEqual(im.size, (196, 51))
+        for name in ("bg-title.png", "bg-title-kelsin.png"):
+            with Image.open(os.path.join(DATA, name)) as im:
+                self.assertEqual(im.size, (196, 51))
 
 
 def read(path):
@@ -87,6 +88,20 @@ class Build(unittest.TestCase):
             self.assertEqual(preview.convert("RGB").crop((0, 0, 196, 51)).tobytes(), title.convert("RGB").tobytes())
             self.assertEqual(preview.convert("RGB").getpixel((196, 0)), (9, 80, 7))
             self.assertEqual(preview.convert("RGB").getpixel((0, 51)), (9, 80, 7))
+
+    def test_kelsin_build(self):
+        self.config(json.dumps({"name": "ToTK"}))
+        Image.new("RGB", (640, 480), (9, 80, 7)).save(os.path.join(self.base, "preview.png"))
+        dest = totk_kelsin.build(self.base, self.out)
+        self.assertEqual(dest, os.path.join(self.out, "ToTK - Kelsin"))
+        title = os.path.join(DATA, "bg-title-kelsin.png")
+        self.assertEqual(read(os.path.join(dest, "skin", "bg-title.png")), read(title))
+        self.assertEqual(read(os.path.join(dest, "skin", "ic-collection-f.png")),
+                         read(os.path.join(DATA, "cards", "rauru-f.png")))
+        with Image.open(os.path.join(dest, "preview.png")) as preview, Image.open(title) as im:
+            self.assertEqual(preview.convert("RGB").crop((0, 0, 196, 51)).tobytes(), im.convert("RGB").tobytes())
+        with open(os.path.join(dest, "config.json"), encoding="utf-8") as f:
+            self.assertEqual(json.load(f)["name"], "ToTK - Kelsin")
 
     def test_no_preview_in_base(self):
         self.config("{}")

@@ -1,7 +1,7 @@
-# ToTK - James theme art
+# ToTK - James and ToTK - Kelsin theme art
 
 - `cards/<id>-f.png` and `cards/<id>-n.png` (`sidon`, `riju`, `mineru`, `rauru`): focused and normal main menu cards, 156x328.
-- `bg-title.png`: the Triforce and "James" in the ToTK theme's own font, 196x51.
+- `bg-title.png` and `bg-title-kelsin.png`: the Triforce and "James" (`ToTK - James`) or "Kelsin" (`ToTK - Kelsin`) in the ToTK theme's own font, 196x51.
 - `collections/Imgs|Imgs_med|Imgs_small/<id>.png`: ToTK-style collection art for spruce cards (336x480, 210x300, 140x200), from the outline drawings of `tools/gen_theme_art.py`. Regenerate with `uv run python tools/gen_zelda_art.py` (reads HYLIA from the ToTK theme; `--sheet` writes a contact sheet to the cache).
 
 Regenerate with `uv run python tools/gen_totk_james.py` (reads the ToTK theme from storage, downloads the renders into the cache, writes a review sheet there).
