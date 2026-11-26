@@ -941,6 +941,22 @@ def pokemon(p):  # pikachu
     p.c([(-5, -2.5), (-2.5, 0.5), (0, -2), (2.5, 0.5), (5, -2.5)])
 
 
+def pokemon_spin_offs(p):  # the snap camera, its lens a poke ball
+    p.rr(-38, -30, -16, -12, 3)
+    p.rr(22, -26, 34, -12, 2)
+    p.rr(-46, -18, 46, 30, 6, opaque=True)
+    p.rr(-39, -10, -26, 0, 2.5)
+    p.o(12, 6, 27, opaque=True)
+    ball = arc(12, 6, 19, 19, 0, 360)
+    p.path(ball, True)
+    with p.inside(ball):
+        p.l([(-20, 6), (44, 6)], 0)
+    p.o(12, 6, 6.5, opaque=True)
+    p.o(12, 6, 2.2)
+    p.o(12, 6, 0.8)
+    p.sparkle(-30, -42, 6)
+
+
 def resident_evil(p):  # umbrella
     scallops = []
     for x in (44, 22, 0, -22):
@@ -1388,6 +1404,103 @@ def ace_attorney(p):  # the attorney's badge: scales on a sunflower
         p.l([(s * 10, 5), (s * 16, -8), (s * 22, 5)], 0)
 
 
+def golden_axe(p):  # gilius's double-bit battle axe: two crescent blades on a socket, a top spike and a wrapped haft
+    p.rr(-4, -16, 4, 42, 2)
+    blade = (arc(12, -27, 34, 31, -62, 62) + spline([(28, 0), (20, -12), (4, -19)])[1:]
+             + [(4, -35)] + spline([(4, -35), (20, -42), (28, -54)])[1:-1])
+    for s in (1, -1):
+        shape = blade if s == 1 else mirror(blade)
+        p.path(shape, True)
+        with p.inside(shape):
+            p.path([(s * x, y) for x, y in arc(12, -27, 26, 24, -66, 66)])
+    p.pg([(-5, -40), (0, -55), (5, -40)], 1.2)
+    p.rr(-8, -42, 8, -12, 2.5, opaque=True)
+    p.o(0, -27, 3.4)
+    p.rr(-7, 12, 7, 18, 2, opaque=True)
+    grip = [(-4, 18), (4, 18), (4, 42), (-4, 42)]
+    with p.inside(grip):
+        p.l([(-6, 20), (6, 26), (-6, 32), (6, 38), (-6, 44)], 0)
+    p.o(0, 47, 5.5, opaque=True)
+
+
+def streets_of_rage(p):  # the police cruiser called in for the special attack, its roof light flashing
+    body = rounded([(-45, -1), (-42, -7), (-25, -8), (-16, -24), (7, -24), (19, -8), (41, -5), (45, 1), (45, 10),
+                    (-45, 10)], 3)
+    p.path(body, True)
+    p.pg([(-18, -11), (-12, -19), (-6.5, -19), (-6.5, -11)], 2)
+    p.l([(-1.5, -19), (-1.5, 10)], 0)  # the door seam, and the front window's back edge
+    p.l([(-1.5, -19), (3, -19), (10, -11), (-1.5, -11)], 2)
+    p.pg(star(9, 1, 5.5, 2.4), 0.6)
+    p.path(arc(-5, -24, 8, 6, 180, 360))
+    for a in (-160, -125, -90, -55, -20):
+        p.l(turn([(-5 + 12, -24), (-5 + 18, -24)], a, -5, -24), 0)
+    for x in (-27, 27):
+        p.o(x, 12, 10, opaque=True)
+        p.o(x, 12, 4)
+
+
+def dragon_ball(p):  # the four-star dragon ball, glowing
+    p.o(0, 0, 33)
+    for x, y in [(0, -14), (-14, 0), (14, 0), (0, 14)]:
+        p.pg(star(x, y, 8, 3.6), 0.8)
+    p.o(-19, -19, 5.5, 2.8, -45)
+    for a in range(0, 360, 30):
+        r = 48 if a % 60 == 0 else 44
+        p.l(turn([(39, 0), (r, 0)], a))
+
+
+def disney(p):  # the fairy-tale castle: a tall spire between two turrets, a pennant and a sparkle
+    p.l([(-11, 10), (-11, -16), (11, -16), (11, 10)], 0)
+    p.pg([(-15, -16), (0, -46), (15, -16)], 1.5, opaque=True)
+    p.l([(0, -46), (0, -56)], 0)
+    p.pg([(0, -56), (12, -52.5), (0, -49)], 1)
+    p.path(arc(0, -3, 4, 4, 180, 360) + [(4, 4), (-4, 4)], True)
+    p.l([(-26, 10), (26, 10)], 0)
+    p.l([(-26, 44), (26, 44)], 0)
+    p.path([(-8, 44)] + arc(0, 30, 8, 8, 180, 360) + [(8, 44)])
+    for s in (1, -1):
+        p.l([(s * 26, -6), (s * 26, 44), (s * 42, 44), (s * 42, -6)], 0)
+        p.pg([(s * 23, -6), (s * 34, -32), (s * 45, -6)], 1.5, opaque=True)
+        p.path(arc(s * 34, 10, 3.5, 3.5, 180, 360) + [(s * 34 + 3.5, 18), (s * 34 - 3.5, 18)], True)
+    p.sparkle(30, -46, 7)
+
+
+def namco(p):  # galaga's fighter from above, its red-tipped cannons pointing up
+    half = [(0, -48), (4, -38), (5, -18), (11, -6), (31, 10), (31, -18), (35, -26), (39, -18), (39, 30), (35, 35),
+            (31, 28), (12, 20), (8, 32)]
+    p.pg(half + mirror(half[::-1])[:-1], 1.5)
+    p.o(0, 2, 4, 7)
+    for s in (1, -1):
+        p.l([(31 * s, -12), (39 * s, -12)], 0)
+
+
+def teenage_mutant_ninja_turtles(p):  # a turtle's head in the bandana mask, its knot tails flying out behind
+    p.pg([(37, -16), (63, 6), (57, 13), (33, -10)], 2)
+    p.pg([(33, -17), (58, -38), (64, -29), (37, -10)], 2, opaque=True)
+    half = [(0, -42), (16, -39), (28, -30), (34, -16), (36, 0), (35, 14), (30, 27), (18, 36), (0, 39)]
+    head = spline(half + mirror(half[::-1])[1:-1], closed=True)
+    p.path(head, True, opaque=True)
+    with p.inside(head):
+        p.c([(-40, -27), (0, -20), (40, -27)])
+        p.c([(-40, -1), (0, 6), (40, -1)])
+    eye = [(5, -11), (24, -17), (23, -6), (8, -4)]
+    p.pg(eye, 2.5)
+    p.pg(mirror(eye), 2.5)
+    p.c([(-28, 11), (-15, 20), (0, 23), (15, 20), (28, 11)])
+    p.o(36, -13, 6, opaque=True)
+
+
+def bomberman(p):  # the series' round bomb with its fuse lit
+    cx, cy, r, a = -4, 8, 32, -50
+    p.o(cx, cy, r)
+    ux, uy = math.cos(math.radians(a)), math.sin(math.radians(a))
+    p.rr(cx + 28.5 * ux - 9, cy + 28.5 * uy - 11, cx + 28.5 * ux + 9, cy + 28.5 * uy, 2.5, rot=a + 90, opaque=True)
+    p.path(arc(cx, cy, 21, 21, 196, 244))
+    top = (cx + 39 * ux, cy + 39 * uy)
+    p.c([top, (top[0] + 2, top[1] - 9), (top[0] + 9, top[1] - 15), (top[0] + 18, top[1] - 14)])
+    p.pg(star(top[0] + 19, top[1] - 14, 9, 4, 6), 0.8, opaque=True)
+
+
 # id: (drawing, band colour, rotation in degrees, scale, offset in px)
 ART = {
     "adventure": (adventure, (44, 146, 118), -6, 1.0, (0, 0)),
@@ -1497,6 +1610,14 @@ ART = {
     "survival-horror": (survival_horror, (58, 62, 70), -24, 1.0, (-24, 0)),
     "system-essentials": (system_essentials, (72, 128, 180), -7, 1.0, (0, 0)),
     "zelda": (zelda, (52, 140, 84), -6, 1.0, (0, 0)),
+    "golden-axe": (golden_axe, (176, 128, 36), 18, 0.9, (-14, 0)),
+    "streets-of-rage": (streets_of_rage, (36, 70, 150), -6, 1.0, (-16, 10)),
+    "dragon-ball": (dragon_ball, (232, 128, 30), 0, 1.0, (-24, 0)),
+    "disney": (disney, (56, 82, 176), -6, 1.0, (-26, 0)),
+    "namco": (namco, (166, 52, 74), -6, 1.0, (-10, 0)),
+    "teenage-mutant-ninja-turtles": (teenage_mutant_ninja_turtles, (128, 56, 112), -6, 0.9, (-36, 0)),
+    "bomberman": (bomberman, (70, 64, 176), -6, 1.0, (-26, 0)),
+    "pokemon-spin-offs": (pokemon_spin_offs, (60, 128, 196), -6, 0.9, (-6, 0)),
 }
 
 
