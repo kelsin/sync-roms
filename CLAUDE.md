@@ -151,7 +151,7 @@ Old personal sets in `sets/` (and any `sets/` folder in storage) are left on dis
 
 Tags come only from storage: `tags.json` at the storage root, read through `tags.py` (`shared.load`, once per run) and written only with `shared.update`, so machines merge; `~/.sync-roms/storage/` mirrors it. A tag put on a game by another machine appears after `sync-roms cache update`. `sync-roms check` validates the file.
 
-`tags.json` is `{"tags", "games", "declined"}`. `tags` maps a tag id (a lowercase slug) to `{"name", "emoji", "description"?, "art"?}`: name and emoji are required and an emoji belongs to one tag; `art` is an `art.json` id and without it a tag uses the art under its own id. `games` maps a bucket key (`<system>/<file>`) to `{"tags": [ids], "files"?, "variants"?}`: `files` are the other storage keys toggled with the game (a multi-disc game's discs), `variants` are `[{"bucket", "note"}]`. The system is the key's folder and titles come from `names.title`, so neither is stored. A record with no tags and no variants is removed. `declined` is `{key: [tag ids]}`: genre suggestions turned down. Tags only help find games: a tag never puts a game on a card.
+`tags.json` is `{"tags", "games", "declined"}`. `tags` maps a tag id (a lowercase slug) to `{"name", "emoji", "description"?}`: name and emoji are required and an emoji belongs to one tag. `games` maps a bucket key (`<system>/<file>`) to `{"tags": [ids], "files"?, "variants"?}`: `files` are the other storage keys toggled with the game (a multi-disc game's discs), `variants` are `[{"bucket", "note"}]`. The system is the key's folder and titles come from `names.title`, so neither is stored. A record with no tags and no variants is removed. `declined` is `{key: [tag ids]}`: genre suggestions turned down. Tags only help find games: a tag never puts a game on a card.
 
 A collection file (see Personal data) is `{"name", "description"?, "art"?, "games"}` (its games may carry a `note`) with its own loader and schema.
 
@@ -224,7 +224,7 @@ Rules for tagged games:
 
 `src/sync_roms/data/themes/art-book-next/` holds:
 
-- `art.json`: the art ids, one per tag among them (`surprise` has art too).
+- `art.json`: the art ids, one per tag id among them (`surprise` has art too); a tag record holds no art, collections pick it.
 - `art/<id>.png`, drawn by `tools/gen_theme_art.py`, with a generated `art/README.md` gallery for GitHub that sync never copies.
 - `art-box/Imgs|Imgs_med|Imgs_small/<id>.png`: retro game boxes for SpruceOS, 336x480, 210x300 and 140x200, drawn by `tools/gen_box_art.py` from `sprites/<id>.txt` (32x32 pixel sprites, colours in `box-palette.json`) with the art's title in `box-font.json` and a badge picked by the id's hash. Run it after changing a sprite and commit both.
 - `../totk-james/collections/Imgs|Imgs_med|Imgs_small/<id>.png`: ToTK-style collection art (gold glowing outline drawings from `gen_theme_art.py` on the theme's swirl card, title in its HYLIA font), 336x480, 210x300 and 140x200 128-colour palette PNGs, drawn by `tools/gen_zelda_art.py` (reads HYLIA from the ToTK theme in storage). Sync uses it instead of `art-box/` on `spruce` cards whose `spruce_theme` is `ToTK` or `ToTK - James`. Run it after changing a drawing or a title and commit both.
@@ -271,7 +271,7 @@ Checking:
 
 - Never finish without looking at the result. Read the generated PNG (the drawing is in y 600..1050), and also crop that part and enlarge it 2x to check every join, line end and overlap.
 - Compare with the pictures next to it in a contact sheet of all of `art/`, and show the user that sheet or the changed pictures. Keep review images out of the commit.
-- The tests check that every `art.json` id has a PNG in `art/`, a sprite (and no sprite lacks an id), the three `art-box/` sizes (equal to what the sprite renders to), the three `totk-james/collections/` sizes and its own emoji; `sync-roms check` notes tags that have no art or share one.
+- The tests check that every `art.json` id has a PNG in `art/`, a sprite (and no sprite lacks an id), the three `art-box/` sizes (equal to what the sprite renders to), the three `totk-james/collections/` sizes and its own emoji.
 
 ## Devices
 
