@@ -132,6 +132,21 @@ table.games { width: 100%; border-collapse: collapse; }
 }
 .size-pop span:nth-child(odd) { text-align: left; color: var(--muted); }
 .size-pop .sum { border-top: 1px solid var(--border); padding-top: 3px; margin-top: 2px; color: var(--text); font-weight: 600; }
+.games .col-art { width: 56px; padding-right: 0; }
+.thumb {
+  display: flex; align-items: center; justify-content: center; width: 42px; height: 56px; border-radius: 4px;
+  background: var(--surface-2); border: 1px solid var(--border); overflow: hidden; cursor: zoom-in;
+}
+.thumb img { max-width: 100%; max-height: 100%; display: block; }
+.thumb.none { cursor: default; color: var(--muted); font-size: 18px; }
+.art-pop {
+  position: fixed; z-index: 7; pointer-events: none; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; box-shadow: var(--shadow); padding: 8px; width: 316px;
+}
+.art-pop img { display: block; width: 300px; height: auto; border-radius: 6px; }
+.art-pop .cap { font-size: 12px; color: var(--muted); padding: 6px 2px 0; }
+.credit { margin-top: 32px; text-align: center; font-size: 13px; color: var(--muted); }
+.credit a { color: inherit; }
 .games .col-tags { width: 1%; white-space: nowrap; }
 .games .col-copy { width: 122px; text-align: right; }
 .games .title { overflow-wrap: anywhere; }
@@ -149,6 +164,8 @@ table.games { width: 100%; border-collapse: collapse; }
   .name { font-size: 24px; }
   .games th, .games td { padding: 8px 10px; }
   .games .col-system { display: none; }
+  .games .col-art { width: 46px; }
+  .thumb { width: 34px; height: 46px; }
   .games .col-year { width: 56px; }
   .games .col-size { width: 74px; }
   .pill { font-size: 12px; padding: 2px 8px; }

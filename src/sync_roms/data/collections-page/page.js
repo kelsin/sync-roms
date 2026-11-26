@@ -5,6 +5,7 @@
   var systems = data.systems || {};
   var list = data.collections || [];
   var hasPaths = list.some(function (c) { return (c.games || []).some(function (g) { return (g.paths || []).length; }); });
+  var hasArt = list.some(function (c) { return (c.games || []).some(function (g) { return g.img; }); });
   var pressed = new Set();
   var cards = [];
   var current = null;
@@ -41,7 +42,37 @@
     pop.style.left = left + "px";
     pop.style.top = Math.max(8, top) + "px";
   }
-  function hidePop() { pop.hidden = true; tip.hidden = true; }
+  function hidePop() { pop.hidden = true; tip.hidden = true; artPop.hidden = true; artFor = null; }
+  // The box art picture lives on the body too, so no row can clip it.
+  var artPop = el("div", "art-pop");
+  var artImg = document.createElement("img");
+  artImg.alt = "";
+  var artCap = el("div", "cap");
+  artPop.appendChild(artImg);
+  artPop.appendChild(artCap);
+  artPop.hidden = true;
+  document.body.appendChild(artPop);
+  var artFor = null;
+  function placeArt() {
+    if (!artFor) return;
+    var box = artFor.getBoundingClientRect(), width = artPop.offsetWidth, height = artPop.offsetHeight;
+    var left = box.right + 8 + width > window.innerWidth - 8 ? box.left - 8 - width : box.right + 8;
+    var top = box.top + box.height / 2 - height / 2;
+    artPop.style.left = Math.max(8, left) + "px";
+    artPop.style.top = Math.max(8, Math.min(top, window.innerHeight - height - 8)) + "px";
+  }
+  artImg.addEventListener("load", function () {
+    artImg.style.visibility = "";
+    placeArt();
+  });
+  function showArt(target, game) {
+    artFor = target;
+    artImg.style.visibility = "hidden";
+    artImg.src = game.img + "-l.webp";
+    artCap.textContent = game.title;
+    artPop.hidden = false;
+    placeArt();
+  }
   // The tag tooltip lives on the body, so no row or header border can clip it.
   var tip = el("div", "tip");
   tip.hidden = true;
@@ -63,7 +94,7 @@
   document.addEventListener("mouseout", hideTip);
   document.addEventListener("focusin", showTip);
   document.addEventListener("focusout", hideTip);
-  window.addEventListener("scroll", hidePop, {passive: true});
+  document.addEventListener("scroll", hidePop, {capture: true, passive: true});
   document.addEventListener("click", function (event) {
     if (!event.target.classList || !event.target.classList.contains("size-val")) hidePop();
   });
@@ -171,6 +202,30 @@
 
   function gameRow(game) {
     var row = el("tr", "game");
+    if (hasArt) {
+      var artCell = el("td", "col-art");
+      var thumb = el("span", game.img ? "thumb" : "thumb none", game.img ? undefined : "\ud83c\udfae");
+      if (game.img) {
+        var small = document.createElement("img");
+        small.loading = "lazy";
+        small.alt = "";
+        small.src = game.img + "-s.webp";
+        thumb.appendChild(small);
+        thumb.tabIndex = 0;
+        thumb.setAttribute("aria-label", "Box art of " + game.title);
+        thumb.addEventListener("mouseenter", function () { showArt(thumb, game); });
+        thumb.addEventListener("mouseleave", hidePop);
+        thumb.addEventListener("focus", function () { showArt(thumb, game); });
+        thumb.addEventListener("blur", hidePop);
+        thumb.addEventListener("click", function (event) {
+          event.stopPropagation();
+          hidePop();
+          showArt(thumb, game);
+        });
+      }
+      artCell.appendChild(thumb);
+      row.appendChild(artCell);
+    }
     var name = el("td", "");
     name.appendChild(el("div", "title", game.flag ? game.title + " " + game.flag : game.title));
     name.appendChild(el("div", "sys-inline", systems[game.system] || game.system));
@@ -305,7 +360,7 @@
     var table = el("table", "games");
     var tr = el("tr");
     entry.ths = {};
-    [["name", "Name", ""], ["system", "System", "col-system"], ["year", "Year", "col-year"], ["size", "Size", "col-size"], [null, "Tags", "col-tags"]]
+    (hasArt ? [[null, "", "col-art"]] : []).concat([["name", "Name", ""], ["system", "System", "col-system"], ["year", "Year", "col-year"], ["size", "Size", "col-size"], [null, "Tags", "col-tags"]])
       .concat(hasPaths ? [[null, "", "col-copy"]] : [])
       .forEach(function (col) {
         var th = el("th", col[2]);
@@ -376,10 +431,19 @@
     if (!rows.length) {
       var none = el("tr", "nomatch");
       var cell = el("td", "", "No games match the filters");
-      cell.colSpan = hasPaths ? 6 : 5;
+      cell.colSpan = 5 + (hasPaths ? 1 : 0) + (hasArt ? 1 : 0);
       none.appendChild(cell);
       entry.tbody.appendChild(none);
     }
+  }
+
+  var credit = document.getElementById("credit");
+  if (data.credit && data.credit.text && data.credit.url) {
+    var link = el("a", "", data.credit.text);
+    link.href = data.credit.url;
+    link.rel = "noopener";
+    credit.appendChild(link);
+    credit.hidden = false;
   }
 
   var search = document.getElementById("search");

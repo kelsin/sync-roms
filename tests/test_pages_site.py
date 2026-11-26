@@ -9,7 +9,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import helpers  # noqa: E402
-from sync_roms import collections, inventory, pages_site, runtime, scrape_plan, tags, usersettings  # noqa: E402
+from sync_roms import collections, collections_page, inventory, pages_site, runtime, scrape_plan, tags, usersettings  # noqa: E402
 
 GIT_ENV = {"GIT_AUTHOR_NAME": "Test", "GIT_AUTHOR_EMAIL": "test@example.com",
            "GIT_COMMITTER_NAME": "Test", "GIT_COMMITTER_EMAIL": "test@example.com"}
@@ -58,6 +58,8 @@ class Site(helpers.Cmd):
         self.assertIn('href="collections/kelsin/"', root)
         self.assertNotIn("nopage", root)
         self.assertLess(root.index("alice"), root.index("kelsin"))
+        self.assertIn(collections_page.CREDIT_URL, root)
+        self.assertIn(collections_page.CREDIT_TEXT, root)
         self.assertIn('url=/', read(site, "collections", "index.html"))
         self.assertTrue(os.path.isfile(os.path.join(site, "collections", "kelsin", "page.js")))
         self.assertNotIn("Super Mario World (USA).zip", read(site, "collections", "kelsin", "index.html"))

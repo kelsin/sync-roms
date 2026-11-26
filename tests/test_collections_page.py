@@ -1,4 +1,6 @@
 import base64
+import contextlib
+import hashlib
 import io
 import json
 import os
@@ -10,7 +12,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import helpers  # noqa: E402
-from sync_roms import collections, collections_page, inventory, names, scrape_plan, store, tags  # noqa: E402
+from sync_roms import collections, collections_page, inventory, names, previews, scrape_plan, store, tags  # noqa: E402
 
 SMW = "snes/Super Mario World (USA).zip"
 TAGS = {"mario": {"name": "Mario", "emoji": "🍄"}, "platformers": {"name": "Platformers", "emoji": "🏃"}}
@@ -192,6 +194,76 @@ def page_json(path):
 
 
 class Public(PageSetup):
+    def setUp(self):
+        super().setUp()
+        self.enterContext(contextlib.redirect_stdout(io.StringIO()))
+        self.thumb = self.enterContext(mock.patch.object(previews, "game_thumb", return_value=None))
+
+    def png(self, width=400):
+        from PIL import Image
+        path = os.path.join(self.enterContext(tempfile.TemporaryDirectory()), "t.png")
+        Image.new("RGB", (width, width // 2), "red").save(path)
+        return path
+
+    def test_game_art_written_small_and_large(self):
+        from PIL import Image
+        self.thumb.return_value = self.png()
+        self.save(games=[{"system": "snes", "bucket": SMW, "title": "x"}])
+        out = self.enterContext(tempfile.TemporaryDirectory())
+        collections_page.write_public(out)
+        h = hashlib.sha1(SMW.encode()).hexdigest()[:16]
+        data = page_json(os.path.join(out, "index.html"))
+        self.assertEqual(data["collections"][0]["games"][0]["img"], f"art/games/{h}")
+        with Image.open(os.path.join(out, "art", "games", f"{h}-s.webp")) as small:
+            self.assertEqual(small.width, 96)
+        with Image.open(os.path.join(out, "art", "games", f"{h}-l.webp")) as large:
+            self.assertLessEqual(large.width, 300)
+        for root, _, files in os.walk(out):
+            for f in files:
+                self.assertNotIn("Super Mario", f)
+        with open(os.path.join(out, "index.html"), encoding="utf-8") as f:
+            self.assertNotIn("Super Mario World (USA).zip", f.read())
+
+    def test_unreadable_art_is_skipped(self):
+        bad = os.path.join(self.enterContext(tempfile.TemporaryDirectory()), "bad.png")
+        with open(bad, "wb") as f:
+            f.write(b"not an image")
+        self.thumb.return_value = bad
+        self.save(games=[{"system": "snes", "bucket": SMW, "title": "x"}])
+        out = self.enterContext(tempfile.TemporaryDirectory())
+        collections_page.write_public(out)
+        self.assertNotIn("img", page_json(os.path.join(out, "index.html"))["collections"][0]["games"][0])
+
+    def test_game_without_art_has_no_img(self):
+        self.save(games=[{"system": "snes", "bucket": SMW, "title": "x"}])
+        out = self.enterContext(tempfile.TemporaryDirectory())
+        collections_page.write_public(out)
+        self.assertNotIn("img", page_json(os.path.join(out, "index.html"))["collections"][0]["games"][0])
+
+    def test_bucket_in_two_collections_made_once(self):
+        self.thumb.return_value = self.png()
+        game = {"system": "snes", "bucket": SMW, "title": "x"}
+        self.save(games=[game])
+        collections.save_collection({"id": "other", "name": "Other", "description": "d", "games": [game]})
+        out = self.enterContext(tempfile.TemporaryDirectory())
+        collections_page.write_public(out)
+        imgs = [c["games"][0]["img"] for c in page_json(os.path.join(out, "index.html"))["collections"]]
+        self.assertEqual(imgs[0], imgs[1])
+        self.thumb.assert_called_once_with(SMW)
+
+    def test_page_data_without_art_dir_has_no_img(self):
+        self.save(games=[{"system": "snes", "bucket": SMW, "title": "x"}])
+        data = collections_page.page_data()
+        self.assertNotIn("img", data["collections"][0]["games"][0])
+        self.thumb.assert_not_called()
+
+    def test_credit_only_in_public(self):
+        self.save(games=[])
+        out = self.enterContext(tempfile.TemporaryDirectory())
+        collections_page.write_public(out)
+        self.assertEqual(page_json(os.path.join(out, "index.html"))["credit"]["url"], collections_page.CREDIT_URL)
+        self.assertNotIn("credit", collections_page.page_data())
+
     def test_public_data_has_no_paths_and_a_home(self):
         self.save(games=[{"system": "snes", "bucket": SMW, "title": "x"}])
         out = self.enterContext(tempfile.TemporaryDirectory())
@@ -269,6 +341,12 @@ class TemplateTest(unittest.TestCase):
         self.assertIn("data.home", js)
         self.assertIn("All users", js)
         self.assertIn("hasPaths", js)
+
+    def test_box_art_column_popover_and_credit(self):
+        js = self.files["page.js"]
+        for text in ("hasArt", "art-pop", "-s.webp", "-l.webp", "data.credit"):
+            self.assertIn(text, js)
+        self.assertIn('id="credit"', self.files["page.html"])
 
     def test_no_external_urls(self):
         self.assertNotIn("http://", self.html)
