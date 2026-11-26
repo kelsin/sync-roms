@@ -371,13 +371,18 @@ class GamesFirst(unittest.TestCase):
     def test_re_adding_a_switched_off_game_from_the_a_list_keeps_its_note(self):
         collection = {"name": "Favs", "games": [dict(self.OLD), dict(self.FF7)]}
         self.run_add(collection, "A", [self.off("gba/Ruby.zip", "A"), self.on("gba/Ruby.zip", None), lambda rows: None], [0])
-        self.assertEqual(collection["games"], [self.OLD, self.FF7])
+        self.assertEqual(collection["games"], [self.FF7, self.OLD])
 
-    def test_a_game_switched_off_and_on_returns_to_its_place(self):
-        a, b = dict(self.OLD), dict(self.FF7)
-        collection = {"name": "Favs", "games": [a, b]}
+    def test_games_are_kept_sorted_by_name_not_by_position(self):
+        zelda = {"title": "Zelda", "system": "gba", "bucket": "gba/Zelda.zip"}
+        collection = {"name": "Favs", "games": [dict(zelda), dict(self.FF7), dict(self.OLD)]}
         self.run_editor(collection, [self.off("gba/Ruby.zip", "S"), self.on("gba/Ruby.zip", None)])
-        self.assertEqual(collection["games"], [self.OLD, self.FF7])
+        self.assertEqual([g["title"] for g in collection["games"]], ["FF7", "Ruby", "Zelda"])
+
+    def test_ordered_sorts_by_title_then_system(self):
+        games = [{"title": "The Zed", "system": "psx", "bucket": "psx/z"}, {"title": "Alpha", "system": "psx", "bucket": "psx/a"},
+                 {"title": "Alpha", "system": "gba", "bucket": "gba/a"}]
+        self.assertEqual([g["bucket"] for g in collectionedit.ordered(games, SYSTEMS)], ["gba/a", "psx/a", "psx/z"])
 
     def test_esc_in_the_system_list_returns_to_the_games_list_unchanged(self):
         collection = {"name": "Favs", "games": [dict(self.OLD)]}
@@ -408,7 +413,7 @@ class GamesFirst(unittest.TestCase):
 
 
 class SettingsMenu(unittest.TestCase):
-    def run_menu(self, collection, picks, answers=()):
+    def run_menu(self, collection, picks, answers=(), others=()):
         seen = []
 
         def pick(title, labels, **k):
@@ -416,7 +421,7 @@ class SettingsMenu(unittest.TestCase):
             return picks[len(seen) - 1] if len(seen) <= len(picks) else None
         with mock.patch.object(picker, "filter_list", pick), mock.patch.object(ui, "ask", side_effect=list(answers)), \
                 mock.patch.object(ui, "yellow", lambda t: t):
-            collectionedit.settings_menu(collection)
+            collectionedit.settings_menu(collection, others)
         return seen
 
     def test_rows_and_art_preview(self):
@@ -445,6 +450,25 @@ class SettingsMenu(unittest.TestCase):
         self.run_menu(c, [1], ["new"])
         self.assertEqual(c["description"], "new")
 
+    def test_x_clears_the_description_on_its_row_only(self):
+        c = {"name": "Favs", "description": "old", "games": []}
+        seen = self.run_menu(c, [("x", 0), ("x", 1)])
+        self.assertEqual(c["name"], "Favs")
+        self.assertEqual(c["description"], "")
+        self.assertEqual(seen[2]["labels"][1], "Description: none")
+        self.assertIn("x", seen[0]["hotkeys"])
+        self.assertIn("clear", seen[0]["hint"])
+
+    def test_rename_to_another_collections_name_is_refused(self):
+        c = {"name": "Favs", "games": []}
+        self.run_menu(c, [0], ["Best"], others=("best",))
+        self.assertEqual(c["name"], "Favs")
+
+    def test_renaming_to_its_own_name_or_case_is_fine(self):
+        c = {"name": "Favs", "games": []}
+        self.run_menu(c, [0], ["FAVS"], others=("best",))
+        self.assertEqual(c["name"], "FAVS")
+
     def test_art_row_calls_pick_art(self):
         c = {"name": "Favs", "games": []}
         with mock.patch.object(collectionedit, "pick_art") as pa:
@@ -459,7 +483,7 @@ class SettingsMenu(unittest.TestCase):
             titles.append(title)
             return "S" if len(titles) == 1 else None
 
-        def settings(coll):
+        def settings(coll, others=()):
             coll["name"] = "Renamed"
         with mock.patch.object(listedit, "toggle_all", toggle), mock.patch.object(collectionedit, "settings_menu", settings):
             collectionedit.edit_one(c, SYSTEMS, lambda b: {"gba/Ruby.zip"})
@@ -634,7 +658,7 @@ class Editor(DataDir):
                 mock.patch.object(ui, "confirm", lambda text, **k: confirms.append(text) or answer(confirm)), \
                 mock.patch.object(ui, "choose", lambda question, *a, **k: self.asked.append(question) or next(choose, "s")), \
                 mock.patch.object(listedit, "print_changes", lambda found: self.reviewed.append(found)), \
-                mock.patch.object(collectionedit, "edit_one", edit_one or (lambda c, systems, keys_of: c["games"].append(dict(RUBY)))), \
+                mock.patch.object(collectionedit, "edit_one", edit_one or (lambda c, systems, keys_of, others=(): c["games"].append(dict(RUBY)))), \
                 mock.patch("subprocess.run") as run:
             code = collectionedit.edit_collections()
         run.assert_not_called()  # no git, no gh
@@ -658,6 +682,16 @@ class Editor(DataDir):
         self.assertEqual(self.asked, ["💾 Save these changes?"] * 2)
         self.assertFalse(os.path.exists(self.path("collections")))
         self.assertIn("Not saved", str(note.call_args_list))
+
+    def test_a_file_in_another_order_is_no_change_and_opens_with_the_other_ids(self):
+        zed = {"title": "Zed", "system": "gba", "bucket": "gba/Zed.zip"}
+        collections.save_collection({"id": "favs", "name": "Favs", "games": [zed, RUBY]})
+        collections.save_collection({"id": "best", "name": "Best", "games": []})
+        seen = []
+        code, _, note = self.run_editor([1, None], edit_one=lambda c, s, k, others=(): seen.append((c["name"], sorted(others))))
+        self.assertEqual((code, self.asked), (0, []))
+        self.assertEqual(seen, [("Favs", ["best"])])
+        self.assertIn("No changes, nothing saved", str(note.call_args_list))
 
     def test_esc_without_changes_saves_nothing(self):
         collections.save_collection({"id": "favs", "name": "Favs", "games": [RUBY]})
@@ -698,7 +732,7 @@ class Editor(DataDir):
         self.assertTrue(os.path.exists(self.path("collections/favs.json")))
 
     def test_an_empty_collection_is_saved_on_done(self):
-        self.run_editor([0, 2], asks=["Empty", ""], edit_one=lambda c, s, k: None)
+        self.run_editor([0, 2], asks=["Empty", ""], edit_one=lambda c, s, k, o=(): None)
         self.assertEqual(self.read("collections/empty.json"), {"name": "Empty", "games": []})
 
     def test_ctrl_c_asks_and_saves_the_changes(self):
@@ -713,7 +747,7 @@ class Editor(DataDir):
 
     def test_ctrl_c_saves_an_empty_collection(self):
         with mock.patch("builtins.print"), self.assertRaises(KeyboardInterrupt):
-            self.run_editor([0, KeyboardInterrupt], asks=["Empty", ""], edit_one=lambda c, s, k: None)
+            self.run_editor([0, KeyboardInterrupt], asks=["Empty", ""], edit_one=lambda c, s, k, o=(): None)
         self.assertEqual(self.read("collections/empty.json"), {"name": "Empty", "games": []})
         self.assertIn("Saved to", str(self.note.call_args_list))
 
@@ -782,15 +816,16 @@ class Editor(DataDir):
                 ask.assert_not_called()
                 self.assertEqual(len(confirms), 1)
                 self.assertEqual(self.read("collections/favs.json")["games"], [
-                    RUBY, {"title": "Crash", "system": "psx", "bucket": "psx/Crash.chd"},
-                    {"title": "FF7", "system": "psx", "bucket": "psx/FF7.m3u", "files": ["psx/FF7 (Disc 1).chd", "psx/FF7 (Disc 2).chd"]}])
+                    {"title": "Crash", "system": "psx", "bucket": "psx/Crash.chd"},
+                    {"title": "FF7", "system": "psx", "bucket": "psx/FF7.m3u", "files": ["psx/FF7 (Disc 1).chd", "psx/FF7 (Disc 2).chd"]},
+                    RUBY])
 
     def test_ctrl_c_in_the_all_systems_list_keeps_its_toggles(self):
         confirms, ask = self.interrupted([RUBY], [0, 0], [(set(), "A"), ({"PlayStation — FF7.m3u"}, KeyboardInterrupt)])
         ask.assert_not_called()
         self.assertEqual(len(confirms), 1)
         self.assertEqual(self.read("collections/favs.json")["games"], [
-            RUBY, {"title": "FF7", "system": "psx", "bucket": "psx/FF7.m3u", "files": ["psx/FF7 (Disc 1).chd", "psx/FF7 (Disc 2).chd"]}])
+            {"title": "FF7", "system": "psx", "bucket": "psx/FF7.m3u", "files": ["psx/FF7 (Disc 1).chd", "psx/FF7 (Disc 2).chd"]}, RUBY])
 
     def test_ctrl_c_in_the_tag_or_meta_picker_keeps_the_games_lists_toggles(self):
         ff7 = {"title": "FF7", "system": "psx", "bucket": "psx/FF7.m3u", "files": ["psx/FF7 (Disc 1).chd", "psx/FF7 (Disc 2).chd"]}
@@ -801,7 +836,7 @@ class Editor(DataDir):
                 confirms, ask = self.interrupted([RUBY], [0, 2], [(set(), "A"), ({"Crash.chd"}, "c"), ({"FF7.m3u"}, key)])
                 ask.assert_not_called()
                 self.assertEqual(len(confirms), 1)
-                self.assertEqual(self.read("collections/favs.json")["games"], [RUBY, crash, ff7])
+                self.assertEqual(self.read("collections/favs.json")["games"], [crash, ff7, RUBY])
             with self.subTest(key=key, toggled=False), mock.patch.object(target, picker_name, side_effect=KeyboardInterrupt):
                 confirms, _ = self.interrupted([RUBY], [0, 2], [(set(), "A"), (set(), key)])
                 self.assertEqual(confirms, [])
@@ -813,7 +848,7 @@ class Editor(DataDir):
         ask.assert_not_called()
         self.assertEqual(len(confirms), 1)
         self.assertEqual(self.read("collections/favs.json")["games"],
-                         [RUBY, {"title": "FF7", "system": "psx", "bucket": "psx/FF7.m3u", "files": ["psx/FF7 (Disc 1).chd", "psx/FF7 (Disc 2).chd"]}])
+                         [{"title": "FF7", "system": "psx", "bucket": "psx/FF7.m3u", "files": ["psx/FF7 (Disc 1).chd", "psx/FF7 (Disc 2).chd"]}, RUBY])
 
     def test_ctrl_c_without_changes_asks_nothing(self):
         confirms = []
