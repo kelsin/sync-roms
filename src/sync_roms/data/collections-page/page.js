@@ -215,8 +215,8 @@
         thumb.addEventListener("blur", hidePop);
         thumb.addEventListener("click", function (event) {
           event.stopPropagation();
-          if (artFor === thumb && !artPop.hidden) hidePop();
-          else { hidePop(); showArt(thumb, game); }
+          hidePop();
+          showArt(thumb, game);
         });
       }
       artCell.appendChild(thumb);
