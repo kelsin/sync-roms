@@ -96,7 +96,7 @@ def _game_size(paths, listed):
 def page_data():
     """{"tags", "systems", "collections"} for the page, collections in load_collections() order."""
     defined = _tag_definitions()
-    system_names = {s["bucket"]: s["name"] for s in store.repo_json("systems")}
+    system_names = {s["bucket"]: store.short_name(s) for s in store.repo_json("systems")}
     loaded = collections.load_collections()
     sizes = _sizes({g["bucket"].partition("/")[0] for c in loaded for g in c["games"]})
     years = _years({g["bucket"].partition("/")[0] for c in loaded for g in c["games"]})

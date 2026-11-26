@@ -44,7 +44,7 @@ class Page(helpers.DataDir):
         self.assertEqual(games[0], {"title": "Super </script> World", "system": "snes", "paths": [SMW],
                                     "tags": ["mario", "platformers"]})
         self.assertEqual(games[1]["paths"], ["zzz/x.zip", "zzz/x2.zip"])
-        self.assertEqual(data["systems"]["snes"], "Nintendo SNES (Super Nintendo)")
+        self.assertEqual(data["systems"]["snes"], "SNES")
         self.assertEqual(data["tags"], {"mario": {"name": "Mario", "emoji": "🍄"},
                                         "platformers": {"name": "Platformers", "emoji": "🏃"}})
 
@@ -93,6 +93,13 @@ class Page(helpers.DataDir):
     def listing(self, files):
         return self.enterContext(mock.patch.object(inventory, "files", lambda prefix, sizes=True: {
             k: v for k, v in files.items() if k.startswith(prefix)}))
+
+    def test_every_system_has_a_short_name_and_the_page_uses_it(self):
+        systems = store.repo_json("systems")
+        self.assertTrue(all(isinstance(s.get("short"), str) and s["short"].strip() for s in systems))
+        self.assertEqual(store.short_name({"name": "Full Name"}), "Full Name")
+        self.save(games=[{"system": "snes", "bucket": SMW, "title": "S"}])
+        self.assertEqual(collections_page.page_data()["systems"], {"snes": "SNES"})
 
     def test_release_year_from_metadata(self):
         meta = {"Super Mario World (USA).zip": {"releasedate": "19901121"}, "x.sfc": {"releasedate": "unknown"}}

@@ -26,7 +26,7 @@ def fold_discs(games, in_storage):
 
 def view(listing, systems):
     """A games list's games per known system, shaped like a card's games so the toggler can edit them."""
-    return {s["bucket"]: {"bucket": s["bucket"], "name": s["name"], "full_system": False,
+    return {s["bucket"]: {"bucket": s["bucket"], "name": store.short_name(s), "full_system": False,
                           "games": [g for g in listing["games"] if g.get("system") == s["bucket"] and g.get("bucket")]}
             for s in systems}
 
@@ -299,7 +299,7 @@ def all_rows(shown, systems, keys_of):
     rows = []
     for system in systems:
         s = shown[system["bucket"]]
-        rows += [(s, key, title, f"{system['name']} — {label}")
+        rows += [(s, key, title, f"{store.short_name(system)} — {label}")
                  for _, key, title, label in system_rows(s, keys_of(system["bucket"]))]
     names = {s["bucket"]: s["name"].lower() for s in systems}
     return sorted(rows, key=lambda r: (store.sort_key(r[2]), names[r[0]["bucket"]]))

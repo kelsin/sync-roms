@@ -214,10 +214,10 @@ def pick_meta(system, meta, filters, keys):
     pos = 0
     while True:
         if meta.get() is None:
-            edit.note(ui.yellow(f"ℹ️  No scraped metadata for {system['name']} yet."))
+            edit.note(ui.yellow(f"ℹ️  No scraped metadata for {store.short_name(system)} yet."))
             return
         extras = [[(f"  {filters[f]}", "cyan")] if f in filters else [] for f, _ in metafilter.FIELDS]
-        i = picker.filter_list(f"🏷️  Filter {system['name']} by", [label for _, label in metafilter.FIELDS],
+        i = picker.filter_list(f"🏷️  Filter {store.short_name(system)} by", [label for _, label in metafilter.FIELDS],
                                extras=extras, cursor=pos, hint=META_HINT, poll=lambda: None,
                                status=lambda _s: f"{SIZING} loading scraped metadata" if meta.get() is LOADING
                                else "Pick a field")
@@ -233,7 +233,7 @@ def pick_meta(system, meta, filters, keys):
             edit.note(ui.yellow(f"ℹ️  No game in this list has a {label.lower()} in its scraped metadata."))
             continue
         values = [v for v, _ in found]
-        j = picker.filter_list(f"🏷️  {label} on {system['name']}", values,
+        j = picker.filter_list(f"🏷️  {label} on {store.short_name(system)}", values,
                                extras=[[(f"  {n} game(s)", "dim")] for _, n in found], hint=VALUES_HINT,
                                cursor=values.index(filters[field]) if filters.get(field) in values else 0)
         if j is not None:
@@ -449,7 +449,7 @@ def keep_card_files(name, setup, systems, card_match):
         try:
             sp = picks.system(system)
         except s3.ERRORS as e:
-            edit.note(ui.yellow(f"⚠️  Couldn't list {system['name']} in storage: {e}"))
+            edit.note(ui.yellow(f"⚠️  Couldn't list {store.short_name(system)} in storage: {e}"))
             continue
         matched = card_match(system, list(sp.in_storage))
         n = sp.keep(sorted(matched))
@@ -733,7 +733,7 @@ class GameFilters:
         elif pressed == PAST_SURPRISE_KEY:
             self.past = surprise.past_keys(self.system["bucket"]) or None
             if self.past is None:
-                edit.note(ui.yellow(f"ℹ️  No past surprises on {self.system['name']}."))
+                edit.note(ui.yellow(f"ℹ️  No past surprises on {store.short_name(self.system)}."))
         elif pressed == META_KEY:
             pick_meta(self.system, self.meta, self.meta_filt, lambda field: [k for k in keys if self.keep(k, field)])
         elif pressed == SET_KEY:
@@ -937,14 +937,14 @@ def edit_system(name, system, setup, to_fetch=None, card_usages=None):
     cards = store.load_cards()
     picks = cardpicks.CardPicks(name, setup, cards)
     if picks.full(bucket):
-        edit.note(ui.yellow(f"ℹ️  {system['name']} is a full system: every file in its storage folder is downloaded, "
+        edit.note(ui.yellow(f"ℹ️  {store.short_name(system)} is a full system: every file in its storage folder is downloaded, "
                             "so there is no game list to edit."))
         return False
     filters = GameFilters(system)
     try:
         sp = picks.system(system)
     except s3.ERRORS as e:
-        edit.note(ui.yellow(f"⚠️  Couldn't list {system['name']} in storage: {e}"))
+        edit.note(ui.yellow(f"⚠️  Couldn't list {store.short_name(system)} in storage: {e}"))
         return False
     others = [x for x in can_play(store.repo_json("systems"), setup) if x["bucket"] != bucket]
     capacity = budget.card_capacity(card_entry(name, setup, cards))
@@ -958,7 +958,7 @@ def edit_system(name, system, setup, to_fetch=None, card_usages=None):
             shown = shown_rows(sp, filters.keep)
             total = len(shown_rows(sp, lambda _key: True))
             result = _games_pass(
-                f"✏️  {system['name']} on {name} — ✅ synced, ⬜ not{off_note}", shown, picks, {bucket: sp}, {},
+                f"✏️  {store.short_name(system)} on {name} — ✅ synced, ⬜ not{off_note}", shown, picks, {bucket: sp}, {},
                 start, work, capacity, to_fetch, place, hint=tagui.games_hint(GAMES_HINT), hotkeys=(*GameFilters.KEYS, VARIANT_KEY, *tagui.TAG_KEYS, tagui.BULK_KEY),
                 key_help=GAMES_KEYS, filters=filters.describe(len(shown), total))
             if not isinstance(result, tuple):

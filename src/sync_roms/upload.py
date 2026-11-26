@@ -280,7 +280,7 @@ def upload_command(args):
         print(ui.yellow("👋 Cancelled."))
         return 0
     bucket = systems[i]["bucket"]
-    print(ui.bold(f"☁️  {'Replace' if args.replace else 'Upload'} {systems[i]['name']}") + ui.dim(f"  {s3.access(True)}  {folder} → {s3.location()}/{bucket}/"))
+    print(ui.bold(f"☁️  {'Replace' if args.replace else 'Upload'} {store.short_name(systems[i])}") + ui.dim(f"  {s3.access(True)}  {folder} → {s3.location()}/{bucket}/"))
     if args.replace:
         return replace_command(args, folder, systems[i])
     try:

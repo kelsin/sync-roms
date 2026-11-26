@@ -78,7 +78,7 @@ class CardPicks:
         self.raw = store.card_games(name, self.cards)
         self.before_excluded = store.card_excluded(name, self.cards)
         self.variants, self.parents = tags.variant_index()
-        self.system_names = {x["bucket"]: x["name"] for x in store.repo_json("systems")}
+        self.system_names = {x["bucket"]: store.short_name(x) for x in store.repo_json("systems")}
         locked = store.card_locked_games(self._entry(), {c["id"]: c for c in colls.load_collections()})
         self.locked_from = {b: {g["bucket"]: g["from"] for g in games} for b, games in locked.items()}
         # the current surprises' keys by system, whatever label locked_from gave them (a collection's comes first)
