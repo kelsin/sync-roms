@@ -83,6 +83,11 @@ def edit_game_tags(key, title):
         return False
 
 
+def games(n):
+    """"1 game", "3 games"."""
+    return f"{n} game" + ("" if n == 1 else "s")
+
+
 def bulk_tag(keys):
     """Tags every game of keys (a file of a record counts as its record, once): a checklist of the tags, checked where
     all the games have it; checking adds a tag to every game, unchecking one they all have removes it. Asks "Tag N
@@ -99,7 +104,7 @@ def bulk_tag(keys):
             ids = sorted(defs, key=lambda i: defs[i]["name"].casefold())
             labels = [f"{defs[i]['emoji']} {defs[i]['name']}" for i in ids]
             session = {"sel": [i in picked for i in ids]}
-            result = picker.filter_list(f"🏷️  Tag {len(owners)} games (n adds a new tag)", labels, multi=True,
+            result = picker.filter_list(f"🏷️  Tag {games(len(owners))} (n adds a new tag)", labels, multi=True,
                                         initial=[i in start for i in ids], hotkeys=(NEW_KEY,), session=session,
                                         hint="Space toggle · Enter done · n new tag",
                                         key_help=[(NEW_KEY, "add a new tag, checked for these games")])
@@ -117,10 +122,10 @@ def bulk_tag(keys):
         if not add and not remove:
             note(ui.yellow("ℹ️  No tag changed."))
             return False
-        if not ui.confirm(f"🏷️  Tag {len(owners)} games?", default=False):
+        if not ui.confirm(f"🏷️  Tag {games(len(owners))}?", default=False):
             return False
         tags.change_games_tags({o: (add, remove) for o in owners})
-        note(f"🏷️  Tagged {len(owners)} games")
+        note(f"🏷️  Tagged {games(len(owners))}")
         return True
     except (*s3.ERRORS, SystemExit, ValueError) as e:
         note(ui.yellow(f"⚠️  Couldn't save the tags in storage: {e}"))
@@ -188,11 +193,12 @@ class TagFilter:
             if entries is None:
                 ids = sorted((i for i, n in counts.items() if n or i in self.required or i in self.excluded),
                              key=lambda i: defs[i]["name"].casefold())
-                entries = ids + ([None] if ids and (none or self.untagged) else [])
+                entries = ids + ([None] if ids and not self.required and (none or self.untagged) else [])
             if not entries:
                 note(ui.yellow("ℹ️  No tag has games among these."))
                 return
-            labels = [f"{'✅' if self.untagged else '⬜'} {NO_TAGS} ({none})" if i is None else
+            labels = [f"{'✅' if self.untagged else '⬜'} {NO_TAGS} " + ("(replaces the ✅ tags)" if self.required else f"({none})")
+                      if i is None else
                       f"{STATES[(i in self.required) + 2 * (i in self.excluded)]} {defs[i]['emoji']} {defs[i]['name']}"
                       f" ({counts[i]})" for i in entries]
             result = picker.filter_list("🏷️  Narrow to games with ✅ tags and without 🚫 ones", labels, cursor=cursor,

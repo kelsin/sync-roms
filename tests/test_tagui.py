@@ -60,7 +60,36 @@ class TagUi(unittest.TestCase):
         tags.change_game_tags(A, add=["cave"])
         with mock.patch.object(tags, "owner", lambda k: A if k == "nes/A.sav" else k):
             self.bulk([A, "nes/A.sav"], {"cave", "shmups"})
-        self.assertEqual(self.asked, ["🏷️  Tag 1 games?"])
+        self.assertEqual(self.asked, ["🏷️  Tag 1 game?"])
+
+    def test_unchecking_a_tag_on_only_some_shown_games_leaves_it_untouched(self):
+        self.bulk([A, B], {"cave"})  # shmups is on B only: not checked at the start, and still unchecked
+        self.assertEqual((tags.tags_of(A), tags.tags_of(B)), (["cave"], ["cave", "shmups"]))
+
+    def test_esc_on_the_bulk_checklist_writes_nothing(self):
+        before = tags.load()
+        with mock.patch.object(picker, "filter_list", return_value=None), \
+                mock.patch.object(ui, "confirm") as confirm:
+            self.assertFalse(tagui.bulk_tag([A, B]))
+        confirm.assert_not_called()
+        self.assertIs(tags.load(), before)
+        self.assertEqual((tags.tags_of(A), tags.tags_of(B)), ([], ["shmups"]))
+
+    def test_n_in_the_bulk_checklist_creates_a_tag_checked_for_every_game(self):
+        calls = []
+
+        def fake(title, labels, **kw):
+            calls.append(labels)
+            return ("n", None) if len(calls) == 1 else kw["session"]["sel"]
+        with mock.patch.object(picker, "filter_list", fake), mock.patch.object(ui, "ask", side_effect=["Pixel Art", "🎨"]), \
+                mock.patch.object(ui, "confirm", return_value=True):
+            self.assertTrue(tagui.bulk_tag([A, B]))
+        self.assertIn("🎨 Pixel Art", calls[1])
+        self.assertEqual(tags.all_tags()["pixel-art"], {"name": "Pixel Art", "emoji": "🎨"})
+        self.assertEqual((tags.tags_of(A), tags.tags_of(B)), (["pixel-art"], ["pixel-art", "shmups"]))
+
+    def test_games_pluralises(self):
+        self.assertEqual([tagui.games(n) for n in (1, 2)], ["1 game", "2 games"])
 
     def test_column_rows(self):
         self.assertEqual(tagui.column([A, B]), [("", ""), ("🚀", "")])
@@ -229,12 +258,19 @@ class TagFilterTest(unittest.TestCase):
             self.assertIsNone(f.pick({A, B, self.C}))
         none = "⬜ 🈳 No tags at all (1)"
         self.assertEqual(seen[0][0], ["⬜ 🐝 Cave (1)", "⬜ 🚀 Shmups (2)", none])  # RPG has no game among the rows
-        self.assertEqual(seen[1][0], ["⬜ 🐝 Cave (1)", "✅ 🚀 Shmups (2)", "⬜ 🈳 No tags at all (0)"])
+        self.assertEqual(seen[1][0], ["⬜ 🐝 Cave (1)", "✅ 🚀 Shmups (2)", "⬜ 🈳 No tags at all (replaces the ✅ tags)"])
         self.assertEqual(seen[2][0], ["⬜ 🐝 Cave (0)", "🚫 🚀 Shmups (0)", none])  # the rows stay, the counts follow
         self.assertEqual(seen[3][0], ["⬜ 🐝 Cave (1)", "⬜ 🚀 Shmups (2)", none])
         self.assertEqual([s[1] for s in seen[1:]], [1, 1, 1])
         self.assertEqual([(s[2], s[3]) for s in seen[1:]], [({"shmups"}, set()), (set(), {"shmups"}), (set(), set())])
         self.assertEqual((f.required, f.excluded), (set(), set()))
+
+    def test_the_no_tags_row_is_left_out_while_a_tag_is_required(self):
+        f, seen = tagui.TagFilter(), []
+        f.required = {"shmups"}
+        with mock.patch.object(picker, "filter_list", lambda t, labels, **kw: seen.append(list(labels)) or None):
+            f.pick({A, B, self.C})
+        self.assertEqual(seen, [["⬜ 🐝 Cave (1)", "✅ 🚀 Shmups (2)"]])
 
     def test_untagged_keeps_only_games_with_no_tags_and_excludes_required_tags(self):
         f = tagui.TagFilter()

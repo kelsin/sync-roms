@@ -1123,6 +1123,23 @@ class TagColumn(DataDir):
         self.assertNotIn("T", seen[2]["hotkeys"])
         self.assertNotIn("T tag", seen[2]["hint"])
 
+    def test_when_filtered_turns_a_on_only_while_a_tag_filter_is_set(self):
+        tagui = edit.tagui
+        tagui.FILTER.clear()
+        self.addCleanup(tagui.FILTER.clear)
+        seen = []
+        answers = iter([("s", None), ("c", None)])
+
+        def fake(title, labels, **kw):
+            seen.append((kw["select_all"], "a all shown" in kw["hint"]))
+            return next(answers, None) or kw["session"]["sel"]
+
+        def pick(row_keys):
+            tagui.FILTER.required = {"x"}
+        with mock.patch.object(picker, "filter_list", fake), mock.patch.object(tagui.FILTER, "pick", pick):
+            edit.toggle_games("t", self.ROWS, select_all=edit.WHEN_FILTERED)
+        self.assertEqual(seen, [(False, False), (True, True), (False, False)])
+
     def test_toggle_games_hides_rows_the_filter_rejects(self):
         self.tags.change_game_tags("nes/A (USA).zip", add=["x"])
         tagui = edit.tagui

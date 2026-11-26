@@ -1034,7 +1034,7 @@ def edit_set(name, game_set, setup, to_fetch=None, card_usages=None, all_games=F
             if not shown and listed:
                 filters += " · no games match the tag filter"
             if all_games:
-                emoji, hint, hotkeys, key_help = "🌐", tagui.games_hint(ALL_GAMES_HINT, select_all=False), (VARIANT_KEY, tagui.TAG_KEY, tagui.BULK_KEY, *tagui.HOTKEYS), ALL_GAMES_KEYS
+                emoji, hint, hotkeys, key_help = "🌐", tagui.games_hint(ALL_GAMES_HINT, select_all=tagui.FILTER.active()), (VARIANT_KEY, tagui.TAG_KEY, tagui.BULK_KEY, *tagui.HOTKEYS), ALL_GAMES_KEYS
                 origin = ""
             else:
                 emoji, hint, hotkeys, key_help = (themeart.collection_emoji(game_set), tagui.games_hint(COLLECTION_GAMES_HINT),
@@ -1043,7 +1043,7 @@ def edit_set(name, game_set, setup, to_fetch=None, card_usages=None, all_games=F
             result = _games_pass(
                 f"{emoji} {game_set['name']} on {name} — ✅ synced, ⬜ not{origin}", shown, picks, sps, files_of,
                 start, work, capacity, to_fetch, place, hint=hint, hotkeys=hotkeys, key_help=key_help, filters=filters,
-                select_all=not all_games)
+                select_all=not all_games or tagui.FILTER.active())
             if not isinstance(result, tuple):
                 break
             if result[0] == tagui.TAG_KEY:

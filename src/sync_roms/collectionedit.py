@@ -3,7 +3,7 @@ import copy
 
 from . import collections as colls
 from . import cardedit, edit, picker, store, themeart, ui
-from .listedit import add_from_system, add_from_tag, diff_lists, edit_menu, folder_lister, reconcile, view
+from .listedit import add_from_filter, add_from_system, add_from_tag, diff_lists, edit_menu, folder_lister, reconcile, view
 
 
 GAMES_HINT = "Space toggle · Enter done · a all · m meta · p past"
@@ -54,7 +54,8 @@ def edit_one(collection, systems, keys_of):
         i = picker.filter_list(f"{label} (Esc = back)",
                                [f"Games in this collection ({len(collection['games'])}): switch some off",
                                 "Add games from a system", "Add games from a tag", "Rename / change the description",
-                                f"{themeart.art_emoji(collection.get('art'))} Theme art: {art_label(collection.get('art'))}"], cursor=pos)
+                                f"{themeart.art_emoji(collection.get('art'))} Theme art: {art_label(collection.get('art'))}",
+                                "Add games matching the current tag filter"], cursor=pos)
         if i is None:
             return
         pos = i
@@ -74,6 +75,8 @@ def edit_one(collection, systems, keys_of):
             add_from_tag(collection, shown, keys_of, label)
         elif i == 4:
             pick_art(collection)
+        elif i == 5:
+            add_from_filter(collection, systems, shown, keys_of, label)
         else:
             name = ui.ask(f"Name [{collection['name']}] (empty keeps it): ").strip()
             problem = colls.collection_problem(name, ()) if name else None

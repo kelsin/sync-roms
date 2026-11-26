@@ -768,7 +768,7 @@ class Flow(DataDir):
         calls = self.run_card(returns((cardedit.SET_KEY, 0)), returns(0), returns(None),
                               toggle("Game Boy — Red.gb"), returns(None))
         self.assertEqual(calls[1][1], ["⬜ 🔴 Pokemon (3)", "⬜ 🈳 No tags at all (2)"])
-        self.assertEqual(calls[2][1], ["✅ 🔴 Pokemon (3)", "⬜ 🈳 No tags at all (0)"])
+        self.assertEqual(calls[2][1], ["✅ 🔴 Pokemon (3)", "⬜ 🈳 No tags at all (replaces the ✅ tags)"])
         self.assertTrue(calls[3][0].startswith("🌐 All games on c"))
         self.assertEqual(calls[3][1], ["Game Boy — Red.gb", "Game Boy Advance — Ruby.sav", "Game Boy Advance — Ruby.zip"])
         self.assertEqual(calls[3][2]["filters"], "✅ 🔴 Pokemon · 3 of 5 shown (c clear filters)")
@@ -2206,6 +2206,29 @@ class SetFlow(Flow):
         self.assertEqual(title, "🌐 All games on c — ✅ synced, ⬜ not")
         self.assertEqual(kw["hotkeys"], (cardedit.VARIANT_KEY, "t", "T", cardedit.SET_KEY, cardedit.CLEAR_KEY))
         self.assertIs(kw["select_all"], False)
+
+    def test_a_works_in_the_all_games_list_only_while_a_tag_filter_is_set(self):
+        self.card()
+        self.tag_pokemon()
+        cardedit.tagui.FILTER.clear()
+        self.addCleanup(cardedit.tagui.FILTER.clear)
+        _, calls = self.run_all(returns((cardedit.SET_KEY, None)), returns(0), returns(None),
+                                lambda labels, kw: kw["session"]["sel"])
+        self.assertIs(calls[0][2]["select_all"], False)
+        self.assertNotIn("a all shown", calls[0][2]["hint"])
+        self.assertIs(calls[3][2]["select_all"], True)
+        self.assertIn("a all shown", calls[3][2]["hint"])
+
+    def test_t_in_the_all_games_list_tags_the_shown_rows(self):
+        self.card()
+        self.tag_pokemon()
+        cardedit.tagui.FILTER.clear()
+        self.addCleanup(cardedit.tagui.FILTER.clear)
+        cardedit.tagui.FILTER.required = {"pk"}
+        asked = []
+        with mock.patch.object(cardedit.tagui, "bulk_tag", side_effect=lambda keys: asked.append(keys)):
+            self.run_all(returns(("T", None)), lambda labels, kw: kw["session"]["sel"])
+        self.assertEqual(asked, [["gb/Red.gb", "gba/Ruby.sav", "gba/Ruby.zip"]])
 
     def test_t_in_the_all_games_list_edits_that_rows_tags(self):
         self.card()

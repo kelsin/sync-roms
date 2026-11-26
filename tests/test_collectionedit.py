@@ -379,13 +379,28 @@ class AddFromTag(unittest.TestCase):
             for s, key, name, _ in rows:
                 s["games"].append({"title": name, "bucket": key})
         keys = {"gba": {"gba/Ruby.zip"}, "psx": DISCS}
-        with mock.patch.object(picker, "filter_list", pick), mock.patch.object(edit, "toggle_games", toggle):
+        with mock.patch.object(picker, "filter_list", pick), mock.patch.object(edit, "toggle_games", toggle), \
+                mock.patch.object(edit, "note"):
             listedit.add_from_tag(listing, shown, lambda bucket: keys[bucket], "💖 Favs")
         self.assertEqual(offered, [["🐝 Cave  (0 games)", "🔀 Mix  (3 games)"]])
         self.assertEqual(toggled, [("✏️  🔀 Mix — ✅ in 💖 Favs, ⬜ not", ["Game Boy Advance — Ruby", "PlayStation — FF7"])])
         self.assertEqual(listing["games"], [
             {"title": "Ruby", "system": "gba", "bucket": "gba/Ruby.zip"},
             {"title": "FF7", "system": "psx", "bucket": "psx/FF7.m3u", "files": ["psx/FF7 (Disc 1).chd"]}])
+
+    def test_the_picked_tag_becomes_the_required_filter_and_a_note_says_it_stays(self):
+        tag_games(self, {"gba/Ruby.zip": None})
+        tagui.FILTER.excluded = {"other"}  # an earlier filter is replaced, so it can't hide the tag's games
+        listing = {"name": "Favs", "games": []}
+        seen, notes = [], []
+
+        def toggle(title, rows, **kw):
+            seen.append((set(tagui.FILTER.required), set(tagui.FILTER.excluded)))
+        with mock.patch.object(picker, "filter_list", return_value=0), mock.patch.object(edit, "toggle_games", toggle), \
+                mock.patch.object(edit, "note", notes.append):
+            listedit.add_from_tag(listing, listedit.view(listing, SYSTEMS), lambda b: {"gba/Ruby.zip"}, "💖 Favs")
+        self.assertEqual(seen, [({"mix"}, set())])
+        self.assertEqual(notes, ["🏷️  The tag filter stays on: ✅ 🔀 Mix (c clears it)"])
 
     def test_esc_or_no_tags_adds_nothing(self):
         tag_games(self, {}, defs={})
@@ -406,6 +421,63 @@ class AddFromTag(unittest.TestCase):
         with mock.patch.object(picker, "filter_list", lambda title, labels, **k: seen.append(labels) or None):
             collectionedit.edit_one({"name": "Favs", "games": []}, SYSTEMS, lambda b: set())
         self.assertEqual(seen[0][2], "Add games from a tag")
+
+
+class AddFromFilter(unittest.TestCase):
+    """listedit.add_from_filter: the collection editor's "Add games matching the current tag filter"."""
+
+    def run_add(self, listing, confirm=True, keys=None):
+        notes = []
+        keys = keys or {"gba": {"gba/Ruby.zip", "gba/Sapphire.zip"}, "psx": DISCS}
+        with mock.patch.object(listedit, "stocked", lambda systems: systems), \
+                mock.patch.object(edit, "note", notes.append), \
+                mock.patch.object(ui, "confirm", return_value=confirm) as asked:
+            listedit.add_from_filter(listing, SYSTEMS, listedit.view(listing, SYSTEMS), lambda b: keys[b], "💖 Favs")
+        return notes, asked
+
+    def test_adds_the_games_the_filter_shows_with_their_files_after_a_count_confirm(self):
+        tag_games(self, {"gba/Ruby.zip": None, "psx/FF7.m3u": ["psx/FF7 (Disc 1).chd"]})
+        tagui.FILTER.required = {"mix"}
+        listing = {"name": "Favs", "games": []}
+        notes, asked = self.run_add(listing)
+        self.assertEqual(asked.call_args.args[0], "✏️  Add 2 games matching ✅ 🔀 Mix to 💖 Favs?")
+        self.assertEqual([(g["bucket"], g.get("files")) for g in listing["games"]], [
+            ("gba/Ruby.zip", None), ("psx/FF7.m3u", ["psx/FF7 (Disc 1).chd"])])
+        self.assertEqual(notes, ["✏️  Added 2 games to 💖 Favs"])
+
+    def test_skips_games_already_in_the_list_and_declined_adds_nothing(self):
+        tag_games(self, {"gba/Ruby.zip": None, "gba/Sapphire.zip": None})
+        tagui.FILTER.required = {"mix"}
+        listing = {"name": "Favs", "games": [dict(RUBY)]}
+        _, asked = self.run_add(listing, confirm=False)
+        self.assertEqual(asked.call_args.args[0], "✏️  Add 1 game matching ✅ 🔀 Mix to 💖 Favs?")
+        self.assertEqual(listing["games"], [RUBY])
+
+    def test_no_match_is_a_note_and_no_filter_asks_for_one(self):
+        tag_games(self, {"nes/Gone.nes": None})
+        tagui.FILTER.required = {"mix"}
+        notes, asked = self.run_add({"name": "Favs", "games": []})
+        asked.assert_not_called()
+        self.assertIn("No games in storage match", notes[0])
+        tagui.FILTER.clear()
+        listing = {"name": "Favs", "games": []}
+        with mock.patch.object(tagui.FILTER, "pick") as pick:
+            notes, asked = self.run_add(listing)
+        pick.assert_called_once()
+        asked.assert_not_called()
+        self.assertEqual(listing["games"], [])
+
+    def test_the_collection_menu_offers_it(self):
+        seen = []
+        with mock.patch.object(picker, "filter_list", lambda title, labels, **k: seen.append(labels) or None):
+            collectionedit.edit_one({"name": "Favs", "games": []}, SYSTEMS, lambda b: set())
+        self.assertEqual(seen[0][5], "Add games matching the current tag filter")
+        called = []
+        answers = iter([5, None])
+        with mock.patch.object(picker, "filter_list", lambda *a, **k: next(answers)), \
+                mock.patch.object(collectionedit, "add_from_filter", lambda *a: called.append(a[-1])):
+            collectionedit.edit_one({"name": "Favs", "games": []}, SYSTEMS, lambda b: set())
+        self.assertEqual(len(called), 1)
 
 
 class FolderLister(unittest.TestCase):
@@ -703,11 +775,17 @@ class AllRows(unittest.TestCase):
             listedit.toggle_all("All", rows)
         self.assertEqual(seen, [(["Game Boy Advance — Ruby.zip"], "✅ 🔀 Mix · 1 of 3 shown (c clear filters)")])
 
-    def test_toggle_all_turns_select_all_off(self):
+    def test_toggle_all_turns_select_all_on_only_while_a_tag_filter_is_set(self):
         _, rows = self.rows()
         with mock.patch.object(edit, "toggle_games", return_value=None) as fake:
             listedit.toggle_all("All", rows)
-        self.assertIs(fake.call_args.kwargs["select_all"], False)
+        self.assertEqual(fake.call_args.kwargs["select_all"], edit.WHEN_FILTERED)
+        seen = []
+        with mock.patch.object(picker, "filter_list", lambda t, labels, **k: seen.append(k) or k["session"]["sel"]):
+            listedit.toggle_all("All", rows)
+            tagui.FILTER.required = {"mix"}
+            listedit.toggle_all("All", rows)
+        self.assertEqual([(k["select_all"], "a all shown" in k["hint"]) for k in seen], [(False, False), (True, True)])
 
 
 if __name__ == "__main__":

@@ -61,20 +61,26 @@ def save_note(games, key, text, covered=False):
 FULL_SYSTEM_NOTE = "Full system: every file in its folder is synced, so it can't be toggled"
 
 
+WHEN_FILTERED = "filtered"  # select_all value: `a` is on only while a tag filter is set (lists too long to toggle whole)
+
+
 def toggle_games(title, rows, hotkeys=(), hint=None, place=None, filters="", key_help=None, select_all=True, notes=True,
                  tag_filter=True):
     """_toggle_games over the rows tagui.FILTER keeps, reopened in the same place after `t` edited a game's tags or
     `s`/`c` changed the tag filter (the toggles made so far are applied first); the other keys are returned as it does.
     A caller that lists s or c in hotkeys handles them itself. tag_filter=False: every row is shown, with no s/c and no
-    banner, for lists whose hidden rows would be acted on unseen (a suggestion review, a tag's own games)."""
+    banner, for lists whose hidden rows would be acted on unseen (a suggestion review, a tag's own games).
+    select_all: True, False, or WHEN_FILTERED (on only while a tag filter is set, judged on each pass)."""
     place = {} if place is None else place
     own = tuple(k for k in (*tagui.HOTKEYS, tagui.BULK_KEY) if k not in hotkeys) if tag_filter else ()
-    hint = tagui.games_hint(hint or GAMES_HINT, tag_filter, notes, select_all)
+    base_hint = hint or GAMES_HINT
     helps = [h for h in (*tagui.KEYS_HELP, tagui.BULK_HELP) if h[0] in own]
     frozen = None  # the rows of the pass `t` was pressed in: shown again as they were, so the cursor stays put
     while True:
         shown = frozen or ([r for r in rows if tagui.FILTER.keep(r[1])] if tag_filter else rows)
         frozen = None
+        every = (tag_filter and tagui.FILTER.active()) if select_all == WHEN_FILTERED else select_all
+        hint = tagui.games_hint(base_hint, tag_filter, notes, every)
         line = tagui.FILTER.describe() if tag_filter else ""
         banner = tagui.banner(len(shown), len(rows)) if line and line not in filters else tagui.paused() if not tag_filter else ""
         if line and not shown and rows:
@@ -82,7 +88,7 @@ def toggle_games(title, rows, hotkeys=(), hint=None, place=None, filters="", key
         pressed, i = _toggle_games(title, shown, (*hotkeys, *own), hint, place,
                                    " · ".join(x for x in (filters, banner) if x),
                                    None if key_help is None else [*key_help, *(h for h in helps if h not in key_help)],
-                                   select_all, notes)
+                                   every, notes)
         if pressed == tagui.TAG_KEY:
             if i is not None:
                 tagui.edit_game_tags(shown[i][1], shown[i][2])

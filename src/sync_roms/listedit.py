@@ -125,20 +125,23 @@ def add_from_system(listing, systems, shown, keys_of, label, toggle=None):
 
 
 def add_from_tag(listing, shown, keys_of, label):
-    """Pick one tag and toggle its games, across every system, in listing (via shown, a view of it).
-    label is listing's name as shown, with its emoji. New games get their record's extra files (the discs of a
-    multi-disc game). Ctrl-C keeps the toggles made, then is raised again."""
+    """Pick one tag, set the tag filter to it (the filter is sticky, so it stays set afterwards and a note says so;
+    any other tag filter is cleared so nothing hides the tag's games), and toggle its games, across every system, in
+    listing (via shown, a view of it). label is listing's name as shown, with its emoji. New games get their
+    record's extra files (the discs of a multi-disc game). Ctrl-C keeps the toggles made, then is raised again."""
     defs, records = tags.all_tags(), tags.load()["games"]
     if not defs:
         edit.note(ui.yellow("ℹ️  No tags yet."))
         return
     ids = sorted(defs, key=lambda i: defs[i]["name"].casefold())
     games_of = {i: [k for k, rec in records.items() if i in rec["tags"]] for i in ids}
-    j = picker.filter_list("✏️  Add games from which tag?",
+    j = picker.filter_list("✏️  Add games with which tag?",
                            [f"{defs[i]['emoji']} {defs[i]['name']}  ({len(games_of[i])} games)" for i in ids])
     if j is None:
         return
     tag = defs[ids[j]]
+    tagui.FILTER.clear()
+    tagui.FILTER.required.add(ids[j])
     games = [{"system": k.partition("/")[0], "bucket": k, **({"files": records[k]["files"]} if "files" in records[k] else {})}
              for k in games_of[ids[j]]]
     rows = edit.list_rows({"games": games}, shown, lambda s: keys_of(s["bucket"]))
@@ -151,6 +154,8 @@ def add_from_tag(listing, shown, keys_of, label):
         edit.toggle_games(f"✏️  {tag['emoji']} {tag['name']} — ✅ in {label}, ⬜ not", rows)
     except KeyboardInterrupt:
         interrupted = True
+    if tagui.FILTER.active():
+        edit.note(f"🏷️  The tag filter stays on: {tagui.FILTER.describe()} (c clears it)")
     added = {g["bucket"] for s in shown.values() for g in s["games"]} - had
     listing["games"] = reconcile(listing["games"], shown)
     files = {g["bucket"]: g["files"] for g in games if g.get("files")}
@@ -159,6 +164,37 @@ def add_from_tag(listing, shown, keys_of, label):
             g["files"] = list(files[g["bucket"]])
     if interrupted:
         raise KeyboardInterrupt
+
+
+def add_from_filter(listing, systems, shown, keys_of, label):
+    """Add every game in storage the tag filter shows (a game once, by its lead key) that listing doesn't have yet,
+    after a count confirm; asks for a filter first when none is set. New games get their record's extra files and a
+    multi-disc game's discs."""
+    if not tagui.FILTER.active():
+        tagui.FILTER.pick(set(tags.load()["games"]))
+        if not tagui.FILTER.active():
+            return
+    options = stocked(systems)
+    had = {g["bucket"] for s in shown.values() for g in s["games"]}
+    rows = [r for r in all_rows(shown, options, keys_of)
+            if r[1] not in had and tags.owner(r[1]) == r[1] and tagui.FILTER.keep(r[1])]
+    line = tagui.FILTER.describe()
+    if not rows:
+        edit.note(ui.yellow(f"ℹ️  No games in storage match {line} that {label} doesn't have."))
+        return
+    if not ui.confirm(f"✏️  Add {tagui.games(len(rows))} matching {line} to {label}?", default=False):
+        return
+    records = tags.load()["games"]
+    for s, key, name, _ in rows:
+        s["games"].append({"title": name, "bucket": key})
+    listing["games"] = reconcile(listing["games"], shown)
+    added = {r[1] for r in rows}
+    for g in listing["games"]:
+        if g.get("bucket") in added and "files" not in g and records.get(g["bucket"], {}).get("files"):
+            g["files"] = list(records[g["bucket"]]["files"])
+    for s in options:
+        fold_discs(listing["games"], keys_of(s["bucket"]))
+    edit.note(f"✏️  Added {tagui.games(len(rows))} to {label}")
 
 
 # --- What changed ------------------------------------------------------------------------------------
@@ -291,5 +327,6 @@ def all_rows(shown, systems, keys_of):
 
 
 def toggle_all(title, rows, place=None):
-    """edit.toggle_games over rows from all_rows (s and c, the sticky tag filter, are its own)."""
-    edit.toggle_games(title, rows, place=place, select_all=False)
+    """edit.toggle_games over rows from all_rows (s and c, the sticky tag filter, are its own). `a` toggles every shown
+    game only while a tag filter is set: the unfiltered list is every file in storage."""
+    edit.toggle_games(title, rows, place=place, select_all=edit.WHEN_FILTERED)
