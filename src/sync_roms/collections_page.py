@@ -4,7 +4,7 @@ import io
 import json
 import os
 
-from . import collections, inventory, metafilter, names, s3, scrape_plan, store, tags, themeart, ui
+from . import collections, inventory, languages, metafilter, names, s3, scrape_plan, store, tags, themeart, ui
 
 QUALITY = 80
 BAND_WIDTH = 150
@@ -112,6 +112,8 @@ def page_data():
             entry = {"title": title if isinstance(title, str) and title else names.title(bucket),
                      "system": system, "paths": paths,
                      "tags": [t for t in tags.tags_of(bucket) if t in defined] if defined else []}
+            if languages.translated(bucket):
+                entry["flag"] = languages.flag(bucket)
             size = _game_size(paths, sizes.get(system))
             if size:
                 entry["size"] = size

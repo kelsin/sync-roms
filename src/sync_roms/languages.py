@@ -69,8 +69,17 @@ def _deciding(name):
     return None
 
 
+def _translated(name):
+    return bool(re.search(r"\[T-En", name, re.I))
+
+
+def translated(key):
+    """True when the ROM is a fan translation into English (its name has a `[T-En` tag)."""
+    return _translated(stem(key))
+
+
 def _english(name, found):
-    if re.search(r"\[T-En", name, re.I):
+    if _translated(name):
         return True
     if not found:
         return None

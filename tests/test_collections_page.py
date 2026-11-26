@@ -48,6 +48,15 @@ class Page(helpers.DataDir):
         self.assertEqual(data["tags"], {"mario": {"name": "Mario", "emoji": "🍄"},
                                         "platformers": {"name": "Platformers", "emoji": "🏃"}})
 
+    def test_translated_rom_gets_a_flag(self):
+        self.save(games=[{"system": "gba", "bucket": "gba/Mother 3 [T-En by Aeon Genesis].gba", "title": "M"},
+                         {"system": "gba", "bucket": "gba/Mother 3 (Japan).gba", "title": "J"},
+                         {"system": "snes", "bucket": SMW, "title": "S"}])
+        games = {g["title"]: g for g in collections_page.page_data()["collections"][0]["games"]}
+        self.assertEqual(games["M"]["flag"], "\U0001F1FA\U0001F1F8")
+        self.assertNotIn("flag", games["J"])
+        self.assertNotIn("flag", games["S"])
+
     def test_title_falls_back_to_names_title(self):
         self.save(games=[{"system": "snes", "bucket": SMW}])
         with mock.patch.object(names, "title", return_value="Scraped"):
