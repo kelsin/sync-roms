@@ -270,6 +270,25 @@ class Editor(unittest.TestCase):
         self.assertEqual(seen, [[True, True], [True, False], [True, True]])
         self.assertEqual(tags.tags_of(B), ["shmups"])
 
+    def test_t_adding_another_tag_keeps_a_rows_unsaved_uncheck(self):
+        seen = []
+
+        def fake(title, labels, **kw):
+            seen.append(list(kw["initial"]))
+            at = labels.index("Nintendo NES — B (USA)")
+            if len(seen) == 1:
+                kw["session"]["sel"] = [True, False]  # B unchecked, then t on it
+                return "t", at
+            return kw["session"]["sel"]
+
+        def add_cave(key, title):
+            tags.change_game_tags(key, add={"cave"})
+            return True
+        with mock.patch.object(picker, "filter_list", fake), mock.patch.object(tagui, "edit_game_tags", add_cave):
+            tageditor.edit_one("shmups", SYSTEMS, lambda b: set())
+        self.assertEqual(seen[1], [True, False])  # still unchecked
+        self.assertEqual(tags.tags_of(B), ["cave"])  # and it lost shmups on leaving
+
     def test_its_games_offer_no_notes_and_ignore_the_sticky_filter(self):
         with mock.patch.object(edit, "toggle_games", return_value=None) as toggle:
             tageditor.edit_one("shmups", SYSTEMS, lambda b: set())

@@ -73,8 +73,8 @@ def toggle_games(title, rows, hotkeys=(), hint=None, place=None, filters="", key
     every row is shown, with no s/c and no banner, for lists whose hidden rows would be acted on unseen (a suggestion
     review, a tag's own games). select_all: True, False, or WHEN_FILTERED (on only while a tag filter is set, judged on
     each pass). before: how many rows there were before the caller's own filters left out some, so a list they emptied
-    says no game matches. retagged(key): called after t or . wrote the tags of the row of key, before the list opens
-    again (a tag's own games make its check follow the tag). bulk: whether T (tag the rows on screen) is offered;
+    says no game matches. retagged(key, had): called after t or . wrote the tags of the row of key (had: its tag ids
+    before), before the list opens again (a tag's own games make its check follow the tag). bulk: whether T (tag the rows on screen) is offered;
     by default with the tag filter, and safe without it too, since T never reaches a row that isn't shown."""
     place = {} if place is None else place
     bulk = tag_filter if bulk is None else bulk
@@ -98,8 +98,9 @@ def toggle_games(title, rows, hotkeys=(), hint=None, place=None, filters="", key
                                    None if key_help is None else [*key_help, *(h for h in helps if h not in key_help)],
                                    every, notes)
         if pressed in tagui.TAG_KEYS:
+            had = set(tags.tags_of(tags.owner(shown[i][1]))) if i is not None else set()
             if tagui.tag_key(pressed, *(shown[i][1:3] if i is not None else (None, None))) and retagged:
-                retagged(shown[i][1])
+                retagged(shown[i][1], had)
             frozen = shown
         elif pressed == tagui.BULK_KEY and pressed in own:
             tagui.bulk_tag([r[1] for r in picker.on_screen(place, shown)])

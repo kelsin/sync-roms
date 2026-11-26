@@ -192,9 +192,10 @@ def edit_one(tag_id, systems, keys_of):
             if place.get("added"):  # back from adding: on the first game added
                 at = next(i for i, r in enumerate(rows) if r[1] in place["added"])
                 place = {"keys": [r[1] for r in rows], "session": {"row": at}}
-            def follow(key):  # t or . changed the row's tags: its check follows whether it has this tag now
-                entry["games"] = [g for g in entry["games"] if g["bucket"] != key] + (
-                    [{"bucket": key}] if tag_id in tags.tags_of(tags.owner(key)) else [])
+            def follow(key, had):  # t or . put this tag on the row or took it off: its check follows
+                has = tag_id in tags.tags_of(tags.owner(key))
+                if has != (tag_id in had):  # another tag changed: the row keeps the check you gave it
+                    entry["games"] = [g for g in entry["games"] if g["bucket"] != key] + ([{"bucket": key}] if has else [])
             try:
                 pressed = edit.toggle_games(header(tag), rows, hotkeys=(ADD_KEY, ADD_ALIAS, SETTINGS_KEY, QUIT_KEY),
                                             hint=GAMES_HINT, key_help=GAMES_HELP, place=place, notes=False,
