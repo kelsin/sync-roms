@@ -12,7 +12,7 @@ from unittest import mock
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import helpers  # noqa: E402,F401  (imports isolate first)
 from PIL import Image  # noqa: E402
-from theme_builds import CachedBuilds, make_base  # noqa: E402
+from test_custom_themes import make_base  # noqa: E402
 
 from sync_roms import commands, custom_themes, runtime, ui, upload, usersettings  # noqa: E402
 from sync_roms.custom_themes import palettes  # noqa: E402
@@ -207,7 +207,7 @@ class Build(helpers.StorageDir):
             custom_themes.build(None, [], os.path.join(self.tmp.name, "out"))
 
 
-class Command(CachedBuilds, helpers.StorageDir):
+class Command(helpers.StorageDir):
     def setUp(self):
         super().setUp()
         self.enterContext(mock.patch.object(usersettings, "apply_settings"))
@@ -217,7 +217,6 @@ class Command(CachedBuilds, helpers.StorageDir):
         self.out = os.path.join(self.tmp.name, "out")
 
     def test_duplicate_palette_flags_collapse(self):
-        self.cache_builds()
         self.assertEqual(commands.run(["themes", "build", "--palette", "Arcade", "--palette", "Arcade", "--out", self.out]), 0)
         self.assertEqual(sorted(os.listdir(self.out)), ["Pixel Consoles - Arcade", "Pixel Controllers - Arcade", "ToTK - James"])
 
@@ -281,7 +280,7 @@ class Command(CachedBuilds, helpers.StorageDir):
 T = "os/spruceos/themes/"
 
 
-class Publish(CachedBuilds, helpers.StorageDir):
+class Publish(helpers.StorageDir):
     def setUp(self):
         super().setUp()
         self.enterContext(mock.patch.object(usersettings, "apply_settings"))
@@ -289,7 +288,6 @@ class Publish(CachedBuilds, helpers.StorageDir):
         self.enterContext(mock.patch.object(ui, "ASSUME_YES", True))
         make_base(os.path.join(self.root, "os", "spruceos", "themes", "SPRUCE"))
         make_base(os.path.join(self.root, "os", "spruceos", "themes", "ToTK"))
-        self.cache_builds()
 
     def test_publish_two_palettes(self):
         mint = self.put(T + "Pixel Consoles - Mint/config.json", b"mint")
