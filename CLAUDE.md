@@ -166,7 +166,7 @@ Rules for tagged games:
 - Every game list shows a game's tag emoji as its last column. `t` edits the highlighted game's tags (`n` adds a tag), `s` opens the tag filter (`Enter` cycles a tag off, required ✅, excluded 🚫; `c` clears it), and the card editor's own `s` opens all games narrowed by tags first. They live in `tagui.py` and `cardedit.py`.
 - `sync-roms tags edit` (`tageditor.py`) edits tags and `sync-roms tags suggest [system ...]` (`tagsuggest.py`, `data/genre-tags.json`) suggests tags from scraped genres for every version of a game, saving the unchecked ones to `declined`. `tools/migrate_sets_to_tags.py` is the one-time script that made `tags.json` from the old set files.
 - `tagui.FILTER` is the one process-wide tag filter, sticky across lists and never cleared but by `c`; tags deleted or merged leave it (`prune`, `retarget`).
-- A list whose hidden rows would be acted on unseen opts out of it with `tag_filter=False` (the tag editor's own games, the `tags suggest` review).
+- A list whose hidden rows would be acted on unseen opts out of it with `tag_filter=False` (the tag editor's own games and its add lists, a collection's own games, the `tags suggest` review) and says `tag filter paused here`.
 - `T` bulk-tags the rows on screen: those the tag filter, the `/` search and the `o` view leave (`picker.on_screen`).
 - Surprise picks only games with any of the tags in the `surprise_tags` setting, or in a card's own `surprise_tags` (card editor S menu), which wins; with neither it has no limit.
 - `sync-roms check` notes tags with no games, one count per system of its untagged games (the pool `tags suggest` uses), `genre-tags.json` ids that aren't tags and a card's leftover `"sets"` key.

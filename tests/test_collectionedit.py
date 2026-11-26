@@ -316,7 +316,7 @@ class GamesFirst(unittest.TestCase):
         for part in ("Favs", "my best", "art: none"):
             self.assertIn(part, calls[0]["title"])
         self.assertEqual(calls[0]["hotkeys"], ("A", "+", "S"))  # s and c: the sticky tag filter's own, in edit.toggle_games
-        self.assertIs(calls[0]["tag_filter"], True)
+        self.assertIs(calls[0]["tag_filter"], False)  # switching a game off removes it: the filter must hide none
         self.assertIn("A add games", calls[0]["hint"])
         self.assertIn(("A / +", "add games"), calls[0]["key_help"])
         self.assertNotIn("+", calls[0]["hint"])
@@ -393,7 +393,7 @@ class GamesFirst(unittest.TestCase):
         seen = []
 
         def inner(title, rows, hotkeys, hint, place, filters, key_help, select_all, notes):
-            seen.append(([r[1] for r in rows], select_all))
+            seen.append(([r[1] for r in rows], select_all, filters))
             if len(seen) == 1:
                 return "A", None
             if len(seen) == 2:  # All systems: every shown game switched on, as `a` does
@@ -405,8 +405,9 @@ class GamesFirst(unittest.TestCase):
                 mock.patch.object(inventory, "cached", return_value=None):
             collectionedit.edit_one(collection, SYSTEMS, lambda b: {k for k in ("gba/Ruby.zip", "gba/Zelda.zip", "psx/FF7.m3u")
                                                                     if k.startswith(f"{b}/")})
-        self.assertEqual(seen[0][0], [])  # Ruby isn't tagged: the collection's own list is filtered too
-        self.assertEqual(seen[1], (["psx/FF7.m3u", "gba/Zelda.zip"], True))
+        self.assertEqual(seen[0][0], ["gba/Ruby.zip"])  # untagged, still listed: the collection's own list ignores the filter
+        self.assertEqual(seen[0][2], tagui.PAUSED)
+        self.assertEqual(seen[1][:2], (["psx/FF7.m3u", "gba/Zelda.zip"], True))  # the add list follows it
         self.assertEqual([g["bucket"] for g in collection["games"]], ["psx/FF7.m3u", "gba/Ruby.zip", "gba/Zelda.zip"])
 
     def test_esc_in_the_system_list_returns_to_the_games_list_unchanged(self):
