@@ -102,3 +102,19 @@
 ## Self-review
 - Spec coverage: rules (T1), sticky filter + bulk-action scope + `s` meaning (T2), every list (T3), audit (T4), data review incl. phases, gate and no-new-tags (T5), `check`/`suggest` (T1).
 - Order: T1 → T2 → T3 → T4 proceed sequentially in code; T5 steps 1–4 can run alongside T3/T4 (they touch tools and scratch only), apply last.
+
+## Addendum: UX tasks picked by the user after the audit (bundles A, B, C, D)
+
+Items come from `.superpowers/sdd/2026-11-25-tags-as-filters/audit-*.md` (git-ignored scratch; the numbers below refer to those files: E=audit-edit-listedit, C=audit-cardedit, T=audit-tag-collection). Run sequentially, one implementer at a time (they share `edit.py`, `cardedit.py`, `tagui.py`). Each task: failing tests first, full suite once before commit, README/help text kept in sync with `tests/test_readme.py`.
+
+### Task 6: Bundle A, filter visibility
+Items E2, C2, T5 ("N of M shown" in the banner whenever the filter is on and hides rows; `tagui.banner(shown: int | None = None, total: int | None = None)`); E8, C1, C11 (banner and `c` on the card editor's system list, collections list and the top menus; system list shows a "N match" count per system while a filter is on); E11, T9, T15 (opted-out lists show "tag filter paused here" when a filter is set); E5, E6, E7, C4, C10 (one hint builder so every games list says `s filter by tag · t edit tags · c clear filters`; hints list `/` and `w` where live); E12 (`c` help says it clears search and filters).
+
+### Task 7: Bundle B, bulk tag and untagged
+Items E1, C6, T1: `T` in every games list that applies the filter (`edit.toggle_games`, card editor system/all/collection lists) opens the tag checklist once and applies the add/remove diff to every shown row through `tags.change_games_tags`, after a confirm that shows the count; reports "Tagged N games". Items T4, C7: `FILTER.pick` always lists tags already required/excluded (even with 0 games here) and has a "no tags at all" entry (keep() true when `tags.record(key)` is None or has no tags); picker counts reflect the current narrowed set (E10).
+
+### Task 8: Bundle C, add all shown
+Items E3, C3: `a` works in All games / All systems lists when a filter is set (`select_all` true only then) and the hint says so. Item E4: "Add games from which tag?" becomes "add games with the tag filter preset" (opens the add list with that tag required) instead of a separate narrowing. Item T14: collection editor gets "Add games matching the current tag filter".
+
+### Task 9: Bundle D, tag picker ergonomics
+Items T2 (recent/frequent tags: checked first, then the last ~8 used this run, then alphabetical; search also matches descriptions), T3 (descriptions as row notes in pickers), T6 (direct `x` key in the filter picker to exclude), T7 (tag editor `o` toggles name/count sort; 0-game tags dimmed), T8 (rename checks duplicate names like `_new_tag`; merge/delete give a result note), T10 (note when `n` created a tag but Esc left it unapplied), T11/E9 (`t` shows "Tagged X: +2 −1"; `.` repeats the last add/remove set; note "No game under the cursor" on an empty list).
