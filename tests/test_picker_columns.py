@@ -273,6 +273,23 @@ class Menu(unittest.TestCase):
         self.assertEqual(m.vis, [3, 1, 0, 2])  # the two A rows by size, the unknown last
 
 
+    def test_a_list_without_the_sort_column_ignores_its_direction(self):
+        shared = picker.Sort(("year", "name", "system"))
+        cols = COLUMNS + [picker.Column("size", "Size", True, descending=True)]
+        sized = model(sort=shared, columns=cols)
+        sized.key("o")
+        sized.key("G")
+        sized.key("enter")
+        self.assertEqual((shared.first, shared.reverse), ("size", True))
+        other = model(sort=shared)  # no Size column: year ascending, as by default
+        self.assertEqual(other.vis, [3, 1, 0, 2])
+        self.assertIn("Year ▲", picker.header_row(other, 60).plain)
+        self.assertEqual((shared.first, shared.reverse), ("size", True))  # kept for lists with Size
+        other.key("O")  # reverses this list's own default order
+        self.assertEqual((shared.first, shared.reverse), ("year", True))
+        self.assertEqual(other.vis, [0, 1, 3, 2])
+
+
 class NameKeys(unittest.TestCase):
     def test_names_the_caller_gives_are_not_worked_out_from_the_labels(self):
         from sync_roms import store

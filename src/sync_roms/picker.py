@@ -233,7 +233,7 @@ def header_row(m, width):
     header dim, the first sort column's bold and marked ▲ (▼ reversed)."""
     from rich.text import Text
     first = m.sort.order(m.sortable)[0] if m.sort else None
-    mark = " ▼" if m.sort and m.sort.reverse else " ▲"
+    mark = " ▼" if m.sort and m.reversed() else " ▲"
 
     def cell(column):
         on = column.id == first
@@ -458,9 +458,18 @@ class _ListModel:
         """The o menu: each sortable column's header (the first sort column's marked ▲, or ▼ reversed) and whether
         it is highlighted."""
         first = self.sort.order(self.sortable)[0]
-        mark = " ▼" if self.sort.reverse else " ▲"
+        mark = " ▼" if self.reversed() else " ▲"
         return [(c.header + (mark if c.id == first else ""), at == self.sort_menu)
                 for at, c in enumerate(self.sort_columns())]
+
+    def falls_back(self):
+        """Whether the sort's first column (picked in another list sharing it) isn't this list's: it then sorts in
+        its default order and direction, leaving the sort's first column and direction for the lists that have it."""
+        return self.sort.first is not None and self.sort.first not in self.sortable
+
+    def reversed(self):
+        """Whether this list's order is reversed: the sort's direction, unless the list falls back (falls_back)."""
+        return self.sort.reverse and not self.falls_back()
 
     def sort_hint(self):
         """What a list with sortable columns adds to its hint."""
@@ -481,9 +490,9 @@ class _ListModel:
                         self.name_keys[i] = store.sort_key(self.labels[i])
                 column = [self.name_keys[i] if v is None else v for i, v in enumerate(column)]
             values.append(column)
-        basis = (order, self.sort.reverse, values)
+        basis = (order, self.reversed(), values)
         if self.sorted is None or self.sorted[0] != basis:
-            place = sorted_positions(values, self.sort.reverse)
+            place = sorted_positions(values, self.reversed())
             ordered = [0] * len(place)
             for i, at in enumerate(place):
                 ordered[at] = i
@@ -733,7 +742,10 @@ class _ListModel:
             first = self.sort.order(self.sortable)[0]
             self.sort_menu = next(at for at, c in enumerate(self.sort_columns()) if c.id == first)
         elif k == "O" and self.sortable:
-            self.sort.reverse = not self.sort.reverse
+            if self.falls_back():  # this list's own default order, reversed (the first column then is this list's)
+                self.sort.first, self.sort.reverse = self.sort.order(self.sortable)[0], True
+            else:
+                self.sort.reverse = not self.sort.reverse
         elif not self.multi:
             pass
         elif k == "u":
@@ -1817,7 +1829,8 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=None, 
     sort_value: optional callable(label index, column id) -> a value to sort by, or None when unknown (sorted last
     both ways); called on every redraw, so values that come later (from poll) re-sort the list, the highlighted row
     staying highlighted. A "name" column with no value sorts by store.sort_key of the label.
-    sort: the Sort the list uses and changes with o and O (share one, like GAMES_SORT, to keep it across lists); by
+    sort: the Sort the list uses and changes with o and O (share one, like GAMES_SORT, to keep it across lists; a list
+    without its first column sorts in its default order and direction, and O there reverses that order); by
     default a new one whose default order is the sortable columns in display order. Without sortable columns the rows
     stay in the caller's order. Indexes (cursor, states, the result, the session's row and visible) are always the
     caller's; only the order rows are shown in changes.
