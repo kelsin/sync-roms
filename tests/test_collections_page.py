@@ -119,6 +119,14 @@ class Page(helpers.DataDir):
         self.assertEqual(games["S"]["year"], "1990")
         self.assertNotIn("year", games["X"])
 
+    def test_title_is_the_scraped_name(self):
+        meta = {"Super Mario World (USA).zip": {"name": "Super Mario World"}}
+        self.enterContext(mock.patch.object(scrape_plan, "load_metadata", lambda system, fresh=False: meta))
+        self.save(games=[{"system": "snes", "bucket": SMW, "title": "Super Mario World (USA)"},
+                         {"system": "snes", "bucket": "snes/x.sfc", "title": "X"}])
+        self.assertEqual([g["title"] for g in collections_page.page_data()["collections"][0]["games"]],
+                         ["Super Mario World", "X"])
+
     def test_unreachable_storage_means_no_years(self):
         self.enterContext(mock.patch.object(scrape_plan, "load_metadata", side_effect=SystemExit(2)))
         self.save(games=[{"system": "snes", "bucket": SMW, "title": "S"}])

@@ -72,6 +72,13 @@ def _load(system):
     return _entry_names(entry)
 
 
+def scraped_name(metadata, key):
+    """The scraped `name` of a storage key from metadata ({system: metadata.json}), or None."""
+    entry = metadata.get(key.partition("/")[0], {}).get(key.partition("/")[2])
+    name = entry.get("name") if isinstance(entry, dict) else None
+    return name if isinstance(name, str) and name else None
+
+
 def title(key):
     """A storage key's display name: the proper name for a MAME or FBNeo set or a PICO-8 cart,
     else the file name without extension."""
