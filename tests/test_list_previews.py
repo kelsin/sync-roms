@@ -54,15 +54,11 @@ class ListPreviews(unittest.TestCase):
             self.assertEqual(art(calls, 2), ["sys-gba", "sys-psx"], module.__name__)
 
     def test_add_games_from_which_system_previews_the_system(self):
-        for module, edit_one in ((collectionedit, collectionedit.edit_one),):
-            fake, calls = capture([1, None, None])  # "add games from a system", then Esc, then back
-            thing = {"name": "X", "games": []}
-            with mock.patch.object(picker, "filter_list", fake), mock.patch.object(listedit, "stocked", return_value=SYSTEMS):
-                try:
-                    edit_one(thing, SYSTEMS, lambda bucket: set())
-                except StopIteration:
-                    pass
-            self.assertEqual(art(calls, 3, 1), [None, "sys-gba", "sys-psx"], module.__name__)
+        fake, calls = capture([None])  # Esc at the system list
+        thing = {"name": "X", "games": []}
+        with mock.patch.object(picker, "filter_list", fake), mock.patch.object(listedit, "stocked", return_value=SYSTEMS):
+            listedit.add_from_system(thing, SYSTEMS, listedit.view(thing, SYSTEMS), lambda bucket: set(), "X")
+        self.assertEqual(art(calls, 3), [None, "sys-gba", "sys-psx"])
 
 
 class GamePreviews(unittest.TestCase):
