@@ -321,7 +321,7 @@ class Step(StorageCase):
             got = self.both(True, False, 1)
         title, labels, kw = lists[0]
         self.assertEqual(title, "\U0001F381 Surprises: keep ✅ or replace ⬜ (Enter to confirm)")
-        self.assertEqual(kw["initial"], [True] * 10)
+        self.assertEqual(kw["initial"], [False] * 10)
         self.assertIs(kw["diff_marks"], False)
         self.assertEqual(len(got), 10)
         self.assertNotIn(current[0], got)
@@ -329,6 +329,44 @@ class Step(StorageCase):
         self.assertEqual(store.load_cards()["SD"]["surprises"], got)
         self.assertEqual([h["bucket"] for h in surprise.load_history()], [g["bucket"] for g in got if g not in current])
         self.assertEqual(edits, ["SD"])
+
+    def test_interactive_replaces_all_unless_kept(self):
+        current = [self.surprise("gba", i) for i in range(5)] + [self.surprise("gb", i) for i in range(5)]
+        self.card(surprises=current)
+        sessions = []
+        with self.patched(filter_list=lambda t, labels, **kw: sessions.append(kw["session"]) or list(kw["initial"])):
+            got = surprise.run_surprise("SD", (None, "esde"), self.chosen(), True, False)
+        self.assertEqual(sessions[0]["sel"], [False] * 10)
+        self.assertEqual(got, [])
+        self.assertEqual(store.load_cards()["SD"]["surprises"], [])
+
+    def test_esc_returning_none_replaces_all(self):
+        self.card(surprises=[self.surprise("gba", i) for i in range(3)])
+        with self.patched():
+            got = surprise.run_surprise("SD", (None, "esde"), self.chosen(), True, False)
+        self.assertEqual(got, [])
+
+    def test_rows_show_the_size_on_the_card_before_the_tags(self):
+        multi = {**self.surprise("gba", 0), "files": ["gba/G1 (USA).zip"]}
+        current = [multi, self.surprise("gb", 2), {"system": "gb", "bucket": "gb/Gone.gb", "title": "Gone"}]
+        self.card(surprises=current)
+        lists = []
+        costs = {"gba": ({"gba/G0 (USA).zip": 1_500_000, "gba/G1 (USA).zip": 500_000}, False),
+                 "gb": ({"gb/G2 (USA).gb": 32_000}, False)}
+        with mock.patch.object(surprise.budget, "game_costs", lambda card, system, keys: costs[system["bucket"]]), \
+                self.patched(filter_list=lambda t, labels, **kw: lists.append(kw) or list(kw["initial"])):
+            self.both(True, False, 6)
+        rows = lists[0]["extras"]
+        self.assertEqual([r[0] for r in rows], [("  2 MB", "dim"), ("  32 KB", "dim"), ("", "dim")])
+        self.assertEqual([len(r) for r in rows], [2, 2, 2])  # the tag column stays last
+
+    def test_rows_show_sizing_while_the_cache_lacks_them(self):
+        self.card(surprises=[self.surprise("gba", 0)])
+        lists = []
+        with mock.patch.object(surprise.budget, "game_costs", lambda card, system, keys: ({}, True)), \
+                self.patched(filter_list=lambda t, labels, **kw: lists.append(kw) or list(kw["initial"])):
+            self.both(True, False, 7)
+        self.assertEqual(lists[0]["extras"][0][0], ("  …", "dim"))
 
     def test_surprises_outside_the_run_are_dropped(self):
         self.card(surprises=[self.surprise("gba", 0), self.surprise("psx", 0)])
