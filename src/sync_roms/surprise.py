@@ -1,5 +1,5 @@
 """Surprise: SLOTS random full English games per card, spread across its systems. Each sync replaces them (all of them
-when nobody can be asked, else the ones the user doesn't keep); the history, kept for ttl_days(), only puts games
+when nobody can be asked, else all but the ones the user marks to keep); the history, kept for ttl_days(), only puts games
 picked before behind those that weren't."""
 import datetime
 import json
@@ -8,7 +8,7 @@ import posixpath
 import random
 import re
 
-from . import frontend, inventory, languages, m3u, mirroring, names, picker, portmaster, previews, s3, store, tagui, tags, ui, usersettings, vita
+from . import budget, frontend, inventory, languages, m3u, mirroring, names, picker, portmaster, previews, s3, store, tagui, tags, ui, usersettings, vita
 
 SLOTS = 10
 RECOMMENDED_SHARE = 2 / 3
@@ -245,10 +245,27 @@ def _current(entry, chosen_systems, layout_name):
                    if isinstance(x, dict) and x.get("system") in names and isinstance(x.get("bucket"), str)]
 
 
+def _size_column(entry, chosen_systems, current):
+    """Each surprise's size on the card, its files' ROM bytes plus the scraped files the card's layout installs
+    (budget.game_costs): (text, "dim"), "…" while the size cache lacks them, blank when storage has none of its files."""
+    from .cardedit import SIZING, size_text  # cardedit imports this module
+    systems = {s["bucket"]: s for s in chosen_systems}
+    costs = {}
+    for bucket in {x["system"] for x in current}:
+        keys = [k for x in current if x["system"] == bucket for k in [x["bucket"], *x.get("files", ())]]
+        costs[bucket] = budget.game_costs(entry, systems[bucket], keys)
+    out = []
+    for x in current:
+        found, partial = costs[x["system"]]
+        keys = [k for k in [x["bucket"], *x.get("files", ())] if k in found]
+        out.append((f"  {size_text(sum(found[k] for k in keys))}" if keys else f"  {SIZING}" if partial else "", "dim"))
+    return out
+
+
 def run_surprise(card_name, setup, chosen_systems, interactive, dry_run, to_fetch=None, card_match=None, on_guest=None):
-    """The sync step that comes first: ask which of a card's surprises to replace (all of them when not interactive),
-    keep the others and save them (the empty slots are filled later, by fill_surprises, after the card editor), then
-    open the card editor when interactive (with Surprise off too). Systems in excluded_systems(), the card's own
+    """The sync step that comes first: ask which of a card's surprises to keep (each starts marked to be replaced, and
+    all of them are when not interactive), keep those and save them (the empty slots are filled later, by
+    fill_surprises, after the card editor), then open the card editor when interactive (with Surprise off too). Systems in excluded_systems(), the card's own
     list or its systems_off are left out, and their current surprises dropped. A dry run changes nothing. Returns
     the surprises kept (on a dry run, the saved ones). to_fetch, card_match, on_guest: passed to the card editor."""
     cards = store.load_cards()
@@ -268,15 +285,16 @@ def run_surprise(card_name, setup, chosen_systems, interactive, dry_run, to_fetc
             print("\U0001F381 would ask which surprises to replace" if interactive
                   else f"\U0001F381 would replace all {len(current)} surprises")
     elif interactive and current:
-        sel = [True] * len(current)
+        sel = [False] * len(current)
+        sizes = _size_column(entry, chosen_systems, current)
         while True:  # t edits a game's tags, then the list opens again with the same picks
             session = {"sel": list(sel)}
             states = picker.filter_list("\U0001F381 Surprises: keep ✅ or replace ⬜ (Enter to confirm)",
                                         [f"{x.get('title') or x['bucket']}  ({names[x['system']]})" for x in current],
-                                        multi=True, initial=[True] * len(current), diff_marks=False,
+                                        multi=True, initial=[False] * len(current), diff_marks=False,
                                         hotkeys=(tagui.TAG_KEY,), hint="Space toggle · Enter done · t tags",
                                         key_help=[tagui.KEY_HELP], session=session,
-                                        extras=[[tag] for tag in tagui.column([x["bucket"] for x in current])],
+                                        extras=[[size, tag] for size, tag in zip(sizes, tagui.column([x["bucket"] for x in current]))],
                                         tag_info=tagui.summary([x["bucket"] for x in current]),
                                         **previews.game_pane([x["bucket"] for x in current]))
             if not isinstance(states, tuple):
@@ -285,7 +303,7 @@ def run_surprise(card_name, setup, chosen_systems, interactive, dry_run, to_fetc
             if states[1] is not None:
                 x = current[states[1]]
                 tagui.edit_game_tags(x["bucket"], x.get("title") or x["bucket"])
-        kept = current if states is None else [x for x, keep in zip(current, states) if keep]
+        kept = [] if states is None else [x for x, keep in zip(current, states) if keep]
     else:
         kept = []
     if not dry_run:
