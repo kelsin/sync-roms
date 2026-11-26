@@ -286,6 +286,7 @@ class GamesFirst(unittest.TestCase):
                           {g["bucket"] for r in rows for g in r[0]["games"]}}, **k})
             return script[len(calls) - 1](rows)
         with mock.patch.object(edit, "toggle_games", toggle), \
+                mock.patch.object(collectionedit, "settings_menu"), \
                 mock.patch.object(picker, "filter_list", side_effect=AssertionError("menu")):
             collectionedit.edit_one(collection, SYSTEMS, keys_of)
         return calls
@@ -393,6 +394,71 @@ class GamesFirst(unittest.TestCase):
     def test_header_omits_an_empty_description(self):
         self.assertEqual(collectionedit.header({"name": "Favs", "description": "", "games": []}).split(" ", 1)[1],
                          "Favs  ·  art: none")
+
+
+class SettingsMenu(unittest.TestCase):
+    def run_menu(self, collection, picks, answers=()):
+        seen = []
+
+        def pick(title, labels, **k):
+            seen.append({"title": title, "labels": labels, **k})
+            return picks[len(seen) - 1] if len(seen) <= len(picks) else None
+        with mock.patch.object(picker, "filter_list", pick), mock.patch.object(ui, "ask", side_effect=list(answers)), \
+                mock.patch.object(ui, "yellow", lambda t: t):
+            collectionedit.settings_menu(collection)
+        return seen
+
+    def test_rows_and_art_preview(self):
+        c = {"name": "Favs", "description": "", "art": "sonic", "games": []}
+        seen = self.run_menu(c, [])
+        self.assertEqual(seen[0]["labels"][:2], ["Name: Favs", "Description: none"])
+        self.assertIn("Theme art:", seen[0]["labels"][2])
+        self.assertEqual(seen[0]["preview"](0), themeart.art_png("sonic"))
+
+    def test_rename_sets_name_and_reopens_on_the_row(self):
+        c = {"name": "Favs", "games": []}
+        seen = self.run_menu(c, [0], ["Best"])
+        self.assertEqual(c["name"], "Best")
+        self.assertEqual(seen[1]["cursor"], 0)
+
+    def test_invalid_name_keeps_the_old_one(self):
+        c = {"name": "Favs", "games": []}
+        with mock.patch.object(collections, "collection_problem", return_value="bad"):
+            self.run_menu(c, [0], ["!!!"])
+        self.assertEqual(c["name"], "Favs")
+
+    def test_empty_description_keeps_the_old_one(self):
+        c = {"name": "Favs", "description": "old", "games": []}
+        self.run_menu(c, [1], [""])
+        self.assertEqual(c["description"], "old")
+        self.run_menu(c, [1], ["new"])
+        self.assertEqual(c["description"], "new")
+
+    def test_art_row_calls_pick_art(self):
+        c = {"name": "Favs", "games": []}
+        with mock.patch.object(collectionedit, "pick_art") as pa:
+            self.run_menu(c, [2])
+        pa.assert_called_once_with(c)
+
+    def test_s_in_edit_one_opens_it_and_refreshes_the_title(self):
+        c = {"name": "Favs", "games": [{"title": "Ruby", "system": "gba", "bucket": "gba/Ruby.zip"}]}
+        titles = []
+
+        def toggle(title, rows, *a, **k):
+            titles.append(title)
+            return "S" if len(titles) == 1 else None
+
+        def settings(coll):
+            coll["name"] = "Renamed"
+        with mock.patch.object(listedit, "toggle_all", toggle), mock.patch.object(collectionedit, "settings_menu", settings):
+            collectionedit.edit_one(c, SYSTEMS, lambda b: {"gba/Ruby.zip"})
+        self.assertIn("Renamed", titles[1])
+
+    def test_empty_menu_settings_row_opens_it(self):
+        with mock.patch.object(picker, "filter_list", side_effect=[1, None]), \
+                mock.patch.object(collectionedit, "settings_menu") as sm:
+            collectionedit.edit_one({"name": "Favs", "games": []}, SYSTEMS, lambda b: set())
+        sm.assert_called_once()
 
 
 class AddFromSystem(unittest.TestCase):

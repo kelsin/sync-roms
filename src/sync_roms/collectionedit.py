@@ -35,6 +35,32 @@ def pick_art(collection):
         collection.pop("art", None)
 
 
+def settings_menu(collection):
+    """The collection's name, description and theme art; Esc returns. The art row shows the current picture."""
+    cursor = 0
+    while True:
+        rows = [f"Name: {collection['name']}", f"Description: {collection.get('description') or 'none'}",
+                f"{themeart.art_emoji(collection.get('art'))} Theme art: {art_label(collection.get('art'))}"]
+        i = picker.filter_list(f"{header(collection)}: settings (Esc = back)", rows, cursor=cursor,
+                               preview=lambda j: themeart.art_png(collection.get("art")))
+        if i is None:
+            return
+        cursor = i
+        if i == 0:
+            name = ui.ask(f"   Name ({collection['name']}; empty keeps it): ").strip()
+            problem = colls.collection_problem(name, ()) if name else None
+            if problem:
+                print(ui.yellow(f"  {problem}"))
+            elif name:
+                collection["name"] = name
+        elif i == 1:
+            desc = ui.ask("   One-line description (empty keeps it): ").strip()
+            if desc:
+                collection["description"] = desc
+        else:
+            pick_art(collection)
+
+
 def toggle_filtered(s, title, rows):
     """edit.toggle_games over a system's rows (s is its entry in a view), narrowed by the card editor's game filters."""
     filters = cardedit.GameFilters(s)
@@ -90,7 +116,8 @@ def edit_one(collection, systems, keys_of):
                 return
         if pressed in (ADD_KEY, ADD_ALIAS):  # Ctrl-C in there keeps its toggles and is raised again
             listedit.add_from_system(collection, systems, shown, keys_of, header_label(collection), toggle=toggle_filtered)
-        # S is filled in by the settings step; for now it lists again
+        elif pressed == SETTINGS_KEY:
+            settings_menu(collection)
 
 
 # --- The editor --------------------------------------------------------------------------------------
