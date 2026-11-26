@@ -21,7 +21,9 @@ def tag_data():
             "games": {SMW: {"tags": ["mario", "platformers", "ghost"]}}}
 
 
-class Page(helpers.DataDir):
+class PageSetup(helpers.DataDir):
+    """Tags from tag_data, an empty storage listing and save() for one collection; no tests of its own."""
+
     def setUp(self):
         super().setUp()
         self.enterContext(mock.patch.object(tags, "load", tag_data))
@@ -29,6 +31,13 @@ class Page(helpers.DataDir):
 
     def save(self, **fields):
         collections.save_collection({"id": "mario", "name": "Mario", "description": "d", "games": [], **fields})
+
+    def listing(self, files):
+        return self.enterContext(mock.patch.object(inventory, "files", lambda prefix, sizes=True: {
+            k: v for k, v in files.items() if k.startswith(prefix)}))
+
+
+class Page(PageSetup):
 
     def test_games_sorted_by_title_not_system(self):
         self.save(games=[{"system": "snes", "bucket": SMW, "title": "b"},
@@ -99,10 +108,6 @@ class Page(helpers.DataDir):
         self.assertEqual(data["tags"], {})
         self.assertEqual(data["collections"][0]["games"][0]["tags"], [])
         self.assertEqual(err.getvalue().count("⚠️"), 1)
-
-    def listing(self, files):
-        return self.enterContext(mock.patch.object(inventory, "files", lambda prefix, sizes=True: {
-            k: v for k, v in files.items() if k.startswith(prefix)}))
 
     def test_every_system_has_a_short_name_and_the_page_uses_it(self):
         systems = store.repo_json("systems")
@@ -185,7 +190,7 @@ def page_json(path):
     return json.loads(html.split('id="page-data">', 1)[1].split("</script>", 1)[0])
 
 
-class Public(Page):
+class Public(PageSetup):
     def test_public_data_has_no_paths_and_a_home(self):
         self.save(games=[{"system": "snes", "bucket": SMW, "title": "x"}])
         out = self.enterContext(tempfile.TemporaryDirectory())
@@ -215,6 +220,8 @@ class Public(Page):
         collections_page.write_public(out)
         arts = [c["art"] for c in page_json(os.path.join(out, "index.html"))["collections"]]
         self.assertEqual(arts[0], arts[1])
+        written = sorted(os.listdir(os.path.join(out, "art")))
+        self.assertEqual(written, sorted(path.split("/", 1)[1] for path in arts[0].values()))
 
     def test_public_removes_stale_files(self):
         out = self.enterContext(tempfile.TemporaryDirectory())

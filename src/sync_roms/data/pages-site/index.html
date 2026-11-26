@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ROM Collections</title>
+<style>
+:root {
+  --bg: #f5f3ef;
+  --surface: #ffffff;
+  --text: #1f1d1a;
+  --muted: #6b665e;
+  --border: #e2ddd4;
+  --accent: #b4532a;
+  --accent-soft: #f6e3d8;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #161514;
+    --surface: #211f1d;
+    --text: #ece8e1;
+    --muted: #a39d93;
+    --border: #36332f;
+    --accent: #e48a5c;
+    --accent-soft: #3b2a20;
+    color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+.wrap { max-width: 640px; margin: 0 auto; padding: 32px 16px; }
+h1 { margin: 0 0 4px; font-size: 26px; }
+p { margin: 0 0 20px; color: var(--muted); }
+ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+a {
+  display: block;
+  padding: 12px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 600;
+}
+a:hover, a:focus-visible { border-color: var(--accent); background: var(--accent-soft); outline: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>ROM Collections</h1>
+  <p>Pick whose collections to see.</p>
+  <ul>
+<!-- users -->
+  </ul>
+</div>
+</body>
+</html>

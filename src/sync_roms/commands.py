@@ -3,6 +3,7 @@ download, flash, format, unmount, mount, cards, saves, layouts, cache, config, d
 sync flow uses."""
 import argparse
 import datetime
+import getpass
 import json
 import os
 import pathlib
@@ -11,7 +12,7 @@ import sys
 import webbrowser
 
 from . import collections as colls
-from . import bezels, budget, cardedit, cardshare, collection_retitle, collectionedit, collections_page, external, guest, inventory, knulli_conf, m3u, names, picker, runtime, s3, shared, spruce_settings, store, surprise, tageditor, tags, tailshare, tagsuggest, themeart, ui, usersettings
+from . import bezels, budget, cardedit, cardshare, collection_retitle, collectionedit, collections_page, external, guest, inventory, knulli_conf, m3u, names, pages_site, picker, runtime, s3, shared, spruce_settings, store, surprise, tageditor, tags, tailshare, tagsuggest, themeart, ui, usersettings
 
 
 UNKNOWN_SHOWN = 8  # device ids named in an "unknown device" error
@@ -669,7 +670,7 @@ CONFIG_KINDS = {"bucket": str, "root": str, "endpoint": str, "profile": str, "wr
                 "eject": bool, "storage_cache_declined": bool, "surprise_ttl_days": int, "surprise_excluded_systems": list,
                 "screenscraper_user": str, "screenscraper_password": str, "ra_mode": str, "ra_username": str,
                 "ra_password": str, "ra_api_key": str, "ra_offline_proxy": bool,
-                "ra_proxy_stats": bool, "syncthing": bool}  # the settings `config set` and `config unset` take
+                "ra_proxy_stats": bool, "syncthing": bool, "pages_repo": str}  # the settings `config set` and `config unset` take
 HIDDEN = {"screenscraper_password", "ra_password", "ra_api_key"}  # set, never printed
 ACCOUNTS = {"screenscraper_user", "ra_username"}  # `config show` says only that they are set
 
@@ -1404,6 +1405,21 @@ def collections_share_cmd(args):
     return 0
 
 
+def collections_publish_cmd(args):
+    user = args.user or getpass.getuser()
+    if not pages_site.valid_user(user):
+        ui.fail(f"{user!r} can't be a user name on the site: use lowercase letters, digits, '-' and '_', starting with a "
+                "letter or digit, at most 39 (pick one with --user NAME)", 2)
+    changed, link = pages_site.publish(user, args.dry_run)
+    if args.dry_run:
+        print(f"Would publish {link}" if changed else "Nothing to publish")
+        for line in pages_site.changes() if changed else []:
+            print(ui.dim(f"  {line}"))
+    else:
+        print(f"Published {link}" if changed else f"Already up to date: {link}")
+    return 0
+
+
 def collections_unshare_cmd(args):
     print("Stopped sharing the collections page." if tailshare.unshare() else "The collections page isn't shared.")
     return 0
@@ -1818,6 +1834,8 @@ def build_parser():
     p.set_defaults(fn=collections_edit)
     p = colsub.add_parser("page", allow_abbrev=False); common(p, card=False); p.add_argument("--out", metavar="FILE")
     p.set_defaults(fn=collections_page_cmd)
+    p = colsub.add_parser("publish", allow_abbrev=False); common(p, card=False); p.add_argument("--user", metavar="NAME")
+    p.set_defaults(fn=collections_publish_cmd)
     p = colsub.add_parser("retitle", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=collections_retitle_cmd)
     p = colsub.add_parser("share", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=collections_share_cmd)
     p = colsub.add_parser("unshare", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=collections_unshare_cmd)
