@@ -113,6 +113,12 @@ class TemplateTest(unittest.TestCase):
     def test_no_innerhtml(self):
         self.assertNotIn("innerHTML", self.html)
 
+    def test_one_open_row_with_sticky_header(self):
+        self.assertIn("position: sticky; top: var(--bar-h", self.html)
+        self.assertIn("overflow: clip", self.html)
+        self.assertNotIn("<details", self.html)
+        self.assertNotIn("overflow: hidden; min-width", self.html)
+
     def test_reads_and_writes_hash(self):
         for needle in ("replaceState", "hashchange", "URLSearchParams"):
             self.assertIn(needle, self.html)

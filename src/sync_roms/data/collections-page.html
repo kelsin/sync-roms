@@ -68,57 +68,84 @@ h1 { margin: 0; font-size: 26px; letter-spacing: -.01em; }
 .controls .tagbox input { flex: 1 1 100px; border: 0; background: none; padding: 4px; outline: none; }
 .controls select { flex: 0 1 220px; }
 .controls button { cursor: pointer; }
-input:focus-visible, select:focus-visible, button:focus-visible, summary:focus-visible {
+input:focus-visible, select:focus-visible, button:focus-visible, [role="button"]:focus-visible {
   outline: 2px solid var(--accent); outline-offset: 1px;
 }
 .chips { display: contents; }
 .chip { cursor: pointer; border-radius: 999px; padding: 2px 10px; font-size: 14px; }
 .chip { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-text); }
 .count { margin-top: 10px; color: var(--muted); font-size: 14px; }
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; align-items: start; }
-@media (max-width: 400px) { .grid { grid-template-columns: 1fr; } }
-.card {
+.list { display: flex; flex-direction: column; gap: 14px; }
+.row {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 12px;
   box-shadow: var(--shadow);
-  overflow: hidden;
+  overflow: clip; /* clips to the rounded corners without making a scroll container, so the header can stick */
   min-width: 0;
 }
-.pics {
-  display: flex; gap: 8px; justify-content: center; align-items: center;
-  padding: 12px; background: var(--surface-2); overflow: hidden; container-type: inline-size;
+.rhead {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 16px; align-items: center;
+  padding: 14px 16px; background: var(--surface); cursor: default;
 }
-/* One height for all three pictures (about 2.05 heights wide together), shrunk to fit the card. */
-.pics img { display: block; height: min(150px, calc((100cqw - 40px) / 2.1)); width: auto; flex: none; border-radius: 6px; }
-.body { padding: 12px 14px 4px; }
-.head { display: flex; align-items: flex-start; gap: 10px; }
-.name { margin: 0; font-size: 18px; overflow-wrap: anywhere; flex: 1; min-width: 0; }
+.rhead[role="button"] { cursor: pointer; }
+.rhead[role="button"]:hover { background: var(--surface-2); }
+.rhead:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.row.open .rhead { position: sticky; top: var(--bar-h, 0px); z-index: 1; border-bottom: 1px solid var(--border); }
+.rtitle { display: flex; align-items: center; gap: 10px; }
+.chev { flex: none; width: 1em; color: var(--accent-text); font-size: 20px; line-height: 1; }
+.chev::before { content: "\25B8"; }
+.row.open .chev::before { content: "\25BE"; }
+.name { margin: 0; font-size: 22px; line-height: 1.25; overflow-wrap: anywhere; flex: 0 1 auto; min-width: 0; }
 .link {
   flex: none; border: 1px solid var(--border); background: var(--surface); border-radius: 6px;
   padding: 2px 8px; font-size: 13px; cursor: pointer;
 }
 .link.done { border-color: var(--accent); color: var(--accent-text); }
 .desc { margin: 4px 0 0; color: var(--muted); overflow-wrap: anywhere; }
-.meta { margin: 6px 0 0; font-size: 13px; color: var(--muted); }
-details { border-top: 1px solid var(--border); margin-top: 10px; }
-summary { cursor: pointer; padding: 10px 14px; color: var(--accent-text); font-weight: 600; font-size: 14px; }
-ul.games { list-style: none; margin: 0; padding: 0 0 6px; }
-.game {
-  display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; align-items: center;
-  padding: 8px 14px; border-top: 1px solid var(--border);
-}
-.game:nth-child(even) { background: var(--surface-2); }
-.title { overflow-wrap: anywhere; }
-.sub { grid-column: 1; font-size: 13px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
-.tags span { cursor: default; }
+.meta { margin: 4px 0 0; font-size: 13px; color: var(--muted); }
+.rtags { margin: 6px 0 0; display: flex; flex-wrap: wrap; gap: 2px 6px; font-size: 16px; line-height: 1.3; }
+.rtags span { cursor: default; }
+.pics { display: flex; gap: 8px; align-items: center; justify-content: flex-end; height: 120px; }
+.pics img { display: block; height: 100%; width: auto; flex: none; border-radius: 6px; }
+.row.stuck .rhead { padding-top: 8px; padding-bottom: 8px; }
+.row.stuck .pics, .row.stuck .desc, .row.stuck .rtags { display: none; }
+.row.stuck .name { font-size: 16px; }
+.row.stuck .rtext { display: flex; align-items: center; flex-wrap: wrap; gap: 0 12px; }
+.row.stuck .meta { margin-top: 0; white-space: nowrap; }
+.tablewrap { overflow-x: auto; }
+table.games { width: 100%; border-collapse: collapse; }
+.games th, .games td { padding: 8px 14px; text-align: left; vertical-align: middle; }
+.games th { background: var(--surface-2); border-bottom: 1px solid var(--border); font-weight: 600; font-size: 13px; color: var(--muted); }
+.games th .sort { border: 0; background: none; padding: 2px 0; cursor: pointer; font-weight: 600; font-size: 13px; color: var(--muted); }
+.games th .sort:hover { color: var(--text); }
+.games th .sort.on { color: var(--accent-text); }
+.games td { border-top: 1px solid var(--border); }
+.games tbody tr:nth-child(even) { background: var(--surface-2); }
+.games .col-system { width: 22%; color: var(--muted); }
+.games .col-tags { width: 150px; }
+.games .col-copy { width: 90px; text-align: right; }
+.games .title { overflow-wrap: anywhere; }
+.sys-inline { display: none; font-size: 13px; color: var(--muted); }
+.cell-tags span { cursor: default; margin-right: 4px; }
 .copy {
-  grid-column: 2; grid-row: 1 / span 2;
   border: 1px solid var(--border); background: var(--surface); border-radius: 6px;
   padding: 4px 10px; font-size: 13px; cursor: pointer; min-width: 64px;
 }
 .copy.done { border-color: var(--accent); color: var(--accent-text); }
-.nomatch { padding: 8px 14px; border-top: 1px solid var(--border); color: var(--muted); font-size: 14px; }
+.nomatch td { color: var(--muted); font-size: 14px; }
+@media (max-width: 640px) {
+  .rhead { grid-template-columns: minmax(0, 1fr); padding: 12px; }
+  .pics { height: 96px; justify-content: flex-start; }
+  .name { font-size: 20px; }
+  .games th, .games td { padding: 8px 10px; }
+  .games .col-system { display: none; }
+  .games .col-tags { width: 84px; }
+  .games .col-copy { width: 76px; }
+  .sys-inline { display: block; }
+  .copy, .link { min-height: 36px; }
+  .row.stuck .rhead { padding: 6px 12px; }
+}
 .empty { color: var(--muted); text-align: center; padding: 48px 0; }
 [hidden] { display: none !important; }
 </style>
@@ -139,7 +166,7 @@ ul.games { list-style: none; margin: 0; padding: 0 0 6px; }
     </div>
     <div class="count" id="count"></div>
   </div>
-  <main class="grid" id="grid"></main>
+  <main class="list" id="grid"></main>
   <p class="empty" id="empty" hidden></p>
 </div>
 <!-- The page's data, filled in by `sync-roms collections page`; empty in the repo. -->
@@ -262,34 +289,75 @@ ul.games { list-style: none; margin: 0; padding: 0 0 6px; }
     });
   }
 
+  var sortKey = "name", sortDir = 1;
+  var bar = document.querySelector(".bar");
+
   function gameRow(game) {
-    var row = el("li", "game");
-    row.appendChild(el("span", "title", game.title));
-    var sub = el("span", "sub");
-    sub.appendChild(el("span", "", systems[game.system] || game.system));
-    var tagBox = el("span", "tags");
+    var row = el("tr", "game");
+    var name = el("td", "");
+    name.appendChild(el("div", "title", game.title));
+    name.appendChild(el("div", "sys-inline", systems[game.system] || game.system));
+    row.appendChild(name);
+    row.appendChild(el("td", "col-system", systems[game.system] || game.system));
+    var tagCell = el("td", "col-tags cell-tags");
     (game.tags || []).forEach(function (id) {
       var def = tagDefs[id];
       if (!def) return;
       var span = el("span", "", def.emoji);
       span.title = def.name;
-      tagBox.appendChild(span);
+      tagCell.appendChild(span);
     });
-    if (tagBox.childNodes.length) sub.appendChild(tagBox);
-    row.appendChild(sub);
+    row.appendChild(tagCell);
     var paths = (game.paths || []).join("\n");
     var button = el("button", "copy", "Copy");
     button.type = "button";
     button.title = paths;
     copyButton(button, function () { return paths; }, "Copy");
-    row.appendChild(button);
+    var last = el("td", "col-copy");
+    last.appendChild(button);
+    row.appendChild(last);
     return row;
+  }
+
+  function tagsOf(c) {
+    var seen = {};
+    (c.games || []).forEach(function (g) {
+      (g.tags || []).forEach(function (id) { if (tagDefs[id]) seen[id] = true; });
+    });
+    return Object.keys(seen).map(function (id) { return {id: id, name: tagDefs[id].name, emoji: tagDefs[id].emoji}; })
+      .sort(byName);
   }
 
   var grid = document.getElementById("grid");
   list.forEach(function (c) {
-    var card = el("article", "card");
+    var row = el("article", "row");
     var art = c.art || {};
+    var head = el("div", "rhead");
+    var text = el("div", "rtext");
+    var title = el("div", "rtitle");
+    title.appendChild(el("span", "chev"));
+    title.lastChild.setAttribute("aria-hidden", "true");
+    title.appendChild(el("h2", "name", c.name));
+    var link = el("button", "link", "🔗");
+    link.type = "button";
+    link.title = "Copy link to this collection";
+    link.setAttribute("aria-label", "Copy link to this collection");
+    copyButton(link, function () { return pageUrl() + "#" + params(c.id).toString(); }, "🔗");
+    link.addEventListener("click", function (event) { event.stopPropagation(); });
+    link.addEventListener("keydown", function (event) { event.stopPropagation(); });
+    title.appendChild(link);
+    text.appendChild(title);
+    if (c.description) text.appendChild(el("p", "desc", c.description));
+    var meta = el("p", "meta");
+    text.appendChild(meta);
+    var tagBox = el("div", "rtags");
+    tagsOf(c).forEach(function (t) {
+      var span = el("span", "", t.emoji);
+      span.title = t.name;
+      tagBox.appendChild(span);
+    });
+    if (tagBox.childNodes.length) text.appendChild(tagBox);
+    head.appendChild(text);
     var pics = el("div", "pics");
     [["box", "box"], ["band", "band"], ["totk", "ToTK"]].forEach(function (kind) {
       if (!art[kind[0]]) return;
@@ -299,45 +367,91 @@ ul.games { list-style: none; margin: 0; padding: 0 0 6px; }
       img.alt = c.name + " " + kind[1];
       pics.appendChild(img);
     });
-    if (pics.childNodes.length) card.appendChild(pics);
-    var body = el("div", "body");
-    var head = el("div", "head");
-    head.appendChild(el("h2", "name", c.name));
-    var link = el("button", "link", "🔗");
-    link.type = "button";
-    link.title = "Copy link to this collection";
-    link.setAttribute("aria-label", "Copy link to this collection");
-    copyButton(link, function () { return pageUrl() + "#" + params(c.id).toString(); }, "🔗");
-    head.appendChild(link);
-    body.appendChild(head);
-    if (c.description) body.appendChild(el("p", "desc", c.description));
-    var meta = el("p", "meta");
-    body.appendChild(meta);
-    card.appendChild(body);
-    var details = el("details");
-    var summary = el("summary", "", "Games");
-    details.appendChild(summary);
-    var ul = el("ul", "games");
-    var rows = (c.games || []).map(function (g) {
-      var row = gameRow(g);
-      ul.appendChild(row);
-      return {game: g, row: row};
-    });
-    var nomatch = el("li", "nomatch", "No games match the filters");
-    nomatch.hidden = true;
-    ul.appendChild(nomatch);
-    details.appendChild(ul);
-    details.hidden = !rows.length;
-    summary.addEventListener("click", function () {
-      if (!details.open) current = c.id;
-      else if (current === c.id) current = null;
-      writeHash();
-    });
-    card.appendChild(details);
-    grid.appendChild(card);
-    cards.push({collection: c, card: card, meta: meta, details: details, summary: summary, rows: rows,
-                 nomatch: nomatch});
+    if (pics.childNodes.length) head.appendChild(pics);
+    row.appendChild(head);
+    var games = (c.games || []).map(function (g, i) { return {game: g, index: i, tr: null}; });
+    var entry = {collection: c, row: row, head: head, meta: meta, body: null, games: games, matching: games,
+                 filtering: false, ths: null, tbody: null};
+    if (games.length) {
+      head.setAttribute("role", "button");
+      head.tabIndex = 0;
+      head.setAttribute("aria-expanded", "false");
+      head.addEventListener("click", function () { toggle(entry); });
+      head.addEventListener("keydown", function (event) {
+        if (event.target === head && (event.key === "Enter" || event.key === " ")) {
+          event.preventDefault();
+          toggle(entry);
+        }
+      });
+    }
+    grid.appendChild(row);
+    cards.push(entry);
   });
+
+  function buildBody(entry) {
+    var wrap = el("div", "tablewrap");
+    var table = el("table", "games");
+    var tr = el("tr");
+    entry.ths = {};
+    [["name", "Name", ""], ["system", "System", "col-system"], [null, "Tags", "col-tags"], [null, "", "col-copy"]]
+      .forEach(function (col) {
+        var th = el("th", col[2]);
+        th.scope = "col";
+        if (col[0]) {
+          var button = el("button", "sort");
+          button.type = "button";
+          button.addEventListener("click", function () {
+            if (sortKey === col[0]) sortDir = -sortDir;
+            else { sortKey = col[0]; sortDir = 1; }
+            cards.forEach(function (other) { if (other.body) renderTable(other); });
+          });
+          th.appendChild(button);
+          entry.ths[col[0]] = {th: th, button: button, label: col[1]};
+        } else {
+          th.textContent = col[1];
+        }
+        tr.appendChild(th);
+      });
+    var thead = el("thead");
+    thead.appendChild(tr);
+    table.appendChild(thead);
+    entry.tbody = el("tbody");
+    table.appendChild(entry.tbody);
+    wrap.appendChild(table);
+    entry.body = wrap;
+    entry.row.appendChild(wrap);
+  }
+
+  function renderTable(entry) {
+    if (!entry.body) buildBody(entry);
+    Object.keys(entry.ths).forEach(function (key) {
+      var h = entry.ths[key];
+      var on = key === sortKey;
+      h.button.textContent = h.label + (on ? (sortDir > 0 ? " ▲" : " ▼") : "");
+      h.button.classList.toggle("on", on);
+      h.th.setAttribute("aria-sort", on ? (sortDir > 0 ? "ascending" : "descending") : "none");
+    });
+    var rows = entry.matching.slice();
+    rows.sort(function (a, b) {
+      var order = 0;
+      if (sortKey === "system") {
+        order = (systems[a.game.system] || a.game.system).localeCompare(systems[b.game.system] || b.game.system);
+      }
+      return (order || a.index - b.index) * sortDir;
+    });
+    entry.tbody.textContent = "";
+    rows.forEach(function (r) {
+      if (!r.tr) r.tr = gameRow(r.game);
+      entry.tbody.appendChild(r.tr);
+    });
+    if (!rows.length) {
+      var none = el("tr", "nomatch");
+      var cell = el("td", "", "No games match the filters");
+      cell.colSpan = 4;
+      none.appendChild(cell);
+      entry.tbody.appendChild(none);
+    }
+  }
 
   var search = document.getElementById("search");
   var count = document.getElementById("count");
@@ -365,6 +479,27 @@ ul.games { list-style: none; margin: 0; padding: 0 0 6px; }
       // Some browsers refuse replaceState on file:// pages; the page still works without the hash.
     }
   }
+  function barHeight() { return Math.round(bar.getBoundingClientRect().height); }
+  function measureBar() {
+    document.documentElement.style.setProperty("--bar-h", barHeight() + "px");
+  }
+  function scrollToRow(entry) {
+    var top = entry.row.getBoundingClientRect().top + window.scrollY;
+    window.scrollTo(0, top - barHeight() - 12);
+  }
+  function openEntry() {
+    return cards.filter(function (entry) { return entry.collection.id === current; })[0];
+  }
+  function toggle(entry) {
+    var before = entry.row.getBoundingClientRect().top;
+    var closing = current === entry.collection.id;
+    current = closing ? null : entry.collection.id;
+    update();
+    var after = entry.row.getBoundingClientRect().top;
+    if (!closing && after !== before) window.scrollBy(0, after - before); // keep the row where it was
+    if (entry.row.getBoundingClientRect().top < barHeight()) scrollToRow(entry);
+    markStuck();
+  }
   function applyHash() {
     var hash = new URLSearchParams(location.hash.slice(1));
     search.value = hash.get("q") || "";
@@ -376,13 +511,26 @@ ul.games { list-style: none; margin: 0; padding: 0 0 6px; }
     });
     renderChips();
     var wanted = hash.get("c");
-    var target = cards.filter(function (entry) { return entry.collection.id === wanted; })[0];
+    var target = cards.filter(function (entry) { return entry.collection.id === wanted && entry.games.length; })[0];
     current = target ? wanted : null;
     update();
-    if (target) {
-      var top = target.card.getBoundingClientRect().top + window.scrollY;
-      window.scrollTo(0, top - document.querySelector(".bar").offsetHeight - 12);
-    }
+    if (target) scrollToRow(target);
+    markStuck();
+  }
+
+  // The open row's header sticks below the bar; it is compact once the row's top has scrolled past the bar.
+  var stuckQueued = false;
+  function markStuck() {
+    stuckQueued = false;
+    var limit = barHeight() - 0.5;
+    cards.forEach(function (entry) {
+      entry.row.classList.toggle("stuck", entry.collection.id === current && entry.row.getBoundingClientRect().top < limit);
+    });
+  }
+  function queueStuck() {
+    if (stuckQueued) return;
+    stuckQueued = true;
+    window.requestAnimationFrame(markStuck);
   }
 
   function update() {
@@ -392,26 +540,23 @@ ul.games { list-style: none; margin: 0; padding: 0 0 6px; }
     var shownCollections = 0, shownGames = 0;
     cards.forEach(function (entry) {
       var nameHit = query && entry.collection.name.toLowerCase().indexOf(query) !== -1;
-      var passing = 0;
-      entry.rows.forEach(function (r) {
+      entry.matching = entry.games.filter(function (r) {
         var g = r.game;
-        var ok = (!query || nameHit || String(g.title).toLowerCase().indexOf(query) !== -1) &&
+        return (!query || nameHit || String(g.title).toLowerCase().indexOf(query) !== -1) &&
           (!system || g.system === system) &&
           Array.from(pressed).every(function (t) { return (g.tags || []).indexOf(t) !== -1; });
-        r.row.hidden = !ok;
-        if (ok) passing++;
       });
+      var passing = entry.matching.length;
       var picked = entry.collection.id === current;
-      var noneMatch = picked && filtering && passing === 0;
-      entry.nomatch.hidden = !noneMatch;
-      entry.details.hidden = !entry.rows.length && !noneMatch;
       var visible = picked || !filtering || passing > 0;
-      entry.card.hidden = !visible;
-      entry.details.open = picked || (filtering && passing > 0);
-      var total = entry.rows.length;
+      entry.row.hidden = !visible;
+      entry.row.classList.toggle("open", picked);
+      entry.head.setAttribute("aria-expanded", picked ? "true" : "false");
+      if (picked) renderTable(entry);
+      if (entry.body) entry.body.hidden = !picked;
+      var total = entry.games.length;
       entry.meta.textContent = filtering && passing !== total
         ? passing + " of " + plural(total, "game") : plural(total, "game");
-      entry.summary.textContent = filtering ? "Matching games" : "Games";
       if (visible) { shownCollections++; shownGames += passing; }
     });
     count.textContent = plural(shownCollections, "collection") + " · " + plural(shownGames, "game");
@@ -425,6 +570,7 @@ ul.games { list-style: none; margin: 0; padding: 0 0 6px; }
       empty.hidden = true;
     }
     writeHash();
+    queueStuck();
   }
 
   search.addEventListener("input", update);
@@ -438,6 +584,10 @@ ul.games { list-style: none; margin: 0; padding: 0 0 6px; }
     update();
   });
   window.addEventListener("hashchange", applyHash);
+  window.addEventListener("scroll", queueStuck, {passive: true});
+  window.addEventListener("resize", function () { measureBar(); queueStuck(); });
+  if (window.ResizeObserver) new ResizeObserver(measureBar).observe(bar);
+  measureBar();
   applyHash();
 })();
 </script>
