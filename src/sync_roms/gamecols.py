@@ -23,7 +23,7 @@ class GameColumns:
         self.shown = None  # the extras lists handed to filter_list, which poll updates in place
         self.pending = {}  # system bucket -> its Metadata, until its answer has arrived
         for bucket, _, _ in self.rows:
-            if bucket not in self.pending:
+            if bucket and bucket not in self.pending:  # no bucket: a row with no known system (no metadata to read)
                 self.pending[bucket] = gamemeta.Metadata(bucket)
         self.poll()
 

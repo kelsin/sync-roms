@@ -247,19 +247,22 @@ def _current(entry, chosen_systems, layout_name):
 
 def _size_column(entry, chosen_systems, current):
     """Each surprise's size on the card, its files' ROM bytes plus the scraped files the card's layout installs
-    (budget.game_costs): (text, "dim"), "…" while the size cache lacks them, blank when storage has none of its files."""
+    (budget.game_costs): ((text, "dim"), "…" while the size cache lacks them, blank when storage has none of its
+    files) and, per surprise, its size in bytes (None when unknown)."""
     from .cardedit import SIZING, size_text  # cardedit imports this module
     systems = {s["bucket"]: s for s in chosen_systems}
     costs = {}
     for bucket in {x["system"] for x in current}:
         keys = [k for x in current if x["system"] == bucket for k in [x["bucket"], *x.get("files", ())]]
         costs[bucket] = budget.game_costs(entry, systems[bucket], keys)
-    out = []
+    out, values = [], []
     for x in current:
         found, partial = costs[x["system"]]
         keys = [k for k in [x["bucket"], *x.get("files", ())] if k in found]
-        out.append((f"  {size_text(sum(found[k] for k in keys))}" if keys else f"  {SIZING}" if partial else "", "dim"))
-    return out
+        total = sum(found[k] for k in keys)
+        out.append((f"  {size_text(total)}" if keys else f"  {SIZING}" if partial else "", "dim"))
+        values.append(total if keys else None)
+    return out, values
 
 
 def run_surprise(card_name, setup, chosen_systems, interactive, dry_run, to_fetch=None, card_match=None, on_guest=None):
@@ -278,7 +281,7 @@ def run_surprise(card_name, setup, chosen_systems, interactive, dry_run, to_fetc
             from . import cardedit  # cardedit imports much of the package
             cardedit.edit_card(card_name, setup, to_fetch, card_match, on_guest)
         return []
-    names, current = _current(entry, chosen_systems, setup[1])
+    _, current = _current(entry, chosen_systems, setup[1])
     if dry_run:
         kept = current
         if current:
@@ -286,17 +289,21 @@ def run_surprise(card_name, setup, chosen_systems, interactive, dry_run, to_fetc
                   else f"\U0001F381 would replace all {len(current)} surprises")
     elif interactive and current:
         sel = [False] * len(current)
-        sizes = _size_column(entry, chosen_systems, current)
+        from . import gamecols  # gamecols imports modules that import this one
+        sizes, size_bytes = _size_column(entry, chosen_systems, current)
+        keys = [x["bucket"] for x in current]
         while True:  # t edits a game's tags, then the list opens again with the same picks
             session = {"sel": list(sel)}
+            cols = gamecols.GameColumns([(x["system"], x.get("title") or x["bucket"], x["bucket"]) for x in current],
+                                        extra_columns=[picker.Column("size", "Size", True), picker.Column("tags", "Tags")],
+                                        extra_values=lambda i, col: size_bytes[i] if col == "size" else None)
             states = picker.filter_list("\U0001F381 Surprises: keep ✅ or replace ⬜ (Enter to confirm)",
-                                        [f"{x.get('title') or x['bucket']}  ({names[x['system']]})" for x in current],
+                                        [x.get("title") or x["bucket"] for x in current],
                                         multi=True, initial=[False] * len(current), diff_marks=False,
                                         hotkeys=(tagui.TAG_KEY,), hint="Space toggle · Enter done · t tags",
                                         key_help=[tagui.KEY_HELP], session=session,
-                                        extras=[[size, tag] for size, tag in zip(sizes, tagui.column([x["bucket"] for x in current]))],
-                                        tag_info=tagui.summary([x["bucket"] for x in current]),
-                                        **previews.game_pane([x["bucket"] for x in current]))
+                                        **cols.kwargs([[size, tag] for size, tag in zip(sizes, tagui.column(keys))]),
+                                        tag_info=tagui.summary(keys), **previews.game_pane(keys))
             if not isinstance(states, tuple):
                 break
             sel = session["sel"]

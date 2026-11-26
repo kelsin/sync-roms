@@ -357,8 +357,11 @@ class Step(StorageCase):
                 self.patched(filter_list=lambda t, labels, **kw: lists.append(kw) or list(kw["initial"])):
             self.both(True, False, 6)
         rows = lists[0]["extras"]
-        self.assertEqual([r[0] for r in rows], [("  2 MB", "dim"), ("  32 KB", "dim"), ("", "dim")])
-        self.assertEqual([len(r) for r in rows], [2, 2, 2])  # the tag column stays last
+        self.assertEqual([r[2] for r in rows], [("  2 MB", "dim"), ("  32 KB", "dim"), ("", "dim")])
+        self.assertEqual([c.id for c in lists[0]["columns"]], ["name", "system", "year", "size", "tags"])
+        self.assertEqual([lists[0]["sort_value"](i, "size") for i in range(3)], [2_000_000, 32_000, None])
+        self.assertEqual(lists[0]["columns"][3], picker.Column("size", "Size", True))
+        self.assertEqual([len(r) for r in rows], [4, 4, 4])  # the tag column stays last
 
     def test_rows_show_sizing_while_the_cache_lacks_them(self):
         self.card(surprises=[self.surprise("gba", 0)])
@@ -366,7 +369,7 @@ class Step(StorageCase):
         with mock.patch.object(surprise.budget, "game_costs", lambda card, system, keys: ({}, True)), \
                 self.patched(filter_list=lambda t, labels, **kw: lists.append(kw) or list(kw["initial"])):
             self.both(True, False, 7)
-        self.assertEqual(lists[0]["extras"][0][0], ("  …", "dim"))
+        self.assertEqual(lists[0]["extras"][0][2], ("  …", "dim"))
 
     def test_surprises_outside_the_run_are_dropped(self):
         self.card(surprises=[self.surprise("gba", 0), self.surprise("psx", 0)])

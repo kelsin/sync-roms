@@ -548,12 +548,20 @@ class StashCommandTest(CommandTest):
         title, labels, kw = self.calls[0]
         self.assertEqual(labels, ["Game", "Other"])
         self.assertEqual(kw["initial"], [False, False])
-        self.assertEqual([t for t, _ in kw["extras"][0]], ["Game Boy Advance", "1 save · 1 state", "gpSP"])
+        self.assertEqual([t for t, _ in kw["extras"][0]], ["  Game Boy Advance", "  —", "  1 save · 1 state", "  gpSP"])
+        self.assertEqual([c.id for c in kw["columns"]], ["name", "system", "year", "kinds", "core"])
+        self.assertEqual([c.sortable for c in kw["columns"]], [True, True, True, False, True])
+        self.assertEqual(kw["sort_value"](0, "core"), "gpSP")
+        self.assertEqual(kw["sort_value"](1, "core"), "mGBA")
         _, files, kw = self.calls[1]
         self.assertEqual(files, ["Game · Game.srm", "Game · Game.state.auto", "Game · Game.state.auto.png"])
         self.assertEqual(kw["initial"], [True, True, True])
-        self.assertEqual([t for t, _ in kw["extras"][2]][0], "thumbnail")
-        self.assertEqual(kw["extras"][0][-1][0], "gpSP")
+        self.assertEqual([t for t, _ in kw["extras"][2]][0], "  thumbnail")
+        self.assertEqual(kw["extras"][0][-1][0], "  gpSP")
+        self.assertEqual([c.id for c in kw["columns"]], ["name", "kind", "size", "modified", "core"])
+        self.assertIs(kw["sort"], saves.FILES_SORT)
+        self.assertEqual(kw["sort_value"](0, "size"), 4)
+        self.assertRegex(kw["sort_value"](0, "modified"), r"^\d{4}-\d\d-\d\d \d\d:\d\d$")
         [stash] = saves.load_stashes()
         self.assertEqual((stash["card"], stash["layout"], stash["core"], stash["game"]), ("SHARE", "onion", "gpSP", "Game"))
         self.assertEqual(sorted(os.listdir(stash["dir"])),
@@ -747,7 +755,7 @@ class ApplyCommandTest(CommandTest):
         self.lists(None)
         code, _, err = self.run_cmd("saves", "apply", base)
         self.assertEqual(code, 0, err)
-        self.assertEqual(self.calls[0][2]["extras"][0][-1], ("boss", "dim"))
+        self.assertEqual(self.calls[0][2]["extras"][0][-1], ("  boss", "dim"))
 
     def nextui_card(self, rom="Game.gba", folder="Game Boy Advance (GBA)"):
         base = self.card("NX", "nextui")
@@ -850,8 +858,12 @@ class ApplyCommandTest(CommandTest):
         _, labels, kw = self.calls[0]
         self.assertEqual(labels, ["Game"])
         shown = [t for t, _ in kw["extras"][0]]
-        self.assertEqual(shown[:2], ["Game Boy Advance", "from SHARE"])
-        self.assertEqual(shown[3:], ["1 save · 1 state", "gpSP", "", ""])
+        self.assertEqual(shown[:3], ["  Game Boy Advance", "  —", "  from SHARE"])
+        self.assertEqual(shown[4:], ["  1 save · 1 state", "  gpSP", "  ", "  "])
+        self.assertEqual([c.id for c in kw["columns"]],
+                         ["name", "system", "year", "from", "stashed", "kinds", "core", "found", "note"])
+        self.assertEqual(kw["sort_value"](0, "stashed"), shown[3].strip())
+        self.assertRegex(kw["sort_value"](0, "stashed"), r"^\d{4}-\d\d-\d\d \d\d:\d\d$")
         self.assertEqual(self.read_file(base, "saves/gba/Game.srm"), "save")
         self.assertEqual(self.read_file(base, "saves/gba/Game.state.auto"), "state")
         self.assertIn("Applied 2 file(s) of 1 game(s) to NEW", out)
@@ -900,7 +912,7 @@ class ApplyCommandTest(CommandTest):
         self.lists([True])
         code, out, err = self.run_cmd("saves", "apply", base)
         self.assertEqual(code, 0, err)
-        self.assertEqual(self.calls[0][2]["extras"][0][-2], ("not on card", "red"))
+        self.assertEqual(self.calls[0][2]["extras"][0][-2], ("  not on card", "red"))
         self.assertEqual(self.read_file(base, "RetroArch/states/gpSP/Game.state.auto"), "state")
         self.assertEqual(self.read_file(base, "RetroArch/saves/gpSP/Game.srm"), "save")
 
@@ -984,7 +996,7 @@ class ApplyCommandTest(CommandTest):
         self.lists([True])
         code, out, err = self.run_cmd("saves", "apply", base)
         self.assertEqual(code, 0, err)
-        self.assertEqual(self.calls[0][2]["extras"][0][0][0], "Neo Geo Pocket Color")
+        self.assertEqual(self.calls[0][2]["extras"][0][0][0], "  Neo Geo Pocket Color")
         self.assertEqual(self.read_file(base, "saves/ngpc/Pocket.srm"), "save")
 
     def test_two_stashes_of_one_game_reopens(self):
@@ -1000,7 +1012,7 @@ class ApplyCommandTest(CommandTest):
         self.assertEqual(code, 0, err)
         self.assertEqual(len(self.calls), 2)
         self.assertIn("one stash per game", out)
-        self.assertEqual(self.calls[0][2]["extras"][0][1][0], "from OTHER")  # newest first
+        self.assertEqual(self.calls[0][2]["extras"][0][2][0], "  from OTHER")  # newest first
         self.assertEqual(self.read_file(base, "saves/gba/Game.srm"), "newer")
 
     def test_core_asked_once_per_system(self):

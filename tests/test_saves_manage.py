@@ -452,6 +452,33 @@ class ManageCommandTest(helpers.Cmd):
         self.assertEqual(code, 0, err)
         self.assertEqual(self.calls[1][1], ["Game.srm", "Game.state.auto"])
         self.assertIn("Nothing changed", out)
+        kw = self.calls[1][2]
+        self.assertEqual([c.id for c in kw["columns"]], ["name", "kind", "size", "modified", "core", "mark"])
+        self.assertIs(kw["sort"], saves_manage.FILES_SORT)
+        self.assertEqual(kw["sort_value"](0, "size"), 4)
+        self.assertRegex(kw["sort_value"](0, "modified"), r"^\d{4}-\d\d-\d\d \d\d:\d\d$")
+
+    def test_stash_list_columns_and_sort_values(self):
+        self.stash(day=3)
+        bad = os.path.join(saves.stash_root(), "gba", "Game", "20260101-000000-X")
+        helpers.touch(os.path.join(bad, "Game.srm"), "abc")
+        helpers.touch(os.path.join(bad, "stash.json"), "{")
+        self.lists(None)
+        code, out, err = self.run_cmd("saves", "manage")
+        self.assertEqual(code, 0, err)
+        _, labels, kw = self.calls[0]
+        self.assertEqual(labels, ["Game", "gba/Game/20260101-000000-X"])
+        self.assertEqual([c.id for c in kw["columns"]], ["name", "system", "year", "from", "stashed", "kinds", "size",
+                                                         "core", "missing", "note"])
+        self.assertEqual([c.sortable for c in kw["columns"]],
+                         [True, True, True, False, True, False, True, True, False, False])
+        self.assertEqual(kw["sort_value"](0, "stashed"), "2026-01-03T00:00:00")
+        self.assertEqual(kw["sort_value"](0, "size"), 6)
+        self.assertEqual(kw["sort_value"](0, "core"), "gpSP")
+        self.assertEqual(kw["sort_value"](1, "stashed"), None)
+        self.assertEqual(kw["sort_value"](1, "size"), 4)
+        self.assertEqual(kw["extras"][1][:2], [("", "dim"), ("", "dim")])  # unreadable: no system or year
+        self.assertNotEqual(kw["extras"][0][0][0].strip(), "")
 
     def test_needs_a_terminal(self):
         self.stash()
