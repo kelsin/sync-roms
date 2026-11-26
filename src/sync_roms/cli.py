@@ -196,18 +196,19 @@ TOPICS = {
   sync-roms themes build [STYLE...] [--palette NAME (repeatable) | --all-palettes] [--out DIR]
       build custom spruce themes
 
-  Builds each named custom theme style (Pixel Consoles, Pixel Controllers, ToTK - James; all of them
-  without names). Pixel Consoles and Pixel Controllers are built in each chosen palette: --palette
-  NAME, repeatable, or --all-palettes for all 28 (Gruvbox, Arcade, Candy, ..., Monochrome). Without
-  either, a terminal shows the palette picker (each palette's six colors as a bar, and a preview
-  where the terminal draws images), starting from the saved selection; Enter saves the palettes on
-  as custom_theme_palettes and builds them, Esc builds nothing. With --yes or no terminal the saved
-  palettes are built (none saved: exit 2). The flags never change the saved palettes. Each theme is
-  named "<style> - <palette>", e.g. "Pixel Consoles - Gruvbox", and goes into the cache's
-  themes/build/ folder, or into DIR/<theme> with --out (replaced); the folders are printed. The base
-  theme is read from os/spruceos/themes/SPRUCE/ in storage, so run `sync-roms themes update` first
-  (ToTK - James has no palette: it is built once, as "ToTK - James", from os/spruceos/themes/ToTK/,
-  and asks for none when it is the only style named). Nothing is written to storage.
+  Builds each named custom theme style (Pixel Consoles, Pixel Controllers, ToTK - James, ToTK -
+  Kelsin; all of them without names). Pixel Consoles and Pixel Controllers are built in each
+  chosen palette: --palette NAME, repeatable, or --all-palettes for all 28 (Gruvbox, Arcade,
+  Candy, ..., Monochrome). Without either, a terminal shows the palette picker (each palette's six
+  colors as a bar, and a preview where the terminal draws images), starting from the saved
+  selection; Enter saves the palettes on as custom_theme_palettes and builds them, Esc builds
+  nothing. With --yes or no terminal the saved palettes are built (none saved: exit 2). The flags
+  never change the saved palettes. Each theme is named "<style> - <palette>", e.g. "Pixel Consoles
+  - Gruvbox", and goes into the cache's themes/build/ folder, or into DIR/<theme> with --out
+  (replaced); the folders are printed. The base theme is read from os/spruceos/themes/SPRUCE/ in
+  storage, so run `sync-roms themes update` first (ToTK - James and ToTK - Kelsin have no palette:
+  each is built once, under its own name, from os/spruceos/themes/ToTK/, and asks for none when
+  only they are named). Nothing is written to storage.
 
   sync-roms themes palettes                   write the overview image of all the palettes and open
                                               it

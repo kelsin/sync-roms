@@ -85,9 +85,9 @@ class Palettes(unittest.TestCase):
         self.assertEqual(custom_themes.theme_name("Pixel Consoles", "Gruvbox"), "Pixel Consoles - Gruvbox")
 
     def test_styles(self):
-        self.assertEqual(custom_themes.styles(), ["Pixel Consoles", "Pixel Controllers", "ToTK - James"])
+        self.assertEqual(custom_themes.styles(), ["Pixel Consoles", "Pixel Controllers", "ToTK - James", "ToTK - Kelsin"])
         for style, module in custom_themes.STYLES.items():
-            self.assertEqual((module.STYLE, module.BASE), (style, "ToTK" if style == "ToTK - James" else "SPRUCE"))
+            self.assertEqual((module.STYLE, module.BASE), (style, "ToTK" if style.startswith("ToTK") else "SPRUCE"))
 
 
 class Recolor(unittest.TestCase):
@@ -218,7 +218,7 @@ class Command(helpers.StorageDir):
 
     def test_duplicate_palette_flags_collapse(self):
         self.assertEqual(commands.run(["themes", "build", "--palette", "Arcade", "--palette", "Arcade", "--out", self.out]), 0)
-        self.assertEqual(sorted(os.listdir(self.out)), ["Pixel Consoles - Arcade", "Pixel Controllers - Arcade", "ToTK - James"])
+        self.assertEqual(sorted(os.listdir(self.out)), ["Pixel Consoles - Arcade", "Pixel Controllers - Arcade", "ToTK - James", "ToTK - Kelsin"])
 
     def test_palette_order_kept(self):
         with mock.patch.object(custom_themes, "build", return_value={}) as build:
