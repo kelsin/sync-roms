@@ -5,6 +5,7 @@ from .listedit import add_from_system, add_from_tag, folder_lister, view
 
 
 SORT_KEY = "o"
+ADD_KEY = "+"  # in a tag's games: add games to it, the / search carried into the games list
 
 
 def _label(tag):
@@ -28,21 +29,32 @@ def _save(write, *args, **kwargs):
 
 # --- One tag -----------------------------------------------------------------------------------------
 
-def switch_games_off(tag_id, label, system_names):
-    """The tag's games as a list to toggle: the ones unchecked lose the tag (saved even after Ctrl-C)."""
-    keys = _games_of(tag_id)
-    if not keys:
-        edit.note(ui.yellow("ℹ️  No game has this tag yet."))
-        return
-    entry = {"bucket": "", "games": [{"bucket": k} for k in keys]}
-    rows = sorted(((entry, k, names.title(k), f"{system_names.get(k.partition('/')[0], k.partition('/')[0])} — {names.title(k)}")
-                   for k in keys), key=lambda r: (store.sort_key(r[2]), r[1]))
-    try:
-        edit.toggle_games(f"✏️  {label} — ✅ has the tag, ⬜ remove it", rows, notes=False, tag_filter=False)
-    finally:
-        gone = set(keys) - {g["bucket"] for g in entry["games"]}
-        if gone:
-            _save(tags.retag_games, tag_id, remove=gone)
+def switch_games_off(tag_id, label, system_names, add=None):
+    """The tag's games as a list to toggle: the ones unchecked lose the tag (saved even after Ctrl-C). With add, `+`
+    saves that, calls add(the list's / search) and lists the tag's games again on the first one it added."""
+    place = {}
+    while True:
+        keys = _games_of(tag_id)
+        if not keys:
+            edit.note(ui.yellow("ℹ️  No game has this tag yet."))
+            return
+        entry = {"bucket": "", "games": [{"bucket": k} for k in keys]}
+        rows = sorted(((entry, k, names.title(k), f"{system_names.get(k.partition('/')[0], k.partition('/')[0])} — {names.title(k)}")
+                       for k in keys), key=lambda r: (store.sort_key(r[2]), r[1]))
+        if place.get("added"):
+            at = next(i for i, r in enumerate(rows) if r[1] in place["added"])
+            place = {"keys": [r[1] for r in rows], "session": {"row": at}}
+        try:
+            pressed = edit.toggle_games(f"✏️  {label} — ✅ has the tag, ⬜ remove it", rows, hotkeys=(ADD_KEY,) if add else (),
+                                        hint="+ add games" if add else None, place=place, notes=False, tag_filter=False)
+        finally:
+            gone = set(keys) - {g["bucket"] for g in entry["games"]}
+            if gone:
+                _save(tags.retag_games, tag_id, remove=gone)
+        if pressed != ADD_KEY:
+            return
+        add(place.get("session", {}).get("query", ""))
+        place["added"] = set(_games_of(tag_id)) - set(keys)
 
 
 def add_games(tag_id, systems, keys_of, add):
@@ -133,7 +145,7 @@ def edit_one(tag_id, systems, keys_of):
             return
         art = tag.get("art")
         i = picker.filter_list(f"✏️  {_label(tag)} (Esc = back)",
-                               [f"Games with this tag ({len(_games_of(tag_id))}): switch some off",
+                               [f"Games with this tag ({len(_games_of(tag_id))}): switch some off, + adds",
                                 "Add games from a system", "Add games with another tag",
                                 f"Rename ({tag['name']})", f"Emoji ({tag['emoji']})",
                                 f"Description{': ' + tag['description'] if tag.get('description') else ''}",
@@ -142,11 +154,12 @@ def edit_one(tag_id, systems, keys_of):
         if i is None:
             return
         pos = i
+        from_system = (lambda query="": add_games(tag_id, systems, keys_of, lambda listing, shown: add_from_system(
+            listing, systems, shown, keys_of, _label(tag), tag_filter=False, query=query)))  # the tag's own lists
         if i == 0:
-            switch_games_off(tag_id, _label(tag), system_names)
+            switch_games_off(tag_id, _label(tag), system_names, from_system)
         elif i == 1:
-            add_games(tag_id, systems, keys_of, lambda listing, shown: add_from_system(
-                listing, systems, shown, keys_of, _label(tag)))
+            from_system()
         elif i == 2:
             add_games(tag_id, systems, keys_of, lambda listing, shown: add_from_tag(listing, shown, keys_of, _label(tag)))
         elif i == 3:

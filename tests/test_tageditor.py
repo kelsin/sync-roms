@@ -6,7 +6,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import helpers  # noqa: E402
-from sync_roms import cli, commands, edit, picker, store, tageditor, tags, tagui, ui  # noqa: E402
+from sync_roms import cli, commands, edit, listedit, picker, store, tageditor, tags, tagui, ui  # noqa: E402
 
 A, B = "nes/A (USA).zip", "nes/B (USA).zip"
 SYSTEMS = [{"name": "Nintendo NES", "bucket": "nes"}]
@@ -236,6 +236,111 @@ class Editor(unittest.TestCase):
         self.assertFalse(tageditor._save(tags.merge_tag, "cave", "shmups"))
         self.assertIn("shmups", self.notes[-1])
         self.assertIn("cave", tags.all_tags())
+
+
+C = "nes/C (USA).zip"  # in storage, with no tags
+
+
+class Walkthrough(unittest.TestCase):
+    """The everyday flows, screen by screen: each step answers one filter_list call as a key sequence would."""
+    setUp = Editor.setUp
+
+    def walk(self, steps):
+        """edit_tags() with each filter_list call answered by the next step(labels, kw) in turn; returns the titles."""
+        steps = iter(steps)
+        titles = []
+
+        def fake(title, labels, **kw):
+            titles.append(title)
+            return next(steps)(labels, kw)
+        with mock.patch.object(picker, "filter_list", fake), mock.patch.object(listedit, "stocked", lambda s: s), \
+                mock.patch.object(listedit, "file_counts", lambda s: [[] for _ in s]), \
+                mock.patch.object(tageditor, "folder_lister", lambda: lambda bucket: {A, B, C}), \
+                mock.patch("builtins.print"):
+            self.assertEqual(tageditor.edit_tags(), 0)
+        return titles
+
+    @staticmethod
+    def pick(text):
+        """Enter on the row containing text (after / and the text, or j/k)."""
+        return lambda labels, kw: next(i for i, label in enumerate(labels) if text in label)
+
+    @staticmethod
+    def search_then(key, query):
+        """/ query Enter, then key (a hotkey) in a multi list: what the picker leaves in its session."""
+        def step(labels, kw):
+            kw["session"]["query"] = query
+            return key, None
+        return step
+
+    @staticmethod
+    def toggle(text):
+        """Space on the row containing text, then Enter."""
+        def step(labels, kw):
+            return [on != (text in label) for on, label in zip(kw["initial"], labels)]
+        return step
+
+    esc = staticmethod(lambda labels, kw: None)
+
+    def add_missing(self, system_row):
+        """Flow A: Shmups, its games, / C finds nothing, + adds, then system_row, Space on C (the search carried), Enter."""
+        tagui.FILTER.required = {"cave"}  # a sticky filter that would hide C
+        seen = {}
+
+        def add_list(labels, kw):
+            seen["add"] = (list(labels), kw["session"].get("query"), kw["filters"])
+            return self.toggle("C (USA)")(labels, kw)
+
+        def back_in_its_games(labels, kw):
+            seen["back"] = (list(labels), kw["session"].get("row"))
+            return list(kw["initial"])  # Enter
+        titles = self.walk([self.pick("Shmups"), self.pick("Games with this tag"), self.search_then("+", "C (USA)"),
+                            self.pick(system_row), add_list, back_in_its_games, self.esc, self.esc])
+        self.assertEqual(tags.tags_of(C), ["shmups"])
+        self.assertEqual(tags.tags_of(A), ["cave", "shmups"])
+        labels, query, filters = seen["add"]
+        self.assertTrue(any("C (USA)" in label for label in labels))  # the sticky filter doesn't hide it here
+        self.assertEqual(query, "C (USA)")  # the search typed in the tag's games is already applied
+        self.assertIn("paused", filters)
+        labels, row = seen["back"]
+        self.assertIn("C (USA)", labels[row])  # back in the tag's games, on the game just added
+        self.assertEqual({"cave"}, tagui.FILTER.required)  # the user's filter is untouched
+        return titles
+
+    def test_a_add_a_missing_game_from_all_systems_in_the_tags_games_list(self):
+        titles = self.add_missing("All systems")
+        self.assertEqual(len(titles), 8)
+
+    def test_a_add_a_missing_game_from_one_system_in_the_tags_games_list(self):
+        titles = self.add_missing("Nintendo NES")
+        self.assertEqual(len(titles), 8)
+
+    def test_b_remove_a_game_from_the_tags_games_list(self):
+        titles = self.walk([self.pick("Shmups"), self.pick("Games with this tag"), self.toggle("B (USA)"),
+                            self.esc, self.esc])
+        self.assertEqual(len(titles), 5)
+        self.assertEqual(tags.tags_of(B), [])
+        self.assertEqual(tags.tags_of(A), ["cave", "shmups"])
+
+    def test_the_tags_games_list_names_plus(self):
+        hints = []
+
+        def games(labels, kw):
+            hints.append(kw["hint"])
+            return list(kw["initial"])
+        self.walk([self.pick("Shmups"), self.pick("Games with this tag"), games, self.esc, self.esc])
+        self.assertIn("+ add games", hints[0])
+
+    def test_the_menus_add_from_a_system_ignores_the_sticky_filter(self):
+        tagui.FILTER.required = {"cave"}
+        seen = []
+
+        def add_list(labels, kw):
+            seen.extend(labels)
+            return list(kw["initial"])
+        self.walk([self.pick("Shmups"), self.pick("from a system"), self.pick("All systems"), add_list,
+                   self.esc, self.esc])
+        self.assertTrue(any("C (USA)" in label for label in seen))
 
 
 class Retag(unittest.TestCase):

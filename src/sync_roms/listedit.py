@@ -81,11 +81,12 @@ def reconcile(games, shown):
 ALL_SYSTEMS = "🌐 All systems"
 
 
-def add_from_system(listing, systems, shown, keys_of, label, toggle=None):
+def add_from_system(listing, systems, shown, keys_of, label, toggle=None, tag_filter=True, query=""):
     """Pick one of systems with files in storage and toggle its games in listing (via shown, a view of it).
     label is listing's name as shown, with its emoji.
 
     toggle(s, title, rows) shows the system's rows (s is its entry in shown) instead of a plain edit.toggle_games.
+    tag_filter=False: the games list ignores the sticky tag filter. query: the games list opens with that / filter.
     New games get the discs of a multi-disc game whose playlist is in storage. Ctrl-C keeps the toggles made, then is
     raised again."""
     options = stocked(systems)
@@ -107,14 +108,15 @@ def add_from_system(listing, systems, shown, keys_of, label, toggle=None):
         picked = [options[j - 1]]
         rows = system_rows(s, keys_of(s["bucket"]))
         title = f"✏️  {s['name']} — ✅ in {label}, ⬜ in storage only"
+    place = {"keys": [r[1] for r in rows], "session": {"query": query}} if query else None
     interrupted = False
     try:
         if everywhere:
-            toggle_all(title, rows)
+            toggle_all(title, rows, place, tag_filter)
         elif toggle:
             toggle(s, title, rows)
         else:
-            edit.toggle_games(title, rows)
+            edit.toggle_games(title, rows, place=place, tag_filter=tag_filter)
     except KeyboardInterrupt:  # Ctrl-C in the list or a picker it opens: the toggles made are kept
         interrupted = True
     listing["games"] = reconcile(listing["games"], shown)
@@ -328,7 +330,7 @@ def all_rows(shown, systems, keys_of):
     return sorted(rows, key=lambda r: (store.sort_key(r[2]), names[r[0]["bucket"]]))
 
 
-def toggle_all(title, rows, place=None):
+def toggle_all(title, rows, place=None, tag_filter=True):
     """edit.toggle_games over rows from all_rows (s and c, the sticky tag filter, are its own). `a` toggles every shown
     game only while a tag filter is set: the unfiltered list is every file in storage."""
-    edit.toggle_games(title, rows, place=place, select_all=edit.WHEN_FILTERED)
+    edit.toggle_games(title, rows, place=place, select_all=edit.WHEN_FILTERED, tag_filter=tag_filter)
