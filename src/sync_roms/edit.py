@@ -66,8 +66,9 @@ WHEN_FILTERED = "filtered"  # select_all value: `a` is on only while a tag filte
 
 def toggle_games(title, rows, hotkeys=(), hint=None, place=None, filters="", key_help=None, select_all=True, notes=True,
                  tag_filter=True):
-    """_toggle_games over the rows tagui.FILTER keeps, reopened in the same place after `t` edited a game's tags or
-    `s`/`c` changed the tag filter (the toggles made so far are applied first); the other keys are returned as it does.
+    """_toggle_games over the rows tagui.FILTER keeps, reopened after `t` edited a game's tags (the same rows, in the
+    same place) or `s`/`c` changed the tag filter (the new rows; the / search and cursor stay only when they are the
+    same rows), the toggles made so far applied first; the other keys are returned as it does.
     A caller that lists s or c in hotkeys handles them itself. tag_filter=False: every row is shown, with no s/c and no
     banner, for lists whose hidden rows would be acted on unseen (a suggestion review, a tag's own games).
     select_all: True, False, or WHEN_FILTERED (on only while a tag filter is set, judged on each pass)."""

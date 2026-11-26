@@ -162,9 +162,10 @@ def settings_menu(tag_id, systems, keys_of):
 
 
 def edit_one(tag_id, systems, keys_of):
-    """One tag: its games first, as the collection editor lists a collection's (a game switched off loses the tag at
-    once but stays listed, so it can be switched back on), with A (or +) to add games, the list's / search carried
-    into All systems, and S for its settings. Q raises Quit once the toggles are saved."""
+    """One tag: its games first, as the collection editor lists a collection's (a game switched off loses the tag when
+    the list is left, by Enter, Esc, A, S, Q or Ctrl-C, but stays listed while the tag is open, so it can be switched
+    back on), with A (or +) to add games, the list's / search carried into All systems, and S for its settings. Q
+    raises Quit once the toggles are saved."""
     system_names = {s["bucket"]: s["name"] for s in systems}
     kept = set()  # every game listed while the tag is open
     files = {}  # game key -> its record's extra files, put back on a game switched back on
