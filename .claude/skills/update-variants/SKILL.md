@@ -88,3 +88,5 @@ and any problems `sync-roms check` shows.
 
 `find_candidates.py --baseline` marks every ROM that is no record's file or variant as checked without judging it. Use it only when the user
 asks to skip the backlog.
+
+Tagged ROMs are candidates too, so the tagged records not yet in `variants-checked.json` come up once, a one-time backlog: judge them as any others.

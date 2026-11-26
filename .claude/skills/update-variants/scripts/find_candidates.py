@@ -53,7 +53,7 @@ def find(records, stored, checked, baseline=False):
 
     A ROM that is a record's own key is tagged on its own, yet still a candidate variant of another, related game
     (a remaster or translation carries its own tags); it is never offered for its own game, for that game's files or
-    for a ROM already listed as that game's variant. Files of any record and variants are never candidates themselves."""
+    for a ROM already listed as that game's variant, nor for a game listed as its own variant. Files of any record and variants are never candidates themselves."""
     games, listed = {}, set()  # listed: files of a record and variants, never candidates
     for key, rec in records.items():
         listed.update(rec.get("files", []))
@@ -87,7 +87,8 @@ def find(records, stored, checked, baseline=False):
         title = names.title(bucket)
         found = set(by_title.get(norm(title), [])) | set(by_family.get(clone_parent(bucket), []))
         found -= set(group)  # a tagged ROM is not a variant of itself
-        found = {g for g in found if bucket not in {v["bucket"] for v in games[g]["variants"]}}
+        found = {g for g in found if bucket not in {v["bucket"] for v in games[g]["variants"]}
+                 and g not in {v["bucket"] for v in games.get(bucket, {}).get("variants", ())}}  # nor the other way
         if not found and not any(k in games for k in group):
             unmatched += 1
         for game in found:

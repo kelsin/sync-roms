@@ -40,6 +40,10 @@ class Candidates(unittest.TestCase):
         out = self.find({**records, "snes/Zelda.sfc": rec("x")}, [A, B, "snes/Zelda.sfc"])
         self.assertEqual(self.cands(out, A), ["snes/Zelda.sfc"])
 
+    def test_a_record_is_not_offered_for_a_game_that_is_already_its_variant(self):
+        out = self.find({A: rec("x", variants=[{"bucket": B, "note": "GBA: adds"}]), B: rec("x")}, [A, B])
+        self.assertEqual(out["matches"], [])
+
     def test_untagged_rom_is_offered_and_unmatched_counted(self):
         out = self.find({A: rec("x")}, [A, B, C])
         self.assertEqual(self.cands(out, A), [B])
