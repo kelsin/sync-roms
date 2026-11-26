@@ -61,9 +61,13 @@
     artPop.style.left = Math.max(8, left) + "px";
     artPop.style.top = Math.max(8, Math.min(top, window.innerHeight - height - 8)) + "px";
   }
-  artImg.addEventListener("load", placeArt);
+  artImg.addEventListener("load", function () {
+    artImg.style.visibility = "";
+    placeArt();
+  });
   function showArt(target, game) {
     artFor = target;
+    artImg.style.visibility = "hidden";
     artImg.src = game.img + "-l.webp";
     artCap.textContent = game.title;
     artPop.hidden = false;
@@ -90,7 +94,7 @@
   document.addEventListener("mouseout", hideTip);
   document.addEventListener("focusin", showTip);
   document.addEventListener("focusout", hideTip);
-  window.addEventListener("scroll", hidePop, {passive: true});
+  document.addEventListener("scroll", hidePop, {capture: true, passive: true});
   document.addEventListener("click", function (event) {
     if (!event.target.classList || !event.target.classList.contains("size-val")) hidePop();
   });

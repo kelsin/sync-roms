@@ -4,11 +4,13 @@ import os
 import shutil
 import tarfile
 import tempfile
+import threading
 
 from . import inventory, mirroring, runtime, s3, scrape_plan, store, themeart
 
 GAME_MEDIA = ("covers", "miximages", "titlescreens", "screenshots")
 GAME_WIDTH = 300  # px: a game's picture is drawn this wide, at the right of its list, between the borders (filter_list preview_width)
+_index_lock = threading.Lock()
 _indexes = {}  # system -> scrape_index of its scrapes/ folder
 OUTLINES = "_inc/systems/artwork-outline/"
 _outlines = []  # [folder or None] once resolved this run
@@ -33,9 +35,10 @@ def card_collection(art_id, entry):
 
 
 def _index(system):
-    if system not in _indexes:
-        _indexes[system] = scrape_plan.scrape_index(scrape_plan.scrape_listing(system, sizes=False))
-    return _indexes[system]
+    with _index_lock:
+        if system not in _indexes:
+            _indexes[system] = scrape_plan.scrape_index(scrape_plan.scrape_listing(system, sizes=False))
+        return _indexes[system]
 
 
 def _image(key):

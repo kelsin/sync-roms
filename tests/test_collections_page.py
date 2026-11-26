@@ -224,6 +224,16 @@ class Public(PageSetup):
         with open(os.path.join(out, "index.html"), encoding="utf-8") as f:
             self.assertNotIn("Super Mario World (USA).zip", f.read())
 
+    def test_unreadable_art_is_skipped(self):
+        bad = os.path.join(self.enterContext(tempfile.TemporaryDirectory()), "bad.png")
+        with open(bad, "wb") as f:
+            f.write(b"not an image")
+        self.thumb.return_value = bad
+        self.save(games=[{"system": "snes", "bucket": SMW, "title": "x"}])
+        out = self.enterContext(tempfile.TemporaryDirectory())
+        collections_page.write_public(out)
+        self.assertNotIn("img", page_json(os.path.join(out, "index.html"))["collections"][0]["games"][0])
+
     def test_game_without_art_has_no_img(self):
         self.save(games=[{"system": "snes", "bucket": SMW, "title": "x"}])
         out = self.enterContext(tempfile.TemporaryDirectory())

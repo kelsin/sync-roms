@@ -70,7 +70,10 @@ def _game_art(bucket, art_dir):
     if not path:
         return None
     name = hashlib.sha1(bucket.encode()).hexdigest()[:16]
-    datas = [(suffix, webp_bytes(path, width)) for suffix, width in GAME_WIDTHS]
+    try:
+        datas = [(suffix, webp_bytes(path, width)) for suffix, width in GAME_WIDTHS]
+    except Exception:  # noqa: BLE001 -- art is cosmetic: an unreadable image just gets none
+        return None
     if any(data is None for _, data in datas):
         return None
     folder = os.path.join(art_dir, "games")
