@@ -93,15 +93,27 @@ def shown_rows(sp, keep):
     return [r for r in sp.rows if r[1] in kept and sp.playlist_of.get(r[1]) not in kept]
 
 
+def _picks_stamp(name):
+    """What of a card's saved picks its systems' rows depend on: each system's full flag and the keys it lists (a pick
+    missing from storage, a Vita DLC or update, is a row of its own)."""
+    out = []
+    for bucket, entry in sorted(store.card_games(name).items()):
+        full = isinstance(entry, dict) and bool(entry.get("full_system"))
+        listed = entry if isinstance(entry, list) else []
+        out.append((bucket, full, frozenset(g.get("bucket") for g in listed if isinstance(g, dict))))
+    return tuple(out)
+
+
 def match_counts(name, setup, systems, memo):
     """{system bucket: rows its games list shows} while a tag filter is on, else None; None for a system that is full
     or can't be listed. Counted as the list groups its rows (discs and records under their lead), so it equals the
-    list's own count. memo: a dict the caller keeps; the counts are worked out again only when the filter, the tags or
-    the storage cache changed."""
+    list's own count. memo: a dict the caller keeps; the counts are worked out again only when the filter, the tags,
+    the card's picks (_picks_stamp) or the storage cache changed."""
     if not tagui.FILTER.describe():
         return None
     data = tags.load()  # kept in the memo and compared with `is`: an id could be reused by a replacement
-    stamp = (inventory.version(), frozenset(tagui.FILTER.required), frozenset(tagui.FILTER.excluded), tagui.FILTER.untagged)
+    stamp = (inventory.version(), frozenset(tagui.FILTER.required), frozenset(tagui.FILTER.excluded), tagui.FILTER.untagged,
+             _picks_stamp(name))
     if memo.get("stamp") != stamp or memo.get("tags") is not data:
         picks, out = cardpicks.CardPicks(name, setup), {}
         for s in systems:
@@ -359,12 +371,14 @@ def edit_card(name, setup=None, to_fetch=None, card_match=None, on_guest=None):
 
         def on_hotkey(key, idx):
             """f and x switch full system and off in place, so the screen isn't torn down and redrawn."""
+            nonlocal matches
             if key not in (FULL_KEY, OFF_KEY) or idx is None:
                 return False
             if key == FULL_KEY and systems[idx]["bucket"] in store.systems_off(card_entry(name, setup)):
                 return "This system is off on the card: turn it on with x first"
             (toggle_full if key == FULL_KEY else toggle_off)(name, systems[idx]["bucket"])
             usages[systems[idx]["bucket"]] = budget.system_usage(card_entry(name, setup), systems[idx])
+            matches = match_counts(name, setup, systems, match_memo)  # a full system has no count
             extras[:] = work_out()[1]
             return True
 

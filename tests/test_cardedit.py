@@ -1767,6 +1767,34 @@ class DiscFlow(Flow):
             cardedit.match_counts("c", setup, [GBA, GB], memo)
             self.assertEqual(len(built), 2)
 
+    def test_match_counts_refresh_when_the_cards_picks_change(self):
+        self.card()
+        storage_tags(self, {"tags": {"pk": {"name": "Pokemon", "emoji": "🔴"}}, "declined": {},
+                            "games": {"gb/Red.gb": {"tags": ["pk"]}, "gb/Blue.gb": {"tags": ["pk"]}}})
+        tagui.FILTER.required.add("pk")
+        memo, setup = {}, (DEVICE, "esde")
+        self.assertEqual(cardedit.match_counts("c", setup, [GB], memo), {"gb": 1})
+        self.card(games={"gb": [g("gb/Blue.gb")]})  # a pick storage doesn't hold is a row of its own
+        self.assertEqual(cardedit.match_counts("c", setup, [GB], memo), {"gb": 2})
+        self.card(games={"gb": {"full_system": True}})
+        self.assertEqual(cardedit.match_counts("c", setup, [GB], memo), {"gb": None})
+
+    def test_f_drops_the_match_count_of_the_system_it_makes_full_at_once(self):
+        self.card()
+        self.tag_pokemon()
+        tagui.FILTER.required.add("pk")
+        seen = []
+
+        def press(labels, kw):
+            at = next(i for i, label in enumerate(labels) if "Game Boy Advance" in label)
+            seen.append(kw["extras"][at][-1])
+            self.assertTrue(kw["on_hotkey"](cardedit.FULL_KEY, at))
+            seen.append(kw["extras"][at][-1])
+            return None
+        self.run_card(press)
+        self.assertRegex(seen[0][0], r"^  \d+ match$")
+        self.assertEqual(seen[1], ("", "dim"))
+
     def test_match_counts_refresh_when_the_tags_object_is_replaced(self):
         self.card()
         self.tag_pokemon()
