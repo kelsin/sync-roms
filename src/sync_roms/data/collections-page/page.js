@@ -1,202 +1,10 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ROM Collections</title>
-<style>
-:root {
-  --bg: #f5f3ef;
-  --surface: #ffffff;
-  --surface-2: #f0ede7;
-  --text: #1f1d1a;
-  --muted: #6b665e;
-  --border: #e2ddd4;
-  --pill-border: #a89f90;
-  --pill-bg: #e6e0d5;
-  --accent: #b4532a;
-  --accent-soft: #f6e3d8;
-  --accent-text: #8a3b19;
-  --shadow: 0 1px 2px rgba(40, 30, 20, .06), 0 4px 14px rgba(40, 30, 20, .06);
-  color-scheme: light;
-}
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #161514;
-    --surface: #211f1d;
-    --surface-2: #2a2825;
-    --text: #ece8e1;
-    --muted: #a39d93;
-    --border: #36332f;
-    --pill-border: #6b665e;
-    --pill-bg: #38352f;
-    --accent: #e48a5c;
-    --accent-soft: #3b2a20;
-    --accent-text: #f2b08e;
-    --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 4px 14px rgba(0, 0, 0, .25);
-    color-scheme: dark;
-  }
-}
-* { box-sizing: border-box; }
-html, body { margin: 0; }
-body {
-  background: var(--bg);
-  color: var(--text);
-  font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-}
-button, input, select { font: inherit; color: inherit; }
-.wrap { max-width: 1100px; margin: 0 auto; padding: 0 16px 48px; }
-header { padding: 28px 0 8px; }
-h1 { margin: 0; font-size: 26px; letter-spacing: -.01em; }
-.bar {
-  position: sticky; top: 0; z-index: 2;
-  background: var(--bg);
-  padding: 12px 4px; /* 4px each side so the bar also covers the open row's 2px outline ring beside it */
-  border-bottom: 1px solid var(--border);
-  margin: 0 -4px 20px;
-}
-.controls { display: flex; flex-wrap: wrap; gap: 8px; }
-.controls input, .controls select, .controls button, .chip {
-  border: 1px solid var(--border);
-  background: var(--surface);
-  border-radius: 8px;
-  padding: 7px 10px;
-  min-width: 0;
-}
-.controls input { flex: 1 1 220px; }
-.tagbox {
-  flex: 1 1 100%; min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px;
-  border: 1px solid var(--border); background: var(--surface); border-radius: 8px; padding: 3px 6px;
-}
-.tagbox:focus-within { outline: 2px solid var(--accent); outline-offset: 1px; }
-.controls .tagbox input { flex: 1 1 100px; border: 0; background: none; padding: 4px; outline: none; }
-.controls select { flex: 0 1 220px; }
-.controls button { cursor: pointer; }
-input:focus-visible, select:focus-visible, button:focus-visible, [role="button"]:focus-visible {
-  outline: 2px solid var(--accent); outline-offset: 1px;
-}
-.chips { display: contents; }
-.chip { cursor: pointer; border-radius: 999px; padding: 2px 10px; font-size: 14px; }
-.chip { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-text); }
-.count { margin-top: 10px; color: var(--muted); font-size: 14px; }
-.list { display: flex; flex-direction: column; gap: 14px; }
-.row {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  box-shadow: var(--shadow);
-  overflow: clip; /* clips to the rounded corners without making a scroll container, so the header can stick */
-  min-width: 0;
-}
-.rhead {
-  display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 16px; align-items: start;
-  padding: 16px; background: var(--surface); cursor: default;
-}
-.rhead[role="button"] { cursor: pointer; }
-.rhead[role="button"]:hover { background: var(--surface-2); }
-.rhead:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
-.row.open { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent), var(--shadow); }
-.row.open .rhead { position: sticky; top: var(--bar-h, 0px); z-index: 1; border-bottom: 1px solid var(--border); }
-.row.open.stuck .rhead { box-shadow: inset 0 3px 0 var(--accent); }
-.rtitle { display: flex; align-items: center; gap: 10px; }
-.name { margin: 0; font-size: 28px; line-height: 1.1; overflow-wrap: anywhere; flex: 0 1 auto; min-width: 0; }
-.desc { margin: 4px 0 0; color: var(--muted); overflow-wrap: anywhere; }
-.pics { display: flex; gap: 8px; align-items: center; align-self: center; justify-content: flex-end; height: 120px; }
-.pics img { display: block; height: 100%; width: auto; flex: none; border-radius: 6px; }
-.pills { margin: 8px 0 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
-.pill { flex: none; display: inline-flex; align-items: center; gap: .3em; min-height: 26px; border: 1px solid var(--pill-border); background: var(--pill-bg); border-radius: 999px; padding: 2px 10px; font-size: 13px; line-height: 1.3; color: var(--muted); white-space: nowrap; }
-.pill b { color: var(--text); font-weight: 700; }
-.pills.tags { margin-top: 6px; gap: 0; }
-.tag {
-  position: relative; display: inline-flex; align-items: center; justify-content: center;
-  flex: none; width: 30px; height: 30px; font-size: 18px; line-height: 1; cursor: default;
-}
-.tip {
-  position: fixed; z-index: 6; background: var(--text); color: var(--bg); border-radius: 6px; padding: 3px 8px;
-  font-size: 12px; line-height: 1.3; white-space: nowrap; pointer-events: none;
-}
-.tablewrap { overflow-x: auto; }
-table.games { width: 100%; border-collapse: collapse; }
-.games th, .games td { padding: 8px 14px; text-align: left; vertical-align: middle; }
-.games th { background: var(--surface-2); border-bottom: 1px solid var(--border); font-weight: 600; font-size: 13px; color: var(--muted); }
-.games th .sort { border: 0; background: none; padding: 2px 0; cursor: pointer; font-weight: 600; font-size: 13px; color: var(--muted); }
-.games th .sort:hover { color: var(--text); }
-.games th .sort.on { color: var(--accent-text); }
-.games td { border-top: 1px solid var(--border); }
-.games tbody tr:nth-child(even) { background: var(--surface-2); }
-.games .col-system { width: 22%; color: var(--muted); }
-.games .col-year { width: 76px; white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--muted); }
-.games .col-size { width: 96px; text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
-.games th.col-size { text-align: right; }
-.size-val { cursor: help; border-bottom: 1px dotted var(--muted); }
-.size-none { color: var(--muted); }
-.size-pop {
-  position: fixed; z-index: 5; background: var(--surface); color: var(--text); border: 1px solid var(--border);
-  border-radius: 8px; box-shadow: var(--shadow); padding: 8px 12px; font-size: 13px; pointer-events: none;
-  display: grid; grid-template-columns: auto auto; gap: 2px 14px; text-align: right; font-variant-numeric: tabular-nums;
-}
-.size-pop span:nth-child(odd) { text-align: left; color: var(--muted); }
-.size-pop .sum { border-top: 1px solid var(--border); padding-top: 3px; margin-top: 2px; color: var(--text); font-weight: 600; }
-.games .col-tags { width: 1%; white-space: nowrap; }
-.games .col-copy { width: 122px; text-align: right; }
-.games .title { overflow-wrap: anywhere; }
-.sys-inline { display: none; font-size: 13px; color: var(--muted); }
-.cell-tags { line-height: 0; white-space: nowrap; }
-.copy {
-  border: 1px solid var(--border); background: var(--surface); border-radius: 6px;
-  padding: 4px 0; font-size: 13px; cursor: pointer; width: 92px; white-space: nowrap;
-}
-.copy.done { border-color: var(--accent); color: var(--accent-text); }
-.nomatch td { color: var(--muted); font-size: 14px; }
-@media (max-width: 640px) {
-  .rhead { grid-template-columns: minmax(0, 1fr); padding: 12px; }
-  .pics { height: 96px; justify-content: flex-start; }
-  .name { font-size: 24px; }
-  .games th, .games td { padding: 8px 10px; }
-  .games .col-system { display: none; }
-  .games .col-year { width: 56px; }
-  .games .col-size { width: 74px; }
-  .pill { font-size: 12px; padding: 2px 8px; }
-  .games .col-copy { width: 112px; }
-  .sys-inline { display: block; }
-  .copy { min-height: 36px; }
-}
-.toast {
-  position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); z-index: 5;
-  background: var(--text); color: var(--bg); border-radius: 999px; padding: 6px 14px; font-size: 13px;
-}
-.empty { color: var(--muted); text-align: center; padding: 48px 0; }
-[hidden] { display: none !important; }
-</style>
-</head>
-<body>
-<div class="wrap">
-  <header><h1>ROM Collections</h1></header>
-  <div class="bar">
-    <div class="controls">
-      <input id="search" type="search" placeholder="Search collections and games" aria-label="Search">
-      <select id="system" aria-label="System"></select>
-      <button id="clear" type="button">Clear</button>
-      <div class="tagbox">
-        <span class="chips" id="chips"></span>
-        <input id="tag-input" type="text" list="tag-options" placeholder="Filter by tag" aria-label="Filter by tag" autocomplete="off">
-        <datalist id="tag-options"></datalist>
-      </div>
-    </div>
-    <div class="count" id="count"></div>
-  </div>
-  <main class="list" id="grid"></main>
-  <p class="empty" id="empty" hidden></p>
-</div>
-<!-- The page's data, filled in by `sync-roms collections page`; empty in the repo. -->
-<script type="application/json" id="page-data">{}</script>
-<script>
 (function () {
   "use strict";
   var data = JSON.parse(document.getElementById("page-data").textContent);
   var tagDefs = data.tags || {};
   var systems = data.systems || {};
   var list = data.collections || [];
+  var hasPaths = list.some(function (c) { return (c.games || []).some(function (g) { return (g.paths || []).length; }); });
   var pressed = new Set();
   var cards = [];
   var current = null;
@@ -398,14 +206,16 @@ table.games { width: 100%; border-collapse: collapse; }
       tagCell.appendChild(span);
     });
     row.appendChild(tagCell);
-    var paths = (game.paths || []).join("\n");
-    var button = el("button", "copy", "Copy");
-    button.type = "button";
-    button.title = paths;
-    copyButton(button, function () { return paths; }, "Copy");
-    var last = el("td", "col-copy");
-    last.appendChild(button);
-    row.appendChild(last);
+    if (hasPaths) {
+      var paths = (game.paths || []).join("\n");
+      var button = el("button", "copy", "Copy");
+      button.type = "button";
+      button.title = paths;
+      copyButton(button, function () { return paths; }, "Copy");
+      var last = el("td", "col-copy");
+      last.appendChild(button);
+      row.appendChild(last);
+    }
     return row;
   }
 
@@ -416,6 +226,13 @@ table.games { width: 100%; border-collapse: collapse; }
     });
     return Object.keys(seen).map(function (id) { return {id: id, name: tagDefs[id].name, emoji: tagDefs[id].emoji}; })
       .sort(byName);
+  }
+
+  if (typeof data.home === "string") {
+    var home = el("a", "home", "\u2190 All users");
+    home.href = data.home;
+    var header = document.querySelector("header");
+    header.insertBefore(home, header.firstChild);
   }
 
   var grid = document.getElementById("grid");
@@ -488,7 +305,8 @@ table.games { width: 100%; border-collapse: collapse; }
     var table = el("table", "games");
     var tr = el("tr");
     entry.ths = {};
-    [["name", "Name", ""], ["system", "System", "col-system"], ["year", "Year", "col-year"], ["size", "Size", "col-size"], [null, "Tags", "col-tags"], [null, "", "col-copy"]]
+    [["name", "Name", ""], ["system", "System", "col-system"], ["year", "Year", "col-year"], ["size", "Size", "col-size"], [null, "Tags", "col-tags"]]
+      .concat(hasPaths ? [[null, "", "col-copy"]] : [])
       .forEach(function (col) {
         var th = el("th", col[2]);
         th.scope = "col";
@@ -558,7 +376,7 @@ table.games { width: 100%; border-collapse: collapse; }
     if (!rows.length) {
       var none = el("tr", "nomatch");
       var cell = el("td", "", "No games match the filters");
-      cell.colSpan = 6;
+      cell.colSpan = hasPaths ? 6 : 5;
       none.appendChild(cell);
       entry.tbody.appendChild(none);
     }
@@ -707,6 +525,3 @@ table.games { width: 100%; border-collapse: collapse; }
   measureBar();
   applyHash();
 })();
-</script>
-</body>
-</html>

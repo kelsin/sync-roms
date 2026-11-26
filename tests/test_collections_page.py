@@ -1,5 +1,6 @@
 import base64
 import io
+import json
 import os
 import pathlib
 import sys
@@ -20,14 +21,24 @@ def tag_data():
             "games": {SMW: {"tags": ["mario", "platformers", "ghost"]}}}
 
 
-class Page(helpers.DataDir):
+class PageSetup(helpers.DataDir):
+    """Tags from tag_data, an empty storage listing and save() for one collection; no tests of its own."""
+
     def setUp(self):
         super().setUp()
         self.enterContext(mock.patch.object(tags, "load", tag_data))
+        self.enterContext(mock.patch.object(scrape_plan, "load_metadata", lambda system, fresh=False: {}))
         self.listing({})
 
     def save(self, **fields):
         collections.save_collection({"id": "mario", "name": "Mario", "description": "d", "games": [], **fields})
+
+    def listing(self, files):
+        return self.enterContext(mock.patch.object(inventory, "files", lambda prefix, sizes=True: {
+            k: v for k, v in files.items() if k.startswith(prefix)}))
+
+
+class Page(PageSetup):
 
     def test_games_sorted_by_title_not_system(self):
         self.save(games=[{"system": "snes", "bucket": SMW, "title": "b"},
@@ -98,10 +109,6 @@ class Page(helpers.DataDir):
         self.assertEqual(data["tags"], {})
         self.assertEqual(data["collections"][0]["games"][0]["tags"], [])
         self.assertEqual(err.getvalue().count("⚠️"), 1)
-
-    def listing(self, files):
-        return self.enterContext(mock.patch.object(inventory, "files", lambda prefix, sizes=True: {
-            k: v for k, v in files.items() if k.startswith(prefix)}))
 
     def test_every_system_has_a_short_name_and_the_page_uses_it(self):
         systems = store.repo_json("systems")
@@ -177,17 +184,91 @@ class Page(helpers.DataDir):
         self.assertEqual(collections_page.page_data()["systems"]["zzz"], "zzz")
 
 
-TEMPLATE = os.path.join(os.path.dirname(collections_page.__file__), "data", "collections-page.html")
+def page_json(path):
+    """The parsed page-data block of a written page."""
+    with open(path, encoding="utf-8") as f:
+        html = f.read()
+    return json.loads(html.split('id="page-data">', 1)[1].split("</script>", 1)[0])
+
+
+class Public(PageSetup):
+    def test_public_data_has_no_paths_and_a_home(self):
+        self.save(games=[{"system": "snes", "bucket": SMW, "title": "x"}])
+        out = self.enterContext(tempfile.TemporaryDirectory())
+        collections_page.write_public(out, home="/")
+        data = page_json(os.path.join(out, "index.html"))
+        self.assertEqual(data["home"], "/")
+        self.assertNotIn("paths", data["collections"][0]["games"][0])
+        with open(os.path.join(out, "index.html"), encoding="utf-8") as f:
+            self.assertNotIn("Super Mario World (USA).zip", f.read())
+
+    def test_public_writes_separate_files(self):
+        self.save(art="mario")
+        out = self.enterContext(tempfile.TemporaryDirectory())
+        collections_page.write_public(out)
+        self.assertEqual(sorted(f for f in os.listdir(out) if os.path.isfile(os.path.join(out, f))),
+                         ["index.html", "page.css", "page.js"])
+        art = page_json(os.path.join(out, "index.html"))["collections"][0]["art"]
+        self.assertEqual(art["band"], "art/mario-band.webp")
+        self.assertTrue(os.path.isfile(os.path.join(out, "art", "mario-band.webp")))
+        with open(os.path.join(out, "index.html"), encoding="utf-8") as f:
+            self.assertNotIn("data:image", f.read())
+
+    def test_public_shared_art_written_once(self):
+        self.save(art="mario")
+        collections.save_collection({"id": "other", "name": "Other", "description": "d", "games": [], "art": "mario"})
+        out = self.enterContext(tempfile.TemporaryDirectory())
+        collections_page.write_public(out)
+        arts = [c["art"] for c in page_json(os.path.join(out, "index.html"))["collections"]]
+        self.assertEqual(arts[0], arts[1])
+        written = sorted(os.listdir(os.path.join(out, "art")))
+        self.assertEqual(written, sorted(path.split("/", 1)[1] for path in arts[0].values()))
+
+    def test_public_removes_stale_files(self):
+        out = self.enterContext(tempfile.TemporaryDirectory())
+        os.makedirs(os.path.join(out, "art"))
+        open(os.path.join(out, "art", "gone-band.webp"), "wb").close()
+        collections_page.write_public(out)
+        self.assertFalse(os.path.exists(os.path.join(out, "art", "gone-band.webp")))
+
+    def test_local_data_unchanged(self):
+        self.save(games=[{"system": "snes", "bucket": SMW, "title": "x"}])
+        data = collections_page.page_data()
+        self.assertNotIn("home", data)
+        self.assertEqual(data["collections"][0]["games"][0]["paths"], [SMW])
+
+
 DATA_BLOCK = '<script type="application/json" id="page-data">{}</script>'
 
 
 class TemplateTest(unittest.TestCase):
     def setUp(self):
-        with open(TEMPLATE, encoding="utf-8") as f:
-            self.html = f.read()
+        self.files = collections_page.template_files()
+        self.html = "\n".join(self.files.values())
 
     def test_empty_data_block(self):
-        self.assertEqual(self.html.count(DATA_BLOCK), 1)
+        self.assertEqual(self.files["page.html"].count(DATA_BLOCK), 1)
+
+    def test_page_html_links_its_files(self):
+        html = self.files["page.html"]
+        self.assertIn('<link rel="stylesheet" href="page.css">', html)
+        self.assertIn('<script src="page.js"></script>', html)
+
+    def test_no_closing_script_in_js(self):
+        self.assertNotIn("</script>", self.files["page.js"])
+
+    def test_render_is_self_contained(self):
+        html = collections_page.render({"tags": {}, "systems": {}, "collections": []})
+        self.assertNotIn('href="page.css"', html)
+        self.assertNotIn('src="page.js"', html)
+        self.assertIn(self.files["page.css"].strip()[:40], html)
+        self.assertIn("<style>", html)
+
+    def test_back_link_and_copy_column_are_conditional(self):
+        js = self.files["page.js"]
+        self.assertIn("data.home", js)
+        self.assertIn("All users", js)
+        self.assertIn("hasPaths", js)
 
     def test_no_external_urls(self):
         self.assertNotIn("http://", self.html)
@@ -246,10 +327,10 @@ class CommandTest(helpers.Cmd):
     def test_script_tag_escaped(self):
         self.save("</script><b>")
         self.page()
-        with open(collections_page.DEFAULT_PATH(), encoding="utf-8") as f, \
-                open(collections_page.TEMPLATE, encoding="utf-8") as t:
-            html, template = f.read(), t.read()
-        self.assertEqual(html.count("</script>"), template.count("</script>"))
+        with open(collections_page.DEFAULT_PATH(), encoding="utf-8") as f:
+            html = f.read()
+        empty = collections_page.render({"tags": {}, "systems": {}, "collections": []})
+        self.assertEqual(html.count("</script>"), empty.count("</script>"))
         self.assertNotIn("<b>", html.split('id="page-data">')[1].split("</script>")[0])
 
     def test_dry_run_refused(self):

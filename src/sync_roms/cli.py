@@ -30,7 +30,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "edit": ("", "interactive editor: cards, tags, collections, device systems"),
     "games": ("list|add|remove|full|export|import", "edit a card's games, interactively or from scripts"),
     "tags": ("edit|suggest", "edit the tags in storage by hand (games, names, emoji, merging, deleting), or add tags from scraped genres"),
-    "collections": ("edit|page|retitle|share|unshare", "edit your collections of favourite games (saved in ~/.sync-roms/collections/), write a shareable HTML page of them, set their titles to the scraped names, or share the page on your tailnet"),
+    "collections": ("edit|page|publish|retitle|share|unshare", "edit your collections of favourite games (saved in ~/.sync-roms/collections/), write a shareable HTML page of them, publish it to sync-roms.games, set their titles to the scraped names, or share the page on your tailnet"),
     "themes": ("update|pick|build|publish|palettes", "copy the latest Art Book Next for ES-DE and the PyUI themes for spruce from GitHub into storage; build and publish custom spruce themes"),
     "download": ("pico8", "add the PICO-8 BBS Featured carts storage doesn't have, and newer revisions of those it has"),
     "ports": ("search|download|done|needed", "put PortMaster ports and the runtimes they need in storage, from PortMaster's catalogue"),
@@ -154,6 +154,8 @@ TOPICS = {
     "collections": """
   sync-roms collections edit                  edit your collections of favourite games
   sync-roms collections page [--out FILE]     write an HTML page of your collections and open it
+  sync-roms collections publish [--user NAME] [--dry-run]
+                                              publish that page to https://sync-roms.games/
   sync-roms collections retitle [--dry-run]   set each game's title to its scraped name
   sync-roms collections share                 share that page on your tailnet with tailscale serve
   sync-roms collections unshare               stop serving it
@@ -178,6 +180,15 @@ TOPICS = {
   (Serve and HTTPS must be on for your tailnet), then prints and copies the link. Run collections
   page to refresh the served page. The server stops with unshare, which also turns off just that
   path, or a restart: run share again after a restart.
+
+  collections publish puts a public copy of the page (no storage paths, but your game lists; a game
+  with no scraped name or saved title shows its file name) in a clone of the Pages repo (the
+  pages_repo setting, default git@github.com:kelsin/sync-roms.games.git; kept in
+  ~/.sync-roms/cache/pages/), in collections/<user>/ (your login name, or --user NAME: lowercase
+  letters, digits, - and _), with the site's list of users at its root, then commits and pushes
+  when anything changed. Only your own folder is replaced. When storage can't be reached it
+  publishes nothing. --dry-run lists what would change and pushes nothing. Setting up the repo and
+  domain: docs/github-pages.md.
 """,
     "themes": """
   sync-roms themes update [--dry-run]         put the latest Art Book Next for ES-DE and the PyUI
@@ -584,7 +595,8 @@ TOPICS = {
   screenscraper_password (text), eject, storage_cache_declined or syncthing (true or false),
   surprise_ttl_days (a positive number of days) or surprise_excluded_systems (comma-separated system
   ids, e.g. gba,snes). root and mirror must be absolute paths (~ is expanded). The password is saved
-  but never printed; `scrape --set-credentials` asks for it without echoing it.
+  but never printed; `scrape --set-credentials` asks for it without echoing it. pages_repo (text) is
+  the git URL `collections publish` pushes to (default git@github.com:kelsin/sync-roms.games.git).
 
   ra_mode (Manual, Disabled, Casual, Softcore or Hardcore), ra_username, ra_password and ra_api_key
   (text, the last two never printed), ra_offline_proxy and ra_proxy_stats (true or false): the

@@ -404,8 +404,8 @@ class Commands(unittest.TestCase):
                 commands.run(["collections", word, "--dry-run"])
 
     def test_wiring(self):
-        self.assertEqual(commands.second_words()["collections"], ["edit", "page", "retitle", "share", "unshare"])
-        self.assertEqual(cli.SUBCOMMANDS["collections"][0], "edit|page|retitle|share|unshare")
+        self.assertEqual(commands.second_words()["collections"], ["edit", "page", "publish", "retitle", "share", "unshare"])
+        self.assertEqual(cli.SUBCOMMANDS["collections"][0], "edit|page|publish|retitle|share|unshare")
 
 
 if __name__ == "__main__":
