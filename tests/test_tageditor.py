@@ -189,18 +189,21 @@ class Editor(unittest.TestCase):
         self.assertEqual(tags.tags_of(A), ["shmups"])
 
     def test_a_multi_disc_game_added_again_gets_its_discs_back(self):
-        """Its last tag gone, its record and files went; A gives the new record the discs, playlist or not."""
+        """Its last tag gone, its record and files went; A gives a new playlist record its discs (even with no files
+        in the listing), and loose discs added as rows records of their own."""
         from sync_roms import inventory
-        loose = ["nes/D (Disc 1).chd", "nes/D (Disc 2).chd"]
-        for key in loose:
+        game = ["nes/D.m3u", "nes/D (Disc 1).chd", "nes/D (Disc 2).chd"]
+        loose = ["nes/E (Disc 1).chd", "nes/E (Disc 2).chd"]
+        for key in game + loose:
             helpers.touch(os.path.join(self.root, key))
         inventory.reset()
 
         def add(listing, systems, shown, keys_of, label, **kw):
-            listing["games"].append({"system": "nes", "bucket": loose[0], "title": "D"})
+            listing["games"] += [{"system": "nes", "bucket": k, "title": k} for k in (game[0], *loose)]
         with mock.patch.object(tageditor, "add_from_system", add):
             self.run_editor(["Cave", ("A", None)])
-        self.assertEqual(tags.record(loose[0]), {"tags": ["cave"], "files": loose[1:]})
+        self.assertEqual(tags.record(game[0]), {"tags": ["cave"], "files": game[1:]})
+        self.assertEqual([tags.record(k) for k in loose], [{"tags": ["cave"]}] * 2)
 
     def test_adding_games_to_a_tag_puts_it_first_among_the_recent_tags(self):
         tagui.RECENT[:] = ["shmups"]

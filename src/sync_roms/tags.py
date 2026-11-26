@@ -201,18 +201,23 @@ def owner(key):
 
 
 def discs(keys):
-    """{key: the other files of its multi-disc game} for those of keys that have no record and are one, grouped as the
-    game lists group them (m3u.file_groups: a playlist and its discs, or the discs of a game with none), each system's
-    storage folder listed once. A folder that can't be listed gives none."""
+    """{playlist key: its discs} for those of keys that are an .m3u playlist in storage with no record yet: the files a
+    new record gets, as the game lists fold a playlist's discs into its row (listedit.playlist_groups). Discs with no
+    playlist are a row each, so their records get none. Each system's folder is listed once (from the storage cache when
+    there is one), and only for a playlist; a folder that can't be listed gives none."""
     load()
-    wanted = [k for k in keys if k not in _data["games"] and k not in _owner]
+    keys = list(keys)
+    taken = set(keys) | set(_data["games"]) | set(_owner)  # a disc that is a record, or becomes one, isn't a file too
+    wanted = [k for k in keys if k.lower().endswith(".m3u") and k not in _data["games"] and k not in _owner]
     out = {}
     for system in sorted({k.partition("/")[0] for k in wanted}):
         try:
-            groups = m3u.file_groups(store.folder_keys(system, say=False))
+            in_storage = store.folder_keys(system, say=False)
         except (*s3.ERRORS, SystemExit):  # storage can't be listed (ui.fail raises SystemExit): no files
             continue
-        out.update({k: [f for f in groups[k] if f != k] for k in wanted if k.partition("/")[0] == system and k in groups})
+        groups = m3u.file_groups(in_storage)
+        out.update({k: [f for f in groups[k][1:] if f not in taken] for k in wanted
+                    if k.partition("/")[0] == system and k in in_storage and groups.get(k, [None])[0] == k})
     return out
 
 
@@ -221,8 +226,9 @@ def _record(data, key, files):
     rec = data["games"].get(key)
     if rec is None:
         rec = data["games"][key] = {"tags": []}
-        if files.get(key):
-            rec["files"] = list(files[key])
+        mine = [f for f in files.get(key, ()) if f not in data["games"]]  # another machine may have made one a record
+        if mine:
+            rec["files"] = mine
     return rec
 
 

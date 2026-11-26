@@ -556,7 +556,8 @@ class TagPickerErgonomics(Base):
 
 
 class DiscsComeBack(Base):
-    """A multi-disc game whose last tag went loses its record and files; t, . and T tag it again with its discs."""
+    """A playlist game whose last tag went loses its record and files; t, . and T tag it again with its discs. Loose
+    discs (no playlist) are a row each, so each gets a record of its own with no files."""
     PLAYLIST = ["psx/FF7.m3u", "psx/FF7 (Disc 1).chd", "psx/FF7 (Disc 2).chd"]
     LOOSE = ["psx/MGS (Disc 1).chd", "psx/MGS (Disc 2).chd"]  # discs with no playlist
 
@@ -568,26 +569,40 @@ class DiscsComeBack(Base):
         inventory.reset()
 
     def files(self):
-        return {k: (tags.record(k) or {}).get("files") for k in (self.PLAYLIST[0], self.LOOSE[0])}
+        return {k: (tags.record(k) or {}).get("files") for k in (self.PLAYLIST[0], *self.LOOSE)}
 
     def untag(self):
-        for lead in (self.PLAYLIST[0], self.LOOSE[0]):
+        for lead in (self.PLAYLIST[0], *self.LOOSE):
             self.pick_tags(lead, set())
-        self.assertEqual(self.files(), {self.PLAYLIST[0]: None, self.LOOSE[0]: None})
+        self.assertEqual(tags.load()["games"], {B: {"tags": ["shmups"]}})
 
-    def test_t_dot_and_T_restore_the_discs(self):
-        want = {self.PLAYLIST[0]: self.PLAYLIST[1:], self.LOOSE[0]: self.LOOSE[1:]}
-        for lead in want:
+    def test_t_dot_and_T_restore_a_playlists_discs_and_give_loose_discs_none(self):
+        rows = [self.PLAYLIST[0], *self.LOOSE]
+        want = {self.PLAYLIST[0]: self.PLAYLIST[1:], self.LOOSE[0]: None, self.LOOSE[1]: None}
+        for lead in rows:
             self.pick_tags(lead, {"cave"})
         self.assertEqual(self.files(), want)
         self.untag()
         tagui.LAST[:] = [(frozenset({"cave"}), frozenset())]
-        for lead in want:
+        for lead in rows:
             self.assertTrue(tagui.repeat_last(lead, lead))
         self.assertEqual(self.files(), want)
         self.untag()
-        self.bulk(list(want), {"cave"})
+        self.bulk(rows, {"cave"})
         self.assertEqual(self.files(), want)
+
+    def test_T_over_every_loose_disc_then_t_off_one_leaves_the_other(self):
+        self.bulk(list(self.LOOSE), {"cave"})
+        self.assertEqual({k: tags.owner(k) for k in self.LOOSE}, {k: k for k in self.LOOSE})
+        self.pick_tags(self.LOOSE[0], set())
+        self.assertIsNone(tags.record(self.LOOSE[0]))
+        self.assertEqual(tags.record(self.LOOSE[1]), {"tags": ["cave"]})
+        self.assertEqual(tagui._count()["cave"], 1)
+
+    def test_t_on_disc_2_alone_makes_its_own_record_with_no_files(self):
+        self.pick_tags(self.LOOSE[1], {"cave"})
+        self.assertEqual(tags.record(self.LOOSE[1]), {"tags": ["cave"]})
+        self.assertIsNone(tags.record(self.LOOSE[0]))
 
 
 if __name__ == "__main__":
