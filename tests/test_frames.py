@@ -6,7 +6,7 @@ import unittest
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import helpers  # noqa: E402,F401  (imports isolate first)
-from PIL import Image  # noqa: E402
+from PIL import Image, ImageChops, ImageDraw  # noqa: E402
 from test_custom_themes import make_base as make_theme_base  # noqa: E402
 
 from sync_roms.custom_themes import palettes  # noqa: E402
@@ -604,20 +604,28 @@ class Frames(unittest.TestCase):
                 base_size = BASE[rel.split("/", 1)[1]][0]
                 canvas = frames.Canvas(img.size, frames.cell_for(img.size, base_size), (0, 0) + img.size)
                 logo = rel.endswith("bg-title.png")
-                colored = 0
-                px = img.load()
-                for y in range(img.height):
-                    for x in range(img.width):
-                        rgba = px[x, y]
-                        self.assertEqual(rgba[3], 255, (x, y))
-                        cx, cy = (x - canvas.ox) // canvas.cell, (y - canvas.oy) // canvas.cell
-                        on_grid = 0 <= cx < canvas.cols and 0 <= cy < canvas.rows
-                        edge = on_grid and min(cx, canvas.cols - 1 - cx, cy, canvas.rows - 1 - cy) < 2
-                        slot = logo and on_grid and cx < canvas.rows  # bg-title's logo, at the left
-                        if not (edge or slot):
-                            self.assertEqual(rgba, (0, 0, 0, 255), (x, y))
-                        colored += rgba != (0, 0, 0, 255)
-                self.assertGreater(colored, 0)
+                black = Image.new("RGBA", img.size, (0, 0, 0, 255))
+                self.assertEqual(img.getchannel("A").getextrema(), (255, 255))  # opaque everywhere
+                # black everywhere but the 2-cell edge ring of the grid and, on bg-title, the logo's slot at the left
+                exempt = Image.new("L", img.size, 0)
+                draw = ImageDraw.Draw(exempt)
+                gx0, gy0 = canvas.ox, canvas.oy
+                gx1, gy1 = gx0 + canvas.cols * canvas.cell, gy0 + canvas.rows * canvas.cell
+                draw.rectangle((gx0, gy0, gx1 - 1, gy1 - 1), fill=255)
+                inner = (gx0 + 2 * canvas.cell, gy0 + 2 * canvas.cell, gx1 - 2 * canvas.cell, gy1 - 2 * canvas.cell)
+                if inner[0] < inner[2] and inner[1] < inner[3]:
+                    draw.rectangle((inner[0], inner[1], inner[2] - 1, inner[3] - 1), fill=0)
+                if logo:
+                    draw.rectangle((gx0, gy0, gx0 + min(canvas.rows, canvas.cols) * canvas.cell - 1, gy1 - 1), fill=255)
+                checked = img.copy()
+                checked.paste(black, mask=exempt)
+                diff = ImageChops.difference(checked, black)
+                bad = diff.getbbox(alpha_only=False)
+                if bad:
+                    first = next(i for i, v in enumerate(diff.crop(bad).getdata()) if v != (0, 0, 0, 0))
+                    xy = (bad[0] + first % (bad[2] - bad[0]), bad[1] + first // (bad[2] - bad[0]))
+                    self.fail(f"not opaque black outside the edge ring: bbox {bad}, first pixel {xy} is {img.getpixel(xy)}")
+                self.assertIsNotNone(ImageChops.difference(img, black).getbbox(alpha_only=False))  # some colored pixel
                 self.assertEqual(spec.background, (0, 0, 0))
 
     def test_border_brackets_have_equal_arms(self):
