@@ -438,6 +438,7 @@ class Session(unittest.TestCase):
                 self.assertEqual(out.getvalue(), printed)
 
     def test_a_long_prompt_wraps_so_its_legend_and_answer_stay_in_view(self):
+        from textual import events
         from textual.geometry import Region
         question = "💾 Save these changes?"
         legend = "s save · e keep editing · d discard · l list every change"
@@ -460,7 +461,9 @@ class Session(unittest.TestCase):
             seen.append(shown())
             await pilot.press("e")
             await wait_for(pilot, lambda: prompting(app, "Name: "))
-            await pilot.press(*"x" * 90)
+            for _ in range(90):
+                app.post_message(events.Key("x", "x"))
+            await wait_for(pilot, lambda: app.model.text == "x" * 90)
             await pilot.pause()
             seen.append(shown())
             await pilot.press("enter")
