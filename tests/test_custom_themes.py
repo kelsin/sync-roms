@@ -113,9 +113,9 @@ class Build(unittest.TestCase):
         self.base = os.path.join(self.tmp.name, "base")
 
     def test_registry_styles(self):
-        self.assertEqual(custom_themes.styles(), ["Pixel Consoles", "Pixel Controllers", "ToTK - James"])
+        self.assertEqual(custom_themes.styles(), ["Pixel Consoles", "Pixel Controllers", "ToTK - James", "ToTK - Kelsin"])
         for style, module in custom_themes.STYLES.items():
-            self.assertEqual(module.BASE, "ToTK" if style == "ToTK - James" else "SPRUCE")
+            self.assertEqual(module.BASE, "ToTK" if style.startswith("ToTK") else "SPRUCE")
 
     def test_build_overlays_base(self):
         make_base(self.base)
@@ -601,7 +601,7 @@ class PaletteFree(CachedBuilds, helpers.StorageDir):
             built = custom_themes.build(None, [GRUVBOX, palettes.get("Candy")], self.out)
         self.assertEqual(sorted(built), [
             "Pixel Consoles - Candy", "Pixel Consoles - Gruvbox",
-            "Pixel Controllers - Candy", "Pixel Controllers - Gruvbox", "ToTK - James"])
+            "Pixel Controllers - Candy", "Pixel Controllers - Gruvbox", "ToTK - James", "ToTK - Kelsin"])
         build.assert_called_once()
 
     def test_palette_flag_ignored_for_totk(self):

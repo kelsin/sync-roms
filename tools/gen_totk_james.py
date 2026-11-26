@@ -1,7 +1,7 @@
-"""Make the art of the "ToTK - James" spruce theme from the ToTK base theme and Zelda Wiki's character renders.
+"""Make the art of the "ToTK - James" and "ToTK - Kelsin" spruce themes from the ToTK base theme and Zelda Wiki's character renders.
 
 Reads the base theme (never writes to it), downloads the four renders into a cache, and writes
-src/sync_roms/data/themes/totk-james/: cards/<id>-f.png and -n.png (156x328) and bg-title.png (196x51).
+src/sync_roms/data/themes/totk-james/: cards/<id>-f.png and -n.png (156x328), bg-title.png and bg-title-kelsin.png (196x51).
 Also writes a review sheet to the cache (never the repo) and prints its path.
 
 uv run python tools/gen_totk_james.py [--base DIR] [--cache DIR]
@@ -33,6 +33,7 @@ W, H = 156, 328
 WIN_X, WIN_Y, WIN_W, WIN_H = 7, 24, 142, 252
 CREAM = (250, 247, 221)
 TEXT_COLOR = (255, 229, 153)
+TITLES = {"bg-title.png": "James", "bg-title-kelsin.png": "Kelsin"}  # title picture: the name drawn after the Triforce
 
 
 def lum(c):
@@ -141,7 +142,7 @@ def make_cards(base, bg, mask, art_path, params):
     return focused, normal
 
 
-def make_title(base):
+def make_title(base, name):
     orig = Image.open(os.path.join(base, "skin", "bg-title.png")).convert("RGBA")
     title = Image.new("RGBA", orig.size, (0, 0, 0, 255))
     title.paste(orig.crop((7, 0, 33, orig.height)), (7, 0))  # the Triforce, as is
@@ -150,7 +151,7 @@ def make_title(base):
     for size in range(10, 60):
         font = ImageFont.truetype(font_path, size)
         mask = Image.new("L", (200, 100), 0)
-        ImageDraw.Draw(mask).text((0, 0), "James", font=font, fill=255)
+        ImageDraw.Draw(mask).text((0, 0), name, font=font, fill=255)
         box = mask.getbbox()
         if box[3] - box[1] >= 24:
             chosen = (font, mask, box)
@@ -193,7 +194,8 @@ def main():
         f, n = make_cards(args.base, bg, mask, fetch(cid, url, args.cache), params)
         f.save(os.path.join(out, "cards", f"{cid}-f.png"))
         n.save(os.path.join(out, "cards", f"{cid}-n.png"))
-    make_title(args.base).convert("RGB").save(os.path.join(out, "bg-title.png"))
+    for file, name in TITLES.items():
+        make_title(args.base, name).convert("RGB").save(os.path.join(out, file))
     sheet = os.path.join(args.cache, "review.png")
     review_sheet(args.base, out, sheet)
     print(sheet)

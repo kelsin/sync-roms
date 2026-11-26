@@ -125,7 +125,7 @@ def _reserved(layout_name):
                                          "spinner"}
 
 
-ZELDA_THEMES = ("ToTK", "ToTK - James")  # the spruce themes whose cards get the ToTK-style collection art
+ZELDA_THEMES = ("ToTK", "ToTK - James", "ToTK - Kelsin")  # the spruce themes whose cards get the ToTK-style collection art
 ZELDA_ART = os.path.join(os.path.dirname(THEME_DATA), "totk-james", "collections")
 
 
