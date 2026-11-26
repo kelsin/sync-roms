@@ -296,12 +296,11 @@ def edit_menu(noun, before, working, state, emoji, art, delete_note, new_item, o
 
 def all_rows(shown, systems, keys_of):
     """Rows for edit.toggle_games over every system's files, by title then system. Each row's entry is the system's
-    view in shown, so toggles write into it; labels start with the system's name."""
+    view in shown, so toggles write into it; the system is the list's System column."""
     rows = []
     for system in systems:
         s = shown[system["bucket"]]
-        rows += [(s, key, title, f"{store.short_name(system)} — {label}")
-                 for _, key, title, label in system_rows(s, keys_of(system["bucket"]))]
+        rows += [(s, key, title, label) for _, key, title, label in system_rows(s, keys_of(system["bucket"]))]
     names = {s["bucket"]: s["name"].lower() for s in systems}
     return sorted(rows, key=lambda r: (store.sort_key(r[2]), names[r[0]["bucket"]]))
 

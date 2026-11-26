@@ -112,7 +112,7 @@ class EditorColumnsTest(unittest.TestCase):
             return kw["initial"]
         with mock.patch.object(edit.picker, "filter_list", fake):
             edit.toggle_games("t", rows)
-        self.assertEqual(seen["extras"], [[("  \U0001F1EF\U0001F1F5", "dim"), ("", "")]])
+        self.assertEqual([e[2:] for e in seen["extras"]], [[("  \U0001F1EF\U0001F1F5", "dim"), ("", "")]])  # after System, Year
 
 
 if __name__ == "__main__":

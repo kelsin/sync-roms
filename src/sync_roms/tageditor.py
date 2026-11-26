@@ -164,7 +164,6 @@ def edit_one(tag_id, systems, keys_of):
     the list is left keeping the changes, by Enter, A, S, Q or Ctrl-C, or by Esc, which asks first whether to keep or
     revert them; it stays listed while the tag is open, so it can be switched back on), with A (or +) to add games,
     the list's / search carried into All systems, and S for its settings. Q raises Quit once the toggles are saved."""
-    system_names = {s["bucket"]: s["name"] for s in systems}
     kept = set()  # every game listed while the tag is open
     files = {}  # game key -> its record's extra files, put back on a game switched back on
     place = {}
@@ -185,8 +184,7 @@ def edit_one(tag_id, systems, keys_of):
             pressed = None if i is None else i[0] if isinstance(i, tuple) else ADD_KEY if i == 0 else SETTINGS_KEY
         else:
             entry = {"bucket": "", "games": [{"bucket": k} for k in keys]}
-            rows = sorted(((entry, k, names.title(k), f"{system_names.get(k.partition('/')[0], k.partition('/')[0])} — {names.title(k)}")
-                           for k in kept), key=lambda r: (store.sort_key(r[2]), r[1]))
+            rows = sorted(((entry, k, names.title(k), names.title(k)) for k in kept), key=lambda r: (store.sort_key(r[2]), r[1]))
             if place.get("added"):  # back from adding: on the first game added
                 at = next(i for i, r in enumerate(rows) if r[1] in place["added"])
                 place = {"keys": [r[1] for r in rows], "session": {"row": at}}

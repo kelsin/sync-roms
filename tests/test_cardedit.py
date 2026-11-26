@@ -599,7 +599,7 @@ class Flow(DataDir):
     def test_collection_view_picks_a_single_game_as_a_direct_pick(self):
         self.favs_two()
         self.card()
-        self.run_card(returns((cardedit.COLLECTIONS_KEY, 0)), returns(0), toggle("Game Boy Advance — Zelda"), returns(None))
+        self.run_card(returns((cardedit.COLLECTIONS_KEY, 0)), returns(0), toggle("Zelda"), returns(None))
         card = self.read("cards.json")["c"]
         self.assertEqual(card["games"]["gba"], [{"title": "Zelda", "bucket": "gba/Zelda.zip"}])
         self.assertNotIn("collections", card)
@@ -607,7 +607,7 @@ class Flow(DataDir):
     def test_collection_view_switching_off_a_whole_collection_game_excludes_it(self):
         self.favs_two()
         self.card(collections=["favs"])
-        self.run_card(returns((cardedit.COLLECTIONS_KEY, 0)), returns(0), toggle("Game Boy Advance — Zelda"), returns(None))
+        self.run_card(returns((cardedit.COLLECTIONS_KEY, 0)), returns(0), toggle("Zelda"), returns(None))
         card = self.read("cards.json")["c"]
         self.assertEqual(card["excluded"], {"gba": ["gba/Zelda.zip"]})
         self.assertEqual(card["collections"], ["favs"])
@@ -2088,7 +2088,7 @@ class SetFlow(Flow):
         self.card()
         _, calls = self.run_set(returns([False, False]))
         title, labels, kw = calls[0]
-        self.assertEqual(labels, ["Game Boy — Red", "Game Boy Advance — Ruby"])
+        self.assertEqual(labels, ["Red", "Ruby"])
         self.assertEqual(title, f"{themeart.collection_emoji(SET)} Pokemon on c — ✅ synced, ⬜ not, 💖 from a collection")
         self.assertEqual(kw["initial"], [False, False])
 
@@ -2098,7 +2098,7 @@ class SetFlow(Flow):
         self.card()
         _, calls = self.run_set(returns([False]))
         title, labels, kw = calls[0]
-        self.assertEqual(labels, ["Game Boy Advance — Ruby"])
+        self.assertEqual(labels, ["Ruby"])
         self.assertEqual(kw["filters"], "✅ 🔴 Pokemon · 1 of 2 shown (c clear filters)")
         self.assertIn(cardedit.SET_KEY, kw["hotkeys"])
         self.assertIn(cardedit.CLEAR_KEY, kw["hotkeys"])
@@ -2111,7 +2111,7 @@ class SetFlow(Flow):
         _, calls = self.run_set(returns((cardedit.CLEAR_KEY, None)), lambda labels, kw: kw["session"]["sel"])
         self.assertEqual(calls[0][1], [])
         self.assertIn("no games match the tag filter", calls[0][2]["filters"])
-        self.assertEqual(calls[1][1], ["Game Boy — Red", "Game Boy Advance — Ruby"])
+        self.assertEqual(calls[1][1], ["Red", "Ruby"])
         self.assertEqual(calls[1][2]["filters"], "")
 
     def test_t_removing_the_required_tag_keeps_the_cursor_until_refresh(self):
@@ -2132,7 +2132,7 @@ class SetFlow(Flow):
             return cardedit.SET_KEY, None
         with mock.patch.object(cardedit.tagui, "edit_game_tags", side_effect=untag):
             _, calls = self.run_set(t_on_ruby, then_s, returns(None), lambda labels, kw: kw["session"]["sel"])
-        self.assertEqual(calls[0][1], ["Game Boy — Red", "Game Boy Advance — Ruby"])
+        self.assertEqual(calls[0][1], ["Red", "Ruby"])
         self.assertEqual(calls[1][1], calls[0][1])  # the edited game stays until the next pass
         self.assertEqual(rows, [1])  # with the cursor on it
 
@@ -2153,7 +2153,7 @@ class SetFlow(Flow):
 
     def test_toggling_a_game_with_files_picks_its_files_too(self):
         self.card()
-        changed, _ = self.run_set(toggle("Game Boy Advance — Ruby"))
+        changed, _ = self.run_set(toggle("Ruby"))
         self.assertTrue(changed)
         games = store.card_games("c")
         self.assertEqual({x["bucket"] for x in games["gba"]}, {"gba/Ruby.zip", "gba/Ruby.sav"})
@@ -2165,7 +2165,7 @@ class SetFlow(Flow):
 
         def step(labels, kw):
             self.assertTrue(kw["initial"][0])
-            return toggle("Game Boy — Red")(labels, kw)
+            return toggle("Red")(labels, kw)
         self.run_set(step)
         self.assertEqual(store.card_excluded("c"), {"gb": ["gb/Red.gb"]})
 
@@ -2185,7 +2185,7 @@ class SetFlow(Flow):
         game_set = {**SET, "games": [*SET["games"], {"system": "psx", "bucket": "psx/X.chd"},
                                      {"system": "gba", "bucket": "gba/Gone.zip"}]}
         _, calls = self.run_set(returns([False, False]), game_set=game_set)
-        self.assertEqual(calls[0][1], ["Game Boy — Red", "Game Boy Advance — Ruby"])
+        self.assertEqual(calls[0][1], ["Red", "Ruby"])
 
     def test_ctrl_c_keeps_the_toggles(self):
         self.card()
@@ -2252,7 +2252,7 @@ class SetFlow(Flow):
         self.card()
 
         def step(labels, kw):
-            self.assertEqual(labels, ["PlayStation — A (USA) (Disc 1)", "PlayStation — A (USA) (Disc 2)"])
+            self.assertEqual(labels, ["A (USA) (Disc 1)", "A (USA) (Disc 2)"])
             self.assertEqual(kw["links"], [[0, 1], [0, 1]])
             return [True, False]  # one row on: the whole game is
         self.run_set(step, game_set=discs, device=PSX_DEVICE)
@@ -2265,7 +2265,7 @@ class SetFlow(Flow):
         self.card()
 
         def step(labels, kw):
-            self.assertEqual(labels, ["PlayStation — A (USA)"])
+            self.assertEqual(labels, ["A (USA)"])
             return [True]
         self.run_set(step, game_set=playlist, device=PSX_DEVICE)
         self.assertEqual(sorted(x["bucket"] for x in store.card_games("c")["psx"]), sorted(DISCS[:3]))
@@ -2289,10 +2289,10 @@ class SetFlow(Flow):
         self.card(games={"gba": [g("gba/Ruby.zip"), g("gba/Ruby.sav")]})
 
         def step(labels, kw):
-            self.assertEqual(kw["on_note"](labels.index("Game Boy — Red"), "x"),
+            self.assertEqual(kw["on_note"](labels.index("Red"), "x"),
                              "Switch the game on and press Enter first, then add its note")
-            self.assertEqual(kw["on_note"](labels.index("Game Boy Advance — Ruby"), "best one"), "Note saved")
-            self.assertEqual(kw["note_text"](labels.index("Game Boy Advance — Ruby")), "best one")
+            self.assertEqual(kw["on_note"](labels.index("Ruby"), "best one"), "Note saved")
+            self.assertEqual(kw["note_text"](labels.index("Ruby")), "best one")
             return kw["session"]["sel"]
         self.assertTrue(self.run_set(step)[0])
         self.assertEqual(self.read("cards.json")["c"]["games"]["gba"],
@@ -2304,7 +2304,7 @@ class SetFlow(Flow):
         answers = []
 
         def step(labels, kw):
-            answers.append(kw["on_note"](labels.index("Game Boy — Red"), "x"))
+            answers.append(kw["on_note"](labels.index("Red"), "x"))
             return kw["session"]["sel"]
         self.run_set(step)
         self.assertIn("directly", answers[0])
@@ -2315,10 +2315,10 @@ class SetFlow(Flow):
         self.card()
 
         def press_v(labels, kw):
-            return (cardedit.VARIANT_KEY, labels.index("Game Boy Advance — Ruby"))
+            return (cardedit.VARIANT_KEY, labels.index("Ruby"))
 
         def now_on(labels, kw):
-            self.assertTrue(kw["row_note"](labels.index("Game Boy Advance — Ruby")).endswith("✅ on the card (v removes it)"))
+            self.assertTrue(kw["row_note"](labels.index("Ruby")).endswith("✅ on the card (v removes it)"))
             return kw["session"]["sel"]
         changed, _ = self.run_set(press_v, now_on)
         self.assertTrue(changed)
@@ -2337,7 +2337,7 @@ class SetFlow(Flow):
             {"title": "Ruby", "system": "gba", "bucket": "gba/Ruby.zip"}]})
         with self.workers_run_at_once():
             self.run_card(returns((cardedit.COLLECTIONS_KEY, 0)), returns(0),
-                          lambda labels, kw: (cardedit.VARIANT_KEY, labels.index("Game Boy Advance — Ruby")), look,
+                          lambda labels, kw: (cardedit.VARIANT_KEY, labels.index("Ruby")), look,
                           self.same_as_fresh)
         self.assertEqual(store.card_games("c"), {"gba": [g("gba/Zelda.zip")], "gb": [g("gb/Red.gb")]})
         self.assertEqual(seen, [self.fresh(count=False)[0]])
@@ -2348,7 +2348,7 @@ class SetFlow(Flow):
 
         def step(labels, kw):
             self.assertEqual(kw["initial"], [True, False])
-            return toggle("Game Boy — Red", "Game Boy Advance — Ruby")(labels, kw)
+            return toggle("Red", "Ruby")(labels, kw)
         self.assertTrue(self.run_set(step)[0])
         self.assertEqual(store.card_games("c"), {"gba": [g("gba/Ruby.sav"), g("gba/Zelda.zip")]})  # the save switched with Ruby
         self.assertEqual(store.card_excluded("c"), {"gb": ["gb/Red.gb"]})
@@ -2362,7 +2362,7 @@ class SetFlow(Flow):
         self.card()
         with mock.patch.object(store, "repo_json", lambda name: catalog[name]):
             _, calls = self.run_set(returns([True]), game_set=game_set, device={**DEVICE, "systems": ["psvita"]})
-        self.assertEqual(calls[0][1], ["Sony PlayStation Vita — G [PCSE00349] [USA] [NoNpDRM]"])
+        self.assertEqual(calls[0][1], ["G [PCSE00349] [USA] [NoNpDRM]"])
         self.assertEqual(store.card_games("c"), {"psvita": [g(G)]})
 
     def run_all(self, *steps, systems=(GBA, GB)):

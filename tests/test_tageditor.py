@@ -158,7 +158,7 @@ class Editor(unittest.TestCase):
         self.run_editor(["Cave", ("S", None), "Delete"], confirms=[True])
         self.assertEqual(tagui.FILTER.state(), (set(), set(), False))
 
-    def test_its_games_lists_titles_with_systems_and_unchecked_ones_lose_the_tag(self):
+    def test_its_games_lists_titles_and_unchecked_ones_lose_the_tag(self):
         seen = []
 
         def toggle(title, rows, **kw):
@@ -168,7 +168,7 @@ class Editor(unittest.TestCase):
             return None
         with mock.patch.object(edit, "toggle_games", toggle):
             self.run_editor(["Shmups"])
-        self.assertEqual(seen, [[(A, "A (USA)", "Nintendo NES — A (USA)"), (B, "B (USA)", "Nintendo NES — B (USA)")]])
+        self.assertEqual(seen, [[(A, "A (USA)", "A (USA)"), (B, "B (USA)", "B (USA)")]])
         self.assertEqual(tags.tags_of(A), ["cave", "shmups"])
         self.assertEqual(tags.tags_of(B), [])
 
@@ -258,7 +258,7 @@ class Editor(unittest.TestCase):
 
         def fake(title, labels, **kw):
             seen.append(list(kw["initial"]))
-            at = labels.index("Nintendo NES — B (USA)")
+            at = labels.index("B (USA)")
             return ("t", at) if len(seen) < 3 else kw["session"]["sel"]
 
         def edit_tags(key, title):
@@ -275,7 +275,7 @@ class Editor(unittest.TestCase):
 
         def fake(title, labels, **kw):
             seen.append(list(kw["initial"]))
-            at = labels.index("Nintendo NES — B (USA)")
+            at = labels.index("B (USA)")
             if len(seen) == 1:
                 kw["session"]["sel"] = [True, False]  # B unchecked, then t on it
                 return "t", at

@@ -14,7 +14,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from helpers import DataDir  # noqa: E402,F401  (re-exported: other test modules still import it from here)
 from helpers import feed_list, pilot_list, screen_lines, screen_text, shown_preview  # noqa: E402
 from helpers import VITA_DLC as DLC, VITA_GAME as G, VITA_UPDATE as NEW  # noqa: E402
-from sync_roms import edit, names, picker, runtime, s3, store, ui  # noqa: E402
+from sync_roms import edit, gamemeta, names, picker, runtime, s3, store, ui  # noqa: E402
 import textual._wait  # noqa: E402
 
 _GRANULARITY = textual._wait.SLEEP_GRANULARITY
@@ -102,7 +102,7 @@ class Helpers(unittest.TestCase):
                            {"title": "A", "system": "gba", "bucket": "gba/A.zip", "category": "Second"}]}
         rows = edit.list_rows(games, list_systems(), lambda s: set())
         self.assertEqual([r[1] for r in rows], ["gba/A.zip", "gba/Z.zip"])
-        self.assertTrue(rows[0][3].startswith("Game Boy Advance — A"))
+        self.assertEqual(rows[0][3], "A  ⚠️ not in storage")
 
 
 class Saving(DataDir):
@@ -420,6 +420,26 @@ class ListRows(unittest.TestCase):
         self.assertEqual(by["ful"]["games"], [])
         self.assertEqual([g["bucket"] for g in by["gba"]["games"]], ["gba/Gone.zip"])
         self.assertEqual([g["bucket"] for g in by["gen"]["games"]], ["gen/Zed.zip"])
+
+    def test_toggle_games_columns(self):
+        listing = {"name": "Mix", "games": [{"title": "A", "system": "gba", "bucket": "gba/A.zip"},
+                                            {"title": "Zed", "system": "gen", "bucket": "gen/Zed.zip"}]}
+        rows = edit.list_rows(listing, list_systems(), lambda s: {"gba/A.zip", "gen/Zed.zip"})
+        systems = [{"bucket": "gba", "name": "Game Boy Advance", "short": "GBA"}, {"bucket": "gen", "name": "Genesis"}]
+        with mock.patch.object(gamemeta, "_spawn", lambda fn: None), \
+                mock.patch.object(gamemeta.Metadata, "get", lambda self: {"gba/A.zip": {"year": {"2001"}}} if self.bucket == "gba" else None), \
+                mock.patch.object(store, "repo_json", lambda name: systems), \
+                mock.patch.object(picker, "filter_list", return_value=[False, False]) as fl:
+            edit.toggle_games("t", rows)
+        kw = fl.call_args.kwargs
+        self.assertEqual([c.id for c in kw["columns"]][:3], ["name", "system", "year"])
+        self.assertEqual(fl.call_args.args[1], ["A", "Zed"])
+        self.assertIs(kw["sort"], picker.GAMES_SORT)
+        self.assertEqual(len(kw["columns"]), 5)
+        self.assertEqual(kw["extras"][0][:2], [("  GBA", "dim"), ("  2001", "dim")])
+        self.assertEqual(kw["extras"][1][:2], [("  Genesis", "dim"), ("  —", "dim")])
+        self.assertEqual([len(e) for e in kw["extras"]], [4, 4])  # then language and tag
+        self.assertEqual(kw["sort_value"](1, "year"), None)
 
     def test_toggle_games_shows_variant_notes(self):
         by = list_systems()
