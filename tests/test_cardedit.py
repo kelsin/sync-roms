@@ -826,11 +826,11 @@ class Flow(DataDir):
         self.card()
         self.tag_pokemon()
         calls = self.run_card(returns((cardedit.SET_KEY, 0)), returns(0), returns(None),
-                              toggle("Game Boy — Red.gb"), returns(None))
+                              toggle("Red.gb"), returns(None))
         self.assertEqual(calls[1][1], ["⬜ 🔴 Pokemon (3)", "⬜ 🈳 No tags at all (2)"])
         self.assertEqual(calls[2][1], ["✅ 🔴 Pokemon (3)", "⬜ 🈳 No tags at all (replaces the ✅ tags)"])
         self.assertTrue(calls[3][0].startswith("🌐 All games on c"))
-        self.assertEqual(calls[3][1], ["Game Boy — Red.gb", "Game Boy Advance — Ruby.sav", "Game Boy Advance — Ruby.zip"])
+        self.assertEqual(calls[3][1], ["Red.gb", "Ruby.sav", "Ruby.zip"])
         self.assertEqual(calls[3][2]["filters"], "✅ 🔴 Pokemon · 3 of 5 shown (c clear filters)")
         self.assertEqual(store.card_games("c"), {"gb": [g("gb/Red.gb")]})
 
@@ -1309,7 +1309,7 @@ class Flow(DataDir):
                          "↳ 2 variants (v picks): GB: the original; PS1: x")
         title, labels, kw = calls[1]
         self.assertEqual(title, "Variants of Ruby")
-        self.assertEqual(labels, ["⬜ GB: the original", "⬜ PS1: x"])
+        self.assertEqual(labels, ["Red", "x"])
         self.assertFalse(kw.get("multi"))
         self.assertEqual(store.card_games("c"), {"gb": [g("gb/Red.gb")]})
 
@@ -1346,9 +1346,35 @@ class Flow(DataDir):
                                        returns((cardedit.SET_KEY, 0)),  # s on Red, which the filter then hides
                                        returns(None), lambda labels, kw: kw["session"]["sel"])
         self.assertEqual([(c[1], c[2]["cursor"]) for c in calls[1:4]],
-                         [(["⬜ PS1: x", "⬜ PS1: y"], 0),
-                          (["⬜ GB: the original", "⬜ PS1: x", "⬜ PS1: y"], 2),  # still on y
-                          (["⬜ PS1: x", "⬜ PS1: y"], 0)])  # Red hidden: on x, the nearest
+                         [(["x", "y"], 0),
+                          (["Red", "x", "y"], 2),  # still on y
+                          (["x", "y"], 0)])  # Red hidden: on x, the nearest
+
+    def test_games_pass_columns(self):
+        self.card()
+        for cache, size in (({"gba/": self.files["gba/"], "gb/": self.files["gb/"], "scrapes/gba/": {}, "BIOS/": {}}, 5),
+                            ({}, None)):  # sizes cached, then still sizing
+            self.cache = cache
+            _, calls = self.run_system(lambda labels, kw: kw["session"]["sel"])
+            labels, kw = calls[0][1], calls[0][2]
+            self.assertEqual([c.id for c in kw["columns"]],
+                             ["name", "system", "year", "files", "from", "lang", "size", "variant", "tags"])
+            self.assertTrue(next(c for c in kw["columns"] if c.id == "size").sortable)
+            self.assertTrue(all(len(e) == len(kw["columns"]) - 1 for e in kw["extras"]))
+            self.assertEqual(kw["sort_value"](labels.index("Ruby.zip"), "size"), size)
+
+    def test_variants_list_columns(self):
+        self.with_variants(self.RED, {"bucket": "psx/x.chd", "note": "PS1: x"})
+        self.card()
+        _, calls = self.run_system(lambda labels, kw: (cardedit.VARIANT_KEY, labels.index("Ruby.zip")),
+                                   returns(None), lambda labels, kw: kw["session"]["sel"])
+        labels, kw = calls[1][1], calls[1][2]
+        self.assertEqual(labels, ["Red", "x"])
+        ids = [c.id for c in kw["columns"]]
+        self.assertEqual(ids[0], "name")
+        self.assertEqual(ids[:5], ["name", "on", "system", "year", "note"])
+        self.assertEqual(kw["extras"][0][0], ("⬜", ""))
+        self.assertEqual(kw["extras"][0][ids.index("note") - 1][0].strip(), "GB: the original")
 
     def test_v_with_two_variants_cancelled_changes_nothing(self):
         self.with_variants(self.RED, {"bucket": "psx/x.chd", "note": "PS1: x"})
@@ -1770,7 +1796,7 @@ class VitaFlow(Flow):
         _, calls = self.run_system(returns([False, False]), bucket="psvita")
         _, labels, kw = calls[0]
         self.assertEqual(labels, [G.split("/", 1)[1], H.split("/", 1)[1]])
-        self.assertEqual(kw["extras"][0][0], ("  🔗 3 files", "dim"))
+        self.assertEqual(kw["extras"][0][2], ("  🔗 3 files", "dim"))
         self.assertFalse(any("🔗" in text for text, _ in kw["extras"][1]))
 
     def test_picking_a_game_saves_only_the_game(self):
@@ -1794,7 +1820,7 @@ class DiscFlow(Flow):
         _, calls = self.psx(returns([False, False]))
         _, labels, kw = calls[0]
         self.assertEqual(labels, ["A (USA).m3u", "B (USA).chd"])
-        self.assertEqual(kw["extras"][0][0], ("  🔗 4 files", "dim"))
+        self.assertEqual(kw["extras"][0][2], ("  🔗 4 files", "dim"))
 
     def test_discs_without_a_playlist_in_storage_are_rows(self):
         self.files["psx/"] = {k: 10 for k in DISCS[1:] + ["psx/B (USA).chd"]}
@@ -2147,7 +2173,7 @@ class SetFlow(Flow):
         _, calls = self.run_system(lambda labels, kw: (cardedit.VARIANT_KEY, labels.index("Ruby.zip")),
                                    returns(None), lambda labels, kw: kw["session"]["sel"])
         title, labels, kw = calls[1]
-        self.assertEqual(labels, ["⬜ PS1: x"])
+        self.assertEqual(labels, ["x"])
         self.assertEqual(kw["filters"], "✅ 🔴 Pokemon · 1 of 2 shown (c clear filters)")
         self.assertIn("s", kw["hotkeys"])
 
@@ -2371,8 +2397,8 @@ class SetFlow(Flow):
             changed = cardedit.edit_all("c", (DEVICE, "esde"), list(systems))
         return changed, script.calls
 
-    ALL_LABELS = ["Game Boy Advance — Emerald.zip", "Game Boy — Red.gb", "Game Boy Advance — Ruby.sav",
-                  "Game Boy Advance — Ruby.zip", "Game Boy Advance — Zelda.zip"]
+    ALL_LABELS = ["Emerald.zip", "Red.gb", "Ruby.sav",
+                  "Ruby.zip", "Zelda.zip"]
 
     def test_esc_in_the_all_games_list_narrowed_to_a_tag_asks_about_a_toggle_it_hides(self):
         self.tag_pokemon()
@@ -2384,7 +2410,7 @@ class SetFlow(Flow):
             self.assertTrue(rows[3][0].startswith("Keep +1 −0 pending change(s)?"))
             self.assertEqual(store.card_games("c"), games)
 
-    def test_edit_all_lists_every_file_of_every_system_with_system_names(self):
+    def test_edit_all_lists_every_file_of_every_system(self):
         self.card()
         _, calls = self.run_all(lambda labels, kw: kw["session"]["sel"])
         title, labels, kw = calls[0]
@@ -2447,13 +2473,13 @@ class SetFlow(Flow):
         self.card()
         asked = []
         with mock.patch.object(cardedit.tagui, "edit_game_tags", side_effect=lambda *a: asked.append(a)):
-            self.run_all(lambda labels, kw: ("t", labels.index("Game Boy — Red.gb")),
+            self.run_all(lambda labels, kw: ("t", labels.index("Red.gb")),
                          lambda labels, kw: kw["session"]["sel"])
         self.assertEqual(asked, [("gb/Red.gb", "Red")])
 
     def test_edit_all_toggle_saves_picks_on_the_right_system(self):
         self.card()
-        changed, _ = self.run_all(toggle("Game Boy — Red.gb", "Game Boy Advance — Zelda.zip"))
+        changed, _ = self.run_all(toggle("Red.gb", "Zelda.zip"))
         self.assertTrue(changed)
         games = store.card_games("c")
         self.assertEqual([x["bucket"] for x in games["gb"]], ["gb/Red.gb"])
@@ -2463,20 +2489,27 @@ class SetFlow(Flow):
         self.card(games={"gb": {"full_system": True}})
 
         def step(labels, kw):
-            i = labels.index("Game Boy — Red.gb")
+            i = labels.index("Red.gb")
             self.assertTrue(kw["locked"][i])
             self.assertTrue(kw["initial"][i])
-            self.assertFalse(kw["locked"][labels.index("Game Boy Advance — Zelda.zip")])
+            self.assertFalse(kw["locked"][labels.index("Zelda.zip")])
             return kw["session"]["sel"]
         self.assertFalse(self.run_all(step)[0])
         self.assertEqual(store.card_games("c"), {"gb": {"full_system": True}})
+
+    def test_all_games_labels_have_no_system(self):
+        self.card()
+        _, calls = self.run_all(lambda labels, kw: kw["session"]["sel"])
+        labels, kw = calls[0][1], calls[0][2]
+        self.assertFalse(any(" — " in label for label in labels))
+        self.assertEqual(kw["extras"][labels.index("Red.gb")][0], ("  Game Boy", "dim"))
 
     def test_edit_all_sorts_by_title_then_system(self):
         self.files["gb/"]["gb/Zelda.gb"] = 4
         self.card()
         _, calls = self.run_all(lambda labels, kw: kw["session"]["sel"])
-        self.assertEqual(calls[0][1], ["Game Boy Advance — Emerald.zip", "Game Boy — Red.gb", "Game Boy Advance — Ruby.sav",
-                                       "Game Boy Advance — Ruby.zip", "Game Boy — Zelda.gb", "Game Boy Advance — Zelda.zip"])
+        self.assertEqual(calls[0][1], ["Emerald.zip", "Red.gb", "Ruby.sav",
+                                       "Ruby.zip", "Zelda.gb", "Zelda.zip"])
 
     def test_edit_all_s_narrows_by_tags_then_c_clears(self):
         self.card()
@@ -2485,7 +2518,7 @@ class SetFlow(Flow):
                                 lambda labels, kw: kw["session"].update(query="red") or (cardedit.CLEAR_KEY, None),
                                 lambda labels, kw: kw["session"]["sel"])
         self.assertEqual(calls[1][1], ["⬜ 🔴 Pokemon (3)", "⬜ 🈳 No tags at all (2)"])  # the tag list
-        self.assertEqual(calls[3][1], ["Game Boy — Red.gb", "Game Boy Advance — Ruby.sav", "Game Boy Advance — Ruby.zip"])
+        self.assertEqual(calls[3][1], ["Red.gb", "Ruby.sav", "Ruby.zip"])
         self.assertEqual(calls[3][2]["filters"], "✅ 🔴 Pokemon · 3 of 5 shown (c clear filters)")
         self.assertEqual(calls[4][1], self.ALL_LABELS)
         self.assertEqual(calls[4][2]["filters"], "")

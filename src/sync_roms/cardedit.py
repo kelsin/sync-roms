@@ -2,7 +2,7 @@
 and each system's games with tag and scraped-metadata filters. Changes are saved to cards.json as they are made."""
 import queue
 
-from . import budget, cardpicks, collections as colls, edit, guest, inventory, languages, listedit, metafilter, picker, previews, s3, spruce_themes, store, surprise, tagui, tags, themeart, ui, usersettings
+from . import budget, cardpicks, collections as colls, edit, gamecols, guest, inventory, languages, listedit, metafilter, names, picker, previews, s3, spruce_themes, store, surprise, tagui, tags, themeart, ui, usersettings
 from .gamemeta import LOADING, Metadata, _spawn  # noqa: F401  (Metadata, LOADING: used here and by tests)
 
 FULL_KEY = "f"
@@ -815,10 +815,14 @@ def _toggle_variant(picks, key, title):
             frozen = None
             places = [all_found.index(v) for v in found]  # on the same variant after s or c, else the nearest shown
             cursor = min(range(len(found)), key=lambda j: (abs(places[j] - at), places[j])) if found and at is not None else 0
-            i = picker.filter_list(f"Variants of {title}",
-                                   [f"{'✅' if picks.on_card(v['bucket']) else '⬜'} {v['note']}" for v in found],
-                                   extras=[[languages.column(v["bucket"]), tag]
-                                           for v, tag in zip(found, tagui.column([v["bucket"] for v in found]))],
+            cols = gamecols.GameColumns([(v["bucket"].partition("/")[0], names.title(v["bucket"]), v["bucket"]) for v in found],
+                                        extra_columns=[picker.Column("note", "Variant"), picker.Column("lang", "Lang"),
+                                                       picker.Column("tags", "Tags")],
+                                        lead_columns=[picker.Column("on", "")])
+            i = picker.filter_list(f"Variants of {title}", [names.title(v["bucket"]) for v in found],
+                                   **cols.kwargs([[(f"  {v['note']}", ""), languages.column(v["bucket"]), tag]
+                                                  for v, tag in zip(found, tagui.column([v["bucket"] for v in found]))],
+                                                 lead=[[("✅" if picks.on_card(v["bucket"]) else "⬜", "")] for v in found]),
                                    hotkeys=(*tagui.TAG_KEYS, *tagui.HOTKEYS), cursor=cursor,
                                    key_help=[tagui.KEY_HELP, tagui.REPEAT_HELP, *tagui.KEYS_HELP],
                                    tag_info=tagui.summary([v["bucket"] for v in found]),
@@ -875,8 +879,17 @@ def _games_pass(title, shown, picks, sps, files_of, start, work, capacity, to_fe
         return bases[b].get(key, False) if b in bases else picks.on_card(key)
     tag_marks = tagui.column(keys)
     extras = [(_row_extras(sp, work, k) + [_variant_mark(picks, k, on_card)]
-               if sp else [("", "dim")] * 2 + [languages.column(k)]) + [tag]
+               if sp else [("", "dim")] * 2 + [languages.column(k)] + [("", "dim")] * 2) + [tag]
               for k, sp, tag in zip(keys, sp_of, tag_marks)]
+
+    def size(i, col_id):
+        """The size column's sort value: the row's bytes, None while sizing or on a full system."""
+        return work["costs"][sp_of[i].bucket].get(keys[i]) if col_id == "size" and sp_of[i] else None
+    cols = gamecols.GameColumns([(k.partition("/")[0], r[2], k) for k, r in zip(keys, shown)],
+                                extra_columns=[picker.Column("files", "Files"), picker.Column("from", ""),
+                                               picker.Column("lang", "Lang"), picker.Column("size", "Size", True),
+                                               picker.Column("variant", ""), picker.Column("tags", "Tags")],
+                                extra_values=size)
 
     def switched(state):
         """{system bucket: (keys, states)} of the rows this pass switched, each with its files."""
@@ -906,7 +919,7 @@ def _games_pass(title, shown, picks, sps, files_of, start, work, capacity, to_fe
 
     try:
         result = picker.filter_list(
-            title, [r[3] for r in shown], multi=True, initial=[start[k] for k in keys], extras=extras, status=status,
+            title, [r[3] for r in shown], multi=True, initial=[start[k] for k in keys], **cols.kwargs(extras), status=status,
             row_note=lambda i: edit.variant_line(keys[i], picks.variants, picks.parents, picks.system_names,
                                                  picks.on_card),
             session=session, note_text=lambda i: edit.note_text(sp_of[i].games, keys[i]),
@@ -1034,7 +1047,7 @@ def edit_set(name, game_set, setup, to_fetch=None, card_usages=None, all_games=F
                           playable, lambda _s: present)
     if all_games:
         label_of = {g["bucket"]: g["label"] for g in game_set["games"]}
-        rows = sorted(((s, key, title, f"{s['name']} — {label_of[key]}") for s, key, title, _ in rows),
+        rows = sorted(((s, key, title, label_of[key]) for s, key, title, _ in rows),
                       key=lambda r: (store.sort_key(r[2]), r[0]["name"].lower()))
     listed = [r for r in rows if r[0]["bucket"] not in sps  # a shown playlist hides its discs
               or sps[r[0]["bucket"]].playlist_of.get(r[1]) not in files_of]

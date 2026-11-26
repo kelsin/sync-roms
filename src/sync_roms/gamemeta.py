@@ -6,7 +6,8 @@ import threading
 from . import metafilter, s3, scrape_plan, ui
 
 LOADING = "loading"
-_metadata = {}  # system bucket -> metafilter.index, kept for the session so entering a system again doesn't fetch it again
+_metadata = {}  # system bucket -> metafilter.index, kept for the session so entering a system again doesn't fetch it
+# again; while its read runs, the Metadata reading it, which later ones for the bucket wait on instead of reading too
 
 
 def _spawn(fn):
@@ -20,8 +21,11 @@ class Metadata:
     def __init__(self, bucket):
         self.bucket = bucket
         self.done = queue.Queue()
-        self.result = _metadata.get(bucket, LOADING)
-        if self.result is LOADING:
+        found = _metadata.get(bucket, LOADING)
+        self.reader = found if isinstance(found, Metadata) else self
+        self.result = LOADING if self.reader is not self else found
+        if self.result is LOADING and self.reader is self:
+            _metadata[bucket] = self
             _spawn(self._load)
 
     def _load(self):
@@ -35,11 +39,15 @@ class Metadata:
 
     def get(self):
         """The index, None when there is none, or LOADING. Never waits."""
-        if self.result is LOADING:
+        if self.result is LOADING and self.reader is not self:
+            self.result = self.reader.get()
+        elif self.result is LOADING:
             try:
                 self.result = self.done.get_nowait()
             except queue.Empty:
                 return LOADING
             if self.result is not None:
                 _metadata[self.bucket] = self.result
+            elif _metadata.get(self.bucket) is self:
+                del _metadata[self.bucket]
         return self.result

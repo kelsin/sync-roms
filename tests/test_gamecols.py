@@ -49,6 +49,16 @@ class GameColumnsTests(unittest.TestCase):
         self.assertEqual(kw["extras"][0][1], ("  1994", "dim"))
         self.assertEqual(kw["sort_value"](0, "year"), "1994")
 
+    def test_lead_columns_sit_between_name_and_system(self):
+        state = {"index": None}
+        with mock.patch.object(gamemeta.Metadata, "get", meta(lambda: state["index"])):
+            cols = gamecols.GameColumns([("snes", "A", "snes/A.sfc")], lead_columns=[picker.Column("on", "")])
+            kw = cols.kwargs(lead=[[("⬜", "")]])
+            self.assertEqual([c.id for c in kw["columns"]], ["name", "on", "system", "year"])
+            state["index"] = {"snes": {"snes/A.sfc": {"year": {"1994"}}}}
+            kw["poll"]()
+        self.assertEqual(kw["extras"][0], [("⬜", ""), ("  SNES", "dim"), ("  1994", "dim")])
+
     def test_stem_year_for_saves(self):
         year = lambda y: {"year": {y}}  # noqa: E731
         index = {"snes": {"snes/Chrono Trigger (USA).sfc": year("1995")}}
@@ -74,6 +84,35 @@ class GameColumnsTests(unittest.TestCase):
             self.assertEqual(calls, [1])
             kw["poll"]()
             self.assertEqual(calls, [1, 1])
+
+
+class SharedReadTests(unittest.TestCase):
+    def test_a_second_metadata_waits_on_the_read_in_flight(self):
+        loaders, fetched = [], []
+
+        def get_text(key):
+            fetched.append(key)
+            return '{"A.sfc": {"releasedate": "1994"}}'
+        with mock.patch.object(gamemeta, "_spawn", loaders.append), mock.patch.object(gamemeta, "_metadata", {}), \
+                mock.patch.object(gamemeta.s3, "get_text", get_text):
+            first, second = gamemeta.Metadata("snes"), gamemeta.Metadata("snes")
+            self.assertEqual(len(loaders), 1)
+            self.assertIs(second.get(), gamemeta.LOADING)
+            loaders.pop()()
+            self.assertEqual(second.get(), first.get())
+            self.assertIn("snes/A.sfc", first.get())
+            self.assertIn("snes/A.sfc", gamemeta.Metadata("snes").get())
+        self.assertEqual(fetched, ["scrapes/snes/metadata.json"])
+
+    def test_a_failed_read_is_tried_again(self):
+        loaders = []
+        with mock.patch.object(gamemeta, "_spawn", loaders.append), mock.patch.object(gamemeta, "_metadata", {}), \
+                mock.patch.object(gamemeta.s3, "get_text", side_effect=FileNotFoundError("x")):
+            first, second = gamemeta.Metadata("snes"), gamemeta.Metadata("snes")
+            loaders.pop()()
+            self.assertIsNone(second.get())
+            gamemeta.Metadata("snes")
+            self.assertEqual(len(loaders), 1)
 
 
 if __name__ == "__main__":

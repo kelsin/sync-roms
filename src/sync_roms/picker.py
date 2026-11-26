@@ -379,7 +379,7 @@ class _ListModel:
         self.sort = (sort or Sort(self.sortable)) if self.sortable else None
         self.pinned = pinned or [False] * len(labels)
         self.sort_menu = None  # the o menu's highlighted entry (of sort_columns) while it is up
-        self.sorted = None  # (what the order was worked out from, each row's place in it)
+        self.sorted = None  # (what the order was worked out from, each row's place in it, the rows in that order)
         self.name_keys = None
         if "name" in self.sortable:
             from . import store
@@ -447,20 +447,24 @@ class _ListModel:
         """What a list with sortable columns adds to its hint."""
         return SORT_HINT if self.sortable else ""
 
-    def value(self, i, column):
-        """Row i's sort value in column (None: unknown); a name the caller doesn't give sorts as store.sort_key does."""
-        got = self.sort_value(i, column) if self.sort_value else None
-        if got is None and column == "name":
-            return self.name_keys[i]
-        return got
-
     def positions(self):
-        """Each row's place in the list's sort, worked out again only when the values or the sort changed."""
+        """Each row's place in the list's sort, worked out again only when the values or the sort changed (None:
+        unknown; a name the caller doesn't give sorts as store.sort_key does)."""
         order = self.sort.order(self.sortable)
-        values = [[self.value(i, c) for i in range(len(self.labels))] for c in order]
+        rows, given = range(len(self.labels)), self.sort_value
+        values = []
+        for c in order:
+            column = [given(i, c) for i in rows] if given else [None] * len(rows)
+            if c == "name":
+                column = [self.name_keys[i] if v is None else v for i, v in zip(rows, column)]
+            values.append(column)
         basis = (order, self.sort.reverse, values)
         if self.sorted is None or self.sorted[0] != basis:
-            self.sorted = basis, sorted_positions(values, self.sort.reverse)
+            place = sorted_positions(values, self.sort.reverse)
+            ordered = [0] * len(place)
+            for i, at in enumerate(place):
+                ordered[at] = i
+            self.sorted = basis, place, ordered
         return self.sorted[1]
 
     def update(self):
@@ -473,10 +477,12 @@ class _ListModel:
         if self.sort:
             if not self.reset and 0 <= self.cur < len(self.vis):
                 follow = self.vis[self.cur]
-            place = self.positions()
-            vis.sort(key=lambda i: (True, i) if self.pinned[i] else (False, place[i]))  # pinned rows last, as given
+            self.positions()
+            shown = set(vis)  # in the sort's order, without sorting again: pinned rows last, as given
+            vis = [i for i in self.sorted[2] if i in shown and not self.pinned[i]] + [i for i in vis if self.pinned[i]]
         self.reset = False
-        vis.sort(key=lambda i: self.hidden[i])  # revealed rows go last; stable within each group
+        if self.revealed and self.hidden_count:
+            vis.sort(key=lambda i: self.hidden[i])  # revealed rows go last; stable within each group
         target = self.restore if self.restore is not None else follow
         if target is not None and target in vis:
             self.cur = vis.index(target)

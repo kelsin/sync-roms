@@ -10,11 +10,12 @@ NO_YEAR = "  —"
 class GameColumns:
     """rows: (system bucket, title, bucket key or None) per list row. A None key is a save's game: its year is that of
     the one metadata entry whose ROM file stem equals the title. extra_values(i, col_id): sort values of the caller's
-    own columns (extra_columns, shown after Year)."""
+    own columns (extra_columns, shown after Year; lead_columns, shown between Name and System)."""
 
-    def __init__(self, rows, extra_columns=(), extra_values=None):
+    def __init__(self, rows, extra_columns=(), extra_values=None, lead_columns=()):
         names = {s["bucket"]: store.short_name(s) for s in store.repo_json("systems")}
         self.rows, self.extra_columns, self.extra_values = list(rows), list(extra_columns), extra_values
+        self.lead_columns = list(lead_columns)
         self.systems = [names.get(bucket, bucket) for bucket, _, _ in self.rows]
         self.names = [store.sort_key(title) for _, title, _ in self.rows]
         self.casefolded = [s.casefold() for s in self.systems]
@@ -56,7 +57,7 @@ class GameColumns:
             if year:
                 self.years[i] = year
                 if self.shown is not None:
-                    self.shown[i][1] = (f"  {year}", "dim")
+                    self.shown[i][len(self.lead_columns) + 1] = (f"  {year}", "dim")
 
     def cells(self, i):
         year = self.years[i]
@@ -71,10 +72,12 @@ class GameColumns:
             return self.years[i]
         return self.extra_values(i, col_id) if self.extra_values else None
 
-    def kwargs(self, extras=None, poll=None):
-        """filter_list's columns, extras, sort, sort_value and poll arguments."""
-        self.shown = [self.cells(i) + (list(extras[i]) if extras else []) for i in range(len(self.rows))]
-        return {"columns": [picker.Column("name", "Name", True), picker.Column("system", "System", True, searchable=True),
+    def kwargs(self, extras=None, poll=None, lead=None):
+        """filter_list's columns, extras, sort, sort_value and poll arguments. lead: each row's lead_columns cells."""
+        self.shown = [(list(lead[i]) if lead else []) + self.cells(i) + (list(extras[i]) if extras else [])
+                      for i in range(len(self.rows))]
+        return {"columns": [picker.Column("name", "Name", True), *self.lead_columns,
+                            picker.Column("system", "System", True, searchable=True),
                             picker.Column("year", "Year", True), *self.extra_columns],
                 "extras": self.shown, "sort": picker.GAMES_SORT, "sort_value": self.sort_value,
                 "poll": lambda: self.poll(poll)}

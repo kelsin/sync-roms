@@ -87,7 +87,8 @@ class EditorColumnsTest(unittest.TestCase):
                 mock.patch.object(cardedit.previews, "game_pane", return_value={}):
             cardedit._games_pass("t", [(system, key, "Parappa", "Parappa")], picks, {}, {}, {key: True}, {}, None,
                                  None, {})
-        self.assertEqual(seen["extras"], [[("", "dim")] * 2 + [("  \U0001F1EF\U0001F1F5", "dim"), ("", "")]])
+        self.assertEqual([e[2:] for e in seen["extras"]],  # after System, Year
+                         [[("", "dim")] * 2 + [("  \U0001F1EF\U0001F1F5", "dim")] + [("", "dim")] * 2 + [("", "")]])
 
     def test_variant_picker_flag_extras(self):
         picks = types.SimpleNamespace(
@@ -100,7 +101,8 @@ class EditorColumnsTest(unittest.TestCase):
             return None
         with mock.patch.object(cardedit.picker, "filter_list", fake):
             cardedit._toggle_variant(picks, "gba/A.zip", "A")
-        self.assertEqual(seen["extras"], [[("  \U0001F1EF\U0001F1F5", "dim"), ("", "")], [("  \U0001F1FA\U0001F1F8", "dim"), ("", "")]])
+        self.assertEqual([e[4:] for e in seen["extras"]],  # after the mark, System, Year and the note
+                         [[("  \U0001F1EF\U0001F1F5", "dim"), ("", "")], [("  \U0001F1FA\U0001F1F8", "dim"), ("", "")]])
 
     def test_toggle_games_flag_extras(self):
         system = {"bucket": "gba", "games": [{"bucket": "gba/Mother 3 (Japan).zip"}]}
