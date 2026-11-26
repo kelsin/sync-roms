@@ -102,21 +102,25 @@ main { max-width: 1140px; margin: 0 auto; padding: 24px 16px 80px; }
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  flex: 1 1 100%;
-  margin: 2px 0 0;
-  padding-top: 10px;
-  border-top: 1px solid var(--line);
+  align-items: center;
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 8px 16px;
 }
-.facts-title { font-weight: 700; font-size: .95rem; align-self: center; margin-right: 4px; }
+.band { background: var(--chip); border-top: 1px solid var(--line); }
+.facts-title { font-weight: 700; font-size: .95rem; line-height: 1.6; margin-right: 4px; }
 .facts-title .dev { font-weight: 400; color: var(--muted); }
 .facts-title .dot { color: var(--muted); font-weight: 400; margin: 0 .4em; }
 .chip {
   background: var(--chip);
   border-radius: 999px;
   padding: 1px 12px;
+  line-height: 1.6;
   font-size: .8rem;
+  border: 1px solid var(--line);
   color: var(--muted);
 }
+.band .chip { background: var(--panel); }
 .chip b { color: var(--ink); font-weight: 600; }
 
 .layout { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 0 32px; align-items: start; }
@@ -295,8 +299,8 @@ code.copy.copied::after { content: "✓ copied"; color: var(--accent); }
       <label class="pick">Device <select id="device"></select></label>
       <label class="pick">Layout <select id="layout"></select></label>
     </div>
-    <div class="device" id="facts"></div>
   </div>
+  <div class="band"><div class="device" id="facts"></div></div>
 </header>
 
 <main>
