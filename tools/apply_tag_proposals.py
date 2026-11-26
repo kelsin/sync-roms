@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Summarize or apply the tag proposals agents wrote for a tag review (see export_tag_review.py).
 
-    tools/apply_tag_proposals.py OUT_DIR [--summary | --apply]
+    tools/apply_tag_proposals.py OUT_DIR [--summary | --apply] [--no-removals] [--skip-tag TAG ...]
 
 Proposals are OUT_DIR/proposals/*.json: {"add": {key: [tag ids]}, "remove": {key: [tag ids]}, "new_tags": {id: {...}}},
 read in file-name order (a later file overrides an earlier one for the same game and tag). Tag ids not in
@@ -35,20 +35,25 @@ def load(out_dir):
     for path in sorted(glob.glob(os.path.join(out_dir, "systems", "*.json"))):
         for row in _read(path):
             games[row["key"]] = {"title": row["title"], "tags": set(row["tags"])}
-    proposals = [_read(p) for p in sorted(glob.glob(os.path.join(out_dir, "proposals", "*.json")))]
+    proposals = []
+    for path in sorted(glob.glob(os.path.join(out_dir, "proposals", "*.json"))):
+        proposals.append({**_read(path), "_file": os.path.basename(path)})
     return vocab, games, proposals
 
 
-def plan(vocab, games, proposals):
-    """What the proposals change: {"changes": {key: (add ids, remove ids)} (only real changes, sorted lists),
-    "unknown_tags": sorted ids, "unknown_keys": sorted keys, "new_tags": {id: fields}}."""
+def plan(vocab, games, proposals, no_removals=False, skip_tags=()):
+    """no_removals ignores every "remove" entry; skip_tags drops those tag ids from adds and removes. What the proposals change: {"changes": {key: (add ids, remove ids)} (only real changes, sorted lists),
+    "unknown_tags": sorted ids, "unknown_keys": sorted keys, "new_tags": {id: fields}, "new_tag_files": {id: [proposal files]}}."""
     want = collections.defaultdict(dict)  # key -> {tag id: True to add, False to remove}
     unknown_tags, unknown_keys, new_tags, owned, conflicts = set(), set(), {}, set(), set()
+    new_tag_files = collections.defaultdict(list)
     for proposal in proposals:
         both = {k for k in proposal.get("add", {}) if k in proposal.get("remove", {})}
         for key in both:
             conflicts.update((key, t) for t in set(proposal["add"][key]) & set(proposal["remove"][key]))
         for action, value in (("add", True), ("remove", False)):
+            if action == "remove" and no_removals:
+                continue
             for key, ids in proposal.get(action, {}).items():
                 if key not in games:
                     unknown_keys.add(key)
@@ -57,11 +62,15 @@ def plan(vocab, games, proposals):
                     owned.add(key)
                     continue
                 for tag_id in ids:
+                    if tag_id in skip_tags:
+                        continue
                     if tag_id in vocab:
                         want[key][tag_id] = value
                     else:
                         unknown_tags.add(tag_id)
-        new_tags.update(proposal.get("new_tags", {}))
+        for tag_id, fields in proposal.get("new_tags", {}).items():
+            new_tags[tag_id] = {**new_tags.get(tag_id, {}), **fields}
+            new_tag_files[tag_id].append(proposal.get("_file", "?"))
     changes = {}
     for key in sorted(want):
         have = games[key]["tags"]
@@ -70,7 +79,8 @@ def plan(vocab, games, proposals):
         if add or remove:
             changes[key] = (add, remove)
     return {"changes": changes, "unknown_tags": sorted(unknown_tags), "unknown_keys": sorted(unknown_keys),
-            "file_keys": sorted(owned), "conflicts": sorted(conflicts), "new_tags": new_tags}
+            "file_keys": sorted(owned), "conflicts": sorted(conflicts), "new_tags": new_tags,
+            "new_tag_files": dict(new_tag_files)}
 
 
 def summary_text(vocab, games, result):
@@ -81,12 +91,13 @@ def summary_text(vocab, games, result):
         for t in remove:
             removed[t].append(games[key]["title"])
     lines = []
-    for t in sorted(set(added) | set(removed), key=lambda t: (-len(added[t]) - len(removed[t]), t)):
-        lines.append(f"{t} ({vocab[t]['name']}): +{len(added[t])} -{len(removed[t])}")
+    for t in sorted(set(added) | set(removed), key=lambda t: (-len(added[t]), -len(removed[t]), t)):
+        lines.append(f"{t} ({vocab[t]['name']}): added {len(added[t])}, removed {len(removed[t])}")
         if added[t]:
-            lines.append("  add: " + "; ".join(added[t][:SAMPLES]))
+            lines.append("  added: " + "; ".join(added[t][:SAMPLES]))
         if removed[t]:
-            lines.append("  remove: " + "; ".join(removed[t][:SAMPLES]))
+            lines.append("  removed: " + "; ".join(removed[t][:SAMPLES]))
+    lines.append(f"Totals: {sum(map(len, added.values()))} tags added, {sum(map(len, removed.values()))} removed")
     lines.append(f"{len(result['changes'])} games change")
     if result["unknown_tags"]:
         lines.append("Ignored unknown tag ids: " + ", ".join(result["unknown_tags"]))
@@ -101,8 +112,9 @@ def summary_text(vocab, games, result):
                      ", ".join(f"{k} [{t}]" for k, t in result["conflicts"][:SAMPLES]) +
                      (" ..." if len(result["conflicts"]) > SAMPLES else ""))
     if result["new_tags"]:
-        lines.append("Proposed new tags (never created here): " +
-                     ", ".join(f"{i} ({f.get('name', '')})" for i, f in sorted(result["new_tags"].items())))
+        lines.append("Proposed new tags (never created here):")
+        for i, f in sorted(result["new_tags"].items()):
+            lines.append(f"  {i} ({f.get('name', '')}): " + ", ".join(result.get("new_tag_files", {}).get(i, [])))
     return "\n".join(lines)
 
 
@@ -119,18 +131,21 @@ def main(argv=None):
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--summary", action="store_true", help="print what would change (default; reads only)")
     mode.add_argument("--apply", action="store_true", help="write the changes to tags.json in storage")
+    parser.add_argument("--no-removals", action="store_true", help="ignore every remove entry")
+    parser.add_argument("--skip-tag", action="append", default=[], metavar="TAG",
+                        help="drop this tag id from adds and removes (repeatable)")
     args = parser.parse_args(argv)
+    usersettings.apply_settings()
+    if runtime.ROOT and not os.path.isdir(runtime.ROOT):  # an unmounted share, not an empty storage
+        ui.fail(f"{runtime.ROOT} is missing", 1)
     try:
         vocab, games, proposals = load(args.out_dir)
-    except (OSError, ValueError) as e:
+        result = plan(vocab, games, proposals, args.no_removals, set(args.skip_tag))  # reads storage (tags.owner)
+    except (OSError, ValueError, *s3.ERRORS) as e:
         ui.fail(str(e), 1)
-    result = plan(vocab, games, proposals)
     print(summary_text(vocab, games, result))
     if not args.apply:
         return 0
-    usersettings.apply_settings()
-    if runtime.ROOT and not os.path.isdir(runtime.ROOT):
-        ui.fail(f"{runtime.ROOT} is missing", 1)
     try:
         try:
             n = apply(result)

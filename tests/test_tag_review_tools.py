@@ -85,6 +85,22 @@ class Summary(helpers.StorageFolder):
         self.assertEqual((result["changes"], result["file_keys"]), ({}, [disc]))
         self.assertIn("files of another record", apply_tool.summary_text(vocab, games, result))
 
+    def test_no_removals_and_skip_tag(self):
+        vocab, games = fixture()
+        props = [{"add": {B: ["shmups", "cave"]}, "remove": {C: ["shmups"]}}]
+        self.assertEqual(apply_tool.plan(vocab, games, props, no_removals=True)["changes"],
+                         {B: (["cave", "shmups"], [])})
+        self.assertEqual(apply_tool.plan(vocab, games, props, skip_tags={"shmups"})["changes"], {B: (["cave"], [])})
+
+    def test_summary_sorts_by_added_and_lists_new_tag_files(self):
+        vocab, games = fixture()
+        props = [{"add": {A: ["shmups"], B: ["shmups", "cave"]}, "_file": "nes-1.json",
+                  "new_tags": {"fresh": {"name": "Fresh"}}}, {"_file": "snes-1.json", "new_tags": {"fresh": {}}}]
+        text = apply_tool.summary_text(vocab, games, apply_tool.plan(vocab, games, props))
+        self.assertLess(text.index("shmups (Shmups): added 2"), text.index("cave (Cave): added 1"))
+        self.assertIn("Totals: 3 tags added, 0 removed", text)
+        self.assertIn("fresh (Fresh): nes-1.json, snes-1.json", text)
+
     def test_summary_reports_add_and_remove_of_one_tag(self):
         vocab, games = fixture()
         result = apply_tool.plan(vocab, games, [{"add": {B: ["cave"]}, "remove": {B: ["cave"]}}])
@@ -104,7 +120,7 @@ class Summary(helpers.StorageFolder):
         result = apply_tool.plan(vocab, games, props)
         self.assertEqual(result["changes"], {A: (["shmups"], []), B: (["shmups"], []), C: ([], ["shmups"])})
         text = apply_tool.summary_text(vocab, games, result)
-        self.assertIn("shmups (Shmups): +2 -1", text)
+        self.assertIn("shmups (Shmups): added 2, removed 1", text)
         self.assertIn("Alpha", text)
         self.assertIn("Gamma", text)
         self.assertNotIn("cave (Cave)", text)  # already had it: no change
@@ -157,12 +173,24 @@ class Apply(helpers.StorageFolder):
         self.assertNotIn(A, games)
         self.assertEqual(games[C]["tags"], ["cave", "shmups"])
 
+    def test_main_sets_up_storage_in_summary_and_apply(self):
+        write(os.path.join(self.out, "proposals", "nes-1.json"), {"add": {B: ["cave"]}})
+        for flag in ("--summary", "--apply"):
+            with mock.patch.object(apply_tool.usersettings, "apply_settings") as setup:
+                with contextlib.redirect_stdout(io.StringIO()):
+                    apply_tool.main([self.out, flag])
+            setup.assert_called_once()
+        with mock.patch.object(apply_tool.usersettings, "apply_settings"), \
+                mock.patch.object(apply_tool.runtime, "ROOT", os.path.join(self.out, "missing")), \
+                self.assertRaises(SystemExit):
+            apply_tool.main([self.out, "--summary"])
+
     def test_summary_writes_nothing(self):
         write(os.path.join(self.out, "proposals", "nes-1.json"), {"add": {B: ["cave"]}})
         before = self.stored()
         code, text = self.run_tool("--summary")
         self.assertEqual(code, 0)
-        self.assertIn("cave (Cave): +1", text)
+        self.assertIn("cave (Cave): added 1", text)
         self.assertEqual(self.stored(), before)
 
     def test_apply_never_creates_tags(self):
