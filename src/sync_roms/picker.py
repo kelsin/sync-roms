@@ -174,12 +174,13 @@ def extras_widths(extras):
 
 @dataclass(frozen=True)
 class Column:
-    """A list column: its id (what sort_value is asked for), its header, whether the list sorts by it and whether `/`
-    matches its cells (as it does the label)."""
+    """A list column: its id (what sort_value is asked for), its header, whether the list sorts by it, whether `/`
+    matches its cells (as it does the label) and whether picking it with o starts it largest (or newest) first."""
     id: str
     header: str
     sortable: bool = False
     searchable: bool = False
+    descending: bool = False
 
 
 class Sort:
@@ -310,6 +311,8 @@ MIN_LIST_WIDTH = 40  # a fixed-width picture (preview_width) is left out when it
 _preview_lock = threading.Lock()  # one picture loads at a time: the preview callables' caches aren't shared safely
 NOTE_PROMPT = "Note (empty clears, Esc cancels): "
 KEEP = object()  # _ListModel.key: the list stays open
+UNCHANGED = object()  # _ListModel.tick: the list stays open and nothing it shows changed (no redraw)
+COLUMN_GAP = 2  # blanks before every extras column of a list with columns, counting those its cells start with
 HOTKEY_CHARS = {"space": " ", "tab": "\t"}  # keys callers name in hotkeys by their character
 
 
@@ -380,10 +383,8 @@ class _ListModel:
         self.pinned = pinned or [False] * len(labels)
         self.sort_menu = None  # the o menu's highlighted entry (of sort_columns) while it is up
         self.sorted = None  # (what the order was worked out from, each row's place in it, the rows in that order)
-        self.name_keys = None
-        if "name" in self.sortable:
-            from . import store
-            self.name_keys = [store.sort_key(l) for l in labels]
+        self.laid_out = None  # layout's (gaps, leads, widths), until extras may have changed
+        self.name_keys = {}  # row -> store.sort_key of its label, for the rows sort_value gives no name
         searched = [j - 1 for j, c in enumerate(columns or ()) if j and c.searchable]
         self.lowered = ["\n".join([l, *(extras[i][j][0].strip() for j in searched if extras and len(extras[i]) > j)])
                         .casefold() for i, l in enumerate(labels)]
@@ -419,17 +420,35 @@ class _ListModel:
         return ui.cell_width(column.header) + (2 if column.sortable else 0)
 
     def lead(self, j):
-        """The fewest blanks column j's non-empty cells start with: its header starts after them."""
-        cells = [parts[j - 1][0] for parts in self.extras or () if j - 1 < len(parts) and parts[j - 1][0].strip()]
-        return min((len(c) - len(c.lstrip(" ")) for c in cells), default=0)
+        """The blanks column j's header starts after: those its non-empty cells start with (the fewest), and the gap."""
+        return self.layout()[1][j - 1]
+
+    def gap(self, j):
+        """The blanks drawn before each of column j's cells, so at least COLUMN_GAP separate it from the one before."""
+        return self.layout()[0][j - 1]
 
     def column_widths(self):
-        """Cells of each extras column: its widest cell, or its header after the cells' leading blanks."""
-        widths = extras_widths(self.extras)
-        for j in range(1, len(self.columns or ())):
-            widths += [0] * (j - len(widths))
-            widths[j - 1] = max(widths[j - 1], self.lead(j) + self.header_width(j))
-        return widths
+        """Cells of each extras column, its gap included: its widest cell, or its header after its lead."""
+        return self.layout()[2]
+
+    def layout(self):
+        """(gaps, leads, widths) of the extras columns, worked out from every row again only after extras may have
+        changed (a key, a poll that changed something): see gap, lead and column_widths."""
+        if self.laid_out is None:
+            widths = extras_widths(self.extras)
+            count = len(self.columns or ())
+            widths += [0] * (count - 1 - len(widths))
+            gaps, leads = [0] * len(widths), [0] * len(widths)
+            for j in range(1, count):
+                cells = [parts[j - 1][0] for parts in self.extras or ()
+                         if j - 1 < len(parts) and parts[j - 1][0].strip()]
+                lead = min((len(c) - len(c.lstrip(" ")) for c in cells), default=0)
+                if cells or self.columns[j].header:  # an empty column with no header takes no room
+                    gaps[j - 1] = max(0, COLUMN_GAP - lead)
+                leads[j - 1] = gaps[j - 1] + lead
+                widths[j - 1] = gaps[j - 1] + max(widths[j - 1], lead + self.header_width(j))
+            self.laid_out = gaps, leads, widths
+        return self.laid_out
 
     def sort_columns(self):
         """The sortable columns, in display order: the o menu's entries."""
@@ -455,8 +474,12 @@ class _ListModel:
         values = []
         for c in order:
             column = [given(i, c) for i in rows] if given else [None] * len(rows)
-            if c == "name":
-                column = [self.name_keys[i] if v is None else v for i, v in zip(rows, column)]
+            if c == "name" and None in column:
+                from . import store
+                for i, v in enumerate(column):
+                    if v is None and i not in self.name_keys:
+                        self.name_keys[i] = store.sort_key(self.labels[i])
+                column = [self.name_keys[i] if v is None else v for i, v in enumerate(column)]
             values.append(column)
         basis = (order, self.sort.reverse, values)
         if self.sorted is None or self.sorted[0] != basis:
@@ -569,12 +592,17 @@ class _ListModel:
         self.notice = "Reverted this list to how it was when opened"
 
     def tick(self):
-        """Call poll, unless help, the o menu or a prompt is up (those wait for a key). Returns KEEP."""
+        """Call poll, unless help, the o menu or a prompt is up (those wait for a key). Returns KEEP when poll may have
+        changed what the list shows (it returned None or a true value: the list is updated and redrawn), else
+        UNCHANGED."""
         if (self.poll and not self.help and not self.asking and not self.reverting and self.note is None
                 and self.sort_menu is None):
-            self.poll()
-            self.update()
-        return KEEP
+            changed = self.poll()
+            if changed is None or changed:
+                self.laid_out = None
+                self.update()
+                return KEEP
+        return UNCHANGED
 
     def scroll_advance(self):
         """Move the one-line tag summary on a cell, unless it fits or a prompt, note or notice has the screen. Whether
@@ -605,6 +633,7 @@ class _ListModel:
         Returns the list's result once it is done, else KEEP."""
         self.notice = ""
         got = self.act(k)
+        self.laid_out = None  # a hotkey or a note may have changed extras in place
         self.update()
         return got
 
@@ -642,9 +671,10 @@ class _ListModel:
             if moved is not None:
                 self.sort_menu = moved
             elif k == "enter":
-                self.sort.first = self.sort_columns()[self.sort_menu].id
+                column = self.sort_columns()[self.sort_menu]
+                self.sort.first, self.sort.reverse = column.id, column.descending
                 self.sort_menu = None
-            elif k in ("escape", "q", "ctrl+g"):
+            elif k in ("escape", "q", "o", "ctrl+g"):
                 self.sort_menu = None
             return KEEP
         vis, cur = self.vis, self.cur
@@ -811,8 +841,10 @@ def _app_class():
             parts = m.extras[i] if m.extras else []
             for j, w in enumerate(columns):  # every column padded, so the next one lines up
                 part, color = parts[j] if j < len(parts) else ("", "")
+                gap = m.gap(j + 1)
+                extras.append(" " * gap, " ".join(style))
                 extras.append(part, " ".join(style + [color]))
-                extras.append(" " * (w - cell_len(part)), " ".join(style))
+                extras.append(" " * (w - gap - cell_len(part)), " ".join(style))
             if self.size.width < 1:  # not laid out yet
                 return text.append_text(extras)
             return fit_row(text, extras, self.size.width, m.label_width)
@@ -1210,6 +1242,8 @@ def _app_class():
             except BaseException as error:
                 self.error = error
                 return self.finish(None)
+            if got is UNCHANGED:
+                return
             if got is not KEEP:
                 return self.finish(got)
             if self.model.help and not isinstance(self.screen, _HelpScreen):
@@ -1755,8 +1789,9 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=None, 
     filter line after the typed text. diff_marks: show ➕/➖ against `initial` (else ✅/⬜ only).
     session: a dict the caller keeps so selection, view, revealed rows, filter text, cursor and scroll survive reopening
     the list (carry_place keeps them across passes that list the same rows).
-    poll: optional callable, called on the list's thread every POLL_MS while it waits for a key; the list is then redrawn,
-    so poll can update extras in place (and status can read what it changed).
+    poll: optional callable, called on the list's thread every POLL_MS while it waits for a key; unless it returns a
+    false value other than None (nothing changed), the list is then updated and redrawn, so poll can update extras in
+    place (and status can read what it changed).
     links: optional per-label lists of the label indexes switched together with it (multi mode): Space/Tab and `a`
     set them all to the toggled row's new state (locked ones excepted).
     on_hotkey: optional callable(key, label index) -> bool, tried first for a hotkey; True (or a message to show) means it
@@ -1777,6 +1812,8 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=None, 
     of emoji and names that scrolls a cell at a time when it is wider than the screen.
     columns: optional list of Column; columns[0] is the label's, columns[1:] the extras parts' by position (every row
     then has len(columns) - 1 parts). A header line names them above the rows (the first sort column bold, ▲ or ▼).
+    Each extras column starts COLUMN_GAP blanks after the one before, header and cells alike (blanks its cells start
+    with count).
     sort_value: optional callable(label index, column id) -> a value to sort by, or None when unknown (sorted last
     both ways); called on every redraw, so values that come later (from poll) re-sort the list, the highlighted row
     staying highlighted. A "name" column with no value sorts by store.sort_key of the label.

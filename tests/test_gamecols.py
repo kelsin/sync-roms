@@ -86,6 +86,33 @@ class GameColumnsTests(unittest.TestCase):
             self.assertEqual(calls, [1, 1])
 
 
+    def test_poll_says_whether_anything_changed(self):
+        state = {"index": None}
+        with mock.patch.object(gamemeta.Metadata, "get", meta(lambda: state["index"])):
+            cols = gamecols.GameColumns([("snes", "A", "snes/A.sfc"), ("gba", "B", "gba/B.gba")])
+            kw = cols.kwargs()
+            self.assertFalse(kw["poll"]())  # still loading
+            state["index"] = {"snes": {"snes/A.sfc": {"year": {"1994"}}}}
+            self.assertTrue(kw["poll"]())  # a year came in
+            self.assertFalse(kw["poll"]())  # gba answered with no metadata: nothing shown changed
+            self.assertEqual(cols.pending, {})
+            self.assertFalse(kw["poll"]())
+
+    def test_the_callers_poll_decides_once_every_system_answered(self):
+        with mock.patch.object(gamemeta.Metadata, "get", meta({"snes": {}})):
+            cols = gamecols.GameColumns([("snes", "A", "snes/A.sfc")])
+            self.assertIsNone(cols.kwargs(poll=lambda: None)["poll"]())  # None: maybe changed, as a plain poll
+            self.assertFalse(cols.kwargs(poll=lambda: False)["poll"]())
+            self.assertTrue(cols.kwargs(poll=lambda: True)["poll"]())
+
+    def test_a_row_with_no_system_sorts_last_by_system(self):
+        with mock.patch.object(gamemeta.Metadata, "get", meta({"snes": {}})):
+            cols = gamecols.GameColumns([("", "x", None), ("snes", "A", "snes/A.sfc")])
+        self.assertIsNone(cols.sort_value(0, "system"))
+        self.assertIsNone(cols.sort_value(0, "year"))
+        self.assertEqual(cols.sort_value(1, "system"), "snes")
+
+
 class SharedReadTests(unittest.TestCase):
     def test_a_second_metadata_waits_on_the_read_in_flight(self):
         loaders, fetched = [], []

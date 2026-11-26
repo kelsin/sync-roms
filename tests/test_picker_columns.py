@@ -1,6 +1,7 @@
 import os
 import sys
 import unittest
+from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import helpers  # noqa: E402,F401
@@ -238,6 +239,127 @@ class Keys(unittest.TestCase):
         m = picker._ListModel("t", ["a"], True, None, "", 0, None, None, "", (), None, None, True, None, None,
                               True, None, None, None, None)
         self.assertEqual(m.sort_hint(), "")
+
+
+
+
+class Menu(unittest.TestCase):
+    def test_o_closes_the_menu(self):
+        m = model()
+        m.key("o")
+        m.key("g")
+        m.key("o")
+        self.assertIsNone(m.sort_menu)
+        self.assertIsNone(m.sort.first)
+
+    def test_a_descending_column_starts_largest_first_and_O_still_flips(self):
+        cols = [picker.Column("name", "Name", True), picker.Column("size", "Size", True, descending=True)]
+        sizes = [5, None, 9, 1]
+        m = picker._ListModel("t", LABELS, False, None, "", None, [[(f"  {n}", "")] for n in sizes], None, "", (),
+                              None, None, True, None, None, True, None, None, None, None, columns=cols,
+                              sort_value=lambda i, c: sizes[i] if c == "size" else None)
+        m.key("o")
+        m.key("G")
+        m.key("enter")
+        self.assertEqual(m.sort.first, "size")
+        self.assertTrue(m.sort.reverse)
+        self.assertEqual(m.vis, [2, 0, 3, 1])  # largest first, the unknown last
+        m.key("O")
+        self.assertEqual(m.vis, [3, 0, 2, 1])
+        m.key("o")
+        m.key("g")
+        m.key("enter")
+        self.assertFalse(m.sort.reverse)  # Name starts A to Z
+        self.assertEqual(m.vis, [3, 1, 0, 2])  # the two A rows by size, the unknown last
+
+
+class NameKeys(unittest.TestCase):
+    def test_names_the_caller_gives_are_not_worked_out_from_the_labels(self):
+        from sync_roms import store
+        calls = []
+        real = store.sort_key
+        names = [real(label) for label in LABELS]
+        with mock.patch.object(store, "sort_key", lambda t: calls.append(t) or real(t)):
+            m = picker._ListModel("t", LABELS + ["➕ New"], False, None, "", None, None, None, "", (), None, None, True,
+                                  None, None, True, None, None, None, None, columns=COLUMNS[:1],
+                                  sort_value=lambda i, c: names[i] if i < 4 else None,
+                                  pinned=[False] * 4 + [True])
+        self.assertEqual(calls, ["➕ New"])
+        self.assertEqual(m.vis, [1, 3, 0, 2, 4])
+
+
+class Gaps(unittest.TestCase):
+    def test_header_of_an_empty_list_keeps_two_blanks_before_each_column(self):
+        m = picker._ListModel("t", [], False, None, "", None, [], None, "", (), None, None, True, None, None, True,
+                              None, None, None, None, columns=COLUMNS, sort_value=lambda i, c: None,
+                              sort=picker.Sort(("year", "name", "system")))
+        header = picker.header_row(m, 60).plain
+        self.assertTrue(header.startswith("Name"))
+        rest = header[m.label_width:]
+        self.assertTrue(rest.startswith("  System"), repr(header))
+        self.assertIn("  Year ▲", rest)
+
+    def test_a_column_of_bare_cells_gets_two_blanks_in_header_and_cells(self):
+        cols = [picker.Column("name", "Name", True), picker.Column("tags", "Tags"), picker.Column("n", "N", True)]
+        extras = [[("🚀", ""), ("12", "")], [("", ""), ("3", "")]]
+        m = picker._ListModel("t", ["Abc", "B"], False, None, "", None, extras, None, "", (), None, None, True, None,
+                              None, True, None, None, None, None, columns=cols, sort_value=lambda i, c: None)
+        header = picker.header_row(m, 40).plain
+        self.assertEqual(header[m.label_width:m.label_width + 8], "  Tags  ")
+        self.assertEqual(m.column_widths(), [2 + len("Tags"), 2 + len("N ▲")])
+
+    def test_cells_that_lead_with_blanks_keep_their_spacing(self):
+        m = model()
+        self.assertEqual(m.column_widths()[0], len("  System ▲"))
+        self.assertEqual(picker.header_row(m, 60).plain[m.label_width:m.label_width + 8], "  System")
+
+    def test_the_tag_list_row_text(self):
+        seen = []
+
+        async def script(pilot):
+            seen.append(helpers.screen_text(pilot.app))
+            await pilot.press("escape")
+        helpers.pilot_list(script, "t", ["🎮 Platformers", "🚀 Shmups"],
+                           extras=[[("12", "")], [("no games", "dim")]],
+                           columns=[picker.Column("name", "Tag", True), picker.Column("games", "Games", True)],
+                           sort_value=lambda i, c: None)
+        screen = seen[0]
+        self.assertTrue(screen[4].startswith("Tag ▲" + " " * 11 + "Games"), repr(screen[4]))
+        self.assertTrue(screen[5].startswith("🎮 Platformers  12 "), repr(screen[5]))
+        self.assertTrue(screen[6].startswith("🚀 Shmups" + " " * 7 + "no games"), repr(screen[6]))
+
+
+class Idle(unittest.TestCase):
+    def test_a_poll_that_says_nothing_changed_skips_the_update(self):
+        calls = []
+        m = model()
+        m.poll = lambda: False
+        m.update = lambda: calls.append(1)
+        self.assertIs(m.tick(), picker.UNCHANGED)
+        self.assertEqual(calls, [])
+
+    def test_a_poll_that_returns_none_or_true_updates(self):
+        for result in (None, True):
+            calls = []
+            m = model()
+            m.poll = lambda: result
+            m.update = lambda: calls.append(1)
+            self.assertIs(m.tick(), picker.KEEP)
+            self.assertEqual(calls, [1])
+
+    def test_widths_are_worked_out_again_only_when_extras_may_have_changed(self):
+        m = model()
+        before = m.column_widths()
+        m.extras[0][0] = ("  a much longer system", "cyan")
+        m.poll = lambda: False
+        m.tick()
+        self.assertEqual(m.column_widths(), before)
+        m.poll = lambda: None
+        m.tick()
+        self.assertEqual(m.column_widths()[0], len("  a much longer system"))
+        m.extras[0][0] = ("  an even much longer system", "cyan")
+        m.key("j")  # a key (a hotkey or a note may change extras)
+        self.assertEqual(m.column_widths()[0], len("  an even much longer system"))
 
 
 class OnScreen(unittest.TestCase):

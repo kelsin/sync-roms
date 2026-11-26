@@ -28,19 +28,23 @@ class GameColumns:
         self.poll()
 
     def poll(self, then=None):
-        """Take the metadata that has arrived since the last call; cheap once every system has answered."""
-        if self.pending:
-            for bucket, meta in list(self.pending.items()):
-                index = meta.get()
-                if index is gamemeta.LOADING:
-                    continue
-                del self.pending[bucket]
-                if index:
-                    self.fill(bucket, index)
-        if then:
-            then()
+        """Take the metadata that has arrived since the last call (nothing to do once every system has answered), then
+        call then. Whether anything shown changed, as filter_list's poll returns it: True when a year came in, else
+        what then returned (None: it may have changed), else False."""
+        changed = False
+        for bucket, meta in list(self.pending.items()):
+            index = meta.get()
+            if index is gamemeta.LOADING:
+                continue
+            del self.pending[bucket]
+            if index and self.fill(bucket, index):
+                changed = True
+        got = then() if then else False
+        return True if changed else got
 
     def fill(self, bucket, index):
+        """Fill in the years of bucket's rows from its metadata index. Whether any row got one."""
+        filled = False
         stems = None  # ROM file stem -> [years of the paths with it]; only built when a save's game needs it
         for i, (system, title, key) in enumerate(self.rows):
             if system != bucket:
@@ -55,9 +59,11 @@ class GameColumns:
                 found = stems.get(title, [])
                 year = found[0] if len(found) == 1 else None
             if year:
+                filled = True
                 self.years[i] = year
                 if self.shown is not None:
                     self.shown[i][len(self.lead_columns) + 1] = (f"  {year}", "dim")
+        return filled
 
     def cells(self, i):
         year = self.years[i]
@@ -67,7 +73,7 @@ class GameColumns:
         if col_id == "name":
             return self.names[i]
         if col_id == "system":
-            return self.casefolded[i]
+            return self.casefolded[i] or None  # a row with no known system sorts last
         if col_id == "year":
             return self.years[i]
         return self.extra_values(i, col_id) if self.extra_values else None

@@ -65,7 +65,7 @@ def feed_list(keys, *args, **kwargs):
     def run(model):
         for k in keys:
             got = model.tick() if k is None else model.key(k)
-            if got is not picker.KEEP:
+            if got is not picker.KEEP and got is not picker.UNCHANGED:
                 return got
         raise AssertionError("the list is still open after the last key")
     with mock.patch.object(picker, "_run", run):
