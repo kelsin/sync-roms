@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.11.1](https://github.com/kelsin/sync-roms/compare/v4.11.0...v4.11.1) (2026-11-26)
+
+
+### :gear: Continuous Integration
+
+* **release:** drop the redundant --version from the tap bump ([#665](https://github.com/kelsin/sync-roms/issues/665)) ([e5db8a4](https://github.com/kelsin/sync-roms/commit/e5db8a4513f3d3c838865c016ad9e803a1cae509))
+
 ## [4.11.0](https://github.com/kelsin/sync-roms/compare/v4.10.0...v4.11.0) (2026-11-26)
 
 
