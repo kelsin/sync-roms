@@ -197,6 +197,26 @@
     });
   }
 
+  function exportButton(c) {
+    var button = el("button", "copy export", "Export");
+    button.type = "button";
+    button.title = "Download this collection for sync-roms collections import";
+    button.addEventListener("click", function (event) {
+      event.stopPropagation();
+      var blob = new Blob([JSON.stringify(c.export, null, 2) + "\n"], {type: "application/json"});
+      var url = URL.createObjectURL(blob);
+      var link = document.createElement("a");
+      link.href = url;
+      link.download = c.id + ".json";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(function () { URL.revokeObjectURL(url); }, 0);
+    });
+    button.addEventListener("keydown", function (event) { event.stopPropagation(); });
+    return button;
+  }
+
   var sortKey = "year", sortDir = 1;
   var bar = document.querySelector(".bar");
 
@@ -298,6 +318,7 @@
     var text = el("div", "rtext");
     var title = el("div", "rtitle");
     title.appendChild(el("h2", "name", c.name));
+    if (c.export) title.appendChild(exportButton(c));
     text.appendChild(title);
     if (c.description) text.appendChild(el("p", "desc", c.description));
     var pills = el("div", "pills");

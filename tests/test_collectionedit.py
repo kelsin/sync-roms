@@ -976,8 +976,8 @@ class Wiring(unittest.TestCase):
         with mock.patch.object(collectionedit, "edit_collections", return_value=0) as run:
             self.assertEqual(commands.run(["collections", "edit"]), 0)
         run.assert_called_once()
-        self.assertEqual(commands.second_words()["collections"], ["edit", "page", "publish", "retitle", "share", "unshare"])
-        self.assertEqual(cli.SUBCOMMANDS["collections"][0], "edit|page|publish|retitle|share|unshare")
+        self.assertEqual(commands.second_words()["collections"], ["edit", "import", "page", "publish", "retitle", "share", "unshare"])
+        self.assertEqual(cli.SUBCOMMANDS["collections"][0], "edit|import|page|publish|retitle|share|unshare")
         self.assertIn("sync-roms collections edit", cli.TOPICS["collections"])
 
 

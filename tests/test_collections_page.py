@@ -310,6 +310,27 @@ class Public(PageSetup):
         self.assertEqual(data["collections"][0]["games"][0]["paths"], [SMW])
 
 
+class Export(PageSetup):
+    GAMES = [{"system": "snes", "bucket": "snes/a.sfc", "title": "A", "note": "n"}]
+
+    def saved(self):
+        collections.save_collection({"id": "couch", "name": "Couch", "games": self.GAMES})
+
+    def test_private_page_embeds_export(self):
+        self.saved()
+        self.assertEqual(collections_page.page_data()["collections"][0]["export"],
+                         {"name": "Couch", "games": self.GAMES})
+
+    def test_public_page_has_no_export(self):
+        self.saved()
+        self.assertNotIn("export", collections_page.page_data(public=True)["collections"][0])
+
+    def test_export_button_is_conditional(self):
+        js = collections_page.template_files()["page.js"]
+        for text in ("c.export", '"Export"', "download", "application/json"):
+            self.assertIn(text, js)
+
+
 DATA_BLOCK = '<script type="application/json" id="page-data">{}</script>'
 
 

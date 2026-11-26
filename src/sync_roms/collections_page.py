@@ -202,6 +202,8 @@ def page_data(public=False, art_dir=None, strict=False):
         out.append({"id": collection["id"], "name": collection["name"], "description": collection["description"],
                     "art": _art(art_id, art_dir), "size": {k: sum(g.get("size", {}).get(k, 0) for g in games) for k in ("rom", "art")},
                     "games": games})
+        if not public:
+            out[-1]["export"] = collections._file_data(collection)
     return {"tags": {i: {"name": t["name"], "emoji": t["emoji"]} for i, t in defined.items()},
             "systems": {s: system_names.get(s, s) for s in sorted(used)},
             "collections": out}

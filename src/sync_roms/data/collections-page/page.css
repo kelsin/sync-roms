@@ -156,6 +156,7 @@ table.games { width: 100%; border-collapse: collapse; }
   border: 1px solid var(--border); background: var(--surface); border-radius: 6px;
   padding: 4px 0; font-size: 13px; cursor: pointer; width: 92px; white-space: nowrap;
 }
+.export { flex: none; }
 .copy.done { border-color: var(--accent); color: var(--accent-text); }
 .nomatch td { color: var(--muted); font-size: 14px; }
 @media (max-width: 640px) {
