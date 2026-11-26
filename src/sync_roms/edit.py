@@ -65,7 +65,7 @@ WHEN_FILTERED = "filtered"  # select_all value: `a` is on only while a tag filte
 
 
 def toggle_games(title, rows, hotkeys=(), hint=None, place=None, filters="", key_help=None, select_all=True, notes=True,
-                 tag_filter=True, before=None, retagged=None):
+                 tag_filter=True, before=None, retagged=None, bulk=None):
     """_toggle_games over the rows tagui.FILTER keeps, reopened after `t` edited a game's tags (the same rows, in the
     same place) or `s`/`c` changed the tag filter (the new rows; the / search and cursor stay only when they are the
     same rows), the toggles made so far applied first; the other keys are returned as it does.
@@ -74,9 +74,12 @@ def toggle_games(title, rows, hotkeys=(), hint=None, place=None, filters="", key
     review, a tag's own games). select_all: True, False, or WHEN_FILTERED (on only while a tag filter is set, judged on
     each pass). before: how many rows there were before the caller's own filters left out some, so a list they emptied
     says no game matches. retagged(key): called after t or . wrote the tags of the row of key, before the list opens
-    again (a tag's own games make its check follow the tag)."""
+    again (a tag's own games make its check follow the tag). bulk: whether T (tag the rows on screen) is offered;
+    by default with the tag filter, and safe without it too, since T never reaches a row that isn't shown."""
     place = {} if place is None else place
-    own = tuple(k for k in (*tagui.HOTKEYS, tagui.BULK_KEY) if k not in hotkeys) if tag_filter else ()
+    bulk = tag_filter if bulk is None else bulk
+    own = tuple(k for k in (*(tagui.HOTKEYS if tag_filter else ()), *((tagui.BULK_KEY,) if bulk else ()))
+                if k not in hotkeys)
     names_filter = tagui.SET_KEY in own  # else the caller's filters line names the tag filter
     base_hint = hint or GAMES_HINT
     helps = [h for h in (*tagui.KEYS_HELP, tagui.BULK_HELP) if h[0] in own]
@@ -85,7 +88,7 @@ def toggle_games(title, rows, hotkeys=(), hint=None, place=None, filters="", key
         shown = frozen or ([r for r in rows if tagui.FILTER.keep(r[1])] if tag_filter else rows)
         frozen = None
         every = (tag_filter and tagui.FILTER.active()) if select_all == WHEN_FILTERED else select_all
-        hint = tagui.games_hint(base_hint, tag_filter, notes, every)
+        hint = tagui.games_hint(base_hint, tag_filter, notes, every, tagui.BULK_KEY in own)
         line = tagui.FILTER.describe() if tag_filter else ""
         banner = tagui.banner(len(shown), len(rows)) if line and names_filter else tagui.paused() if not tag_filter else ""
         empty = ("no games match the tag filter" if line else "no games match the filters" if filters else "") \

@@ -335,6 +335,8 @@ class GamesFirst(unittest.TestCase):
             self.assertIn(part, calls[0]["title"])
         self.assertEqual(calls[0]["hotkeys"], ("A", "+", "S"))  # s and c: the sticky tag filter's own, in edit.toggle_games
         self.assertIs(calls[0]["tag_filter"], False)  # switching a game off removes it: the filter must hide none
+        self.assertIs(calls[0]["bulk"], True)  # T and a only reach the rows on screen: the collection's own games
+        self.assertIs(calls[0]["select_all"], True)
         self.assertIn("A add games", calls[0]["hint"])
         self.assertIn(("A / +", "add games"), calls[0]["key_help"])
         self.assertNotIn("+", calls[0]["hint"])
@@ -346,6 +348,28 @@ class GamesFirst(unittest.TestCase):
         self.assertIn("gba/Ruby.zip", calls[1]["keys"])
         self.assertNotIn("gba/Ruby.zip", calls[1]["ons"])
         self.assertEqual(collection["games"], [self.FF7])
+
+    def test_its_games_list_keeps_T_and_a_with_the_tag_filter_paused(self):
+        tag_games(self, {"gba/Zelda.zip": None})
+        tagui.FILTER.required = {"mix"}
+        collection = {"name": "Favs", "games": [dict(self.OLD), dict(self.FF7)]}
+        seen, bulk = [], []
+
+        def fake(title, labels, **kw):
+            seen.append(kw)
+            return ("T", None) if len(seen) == 1 else kw["session"]["sel"]
+        with mock.patch.object(picker, "filter_list", fake), \
+                mock.patch.object(tagui, "bulk_tag", side_effect=lambda keys: bulk.append(keys)):
+            collectionedit.edit_one(collection, SYSTEMS, lambda b: {"gba/Ruby.zip", "psx/FF7.m3u"})
+        kw = seen[0]
+        self.assertIn("T", kw["hotkeys"])
+        self.assertNotIn("s", kw["hotkeys"])
+        self.assertIn("T tag all shown", kw["hint"])
+        self.assertIn("a all shown", kw["hint"])
+        self.assertIs(kw["select_all"], True)
+        self.assertEqual(kw["filters"], tagui.PAUSED)
+        self.assertEqual(bulk, [["psx/FF7.m3u", "gba/Ruby.zip"]])
+        self.assertEqual(len(collection["games"]), 2)
 
     def test_switching_a_removed_game_back_on_restores_its_note_and_discs(self):
         for entry in (self.OLD, self.FF7):

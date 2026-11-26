@@ -136,6 +136,7 @@ def edit_one(collection, systems, keys_of, others=()):
         else:
             try:
                 pressed = listedit.toggle_all(header(collection), rows, place, tag_filter=False,  # off hides nothing
+                                              select_all=True, bulk=True,  # its rows are its games, all on screen
                                               hotkeys=(ADD_KEY, ADD_ALIAS, SETTINGS_KEY),
                                               hint="A add games · S settings",
                                               key_help=[(f"{ADD_KEY} / {ADD_ALIAS}", "add games"), (SETTINGS_KEY, "settings")])

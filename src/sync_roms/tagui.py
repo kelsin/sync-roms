@@ -383,13 +383,14 @@ def paused():
     return PAUSED if FILTER.describe() else ""
 
 
-def games_hint(base, filtering=True, notes=True, select_all=True):
-    """The hint of a games list: base (its own keys, starting "Space toggle · Enter done") with s, t and c named the
-    same way everywhere, then / and w and a where the list has them. filtering False: a list that ignores the tag
-    filter names only t."""
+def games_hint(base, filtering=True, notes=True, select_all=True, bulk=None):
+    """The hint of a games list: base (its own keys, starting "Space toggle · Enter done") with s, t, T and c named
+    the same way everywhere, then / and w and a where the list has them. filtering False: a list that ignores the tag
+    filter names only t, and T with bulk (by default as filtering)."""
     drop = {"Space", "Enter", "s", "t", "c", "/", "w", "a"}
     rest = [p for p in base.split(" · ") if p.split(" ", 1)[0] not in drop]
-    tag = TAGS_HINT if filtering else TAGS_HINT.split(" · ")[1]
+    parts = TAGS_HINT.split(" · ")
+    tag = TAGS_HINT if filtering else " · ".join(parts[1:3] if (filtering if bulk is None else bulk) else parts[1:2])
     keys = ["/ filter"] + (["w note"] if notes else []) + (["a all shown"] if select_all else [])
     return " · ".join(["Space toggle", "Enter done", tag, *keys, *rest])
 

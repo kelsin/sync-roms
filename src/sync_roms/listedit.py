@@ -305,9 +305,11 @@ def all_rows(shown, systems, keys_of):
     return sorted(rows, key=lambda r: (store.sort_key(r[2]), names[r[0]["bucket"]]))
 
 
-def toggle_all(title, rows, place=None, tag_filter=True, hotkeys=(), hint=None, key_help=None):
+def toggle_all(title, rows, place=None, tag_filter=True, hotkeys=(), hint=None, key_help=None,
+               select_all=edit.WHEN_FILTERED, bulk=None):
     """edit.toggle_games over rows from all_rows (s and c, the sticky tag filter, are its own). `a` toggles every shown
-    game only while a tag filter is set: the unfiltered list is every file in storage. Keys in hotkeys end the list and
-    are returned (Enter and Esc return None); hint and key_help add to the hint line and what ? lists."""
-    return edit.toggle_games(title, rows, hotkeys=hotkeys, hint=hint, place=place, select_all=edit.WHEN_FILTERED,
-                             tag_filter=tag_filter, key_help=key_help)
+    game only while a tag filter is set: the unfiltered list is every file in storage (select_all: as toggle_games
+    takes it, for rows that aren't). Keys in hotkeys end the list and are returned (Enter and Esc return None); hint
+    and key_help add to the hint line and what ? lists; bulk: as toggle_games takes it."""
+    return edit.toggle_games(title, rows, hotkeys=hotkeys, hint=hint, place=place, select_all=select_all,
+                             tag_filter=tag_filter, key_help=key_help, bulk=bulk)
