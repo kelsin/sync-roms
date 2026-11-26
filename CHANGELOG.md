@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.7.0](https://github.com/kelsin/sync-roms/compare/v4.6.0...v4.7.0) (2026-11-26)
+
+
+### :video_game: Features
+
+* **collections:** show scraped names and add collections retitle ([#643](https://github.com/kelsin/sync-roms/issues/643)) ([254442a](https://github.com/kelsin/sync-roms/commit/254442ad328148fac577ed0a8bba2457a37241a9))
+
 ## [4.6.0](https://github.com/kelsin/sync-roms/compare/v4.5.0...v4.6.0) (2026-11-26)
 
 
