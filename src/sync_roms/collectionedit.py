@@ -53,6 +53,10 @@ def header(collection):
     return f"{themeart.collection_emoji(collection)} {collection['name']}{desc}  ·  art: {art_label(collection.get('art'))}"
 
 
+def header_label(collection):
+    return f"{themeart.collection_emoji(collection)} {collection['name']}"
+
+
 def edit_one(collection, systems, keys_of):
     """Edit one collection: its games first (a game switched off stays listed, so it can be switched back on), with
     A to add games and S for its settings."""
@@ -84,7 +88,9 @@ def edit_one(collection, systems, keys_of):
                                        else g for g in collection["games"]]
             if pressed is None:
                 return
-        # A (or +) and S are filled in by the add and settings steps; for now they list again
+        if pressed in (ADD_KEY, ADD_ALIAS):  # Ctrl-C in there keeps its toggles and is raised again
+            listedit.add_from_system(collection, systems, shown, keys_of, header_label(collection), toggle=toggle_filtered)
+        # S is filled in by the settings step; for now it lists again
 
 
 # --- The editor --------------------------------------------------------------------------------------
