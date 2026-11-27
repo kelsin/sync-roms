@@ -20,7 +20,7 @@ def threedo_console():
     s.rrect(0, 4, 6, 13, "dark", 2)             # front column
     s.rect(5, 6, 1, 9, "black")                 # its seam with the body
     s.rect(2, 6, 1, 9, "black")                 # rib
-    s.rect(1, 9, 2, 1, "gray")                  # power / open-close
+    s.rect(2, 9, 2, 1, "gray")                  # power / open-close
     s.rect(7, 8, 6, 3, "black")                 # disc tray
     s.mirror()
     s.rect(10, 9, 6, 1, "tan")                  # gold name
@@ -34,11 +34,11 @@ def threedo_pad():
     tops = [2, 1, 0, 0, 0, 0, 0, 1, 2, 2, 2, 2, 2]
     bottoms = [13, 15, 16, 17, 17, 17, 17, 16, 16, 16, 16, 16, 16]
     s = body_from_half(tops, bottoms, "dark")
-    s.ellipse(5, 9, 3.6, 3.6, "black")          # d-pad ring
-    plus(s, 3, 7, 5, 1, "gray")
+    s.ellipse(4.5, 8.5, 3.1, 3.1, "black")      # d-pad ring
+    plus(s, 2, 6, 6, 2, "gray")
     s.rect(9, 4, 2, 1, "dgray")                 # stop
     s.rect(12, 4, 2, 1, "dgray")                # play / pause
-    for x, y in ((12, 12), (17, 8), (22, 4)):   # A B C
+    for x, y in ((11, 12), (16, 8), (21, 4)):   # A B C
         s.ellipse(x, y, 2.6, 2.6, "gray")
     return s
 
@@ -49,16 +49,16 @@ def cdi_console():
     """Philips CD-i 910 (Wikimedia, Evan-Amos, "CD-i-910-Console-Set"): the flat gray player, the vent grille at
     the back of the top, the disc tray on the left of the front, the black display and the previous / play / next
     keys on the right."""
-    s = Sprite(26, 14)
-    s.rrect(0, 0, 26, 14, "dgray", 1)
+    s = Sprite(26, 15)
+    s.rrect(0, 0, 26, 15, "dgray", 1)
     on(s, 0, 0, 26, 5, "gray")                  # top
-    keys(s, 14, 1, 5, 2, "dgray", 1, 1, 1, 0)   # vent grille
+    keys(s, 14, 2, 5, 2, "dgray", 1, 1, 1, 0)   # vent grille
     s.rect(2, 6, 9, 3, "dark")                  # disc tray
     s.rect(4, 7, 2, 1, "gray")                  # its disc logo
-    s.rect(12, 6, 7, 3, "black")                # display
-    for x in (20, 22, 24):                      # previous / play / next
+    s.rect(12, 6, 6, 3, "black")                # display
+    for x in (19, 21, 23):                      # previous / play / next
         s.rect(x, 7, 1, 1, "gray")
-    s.rect(1, 10, 24, 1, "dark")                # lower front
+    s.rect(2, 10, 22, 1, "dark")                # lower front
     s.rect(3, 12, 2, 1, "dark")                 # on / off
     s.rect(21, 12, 2, 1, "dark")                # pause / stop
     return s
@@ -67,12 +67,12 @@ def cdi_console():
 def cdi_pad():
     """CD-i gamepad (Wikimedia, Evan-Amos, "CD-i-Gamepad"): the gray dog-bone pad, the big black thumb disc with
     its gold centre on the left lobe, the gray 1/2 button and three black buttons in a diamond on the right."""
-    tops = [5, 3, 2, 1, 1, 1, 2, 3, 4, 4, 4, 4, 4]
-    bottoms = [11, 13, 14, 15, 15, 15, 14, 13, 12, 12, 12, 12, 12]
+    tops = [5, 3, 2, 1, 1, 1, 2, 2, 3, 4, 4, 4, 4]
+    bottoms = [11, 13, 14, 15, 15, 15, 14, 14, 14, 13, 12, 12, 12]
     s = body_from_half(tops, bottoms, "dgray")
     s.ellipse(5.5, 8.5, 4, 4, "black")          # thumb disc
     s.rect(5, 8, 2, 2, "tan")
-    diamond(s, 17, 4, "black", "gray", "black", "black")
+    diamond(s, 16, 4, "black", "gray", "black", "black")
     return s
 
 
@@ -104,17 +104,17 @@ def pcfx_console():
 def pcfx_pad():
     """PC-FX pad (Wikimedia, Evan-Amos, "PC-FX-Console-Set"): the white pad, the gray d-pad on its round base on the
     left, the two mode switches and select / run in the middle, and the six gray buttons I to VI in two rows."""
-    tops = [5, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
-    bottoms = [11, 13, 14, 15, 15, 15, 14, 14, 14, 14, 14, 14, 14]
+    tops = [4, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
+    bottoms = [12, 13, 14, 15, 15, 15, 14, 14, 14, 14, 14, 14, 14]
     s = body_from_half(tops, bottoms, "white")
-    s.ellipse(4, 8, 3.3, 3.3, "gray")           # d-pad base
-    plus(s, 2, 6, 5, 1, "dgray")
+    s.ellipse(4.5, 8.5, 3.1, 3.1, "gray")       # d-pad base
+    plus(s, 2, 6, 6, 2, "dgray")
     s.rect(9, 5, 2, 1, "dgray")                 # mode switches
     s.rect(9, 7, 2, 1, "dgray")
     s.rect(9, 12, 2, 1, "gray")                 # select / run
     s.rect(12, 12, 2, 1, "gray")
     for y in (4, 8):                            # IV V VI over III II I
-        for x in (13, 17, 21):
+        for x in (12, 16, 20):
             s.rect(x, y, 3, 3, "gray")
     return s
 
@@ -128,16 +128,16 @@ def jaguarcd_console():
     s = Sprite(26, 22)
     s.rrect(0, 9, 26, 13, "dark", 3)            # Jaguar
     for y in (13, 15, 17):                      # ribs
-        s.rect(1, y, 3, 1, "dgray")
+        s.rect(2, y, 2, 1, "dgray")
     s.rect(5, 17, 8, 3, "dgray")                # front strip
-    s.rrect(3, 0, 20, 11, "dark", 3)            # CD drive
-    s.rect(4, 10, 18, 1, "black")               # its base on the Jaguar
+    s.rrect(2, 0, 22, 12, "dark", 3)            # CD drive
+    s.rect(4, 11, 18, 1, "black")               # its base on the Jaguar
     s.mirror()
-    s.ellipse(12.5, 5, 8, 3.5, "black")         # lid
-    s.ellipse(12.5, 5, 7, 2.5, "dark")
-    s.rect(8, 4, 4, 2, "dgray")                 # oval window
+    s.ellipse(12.5, 5.5, 9, 4.5, "black")       # lid
+    s.ellipse(12.5, 5.5, 8, 3.5, "dark")
+    s.rect(7, 5, 4, 2, "dgray")                 # oval window
     for i in range(3):                          # Jaguar CD mark
-        s.rect(12 + 2 * i, 6 - i, 2, 1, "red")
+        s.rect(13 + 2 * i, 7 - i, 2, 1, "red")
     s.rect(11, 17, 4, 2, "red")                 # button
     return s
 
@@ -175,12 +175,15 @@ def arcadia_pad():
     stripes of the logo, the gold twelve-key pad and the stick on its gold disc at the bottom."""
     s = Sprite(15, 23)
     s.rrect(0, 0, 15, 23, "dark", 3)
-    s.px(3, 2, "red")                           # logo stripes
-    s.px(4, 2, "green")
-    s.px(5, 2, "blue")
-    s.rect(7, 2, 5, 1, "gray")
-    s.rect(1, 4, 13, 9, "tan")                  # keypad
-    keys(s, 2, 5, 3, 4, "brown", 3, 1, 1, 1)
+    s.px(4, 2, "red")                           # logo stripes
+    s.px(5, 2, "green")
+    s.px(6, 2, "blue")
+    s.rect(8, 2, 3, 1, "gray")
+    s.rect(2, 4, 11, 9, "tan")                  # keypad
+    for y in (5, 7, 9, 11):
+        s.rect(3, y, 2, 1, "brown")
+        s.rect(6, y, 3, 1, "brown")
+        s.rect(10, y, 2, 1, "brown")
     s.ellipse(7, 17, 3.6, 3.6, "tan")           # stick on its disc
     s.ellipse(7, 17, 1.6, 1.6, "black")
     return s
@@ -196,18 +199,18 @@ def gamecom():
     s = Sprite(26, 17)
     s.rrect(0, 0, 26, 17, "gray", 3)
     on(s, 0, 13, 26, 4, "dgray")                # lower band
-    keys(s, 2, 3, 2, 2, "dgray", 1, 1, 1, 1)    # speaker
-    s.ellipse(3, 9, 2.6, 2.6, "black")          # d-pad
-    plus(s, 2, 8, 3, 1, "dgray")
-    s.rect(7, 2, 12, 10, "dgray")               # screen bezel
+    keys(s, 3, 3, 2, 2, "dgray", 1, 1, 1, 1)    # speaker
+    s.ellipse(4, 9, 2.6, 2.6, "black")          # d-pad
+    plus(s, 3, 8, 3, 1, "dgray")
+    s.rect(8, 2, 10, 10, "dgray")               # screen bezel
     s.rect(8, 3, 10, 8, "screen")               # 5:4
     face(s, 13, 4, 3)
-    s.rect(21, 2, 2, 2, "teal")                 # power
-    for x in (20, 23):                          # A B / C D
+    s.rect(20, 2, 2, 2, "teal")                 # power
+    for x in (19, 22):                          # A B / C D
         s.rect(x, 5, 2, 2, "dark")
         s.rect(x, 8, 2, 2, "dark")
-    s.rect(3, 14, 11, 1, "black")               # stylus
-    for x in (15, 18, 21):                      # menu / sound / pause
+    s.rect(4, 14, 9, 1, "black")                # stylus
+    for x in (14, 17, 20):                      # menu / sound / pause
         s.rect(x, 14, 2, 1, "teal")
     return s
 
