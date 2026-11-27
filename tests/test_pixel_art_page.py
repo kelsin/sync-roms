@@ -4,9 +4,13 @@ import unittest
 
 import helpers  # noqa: F401
 from PIL import Image
+from test_custom_themes import make_base as make_theme_base
+from test_frames import BASE as FRAMES_BASE
+from test_frames import make_base as make_frames_base
 
-from sync_roms import pixel_art_page
-from sync_roms.custom_themes.pixel import app_icons, build, menu, ui_settings, ui_status, variants
+from sync_roms import pixel_art_page, store
+from sync_roms.custom_themes import palettes, theme_name
+from sync_roms.custom_themes.pixel import app_icons, build, frames, menu, ui_settings, ui_status, variants
 from sync_roms.custom_themes.pixel.sprite import render
 
 
@@ -63,6 +67,95 @@ class SpriteSectionsTest(unittest.TestCase):
     def test_image_paths_unique(self):
         paths = [p for s in self.sections for i in s["items"] for p in (i["img"], i.get("dim")) if p]
         self.assertEqual(len(paths), len(set(paths)))
+
+
+TRANSPARENT = ("bg-grid-s", "div-line-v-02", "navbg", "num-bg", "preview-bg", "statbg", "thumb-default")
+
+
+def fake_base(path):
+    """The theme base the frames tests use, with the real base's transparent files and without its hint files."""
+    make_theme_base(path)
+    files = {n: v for n, v in FRAMES_BASE.items() if not n.startswith("context-")}
+    make_frames_base(path, files=files, copies={})
+    for name in TRANSPARENT:
+        Image.new("RGBA", FRAMES_BASE[f"{name}.png"][0], (0, 0, 0, 0)).save(os.path.join(path, "skin", f"{name}.png"))
+
+
+class FrameSectionTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.tmp = tempfile.TemporaryDirectory()
+        base = os.path.join(cls.tmp.name, "base")
+        fake_base(base)
+        cls.theme, cls.canvases = pixel_art_page.build_frames_theme(base, os.path.join(cls.tmp.name, "out"))
+        cls.img = os.path.join(cls.tmp.name, "img")
+        cls.section = pixel_art_page.frame_section(cls.img, cls.canvases)
+        cls.sprites = pixel_art_page.sprite_sections(os.path.join(cls.tmp.name, "sprites"), cls.theme)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.tmp.cleanup()
+
+    def test_frames_section_covers_what_themes_draw(self):
+        self.assertEqual(self.section["id"], "frames")
+        want = {n for n in frames.FRAMES if n[5:-4] not in TRANSPARENT}
+        paths = {i["files"][0]["path"] for i in self.section["items"]}
+        self.assertEqual(paths, want)
+        hints = [i for i in self.section["items"] if i.get("note")]
+        self.assertEqual({i["files"][0]["path"] for i in hints}, {f"skin/{n}" for n in pixel_art_page.HINT_SIZES})
+        for item in hints:
+            name = item["files"][0]["path"][5:]
+            self.assertEqual(item["note"], "not in the SPRUCE base")
+            size = pixel_art_page.HINT_SIZES[name]
+            self.assertEqual(item["files"][0]["size"], list(size))
+            self.assertEqual((item["w"] * item["cell"], item["h"] * item["cell"]), size)
+
+    def test_frame_image_is_cells(self):
+        item = next(i for i in self.section["items"] if i["files"][0]["path"] == "skin/bg-title.png")
+        canvas = self.canvases["skin/bg-title.png"]
+        self.assertEqual(item["cell"], canvas.cell)
+        self.assertEqual(item["files"][0]["size"], list(canvas.size))
+        with Image.open(os.path.join(self.img, *item["img"].split("/")[1:])) as cells, \
+                Image.open(os.path.join(self.theme, "skin", "bg-title.png")) as built:
+            crop = built.convert("RGBA").crop((canvas.ox, canvas.oy, canvas.ox + canvas.cols * canvas.cell,
+                                               canvas.oy + canvas.rows * canvas.cell))
+            self.assertEqual(cells.convert("RGBA").resize(crop.size, Image.NEAREST).tobytes(), crop.tobytes())
+
+    def test_sprite_sizes_come_from_the_theme(self):
+        by_id = {s["id"]: s for s in self.sprites}
+        with Image.open(os.path.join(self.theme, "icons", "gba.png")) as im:
+            gba = list(im.size)
+        item = next(i for i in by_id["systems-shared"]["items"] if i["img"].endswith("/gba.png"))
+        self.assertEqual(item["files"][0], {"path": "icons/gba.png", "size": gba})
+        for sid in ("settings", "status"):
+            for item in by_id[sid]["items"]:
+                path = os.path.join(self.theme, *item["files"][0]["path"].split("/"))
+                if os.path.isfile(path):
+                    self.assertNotIn("note", item)
+                    with Image.open(path) as im:
+                        self.assertEqual(item["files"][0]["size"], list(im.size))
+                else:
+                    self.assertEqual(item["note"], "not in the SPRUCE base")
+        self.assertTrue(any(i.get("note") for i in by_id["status"]["items"]))
+
+
+class BoxSectionTest(unittest.TestCase):
+    def test_box_reduction_exact(self):
+        folder = os.path.join(store.REPO_DATA, "themes", "art-book-next", "art-box", "Imgs")
+        ids = sorted(n[:-4] for n in os.listdir(folder) if n.endswith(".png"))
+        with tempfile.TemporaryDirectory() as tmp:
+            section = pixel_art_page.box_section(tmp)
+            self.assertEqual(section["id"], "boxes")
+            self.assertEqual([i["label"] for i in section["items"]], ids)
+            for item in section["items"]:
+                self.assertEqual((item["w"], item["h"]), (84, 120))
+                name = item["label"]
+                self.assertEqual([f["path"] for f in item["files"]], [f"Collections/{d}/{name}.png" for d in ("Imgs", "Imgs_med", "Imgs_small")])
+                self.assertEqual([f["size"] for f in item["files"]], [[336, 480], [210, 300], [140, 200]])
+                with Image.open(os.path.join(tmp, *item["img"].split("/")[1:])) as small, \
+                        Image.open(os.path.join(folder, f"{name}.png")) as src:
+                    self.assertEqual(small.convert("RGB").resize((336, 480), Image.NEAREST).tobytes(),
+                                     src.convert("RGB").tobytes())
 
 
 if __name__ == "__main__":

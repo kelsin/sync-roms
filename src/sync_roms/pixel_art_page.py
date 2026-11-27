@@ -4,7 +4,9 @@ import re
 
 from PIL import Image
 
-from .custom_themes.pixel import app_icons, build, ids, menu, ui_settings, ui_status, variants
+from . import store
+from .custom_themes import palettes, theme_name
+from .custom_themes.pixel import app_icons, build, frames, ids, menu, ui_settings, ui_status, variants
 from .custom_themes.pixel.sprite import render
 
 PALETTE = "Gruvbox"
@@ -29,12 +31,26 @@ class _Writer:
         self.used = set()
         os.makedirs(self.dir, exist_ok=True)
 
-    def item(self, label, name, draw, files, dim=True, note=None):
+    def stem(self, name):
         stem = re.sub(r"[^A-Za-z0-9_.-]", "_", name)
         base, n = stem, 2
         while stem in self.used:
             stem, n = f"{base}_{n}", n + 1
         self.used.add(stem)
+        return stem
+
+    def image_item(self, label, name, img, files, note=None, **extra):
+        """An item whose picture is a ready PIL image, saved as it is."""
+        stem = self.stem(name)
+        img.save(os.path.join(self.dir, f"{stem}.png"))
+        item = {"label": label, "img": f"img/{self.section}/{stem}.png", "w": img.width, "h": img.height,
+                "files": files, **extra}
+        if note:
+            item["note"] = note
+        return item
+
+    def item(self, label, name, draw, files, dim=True, note=None):
+        stem = self.stem(name)
         sprite = draw()
         sel = render(sprite, 1, "sel")
         sel.save(os.path.join(self.dir, f"{stem}.png"))
@@ -119,3 +135,51 @@ def sprite_sections(img_dir, theme_dir=None):
             _ui(img_dir, theme_dir, "apps", "App icons", app_icons, always=True),
             _ui(img_dir, theme_dir, "settings", "Settings icons", ui_settings),
             _ui(img_dir, theme_dir, "status", "Status icons", ui_status)]
+
+
+HINT_SIZES = {"context-a.png": (26, 26), "context-b.png": (26, 26), "context-x.png": (26, 26),
+              "context-y.png": (26, 26), "context-menu.png": (66, 26), "context-select.png": (66, 26),
+              "context-start.png": (66, 26)}
+
+
+def build_frames_theme(base_dir, out_dir):
+    """Build the Consoles theme in the page's palette from base_dir; returns (theme_dir, {"skin/<file>": Canvas})."""
+    canvases = {}
+    theme = build.build_theme(base_dir, out_dir, theme_name("Pixel Consoles", PALETTE), "CONSOLES",
+                              palettes.get(PALETTE), canvases=canvases)
+    return theme, {k: v for k, v in canvases.items() if k.startswith("skin/")}
+
+
+def frame_section(img_dir, canvases):
+    """One item per frame the theme drew (its cell grid, one pixel per cell), plus the hint pills the real base has
+    but a test base may not."""
+    w = _Writer(img_dir, "frames")
+    items = [w.image_item(_file_stem(key), _file_stem(key), canvas.cell_image(),
+                          [{"path": key, "size": list(canvas.size)}], cell=canvas.cell)
+             for key, canvas in sorted(canvases.items(), key=lambda kv: kv[0].rsplit("/", 1)[-1])]
+    colors = frames.shades(palettes.get(PALETTE))
+    for name, size in HINT_SIZES.items():
+        key = f"skin/{name}"
+        spec = frames.FRAMES.get(key)
+        if key in canvases or spec is None:
+            continue
+        canvas = frames.Canvas(size, frames.cell_for(size, None, spec.small), (0, 0) + size, spec.background)
+        spec.draw(canvas, colors)
+        items.append(w.image_item(_file_stem(key), _file_stem(key), canvas.cell_image(),
+                                  [{"path": key, "size": list(size)}], note="not in the SPRUCE base", cell=canvas.cell))
+    return _section("frames", "Frames", items)
+
+
+def box_section(img_dir):
+    """One item per collection box picture, shown at a quarter of its 336x480."""
+    folder = os.path.join(store.REPO_DATA, "themes", "art-book-next", "art-box", "Imgs")
+    w = _Writer(img_dir, "boxes")
+    items = []
+    for name in sorted(f[:-4] for f in os.listdir(folder) if f.endswith(".png")):
+        file = f"{name}.png"
+        with Image.open(os.path.join(folder, file)) as im:
+            small = im.convert("RGB").resize((im.width // 4, im.height // 4), Image.NEAREST)
+        files = [{"path": f"Collections/{d}/{file}", "size": s}
+                 for d, s in (("Imgs", [336, 480]), ("Imgs_med", [210, 300]), ("Imgs_small", [140, 200]))]
+        items.append(w.image_item(name, name, small, files))
+    return _section("boxes", "Collection box art", items)
