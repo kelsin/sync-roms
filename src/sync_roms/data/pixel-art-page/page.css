@@ -99,7 +99,7 @@ h2 {
 .note { margin-top: 2px; font-size: 11px; color: var(--tile-muted); font-style: italic; }
 .view {
   position: fixed; z-index: 10;
-  max-width: calc(100vw - 32px);
+  max-width: calc(100vw - 32px); /* page.js narrows these to the viewport less its scrollbar */
   max-height: calc(100vh - 32px);
   overflow: auto;
   padding: 12px;

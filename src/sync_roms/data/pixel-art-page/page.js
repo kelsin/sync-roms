@@ -127,7 +127,6 @@
     const ctx = canvas.getContext("2d");
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(img, 0, 0, w * s, h * s);
-    if (s < 3) return; // a grid at 1x or 2x would hide the picture
     ctx.fillStyle = GRID;
     for (let x = 1; x < w; x++) ctx.fillRect(x * s, 0, 1, h * s);
     for (let y = 1; y < h; y++) ctx.fillRect(0, y * s, w * s, 1);
@@ -149,17 +148,20 @@
     pinned = pin;
     tile.classList.add("open");
     view.classList.toggle("hover", !pin);
-    info(item);
     const srcs = item.dim ? [item.img, item.dim] : [item.img];
     Promise.all(srcs.map(load)).then((imgs) => {
       if (gen !== generation) return;
       const { w, h } = item;
+      const vw = document.documentElement.clientWidth, vh = document.documentElement.clientHeight;
+      info(item); // only now, so a new label never shows over the old art
       viewArt.replaceChildren();
+      view.style.maxWidth = vw - 2 * GAP + "px";
+      view.style.maxHeight = vh - 2 * GAP + "px";
       view.hidden = false;
       // Room for the art: the viewport less the gutter, the panel's padding and border, and the info under it.
       const pad = 26;
-      const roomW = window.innerWidth - 2 * GAP - pad;
-      const roomH = window.innerHeight - 2 * GAP - pad - viewInfo.offsetHeight - 10;
+      const roomW = vw - 2 * GAP - pad;
+      const roomH = vh - 2 * GAP - pad - viewInfo.offsetHeight - 10;
       let s, stacked = false;
       if (imgs.length === 1) {
         s = Math.floor(Math.min(roomW / w, roomH / h));
@@ -170,7 +172,7 @@
         stacked = stack > side;
         s = Math.max(side, stack);
       }
-      s = Math.max(1, s);
+      s = Math.max(4, s); // at least 4x, with the grid: past the viewport, the panel scrolls
       viewArt.classList.toggle("stacked", stacked);
       imgs.forEach((img, i) => {
         const canvas = el("canvas");
@@ -181,12 +183,12 @@
         viewArt.append(fig);
       });
       place(tile);
-    }, () => {});
+    }, () => { if (gen === generation) close(); });
   }
 
   // Beside the tile when there's room (so hovering doesn't cover it), else over it; always inside the viewport.
   function place(tile) {
-    const vw = window.innerWidth, vh = window.innerHeight;
+    const vw = document.documentElement.clientWidth, vh = document.documentElement.clientHeight;
     const pw = view.offsetWidth, ph = view.offsetHeight;
     const r = tile.getBoundingClientRect();
     let x, y;

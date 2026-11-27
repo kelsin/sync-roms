@@ -90,7 +90,9 @@ def publish(user, dry_run=False):
     git("clean", "-q", "-fdx", cwd=clone)
     try:
         build(clone, user)
-    except (SystemExit, custom_themes.BaseMissing, custom_themes.DownloadFailed, *s3.ERRORS) as e:  # the clone is reset at the next publish
+    except custom_themes.BaseMissing as e:  # the clone is reset at the next publish
+        ui.fail(f"The base theme {e.base} isn't in storage, so nothing was published (the pixel art page needs it)", 1)
+    except (SystemExit, custom_themes.DownloadFailed, *s3.ERRORS) as e:
         detail = f": {e}" if not isinstance(e, SystemExit) else ""
         ui.fail(f"Storage isn't reachable, so nothing was published (the page would lack tags, sizes and scraped names){detail}", 1)
     git("add", "-A", cwd=clone)

@@ -79,9 +79,10 @@ class Site(helpers.Cmd):
     def test_publish_fails_without_base(self):
         self.enterContext(mock.patch.object(pixel_art_page, "write", REAL_PIXEL_ART_WRITE))
         self.enterContext(mock.patch.object(custom_themes, "fetch_base", side_effect=custom_themes.BaseMissing("SPRUCE")))
-        with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as raised:
+        with contextlib.redirect_stderr(io.StringIO()) as err, self.assertRaises(SystemExit) as raised:
             pages_site.publish("kelsin")
         self.assertEqual(raised.exception.code, 1)
+        self.assertIn("The base theme SPRUCE isn't in storage, so nothing was published", err.getvalue())
         self.assertEqual(git_ls_tree(self.bare, "main"), [])
 
     def test_invalid_users_refused(self):
