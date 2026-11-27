@@ -468,6 +468,23 @@ class PixelArt(Card):
         self.assertFalse(os.path.exists(self.pixel("systems", "consoles", "surprise.png")))
         self.assertEqual(read(self.pixel(esde_pixel.OWNED)), "")
 
+    def test_each_collection_gets_a_theme_folder_that_a_pixel_install_keeps(self):
+        # ES-DE groups a custom collection under "collections" unless the theme has <name>/theme.xml
+        include = "<theme><include>./../theme.xml</include></theme>\n"
+        self.install({**SURPRISE, "My Shmups": "shmups"})
+        for name in ("my shmups", "surprise"):
+            self.assertEqual(read(self.pixel(name, "theme.xml")), include)
+        with contextlib.redirect_stdout(io.StringIO()):
+            esde_pixel.install("esde", self.base)  # the art step runs first on a new card
+            write(self.pixel(esde_pixel.MARKER), "an older build\n")
+            self.assertTrue(esde_pixel.install("esde", self.base))
+        for name in ("my shmups", "surprise"):
+            self.assertEqual(read(self.pixel(name, "theme.xml")), include)
+        self.assertTrue(os.path.exists(self.pixel("systems", "consoles", "my shmups.png")))
+        self.install(SURPRISE)
+        self.assertFalse(os.path.exists(self.pixel("my shmups")))
+        self.assertTrue(os.path.exists(self.pixel("surprise", "theme.xml")))
+
     def test_no_delete_keeps_gone_collection_art(self):
         self.install({**SURPRISE, "My Shmups": "shmups"})
         with contextlib.redirect_stdout(io.StringIO()):

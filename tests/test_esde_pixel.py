@@ -504,6 +504,8 @@ class Install(unittest.TestCase):
         write(self.copy("systems", "consoles", "my shmups.png"), "art")
         write(self.copy("systems", "controllers", "My Shmups.png"), "art")  # cards ignore case
         write(self.copy("systems", "other", "my shmups.png"), "not ours")
+        write(self.copy("My Shmups", "theme.xml"), "<theme/>")  # the collection's own theme folder
+        write(self.copy("other", "theme.xml"), "<theme/>")
         os.remove(self.copy(esde_pixel.MARKER))  # an older build
         self.assertTrue(self.install())
         self.assertFalse(os.path.exists(self.copy("old")))
@@ -512,6 +514,8 @@ class Install(unittest.TestCase):
         self.assertEqual(read(self.copy(esde_pixel.OWNED)), "my shmups\n")
         self.assertEqual(read(self.copy("systems", "consoles", "my shmups.png")), "art")
         self.assertEqual(read(self.copy("systems", "controllers", "My Shmups.png")), "art")
+        self.assertEqual(read(self.copy("My Shmups", "theme.xml")), "<theme/>")
+        self.assertFalse(os.path.exists(self.copy("other")))
 
     def test_stopped_copy_is_finished(self):
         self.install()

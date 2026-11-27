@@ -32,6 +32,7 @@ ESDE_ARCHIVE = runtime.ESDE_THEMES_PREFIX + "art-book-next-es-de.tar.gz"
 ESDE_COMMIT = runtime.ESDE_THEMES_PREFIX + "art-book-next-es-de.commit"  # the commit the archive was made from
 ESDE_MARKER = ".sync-roms-commit"  # the same, in the card's copy
 ESDE_OWNED = ".sync-roms-collections"  # the collection folders sync-roms gave art in the card's copy
+ESDE_INCLUDE = b"<theme><include>./../theme.xml</include></theme>\n"  # a collection's <folder>/theme.xml
 ARCHIVE_ERRORS = (tarfile.TarError, EOFError, zlib.error)  # what a damaged .tar.gz raises
 
 # Knulli's Art Book Next is read-only, but takes artwork and logos from theme-customizations/ on the card for systems
@@ -186,8 +187,8 @@ def _pixel_usable(arts):
 
 
 def install_pixel(layout_name, base, arts, keep=False):
-    """Give each collection in arts ({name: outline art png}) its box art in Pixel's variants, under the name ES-DE
-    themes it by (lower case), list the names in Pixel's own collection list, and (unless keep) remove the art of names
+    """Give each collection in arts ({name: outline art png}) its box art in Pixel's variants and its theme folder, under
+    the name ES-DE themes it by (lower case), list the names in Pixel's own collection list, and (unless keep) remove the art of names
     on the list no longer in arts. ES-DE's Theme is never changed. Returns whether anything changed."""
     arts = _pixel_usable(arts)
     dest = esde_pixel.dest(layout_name, base)
@@ -200,6 +201,11 @@ def install_pixel(layout_name, base, arts, keep=False):
                 with contextlib.suppress(FileNotFoundError):
                     os.remove(os.path.join(dest, "systems", folder, f"{name}.png"))
                     changed = True
+            with contextlib.suppress(FileNotFoundError):
+                os.remove(os.path.join(dest, name, "theme.xml"))
+                changed = True
+            with contextlib.suppress(OSError):
+                os.rmdir(os.path.join(dest, name))  # only when that emptied it
         owned = [n for n in owned if n in keep_names]
     names = sorted(set(n for n in owned if n) | keep_names)
     if names or os.path.exists(os.path.join(dest, esde_pixel.OWNED)):
@@ -209,6 +215,8 @@ def install_pixel(layout_name, base, arts, keep=False):
             data = f.read()
         for folder in esde_pixel.ART_FOLDERS:
             changed |= cardfs.write_bytes(os.path.join(dest, "systems", folder, f"{name.lower()}.png"), data)
+        # ES-DE shows a custom collection as a system of its own only when the theme has a folder for it
+        changed |= cardfs.write_bytes(os.path.join(dest, name.lower(), "theme.xml"), ESDE_INCLUDE)
     if changed:
         cardfs.clear()  # the card changed: later steps list it afresh
     return changed
@@ -319,7 +327,7 @@ def _esde_files(arts):
         if logo:
             files[f"_inc/systems/logos/{folder}.svg"] = logo.encode()
         files[f"_inc/systems/_metadata-global/{folder}.xml"] = _metadata(name)
-        files[f"{folder}/theme.xml"] = b"<theme><include>./../theme.xml</include></theme>\n"
+        files[f"{folder}/theme.xml"] = ESDE_INCLUDE
     return files
 
 

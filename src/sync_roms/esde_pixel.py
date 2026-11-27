@@ -81,9 +81,11 @@ def _shown(layout_name, base):
 
 
 def _kept(target):
-    """name_keys of the files in target that sync-roms writes there itself: the collection list and its names' art."""
-    rels = [MARKER, OWNED] + [f"systems/{folder}/{name}.png" for name in _read(os.path.join(target, OWNED)).splitlines()
-                              if name for folder in ART_FOLDERS]
+    """name_keys of the files in target that sync-roms writes there itself: the collection list and its names' art and
+    theme folders (`<name>/theme.xml`)."""
+    names = [name for name in _read(os.path.join(target, OWNED)).splitlines() if name]
+    rels = [MARKER, OWNED] + [f"systems/{folder}/{name}.png" for name in names for folder in ART_FOLDERS] \
+        + [f"{name}/theme.xml" for name in names]
     return {downloads.name_key(os.path.join(target, *rel.split("/"))) for rel in rels}
 
 
