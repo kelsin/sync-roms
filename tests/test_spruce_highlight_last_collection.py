@@ -1,7 +1,8 @@
 """spruce_fixes.highlight_last_collection against copies of PyUI's files (fixtures): spruceOS 4.6.0 and Development,
-each with spruceOS PR 2070 applied (`4.6.0-patched`, `development-patched`), and Development with the earlier "Reopen
-last collection" patch sync-roms applied (`old-patched`), and a real 4.6.0 card's files after a draft of that patch
-(`4.6.0-old-draft`). Delete with the fix."""
+each with spruceOS PR 2070 applied (`4.6.0-patched`, `development-patched`) and with the earlier "<system>::<folder>"
+key patch sync-roms applied (`4.6.0-keyed`, `development-keyed`), Development with the earlier "Reopen last collection"
+patch sync-roms applied (`old-patched`), and a real 4.6.0 card's files after a draft of that patch (`4.6.0-old-draft`).
+Delete with the fix."""
 import os
 import shutil
 import sys
@@ -66,8 +67,8 @@ class ApplyTests(Base):
         self.card(version)
         before = self.snapshot()
         count, line, err = self.run_fixes()
-        self.assertEqual(count, 3)
-        self.assertIn("applied to 3 file(s)", line)
+        self.assertEqual(count, 4)
+        self.assertIn("applied to 4 file(s)", line)
         self.assertEqual(err, "")
         for rel in FILES:
             self.assertEqual(self.read(rel), self.read(rel, f"{version}-patched"), rel)
@@ -85,8 +86,8 @@ class ApplyTests(Base):
     def test_earlier_setting_is_taken_out(self):
         self.card("development", "old-patched")
         count, line, err = self.run_fixes()
-        self.assertEqual(count, 7)
-        self.assertIn("applied to 7 file(s)", line)
+        self.assertEqual(count, 8)
+        self.assertIn("applied to 8 file(s)", line)
         self.assertEqual(err, "")
         for rel in FILES:
             self.assertEqual(self.read(rel), self.read(rel, "development-patched"), rel)
@@ -98,12 +99,24 @@ class ApplyTests(Base):
         methods before set_ignore_articles_when_sorting."""
         self.card("4.6.0", "4.6.0-old-draft")
         count, line, err = self.run_fixes()
-        self.assertEqual(count, 7)
+        self.assertEqual(count, 8)
         self.assertEqual(err, "")
         for rel in FILES:
             self.assertEqual(self.read(rel), self.read(rel, "4.6.0-patched"), rel)
         for rel in set(OLD_FILES) - set(FILES):
             self.assertEqual(self.read(rel), self.read(rel, "4.6.0"), rel)
+
+    def test_earlier_keyed_patch_is_undone(self):
+        for version in ("4.6.0", "development"):
+            with self.subTest(version):
+                shutil.rmtree(self.base)
+                self.card(version, f"{version}-keyed")
+                count, line, err = self.run_fixes()
+                self.assertEqual(count, 4)
+                self.assertEqual(err, "")
+                for rel in FILES:
+                    self.assertEqual(self.read(rel), self.read(rel, f"{version}-patched"), rel)
+                self.assertNotIn(b"::", self.read("main-ui/menus/games/game_select_menu.py"))
 
     def test_lf_files_stay_lf(self):
         self.card("development")
@@ -112,7 +125,7 @@ class ApplyTests(Base):
             with open(self.path(rel), "wb") as f:
                 f.write(data)
         count, _, _ = self.run_fixes()
-        self.assertEqual(count, 3)
+        self.assertEqual(count, 4)
         for rel in FILES:
             self.assertEqual(self.read(rel), self.read(rel, "development-patched").replace(b"\r\n", b"\n"), rel)
 
@@ -175,6 +188,17 @@ class SkipTests(Base):
         shutil.copy(self.path(ROMS_MENU, os.path.join(FIXTURES, "development-patched", fix.ROOT)), self.path(ROMS_MENU))
         self.assert_untouched("only some of its files have the change")
 
+    def test_half_keyed_patch(self):
+        self.card("development")
+        shutil.copy(self.path(ROMS_MENU, os.path.join(FIXTURES, "development-keyed", fix.ROOT)), self.path(ROMS_MENU))
+        self.assert_untouched("only some of its files have the earlier per-folder key patch")
+
+    def test_keyed_patch_edited(self):
+        self.card("development", "development-keyed")
+        self.edit("main-ui/menus/games/game_select_menu.py", b'f"{page_name}::{self.subfolder}"',
+                  b'f"{page_name}/{self.subfolder}"')
+        self.assert_untouched("game_select_menu.py isn't as the earlier per-folder key patch left it")
+
     def test_half_old_patch(self):
         self.card("development")
         shutil.copy(self.path("lang/English.json", os.path.join(FIXTURES, "old-patched", fix.ROOT)),
@@ -201,8 +225,8 @@ class SkipTests(Base):
         self.card("4.6.0")
         before = self.snapshot()
         count, line, _ = self.run_fixes(dry_run=True)
-        self.assertEqual(count, 3)
-        self.assertIn("would apply to 3 file(s)", line)
+        self.assertEqual(count, 4)
+        self.assertIn("would apply to 4 file(s)", line)
         self.assertEqual(self.snapshot(), before)
 
 
