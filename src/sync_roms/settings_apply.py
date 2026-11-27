@@ -1,7 +1,8 @@
-"""`config apply [CARD]`: apply the saved settings to a mounted spruce or Knulli card, or over adb to an Android device."""
+"""`config apply [CARD]`: apply the saved settings to a mounted spruce or Knulli card, to this computer for an EmuDeck card,
+or over adb to an Android device."""
 import os
 
-from . import adb, android, android_settings, applied, knulli_conf, picker, spruce_hotkeys, spruce_retroarch, spruce_settings, spruce_syncthing, spruce_wifi, store, ui
+from . import adb, android, android_settings, applied, knulli_conf, picker, spruce_hotkeys, spruce_retroarch, spruce_settings, spruce_syncthing, spruce_wifi, steamos_settings, store, ui
 
 
 VOLUMES = "/Volumes"
@@ -49,8 +50,13 @@ def run(card_arg, dry_run):
         layout = saved.get("layout")
         if not layout:
             ui.fail(f"{name!r} has no layout. Set it with `sync-roms cards set {name} --layout NAME`, or sync the card once", 2)
-        if layout not in ("spruce", "knulli"):
-            ui.fail(f"config apply supports spruce and Knulli cards and Android devices, not {layout}", 2)
+        if layout not in ("spruce", "knulli", "emudeck"):
+            ui.fail(f"config apply supports spruce, Knulli and EmuDeck cards and Android devices, not {layout}", 2)
+        if layout == "emudeck":
+            if not os.path.isdir(os.path.join(base, "Emulation")):
+                ui.fail(f"No Emulation/ folder in {base}: give the folder that holds Emulation/, or run from it", 2)
+            catalog = store.load_catalog()
+            return 1 if steamos_settings.apply(base, catalog["layouts"]["emudeck"], catalog["systems"], dry_run) else 0
         if not os.path.isdir(base):
             ui.fail(f"No folder {base}: give the card's mounted folder, e.g. `sync-roms config apply /Volumes/{name}`", 2)
         return 1 if (_spruce(base, name, name, dry_run) if layout == "spruce" else _knulli(base, name, dry_run)) else 0

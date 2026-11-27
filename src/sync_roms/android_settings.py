@@ -35,13 +35,14 @@ def hotkeys():
     return wanted
 
 
-def cfg_wanted(overlay_dir=None):
-    """{key: value} for retroarch.cfg: the RetroArch preferences, the Syncthing save settings (when on), RetroAchievements, the overlay folder (when given), the hotkeys, then Cloud Sync cleared."""
+def cfg_wanted(overlay_dir=None, platform="android"):
+    """{key: value} for retroarch.cfg (platform "steamos": no save folders, overlay folder or hotkeys, which EmuDeck sets itself): the RetroArch preferences, the Syncthing save settings (when on), RetroAchievements, the overlay folder (when given), the hotkeys, then Cloud Sync cleared."""
     wanted = dict(store.repo_json("retroarch")["settings"])
     if spruce_syncthing.enabled():
         wanted.update(spruce_syncthing.data()["retroarch"])
-        wanted["savefile_directory"] = android.DEFAULT_SAVES
-        wanted["savestate_directory"] = android.DEFAULT_STATES
+        if platform == "android":
+            wanted["savefile_directory"] = android.DEFAULT_SAVES
+            wanted["savestate_directory"] = android.DEFAULT_STATES
         wanted["savestate_auto_save"] = "true"  # spruce's raAutoSave and raAutoLoad
         wanted["savestate_auto_load"] = "true"
     settings = usersettings.load_settings()
@@ -49,9 +50,10 @@ def cfg_wanted(overlay_dir=None):
     for setting, key in (("ra_username", "cheevos_username"), ("ra_password", "cheevos_password")):
         if settings.get(setting):
             wanted[key] = settings[setting]
-    if overlay_dir:
-        wanted["overlay_directory"] = overlay_dir
-    wanted.update(hotkeys())
+    if platform == "android":
+        if overlay_dir:
+            wanted["overlay_directory"] = overlay_dir
+        wanted.update(hotkeys())
     wanted.update(CLOUD_SYNC)
     return wanted
 
