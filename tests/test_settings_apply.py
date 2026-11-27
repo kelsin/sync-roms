@@ -7,9 +7,10 @@ from unittest import mock
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 import helpers  # noqa: E402
-from sync_roms import adb, android, android_settings, settings_apply, store, ui, usersettings  # noqa: E402
+from sync_roms import adb, android, android_settings, settings_apply, steamos_settings, store, ui, usersettings  # noqa: E402
 
-CATALOG = {"layouts": {"esde": {"roms_dir": "ROMs"}, "spruce": {"roms_dir": "Roms"}, "onion": {"roms_dir": "Roms"}},
+CATALOG = {"layouts": {"esde": {"roms_dir": "ROMs"}, "spruce": {"roms_dir": "Roms"}, "onion": {"roms_dir": "Roms"},
+                       "emudeck": {"roms_dir": "Emulation/roms"}},
            "systems": {}, "devices": []}
 
 
@@ -91,7 +92,7 @@ class Apply(helpers.Cmd):
         self.addCleanup(os.chdir, old)
         code, _, err = self.run_cmd("config", "apply")
         self.assertEqual(code, 2)
-        self.assertIn("supports spruce and Knulli cards and Android devices, not onion", err)
+        self.assertIn("config apply supports spruce, Knulli and EmuDeck cards and Android devices, not onion", err)
         self.resolve.assert_not_called()
 
     def test_knulli_card_applies_knulli_conf(self):
@@ -157,6 +158,38 @@ class Apply(helpers.Cmd):
         code, _, err = self.run_cmd("config", "apply", base)
         self.assertEqual(code, 2)
         self.assertIn("has no layout", err)
+
+    def test_emudeck_routes_to_steamos(self):
+        base = self.card("deck", "emudeck", "steam-deck")
+        os.makedirs(os.path.join(base, "Emulation"))
+        with mock.patch.object(steamos_settings, "apply", return_value=0) as apply:
+            code, _, _ = self.run_cmd("config", "apply", base, "--dry-run")
+        self.assertEqual(code, 0)
+        self.assertEqual(apply.call_args[0], (base, CATALOG["layouts"]["emudeck"], CATALOG["systems"], True))
+        self.resolve.assert_not_called()
+
+    def test_emudeck_failure_exits_1(self):
+        base = self.card("deck", "emudeck", "steam-deck")
+        os.makedirs(os.path.join(base, "Emulation"))
+        with mock.patch.object(steamos_settings, "apply", return_value=1):
+            self.assertEqual(self.run_cmd("config", "apply", base)[0], 1)
+
+    def test_emudeck_without_emulation_refused(self):
+        base = self.card("deck", "emudeck", "steam-deck")
+        with mock.patch.object(steamos_settings, "apply") as apply:
+            code, _, err = self.run_cmd("config", "apply", base)
+        self.assertEqual(code, 2)
+        self.assertIn("the folder that holds Emulation/", err)
+        apply.assert_not_called()
+
+    def test_emudeck_bare_name_hints_folder(self):
+        self.card("deck", "emudeck", "steam-deck")
+        with mock.patch.object(settings_apply, "VOLUMES", os.path.join(self.tmp.name, "none")), \
+                mock.patch.object(steamos_settings, "apply") as apply:
+            code, _, err = self.run_cmd("config", "apply", "deck")
+        self.assertEqual(code, 2)
+        self.assertIn("the folder that holds Emulation/", err)
+        apply.assert_not_called()
 
     def test_show_dry_run_still_refused(self):
         self.assertEqual(self.run_cmd("config", "show", "--dry-run")[0], 2)

@@ -599,8 +599,8 @@ TOPICS = {
   sync-roms config unset NAME           remove it (back to its default)
   sync-roms config import [CARD]        save a card's own settings (spruceOS or Knulli
                                         preferences) in settings.json
-  sync-roms config apply [CARD] [--dry-run] [--yes]   apply the saved settings to a spruce or Knulli
-                                                      card or an Android device
+  sync-roms config apply [CARD] [--dry-run] [--yes]   apply the saved settings to a spruce, Knulli
+                                                      or EmuDeck card or an Android device
 
   NAME is bucket, root, endpoint, profile, write_profile, mirror, screenscraper_user or
   screenscraper_password (text), eject, storage_cache_declined or syncthing (true or false),
@@ -638,7 +638,10 @@ TOPICS = {
   over adb (CARD naming an Android card, or none to pick the device) gets RetroArch's and ES-DE's
   settings (RetroArch Cloud Sync turned off, its overlay folder pointed at the card's
   Bezels/retroarch when storage has bezels for the device) and its APKs installed or upgraded,
-  except those that don't fit the device.
+  except those that don't fit the device. An EmuDeck card's folder (CARD, the folder that holds
+  Emulation/, or run from it), on the Steam Deck or Steam Machine itself, gets RetroArch's settings
+  (not its save folders or hotkeys, which EmuDeck sets), ES-DE's cores and Syncthing for RetroArch's
+  save and state folders; it warns when EmuDeck's Cloud Saves are on or a core override moves them.
   --dry-run lists every setting, changed or not; --yes skips the questions.
 """,
     "cache": """
