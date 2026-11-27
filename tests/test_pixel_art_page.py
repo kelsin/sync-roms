@@ -9,6 +9,7 @@ import helpers  # noqa: F401
 from PIL import Image
 from test_custom_themes import make_base as make_theme_base
 from test_frames import BASE as FRAMES_BASE
+from test_frames import HINTS, transparent_icons
 from test_frames import make_base as make_frames_base
 
 from sync_roms import pixel_art_page, store
@@ -78,10 +79,11 @@ TRANSPARENT = pixel_art_page.TRANSPARENT
 
 
 def fake_base(path):
-    """The theme base the frames tests use, with the real base's transparent files and without its hint files."""
+    """The theme base the frames tests use (no hint pills, as in the real base), with the real base's transparent
+    files."""
     make_theme_base(path)
-    files = {n: v for n, v in FRAMES_BASE.items() if not n.startswith("context-")}
-    make_frames_base(path, files=files, copies={})
+    make_frames_base(path, files=FRAMES_BASE, copies={})
+    transparent_icons(path, {"skin": (640, 54)})
     for name in TRANSPARENT:
         Image.new("RGBA", FRAMES_BASE[f"{name}.png"][0], (0, 0, 0, 0)).save(os.path.join(path, "skin", f"{name}.png"))
 
@@ -106,14 +108,14 @@ class FrameSectionTest(unittest.TestCase):
         want = {n for n in frames.FRAMES if n[5:-4] not in TRANSPARENT}
         paths = {i["files"][0]["path"] for i in self.section["items"]}
         self.assertEqual(paths, want)
-        hints = [i for i in self.section["items"] if i.get("note")]
-        self.assertEqual({i["files"][0]["path"] for i in hints}, {f"skin/{n}" for n in pixel_art_page.HINT_SIZES})
-        for item in hints:
-            name = item["files"][0]["path"][5:]
-            self.assertEqual(item["note"], "not in the SPRUCE base")
-            size = pixel_art_page.HINT_SIZES[name]
-            self.assertEqual(item["files"][0]["size"], list(size))
-            self.assertEqual((item["w"] * item["cell"], item["h"] * item["cell"]), size)
+        # the hint pills (which the base lacks) and the A/B icons come from the build, at the pills' sizes
+        sizes = dict(HINTS, **{"icon-A-54.png": (26, 26), "icon-B-54.png": (26, 26)})
+        hints = {i["files"][0]["path"][5:]: i for i in self.section["items"] if i["files"][0]["path"][5:] in sizes}
+        self.assertEqual(set(hints), set(sizes))
+        for name, item in hints.items():
+            self.assertEqual(item["files"][0]["size"], list(sizes[name]))
+            self.assertEqual((item["w"] * item["cell"], item["h"] * item["cell"]), sizes[name])
+            self.assertEqual(item["cell"], self.canvases[f"skin/{name}"].cell)
 
     def test_warns_for_a_frame_with_no_canvas(self):
         from sync_roms import ui

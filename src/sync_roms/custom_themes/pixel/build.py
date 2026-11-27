@@ -151,6 +151,7 @@ def build_theme(base_dir, out_dir, name, kind, palette, canvases=None):
         config.update({"name": name, "author": "sync-roms", "description": spec["description"], "collectionsEnabled": True})
         if "screensaver" in config:
             config["screensaver"]["bgColor"] = "#000000"
+        config.setdefault("hint", {})["contextbuttons"] = True  # PyUI's contextual bottom bar, with the hint pills
         recolor.recolor_config(config, palette)
         old_fonts |= set_font(config)
         with open(config_path, "w") as f:

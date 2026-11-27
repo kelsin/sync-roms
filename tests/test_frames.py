@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import sys
 import tempfile
 import unittest
@@ -65,21 +66,21 @@ BASE = {
     "nav-file-f.png": ((40, 40), (3, 5, 37, 33)),
     "nav-file-n.png": ((40, 40), (3, 5, 37, 33)),
     "progress-dot.png": ((12, 12), (1, 1, 11, 11)),
-    "context-a.png": ((26, 26), None),
-    "context-b.png": ((26, 26), None),
-    "context-x.png": ((26, 26), None),
-    "context-y.png": ((26, 26), None),
-    "context-menu.png": ((66, 26), None),
-    "context-select.png": ((66, 26), None),
-    "context-start.png": ((66, 26), None),
 }
+# the button hints the build draws at their own size (scaled per skin_<W>x<H>/ folder): the pills, which the base lacks,
+# are made in every skin/ and skin_<W>x<H>/ folder; the A/B icons, fully transparent and screen-wide in the base, are
+# redrawn as the A/B pills where the base has them
+HINTS = {"context-a.png": (26, 26), "context-b.png": (26, 26), "context-x.png": (26, 26), "context-y.png": (26, 26),
+         "context-menu.png": (66, 26), "context-select.png": (66, 26), "context-start.png": (66, 26)}
+AB_ICONS = {"icon-A-54.png": "context-a.png", "icon-B-54.png": "context-b.png"}
+AB_ICON_SIZES = {"skin": (640, 54), "skin_1024x768": (1024, 86)}  # the base's transparent files
 for _i in range(1, 6):
     BASE[f"app_loading_0{_i}.png"] = ((100, 480), (27, 198, 75, 282))
     BASE[f"charging-0{_i}.png"] = ((100, 480), (27, 198, 75, 282))
 KEYS = {"bg-btn-01-f", "bg-btn-01-n", "bg-btn-02-f", "bg-btn-02-n", "bg-btn-nor", "bg-btn-sel", "bg-btn-shift-active",
         "value-frame-f", "value-frame-n", "num-bg", "btn-delete", "btn-empty", "btn-shift", "btn-space",
         "nav-favorite-f", "nav-favorite-n", "nav-file-f", "nav-file-n", "progress-dot", "context-a", "context-b",
-        "context-x", "context-y", "context-menu", "context-select", "context-start"} | {
+        "context-x", "context-y", "context-menu", "context-select", "context-start", "icon-A-54", "icon-B-54"} | {
     f"{kind}{i}" for kind in ("app_loading_0", "charging-0") for i in range(1, 6)}
 # the spec's file list (2026-11-23-pixel-frames-design.md, "The files"), and the ones it keeps as they are
 SPEC_FILES = {
@@ -108,16 +109,13 @@ COPIES = {
     "skin_752x560": {"bg-title.png": ((752, 70), None), "app_loading_bg.png": ((746, 559), None),
                      "menu-sub-bg.png": ((373, 349), None), "preview-nameFrame.png": ((201, 81), None),
                      "thumb-default.png": ((291, 419), None)},
-    # even grids at cell 2 (a 14-cell button, 36x14 pills) and cell 3 copies
-    "skin_720x540": {"context-a.png": ((29, 29), None), "context-start.png": ((73, 29), None),
-                     "context-select.png": ((73, 29), None), "context-menu.png": ((73, 29), None),
-                     "btn-delete.png": ((33, 33), (1, 5, 32, 28)), "btn-empty.png": ((33, 33), (1, 3, 32, 30)),
+    # cell 3 copies
+    "skin_720x540": {"btn-delete.png": ((33, 33), (1, 5, 32, 28)), "btn-empty.png": ((33, 33), (1, 3, 32, 30)),
                      "btn-shift.png": ((33, 33), (2, 8, 31, 25)), "btn-space.png": ((33, 33), (4, 4, 29, 29)),
                      "nav-favorite-f.png": ((45, 45), (2, 3, 43, 42)), "nav-file-n.png": ((45, 45), (4, 6, 41, 37)),
                      "progress-dot.png": ((13, 13), (1, 1, 12, 12)), "bg-btn-02-f.png": ((123, 55), None),
                      "app_loading_03.png": ((112, 540), (30, 223, 84, 317))},
-    "skin_1024x768": {"context-b.png": ((41, 41), None), "context-menu.png": ((104, 41), None),
-                      "btn-empty.png": ((48, 48), (2, 4, 46, 44)), "nav-file-f.png": ((64, 64), (5, 8, 59, 53)),
+    "skin_1024x768": {"btn-empty.png": ((48, 48), (2, 4, 46, 44)), "nav-file-f.png": ((64, 64), (5, 8, 59, 53)),
                       "nav-favorite-n.png": ((64, 64), (3, 4, 61, 60)), "bg-btn-01-f.png": ((80, 80), None),
                       "value-frame-n.png": ((96, 38), None), "charging-02.png": ((160, 768), (43, 317, 120, 451))},
 }
@@ -152,6 +150,37 @@ def make_base(path, files=None, copies=None):
     for folder, entries in (COPIES if copies is None else copies).items():
         for name, (size, box) in entries.items():
             synthetic(os.path.join(path, folder, name), size, box)
+    if files is None and copies is None:
+        transparent_icons(path)
+
+
+def transparent_icons(path, sizes=AB_ICON_SIZES):
+    """The base's icon-A-54.png and icon-B-54.png: fully transparent and as wide as the screen."""
+    for folder, size in sizes.items():
+        for name in AB_ICONS:
+            os.makedirs(os.path.join(path, folder), exist_ok=True)
+            Image.new("RGBA", size, (0, 0, 0, 0)).save(os.path.join(path, folder, name))
+
+
+def hint_size(name, folder):
+    """A button hint's size in a skin folder with no tips-bar-bg.png of its own: its 640x480 size scaled by the
+    folder's screen, rounded down."""
+    w, h = HINTS[AB_ICONS.get(name, name)]
+    sw, sh = frames.screen(folder)
+    scale = min(sw / 640, sh / 480)
+    return int(w * scale), int(h * scale)
+
+
+def hint_files(folders, icons=AB_ICON_SIZES):
+    """{rel: (size, None)} of the hint files the build makes in these skin folders, `icons` the folders whose base has
+    the A/B icons."""
+    out = {}
+    for folder in folders:
+        if folder == "skin" or re.fullmatch(r"skin_\d+x\d+", folder):
+            out.update({f"{folder}/{n}": (hint_size(n, folder), None) for n in HINTS})
+        if folder in icons:
+            out.update({f"{folder}/{n}": (hint_size(n, folder), None) for n in AB_ICONS})
+    return out
 
 
 def load(path):
@@ -313,18 +342,21 @@ class Frames(unittest.TestCase):
 
     def test_every_registered_frame(self):
         names = {key.split("/", 1)[1] for key in frames.FRAMES}
-        self.assertEqual(names, set(BASE))
+        self.assertEqual(names, set(BASE) | set(HINTS) | set(AB_ICONS))
         theme, written = self.build(GRUVBOX, "a")
         other, _ = self.build(GRUVBOX, "b")
         arcade, _ = self.build(ARCADE, "c")
+        hints = hint_files(["skin", *COPIES])
         expected = {f"skin/{n}" for n in BASE} | {f"{folder}/{n}" for folder, entries in COPIES.items() for n in entries}
-        self.assertEqual(sorted(written), sorted(expected))
+        self.assertEqual(sorted(written), sorted(expected | set(hints)))
         sizes = dict({f"skin/{n}": v for n, v in BASE.items()},
-                     **{f"{folder}/{n}": v for folder, entries in COPIES.items() for n, v in entries.items()})
+                     **{f"{folder}/{n}": v for folder, entries in COPIES.items() for n, v in entries.items()}, **hints)
         for rel in sorted(written):
             with self.subTest(rel):
-                spec = frames.FRAMES["skin/" + rel.split("/", 1)[1]]
-                (size, box), base_size = sizes[rel], BASE[rel.split("/", 1)[1]][0]
+                file = rel.split("/", 1)[1]
+                spec = frames.FRAMES["skin/" + file]
+                size, box = sizes[rel]
+                base_size = BASE[file][0] if file in BASE else HINTS[AB_ICONS.get(file, file)]
                 cell = frames.cell_for(size, base_size, spec.small)
                 if spec.height is not None:  # one list row tall, whatever the base's height
                     size = (size[0], spec.height(theme, rel.split("/", 1)[0]))
@@ -396,13 +428,14 @@ class Frames(unittest.TestCase):
         on odd (13-cell) and even (14-cell) grids alike."""
         theme, written = self.gruvbox
         ink = frames.shades(GRUVBOX).ink
-        hints = [rel for rel in written if rel.split("/", 1)[1].startswith("context-")]
-        self.assertGreaterEqual(len(hints), 7 + 5)
+        hints = [rel for rel in written if rel.split("/", 1)[1] in HINTS or rel.split("/", 1)[1] in AB_ICONS]
+        self.assertEqual(len(hints), len(hint_files(["skin", *COPIES])))
         for rel in hints:
             with self.subTest(rel):
                 img = load(os.path.join(theme, rel))
                 name = rel.split("/", 1)[1]
-                canvas = frames.Canvas(img.size, frames.cell_for(img.size, BASE[name][0], small=True), (0, 0) + img.size)
+                canvas = frames.Canvas(img.size, frames.cell_for(img.size, frames.FRAMES[f"skin/{name}"].size, small=True),
+                                       (0, 0) + img.size)
                 cells = grid(img, canvas)
                 # the letters: ink cells inside the button (not its outline ring)
                 body = {xy for xy, rgba in cells.items() if rgba[3] and rgba[:3] != ink}
@@ -414,6 +447,75 @@ class Frames(unittest.TestCase):
                 top, bottom = min(y for _, y in letters), max(y for _, y in letters)
                 self.assertEqual(left, canvas.cols - 1 - right)
                 self.assertEqual(top, canvas.rows - 1 - bottom)
+
+    def test_hint_pills_made_where_the_base_has_none(self):
+        """The base ships no context-*.png: every skin/ and skin_<W>x<H>/ folder gets all seven, at the 640x480 size
+        scaled by the folder's screen; skin_640_480/ (a partial override folder) gets none."""
+        theme, written = self.gruvbox
+        want = {"skin": ((26, 26), (66, 26)), "skin_1024x768": ((41, 41), (105, 41)),
+                "skin_720x540": ((29, 29), (74, 29)), "skin_1280x720": ((39, 39), (99, 39))}
+        for folder, (button, pill) in want.items():
+            for name in HINTS:
+                with self.subTest(folder=folder, name=name):
+                    self.assertIn(f"{folder}/{name}", written)
+                    img = load(os.path.join(theme, folder, name))
+                    self.assertEqual(img.size, pill if name in ("context-menu.png", "context-select.png",
+                                                                "context-start.png") else button)
+                    self.assertIsNotNone(img.getchannel("A").getbbox())
+        self.assertFalse(any(os.path.exists(os.path.join(theme, "skin_640_480", n)) for n in HINTS))
+
+    def test_hint_scale_follows_the_base_tips_bar(self):
+        """With tips-bar-bg.png in skin/ and the folder, the hints scale as the base's art does there: that bar's
+        height over skin/'s, not the folder's screen. skin_480x800 keeps 640x480-sized art (a 60-high bar)."""
+        theme = os.path.join(self.tmp.name, "theme")
+        bar = {"tips-bar-bg.png": ((640, 60), None)}
+        make_base(theme, bar, {"skin_480x800": bar, "skin_1024x768": {"tips-bar-bg.png": ((1024, 90), None)}})
+        transparent_icons(theme, {"skin_480x800": (640, 54), "skin_1024x768": (1024, 86)})
+        written = frames.apply(theme, GRUVBOX)
+        for folder, button, pill in (("skin_480x800", (26, 26), (66, 26)),
+                                     ("skin_1024x768", (39, 39), (99, 39))):  # 90/60, not min(1024/640, 768/480)
+            for name in [*HINTS, *AB_ICONS]:
+                with self.subTest(folder=folder, name=name):
+                    self.assertIn(f"{folder}/{name}", written)
+                    wide = name in ("context-menu.png", "context-select.png", "context-start.png")
+                    self.assertEqual(load(os.path.join(theme, folder, name)).size, pill if wide else button)
+
+    def test_ab_icons_are_the_a_and_b_pills(self):
+        """The base's transparent, screen-wide icon-A-54/icon-B-54 come out as the A and B pills, at their size."""
+        theme, written = self.gruvbox
+        for folder, size in (("skin", (26, 26)), ("skin_1024x768", (41, 41))):
+            for icon, pill in AB_ICONS.items():
+                with self.subTest(folder=folder, icon=icon):
+                    self.assertIn(f"{folder}/{icon}", written)
+                    img = load(os.path.join(theme, folder, icon))
+                    self.assertEqual(img.size, size)
+                    self.assertIsNotNone(img.getchannel("A").getbbox())
+                    with open(os.path.join(theme, folder, icon), "rb") as f, \
+                            open(os.path.join(theme, folder, pill), "rb") as g:
+                        self.assertEqual(f.read(), g.read())
+        self.assertNotEqual(load(os.path.join(theme, "skin", "icon-A-54.png")).tobytes(),
+                            load(os.path.join(theme, "skin", "icon-B-54.png")).tobytes())
+        self.assertFalse(os.path.exists(os.path.join(theme, "skin_720x540", "icon-A-54.png")))  # not in that base folder
+
+    def test_build_theme_turns_context_buttons_on(self):
+        base = os.path.join(self.tmp.name, "base")
+        make_theme_base(base)
+        make_base(base)
+        with open(os.path.join(base, "config.json")) as f:
+            config = json.load(f)
+        config["hint"] = {"size": 25, "color": "#EBDBB2"}
+        with open(os.path.join(base, "config.json"), "w") as f:
+            json.dump(config, f)
+        with open(os.path.join(base, "config_1024x768.json"), "w") as f:
+            json.dump({"list": {"size": 36}}, f)
+        dest = pixel_build.build_theme(base, os.path.join(self.tmp.name, "out"), "T", "CONSOLES", GRUVBOX)
+        with open(os.path.join(dest, "config.json")) as f:
+            hint = json.load(f)["hint"]
+        self.assertIs(hint["contextbuttons"], True)
+        self.assertEqual(hint["size"], 24)  # its other keys kept (the size rounded as every font size is)
+        self.assertIn("color", hint)
+        with open(os.path.join(dest, "config_1024x768.json")) as f:
+            self.assertIs(json.load(f)["hint"]["contextbuttons"], True)  # made when the config had no hint
 
     def test_animation_frames_keep_positions(self):
         theme, written = self.gruvbox
@@ -721,7 +823,8 @@ class Frames(unittest.TestCase):
         with open(os.path.join(theme, "icons", "bg-list-l.png"), "rb") as f:
             icon = f.read()
         written = frames.apply(theme, GRUVBOX)
-        self.assertEqual(sorted(written), ["skin/bg-list-s.png", "skin_720x480/bg-grid-s.png"])
+        self.assertEqual(sorted(written), sorted(["skin/bg-list-s.png", "skin_720x480/bg-grid-s.png",
+                                                  *hint_files(["skin", "skin_720x480"], icons=())]))
         with open(os.path.join(theme, "icons", "bg-list-l.png"), "rb") as f:
             self.assertEqual(f.read(), icon)
         self.assertEqual(set(load(os.path.join(theme, "skin", "background.png")).get_flattened_data()), {(0, 0, 0, 255)})
@@ -734,7 +837,7 @@ class Frames(unittest.TestCase):
         Image.new("RGBA", (156, 176), (0, 0, 0, 0)).save(path)
         with open(path, "rb") as f:
             before = f.read()
-        self.assertEqual(frames.apply(theme, GRUVBOX), [])
+        self.assertEqual(frames.apply(theme, GRUVBOX), sorted(hint_files(["skin"], icons=())))
         with open(path, "rb") as f:
             self.assertEqual(f.read(), before)
 

@@ -282,10 +282,14 @@ register("skin/btn-shift.png", shift, symmetric=True, flush=("top", "bottom"))
 register("skin/btn-space.png", space, symmetric=True, flush=ALL)
 register("skin/btn-empty.png", trash, symmetric=True, flush=ALL)
 register("skin/progress-dot.png", dot, symmetric=True, flush=ALL)
+# the hint pills of PyUI's contextual bottom bar: the base has none, so they are made at their 640x480 size
 for _letter in "ABXY":
-    register(f"skin/context-{_letter.lower()}.png", hint(_letter), flush=ALL, small=True)
-for _word in ("MENU", "SELECT", "START"):
-    register(f"skin/context-{_word.lower()}.png", hint(_word), flush=ALL, small=True)  # the word needs small cells
+    register(f"skin/context-{_letter.lower()}.png", hint(_letter), flush=ALL, small=True, size=(26, 26), create=True)
+for _word in ("MENU", "SELECT", "START"):  # the word needs small cells
+    register(f"skin/context-{_word.lower()}.png", hint(_word), flush=ALL, small=True, size=(66, 26), create=True)
+# the confirm and back icons of the standard bottom bar: transparent and screen-wide in the base, the A and B pills here
+register("skin/icon-A-54.png", hint("A"), flush=ALL, small=True, size=(26, 26))
+register("skin/icon-B-54.png", hint("B"), flush=ALL, small=True, size=(26, 26))
 for _kind in ("app_loading_0", "charging-0"):
     _group = tuple(f"{_kind}{i}.png" for i in range(1, 6))
     for _i in range(1, 6):
