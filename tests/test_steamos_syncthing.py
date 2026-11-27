@@ -16,7 +16,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from sync_roms import android_syncthing, spruce_syncthing, steamos_syncthing as st  # noqa: E402
 
-CONFIG = "<configuration><gui tls=\"{tls}\"><address>{address}</address><apikey>k</apikey></gui></configuration>"
+KEY = "sekret-api-key-123"
+CONFIG = "<configuration><gui tls=\"{tls}\"><address>{address}</address><apikey>%s</apikey></gui></configuration>" % KEY
 REAL_INSTALL = st.install
 PATHS = {"saves": "/home/deck/Emulation/saves/retroarch/saves", "states": "/home/deck/Emulation/saves/retroarch/states"}
 
@@ -61,10 +62,10 @@ class FindTest(Base):
     def test_find_order(self):
         state = os.path.join(self.home, ".local/state/syncthing/config.xml")
         config = os.path.join(self.home, ".config/syncthing/config.xml")
-        write(config)
-        self.assertEqual(st.find(self.home), st.Install(config, None))
         write(state)
         self.assertEqual(st.find(self.home), st.Install(state, None))
+        write(config)  # Syncthing keeps using an existing legacy folder
+        self.assertEqual(st.find(self.home), st.Install(config, None))
         self.run.side_effect = lambda *a, **k: subprocess.CompletedProcess(
             a[0], 0, "12 syncthing-gtk\n34 /usr/bin/syncthing serve --home=/x --no-browser\n", "")
         self.assertEqual(st.find(self.home), st.Install("/x/config.xml", None))
@@ -83,6 +84,9 @@ class FindTest(Base):
                 path = os.path.join(home, ".var/app", st.FLATPAKS[0], sub, "syncthing/config.xml")
                 write(path)
                 self.assertEqual(st.find(home), st.Install(path, st.FLATPAKS[0]))
+        legacy = os.path.join(home, ".var/app", st.FLATPAKS[0], "config/syncthing/config.xml")
+        write(legacy)  # with both, the legacy one Syncthing keeps using
+        self.assertEqual(st.find(home), st.Install(legacy, st.FLATPAKS[0]))
 
     def test_find_none(self):
         self.assertIsNone(st.find(self.home))
@@ -92,8 +96,8 @@ class FindTest(Base):
 
 class ReadConfigTest(unittest.TestCase):
     def test_read_config_tls_and_port(self):
-        self.assertEqual(st.read_config(CONFIG.format(tls="true", address="0.0.0.0:8385")), ("k", 8385, "https"))
-        self.assertEqual(st.read_config(CONFIG.format(tls="false", address="127.0.0.1:8384")), ("k", 8384, "http"))
+        self.assertEqual(st.read_config(CONFIG.format(tls="true", address="0.0.0.0:8385")), (KEY, 8385, "https"))
+        self.assertEqual(st.read_config(CONFIG.format(tls="false", address="127.0.0.1:8384")), (KEY, 8384, "http"))
         self.assertEqual(st.read_config("<configuration><gui><address>[::1]:9000</address><apikey>k</apikey></gui></configuration>"),
                          ("k", 9000, "http"))
 
@@ -116,6 +120,17 @@ class FlatpakEntriesTest(unittest.TestCase):
         entries = st.flatpak_entries("app", folders, "[Context]\nfilesystems=xdg-download;/home/deck/Emu;\n")
         self.assertEqual([(e.key, e.old, e.new) for e in entries], [("filesystem /home/deck/Emulation/x", None, "allowed")])
         self.assertEqual(len(st.flatpak_entries("app", folders, "[Context]\nshared=network;\n")), 1)
+
+    def test_home_and_host_miss_var_app(self):
+        home = os.path.realpath(os.path.expanduser("~"))
+        saves = os.path.join(home, ".var/app/org.libretro.RetroArch/config/retroarch/saves")
+        for grants in ("home;", "~;", "host;", "~/;", "/;", "~/.var;", "~/.var/app/org.libretro.RetroArch/config/retroarch/states;"):
+            with self.subTest(grants=grants):
+                entries = st.flatpak_entries("app", [saves], f"[Context]\nfilesystems={grants}\n")
+                self.assertEqual([e.key for e in entries], [f"filesystem {saves}"])
+        for grants in (f"{saves};", "home;~/.var/app/org.libretro.RetroArch;", "~/.var/app;", f"xdg-download;{saves}/;"):
+            with self.subTest(grants=grants):
+                self.assertEqual(st.flatpak_entries("app", [saves], f"[Context]\nfilesystems={grants}\n"), [])
 
 
 class InstallTest(Base):
@@ -192,9 +207,9 @@ class ApplyTest(Base):
         failed, out, err = self.apply()
         self.assertEqual(failed, [])
         self.install.assert_not_called()
-        self.configure.assert_called_once_with(8384, "k", self.SRV, PATHS, False, "https", where="Syncthing",
+        self.configure.assert_called_once_with(8384, KEY, self.SRV, PATHS, False, "https", where="Syncthing",
                                                mod_time_window=2, wait=False)
-        self.assertNotIn("k\n", out + err)
+        self.assertNotIn(KEY, out + err)
 
     def test_apply_existing_down_warns(self):
         write(os.path.join(self.home, ".config/syncthing/config.xml"), CONFIG.format(tls="false", address="127.0.0.1:8384"))
@@ -221,7 +236,7 @@ class ApplyTest(Base):
         self.install.side_effect = install
         failed, out, err = self.apply()
         self.install.assert_called_once_with(self.home)
-        self.assertEqual(self.configure.call_args.args[:6], (8384, "k", self.SRV, PATHS, False, "http"))
+        self.assertEqual(self.configure.call_args.args[:6], (8384, KEY, self.SRV, PATHS, False, "http"))
 
     def test_apply_existing_binary_not_installed(self):
         for rel in (".local/bin/syncthing", ".config/systemd/user/syncthing.service"):
@@ -253,7 +268,7 @@ class ApplyTest(Base):
         failed, out, err = self.apply()
         self.install.assert_not_called()
         self.assertEqual(failed, [])
-        self.assertEqual(self.configure.call_args.args[:2], (8390, "k"))
+        self.assertEqual(self.configure.call_args.args[:2], (8390, KEY))
 
     def test_apply_install_error_fails(self):
         self.install.side_effect = ValueError("checksum")
@@ -276,6 +291,17 @@ class ApplyTest(Base):
         self.assertEqual(overrides, [["flatpak", "override", "--user", f"--filesystem={p}", app] for p in PATHS.values()])
         self.assertIn(f"restart {app}", out + err)
 
+    def test_apply_flatpak_override_seen_on_rerun(self):
+        app = st.FLATPAKS[0]
+        write(os.path.join(self.home, ".var/app", app, "config/syncthing/config.xml"),
+              CONFIG.format(tls="false", address="127.0.0.1:8384"))
+        shown = "[Context]\nfilesystems=home;" + "".join(f"{p};" for p in PATHS.values()) + "\n"  # --user overrides included
+        self.run.side_effect = lambda cmd, **k: (subprocess.CompletedProcess(cmd, 0, shown, "")
+                                                 if cmd[:2] == ["flatpak", "info"] else no_pgrep(cmd))
+        failed, out, err = self.apply()
+        self.assertFalse([c for c in self.run.call_args_list if c.args[0][:2] == ["flatpak", "override"]])
+        self.assertNotIn("restart", out + err)
+
     def test_apply_flatpak_dry_run_overrides_nothing(self):
         app = st.FLATPAKS[0]
         write(os.path.join(self.home, ".var/app", app, "config/syncthing/config.xml"),
@@ -291,6 +317,16 @@ class ApplyTest(Base):
             failed, out, err = self.apply()
         self.assertEqual(out + err, "")
         self.run.assert_not_called()
+
+    def test_apply_no_server_installs_nothing(self):
+        for dry_run in (False, True):
+            with self.subTest(dry_run=dry_run), mock.patch.object(spruce_syncthing, "server", return_value=None):
+                failed, out, err = self.apply(dry_run)
+            self.install.assert_not_called()
+            self.configure.assert_not_called()
+            self.assertEqual(failed, [])
+            self.assertIn("syncthing_server isn't set", out)
+            self.assertNotIn("would install", out)
 
     def test_apply_no_server_skips_configure(self):
         write(os.path.join(self.home, ".config/syncthing/config.xml"), CONFIG.format(tls="false", address="127.0.0.1:8384"))

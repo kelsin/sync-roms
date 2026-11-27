@@ -21,8 +21,10 @@ Install = namedtuple("Install", "config flatpak")  # config.xml's path, the Flat
 # The Decky Syncthing plugin (theCapypara/steamdeck-decky-syncthing) has no Syncthing of its own: it drives one of these
 # or a systemd one, so it has no path here.
 FLATPAKS = ("com.github.zocker_160.SyncThingy", "me.kozec.syncthingtk", "io.github.martchus.syncthingtray")
-FLATPAK_CONFIGS = (".local/state/syncthing/config.xml", "config/syncthing/config.xml")  # under ~/.var/app/<id>/
-CONFIGS = (".local/state/syncthing/config.xml", ".config/syncthing/config.xml")  # under ~
+FLATPAK_CONFIGS = ("config/syncthing/config.xml", ".local/state/syncthing/config.xml")  # under ~/.var/app/<id>/, as CONFIGS
+# Under ~. Syncthing 1.27.0+ defaults to ~/.local/state/syncthing but keeps using an existing legacy ~/.config/syncthing
+# (docs.syncthing.net/users/config.html: "Existing installations may still use these directories"), so that one first.
+CONFIGS = (".config/syncthing/config.xml", ".local/state/syncthing/config.xml")
 REPO = "syncthing/syncthing"
 SUMS = ("sha256sum.txt", "sha256sum.txt.asc")  # releases ship the clearsigned .asc
 ARCHES = {"x86_64": "amd64", "amd64": "amd64", "aarch64": "arm64", "arm64": "arm64"}
@@ -107,12 +109,19 @@ def read_config(text):
     return key, int(match.group(1)) if match else 8384, scheme
 
 
+def _within(path, parent):
+    return path == parent or path.startswith(parent.rstrip("/") + "/")
+
+
 def _covers(grant, folder, home):
     grant, _, mode = grant.partition(":")
     if mode == "ro" or grant.startswith("!"):
         return False
+    # ~/.var/app (every app's data) isn't available with home or host: it must be granted itself or below
+    # (docs.flatpak.org/en/latest/sandbox-permissions.html; flatpak-context.c hides it with a tmpfs).
+    var_app = os.path.join(home, ".var", "app")
     if grant == "host":
-        return True
+        return not _within(folder, var_app)
     if grant == "home" or grant == "~":
         grant = home
     elif grant.startswith("~/"):
@@ -120,11 +129,15 @@ def _covers(grant, folder, home):
     if not grant.startswith("/"):
         return False  # xdg-*, host-os, host-etc
     grant = grant.rstrip("/") or "/"
-    return folder == grant or folder.startswith(grant.rstrip("/") + "/")
+    if _within(folder, var_app) and not _within(grant, var_app):
+        return False
+    return _within(folder, grant)
 
 
 def flatpak_entries(app, folders, permissions):
-    """An entry per folder the app's `flatpak info --show-permissions` output doesn't let it write."""
+    """An entry per folder the app's `flatpak info --show-permissions` output doesn't let it write. That output includes
+    the --user overrides: flatpak_context_load_for_deploy (common/flatpak-run.c) merges flatpak_deploy_get_overrides,
+    which always loads the per-user ones (common/flatpak-dir.c), so a re-run sees the override it added."""
     line = next((line for line in permissions.splitlines() if line.startswith("filesystems=")), "filesystems=")
     grants = [g for g in line.partition("=")[2].split(";") if g]
     home = os.path.realpath(os.path.expanduser("~"))
@@ -179,7 +192,7 @@ def install(home):
         f.write(re.sub(r"^ExecStart=\S+", lambda _: f"ExecStart={binary}", unit, flags=re.M))
     subprocess.run(["systemctl", "--user", "daemon-reload"], check=True)
     subprocess.run(["systemctl", "--user", "enable", "--now", "syncthing"], check=True)
-    config = os.path.join(home, *CONFIGS[0].split("/"))
+    config = os.path.join(home, *CONFIGS[1].split("/"))  # a new install uses the current default
     deadline = time.monotonic() + 30
     while not os.path.isfile(config):
         if time.monotonic() >= deadline:
@@ -214,6 +227,10 @@ def apply(paths, dry_run, failed):
                     "running and has no config yet: start it with `systemctl --user start syncthing`, then run config apply again")
             failed.append(WHERE)
             return
+        srv = spruce_syncthing.server()
+        if found is None and not srv:
+            print(ui.dim("Syncthing isn't installed, since syncthing_server isn't set in settings.json"))
+            return
         if found is None:
             if dry_run:
                 print(ui.dim("🧪 Dry run: no Syncthing found; would install the official one as a systemd user service "
@@ -227,7 +244,6 @@ def apply(paths, dry_run, failed):
             return
         key, port, scheme = config
         entries = _flatpak_access(found.flatpak, list(paths.values()), dry_run) if found.flatpak else []
-        srv = spruce_syncthing.server()
         if srv:
             if android_syncthing._up(port, key, scheme):
                 entries += android_syncthing.configure(port, key, srv, paths, dry_run, scheme, where=WHERE,
