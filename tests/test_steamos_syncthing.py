@@ -17,6 +17,7 @@ import isolate  # noqa: E402,F401
 from sync_roms import android_syncthing, spruce_syncthing, steamos_syncthing as st  # noqa: E402
 
 CONFIG = "<configuration><gui tls=\"{tls}\"><address>{address}</address><apikey>k</apikey></gui></configuration>"
+REAL_INSTALL = st.install
 PATHS = {"saves": "/home/deck/Emulation/saves/retroarch/saves", "states": "/home/deck/Emulation/saves/retroarch/states"}
 
 
@@ -221,6 +222,38 @@ class ApplyTest(Base):
         failed, out, err = self.apply()
         self.install.assert_called_once_with(self.home)
         self.assertEqual(self.configure.call_args.args[:6], (8384, "k", self.SRV, PATHS, False, "http"))
+
+    def test_apply_existing_binary_not_installed(self):
+        for rel in (".local/bin/syncthing", ".config/systemd/user/syncthing.service"):
+            with self.subTest(rel=rel):
+                self.home = tempfile.mkdtemp(dir=os.environ["HOME"])
+                write(os.path.join(self.home, rel), "[Service]\nExecStart=/usr/bin/syncthing serve\n")
+                for dry_run in (False, True):
+                    with mock.patch.dict(os.environ, {"HOME": self.home}):
+                        failed, out, err = self.apply(dry_run)
+                    self.install.assert_not_called()
+                    self.configure.assert_not_called()
+                    self.assertEqual(failed, ["Syncthing"])
+                    self.assertIn("systemctl --user start syncthing", err)
+
+    def test_install_not_downloaded_when_binary_exists(self):
+        write(os.path.join(self.home, ".local/bin/syncthing"), "x")
+        with mock.patch.object(st.github, "json") as release, mock.patch.object(st, "_fetch") as fetch, \
+                mock.patch.object(st, "install", REAL_INSTALL):
+            failed, out, err = self.apply()
+        self.assertEqual(failed, ["Syncthing"])
+        release.assert_not_called()
+        fetch.assert_not_called()
+
+    def test_apply_unit_home_used(self):
+        folder = os.path.join(self.home, "st")
+        write(os.path.join(folder, "config.xml"), CONFIG.format(tls="false", address="127.0.0.1:8390"))
+        write(os.path.join(self.home, ".config/systemd/user/syncthing.service"),
+              f"[Service]\nExecStart={self.home}/.local/bin/syncthing serve --home={folder} --no-browser\n")
+        failed, out, err = self.apply()
+        self.install.assert_not_called()
+        self.assertEqual(failed, [])
+        self.assertEqual(self.configure.call_args.args[:2], (8390, "k"))
 
     def test_apply_install_error_fails(self):
         self.install.side_effect = ValueError("checksum")

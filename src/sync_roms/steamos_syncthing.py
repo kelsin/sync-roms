@@ -44,14 +44,40 @@ def _running():
         return None
     for line in result.stdout.splitlines():
         args = line.split()[1:]
-        if not args or os.path.basename(args[0]) != "syncthing":
-            continue
-        for i, arg in enumerate(args[1:], 1):
-            match = re.fullmatch(r"--?(?:home|config)(?:=(.+))?", arg)
-            if match:
-                folder = match.group(1) or (args[i + 1] if i + 1 < len(args) else None)
-                if folder:
-                    return folder
+        if args and os.path.basename(args[0]) == "syncthing" and (folder := _home_arg(args[1:])):
+            return folder
+    return None
+
+
+def _home_arg(args):
+    """The folder given with --home or --config in a syncthing command line's arguments, or None."""
+    for i, arg in enumerate(args):
+        match = re.fullmatch(r"--?(?:home|config)(?:=(.+))?", arg)
+        if match:
+            folder = match.group(1) or (args[i + 1] if i + 1 < len(args) else None)
+            if folder:
+                return folder
+    return None
+
+
+def _binary(home):
+    return os.path.join(home, ".local", "bin", "syncthing")
+
+
+def _unit(home):
+    return os.path.join(home, ".config", "systemd", "user", "syncthing.service")
+
+
+def _unit_home(home):
+    """The --home/--config folder in an existing user unit's ExecStart, or None."""
+    try:
+        with open(_unit(home), encoding="utf-8") as f:
+            text = f.read()
+    except FileNotFoundError:
+        return None
+    for match in re.finditer(r"^ExecStart=(.*)$", text, re.M):
+        if folder := _home_arg(match.group(1).split()[1:]):
+            return folder
     return None
 
 
@@ -131,8 +157,7 @@ def install(home):
         raise ValueError(f"{name} doesn't match its sha256sum.txt checksum")
     cache = os.path.join(home, ".cache")
     os.makedirs(cache, exist_ok=True)
-    binary = os.path.join(home, ".local", "bin", "syncthing")
-    unit_path = os.path.join(home, ".config", "systemd", "user", "syncthing.service")
+    binary, unit_path = _binary(home), _unit(home)
     with tempfile.TemporaryDirectory(dir=cache) as tmp:
         archive = os.path.join(tmp, name)
         with open(archive, "wb") as f:
@@ -182,6 +207,13 @@ def apply(paths, dry_run, failed):
     try:
         home = os.path.expanduser("~")
         found = find(home)
+        if found is None and (folder := _unit_home(home)):
+            found = Install(os.path.join(folder, "config.xml"), _flatpak_of(os.path.join(folder, "config.xml"), home))
+        if found is None and any(os.path.exists(p) for p in (_binary(home), _unit(home))):
+            ui.warn(f"Syncthing is installed ({_binary(home) if os.path.exists(_binary(home)) else _unit(home)}) but isn't "
+                    "running and has no config yet: start it with `systemctl --user start syncthing`, then run config apply again")
+            failed.append(WHERE)
+            return
         if found is None:
             if dry_run:
                 print(ui.dim("🧪 Dry run: no Syncthing found; would install the official one as a systemd user service "
