@@ -57,7 +57,11 @@ def warnings(ra_dir, emudeck_settings):
     except OSError:
         cores = []
     for core in cores:
-        for path in sorted(e.path for e in os.scandir(core) if e.is_file() and e.name.endswith(".cfg")):
+        try:
+            paths = sorted(e.path for e in os.scandir(core) if e.is_file() and e.name.endswith(".cfg"))
+        except OSError:
+            continue  # an unreadable core folder
+        for path in paths:
             try:
                 cfg = android.parse_config(_read(path))
             except (OSError, UnicodeDecodeError):

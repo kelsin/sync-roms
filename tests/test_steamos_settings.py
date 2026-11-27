@@ -60,6 +60,21 @@ class Warnings(helpers.DataDir):
         self.assertTrue(any("mGBA.cfg" in w and "savefile_directory" in w for w in got))
         self.assertTrue(any("gb.cfg" in w and "savestate_directory" in w for w in got))
 
+    def test_warnings_unreadable_core_skipped(self):
+        ra = os.path.join(self.tmp.name, "ra")
+        write(os.path.join(ra, "config", "mGBA", "mGBA.cfg"), 'savefile_directory = "/x"\n')
+        write(os.path.join(ra, "config", "Snes9x", "Snes9x.cfg"), 'savefile_directory = "/y"\n')
+        real = os.scandir
+
+        def scandir(path):
+            if os.path.basename(path) == "mGBA":
+                raise PermissionError(13, "Permission denied", path)
+            return real(path)
+        with mock.patch.object(ss.os, "scandir", side_effect=scandir):
+            got = ss.warnings(ra, None)
+        self.assertEqual(len(got), 1)
+        self.assertIn("Snes9x.cfg", got[0])
+
     def test_warnings_none(self):
         ra = os.path.join(self.tmp.name, "ra")
         self.assertEqual(ss.warnings(ra, 'cloud_sync_status="false"\n'), [])
