@@ -73,6 +73,12 @@ class Batches(unittest.TestCase):
     def test_batch_5_drawn(self):
         self.assert_drawn(["3do", "cdimono1", "pcfx", "atarijaguarcd", "arcadia", "gamecom", "uzebox"])
 
+    def test_batch_6_drawn(self):
+        self.assert_drawn(["model2", "model3", "stv", "triforce", "type-x", "daphne", "lowresnx", "lutro"])
+
+    def test_nothing_pending(self):
+        self.assertEqual(esde_systems.PENDING, set())
+
 
 def load_tool(name):
     path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tools", name + ".py")

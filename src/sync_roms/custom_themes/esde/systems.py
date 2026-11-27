@@ -29,7 +29,7 @@ EXTRA.update({name: {"CONSOLES": modern.CONSOLES[name], "CONTROLLERS": modern.CO
 EXTRA.update({name: {"CONSOLES": esde_extra.CONSOLES[name], "CONTROLLERS": esde_extra.CONTROLLERS[name]}
               for name in esde_extra.CONSOLES})
 # ES-DE names still waiting for a drawing
-PENDING = {"daphne", "lowresnx", "lutro", "model2", "model3", "stv", "triforce", "type-x"}
+PENDING = set()
 
 
 def esde_names():
