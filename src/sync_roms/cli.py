@@ -30,7 +30,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "edit": ("", "interactive editor: cards, tags, collections, device systems"),
     "games": ("list|add|remove|full|export|import", "edit a card's games, interactively or from scripts"),
     "tags": ("edit|suggest", "edit the tags in storage by hand (games, names, emoji, merging, deleting), or add tags from scraped genres"),
-    "collections": ("edit|import|page|publish|retitle|share|unshare", "edit your collections of favourite games (saved in ~/.sync-roms/collections/), import ones exported from a share page, write a shareable HTML page of them, publish it to sync-roms.games, set their titles to the scraped names, or share the page on your tailnet"),
+    "collections": ("edit|import|page|publish|retitle|share|unshare|update", "edit your collections of favourite games (saved in ~/.sync-roms/collections/), import ones exported from a share page, write a shareable HTML page of them, publish it to sync-roms.games, set their titles to the scraped names, share the page on your tailnet, or share and publish it in one go"),
     "themes": ("update|pick|build|publish|palettes", "copy the latest Art Book Next for ES-DE and the PyUI themes for spruce from GitHub into storage; build and publish custom spruce themes"),
     "download": ("pico8", "add the PICO-8 BBS Featured carts storage doesn't have, and newer revisions of those it has"),
     "ports": ("search|download|done|needed", "put PortMaster ports and the runtimes they need in storage, from PortMaster's catalogue"),
@@ -161,6 +161,7 @@ TOPICS = {
   sync-roms collections retitle [--dry-run]   set each game's title to its scraped name
   sync-roms collections share                 share that page on your tailnet with tailscale serve
   sync-roms collections unshare               stop serving it
+  sync-roms collections update [--user NAME]  run collections share, then collections publish
 
   Your own lists of games, saved to ~/.sync-roms/collections/<id>.json
   after Done or Esc shows the changes; Quit discards. No git or gh needed, and nothing goes to
@@ -200,6 +201,9 @@ TOPICS = {
   when anything changed. Only your own folder is replaced. When storage can't be reached it
   publishes nothing. --dry-run lists what would change and pushes nothing. Setting up the repo and
   domain: docs/github-pages.md.
+
+  collections update runs collections share, then collections publish (with --user NAME when
+  given), stopping at the first that fails. It has no --dry-run: run collections publish --dry-run.
 """,
     "themes": """
   sync-roms themes update [--dry-run]         put the latest Art Book Next for ES-DE and the PyUI

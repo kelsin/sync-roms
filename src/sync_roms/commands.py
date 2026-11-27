@@ -1432,6 +1432,16 @@ def collections_publish_cmd(args):
     return 0
 
 
+def collections_update_cmd(args):
+    """Share the page on the tailnet, then publish it, stopping at the first step that fails."""
+    for step in (["collections", "share"], ["collections", "publish", *(["--user", args.user] if args.user else [])]):
+        print(ui.bold("▶ sync-roms " + " ".join(step)))
+        code = run(step)
+        if code:
+            return code
+    return 0
+
+
 def collections_unshare_cmd(args):
     print("Stopped sharing the collections page." if tailshare.unshare() else "The collections page isn't shared.")
     return 0
@@ -1853,6 +1863,8 @@ def build_parser():
     p = colsub.add_parser("retitle", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=collections_retitle_cmd)
     p = colsub.add_parser("share", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=collections_share_cmd)
     p = colsub.add_parser("unshare", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=collections_unshare_cmd)
+    p = colsub.add_parser("update", allow_abbrev=False); common(p, card=False); p.add_argument("--user", metavar="NAME")
+    p.set_defaults(fn=collections_update_cmd)
 
     themes = sub.add_parser("themes", add_help=False, allow_abbrev=False)
     tsub = themes.add_subparsers(dest="action", required=True)
@@ -1956,7 +1968,7 @@ def run(argv):
     ap = build_parser()
     ap.prog = f"sync-roms {argv[0]}"  # its errors (unrecognized arguments) point at the command's help
     args = ap.parse_args(argv)
-    if getattr(args, "dry_run", False) and not (args.fn is config_cmd and args.action in ("apply", "push")) and (args.fn in (games_list, games_export, layouts_cmd, config_cmd, cache_cmd, doctor_cmd, guide_cmd, collections_page_cmd, collections_share_cmd, collections_unshare_cmd, check_cmd, completion_cmd, themes_pick, themes_build, themes_palettes,
+    if getattr(args, "dry_run", False) and not (args.fn is config_cmd and args.action in ("apply", "push")) and (args.fn in (games_list, games_export, layouts_cmd, config_cmd, cache_cmd, doctor_cmd, guide_cmd, collections_page_cmd, collections_share_cmd, collections_unshare_cmd, collections_update_cmd, check_cmd, completion_cmd, themes_pick, themes_build, themes_palettes,
                                                           edit_cmd, install_cmd, devices_cmd, diff_cmd, scrape_review_cmd, scrape_missing_cmd, refresh_cmd, ports_done, ports_needed)
                                             or (args.fn is mirror_cmd and args.action == "clear")):
         name = " ".join(w for w in (args.command, getattr(args, "action", None), getattr(args, "verb", None)) if w)
