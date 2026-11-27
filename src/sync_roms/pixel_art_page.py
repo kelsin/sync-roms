@@ -149,9 +149,6 @@ def sprite_sections(img_dir, theme_dir=None):
 
 # Frames the real base ships fully transparent, so they have no canvas to draw over.
 TRANSPARENT = ("bg-grid-s", "div-line-v-02", "navbg", "num-bg", "preview-bg", "statbg", "thumb-default")
-HINT_SIZES = {"context-a.png": (26, 26), "context-b.png": (26, 26), "context-x.png": (26, 26),
-              "context-y.png": (26, 26), "context-menu.png": (66, 26), "context-select.png": (66, 26),
-              "context-start.png": (66, 26)}
 
 
 def build_frames_theme(base_dir, out_dir):
@@ -163,26 +160,14 @@ def build_frames_theme(base_dir, out_dir):
 
 
 def frame_section(img_dir, canvases):
-    """One item per frame the theme drew (its cell grid, one pixel per cell), plus the hint pills the real base has
-    but a test base may not."""
+    """One item per frame the theme drew (its cell grid, one pixel per cell)."""
     w = _Writer(img_dir, "frames")
     for key in sorted(frames.FRAMES):
-        name = key.rsplit("/", 1)[-1]
-        if key not in canvases and name not in HINT_SIZES and _file_stem(key) not in TRANSPARENT:
+        if key not in canvases and _file_stem(key) not in TRANSPARENT:
             ui.warn(f"The frame {key} has no canvas in the base theme, so it won't show on the pixel art page")
     items = [w.image_item(_file_stem(key), _file_stem(key), canvas.cell_image(),
                           [{"path": key, "size": list(canvas.size)}], cell=canvas.cell)
              for key, canvas in sorted(canvases.items(), key=lambda kv: kv[0].rsplit("/", 1)[-1])]
-    colors = frames.shades(palettes.get(PALETTE))
-    for name, size in HINT_SIZES.items():
-        key = f"skin/{name}"
-        spec = frames.FRAMES.get(key)
-        if key in canvases or spec is None:
-            continue
-        canvas = frames.Canvas(size, frames.cell_for(size, None, spec.small), (0, 0) + size, spec.background)
-        spec.draw(canvas, colors)
-        items.append(w.image_item(_file_stem(key), _file_stem(key), canvas.cell_image(),
-                                  [{"path": key, "size": list(size)}], note="not in the SPRUCE base", cell=canvas.cell))
     return _section("frames", "Frames", items)
 
 
