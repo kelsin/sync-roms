@@ -138,6 +138,17 @@ class Canvas:
         return img
 
 
+    def cell_image(self):
+        """The grid at one pixel per cell: each cell's color where it is drawn, the background (opaque) under empty
+        cells when there is one, else transparent."""
+        img = Image.new("RGBA", (self.cols, self.rows), (0, 0, 0, 0))
+        if self.background is not None:
+            img.paste(tuple(self.background) + (255,), (0, 0, self.cols, self.rows))
+        for (x, y), rgb in self.cells.items():
+            img.putpixel((x, y), tuple(rgb) + (255,))
+        return img
+
+
 @dataclass
 class FrameSpec:
     draw: object  # draw(canvas, shades)
@@ -162,8 +173,9 @@ def screen(folder):
     return (int(m[1]), int(m[2])) if m else (640, 480)
 
 
-def apply(theme_dir, palette):
-    """Redraw every registered frame present in the theme's skin*/ folders; returns the relative paths written."""
+def apply(theme_dir, palette, canvases=None):
+    """Redraw every registered frame present in the theme's skin*/ folders; returns the relative paths written. A dict
+    passed as `canvases` gets each drawn frame's Canvas under its relative path."""
     colors = shades(palette)
     base_sizes = {name: _base_size(theme_dir, name.split("/", 1)[1]) for name in FRAMES}  # before skin/ is redrawn
     written = []
@@ -197,6 +209,8 @@ def apply(theme_dir, palette):
             spec.draw(canvas, colors)
             canvas.image().save(os.path.join(theme_dir, folder, file))
             written.append(f"{folder}/{file}")
+            if canvases is not None:
+                canvases[f"{folder}/{file}"] = canvas
     return written
 
 
