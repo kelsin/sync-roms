@@ -105,7 +105,7 @@ def plan(config, srv, defaults_device, defaults_folder, paths=None, where=WHERE,
                 entries += _settings_entries(folder_id, found, where)
                 window = mod_time_window is not None and found.get("modTimeWindowS") != mod_time_window
                 if mod_time_window is not None:
-                    entries.append(applied.Entry(where, f"folder {folder_id} modTimeWindowS", str(found.get("modTimeWindowS")),
+                    entries.append(applied.Entry(where, f"folder {folder_id} modTimeWindowS", None if found.get("modTimeWindowS") is None else str(found["modTimeWindowS"]),
                                                  str(mod_time_window), False))
                 if not shared or window or _settings_differ(found):
                     devices = found.get("devices", []) + ([] if shared else [{"deviceID": server}])
@@ -139,17 +139,12 @@ def _api(port, key, method, path, body=None, scheme="https"):
     return json.loads(raw) if raw.strip() else None
 
 
-def _call(scheme, *args):
-    """_api, naming the scheme only when it isn't https."""
-    return _api(*args) if scheme == "https" else _api(*args, scheme=scheme)
-
-
 def _up(port, key, scheme="https"):
     """Whether the health check answers within 15 seconds."""
     deadline = time.monotonic() + 15
     while True:
         try:
-            _call(scheme, port, key, "GET", "/rest/noauth/health")
+            _api(port, key, "GET", "/rest/noauth/health", scheme=scheme)
             return True
         except OSError:
             pass
@@ -158,18 +153,20 @@ def _up(port, key, scheme="https"):
         time.sleep(1)
 
 
-def configure(port, key, srv, paths, dry_run, scheme="https", where=WHERE, mod_time_window=None):
-    """entries for the server and folders (their REST calls sent unless a dry run), or None with a warning when the API can't be used."""
-    if not _up(port, key, scheme):
+def configure(port, key, srv, paths, dry_run, scheme="https", where=WHERE, mod_time_window=None, wait=True):
+    """entries for the server and folders (their REST calls sent unless a dry run), or None with a warning when the API can't be used.
+
+    `wait` False skips the wait for the health check (the caller already did it)."""
+    if wait and not _up(port, key, scheme):
         if dry_run:
             print(ui.dim(DOWN))
         else:
             ui.warn(DOWN)
         return None
     try:
-        config = _call(scheme, port, key, "GET", "/rest/config")
-        device = _call(scheme, port, key, "GET", "/rest/config/defaults/device")
-        default = _call(scheme, port, key, "GET", "/rest/config/defaults/folder")
+        config = _api(port, key, "GET", "/rest/config", scheme=scheme)
+        device = _api(port, key, "GET", "/rest/config/defaults/device", scheme=scheme)
+        default = _api(port, key, "GET", "/rest/config/defaults/folder", scheme=scheme)
     except urllib.error.HTTPError as e:
         if e.code != 403:
             raise
@@ -181,7 +178,7 @@ def configure(port, key, srv, paths, dry_run, scheme="https", where=WHERE, mod_t
         ui.warn(warning)
     if not dry_run:
         for method, path, body in calls:
-            _call(scheme, port, key, method, path, body)
+            _api(port, key, method, path, body, scheme=scheme)
     return entries
 
 
@@ -200,7 +197,13 @@ def _folder_part(serial, srv, dry_run):
         if not _up(port, key):
             if not dry_run:
                 adb.shell(serial, "monkey", "-p", PACKAGE, "-c", "android.intent.category.LAUNCHER", "1")
-        return configure(port, key, srv, None, dry_run) or []
+            if dry_run or not _up(port, key):
+                if dry_run:
+                    print(ui.dim(DOWN))
+                else:
+                    ui.warn(DOWN)
+                return []
+        return configure(port, key, srv, None, dry_run, wait=False) or []
     finally:
         adb.forward_remove(serial, port)
 

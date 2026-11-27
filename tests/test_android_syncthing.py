@@ -190,8 +190,11 @@ class Plan(unittest.TestCase):
             if path == "/rest/noauth/health":
                 return None
             raise error
-        with mock.patch.object(android_syncthing, "_api", api), contextlib.redirect_stderr(io.StringIO()):
-            self.assertIsNone(android_syncthing.configure(1, "k", SRV, None, False))
+        err = io.StringIO()
+        with mock.patch.object(android_syncthing, "_api", api), contextlib.redirect_stderr(err):
+            self.assertIsNone(android_syncthing.configure(1, "secretkey", SRV, None, False))
+        self.assertIn("refused", err.getvalue())
+        self.assertNotIn("secretkey", err.getvalue())
 
 
 class Apply(unittest.TestCase):
@@ -233,7 +236,7 @@ class Apply(unittest.TestCase):
             return self.dumpsys
         return ""
 
-    def api(self, port, key, method, path, body=None):
+    def api(self, port, key, method, path, body=None, scheme="https"):
         self.api_calls.append((method, path, body))
         if path == "/rest/noauth/health":
             if not self.health:
