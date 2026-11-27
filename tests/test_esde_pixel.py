@@ -1,3 +1,4 @@
+import importlib.util
 import os
 import sys
 import unittest
@@ -37,6 +38,22 @@ class SystemsMap(unittest.TestCase):
         self.assertEqual(esde_systems.ICONS["msx2"], "msx")
         self.assertEqual(esde_systems.ICONS["fbneo"], "arcade")
         self.assertIn("mark3", esde_systems.EXTRA)
+
+
+def load_tool(name):
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tools", name + ".py")
+    spec = importlib.util.spec_from_file_location(name, path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+class SpriteSheet(unittest.TestCase):
+    def test_sheet_has_a_row_per_name_and_the_reference_row(self):
+        tool = load_tool("esde_sprite_sheet")
+        img = tool.sheet(["gb", "nes"])
+        self.assertEqual(img.height, 3 * tool.ROW)
+        self.assertGreaterEqual(img.width, 4 * tool.CELL)
 
 
 if __name__ == "__main__":
