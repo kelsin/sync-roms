@@ -158,13 +158,16 @@ class FrameSpec:
     group: tuple = field(default=())  # files (in the same folder) whose footprints are intersected: one shared grid
     small: bool = False  # the small-file cell rule whatever the width (see cell_for)
     height: object = None  # height(theme_dir, skin folder): the file's height there, its footprint the whole file
+    size: tuple = None  # the file's 640x480 size, whatever the base's (scaled by `scale`); its footprint the whole file
+    create: bool = False  # with `size`: made in skin/ and every skin_<W>x<H>/ folder, whether the base has it or not
 
 
-FRAMES = {}  # "skin/<file>.png": FrameSpec, drawn in every skin*/ folder that has the file
+FRAMES = {}  # "skin/<file>.png": FrameSpec, drawn in every skin*/ folder that has the file (and see `create`)
 
 
-def register(name, draw, symmetric=False, flush=(), background=None, group=(), small=False, height=None):
-    FRAMES[name] = FrameSpec(draw, symmetric, tuple(flush), background, tuple(group), small, height)
+def register(name, draw, symmetric=False, flush=(), background=None, group=(), small=False, height=None, size=None,
+             create=False):
+    FRAMES[name] = FrameSpec(draw, symmetric, tuple(flush), background, tuple(group), small, height, size, create)
 
 
 def screen(folder):
@@ -173,15 +176,40 @@ def screen(folder):
     return (int(m[1]), int(m[2])) if m else (640, 480)
 
 
+SCALE_BAR = "tips-bar-bg.png"  # a bar every base skin folder has, as tall as that folder's art is scaled
+
+
+def scale(theme_dir, folder):
+    """How much the base scales its art in a skin folder: its SCALE_BAR's height over skin/'s (skin_480x800 keeps
+    640x480-sized art), else min(W/640, H/480) of the folder's screen when either bar is missing."""
+    heights = []
+    for name in ("skin", folder):
+        path = os.path.join(theme_dir, name, SCALE_BAR)
+        if os.path.exists(path):
+            with Image.open(path) as im:
+                heights.append(im.size[1])
+    if len(heights) == 2:
+        return heights[1] / heights[0]
+    w, h = screen(folder)
+    return min(w / 640, h / 480)
+
+
+def sized(size, ratio):
+    """A 640x480 file `size` scaled by `ratio`, rounded down."""
+    return int(size[0] * ratio), int(size[1] * ratio)
+
+
 def apply(theme_dir, palette, canvases=None):
-    """Redraw every registered frame present in the theme's skin*/ folders; returns the relative paths written. A dict
+    """Redraw every registered frame present in the theme's skin*/ folders, and make the `create` ones where they are
+    missing; returns the relative paths written. A dict
     passed as `canvases` gets each drawn frame's Canvas under its relative path."""
     colors = shades(palette)
     base_sizes = {name: _base_size(theme_dir, name.split("/", 1)[1]) for name in FRAMES}  # before skin/ is redrawn
+    folders = [folder for folder in sorted(os.listdir(theme_dir))
+               if folder.startswith("skin") and os.path.isdir(os.path.join(theme_dir, folder))]
+    scales = {folder: scale(theme_dir, folder) for folder in folders}  # before any bar is redrawn
     written = []
-    for folder in sorted(os.listdir(theme_dir)):
-        if not folder.startswith("skin") or not os.path.isdir(os.path.join(theme_dir, folder)):
-            continue
+    for folder in folders:
         found = {}  # every frame's size and footprint, read before any is drawn over (a group reads the others')
         for name in sorted(FRAMES):
             file = name.split("/", 1)[1]
@@ -189,22 +217,29 @@ def apply(theme_dir, palette, canvases=None):
             if os.path.exists(path):
                 with Image.open(path) as im:
                     found[file] = (im.size, footprint(im.convert("RGBA")))
+        made = folder == "skin" or re.fullmatch(r"skin_\d+x\d+", folder)  # where `create` frames are made
         for name, spec in sorted(FRAMES.items()):
             file = name.split("/", 1)[1]
-            if file not in found:
-                continue
-            size, box = found[file]
-            if box is None:  # nothing shows in the base: keep it that way
-                continue
-            for other in spec.group:  # animation frames: draw on the grid of the box every frame covers
-                other_box = found.get(other, (None, None))[1]
-                if other_box is not None:
-                    box = (max(box[0], other_box[0]), max(box[1], other_box[1]), min(box[2], other_box[2]),
-                           min(box[3], other_box[3]))
-            cell = cell_for(size, base_sizes[name], spec.small)
-            if spec.height is not None:
-                height = spec.height(theme_dir, folder)
-                size, box = (size[0], height), (box[0], 0, box[2], height)
+            if spec.size is not None:  # drawn at its own size over the whole file, the base's (if any) ignored
+                if file not in found and not (spec.create and made):
+                    continue
+                size = sized(spec.size, scales[folder])
+                box, cell = (0, 0) + size, cell_for(size, spec.size, spec.small)
+            else:
+                if file not in found:
+                    continue
+                size, box = found[file]
+                if box is None:  # nothing shows in the base: keep it that way
+                    continue
+                for other in spec.group:  # animation frames: draw on the grid of the box every frame covers
+                    other_box = found.get(other, (None, None))[1]
+                    if other_box is not None:
+                        box = (max(box[0], other_box[0]), max(box[1], other_box[1]), min(box[2], other_box[2]),
+                               min(box[3], other_box[3]))
+                cell = cell_for(size, base_sizes[name], spec.small)
+                if spec.height is not None:
+                    height = spec.height(theme_dir, folder)
+                    size, box = (size[0], height), (box[0], 0, box[2], height)
             canvas = Canvas(size, cell, box, spec.background)
             spec.draw(canvas, colors)
             canvas.image().save(os.path.join(theme_dir, folder, file))
