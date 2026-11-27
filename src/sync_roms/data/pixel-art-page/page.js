@@ -92,10 +92,17 @@
   }
   layout();
   let queued = false;
+  let lastWidth = window.innerWidth;
   window.addEventListener("resize", () => {
     if (queued) return;
     queued = true;
-    requestAnimationFrame(() => { queued = false; layout(); if (current) close(); });
+    requestAnimationFrame(() => {
+      queued = false;
+      layout();
+      // Only a width change closes the view: a phone's address bar hiding changes just the height.
+      if (current && window.innerWidth !== lastWidth) close();
+      lastWidth = window.innerWidth;
+    });
   });
 
   // Large view
@@ -114,6 +121,7 @@
       const list = el("ul");
       for (const file of item.files) {
         const li = el("li", "", file.path + "  ");
+        if (file.theme) li.append(el("span", "dim", "(in the " + file.theme + " theme)  "));
         li.append(el("span", "dim", file.size ? dims(file.size[0], file.size[1]) : "size unknown"));
         list.append(li);
       }
@@ -218,5 +226,12 @@
   document.addEventListener("click", (e) => {
     if (current && !view.contains(e.target) && !e.target.closest(".tile")) close();
   });
-  window.addEventListener("scroll", () => { if (current && !pinned) close(); }, { passive: true });
+  // A hover view closes on scroll; a pinned one stays while its tile is on screen (scrolling inside the panel
+  // fires no window scroll).
+  window.addEventListener("scroll", () => {
+    if (!current) return;
+    if (!pinned) return close();
+    const r = current.getBoundingClientRect();
+    if (r.bottom < 0 || r.top > window.innerHeight) close();
+  }, { passive: true });
 })();

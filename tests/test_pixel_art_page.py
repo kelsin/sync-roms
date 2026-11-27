@@ -60,6 +60,8 @@ class SpriteSectionsTest(unittest.TestCase):
         item = next(i for i in self.by_id["systems-shared"]["items"] if i["img"].endswith("/gb.png"))
         self.assertEqual(item["files"], [{"path": "icons/gb.png", "size": [120, 130]},
                                          {"path": "icons/sel/gb.png", "size": [120, 130]}])
+        used = next(i for i in self.by_id["regions"]["items"] if i["note"] == "used by the themes" and i["files"])
+        self.assertTrue(all(f["theme"] in ("Pixel Consoles", "Pixel Controllers") for f in used["files"]))
         unused = [i for i in self.by_id["regions"]["items"] if i["note"] == "not used by the themes"]
         self.assertTrue(unused)
         self.assertTrue(all(not i["files"] for i in unused))
@@ -72,7 +74,7 @@ class SpriteSectionsTest(unittest.TestCase):
         self.assertEqual(len(paths), len(set(paths)))
 
 
-TRANSPARENT = ("bg-grid-s", "div-line-v-02", "navbg", "num-bg", "preview-bg", "statbg", "thumb-default")
+TRANSPARENT = pixel_art_page.TRANSPARENT
 
 
 def fake_base(path):
@@ -112,6 +114,17 @@ class FrameSectionTest(unittest.TestCase):
             size = pixel_art_page.HINT_SIZES[name]
             self.assertEqual(item["files"][0]["size"], list(size))
             self.assertEqual((item["w"] * item["cell"], item["h"] * item["cell"]), size)
+
+    def test_warns_for_a_frame_with_no_canvas(self):
+        from sync_roms import ui
+        canvases = {k: v for k, v in self.canvases.items() if k != "skin/bg-title.png"}
+        with mock.patch.object(ui, "warn") as warn:
+            pixel_art_page.frame_section(os.path.join(self.tmp.name, "img2"), canvases)
+        self.assertEqual(len(warn.call_args_list), 1)
+        self.assertIn("skin/bg-title.png", warn.call_args[0][0])
+        with mock.patch.object(ui, "warn") as warn:
+            pixel_art_page.frame_section(os.path.join(self.tmp.name, "img3"), self.canvases)
+        warn.assert_not_called()
 
     def test_frame_image_is_cells(self):
         item = next(i for i in self.section["items"] if i["files"][0]["path"] == "skin/bg-title.png")
@@ -153,7 +166,7 @@ class BoxSectionTest(unittest.TestCase):
             for item in section["items"]:
                 self.assertEqual((item["w"], item["h"]), (84, 120))
                 name = item["label"]
-                self.assertEqual([f["path"] for f in item["files"]], [f"Collections/{d}/{name}.png" for d in ("Imgs", "Imgs_med", "Imgs_small")])
+                self.assertEqual([f["path"] for f in item["files"]], [f"Collections/{d}/<collection name>.png" for d in ("Imgs", "Imgs_med", "Imgs_small")])
                 self.assertEqual([f["size"] for f in item["files"]], [[336, 480], [210, 300], [140, 200]])
                 with Image.open(os.path.join(tmp, *item["img"].split("/")[1:])) as small, \
                         Image.open(os.path.join(folder, f"{name}.png")) as src:

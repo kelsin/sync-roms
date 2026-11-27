@@ -85,6 +85,14 @@ class Site(helpers.Cmd):
         self.assertIn("The base theme SPRUCE isn't in storage, so nothing was published", err.getvalue())
         self.assertEqual(git_ls_tree(self.bare, "main"), [])
 
+    def test_publish_fails_when_base_download_fails(self):
+        self.enterContext(mock.patch.object(pixel_art_page, "write", REAL_PIXEL_ART_WRITE))
+        self.enterContext(mock.patch.object(custom_themes, "fetch_base", side_effect=custom_themes.DownloadFailed("x")))
+        with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as raised:
+            pages_site.publish("kelsin")
+        self.assertEqual(raised.exception.code, 1)
+        self.assertEqual(git_ls_tree(self.bare, "main"), [])
+
     def test_invalid_users_refused(self):
         for name in ("Kelsin", "a b", "../x", "a/b", "", "-x", "a" * 40):
             self.assertFalse(pages_site.valid_user(name), name)

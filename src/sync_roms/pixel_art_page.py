@@ -6,7 +6,7 @@ import tempfile
 
 from PIL import Image
 
-from . import collections_page, custom_themes, store
+from . import collections_page, custom_themes, store, ui
 from .custom_themes import palettes, pixel_consoles, theme_name
 from .custom_themes.pixel import app_icons, build, frames, ids, menu, ui_settings, ui_status, variants
 from .custom_themes.pixel.sprite import render
@@ -88,9 +88,16 @@ def _menu(img_dir, theme_dir):
     return _section("menu", "Menu icons", items)
 
 
-def _system_files(theme_dir, icon):
-    return [{"path": p, "size": _size(theme_dir, p, build.ICON_SIZE)}
-            for p in (f"icons/{icon}.png", f"icons/sel/{icon}.png")]
+THEME_OF_PART = {"console": "Pixel Consoles", "pad": "Pixel Controllers"}
+
+
+def _system_files(theme_dir, icon, theme=None):
+    files = [{"path": p, "size": _size(theme_dir, p, build.ICON_SIZE)}
+             for p in (f"icons/{icon}.png", f"icons/sel/{icon}.png")]
+    if theme:
+        for f in files:
+            f["theme"] = theme
+    return files
 
 
 def _systems(img_dir, theme_dir):
@@ -113,10 +120,10 @@ def _regions(img_dir, theme_dir):
     for icon, regions in variants.VARIANTS.items():
         for region, parts in regions.items():
             for part, draw in parts.items():
-                used = region == variants.REGION[icon]
+                used = region == variants.REGION.get(icon, variants.DEFAULT[icon])
                 label = f"{ids.IDS.get(icon, icon)} — {region.upper()} {part}"
                 items.append(w.item(label, f"{icon}-{region}-{part}", draw,
-                                    _system_files(theme_dir, icon) if used else [],
+                                    _system_files(theme_dir, icon, THEME_OF_PART[part]) if used else [],
                                     note="used by the themes" if used else "not used by the themes"))
     return _section("regions", "Regional variants", items)
 
@@ -137,9 +144,11 @@ def sprite_sections(img_dir, theme_dir=None):
     return [_menu(img_dir, theme_dir), *_systems(img_dir, theme_dir), _regions(img_dir, theme_dir),
             _ui(img_dir, theme_dir, "apps", "App icons", app_icons, always=True),
             _ui(img_dir, theme_dir, "settings", "Settings icons", ui_settings),
-            _ui(img_dir, theme_dir, "status", "Status icons", ui_status)]
+            _ui(img_dir, theme_dir, "status", "Status and buttons", ui_status)]
 
 
+# Frames the real base ships fully transparent, so they have no canvas to draw over.
+TRANSPARENT = ("bg-grid-s", "div-line-v-02", "navbg", "num-bg", "preview-bg", "statbg", "thumb-default")
 HINT_SIZES = {"context-a.png": (26, 26), "context-b.png": (26, 26), "context-x.png": (26, 26),
               "context-y.png": (26, 26), "context-menu.png": (66, 26), "context-select.png": (66, 26),
               "context-start.png": (66, 26)}
@@ -157,6 +166,10 @@ def frame_section(img_dir, canvases):
     """One item per frame the theme drew (its cell grid, one pixel per cell), plus the hint pills the real base has
     but a test base may not."""
     w = _Writer(img_dir, "frames")
+    for key in sorted(frames.FRAMES):
+        name = key.rsplit("/", 1)[-1]
+        if key not in canvases and name not in HINT_SIZES and _file_stem(key) not in TRANSPARENT:
+            ui.warn(f"The frame {key} has no canvas in the base theme, so it won't show on the pixel art page")
     items = [w.image_item(_file_stem(key), _file_stem(key), canvas.cell_image(),
                           [{"path": key, "size": list(canvas.size)}], cell=canvas.cell)
              for key, canvas in sorted(canvases.items(), key=lambda kv: kv[0].rsplit("/", 1)[-1])]
@@ -182,7 +195,7 @@ def box_section(img_dir):
         file = f"{name}.png"
         with Image.open(os.path.join(folder, file)) as im:
             small = im.convert("RGB").resize((im.width // 4, im.height // 4), Image.NEAREST)
-        files = [{"path": f"Collections/{d}/{file}", "size": s}
+        files = [{"path": f"Collections/{d}/<collection name>.png", "size": s}
                  for d, s in (("Imgs", [336, 480]), ("Imgs_med", [210, 300]), ("Imgs_small", [140, 200]))]
         items.append(w.image_item(name, name, small, files))
     return _section("boxes", "Collection box art", items)
