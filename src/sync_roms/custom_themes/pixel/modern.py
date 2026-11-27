@@ -42,11 +42,11 @@ def gc_pad():
     s.ellipse(4.5, 6.5, 1, 1, "dgray")
     plus(s, 3, 11, 5, 1, "gray")                # d-pad
     s.rect(12, 7, 2, 1, "gray")                 # start
-    s.ellipse(19.5, 7.5, 2.2, 2.2, "green")     # A
-    s.rect(16, 9, 2, 2, "red")                  # B
-    s.rect(23, 6, 1, 4, "gray")                 # X
-    s.rect(18, 4, 4, 1, "gray")                 # Y
-    s.ellipse(20.5, 13.5, 1.6, 1.6, "yellow")   # C-stick
+    s.ellipse(19, 9, 2.6, 2.6, "green")         # A
+    s.rect(14, 8, 2, 2, "red")                  # B
+    s.rect(23, 7, 1, 4, "gray")                 # X
+    s.rect(18, 5, 4, 1, "gray")                 # Y
+    s.ellipse(20.5, 14.5, 1.6, 1.6, "yellow")   # C-stick
     return s
 
 
@@ -104,18 +104,18 @@ def wiiu_console():
 def wiiu_pad():
     """Wii U GamePad (Wikimedia, Takimata, "Wii U Console and Gamepad"): the black tablet with the screen in the
     middle, a stick at the top of each side, the d-pad below the left one and A B X Y below the right one."""
-    s = Sprite(26, 15)
-    s.rrect(0, 0, 26, 15, "dgray", 3)
-    s.rect(6, 1, 14, 13, "black")               # screen
-    s.rect(7, 2, 12, 11, "screen")
+    s = Sprite(26, 13)
+    s.rrect(0, 0, 26, 13, "dgray", 3)
+    s.rect(5, 1, 16, 11, "black")               # wide screen
+    s.rect(6, 2, 14, 9, "screen")
     face(s, 13, 4, 3)
-    s.ellipse(2.5, 3.5, 1.5, 1.5, "gray")       # sticks
-    s.ellipse(22.5, 3.5, 1.5, 1.5, "gray")
-    plus(s, 1, 8, 3, 1, "dark")                 # d-pad
-    s.px(23, 7, "gray")                         # X Y A B
-    s.px(22, 8, "gray")
-    s.px(24, 8, "gray")
-    s.px(23, 9, "gray")
+    s.ellipse(2.5, 3.5, 1.9, 1.9, "gray")       # sticks
+    s.ellipse(22.5, 3.5, 1.9, 1.9, "gray")
+    plus(s, 1, 7, 3, 1, "dark")                 # d-pad
+    s.px(23, 7, "dark")                         # X Y A B
+    s.px(22, 8, "dark")
+    s.px(24, 8, "dark")
+    s.px(23, 9, "dark")
     return s
 
 
