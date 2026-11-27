@@ -1111,14 +1111,26 @@ const SECTIONS = [
           </ol>`,
       },
       {
+        title: "SteamOS",
+        when: { platform: ["steamos"] },
+        body: `
+          <ol>
+            <li>On the device, install uv and sync-roms: <code class="copy">curl -LsSf https://astral.sh/uv/install.sh | sh</code>, then <code class="copy">uv tool install git+https://github.com/kelsin/sync-roms</code>.</li>
+            <li>On the Mac, run <code class="copy">sync-roms config push USER@HOST</code>. It needs SSH access to the device, copies settings.json (without the storage settings: the device keeps its own) and the collections, and lists what it changes. Settings and collections are made on the Mac only, so run it again after changing them.</li>
+            <li>On the device, run <code class="copy">sync-roms</code>. The first run asks for storage, sets up the card (layout <code>emudeck</code>) and syncs.</li>
+            <li>With RetroArch closed, run <code class="copy">sync-roms config apply FOLDER</code> on the device, FOLDER being the folder that holds <code>Emulation/</code> (or run it from there). It sets RetroArch's save settings, auto save/load and RetroAchievements, turns Cloud Sync off, and sets each system's ES-DE emulator to its core in "RetroArch cores" (it asks before changing ES-DE while it is open). It uses the Syncthing already installed or installs the official one as a systemd user service, and with <code>syncthing_server</code> in settings.json adds the server and the <code class="copy">ra-saves</code> and <code class="copy">ra-states</code> folders (at RetroArch's save and state folders). It warns when EmuDeck's Cloud Saves are on or a RetroArch core override sets its own save or state folder.</li>
+            <li>Server UI: accept the new device, and on its <b>Sharing</b> tab tick <code class="copy">ra-saves</code> and <code class="copy">ra-states</code>. Save.</li>
+            <li>After an EmuDeck update or reset, run <code class="copy">sync-roms config apply</code> again.</li>
+          </ol>`,
+      },
+      {
         title: "Desktop",
-        when: { platform: ["windows", "steamos"] },
+        when: { platform: ["windows"] },
         body: `
           <ol>
             <li>Install Syncthing.</li>
             <li>Pair it with the server and share the saves folders (see "Pair and share").</li>
-          </ol>
-          <p class="note">On a Steam Deck, Flatpak emulators keep saves under <code>~/.var</code>; Syncthing may need access granted to those folders. EmuDeck also has its own cloud save feature.</p>`,
+          </ol>`,
       },
       {
         title: "Knulli",
@@ -1165,7 +1177,7 @@ const SECTIONS = [
       },
       {
         title: "Pair and share",
-        when: { layout: ["esde", "knulli", "muos", "onion", "nextui", "emudeck"], platform: ["windows", "steamos", "linux"] },
+        when: { layout: ["esde", "knulli", "muos", "onion", "nextui", "emudeck"], platform: ["windows", "linux"] },
         body: `
           <ol>
             <li>Device UI: <b>Add Remote Device</b> with the server's ID (server UI: Actions &gt; Show ID).</li>
