@@ -152,8 +152,7 @@ class ThemeFiles(unittest.TestCase):
         for v in variants.values():
             self.assertEqual(v.findtext("selectable"), "true")
         schemes = {c.get("name"): c.findtext("label") for c in root.findall("colorScheme")}
-        self.assertEqual(len(palettes.PALETTES), 35)
-        self.assertEqual(len(root.findall("colorScheme")), 35)
+        self.assertEqual(len(root.findall("colorScheme")), len(palettes.PALETTES))
         self.assertEqual(schemes, {slug(name): name for name in palettes.PALETTES})
         self.assertEqual({a.text for a in root.findall("aspectRatio")}, set(esde_build.RATIOS))
 

@@ -9,7 +9,7 @@ ToTK for ES-DE is a later, separate project.
 ## Goals
 
 - One ES-DE theme, **Pixel**, built by sync-roms from repo code and installed by sync next to the Art Book Next copy. The user picks it in ES-DE's own UI Settings, like any theme.
-- Consoles and Controllers are theme **variants**; the 35 palettes of `custom_themes/palettes.py` are **color schemes**. Both are picked in ES-DE's UI settings.
+- Consoles and Controllers are theme **variants**; every palette of `custom_themes/palettes.py` is one of the **color schemes**. Both are picked in ES-DE's UI settings.
 - Layouts for every aspect ratio the `esde`/`emudeck` devices in `devices.json` need: 16:9, 16:10, 4:3, 3:2, 1:1, 8:7 (the 31:27 and 10:9 devices), and `5:3_vertical` (MagicX Zero 40, 480x800).
 - **System view**: a carousel. The selected system's sprite is large on a rounded `bar`-coloured tile (like Spruce's selected main-menu item), the neighbours smaller, the system name below in `text` and the game count in `accent`. Horizontal on wide screens, vertical (top to bottom) on `5:3_vertical`.
 - **Game list view**: the text list (selected row on the `bar` colour, others in `list`) beside the scraped art (miximage), the metadata labels (genre, players, release date, rating; label names in `accent`) and the description. On `5:3_vertical`: art and metadata on top, list below, no description.
