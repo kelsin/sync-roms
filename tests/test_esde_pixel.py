@@ -209,5 +209,98 @@ class ThemeFiles(unittest.TestCase):
             self.assertFalse(os.path.exists(stale))
 
 
+# The screen size in pixels that ES-DE's fontSize is a fraction of: the height, or the width on a vertical screen.
+FONT_REFERENCE = {"16:9": 1080, "16:10": 800, "4:3": 960, "3:2": 640, "1:1": 720, "8:7": 1080, "5:3_vertical": 480}
+
+
+class SystemView(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.tmp = tempfile.TemporaryDirectory()
+        cls.dest = esde_build.build(cls.tmp.name)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.tmp.cleanup()
+
+    def parse(self, rel):
+        return ET.parse(os.path.join(self.dest, rel)).getroot()
+
+    def system_views(self):
+        """Every `<view name="system">` of theme.xml (general and per variant) and the layout files."""
+        root = self.parse("theme.xml")
+        views = root.findall("view[@name='system']") + root.findall("variant/view[@name='system']")
+        for ratio in esde_build.RATIOS:
+            views += self.parse(esde_build.layout_file(ratio)).findall("view[@name='system']")
+        return views
+
+    def test_carousel_per_ratio(self):
+        for ratio in esde_build.RATIOS:
+            views = self.parse(esde_build.layout_file(ratio)).findall("view[@name='system']")
+            self.assertEqual(len(views), 1, ratio)
+            carousels = views[0].findall("carousel")
+            self.assertEqual(len(carousels), 1, ratio)
+            want = "vertical" if ratio == "5:3_vertical" else "horizontal"
+            self.assertEqual(carousels[0].findtext("type"), want, ratio)
+
+    def test_colours_are_variables(self):
+        seen = 0
+        for view in self.system_views():
+            for el in view.iter():
+                if el.tag == "color" or el.tag.endswith("Color"):
+                    self.assertRegex(el.text, r"^\$\{pixel[A-Z]\w*\}$", el.tag)
+                    seen += 1
+        self.assertGreater(seen, 0)
+
+    def test_colour_variables_exist(self):
+        root = self.parse("theme.xml")
+        names = {el.tag for el in root.find("variables")}
+        names |= {el.tag for el in root.find("colorScheme/variables")}
+        for view in self.system_views():
+            for el in view.iter():
+                for var in re.findall(r"\$\{(pixel\w*)\}", el.text or ""):
+                    self.assertTrue(var in names or var == "pixelSystemArt", var)
+
+    def test_paths_only_in_theme_xml(self):
+        """`./` paths resolve from the file they are in, so the layout files hold none."""
+        for ratio in esde_build.RATIOS:
+            for el in self.parse(esde_build.layout_file(ratio)).iter():
+                self.assertNotIn("./", el.text or "", (ratio, el.tag))
+                self.assertNotIn("pixelSystemArt", el.text or "", (ratio, el.tag))
+
+    def test_system_art_is_set_per_variant(self):
+        root = self.parse("theme.xml")
+        for view in root.findall("view"):
+            self.assertNotIn("pixelSystemArt", ET.tostring(view, encoding="unicode"))
+        for name in esde_build.VARIANTS:
+            carousel = root.find(f"variant[@name='{name}']/view[@name='system']/carousel[@name='systemCarousel']")
+            self.assertEqual(carousel.findtext("staticImage"), "${pixelSystemArt}", name)
+
+    def test_paths_exist(self):
+        root = self.parse("theme.xml")
+        for el in root.iter():
+            if el.tag in ("path", "fontPath"):
+                self.assertTrue(os.path.isfile(os.path.join(self.dest, el.text)), el.text)
+
+    def test_layout_elements_are_declared_in_theme_xml(self):
+        """A layout only places elements theme.xml declares (same type and name), so they merge."""
+        declared = {(el.tag, el.get("name")) for el in self.parse("theme.xml").find("view[@name='system']")}
+        for ratio in esde_build.RATIOS:
+            view = self.parse(esde_build.layout_file(ratio)).find("view[@name='system']")
+            self.assertEqual({(el.tag, el.get("name")) for el in view}, declared, ratio)
+
+    def test_sprites_stay_crisp(self):
+        general = self.parse("theme.xml").find("view[@name='system']")
+        self.assertEqual(general.find("carousel").findtext("imageInterpolation"), "nearest")
+        self.assertEqual(general.find("image[@name='pixelTile']").findtext("interpolation"), "nearest")
+
+    def test_font_sizes_land_on_twelves(self):
+        for ratio in esde_build.RATIOS:
+            for el in self.parse(esde_build.layout_file(ratio)).iter("fontSize"):
+                px = float(el.text) * FONT_REFERENCE[ratio]
+                self.assertAlmostEqual(px / 12, round(px / 12), delta=0.01, msg=(ratio, px))
+                self.assertGreaterEqual(round(px), 12, ratio)
+
+
 if __name__ == "__main__":
     unittest.main()
