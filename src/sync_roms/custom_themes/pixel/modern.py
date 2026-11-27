@@ -4,6 +4,7 @@ Not in build.BATCHES, so the Spruce themes don't change; esde/systems.py maps th
 """
 from .handhelds import face, plus
 from .nintendo_sega import body_from_half, n64_pad, on
+from .others import plus as dpad
 from .sprite import Sprite
 
 
@@ -191,7 +192,260 @@ def n64dd_console():
     return s
 
 
+# ---------------------------------------------------------------- PlayStation 2
+
+def ps2_console():
+    """PlayStation 2 (Wikimedia, Evan-Amos, "Sony-PlayStation-2-30001-wController-L"): the black console lying flat,
+    the ribbed top, the disc tray along the front with the blue eject and green reset lights beside it, and the pad
+    and card ports below."""
+    s = Sprite(26, 14)
+    s.rrect(0, 0, 26, 14, "dark", 2)
+    for y in (2, 4, 6):                         # ribbed top
+        s.rect(2, y, 22, 1, "dgray")
+    s.rect(1, 8, 24, 1, "black")                # front edge
+    s.rect(3, 10, 13, 1, "black")               # disc tray
+    s.rect(18, 10, 2, 1, "green")               # reset
+    s.rect(22, 10, 2, 1, "blue")                # eject
+    s.rect(3, 12, 3, 1, "dgray")                # pad and memory card ports
+    s.rect(8, 12, 3, 1, "dgray")
+    return s
+
+
+def ds_pad(body="dark", detail="dgray"):
+    """DualShock 2 / 3 (Wikimedia, Evan-Amos, "Sony-PlayStation-2-30001-wController-L", "PS3-Fat-Console-Set"): the
+    DualShock's shape (see others.ps_pad) in black, with the d-pad, select and start in the body's lighter gray."""
+    s = Sprite(26, 20)
+    s.rrect(0, 0, 9, 20, body, 3)
+    s.rect(7, 2, 6, 12, body)
+    s.rrect(8, 9, 4, 4, detail, 1)              # sticks
+    s.rect(10, 7, 2, 1, detail)                 # select / start
+    s.mirror()
+    dpad(s, 1, 3, detail)
+    s.rect(20, 3, 2, 2, "green")
+    s.rect(20, 9, 2, 2, "blue")
+    s.rect(17, 6, 2, 2, "pink")
+    s.rect(23, 6, 2, 2, "red")
+    return s
+
+
+def ps2_pad():
+    """DualShock 2: the black DualShock."""
+    return ds_pad()
+
+
+# ---------------------------------------------------------------- PlayStation 3
+
+def ps3_console():
+    """PlayStation 3, the launch model (Wikimedia, Evan-Amos, "PS3-Fat-Console-Set"): the glossy black body with its
+    curved top, the silver front strip, the disc slot and the power and eject touch buttons."""
+    tops = [5, 4, 3, 2, 2, 1, 1, 1, 1, 0, 0, 0, 0]
+    s = body_from_half(tops, [13] * 13, "dark")
+    for x in range(2, 13):                      # gloss along the curve
+        s.px(x, tops[x] + 2, "dgray")
+    s.mirror()
+    on(s, 0, 9, 26, 5, "gray")                  # silver front
+    s.rect(3, 11, 15, 1, "black")               # disc slot
+    s.rect(20, 11, 1, 1, "dark")                # power / eject
+    s.rect(22, 11, 1, 1, "dark")
+    return s
+
+
+def ps3_pad():
+    """DualShock 3 (Wikimedia, Evan-Amos, "PS3-Fat-Console-Set"): the black DualShock with the round PS button in
+    the middle and the four red player lights along the top."""
+    s = ds_pad()
+    s.rect(10, 7, 2, 1, "dark")                 # select / start move up for the PS button
+    s.rect(14, 7, 2, 1, "dark")
+    s.rect(9, 5, 2, 1, "dgray")
+    s.rect(15, 5, 2, 1, "dgray")
+    s.rrect(11, 7, 4, 3, "gray", 1)             # PS button
+    for x in (9, 11, 14, 16):                   # player lights
+        s.px(x, 3, "red")
+    return s
+
+
+# ---------------------------------------------------------------- PlayStation 4
+
+def ps4_console():
+    """PlayStation 4 (Wikimedia, Evan-Amos, "PS4-Console-wDS4"): the slanted black slab seen from the front, the
+    glossy upper half and matte lower half split by the groove with the blue light bar."""
+    s = Sprite(26, 12)
+    for y in range(12):
+        x0 = (11 - y) // 2
+        s.rect(x0, y, 20, 1, "dgray" if y < 5 else "dark")
+    for y in (5, 6):                            # the groove
+        x0 = (11 - y) // 2
+        s.rect(x0, y, 20, 1, "black")
+    s.rect(4, 6, 6, 1, "blue")                  # light bar
+    return s
+
+
+def ps4_pad():
+    """DualShock 4 (Wikimedia, Evan-Amos, "PS4-Console-wDS4"): black, the touchpad in the middle with the blue light
+    bar along its top edge, the sticks side by side below it, the PS button between them and the long grips."""
+    tops = [3, 2, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2]
+    bottoms = [15, 17, 18, 18, 17, 16, 16, 15, 15, 15, 15, 15, 15]
+    s = body_from_half(tops, bottoms, "dark")
+    s.rect(9, 1, 4, 1, "blue")                  # light bar
+    s.rect(9, 2, 4, 5, "dgray")                 # touchpad
+    s.rect(7, 3, 1, 2, "dgray")                 # share / options
+    s.ellipse(9, 12, 2.6, 2.6, "dgray")         # sticks
+    s.mirror()
+    dpad(s, 1, 4, "dgray")
+    s.rect(12, 8, 2, 2, "gray")                 # PS button
+    s.rect(20, 4, 2, 2, "green")
+    s.rect(20, 10, 2, 2, "blue")
+    s.rect(17, 7, 2, 2, "pink")
+    s.rect(23, 7, 2, 2, "red")
+    return s
+
+
+# ---------------------------------------------------------------- PS Vita
+
+def psvita():
+    """PS Vita 1000 (Wikimedia, Evan-Amos, "PlayStation-Vita-1101-FL"): the black oval handheld with the wide OLED
+    screen, the d-pad above the left stick, the four face buttons above the right stick, and the PS button. It is
+    also its own controller, like the PSP."""
+    s = Sprite(26, 13)
+    s.rrect(0, 0, 26, 13, "dark", 4)
+    s.rect(5, 1, 16, 11, "black")
+    s.rect(6, 2, 14, 8, "sky")                  # 16:9
+    face(s, 13, 3, 3)
+    s.ellipse(2.5, 8.5, 1.6, 1.6, "dgray")      # sticks
+    s.ellipse(23.5, 8.5, 1.6, 1.6, "dgray")
+    plus(s, 1, 2, 3, 1, "gray")
+    s.px(23, 2, "green")                        # triangle
+    s.px(22, 3, "pink")                         # square
+    s.px(24, 3, "red")                          # circle
+    s.px(23, 4, "blue")                         # cross
+    s.rect(12, 11, 2, 1, "dgray")               # PS button
+    return s
+
+
+# ---------------------------------------------------------------- Xbox
+
+def xbox_console():
+    """Xbox (Wikimedia, Evan-Amos, "Xbox-console"): the big black box with the green jewel and its X on top, the
+    disc tray across the front, and the four pad ports under it."""
+    s = Sprite(26, 16)
+    s.rrect(0, 0, 26, 16, "dark", 2)
+    s.ellipse(12.5, 5, 5, 4, "forest")          # jewel
+    s.ellipse(12.5, 5, 4, 3, "green")
+    s.line(10, 3, 12, 5, "forest")              # its X
+    s.line(10, 7, 12, 5, "forest")
+    on(s, 0, 10, 13, 6, "black")                # front
+    s.rect(3, 11, 10, 1, "dgray")               # disc tray
+    for x in (2, 7):                            # pad ports
+        s.rect(x, 13, 3, 1, "dgray")
+    s.mirror()
+    s.rect(18, 11, 2, 1, "green")               # power / eject
+    s.rect(21, 11, 2, 1, "gray")
+    return s
+
+
+PAD_TOPS = [4, 3, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3]
+PAD_BOTTOMS = [15, 17, 18, 18, 18, 17, 16, 15, 14, 14, 14, 13, 13]
+
+
+def xbox_pad():
+    """Xbox Controller S (Wikimedia, Evan-Amos, "Xbox-s-controller"): black, the left stick high and the d-pad low,
+    the right stick low, the green A, red B, blue X and yellow Y, with the white and black buttons below them."""
+    s = body_from_half(PAD_TOPS, PAD_BOTTOMS, "dgray")
+    s.ellipse(4, 6, 2.6, 2.6, "black")              # left stick
+    plus(s, 7, 9, 5, 1, "black")               # d-pad
+    s.ellipse(16, 11, 2.6, 2.6, "black")            # right stick
+    s.rect(20, 4, 2, 2, "yellow")               # Y
+    s.rect(17, 6, 2, 2, "blue")                 # X
+    s.rect(23, 6, 2, 2, "red")                  # B
+    s.rect(20, 8, 2, 2, "green")                # A
+    s.px(22, 11, "white")                       # white button
+    return s
+
+
+# ---------------------------------------------------------------- Xbox 360
+
+def xbox360_console():
+    """Xbox 360 (Wikimedia, Evan-Amos, "Xbox-360-Pro-wController"): the white console lying flat, the silver disc
+    tray, the ring of light around the power button with its green quarters, and the vents at both ends."""
+    s = Sprite(26, 14)
+    s.rrect(0, 0, 26, 14, "gray", 2)
+    s.rect(1, 1, 24, 12, "white")
+    for y in (3, 5, 7, 9):                      # vents
+        s.rect(1, y, 2, 1, "gray")
+    s.mirror()
+    s.rect(4, 3, 13, 2, "gray")                 # disc tray
+    s.rect(5, 4, 11, 1, "dgray")
+    s.ellipse(19.5, 8.5, 2.6, 2.6, "green")     # ring of light
+    s.ellipse(19.5, 8.5, 1.5, 1.5, "gray")
+    s.rect(19, 3, 2, 1, "gray")                 # eject
+    return s
+
+
+def inset(s, body, inner):
+    """Recolor the body's cells that aren't on its edge, leaving a one-pixel rim."""
+    filled = [[c is not None for c in row] for row in s.g]
+    for y in range(1, s.h - 1):
+        for x in range(1, s.w - 1):
+            if s.g[y][x] == body and filled[y - 1][x] and filled[y + 1][x] and filled[y][x - 1] and filled[y][x + 1]:
+                s.g[y][x] = inner
+
+
+def xbox360_pad():
+    """Xbox 360 controller (Wikimedia, Evan-Amos, "Xbox-360-Pro-wController"): white, the silver Guide button with
+    its green X in the middle, the left stick high and the d-pad low, the right stick low and A B X Y high."""
+    s = body_from_half(PAD_TOPS, PAD_BOTTOMS, "gray")
+    inset(s, "gray", "white")
+    s.ellipse(4, 6, 2.6, 2.6, "dgray")              # left stick
+    plus(s, 7, 9, 5, 1, "dgray")               # d-pad
+    s.ellipse(16, 11, 2.6, 2.6, "dgray")            # right stick
+    s.rrect(11, 4, 4, 4, "gray", 1)             # Guide
+    s.rect(12, 5, 2, 2, "green")
+    s.rect(20, 4, 2, 2, "yellow")
+    s.rect(17, 6, 2, 2, "blue")
+    s.rect(23, 6, 2, 2, "red")
+    s.rect(20, 8, 2, 2, "green")
+    return s
+
+
+# ---------------------------------------------------------------- Xbox One
+
+def xboxone_console():
+    """Xbox One (Wikimedia, Evan-Amos, "Microsoft-Xbox-One-Console-Set-wKinect"): the wide black box, the vented
+    matte top left and the glossy top right, the disc slot on the front and the glowing white Xbox button."""
+    s = Sprite(26, 14)
+    s.rrect(0, 0, 26, 14, "dark", 1)
+    for y in (1, 3, 5):                         # vents
+        s.rect(1, y, 15, 1, "black")
+    on(s, 17, 0, 9, 7, "dgray")                 # glossy part
+    on(s, 0, 7, 26, 7, "black")                 # front
+    s.rect(2, 9, 12, 1, "dgray")                # disc slot
+    s.ellipse(21, 10, 2.6, 2.6, "white")        # Xbox button
+    return s
+
+
+def xboxone_pad():
+    """Xbox One controller (Wikimedia, Evan-Amos, "Microsoft-Xbox-One-Console-Set-wKinect"): black, the glowing white
+    Xbox button at the top, the view and menu buttons, the left stick high and the d-pad low, the right stick low and
+    A B X Y high."""
+    s = body_from_half(PAD_TOPS, PAD_BOTTOMS, "dark")
+    s.ellipse(4, 6, 2.6, 2.6, "dgray")
+    plus(s, 7, 9, 5, 1, "dgray")
+    s.ellipse(16, 11, 2.6, 2.6, "dgray")
+    s.rect(12, 4, 2, 2, "white")                # Xbox button
+    s.px(10, 7, "dgray")                        # view / menu
+    s.px(15, 7, "dgray")
+    s.rect(20, 4, 2, 2, "yellow")
+    s.rect(17, 6, 2, 2, "blue")
+    s.rect(23, 6, 2, 2, "red")
+    s.rect(20, 8, 2, 2, "green")
+    return s
+
+
 CONSOLES = {"gc": gc_console, "wii": wii_console, "wiiu": wiiu_console, "switch": switch_console,
-            "n64dd": n64dd_console}
+            "n64dd": n64dd_console, "ps2": ps2_console, "ps3": ps3_console, "ps4": ps4_console, "psvita": psvita,
+            "xbox": xbox_console, "xbox360": xbox360_console, "xboxone": xboxone_console}
 # 64DD: it used the standard Nintendo 64 pad, so the existing drawing is the honest one
-CONTROLLERS = {"gc": gc_pad, "wii": wii_pad, "wiiu": wiiu_pad, "switch": switch_pad, "n64dd": n64_pad}
+# PS Vita: the handheld is its own controller, so both kinds draw it (as the PSP does)
+CONTROLLERS = {"gc": gc_pad, "wii": wii_pad, "wiiu": wiiu_pad, "switch": switch_pad, "n64dd": n64_pad,
+               "ps2": ps2_pad, "ps3": ps3_pad, "ps4": ps4_pad, "psvita": psvita, "xbox": xbox_pad,
+               "xbox360": xbox360_pad, "xboxone": xboxone_pad}

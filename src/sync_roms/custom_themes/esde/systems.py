@@ -28,8 +28,8 @@ EXTRA.update({name: {"CONSOLES": modern.CONSOLES[name], "CONTROLLERS": modern.CO
               for name in modern.CONSOLES})
 # ES-DE names still waiting for a drawing
 PENDING = {
-    "pcfx", "daphne", "lowresnx", "lutro", "3do", "uzebox", "atarijaguarcd", "cdimono1", "model2", "model3", "ps2",
-    "ps3", "ps4", "psvita", "stv", "triforce", "type-x", "xbox", "xbox360", "xboxone", "arcadia", "gamecom",
+    "pcfx", "daphne", "lowresnx", "lutro", "3do", "uzebox", "atarijaguarcd", "cdimono1", "model2", "model3", "stv",
+    "triforce", "type-x", "arcadia", "gamecom",
 }
 
 

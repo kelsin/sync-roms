@@ -67,6 +67,9 @@ class Batches(unittest.TestCase):
     def test_batch_3_drawn(self):
         self.assert_drawn(["gc", "wii", "wiiu", "switch", "n64dd"])
 
+    def test_batch_4_drawn(self):
+        self.assert_drawn(["ps2", "ps3", "ps4", "psvita", "xbox", "xbox360", "xboxone"])
+
 
 def load_tool(name):
     path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tools", name + ".py")
