@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.12.0](https://github.com/kelsin/sync-roms/compare/v4.11.1...v4.12.0) (2026-11-27)
+
+
+### :video_game: Features
+
+* **collections:** add collections update to rebuild, share and publish the pages ([#669](https://github.com/kelsin/sync-roms/issues/669)) ([820fded](https://github.com/kelsin/sync-roms/commit/820fdedb1ae4408353f01758f066dedcd94b12f9))
+* **collections:** publish a pixel art page to sync-roms.games ([#670](https://github.com/kelsin/sync-roms/issues/670)) ([15f1c8d](https://github.com/kelsin/sync-roms/commit/15f1c8da86b4ff253319cea3c04ed395e2bb6cbd))
+* **config:** set up SteamOS devices with config push and config apply ([#667](https://github.com/kelsin/sync-roms/issues/667)) ([ff457a0](https://github.com/kelsin/sync-roms/commit/ff457a0748dcc817884dba7ba37881424e7616ac))
+
 ## [4.11.1](https://github.com/kelsin/sync-roms/compare/v4.11.0...v4.11.1) (2026-11-26)
 
 
