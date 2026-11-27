@@ -129,7 +129,7 @@ SPECS = {
 }
 
 
-def build_theme(base_dir, out_dir, name, kind, palette):
+def build_theme(base_dir, out_dir, name, kind, palette, canvases=None):
     """Write <out_dir>/<name>/, a copy of base_dir with the pixel-art overlays (kind: CONSOLES or CONTROLLERS) in the
     palette's colors."""
     spec = dict(SPECS[kind], systems=systems(kind))
@@ -192,7 +192,7 @@ def build_theme(base_dir, out_dir, name, kind, palette):
             scale = max(1, min(4, size[0] // (sprite.w + 2), size[1] // (sprite.h + 2)))
             place(render(sprite, scale, "sel"), size, (size[0] / 2, size[1] / 2)).save(target)
             drawn.add(rel)
-    native = set(frames.apply(dest, palette))  # last among the skin steps, after the recolor and blacken
+    native = set(frames.apply(dest, palette, canvases))  # last among the skin steps, after the recolor and blacken
     resize_variants(dest, drawn, native)
     preview(dest, kind, palette)
     with open(os.path.join(dest, "CREDITS.txt"), "a") as f:

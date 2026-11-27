@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pixel art</title>
+<link rel="stylesheet" href="page.css">
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="home" id="home" hidden>← sync-roms.games</a>
+    <h1>Pixel art</h1>
+    <p class="intro">Every picture sync-roms draws for its spruceOS pixel themes, one art pixel to one image pixel. Hover a picture (tap on a phone) to see it on a pixel grid, with the theme files it goes in and their sizes.</p>
+    <p class="intro" id="palette"></p>
+    <nav class="jump" id="jump" aria-label="Sections"></nav>
+  </header>
+  <main id="sections"></main>
+</div>
+<div class="view" id="view" hidden role="dialog" aria-label="Large view">
+  <div class="view-art" id="view-art"></div>
+  <div class="view-info" id="view-info"></div>
+</div>
+<!-- The page's data, filled in by `pixel_art_page.write`; empty in the repo. -->
+<script type="application/json" id="page-data">{}</script>
+<script src="page.js"></script>
+</body>
+</html>

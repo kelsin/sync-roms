@@ -1,8 +1,8 @@
 # Publishing your collections to GitHub Pages
 
-`sync-roms collections publish` puts a public copy of your collections page at `https://sync-roms.games/collections/<user>/`, with a list of every user's page at `https://sync-roms.games/`. The site is a GitHub repo served by GitHub Pages. These are the one-time steps to set it up.
+`sync-roms collections publish` puts a public copy of your collections page at `https://sync-roms.games/collections/<user>/`, with a list of every user's page at `https://sync-roms.games/`, and rebuilds the pixel art page at `https://sync-roms.games/pixel-art/` (every picture of the spruceOS pixel themes, with its theme files and sizes). Building it needs the `SPRUCE` base theme in storage: without it nothing is published. The site is a GitHub repo served by GitHub Pages. These are the one-time steps to set it up.
 
-The public page has no storage paths, but it does list your games; a game with no scraped name or saved title shows its file name (without the extension). The Pages repo is public and its history keeps every earlier publish, so games you remove stay readable there, and each commit carries your git author name and email. Each publish replaces only your own `collections/<user>/` folder; other users' folders stay as they are.
+The public page has no storage paths, but it does list your games; a game with no scraped name or saved title shows its file name (without the extension). The Pages repo is public and its history keeps every earlier publish, so games you remove stay readable there, and each commit carries your git author name and email. Each publish replaces only your own `collections/<user>/` folder and the shared `pixel-art/` page; other users' folders stay as they are.
 
 ## 1. Create the repo
 
@@ -64,5 +64,6 @@ Wait for GitHub to issue the certificate (the repo's Settings → Pages says whe
 - `https://sync-roms.games/` lists the users.
 - `https://sync-roms.games/collections` goes back to that list.
 - `https://sync-roms.games/collections/kelsin/` shows the page, with **← All users** back to the list.
+- `https://sync-roms.games/pixel-art/` shows the pixel art page, linked from the list.
 
 After that, run `sync-roms collections publish` whenever your collections change. It commits and pushes only when something changed.

@@ -338,6 +338,33 @@ class Frames(unittest.TestCase):
                 self.assertEqual(img.getchannel("A"), second.getchannel("A"))
                 self.assertNotEqual(img.convert("RGB"), second.convert("RGB"))
 
+    def test_cell_image_matches_drawn_frame(self):
+        theme = os.path.join(self.tmp.name, "cells")
+        make_base(theme)
+        canvases = {}
+        written = frames.apply(theme, GRUVBOX, canvases)
+        self.assertTrue(any(rel.startswith("skin_") for rel in written))
+        for rel, canvas in sorted(canvases.items()):
+            with self.subTest(rel):
+                cells = canvas.cell_image()
+                self.assertEqual(cells.mode, "RGBA")
+                self.assertEqual(cells.size, (canvas.cols, canvas.rows))
+                big = cells.resize((canvas.cols * canvas.cell, canvas.rows * canvas.cell), Image.NEAREST)
+                c = canvas.cell
+                drawn = load(os.path.join(theme, rel)).crop(
+                    (canvas.ox, canvas.oy, canvas.ox + canvas.cols * c, canvas.oy + canvas.rows * c))
+                self.assertIsNone(ImageChops.difference(big, drawn).getbbox())
+
+    def test_apply_without_canvases_unchanged(self):
+        theme = os.path.join(self.tmp.name, "plain")
+        make_base(theme)
+        written = frames.apply(theme, GRUVBOX)
+        other = os.path.join(self.tmp.name, "with")
+        make_base(other)
+        canvases = {}
+        self.assertEqual(frames.apply(other, GRUVBOX, canvases), written)
+        self.assertEqual(set(canvases), set(written))
+
     def test_registry_has_all_key_files(self):
         names = {key.split("/", 1)[1][:-len(".png")] for key in frames.FRAMES}
         self.assertLessEqual(KEYS, names)
