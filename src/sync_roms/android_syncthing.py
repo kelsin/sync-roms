@@ -47,9 +47,10 @@ def read_export(data):
     return key, int(match.group(1)) if match else 8384
 
 
-def folder_paths(srv):
-    """[(folder id, label, Android path)] of the server's folders."""
-    return [(folder_id, label, PATHS[role]) for role, folder_id, label, _ in srv["folders"]]
+def folder_paths(srv, paths=None):
+    """[(folder id, label, path)] of the server's folders, at `paths` ({"saves", "states"}; Android's by default)."""
+    paths = paths or PATHS
+    return [(folder_id, label, paths[role]) for role, folder_id, label, _ in srv["folders"]]
 
 
 def _wanted_folder():
@@ -59,17 +60,17 @@ def _wanted_folder():
             "versioning": {"type": kind, "params": {"keep": str(keep)}, "cleanupIntervalS": 3600, "fsPath": "", "fsType": "basic"}}
 
 
-def _settings_entries(folder_id, found):
+def _settings_entries(folder_id, found, where=WHERE):
     """Entries for the three folder settings, `found` being the folder's current config (None: not there yet)."""
     wanted = _wanted_folder()
     kind, keep = wanted["versioning"]["type"], wanted["versioning"]["params"]["keep"]
     old = (found or {}).get("versioning") or {}
     old_versioning = spruce_syncthing.versioning_text(old["type"], (old.get("params") or {}).get("keep")) if old.get("type") else None
-    return [applied.Entry(WHERE, f"folder {folder_id} ignorePerms", None if found is None else str(found.get("ignorePerms", False)).lower(),
+    return [applied.Entry(where, f"folder {folder_id} ignorePerms", None if found is None else str(found.get("ignorePerms", False)).lower(),
                           str(wanted["ignorePerms"]).lower(), False),
-            applied.Entry(WHERE, f"folder {folder_id} maxConflicts", None if found is None else str(found.get("maxConflicts")),
+            applied.Entry(where, f"folder {folder_id} maxConflicts", None if found is None else str(found.get("maxConflicts")),
                           str(wanted["maxConflicts"]), False),
-            applied.Entry(WHERE, f"folder {folder_id} versioning", old_versioning, spruce_syncthing.versioning_text(kind, keep), False)]
+            applied.Entry(where, f"folder {folder_id} versioning", old_versioning, spruce_syncthing.versioning_text(kind, keep), False)]
 
 
 def _settings_differ(found):
@@ -80,65 +81,108 @@ def _settings_differ(found):
             or (old.get("params") or {}).get("keep") != wanted["versioning"]["params"]["keep"])
 
 
-def plan(config, srv, defaults_device, defaults_folder):
-    """(entries, REST calls (method, path, body), warnings) to add the server and its folders to `config`."""
+def plan(config, srv, defaults_device, defaults_folder, paths=None, where=WHERE, mod_time_window=None):
+    """(entries, REST calls (method, path, body), warnings) to add the server and its folders to `config`.
+
+    `paths` is {"saves", "states"} (Android's by default); `mod_time_window` sets modTimeWindowS on the folders."""
     server = srv["id"]
     entries, calls, warnings = [], [], []
     known = any(d["deviceID"].upper() == server for d in config.get("devices", []))
-    entries.append(applied.Entry(WHERE, "device server", server if known else None, server, False))
+    entries.append(applied.Entry(where, "device server", server if known else None, server, False))
     if not known:
         calls.append(("PUT", f"/rest/config/devices/{server}",
                       {**defaults_device, "deviceID": server, "name": "server", "addresses": [srv["address"]]}))
     folders = config.get("folders", [])
-    for folder_id, label, path in folder_paths(srv):
+    for folder_id, label, path in folder_paths(srv, paths):
         want = f"{path}, shared with the server"
         found = next((f for f in folders if f["id"] == folder_id), None)
         if found is not None:
             if found["path"].rstrip("/") != path:
-                warnings.append(f"Syncthing-Fork folder {folder_id} is at {found['path']}, not {path}; left as it is")
+                warnings.append(f"{where} folder {folder_id} is at {found['path']}, not {path}; left as it is")
             else:
                 shared = any(d["deviceID"].upper() == server for d in found.get("devices", []))
-                entries.append(applied.Entry(WHERE, f"folder {folder_id}", want if shared else f"{path}, not shared with the server", want, False))
-                entries += _settings_entries(folder_id, found)
-                if not shared or _settings_differ(found):
+                entries.append(applied.Entry(where, f"folder {folder_id}", want if shared else f"{path}, not shared with the server", want, False))
+                entries += _settings_entries(folder_id, found, where)
+                window = mod_time_window is not None and found.get("modTimeWindowS") != mod_time_window
+                if mod_time_window is not None:
+                    entries.append(applied.Entry(where, f"folder {folder_id} modTimeWindowS", str(found.get("modTimeWindowS")),
+                                                 str(mod_time_window), False))
+                if not shared or window or _settings_differ(found):
                     devices = found.get("devices", []) + ([] if shared else [{"deviceID": server}])
-                    calls.append(("PUT", f"/rest/config/folders/{folder_id}", {**found, **_wanted_folder(), "devices": devices}))
+                    extra = {} if mod_time_window is None else {"modTimeWindowS": mod_time_window}
+                    calls.append(("PUT", f"/rest/config/folders/{folder_id}", {**found, **_wanted_folder(), **extra, "devices": devices}))
             continue
         other = next((f for f in folders if f["path"].rstrip("/") == path), None)
         if other is not None:
-            warnings.append(f"Syncthing-Fork folder {other['id']} is already at {path}, so {folder_id} isn't added there; left as it is")
+            warnings.append(f"{where} folder {other['id']} is already at {path}, so {folder_id} isn't added there; left as it is")
             continue
-        entries.append(applied.Entry(WHERE, f"folder {folder_id}", None, want, False))
-        entries += _settings_entries(folder_id, None)
+        entries.append(applied.Entry(where, f"folder {folder_id}", None, want, False))
+        entries += _settings_entries(folder_id, None, where)
+        if mod_time_window is not None:
+            entries.append(applied.Entry(where, f"folder {folder_id} modTimeWindowS", None, str(mod_time_window), False))
         calls.append(("PUT", f"/rest/config/folders/{folder_id}",
                       {**defaults_folder, "id": folder_id, "label": label, "path": path, "type": "sendreceive",
-                       **_wanted_folder(), "devices": [{"deviceID": server}]}))
+                       **_wanted_folder(), **({} if mod_time_window is None else {"modTimeWindowS": mod_time_window}),
+                       "devices": [{"deviceID": server}]}))
     return entries, calls, warnings
 
 
-def _api(port, key, method, path, body=None):
-    """The JSON answer of Syncthing-Fork's REST API on 127.0.0.1:port, None when empty."""
-    request = urllib.request.Request(f"https://127.0.0.1:{port}{path}", method=method, headers={"X-API-Key": key},
+def _api(port, key, method, path, body=None, scheme="https"):
+    """The JSON answer of a Syncthing REST API on 127.0.0.1:port, None when empty."""
+    request = urllib.request.Request(f"{scheme}://127.0.0.1:{port}{path}", method=method, headers={"X-API-Key": key},
                                      data=None if body is None else json.dumps(body).encode())
     if body is not None:
         request.add_header("Content-Type", "application/json")
-    with urllib.request.urlopen(request, timeout=10, context=ssl._create_unverified_context()) as response:
+    kwargs = {"context": ssl._create_unverified_context()} if scheme == "https" else {}
+    with urllib.request.urlopen(request, timeout=10, **kwargs) as response:
         raw = response.read()
     return json.loads(raw) if raw.strip() else None
 
 
-def _up(port, key):
+def _call(scheme, *args):
+    """_api, naming the scheme only when it isn't https."""
+    return _api(*args) if scheme == "https" else _api(*args, scheme=scheme)
+
+
+def _up(port, key, scheme="https"):
     """Whether the health check answers within 15 seconds."""
     deadline = time.monotonic() + 15
     while True:
         try:
-            _api(port, key, "GET", "/rest/noauth/health")
+            _call(scheme, port, key, "GET", "/rest/noauth/health")
             return True
         except OSError:
             pass
         if time.monotonic() >= deadline:
             return False
         time.sleep(1)
+
+
+def configure(port, key, srv, paths, dry_run, scheme="https", where=WHERE, mod_time_window=None):
+    """entries for the server and folders (their REST calls sent unless a dry run), or None with a warning when the API can't be used."""
+    if not _up(port, key, scheme):
+        if dry_run:
+            print(ui.dim(DOWN))
+        else:
+            ui.warn(DOWN)
+        return None
+    try:
+        config = _call(scheme, port, key, "GET", "/rest/config")
+        device = _call(scheme, port, key, "GET", "/rest/config/defaults/device")
+        default = _call(scheme, port, key, "GET", "/rest/config/defaults/folder")
+    except urllib.error.HTTPError as e:
+        if e.code != 403:
+            raise
+        ui.warn(f"{where} refused the export's API key: export its settings again" if where == WHERE
+                else f"{where} refused the API key")
+        return None
+    entries, calls, warnings = plan(config, srv, device, default, paths, where, mod_time_window)
+    for warning in warnings:
+        ui.warn(warning)
+    if not dry_run:
+        for method, path, body in calls:
+            _call(scheme, port, key, method, path, body)
+    return entries
 
 
 def _folder_part(serial, srv, dry_run):
@@ -156,28 +200,7 @@ def _folder_part(serial, srv, dry_run):
         if not _up(port, key):
             if not dry_run:
                 adb.shell(serial, "monkey", "-p", PACKAGE, "-c", "android.intent.category.LAUNCHER", "1")
-            if dry_run or not _up(port, key):
-                if dry_run:
-                    print(ui.dim(DOWN))
-                else:
-                    ui.warn(DOWN)
-                return []
-        try:
-            config = _api(port, key, "GET", "/rest/config")
-            device = _api(port, key, "GET", "/rest/config/defaults/device")
-            default = _api(port, key, "GET", "/rest/config/defaults/folder")
-        except urllib.error.HTTPError as e:
-            if e.code != 403:
-                raise
-            ui.warn("Syncthing-Fork refused the export's API key: export its settings again")
-            return []
-        entries, calls, warnings = plan(config, srv, device, default)
-        for warning in warnings:
-            ui.warn(warning)
-        if not dry_run:
-            for method, path, body in calls:
-                _api(port, key, method, path, body)
-        return entries
+        return configure(port, key, srv, None, dry_run) or []
     finally:
         adb.forward_remove(serial, port)
 

@@ -153,6 +153,46 @@ class Plan(unittest.TestCase):
             self.assertEqual(body[key], value)
         self.assertEqual(body["devices"], [{"deviceID": SID}])
 
+    def test_plan_uses_given_paths(self):
+        paths = {"saves": "/home/deck/s", "states": "/home/deck/t"}
+        _, calls, _ = android_syncthing.plan({"devices": [], "folders": []}, SRV, DD, DF, paths=paths)
+        body = next(c[2] for c in calls if c[1] == "/rest/config/folders/ra-saves")
+        self.assertEqual(body["path"], "/home/deck/s")
+
+    def test_plan_warning_names_where(self):
+        config = {"devices": [], "folders": [folder("ra-saves", "/elsewhere")]}
+        _, _, warns = android_syncthing.plan(config, SRV, DD, DF, where="Syncthing")
+        self.assertTrue(warns[0].startswith("Syncthing folder ra-saves"))
+
+    def test_plan_mod_time_window(self):
+        _, calls, _ = android_syncthing.plan({"devices": [], "folders": []}, SRV, DD, DF, mod_time_window=2)
+        body = next(c[2] for c in calls if c[1] == "/rest/config/folders/ra-saves")
+        self.assertEqual(body["modTimeWindowS"], 2)
+        config = {"devices": [{"deviceID": SID}],
+                  "folders": [{**folder("ra-saves", android.DEFAULT_SAVES, [SID]), "modTimeWindowS": 0}]}
+        entries, calls, _ = android_syncthing.plan(config, SRV, DD, DF, mod_time_window=2)
+        body = next(c[2] for c in calls if c[1] == "/rest/config/folders/ra-saves")
+        self.assertEqual(body["modTimeWindowS"], 2)
+        self.assertTrue(any(e.key == "folder ra-saves modTimeWindowS" for e in entries))
+
+    def test_api_http_scheme(self):
+        response = mock.MagicMock()
+        response.__enter__.return_value.read.return_value = b"{}"
+        with mock.patch("urllib.request.urlopen", return_value=response) as opened:
+            android_syncthing._api(1234, "k", "GET", "/rest/config", scheme="http")
+        self.assertTrue(opened.call_args.args[0].full_url.startswith("http://127.0.0.1:"))
+        self.assertNotIn("context", opened.call_args.kwargs)
+
+    def test_configure_403_returns_none(self):
+        error = urllib.error.HTTPError("u", 403, "Forbidden", {}, None)
+
+        def api(port, key, method, path, body=None, scheme="https"):
+            if path == "/rest/noauth/health":
+                return None
+            raise error
+        with mock.patch.object(android_syncthing, "_api", api), contextlib.redirect_stderr(io.StringIO()):
+            self.assertIsNone(android_syncthing.configure(1, "k", SRV, None, False))
+
 
 class Apply(unittest.TestCase):
     """android_syncthing.apply with adb and the REST API mocked."""
