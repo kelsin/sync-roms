@@ -13,7 +13,8 @@ import time
 from xml.sax import saxutils
 import zlib
 
-from . import cardfs, downloads, frontend, github, rocknix_collections, runtime, s3, store, ui
+from . import cardfs, downloads, esde_pixel, frontend, github, rocknix_collections, runtime, s3, store, ui
+from .custom_themes.esde import systems as pixel_systems
 
 THEME_DATA = os.path.join(store.REPO_DATA, "themes", "art-book-next")
 SURPRISE_ART = "surprise"
@@ -158,11 +159,69 @@ def usable(layout_name, arts, spruce_theme=None):
 
 # --- ES-DE ---------------------------------------------------------------------------------------------------------
 
+def _esde_theme(layout_name, base):
+    return frontend.get_string(cardfs.text(frontend.settings_path(layout_name, base)), "Theme")
+
+
 def esde_wanted(layout_name, base):
-    """Whether the card's ES-DE uses Art Book Next (the downloaded theme or the card's copy of it) or hasn't picked a
-    theme yet, so a new card has the theme before ES-DE is first set up."""
-    theme = frontend.get_string(cardfs.text(frontend.settings_path(layout_name, base)), "Theme")
-    return not theme or theme in (ESDE_THEME, ESDE_COPY)
+    """Whether the card's ES-DE uses Art Book Next (the downloaded theme or the card's copy of it) or Pixel, or hasn't
+    picked a theme yet, so a new card has Art Book Next before ES-DE is first set up."""
+    theme = _esde_theme(layout_name, base)
+    return not theme or theme in (ESDE_THEME, ESDE_COPY, esde_pixel.THEME)
+
+
+def _pixel_stale(dest, keep):
+    """The names on Pixel's collection list at dest that aren't in keep (lower-case names): their art is removed."""
+    return [n for n in _read(os.path.join(dest, esde_pixel.OWNED)).splitlines()
+            if n not in keep and n and frontend.safe_name(n) == n]
+
+
+def _pixel_usable(arts):
+    """arts without the names Pixel draws a system sprite for (EmuDeck's folder names aren't all ES-DE's), warning
+    about them."""
+    sprites = {n.lower() for n in pixel_systems.esde_names()}
+    for name in [n for n in arts if n.lower() in sprites]:
+        ui.warn(f"{name}: Pixel already has art of its own for that name; skipped")
+    return {n: png for n, png in arts.items() if n.lower() not in sprites}
+
+
+def install_pixel(layout_name, base, arts, keep=False):
+    """Give each collection in arts ({name: outline art png}) its box art in Pixel's variants, under the name ES-DE
+    themes it by (lower case), list the names in Pixel's own collection list, and (unless keep) remove the art of names
+    on the list no longer in arts. ES-DE's Theme is never changed. Returns whether anything changed."""
+    arts = _pixel_usable(arts)
+    dest = esde_pixel.dest(layout_name, base)
+    keep_names = {n.lower() for n in arts}
+    owned = _read(os.path.join(dest, esde_pixel.OWNED)).splitlines()
+    changed = False
+    if not keep:
+        for name in _pixel_stale(dest, keep_names):
+            for folder in esde_pixel.ART_FOLDERS:
+                with contextlib.suppress(FileNotFoundError):
+                    os.remove(os.path.join(dest, "systems", folder, f"{name}.png"))
+                    changed = True
+        owned = [n for n in owned if n in keep_names]
+    names = sorted(set(n for n in owned if n) | keep_names)
+    if names or os.path.exists(os.path.join(dest, esde_pixel.OWNED)):
+        changed |= cardfs.write_bytes(os.path.join(dest, esde_pixel.OWNED), "".join(f"{n}\n" for n in names).encode())
+    for name, png in arts.items():
+        with open(os.path.join(THEME_DATA, "art-box", "Imgs", os.path.basename(png)), "rb") as f:
+            data = f.read()
+        for folder in esde_pixel.ART_FOLDERS:
+            changed |= cardfs.write_bytes(os.path.join(dest, "systems", folder, f"{name.lower()}.png"), data)
+    if changed:
+        cardfs.clear()  # the card changed: later steps list it afresh
+    return changed
+
+
+def describe_pixel(layout_name, base, arts, keep=False):
+    arts = _pixel_usable(arts)
+    where = esde_pixel._shown(layout_name, base)
+    stale = [] if keep else _pixel_stale(esde_pixel.dest(layout_name, base), {n.lower() for n in arts})
+    if stale:
+        print(ui.dim(f"🎨 would remove the art for {', '.join(stale)} from {where}"))
+    if arts:
+        print(ui.dim(f"🎨 would add art for {', '.join(arts)} to {where}"))
 
 
 def _esde_dir(layout_name, base):
@@ -295,9 +354,12 @@ def _esde_remove(dest, keep):
 
 def install_esde(layout_name, base, arts, keep=False):
     """Put Art Book Next with the collections' art in the card's ES-DE and select it, and remove the art sync-roms gave
-    collections no longer in arts. Returns whether anything changed."""
+    collections no longer in arts; when ES-DE uses Pixel, the art goes there instead (`install_pixel`). Returns whether
+    anything changed."""
     if not esde_wanted(layout_name, base):
         return False
+    if _esde_theme(layout_name, base) == esde_pixel.THEME:
+        return install_pixel(layout_name, base, arts, keep)
     dest = _esde_dir(layout_name, base)
     if not arts:  # nothing to add, so the theme is neither copied nor selected
         return False if keep else _esde_remove(dest, ())
@@ -334,6 +396,8 @@ def install_esde(layout_name, base, arts, keep=False):
 def describe_esde(layout_name, base, arts, keep=False):
     if not esde_wanted(layout_name, base):
         return
+    if _esde_theme(layout_name, base) == esde_pixel.THEME:
+        return describe_pixel(layout_name, base, arts, keep)
     stale = [] if keep else _esde_stale(_esde_dir(layout_name, base), {n.lower() for n in arts})
     if stale:
         print(ui.dim(f"🎨 would remove the art for {', '.join(stale)} from {_shown(layout_name, base).replace(os.sep, '/')}"))
