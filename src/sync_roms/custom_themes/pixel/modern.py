@@ -258,7 +258,7 @@ def ps3_pad():
     s.rect(14, 7, 2, 1, "dark")
     s.rect(9, 5, 2, 1, "dgray")
     s.rect(15, 5, 2, 1, "dgray")
-    s.rrect(11, 7, 4, 3, "gray", 1)             # PS button
+    s.rrect(11, 6, 4, 3, "gray", 1)             # PS button
     for x in (9, 11, 14, 16):                   # player lights
         s.px(x, 3, "red")
     return s
@@ -286,8 +286,8 @@ def ps4_pad():
     tops = [3, 2, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2]
     bottoms = [15, 17, 18, 18, 17, 16, 16, 15, 15, 15, 15, 15, 15]
     s = body_from_half(tops, bottoms, "dark")
-    s.rect(9, 1, 4, 1, "blue")                  # light bar
-    s.rect(9, 2, 4, 5, "dgray")                 # touchpad
+    s.rect(10, 1, 3, 1, "blue")                 # light bar
+    s.rect(10, 2, 3, 5, "dgray")                # touchpad
     s.rect(7, 3, 1, 2, "dgray")                 # share / options
     s.ellipse(9, 12, 2.6, 2.6, "dgray")         # sticks
     s.mirror()
@@ -304,21 +304,20 @@ def ps4_pad():
 
 def psvita():
     """PS Vita 1000 (Wikimedia, Evan-Amos, "PlayStation-Vita-1101-FL"): the black oval handheld with the wide OLED
-    screen, the d-pad above the left stick, the four face buttons above the right stick, and the PS button. It is
-    also its own controller, like the PSP."""
-    s = Sprite(26, 13)
-    s.rrect(0, 0, 26, 13, "dark", 4)
-    s.rect(5, 1, 16, 11, "black")
-    s.rect(6, 2, 14, 8, "sky")                  # 16:9
+    screen, the d-pad above the left stick, the four face buttons above the right stick, the PS button below the
+    left stick and start below the right one. It is also its own controller, like the PSP."""
+    s = Sprite(26, 14)
+    s.rrect(0, 0, 26, 14, "dark", 4)
+    s.rrect(2, 7, 3, 3, "dgray", 1)             # sticks (nubs, as on the PSP)
+    s.px(3, 11, "dgray")                        # PS button / start
+    s.mirror()
+    s.rect(6, 2, 14, 8, "sky")                  # 16:9, under the one black glass front
     face(s, 13, 3, 3)
-    s.ellipse(2.5, 8.5, 1.6, 1.6, "dgray")      # sticks
-    s.ellipse(23.5, 8.5, 1.6, 1.6, "dgray")
-    plus(s, 1, 2, 3, 1, "gray")
-    s.px(23, 2, "green")                        # triangle
-    s.px(22, 3, "pink")                         # square
-    s.px(24, 3, "red")                          # circle
-    s.px(23, 4, "blue")                         # cross
-    s.rect(12, 11, 2, 1, "dgray")               # PS button
+    plus(s, 2, 3, 3, 1, "gray")
+    s.px(22, 3, "green")                        # triangle
+    s.px(21, 4, "pink")                         # square
+    s.px(23, 4, "red")                          # circle
+    s.px(22, 5, "blue")                         # cross
     return s
 
 
@@ -344,12 +343,13 @@ def xbox_console():
 
 
 PAD_TOPS = [4, 3, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3]
-PAD_BOTTOMS = [15, 17, 18, 18, 18, 17, 16, 15, 14, 14, 14, 13, 13]
+PAD_BOTTOMS = [15, 17, 18, 18, 18, 17, 16, 15, 15, 15, 15, 14, 14]
 
 
 def xbox_pad():
     """Xbox Controller S (Wikimedia, Evan-Amos, "Xbox-s-controller"): black, the left stick high and the d-pad low,
-    the right stick low, the green A, red B, blue X and yellow Y, with the white and black buttons below them."""
+    the right stick low, the green jewel between them, the green A, red B, blue X and yellow Y, with the white button
+    below them."""
     s = body_from_half(PAD_TOPS, PAD_BOTTOMS, "dgray")
     s.ellipse(4, 6, 2.6, 2.6, "black")              # left stick
     plus(s, 7, 9, 5, 1, "black")               # d-pad
@@ -359,6 +359,8 @@ def xbox_pad():
     s.rect(23, 6, 2, 2, "red")                  # B
     s.rect(20, 8, 2, 2, "green")                # A
     s.px(22, 11, "white")                       # white button
+    s.rrect(11, 4, 4, 4, "forest", 1)           # jewel
+    s.rect(12, 5, 2, 2, "green")
     return s
 
 
@@ -410,13 +412,13 @@ def xbox360_pad():
 # ---------------------------------------------------------------- Xbox One
 
 def xboxone_console():
-    """Xbox One (Wikimedia, Evan-Amos, "Microsoft-Xbox-One-Console-Set-wKinect"): the wide black box, the vented
-    matte top left and the glossy top right, the disc slot on the front and the glowing white Xbox button."""
+    """Xbox One (Wikimedia, Evan-Amos, "Microsoft-Xbox-One-Console-Set-wKinect"): the wide black box, the glossy top
+    left and the vented matte top right, the disc slot on the front and the glowing white Xbox button."""
     s = Sprite(26, 14)
     s.rrect(0, 0, 26, 14, "dark", 1)
+    on(s, 0, 0, 9, 7, "dgray")                  # glossy part
     for y in (1, 3, 5):                         # vents
-        s.rect(1, y, 15, 1, "black")
-    on(s, 17, 0, 9, 7, "dgray")                 # glossy part
+        s.rect(10, y, 15, 1, "black")
     on(s, 0, 7, 26, 7, "black")                 # front
     s.rect(2, 9, 12, 1, "dgray")                # disc slot
     s.ellipse(21, 10, 2.6, 2.6, "white")        # Xbox button
