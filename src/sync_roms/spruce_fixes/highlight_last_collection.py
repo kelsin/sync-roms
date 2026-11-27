@@ -1,15 +1,19 @@
 """Backing out of a collection or a folder with B highlights it the next time instead of opening it again, and each
-folder of a system's game list remembers its own last game, from https://github.com/spruceUI/spruceOS/pull/2070, which
-isn't released yet. PyUI still resumes inside a collection or folder after a game. Delete this fix once a spruceOS
-release with that PR is on every spruce card (the line then reads "the card's PyUI already has it").
+folder of a system's game list remembers its own last game (in pyui-state.json, under its system's entry in a "folders"
+map keyed by the folder's path), from https://github.com/spruceUI/spruceOS/pull/2070, which isn't released yet. PyUI
+still resumes inside a collection or folder after a game. Delete this fix once a spruceOS release with that PR is on
+every spruce card (the line then reads "the card's PyUI already has it").
 
-Three files under App/PyUI/main-ui/menus/games/ are edited by replacing blocks that must each appear once, in the 4.6.0
-and the Development code alike, so the card's own version is kept (never a whole file). The fix is all or nothing:
-when none of the three has the change yet and every block matches, all three are patched; when all of them have it,
-nothing is done; anything else (another PyUI version, a file missing, half patched) leaves the card untouched with a
-warning. Line ends (CRLF on spruce cards) are kept.
+Three files under App/PyUI/main-ui/menus/games/ and utils/py_ui_state.py are edited by replacing blocks that must each
+appear once, in the 4.6.0 and the Development code alike, so the card's own version is kept (never a whole file). The
+fix is all or nothing: when none of the four has the change yet and every block matches, all four are patched; when all
+of them have it, nothing is done; anything else (another PyUI version, a file missing, half patched) leaves the card
+untouched with a warning. Line ends (CRLF on spruce cards) are kept.
 
-An earlier sync-roms patched cards with a "Reopen last collection" setting (an earlier draft of the same PR). Its
+An earlier sync-roms applied a draft of the same PR that kept each folder's selection under a "<system>::<folder>" key
+(KEYED). On cards that have it, it is undone exactly before the change is applied, in the same write.
+
+An even earlier sync-roms patched cards with a "Reopen last collection" setting (another draft of the same PR). Its
 insertions in five files (OLD) are taken out again, exactly, in the same write, so those cards end up as if they had
 never had it. A draft of that patch put user_config.py's methods before set_ignore_articles_when_sorting instead of after
 it, so either placement is taken out."""
@@ -25,22 +29,169 @@ GAMES = "main-ui/menus/games/"
 
 ROMS_MENU = GAMES + "roms_menu_common.py"
 RUN_METHOD = "    def _run_rom_selection_for_rom_list(self, page_name, rom_list, refresh_rom_list=None) :\n"
-# Every state write in RUN_METHOD's body takes the per-folder key instead of the page name
-RUN_CALLS = (re.compile(r"(PyUiState\.set_last_game_selection\(\s*)page_name,"), r"\1state_key,", 10)
+# Every state write in RUN_METHOD's body passes the folder after its last argument
+RUN_CALLS = (re.compile(r"(PyUiState\.set_last_game_selection\(\s*page_name,(?:[^()]|\([^()]*\))*?"
+                        r"\n( +)[^\n]*[^,\s])(\n *\))"),
+             r"\1,\n\2folder=folder\3", 10)
 # Only in Development: 4.6.0 has no ROM deletion handler
 DELETION_METHOD = "    def _restore_selection_after_rom_deletion(self, page_name, rom_list, selected_index):\n"
 DELETION_EDIT = ("""\
             PyUiState.set_last_game_selection(
                 page_name,
                 next_game.rom_file_path,
+                getattr(self, 'subfolder', '') or ''
+            )
 """, """\
             PyUiState.set_last_game_selection(
-                self._selection_state_key(page_name),
+                page_name,
                 next_game.rom_file_path,
+                getattr(self, 'subfolder', '') or '',
+                folder=self._selection_folder()
+            )
 """)
 
 # (path under App/PyUI, marker of the change, [(old, new)])
 EDITS = (
+    (ROMS_MENU, "def _selection_folder", [
+        ("""\
+    def _check_for_last_subfolder_existance(self, last_subfolder, rom_list):
+        if (
+            last_subfolder != '' and
+""", """\
+    def _check_for_last_subfolder_existance(self, page_name, folder, last_subfolder, rom_list):
+        if (
+            last_subfolder and
+"""),
+        ("""\
+                return return_value
+
+    def default_to_last_game_selection(self):
+        return True
+""", """\
+                return return_value
+            # Backed out of the reopened folder, so highlight it
+            PyUiState.set_last_game_selection(page_name, last_subfolder, getattr(self, 'subfolder', '') or '', folder=folder)
+
+    def default_to_last_game_selection(self):
+        return True
+
+    def _selection_folder(self):
+        return None
+"""),
+        ("""\
+        last_game_file_path, last_subfolder = PyUiState.get_last_game_selection(page_name)
+
+        last_subfolder = self._check_for_last_subfolder_existance(last_subfolder, rom_list)
+
+        if(last_subfolder is not None):
+            return last_subfolder
+""", """\
+        folder = self._selection_folder()
+        last_game_file_path, last_subfolder = PyUiState.get_last_game_selection(page_name, folder=folder)
+
+        last_subfolder = self._check_for_last_subfolder_existance(page_name, folder, last_subfolder, rom_list)
+
+        if(last_subfolder is not None):
+            return last_subfolder
+
+        # Backing out of a reopened folder or collection updates what to highlight
+        last_game_file_path, _ = PyUiState.get_last_game_selection(page_name, folder=folder)
+"""),
+        ("""\
+                        )
+
+                        if(selected.get_selection().get_value().is_collection):
+                            PyUiState.set_last_game_selection(
+                                page_name,
+                                "Collection",
+                                selected.get_selection().get_value().rom_file_path
+                            )
+""" + " " * 24 + """
+                    return ControllerInput.B
+""", """\
+                        )
+
+                    return ControllerInput.B
+"""),
+    ]),
+    (GAMES + "game_select_menu.py", "def _selection_folder", [
+        ("""\
+
+    def prefer_savestate_screenshot(self):
+""", """\
+
+    def _selection_folder(self):
+        # Each folder remembers its own last game under its system's entry
+        return self.subfolder or None
+
+    def prefer_savestate_screenshot(self):
+"""),
+    ]),
+    (GAMES + "collections_menu.py", "def _check_for_last_subfolder_existance(self, page_name, folder,", [
+        ("    def _check_for_last_subfolder_existance(self, last_subfolder, rom_list):\n",
+         "    def _check_for_last_subfolder_existance(self, page_name, folder, last_subfolder, rom_list):\n"),
+        ("""\
+                    self._load_collection_menu(RomInfo(None, collection, is_collection=True))
+                    PyUiState.set_last_game_selection(
+                        "Collections",
+                        '',
+                        getattr(self, 'subfolder', '') or ''
+                    )
+""", """\
+                    self._load_collection_menu(RomInfo(None, collection, is_collection=True))
+                    # Backed out of the reopened collection, so highlight it
+                    PyUiState.set_last_game_selection(
+                        page_name,
+                        collection,
+                        getattr(self, 'subfolder', '') or '',
+                        folder=folder
+                    )
+"""),
+    ]),
+    ("main-ui/utils/py_ui_state.py", "def get_last_game_selection(cls, page_name, folder=None)", [
+        ("""\
+    def get_last_game_selection(cls, page_name):
+        return cls._data.get(page_name, {}).get("lastGameSelection", None), cls._data.get(page_name, {}).get("subfolder", None)
+""", """\
+    def get_last_game_selection(cls, page_name, folder=None):
+        entry = cls._data.get(page_name, {})
+        if(folder is not None):
+            entry = entry.get("folders", {}).get(folder, {})
+        return entry.get("lastGameSelection", None), entry.get("subfolder", None)
+"""),
+        ("""\
+    def set_last_game_selection(cls, page_name, value, subfolder):
+        if page_name not in cls._data:
+            cls._data[page_name] = {}
+        cls._data[page_name]["lastGameSelection"] = value
+        cls._data[page_name]["subfolder"] = subfolder
+""", """\
+    def set_last_game_selection(cls, page_name, value, subfolder, folder=None):
+        if page_name not in cls._data:
+            cls._data[page_name] = {}
+        entry = cls._data[page_name]
+        if(folder is not None):
+            entry = entry.setdefault("folders", {}).setdefault(folder, {})
+        entry["lastGameSelection"] = value
+        entry["subfolder"] = subfolder
+"""),
+    ]),
+)
+
+# The same PR's earlier draft, which an earlier sync-roms applied: each folder's selection under a
+# "<system>::<folder>" key. Taken out, exactly, before EDITS: (path, its marker, [(old, new)] as it applied them), its
+# RUN_METHOD state writes (pattern, replacement, count) and its ROM deletion handler edit, each undone
+KEYED_CALLS = (re.compile(r"(PyUiState\.set_last_game_selection\(\s*)state_key,"), r"\1page_name,", 10)
+KEYED_DELETION_EDIT = ("""\
+            PyUiState.set_last_game_selection(
+                self._selection_state_key(page_name),
+                next_game.rom_file_path,
+""", """\
+            PyUiState.set_last_game_selection(
+                page_name,
+                next_game.rom_file_path,
+""")
+KEYED = (
     (ROMS_MENU, "def _selection_state_key", [
         ("""\
     def _check_for_last_subfolder_existance(self, last_subfolder, rom_list):
@@ -215,6 +366,18 @@ def plan(base):
                 return [], _mismatch(f"{rel} isn't as the earlier Reopen last collection patch left it")
             edited[rel] = text
 
+    keyed = [marker in edited[rel] for rel, marker, _ in KEYED]
+    if any(keyed) and not all(keyed):
+        return [], _mismatch("only some of its files have the earlier per-folder key patch")
+    if all(keyed):
+        for rel, _, edits in KEYED:
+            text = _run_calls(edited[rel], KEYED_CALLS, KEYED_DELETION_EDIT) if rel == ROMS_MENU else edited[rel]
+            for old_text, new_text in reversed(edits):
+                if text is None or text.count(new_text) != 1:
+                    return [], _mismatch(f"{rel} isn't as the earlier per-folder key patch left it")
+                text = text.replace(new_text, old_text)
+            edited[rel] = text
+
     done = [marker in edited[rel] for rel, marker, _ in EDITS]
     if any(done) and not all(done):
         return [], _mismatch("only some of its files have the change")
@@ -224,7 +387,7 @@ def plan(base):
                 if edited[rel].count(old_text) != 1:
                     return [], _mismatch(f"{rel} isn't as expected")
                 edited[rel] = edited[rel].replace(old_text, new_text)
-        text = _state_key_calls(edited[ROMS_MENU])
+        text = _run_calls(edited[ROMS_MENU], RUN_CALLS, DELETION_EDIT)
         if text is None:
             return [], _mismatch(f"{ROMS_MENU} isn't as expected")
         edited[ROMS_MENU] = text
@@ -246,23 +409,23 @@ def _take_out(text, inserts):
     return text
 
 
-def _state_key_calls(text):
-    """RUN_METHOD's state writes and the ROM deletion handler's (where there is one) switched to the per-folder key;
-    None when the code isn't as expected."""
+def _run_calls(text, calls, deletion_edit):
+    """RUN_METHOD's state writes edited with calls (pattern, replacement, count) and the ROM deletion handler's (where
+    there is one) with deletion_edit; None when the code isn't as expected."""
     if text.count(RUN_METHOD) != 1:
         return None
     start = text.index(RUN_METHOD)
     end = text.find("\n    def ", start + len(RUN_METHOD))
     end = len(text) if end < 0 else end
-    pattern, replacement, expected = RUN_CALLS
+    pattern, replacement, expected = calls
     body, count = pattern.subn(replacement, text[start:end])
-    if count != expected:
+    if count != expected or text[start:end].count("PyUiState.set_last_game_selection(") != expected:
         return None
     text = text[:start] + body + text[end:]
     if DELETION_METHOD in text:
-        if text.count(DELETION_EDIT[0]) != 1:
+        if text.count(deletion_edit[0]) != 1:
             return None
-        text = text.replace(*DELETION_EDIT)
+        text = text.replace(*deletion_edit)
     return text
 
 
