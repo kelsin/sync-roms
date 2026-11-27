@@ -438,25 +438,8 @@ class PixelArt(Card):
             return themeart.install("esde", self.base, arts)
 
     def box(self, art_id):
-        return themeart.pixel_png(art_id)
-
-    def test_collection_art_is_the_box_sprite_alone_on_a_system_sprite_s_canvas(self):
-        from PIL import Image
-        from sync_roms import box_sprites
-        from sync_roms.custom_themes.pixel import build as pixel_build
-        with Image.open(io.BytesIO(themeart.pixel_png("shmups"))) as im:
-            self.assertEqual(im.size, pixel_build.ICON_SIZE)
-            left, top, right, bottom = im.getbbox()
-            sprite = box_sprites.load("shmups")
-            sl, st, sr, sb = sprite.getbbox()
-            scale = themeart.PIXEL_SCALE
-            self.assertEqual((right - left, bottom - top), ((sr - sl) * scale, (sb - st) * scale))
-            self.assertAlmostEqual((left + right) / 2, pixel_build.ICON_CENTER[0], delta=1)
-            self.assertAlmostEqual((top + bottom) / 2, pixel_build.ICON_CENTER[1], delta=1)
-            # the sprite as it is, in whole pixels: no outline or bevel of Pixel's own on top of the sprite's
-            drawn = sprite.crop((sl, st, sr, sb))
-            self.assertEqual(im.crop((left, top, right, bottom)).convert("RGBA").tobytes(),
-                             drawn.resize((drawn.width * scale, drawn.height * scale), Image.NEAREST).tobytes())
+        with open(os.path.join(themeart.THEME_DATA, "art-box", "Imgs", f"{art_id}.png"), "rb") as f:
+            return f.read()
 
     def test_a_listed_name_pixel_now_draws_a_sprite_for_keeps_the_sprite(self):
         write(self.pixel(esde_pixel.OWNED), "snes\n")

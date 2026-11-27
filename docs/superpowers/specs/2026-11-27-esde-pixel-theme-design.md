@@ -14,7 +14,7 @@ ToTK for ES-DE is a later, separate project.
 - **System view**: a carousel. The selected system's sprite is large on a rounded `bar`-coloured tile (like Spruce's selected main-menu item), the neighbours smaller, the system name below in `text` and the game count in `accent`. Horizontal on wide screens, vertical (top to bottom) on `5:3_vertical`.
 - **Game list view**: the text list (selected row on the `bar` colour, others in `list`) beside the scraped art (miximage), the metadata labels (genre, players, release date, rating; label names in `accent`) and the description. On `5:3_vertical`: art and metadata on top, list below, no description.
 - A Pixel sprite, in both variants, for **every system in `systems.json` that has an ES-DE folder**. About 20 already exist under another id (e.g. `pico8`, `atari7800`): map them. About 25 are new drawings, two each (console and pad): GameCube, Wii, Wii U, Switch, PS2, PS3, PS4, PS Vita, 3DS/New 3DS, Xbox, Xbox 360, Xbox One, 3DO, CD-i, Jaguar CD, PC-FX, 64DD, Model 2, Model 3, ST-V, NAOMI 2/GD, Triforce, Type X, Daphne, and the others the mapping step finds missing.
-- Collections (custom and Surprise) get pixel art from the existing box-art sprites (`data/themes/art-book-next/sprites/<id>.txt`) when Pixel is ES-DE's theme.
+- Collections (custom and Surprise) get the box art (`data/themes/art-book-next/art-box/Imgs/<id>.png`, the same boxes Spruce cards get) when Pixel is ES-DE's theme, by the user's decision.
 
 ## Non-goals
 
@@ -60,7 +60,7 @@ ToTK for ES-DE is a later, separate project.
 - **ES-DE version:** current ES-DE 3.x (colour schemes, variants and font size presets all available), on Android and EmuDeck alike.
 - The picked mockup (`.superpowers/brainstorm/esde-pixel-1.html`) is git-ignored; this doc's System view and Game list view goals describe it fully.
 - The theme folder name is `pixel-sync-roms`, shown as "Pixel".
-- Collection art in Pixel uses the 32x32 box-art sprites on the carousel.
+- Collection art in Pixel is the `art-box/Imgs/<id>.png` box art, copied as is, by the user's decision (not the 32x32 sprites).
 - Game list video: not shown (keeps the look still and simple); the miximage is the picture.
 - The card editor's S menu theme line is reworded to say it covers both themes.
 
