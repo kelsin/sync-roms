@@ -3,7 +3,7 @@ import json
 import os
 
 from ... import store
-from ..pixel import build, variants
+from ..pixel import build, modern, variants
 
 # ES-DE system name -> Pixel icon id (pixel/ids.py, or a drawing in pixel/extras.py)
 ICONS = {
@@ -24,11 +24,12 @@ ICONS = {
 }
 # ES-DE name -> {"CONSOLES": draw, "CONTROLLERS": draw} for drawings that aren't a Spruce icon id
 EXTRA = {"mark3": {"CONSOLES": variants.mark3_console, "CONTROLLERS": variants.mark3_pad}}
+EXTRA.update({name: {"CONSOLES": modern.CONSOLES[name], "CONTROLLERS": modern.CONTROLLERS[name]}
+              for name in modern.CONSOLES})
 # ES-DE names still waiting for a drawing
 PENDING = {
-    "pcfx", "daphne", "lowresnx", "lutro", "n64dd", "3do", "uzebox", "atarijaguarcd", "cdimono1", "gc", "model2",
-    "model3", "ps2", "ps3", "ps4", "psvita", "stv", "switch", "triforce", "type-x", "wii", "wiiu", "xbox",
-    "xbox360", "xboxone", "arcadia", "gamecom",
+    "pcfx", "daphne", "lowresnx", "lutro", "3do", "uzebox", "atarijaguarcd", "cdimono1", "model2", "model3", "ps2",
+    "ps3", "ps4", "psvita", "stv", "triforce", "type-x", "xbox", "xbox360", "xboxone", "arcadia", "gamecom",
 }
 
 
