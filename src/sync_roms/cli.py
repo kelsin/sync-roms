@@ -51,7 +51,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "install": ("", "brew install the 7z, unar and chdman that `prepare` needs"),
     "mirror": ("[DIR] | use DIR | clear", "make or refresh a local copy of everything your lists reference"),
     "cache": ("[update [--full]]", "show the storage cache every command reads file lists and sizes from, or update it"),
-    "config": ("show|path|set NAME VALUE|unset NAME|import [CARD]|apply [CARD]", "show the effective settings and where each comes from, or change one"),
+    "config": ("show|path|set NAME VALUE|unset NAME|import [CARD]|apply [CARD]|push USER@HOST", "show the effective settings and where each comes from, or change one"),
     "guide": ("", "open the device setup guide (steps to finish a device by hand) in a browser"),
     "doctor": ("", "check the AWS profile, storage access, tools and your data files"),
     "check": ("", "validate cards.json, surprises.json, the device overlay, tags.json and your collections"),
@@ -601,6 +601,8 @@ TOPICS = {
                                         preferences) in settings.json
   sync-roms config apply [CARD] [--dry-run] [--yes]   apply the saved settings to a spruce, Knulli
                                                       or EmuDeck card or an Android device
+  sync-roms config push USER@HOST [--dry-run]   copy settings.json and the collections to a
+                                                SteamOS device over SSH
 
   NAME is bucket, root, endpoint, profile, write_profile, mirror, screenscraper_user or
   screenscraper_password (text), eject, storage_cache_declined or syncthing (true or false),
@@ -614,6 +616,12 @@ TOPICS = {
   RetroAchievements settings written into a spruce card or an Android device's
   Saves/spruce/spruce-config.json. Set them with `config set`; `config import` doesn't read them
   from the card.
+
+  config push USER@HOST copies settings.json, without bucket, root, endpoint, profile,
+  write_profile, mirror, eject and storage_cache_declined (the device keeps its own), and every
+  collection to the device's data folder over ssh (BatchMode, so an SSH key must already work);
+  the device's other settings and collections are made to match this machine's. It lists the
+  settings and collections it adds, changes or removes, by name only; --dry-run stops there.
 
   config import takes CARD (a card name from cards.json, found at /Volumes/<name>, or the card's
   folder; default the current folder) and picks what to import from the card's saved layout (spruce
