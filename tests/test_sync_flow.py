@@ -740,9 +740,8 @@ class SyncFlowTest(unittest.TestCase):
                                  extra=[(ui, "warn", self.warned.append)] + scraping, **kw)
 
     @staticmethod
-    def skipped(reason):
-        return (f"{reason}, so the card's gamelists and collections were skipped; "
-                "sync on the Steam Machine or Steam Deck to get them")
+    def skipped(reason, what="the card's gamelists and collections, and the Pixel ES-DE theme were"):
+        return f"{reason}, so {what} skipped; sync on the Steam Machine or Steam Deck to get them"
 
     def test_emudeck_card_writes_its_collection_into_es_de_on_this_computer(self):
         self.warned = []
@@ -826,7 +825,8 @@ class SyncFlowTest(unittest.TestCase):
                 self.warned = []
                 appdata = os.path.join(tmp, "ES-DE")
                 _, out, _, _, _ = self.run_emudeck(appdata, rom_dir=None, colls=False, dry_run=dry_run)
-                self.assertEqual(self.warned, [self.skipped(f"ES-DE isn't set up on this computer (no {appdata})")])
+                self.assertEqual(self.warned, [self.skipped(f"ES-DE isn't set up on this computer (no {appdata})",
+                                                            "the Pixel ES-DE theme was")])
                 self.assertFalse(os.path.exists(appdata))
                 self.assertNotIn("Pixel", out)
 

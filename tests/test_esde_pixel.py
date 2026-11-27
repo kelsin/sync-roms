@@ -482,7 +482,9 @@ class Install(unittest.TestCase):
         self.assertEqual(esde_pixel.dest("esde", self.base), self.copy())
         got = files(self.copy())
         cached = files(esde_pixel.cached())
-        self.assertEqual(got, cached)
+        self.assertEqual(got.keys(), cached.keys())
+        self.assertEqual({k: v for k, v in got.items() if k != esde_pixel.MARKER},
+                         {k: v for k, v in cached.items() if k != esde_pixel.MARKER})
         self.assertIn("theme.xml", got)
         self.assertIn("capabilities.xml", got)
         self.assertEqual(got[esde_pixel.MARKER].decode().strip(), esde_pixel.key())
@@ -562,8 +564,8 @@ class Install(unittest.TestCase):
         self.assertTrue(problem)
         skips = []
         for dry_run in (True, False):
-            self.assertFalse(esde_pixel.step("emudeck", self.base, {}, dry_run, problem, lambda: skips.append(1)))
-        self.assertEqual(len(skips), 2)
+            self.assertFalse(esde_pixel.step("emudeck", self.base, {}, dry_run, problem, skips.append))
+        self.assertEqual(skips, [esde_pixel.LABEL] * 2)
         self.assertFalse(os.path.exists(frontend.esde_dir("emudeck", self.base)))
         self.assertEqual(os.listdir(self.base), ["Emulation"])
 
@@ -623,6 +625,12 @@ class Cache(unittest.TestCase):
         os.remove(os.path.join(path, esde_pixel.MARKER))  # a build stopped before its marker
         esde_pixel.cached()
         self.assertEqual(len(self.built), 4)
+        os.remove(os.path.join(path, "theme.xml"))  # files gone from a build that has its marker
+        esde_pixel.cached()
+        self.assertEqual(len(self.built), 5)
+        self.assertTrue(os.path.exists(os.path.join(path, "theme.xml")))
+        esde_pixel.cached()
+        self.assertEqual(len(self.built), 5)
 
 
 class Sources(unittest.TestCase):

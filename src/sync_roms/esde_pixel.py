@@ -10,6 +10,7 @@ THEME = build.THEME
 MARKER = ".sync-roms-build"  # the build's key, in the cached build and (written last) in the card's copy
 OWNED = ".sync-roms-collections"  # the collection names sync-roms gave art in the card's copy
 ART_FOLDERS = ("consoles", "controllers")  # the variants' `systems/` folders, where a collection's art goes
+LABEL = "the Pixel ES-DE theme"  # what a skipped step names
 _ROOT = os.path.dirname(os.path.abspath(__file__))
 # What the build reads: its code, the Pixel sprites and palettes, the font, the box art and the system list.
 SOURCES = (os.path.join(_ROOT, "custom_themes", "esde"), os.path.join(_ROOT, "custom_themes", "pixel"),
@@ -53,13 +54,19 @@ def cache_root():
     return os.path.join(store.cache_dir(), "themes", "esde")
 
 
+def _count(path):
+    """The number of files under path, its marker left out."""
+    return sum(len(names) for _, _, names in os.walk(path)) - os.path.exists(os.path.join(path, MARKER))
+
+
 def cached():
-    """The built theme folder in the cache, rebuilt when the sources changed (or a build stopped before its marker)."""
+    """The built theme folder in the cache. Its marker holds the key and the build's file count: it is rebuilt when the
+    sources changed, a build stopped before its marker, or files have gone from it since."""
     digest = key()
     path = os.path.join(cache_root(), THEME)
-    if _read(os.path.join(path, MARKER)).strip() != digest:
+    if _read(os.path.join(path, MARKER)).split() != [digest, str(_count(path))]:
         build.build(cache_root())
-        store.write_text(os.path.join(path, MARKER), digest + "\n")
+        store.write_text(os.path.join(path, MARKER), f"{digest}\n{_count(path)}\n")
     return path
 
 
@@ -86,7 +93,7 @@ def install(layout_name, base):
     next. Returns whether anything changed (False only when the card's marker
     already names this build)."""
     source = cached()
-    digest = _read(os.path.join(source, MARKER)).strip()
+    digest = _read(os.path.join(source, MARKER)).split()[0]
     target = dest(layout_name, base)
     if _read(os.path.join(target, MARKER)).strip() == digest:
         return False
@@ -109,6 +116,7 @@ def install(layout_name, base):
         if folder != target and not os.listdir(folder):
             os.rmdir(folder)
     store.replace_file(os.path.join(target, MARKER), (digest + "\n").encode())
+    cardfs.clear()  # the card changed: later steps list it afresh
     return True
 
 
@@ -120,14 +128,20 @@ def describe(layout_name, base):
     print(ui.dim(f"🎨 {verb} {_shown(layout_name, base)}"))
 
 
+def wanted(layout_name, entry):
+    """Whether sync puts Pixel on this card: `esde` and `emudeck` cards with the `theme` flag on."""
+    return layout_name in frontend.ESDE_LAYOUTS and store.card_flag(entry, "theme")
+
+
 def step(layout_name, base, entry, dry_run, problem=None, skipped=None):
     """Sync's Pixel step: on `esde`/`emudeck` with the card's `theme` flag on, install or update Pixel (dry run: say so).
-    problem is `frontend.emudeck_problem`'s answer for emudeck; skipped says it. Returns whether it changed anything."""
-    if layout_name not in frontend.ESDE_LAYOUTS or not store.card_flag(entry, "theme"):
+    problem is `frontend.emudeck_problem`'s answer for emudeck; skipped(LABEL) says it. Returns whether it changed
+    anything."""
+    if not wanted(layout_name, entry):
         return False
     if problem:
         if skipped:
-            skipped()
+            skipped(LABEL)
         return False
     if dry_run:
         describe(layout_name, base)

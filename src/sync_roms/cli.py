@@ -1559,11 +1559,14 @@ def sync_card(args):
     stale_es_dir = None if esde_problem else es_dir
     warned = []
 
-    def skipped():
-        """Say (once) that the card's gamelists and collections were skipped, and why."""
+    def skipped(what="the card's gamelists and collections"):
+        """Say (once) what was skipped on ES-DE, and why: what, and the Pixel theme when sync puts it on this card."""
         if not warned:
             warned.append(esde_problem)
-            ui.warn(f"{esde_problem}, so the card's gamelists and collections were skipped; "
+            items = [what] + ([esde_pixel.LABEL] if what != esde_pixel.LABEL
+                              and esde_pixel.wanted(layout_name, store.saved_card(card)) else [])
+            verb = "was" if items == [esde_pixel.LABEL] else "were"
+            ui.warn(f"{esde_problem}, so {', and '.join(items)} {verb} skipped; "
                     "sync on the Steam Machine or Steam Deck to get them")
     scrapes = layout_name in scrape_plan.SCRAPE_LAYOUTS
     scraped = {}
