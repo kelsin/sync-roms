@@ -306,13 +306,13 @@ def psvita():
     """PS Vita 1000 (Wikimedia, Evan-Amos, "PlayStation-Vita-1101-FL"): the black oval handheld with the wide OLED
     screen, the d-pad above the left stick, the four face buttons above the right stick, the PS button below the
     left stick and start below the right one. It is also its own controller, like the PSP."""
-    s = Sprite(26, 14)
-    s.rrect(0, 0, 26, 14, "dark", 4)
-    s.rrect(2, 7, 3, 3, "dgray", 1)             # sticks (nubs, as on the PSP)
-    s.px(3, 11, "dgray")                        # PS button / start
+    s = Sprite(26, 15)
+    s.rrect(0, 0, 26, 15, "dark", 4)
+    s.rrect(1, 7, 4, 4, "dgray", 1)             # sticks
+    s.px(4, 12, "dgray")                        # PS button / start
     s.mirror()
-    s.rect(6, 2, 14, 8, "sky")                  # 16:9, under the one black glass front
-    face(s, 13, 3, 3)
+    s.rect(6, 3, 14, 8, "sky")                  # 16:9, under the one black glass front
+    face(s, 13, 4, 3)
     plus(s, 2, 3, 3, 1, "gray")
     s.px(22, 3, "green")                        # triangle
     s.px(21, 4, "pink")                         # square
