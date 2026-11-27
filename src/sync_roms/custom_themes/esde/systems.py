@@ -3,7 +3,7 @@ import json
 import os
 
 from ... import store
-from ..pixel import build, modern, variants
+from ..pixel import build, esde_extra, modern, variants
 
 # ES-DE system name -> Pixel icon id (pixel/ids.py, or a drawing in pixel/extras.py)
 ICONS = {
@@ -26,11 +26,10 @@ ICONS = {
 EXTRA = {"mark3": {"CONSOLES": variants.mark3_console, "CONTROLLERS": variants.mark3_pad}}
 EXTRA.update({name: {"CONSOLES": modern.CONSOLES[name], "CONTROLLERS": modern.CONTROLLERS[name]}
               for name in modern.CONSOLES})
+EXTRA.update({name: {"CONSOLES": esde_extra.CONSOLES[name], "CONTROLLERS": esde_extra.CONTROLLERS[name]}
+              for name in esde_extra.CONSOLES})
 # ES-DE names still waiting for a drawing
-PENDING = {
-    "pcfx", "daphne", "lowresnx", "lutro", "3do", "uzebox", "atarijaguarcd", "cdimono1", "model2", "model3", "stv",
-    "triforce", "type-x", "arcadia", "gamecom",
-}
+PENDING = {"daphne", "lowresnx", "lutro", "model2", "model3", "stv", "triforce", "type-x"}
 
 
 def esde_names():
