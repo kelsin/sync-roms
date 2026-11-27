@@ -17,6 +17,7 @@ import sys
 from PIL import Image, ImageDraw, ImageFont
 
 from gen_theme_art import ART
+from sync_roms import box_sprites
 
 DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src", "sync_roms", "data", "themes",
                     "art-book-next")
@@ -43,13 +44,8 @@ def _load(name):
         return json.load(f)
 
 
-def _rgb(hex_colour):
-    return tuple(int(hex_colour[i:i + 2], 16) for i in (1, 3, 5))
-
-
 TITLES = _load("art.json")
 FONT = _load("box-font.json")
-PALETTE = {k: _rgb(v) for k, v in _load("box-palette.json").items()}
 
 
 def shade(c, f):
@@ -89,17 +85,6 @@ def wrap(text, width=72):
     if any(text_width(line) > width for line in lines) or len(lines) > 3:
         raise ValueError(f"{text!r} doesn't fit {width} px in 3 lines")
     return lines
-
-
-def load_sprite(art_id):
-    with open(os.path.join(DATA, "sprites", f"{art_id}.txt")) as f:
-        rows = f.read().splitlines()
-    im = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
-    for y, row in enumerate(rows):
-        for x, ch in enumerate(row):
-            if ch != ".":
-                im.putpixel((x, y), PALETTE[ch] + (255,))
-    return im
 
 
 def layout(art_id):
@@ -150,7 +135,7 @@ def render(art_id):
     d.rectangle(lay["title_band"], fill=DARK)
     for i, f in enumerate((0.70, 0.85, 1.00)):
         d.line([(0, band + 1 + 2 * i), (W - 1, band + 1 + 2 * i)], fill=shade(c, f))
-    sprite = load_sprite(art_id).resize((SPRITE, SPRITE), Image.NEAREST)
+    sprite = box_sprites.load(art_id).resize((SPRITE, SPRITE), Image.NEAREST)
     im.paste(sprite, (sx, sy), sprite)
     d.rectangle([0, FOOTER, W - 1, H - 1], fill=DARK)
     for i, line in enumerate(wrap(title(art_id))):

@@ -2,6 +2,7 @@
 muOS, ROCKNIX and Spruce cards."""
 import contextlib
 import functools
+import io
 import json
 import unicodedata
 import http.client
@@ -13,8 +14,12 @@ import time
 from xml.sax import saxutils
 import zlib
 
-from . import cardfs, downloads, esde_pixel, frontend, github, rocknix_collections, runtime, s3, store, ui
+from PIL import Image
+
+from . import box_sprites, cardfs, downloads, esde_pixel, frontend, github, rocknix_collections, runtime, s3, store, ui
 from .custom_themes.esde import systems as pixel_systems
+from .custom_themes.pixel import build as pixel_build
+from .custom_themes.pixel.sprite import place
 
 THEME_DATA = os.path.join(store.REPO_DATA, "themes", "art-book-next")
 SURPRISE_ART = "surprise"
@@ -186,8 +191,23 @@ def _pixel_usable(arts):
     return {n: png for n, png in arts.items() if n.lower() not in sprites}
 
 
+PIXEL_SCALE = 3  # the box sprites are up to 30 pixels across: at 3 they fit where Pixel's system sprites sit
+
+
+@functools.cache
+def pixel_png(art_id):
+    """A collection's picture in Pixel: its box-art sprite alone (it draws its own outline), cut to what it draws, scaled
+    by whole pixels and placed on a system sprite's canvas, so it sits in the carousel like one."""
+    img = box_sprites.load(art_id)
+    img = img.crop(img.getbbox())
+    img = img.resize((img.width * PIXEL_SCALE, img.height * PIXEL_SCALE), Image.NEAREST)
+    out = io.BytesIO()
+    place(img, pixel_build.ICON_SIZE, pixel_build.ICON_CENTER).save(out, "PNG")
+    return out.getvalue()
+
+
 def install_pixel(layout_name, base, arts, keep=False):
-    """Give each collection in arts ({name: outline art png}) its box art in Pixel's variants and its theme folder, under
+    """Give each collection in arts ({name: outline art png}) its box-art sprite in Pixel's variants and its theme folder, under
     the name ES-DE themes it by (lower case), list the names in Pixel's own collection list, and (unless keep) remove the art of names
     on the list no longer in arts. ES-DE's Theme is never changed. Returns whether anything changed."""
     arts = _pixel_usable(arts)
@@ -196,8 +216,9 @@ def install_pixel(layout_name, base, arts, keep=False):
     owned = _read(os.path.join(dest, esde_pixel.OWNED)).splitlines()
     changed = False
     if not keep:
+        sprites = {n.lower() for n in pixel_systems.esde_names()}
         for name in _pixel_stale(dest, keep_names):
-            for folder in esde_pixel.ART_FOLDERS:
+            for folder in () if name in sprites else esde_pixel.ART_FOLDERS:  # the build's own sprite now
                 with contextlib.suppress(FileNotFoundError):
                     os.remove(os.path.join(dest, "systems", folder, f"{name}.png"))
                     changed = True
@@ -211,8 +232,7 @@ def install_pixel(layout_name, base, arts, keep=False):
     if names or os.path.exists(os.path.join(dest, esde_pixel.OWNED)):
         changed |= cardfs.write_bytes(os.path.join(dest, esde_pixel.OWNED), "".join(f"{n}\n" for n in names).encode())
     for name, png in arts.items():
-        with open(os.path.join(THEME_DATA, "art-box", "Imgs", os.path.basename(png)), "rb") as f:
-            data = f.read()
+        data = pixel_png(os.path.splitext(os.path.basename(png))[0])
         for folder in esde_pixel.ART_FOLDERS:
             changed |= cardfs.write_bytes(os.path.join(dest, "systems", folder, f"{name.lower()}.png"), data)
         # ES-DE shows a custom collection as a system of its own only when the theme has a folder for it
@@ -224,7 +244,7 @@ def install_pixel(layout_name, base, arts, keep=False):
 
 def describe_pixel(layout_name, base, arts, keep=False):
     arts = _pixel_usable(arts)
-    where = esde_pixel._shown(layout_name, base)
+    where = esde_pixel.shown(layout_name, base)
     stale = [] if keep else _pixel_stale(esde_pixel.dest(layout_name, base), {n.lower() for n in arts})
     if stale:
         print(ui.dim(f"🎨 would remove the art for {', '.join(stale)} from {where}"))

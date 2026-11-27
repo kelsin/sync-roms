@@ -12,10 +12,9 @@ OWNED = ".sync-roms-collections"  # the collection names sync-roms gave art in t
 ART_FOLDERS = ("consoles", "controllers")  # the variants' `systems/` folders, where a collection's art goes
 LABEL = "the Pixel ES-DE theme"  # what a skipped step names
 _ROOT = os.path.dirname(os.path.abspath(__file__))
-# What the build reads: its code, the Pixel sprites and palettes, the font, the box art and the system list.
+# What the build reads: its code, the Pixel sprites and palettes, the font and the system list.
 SOURCES = (os.path.join(_ROOT, "custom_themes", "esde"), os.path.join(_ROOT, "custom_themes", "pixel"),
            os.path.join(_ROOT, "custom_themes", "palettes.py"), os.path.join(store.REPO_DATA, "themes", "fusion-pixel"),
-           os.path.join(store.REPO_DATA, "themes", "art-book-next", "art-box", "Imgs"),
            os.path.join(store.REPO_DATA, "systems.json"))
 
 
@@ -74,7 +73,7 @@ def dest(layout_name, base):
     return os.path.join(frontend.esde_dir(layout_name, base), "themes", THEME)
 
 
-def _shown(layout_name, base):
+def shown(layout_name, base):
     """The copy's path from ES-DE's data folder's parent, for messages."""
     es_dir = frontend.esde_dir(layout_name, base)
     return os.path.relpath(dest(layout_name, base), os.path.dirname(os.path.normpath(es_dir))).replace(os.sep, "/")
@@ -127,7 +126,7 @@ def describe(layout_name, base):
     if card == key():
         return
     verb = "would update Pixel for ES-DE in" if card else "would install Pixel for ES-DE into"
-    print(ui.dim(f"🎨 {verb} {_shown(layout_name, base)}"))
+    print(ui.dim(f"🎨 {verb} {shown(layout_name, base)}"))
 
 
 def wanted(layout_name, entry):

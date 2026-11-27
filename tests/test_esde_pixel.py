@@ -642,8 +642,7 @@ class Sources(unittest.TestCase):
         sources = {os.path.normpath(p) for p in esde_pixel.SOURCES}
         root = os.path.dirname(esde_pixel.__file__)
         for rel in (("custom_themes", "esde"), ("custom_themes", "pixel"), ("custom_themes", "palettes.py"),
-                    ("data", "themes", "fusion-pixel"), ("data", "themes", "art-book-next", "art-box", "Imgs"),
-                    ("data", "systems.json")):
+                    ("data", "themes", "fusion-pixel"), ("data", "systems.json")):
             self.assertIn(os.path.normpath(os.path.join(root, *rel)), sources)
 
 

@@ -1565,9 +1565,9 @@ def sync_card(args):
             warned.append(esde_problem)
             items = [what] + ([esde_pixel.LABEL] if what != esde_pixel.LABEL
                               and esde_pixel.wanted(layout_name, store.saved_card(card)) else [])
-            verb = "was" if items == [esde_pixel.LABEL] else "were"
+            verb, them = ("was", "it") if items == [esde_pixel.LABEL] else ("were", "them")
             ui.warn(f"{esde_problem}, so {', and '.join(items)} {verb} skipped; "
-                    "sync on the Steam Machine or Steam Deck to get them")
+                    f"sync on the Steam Machine or Steam Deck to get {them}")
     scrapes = layout_name in scrape_plan.SCRAPE_LAYOUTS
     scraped = {}
 

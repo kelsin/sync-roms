@@ -100,7 +100,6 @@ def capabilities():
 def theme():
     root = ET.Element("theme")
     variables = _sub(root, "variables")
-    _sub(variables, "pixelBackground", "000000FF")
     _sub(variables, "pixelClear", "00000000")
     for name, palette in palettes.PALETTES.items():
         variables = _sub(_sub(root, "colorScheme", name=slug(name)), "variables")
