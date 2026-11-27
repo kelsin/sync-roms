@@ -302,5 +302,139 @@ class SystemView(unittest.TestCase):
                 self.assertGreaterEqual(round(px), 12, ratio)
 
 
+GAMELIST_TYPES = {"textlist", "image", "text", "datetime", "helpsystem"}
+
+
+class GamelistView(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.tmp = tempfile.TemporaryDirectory()
+        cls.dest = esde_build.build(cls.tmp.name)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.tmp.cleanup()
+
+    def parse(self, rel):
+        return ET.parse(os.path.join(self.dest, rel)).getroot()
+
+    def general(self):
+        views = self.parse("theme.xml").findall("view[@name='gamelist']")
+        self.assertEqual(len(views), 1)
+        return views[0]
+
+    def layout_view(self, ratio):
+        views = self.parse(esde_build.layout_file(ratio)).findall("view[@name='gamelist']")
+        self.assertEqual(len(views), 1, ratio)
+        return views[0]
+
+    def merged(self, ratio):
+        """{(type, name): {property: value}}: theme.xml's gamelist view with the ratio's layout over it."""
+        out = {}
+        for view in (self.general(), self.layout_view(ratio)):
+            for el in view:
+                props = out.setdefault((el.tag, el.get("name")), {})
+                props.update({child.tag: child.text for child in el})
+        return out
+
+    def test_gamelist_has_list_image_metadata(self):
+        for ratio in esde_build.RATIOS:
+            merged = self.merged(ratio)
+            lists = [props for (tag, _), props in merged.items() if tag == "textlist"]
+            self.assertEqual(len(lists), 1, ratio)
+            images = [props for (tag, _), props in merged.items() if tag == "image"]
+            self.assertTrue(any(p.get("imageType") == "miximage" for p in images), ratio)
+            fields = {props.get("metadata") for (tag, _), props in merged.items() if tag in ("text", "datetime")}
+            for field in ("genre", "players", "releasedate", "rating"):
+                self.assertIn(field, fields, (ratio, field))
+            self.assertEqual(merged[("datetime", "pixelReleased")]["metadata"], "releasedate")
+            for key, props in merged.items():
+                if props.get("visible") != "false":
+                    self.assertIn("pos", props, (ratio, key))
+
+    def test_list_colours(self):
+        textlist = self.general().find("textlist")
+        self.assertEqual(textlist.findtext("selectorColor"), "${pixelBar}")
+        self.assertEqual(textlist.findtext("selectedColor"), "${pixelSelected}")
+        self.assertEqual(textlist.findtext("primaryColor"), "${pixelList}")
+
+    def test_labels_in_accent(self):
+        labels = [el for el in self.general().findall("text") if el.get("name").endswith("Label")]
+        self.assertEqual(len(labels), 4)
+        for el in labels:
+            self.assertEqual(el.findtext("color"), "${pixelAccent}", el.get("name"))
+            self.assertTrue(el.findtext("text"), el.get("name"))
+
+    def test_vertical_has_no_description(self):
+        for ratio in esde_build.RATIOS:
+            desc = self.merged(ratio)[("text", "pixelDescription")]
+            self.assertEqual(desc["metadata"], "description")
+            hidden = desc.get("visible") == "false"
+            self.assertEqual(hidden, ratio == "5:3_vertical", ratio)
+
+    def test_no_video(self):
+        root = self.parse("theme.xml")
+        self.assertEqual(root.findall(".//video"), [])
+        for ratio in esde_build.RATIOS:
+            self.assertEqual(self.parse(esde_build.layout_file(ratio)).findall(".//video"), [], ratio)
+
+    def test_layout_elements_are_declared_in_theme_xml(self):
+        declared = {(el.tag, el.get("name")) for el in self.general()}
+        self.assertEqual({tag for tag, _ in declared}, GAMELIST_TYPES)
+        for ratio in esde_build.RATIOS:
+            self.assertEqual({(el.tag, el.get("name")) for el in self.layout_view(ratio)}, declared, ratio)
+
+    def test_colours_are_variables(self):
+        views = [self.general()] + [self.layout_view(ratio) for ratio in esde_build.RATIOS]
+        for view in views:
+            for el in view.iter():
+                if el.tag == "color" or el.tag.endswith("Color"):
+                    self.assertRegex(el.text, r"^\$\{pixel[A-Z]\w*\}$", el.tag)
+
+    def test_layouts_hold_no_colours_or_paths(self):
+        for ratio in esde_build.RATIOS:
+            for el in self.layout_view(ratio).iter():
+                self.assertFalse(el.tag == "color" or el.tag.endswith("Color") or el.tag.endswith("Path"), (ratio, el.tag))
+
+    def test_font_paths_exist(self):
+        for el in self.general().iter("fontPath"):
+            self.assertTrue(os.path.isfile(os.path.join(self.dest, el.text)), el.text)
+
+    def test_font_sizes_are_multiples_of_12(self):
+        for ratio in esde_build.RATIOS:
+            sizes = list(self.layout_view(ratio).iter("fontSize"))
+            self.assertGreater(len(sizes), 0, ratio)
+            for el in sizes:
+                px = float(el.text) * FONT_REFERENCE[ratio]
+                self.assertAlmostEqual(px / 12, round(px / 12), delta=0.01, msg=(ratio, px))
+                self.assertGreaterEqual(round(px), 12, ratio)
+
+    def test_boxes_stay_on_screen_and_apart(self):
+        """The list, art, metadata rows and description lie on screen and don't overlap."""
+        for ratio in esde_build.RATIOS:
+            width, height = esde_build.SYSTEM_LAYOUTS[ratio].screen
+            geo = esde_build.gamelist_geometry(ratio)
+            boxes = [(name, box) for name, box in geo.items() if name != "help"]
+            for name, (x, y, w, h) in boxes:
+                self.assertGreaterEqual(x, 0, (ratio, name))
+                self.assertGreaterEqual(y, 0, (ratio, name))
+                self.assertLessEqual(x + w, width + 0.01, (ratio, name))
+                self.assertLessEqual(y + h, height + 0.01, (ratio, name))
+            for i, (a, (ax, ay, aw, ah)) in enumerate(boxes):
+                for b, (bx, by, bw, bh) in boxes[i + 1:]:
+                    apart = ax + aw <= bx or bx + bw <= ax or ay + ah <= by or by + bh <= ay
+                    self.assertTrue(apart, (ratio, a, b))
+
+
+class FourThreeSprites(unittest.TestCase):
+    def test_sprite_pixels_are_whole_on_4_3_devices(self):
+        """Selected and unfocused sprite pixels are whole screen pixels at 640x480, 960x720 and 1280x960."""
+        lay = esde_build.SYSTEM_LAYOUTS["4:3"]
+        for device_height in (480, 720, 960):
+            factor = device_height / lay.screen[1]
+            for size in (4 * lay.scale, 2 * lay.scale):  # sprite pixel in screen px: selected, unfocused
+                self.assertEqual(size * factor, round(size * factor), (device_height, size))
+
+
 if __name__ == "__main__":
     unittest.main()
