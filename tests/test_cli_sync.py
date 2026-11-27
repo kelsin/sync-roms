@@ -898,13 +898,14 @@ class SyncSmokeTest(DataDir):
         real_replace = store.replace_file
 
         def replace_file(path, data, **kw):
-            writes.append((os.path.basename(path), data.decode()))
+            if path.endswith(".m3u"):
+                writes.append((os.path.basename(path), data.decode()))
             return real_replace(path, data, **kw)
         patches = ((store, {"load_manifest": lambda names=(): manifest, "replace_file": replace_file}),
                    (cli.s3, {"list_sizes": lambda prefix, sizes_=True: sizes if prefix == "psx/" else {}, "download": download}),
                    (cli, {"free_space": lambda path: 10**9}), (cli.downloads, {"run_downloads": downloads.run_downloads}))
         self.assertEqual(self.run_sync(False, prepare=prepare, patches=patches), 0)
-        return [w for w in writes if w[0].endswith(".m3u")]
+        return writes
 
     def test_a_playlist_is_written_once_already_prefixed(self):
         discs = ["Fahrenheit (USA) (Disc 1) (Sega CD).chd", "Fahrenheit (USA) (Disc 2) (Sega CD).chd"]

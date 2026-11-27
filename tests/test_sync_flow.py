@@ -14,7 +14,7 @@ from unittest import mock
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 
-from sync_roms import budget, cli, clean, downloads, frontend, ignore, inventory, mirroring, runtime, s3, scrape_plan, store, ui, usersettings  # noqa: E402
+from sync_roms import budget, cli, clean, downloads, esde_pixel, frontend, ignore, inventory, mirroring, runtime, s3, scrape_plan, store, ui, usersettings  # noqa: E402
 from sync_roms import collections as collections_mod  # noqa: E402
 from helpers import MANIFEST, list_sizes  # noqa: E402
 
@@ -571,12 +571,12 @@ class SyncFlowTest(unittest.TestCase):
         self.assertNotIn("cache update", out)
 
     def test_nothing_downloaded_skips_card_cleaning(self):
-        _, _, _, root, _ = self.run_sync(plan=[])
+        _, _, _, root, _ = self.run_sync(plan=[], prepare=self.put_pixel)
         self.assertIsNone(root)
 
     def scrape_sync(self, wrote):
         plan = {"jobs": [], "gamelists": {"/card/gamelist.xml": {}}, "writes": []}
-        _, _, _, root, _ = self.run_sync(plan=[], extra=[
+        _, _, _, root, _ = self.run_sync(plan=[], prepare=self.put_pixel, extra=[
             (scrape_plan, "build_scrape_plan", lambda *a, **k: plan),
             (scrape_plan, "apply_scrape_plan", lambda *a: (0, wrote))])
         return root
@@ -715,7 +715,7 @@ class SyncFlowTest(unittest.TestCase):
         self.assertIn("<config>", settings)
 
     def run_emudeck(self, appdata, rom_dir=lambda d: os.path.join(d, "Emulation", "roms") + "/", colls=True,
-                    scrape=False, **kw):
+                    scrape=False, card=None, **kw):
         """A sync of an EmuDeck card, with FAVS when colls, ES-DE's data folder on this computer at appdata, its
         ROMDirectory rom_dir(card folder) (no settings file when rom_dir is None, no ROMDirectory when it returns None).
         With scrape, the card gets SCRAPED's media and gamelist; the downloads asked for go in self.fetched."""
@@ -735,7 +735,7 @@ class SyncFlowTest(unittest.TestCase):
                     (scrape_plan, "apply_scrape_plan", REAL_APPLY_SCRAPE_PLAN),
                     (cli.downloads, "run_downloads", lambda todo, *a: self.fetched.extend(todo) or 0)] if scrape else []
         with mock.patch.dict(os.environ, {"ESDE_APPDATA_DIR": appdata}):
-            return self.run_sync(cards={"collections": ["favs"]} if colls else {}, colls=[FAVS] if colls else [], manifest=manifest,
+            return self.run_sync(cards={**({"collections": ["favs"]} if colls else {}), **(card or {})}, colls=[FAVS] if colls else [], manifest=manifest,
                                  setup=(None, "emudeck"), files=["Emulation/roms/gba/Game.zip"], prepare=prepare,
                                  extra=[(ui, "warn", self.warned.append)] + scraping, **kw)
 
@@ -817,8 +817,37 @@ class SyncFlowTest(unittest.TestCase):
     def test_emudeck_card_with_nothing_to_skip_does_not_warn(self):
         self.warned = []
         with tempfile.TemporaryDirectory() as tmp:
-            self.run_emudeck(os.path.join(tmp, "ES-DE"), rom_dir=None, colls=False)
+            self.run_emudeck(os.path.join(tmp, "ES-DE"), rom_dir=None, colls=False, card={"theme": False})
         self.assertFalse(self.warned)
+
+    def test_emudeck_card_without_es_de_skips_pixel_and_says_so(self):
+        for dry_run in (False, True):
+            with self.subTest(dry_run=dry_run), tempfile.TemporaryDirectory() as tmp:
+                self.warned = []
+                appdata = os.path.join(tmp, "ES-DE")
+                _, out, _, _, _ = self.run_emudeck(appdata, rom_dir=None, colls=False, dry_run=dry_run)
+                self.assertEqual(self.warned, [self.skipped(f"ES-DE isn't set up on this computer (no {appdata})")])
+                self.assertFalse(os.path.exists(appdata))
+                self.assertNotIn("Pixel", out)
+
+    def test_an_esde_sync_installs_pixel_and_a_dry_run_names_it(self):
+        _, out, _, _, _ = self.run_sync(dry_run=True, after=lambda d: os.path.exists(esde_pixel.dest("esde", d)))
+        self.assertIn("would install Pixel for ES-DE into ES-DE/themes/pixel-sync-roms", out)
+        self.assertFalse(self.after)
+        _, out, _, root, _ = self.run_sync(plan=[], after=lambda d: os.path.exists(os.path.join(esde_pixel.dest("esde", d),
+                                                                                                 esde_pixel.MARKER)))
+        self.assertIn("Installed Pixel for ES-DE", out)
+        self.assertTrue(self.after)
+        self.assertIsNotNone(root)  # a card write: the card is cleaned
+        _, out, _, _, _ = self.run_sync(cards={"theme": False}, plan=[],
+                                        after=lambda d: os.path.exists(esde_pixel.dest("esde", d)))
+        self.assertNotIn("Pixel", out)
+        self.assertFalse(self.after)
+
+    def put_pixel(self, card_dir):
+        """The card with Pixel already current, as an earlier sync left it."""
+        with contextlib.redirect_stdout(io.StringIO()):
+            esde_pixel.install("esde", card_dir)
 
     def test_dry_run_describes_and_writes_nothing(self):
         _, out, updates, _, _ = self.run_sync(cards={"collections": ["favs"]}, colls=[FAVS], dry_run=True,
@@ -857,7 +886,8 @@ class SyncFlowTest(unittest.TestCase):
 
     def test_a_second_identical_sync_writes_no_collection_and_skips_card_cleaning(self):
         _, out, updates, root, _ = self.run_sync(cards={"collections": ["favs"], "frontend_collections": ["Favs"]},
-                                                 colls=[FAVS], files=["ROMs/gba/Game.zip"], plan=[], prepare=self.put_favs)
+                                                 colls=[FAVS], files=["ROMs/gba/Game.zip"], plan=[],
+                                                 prepare=lambda d: self.put_favs(d) or self.put_pixel(d))
         self.assertNotIn("collection(s)", out)
         self.assertIsNone(root)
         self.assertFalse([u for u in updates if "frontend_collections" in u])

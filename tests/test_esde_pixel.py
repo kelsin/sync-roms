@@ -1,9 +1,12 @@
+import contextlib
 import importlib.util
+import io
 import os
 import re
 import sys
 import tempfile
 import unittest
+from unittest import mock
 import xml.etree.ElementTree as ET
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -11,6 +14,7 @@ import helpers  # noqa: E402,F401  (imports isolate first)
 
 from PIL import Image  # noqa: E402
 
+from sync_roms import esde_pixel, frontend, ui  # noqa: E402
 from sync_roms.custom_themes import palettes  # noqa: E402
 from sync_roms.custom_themes.esde import build as esde_build  # noqa: E402
 from sync_roms.custom_themes.esde import systems as esde_systems  # noqa: E402
@@ -434,6 +438,201 @@ class FourThreeSprites(unittest.TestCase):
             factor = device_height / lay.screen[1]
             for size in (4 * lay.scale, 2 * lay.scale):  # sprite pixel in screen px: selected, unfocused
                 self.assertEqual(size * factor, round(size * factor), (device_height, size))
+
+
+
+def write(path, text):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w") as f:
+        f.write(text)
+
+
+def read(path):
+    with open(path) as f:
+        return f.read()
+
+
+def files(folder):
+    """{relative path with "/": bytes} of every file under folder."""
+    out = {}
+    for root, _, names in os.walk(folder):
+        for name in names:
+            path = os.path.join(root, name)
+            with open(path, "rb") as f:
+                out[os.path.relpath(path, folder).replace(os.sep, "/")] = f.read()
+    return out
+
+
+class Install(unittest.TestCase):
+    def setUp(self):
+        self.base = self.enterContext(tempfile.TemporaryDirectory())
+        self.warned = []
+        self.enterContext(mock.patch.object(ui, "warn", self.warned.append))
+        self.out = io.StringIO()
+        self.enterContext(contextlib.redirect_stdout(self.out))
+
+    def copy(self, *rel):
+        return os.path.join(self.base, "ES-DE", "themes", esde_build.THEME, *rel)
+
+    def install(self):
+        return esde_pixel.install("esde", self.base)
+
+    def test_install_copies_theme_and_marker(self):
+        self.assertTrue(self.install())
+        self.assertEqual(esde_pixel.dest("esde", self.base), self.copy())
+        got = files(self.copy())
+        cached = files(esde_pixel.cached())
+        self.assertEqual(got, cached)
+        self.assertIn("theme.xml", got)
+        self.assertIn("capabilities.xml", got)
+        self.assertEqual(got[esde_pixel.MARKER].decode().strip(), esde_pixel.key())
+
+    def test_second_install_changes_nothing(self):
+        self.install()
+        before = {p: os.stat(os.path.join(self.copy(), p)).st_mtime_ns for p in files(self.copy())}
+        self.assertFalse(self.install())
+        after = {p: os.stat(os.path.join(self.copy(), p)).st_mtime_ns for p in files(self.copy())}
+        self.assertEqual(before, after)
+
+    def test_stale_file_removed_but_collection_art_kept(self):
+        self.install()
+        write(self.copy("old", "gone.xml"), "<theme/>")
+        write(self.copy("systems", "consoles", "OLD.png"), "x")
+        write(self.copy(esde_pixel.OWNED), "my shmups\n")
+        write(self.copy("systems", "consoles", "my shmups.png"), "art")
+        write(self.copy("systems", "controllers", "My Shmups.png"), "art")  # cards ignore case
+        write(self.copy("systems", "other", "my shmups.png"), "not ours")
+        os.remove(self.copy(esde_pixel.MARKER))  # an older build
+        self.assertTrue(self.install())
+        self.assertFalse(os.path.exists(self.copy("old")))
+        self.assertFalse(os.path.exists(self.copy("systems", "consoles", "OLD.png")))
+        self.assertFalse(os.path.exists(self.copy("systems", "other")))
+        self.assertEqual(read(self.copy(esde_pixel.OWNED)), "my shmups\n")
+        self.assertEqual(read(self.copy("systems", "consoles", "my shmups.png")), "art")
+        self.assertEqual(read(self.copy("systems", "controllers", "My Shmups.png")), "art")
+
+    def test_stopped_copy_is_finished(self):
+        self.install()
+        os.remove(self.copy("theme.xml"))
+        os.remove(self.copy(esde_pixel.MARKER))  # stopped before the marker, which is written last
+        self.assertTrue(self.install())
+        self.assertTrue(os.path.exists(self.copy("theme.xml")))
+        self.assertEqual(read(self.copy(esde_pixel.MARKER)).strip(), esde_pixel.key())
+
+    def test_an_older_marker_updates_and_says_so(self):
+        self.install()
+        write(self.copy(esde_pixel.MARKER), "old\n")
+        esde_pixel.describe("esde", self.base)
+        self.assertIn("🎨 would update Pixel for ES-DE in ES-DE/themes/pixel-sync-roms", self.out.getvalue())
+        self.assertTrue(esde_pixel.step("esde", self.base, {}, False))
+        self.assertIn("🎨 Updated Pixel for ES-DE", self.out.getvalue())
+
+    def test_dry_run_names_the_install_and_writes_nothing(self):
+        self.assertFalse(esde_pixel.step("esde", self.base, {}, True))
+        self.assertIn("🎨 would install Pixel for ES-DE into ES-DE/themes/pixel-sync-roms", self.out.getvalue())
+        self.assertFalse(os.path.exists(os.path.join(self.base, "ES-DE")))
+        self.assertTrue(esde_pixel.step("esde", self.base, {}, False))
+        self.assertIn("🎨 Installed Pixel for ES-DE", self.out.getvalue())
+        self.out.truncate(0)
+        self.out.seek(0)
+        esde_pixel.describe("esde", self.base)  # current: nothing to say
+        self.assertFalse(esde_pixel.step("esde", self.base, {}, False))
+        self.assertEqual(self.out.getvalue(), "")
+
+    def test_theme_flag_off_installs_nothing_and_keeps_existing(self):
+        entry = {"theme": False}
+        self.assertFalse(esde_pixel.step("esde", self.base, entry, False))
+        self.assertFalse(esde_pixel.step("esde", self.base, entry, True))
+        self.assertFalse(os.path.exists(self.copy()))
+        write(self.copy("theme.xml"), "mine")
+        write(self.copy("extra.txt"), "mine")
+        self.assertFalse(esde_pixel.step("esde", self.base, entry, False))
+        self.assertEqual(files(self.copy()), {"theme.xml": b"mine", "extra.txt": b"mine"})
+        self.assertEqual(self.out.getvalue(), "")
+
+    def test_other_layouts_get_nothing(self):
+        for layout in ("knulli", "spruce", "nextui"):
+            self.assertFalse(esde_pixel.step(layout, self.base, {}, False))
+        self.assertEqual(os.listdir(self.base), [])
+
+    def test_emudeck_problem_skips(self):
+        roms = os.path.join(self.base, "Emulation", "roms")
+        os.makedirs(roms)
+        problem = frontend.emudeck_problem(self.base, roms)  # no ES-DE folder on this computer
+        self.assertTrue(problem)
+        skips = []
+        for dry_run in (True, False):
+            self.assertFalse(esde_pixel.step("emudeck", self.base, {}, dry_run, problem, lambda: skips.append(1)))
+        self.assertEqual(len(skips), 2)
+        self.assertFalse(os.path.exists(frontend.esde_dir("emudeck", self.base)))
+        self.assertEqual(os.listdir(self.base), ["Emulation"])
+
+    def test_emudeck_installs_into_this_computer_s_es_de(self):
+        es_dir = os.path.join(self.base, "machine-ES-DE")
+        os.makedirs(es_dir)
+        with mock.patch.dict(os.environ, {"ESDE_APPDATA_DIR": es_dir}):
+            self.assertTrue(esde_pixel.step("emudeck", self.base, {}, False))
+        self.assertTrue(os.path.exists(os.path.join(es_dir, "themes", esde_build.THEME, "theme.xml")))
+
+    def test_never_touches_theme_setting(self):
+        settings = frontend.settings_path("esde", self.base)
+        for theme in ("", '<string name="Theme" value="art-book-next-sync-roms" />\n'):
+            write(settings, f'<?xml version="1.0"?>\n{theme}')
+            before = read(settings)
+            esde_pixel.step("esde", self.base, {}, False)
+            esde_pixel.step("esde", self.base, {}, True)
+            self.assertEqual(read(settings), before)
+        os.remove(settings)
+        os.remove(self.copy(esde_pixel.MARKER))
+        esde_pixel.install("esde", self.base)
+        self.assertFalse(os.path.exists(settings))
+
+
+class Cache(unittest.TestCase):
+    def setUp(self):
+        self.src = self.enterContext(tempfile.TemporaryDirectory())
+        write(os.path.join(self.src, "code", "a.py"), "a")
+        write(os.path.join(self.src, "code", "__pycache__", "a.cpython-312.pyc"), "compiled")
+        write(os.path.join(self.src, "one.py"), "one")
+        self.enterContext(mock.patch.object(esde_pixel, "SOURCES",
+                                            (os.path.join(self.src, "code"), os.path.join(self.src, "one.py"))))
+        self.built = []
+        real = esde_build.build
+
+        def counting(out_dir):
+            self.built.append(out_dir)
+            return real(out_dir)
+        self.enterContext(mock.patch.object(esde_build, "build", counting))
+
+    def test_cached_rebuilds_only_when_sources_change(self):
+        path = esde_pixel.cached()
+        self.assertEqual(path, os.path.join(esde_pixel.cache_root(), esde_build.THEME))
+        self.assertTrue(os.path.exists(os.path.join(path, "theme.xml")))
+        self.assertEqual(len(self.built), 1)
+        self.assertEqual(esde_pixel.cached(), path)
+        self.assertEqual(len(self.built), 1)
+        write(os.path.join(self.src, "code", "__pycache__", "a.cpython-312.pyc"), "recompiled")  # not a source
+        esde_pixel.cached()
+        self.assertEqual(len(self.built), 1)
+        write(os.path.join(self.src, "code", "a.py"), "b")
+        esde_pixel.cached()
+        self.assertEqual(len(self.built), 2)
+        write(os.path.join(self.src, "code", "new.py"), "")
+        esde_pixel.cached()
+        self.assertEqual(len(self.built), 3)
+        os.remove(os.path.join(path, esde_pixel.MARKER))  # a build stopped before its marker
+        esde_pixel.cached()
+        self.assertEqual(len(self.built), 4)
+
+
+class Sources(unittest.TestCase):
+    def test_the_key_covers_the_build_s_inputs(self):
+        sources = {os.path.normpath(p) for p in esde_pixel.SOURCES}
+        root = os.path.dirname(esde_pixel.__file__)
+        for rel in (("custom_themes", "esde"), ("custom_themes", "pixel"), ("custom_themes", "palettes.py"),
+                    ("data", "themes", "fusion-pixel"), ("data", "themes", "art-book-next", "art-box", "Imgs"),
+                    ("data", "systems.json")):
+            self.assertIn(os.path.normpath(os.path.join(root, *rel)), sources)
 
 
 if __name__ == "__main__":
