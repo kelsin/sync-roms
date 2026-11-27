@@ -10,7 +10,7 @@ from xml.dom import minidom
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from sync_roms import frontend, github, runtime, store, themeart, ui  # noqa: E402
+from sync_roms import esde_pixel, frontend, github, runtime, store, themeart, ui  # noqa: E402
 
 def archive(files):
     """A .tar.gz stream like GitHub's, its files under one top folder."""
@@ -419,6 +419,130 @@ class EsdeOwnArt(Esde):
         self.assertIn("Steam", self.warned[0])
         self.assertFalse(os.path.exists(self.copy("_inc", "systems", "artwork-outline", "steam.png")))
         self.assertIn("<systemName>My Shmups</systemName>", read(self.copy("_inc", "systems", "_metadata-global", "my shmups.xml")))
+
+
+class PixelArt(Card):
+    """An ES-DE card whose selected theme is Pixel: collection art goes into Pixel's systems/ folders."""
+    def setUp(self):
+        super().setUp()
+        self.storage = self.enterContext(tempfile.TemporaryDirectory())
+        self.enterContext(mock.patch.object(runtime, "ROOT", self.storage))
+        self.settings_text = f'<?xml version="1.0"?>\n<string name="Theme" value="{esde_pixel.THEME}" />\n'
+        write(frontend.settings_path("esde", self.base), self.settings_text)
+
+    def pixel(self, *rel):
+        return os.path.join(esde_pixel.dest("esde", self.base), *rel)
+
+    def install(self, arts):
+        with contextlib.redirect_stdout(io.StringIO()):
+            return themeart.install("esde", self.base, arts)
+
+    def box(self, art_id):
+        with open(os.path.join(themeart.THEME_DATA, "art-box", "Imgs", f"{art_id}.png"), "rb") as f:
+            return f.read()
+
+    def test_a_listed_name_pixel_now_draws_a_sprite_for_keeps_the_sprite(self):
+        write(self.pixel(esde_pixel.OWNED), "snes\n")
+        for variant in esde_pixel.ART_FOLDERS:
+            os.makedirs(self.pixel("systems", variant), exist_ok=True)
+            with open(self.pixel("systems", variant, "snes.png"), "wb") as f:
+                f.write(b"the build's sprite")
+        write(self.pixel("snes", "theme.xml"), "left by an older sync")
+        self.install(SURPRISE)
+        for variant in esde_pixel.ART_FOLDERS:
+            with open(self.pixel("systems", variant, "snes.png"), "rb") as f:
+                self.assertEqual(f.read(), b"the build's sprite")
+        self.assertEqual(read(self.pixel(esde_pixel.OWNED)), "surprise\n")
+        self.assertFalse(os.path.exists(self.pixel("snes")))
+
+    def test_pixel_selected_gets_box_art_in_both_variants(self):
+        self.assertTrue(self.install({**SURPRISE, "My Shmups": "shmups"}))
+        for variant in esde_pixel.ART_FOLDERS:
+            with open(self.pixel("systems", variant, "my shmups.png"), "rb") as f:
+                self.assertEqual(f.read(), self.box("shmups"))
+            with open(self.pixel("systems", variant, "surprise.png"), "rb") as f:
+                self.assertEqual(f.read(), self.box("surprise"))
+        self.assertEqual(read(self.pixel(esde_pixel.OWNED)), "my shmups\nsurprise\n")
+        self.assertFalse(os.path.exists(os.path.join(self.base, "ES-DE", "themes", themeart.ESDE_COPY)))
+        self.assertFalse(self.install({**SURPRISE, "My Shmups": "shmups"}))  # nothing new the second time
+
+    def test_pixel_selected_theme_setting_unchanged(self):
+        self.install({**SURPRISE, "My Shmups": "shmups"})
+        self.install({})
+        self.assertEqual(read(frontend.settings_path("esde", self.base)), self.settings_text)
+
+    def test_pixel_removes_gone_collection_art(self):
+        self.install({**SURPRISE, "My Shmups": "shmups"})
+        self.assertTrue(self.install(SURPRISE))
+        for variant in esde_pixel.ART_FOLDERS:
+            self.assertFalse(os.path.exists(self.pixel("systems", variant, "my shmups.png")))
+            self.assertTrue(os.path.exists(self.pixel("systems", variant, "surprise.png")))
+        self.assertEqual(read(self.pixel(esde_pixel.OWNED)), "surprise\n")
+        self.install({})
+        self.assertFalse(os.path.exists(self.pixel("systems", "consoles", "surprise.png")))
+        self.assertEqual(read(self.pixel(esde_pixel.OWNED)), "")
+
+    def test_each_collection_gets_a_theme_folder_that_a_pixel_install_keeps(self):
+        # ES-DE groups a custom collection under "collections" unless the theme has <name>/theme.xml
+        include = "<theme><include>./../theme.xml</include></theme>\n"
+        self.install({**SURPRISE, "My Shmups": "shmups"})
+        for name in ("my shmups", "surprise"):
+            self.assertEqual(read(self.pixel(name, "theme.xml")), include)
+        with contextlib.redirect_stdout(io.StringIO()):
+            esde_pixel.install("esde", self.base)  # the art step runs first on a new card
+            write(self.pixel(esde_pixel.MARKER), "an older build\n")
+            self.assertTrue(esde_pixel.install("esde", self.base))
+        for name in ("my shmups", "surprise"):
+            self.assertEqual(read(self.pixel(name, "theme.xml")), include)
+        self.assertTrue(os.path.exists(self.pixel("systems", "consoles", "my shmups.png")))
+        self.install(SURPRISE)
+        self.assertFalse(os.path.exists(self.pixel("my shmups")))
+        self.assertTrue(os.path.exists(self.pixel("surprise", "theme.xml")))
+
+    def test_no_delete_keeps_gone_collection_art(self):
+        self.install({**SURPRISE, "My Shmups": "shmups"})
+        with contextlib.redirect_stdout(io.StringIO()):
+            themeart.install("esde", self.base, SURPRISE, keep=True)
+        self.assertTrue(os.path.exists(self.pixel("systems", "consoles", "my shmups.png")))
+        self.assertIn("my shmups", read(self.pixel(esde_pixel.OWNED)))
+
+    def test_reserved_name_never_overwrites_a_system_sprite(self):
+        sprite = self.pixel("systems", "consoles", "snes.png")
+        os.makedirs(os.path.dirname(sprite))
+        with open(sprite, "wb") as f:
+            f.write(b"the system's own sprite")
+        self.install({"SNES": "shmups"})
+        with open(sprite, "rb") as f:
+            self.assertEqual(f.read(), b"the system's own sprite")
+        self.assertIn("SNES", self.warned[0])
+        self.assertFalse(os.path.exists(self.pixel(esde_pixel.OWNED)))
+
+    def test_a_name_pixel_has_a_sprite_for_is_skipped_on_emudeck(self):
+        appdata = self.enterContext(tempfile.TemporaryDirectory())
+        self.enterContext(mock.patch.dict(os.environ, {"ESDE_APPDATA_DIR": appdata}))
+        write(os.path.join(appdata, "settings", "es_settings.xml"), self.settings_text)
+        with contextlib.redirect_stdout(io.StringIO()):  # ps4 has no emudeck folder, so usable lets it through
+            themeart.install("emudeck", self.base, {"PS4": "shmups", "My Shmups": "shmups"})
+        pixel = esde_pixel.dest("emudeck", self.base)
+        self.assertFalse(os.path.exists(os.path.join(pixel, "systems", "consoles", "ps4.png")))
+        self.assertTrue(os.path.exists(os.path.join(pixel, "systems", "consoles", "my shmups.png")))
+        self.assertIn("PS4", self.warned[0])
+
+    def test_the_dry_run_names_pixel_and_selects_nothing(self):
+        self.install({"My Shmups": "shmups"})
+        with contextlib.redirect_stdout(io.StringIO()) as out:
+            themeart.describe("esde", self.base, SURPRISE)
+        self.assertIn("would add art for Surprise to", out.getvalue())
+        self.assertIn(esde_pixel.THEME, out.getvalue())
+        self.assertIn("would remove the art for my shmups", out.getvalue())
+        self.assertNotIn("select", out.getvalue())
+
+    def test_new_card_still_gets_art_book_next(self):
+        os.remove(frontend.settings_path("esde", self.base))
+        Esde.store(self, "abc", {"theme.xml": b"<theme/>"})
+        self.assertTrue(self.install(SURPRISE))
+        self.assertIn(f'value="{themeart.ESDE_COPY}"', read(frontend.settings_path("esde", self.base)))
+        self.assertFalse(os.path.exists(self.pixel()))
 
 
 class Emudeck(Esde):

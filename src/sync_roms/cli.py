@@ -10,7 +10,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError
 
-from . import __version__, bezels, budget, cardedit, cardfs, clean, commands, downloads, drivers, frontend, install, inventory, m3u, mirroring, picker, runtime, s3, scrape_plan, store
+from . import __version__, bezels, budget, cardedit, cardfs, clean, commands, downloads, drivers, esde_pixel, frontend, install, inventory, m3u, mirroring, picker, runtime, s3, scrape_plan, store
 from . import knulli_conf, muos_collections, nextui_folders, onion_surprise, pico8, portmaster, raofflineproxy, rocknix_collections, saves, spruce_collections, spruce_bootlogo, spruce_emu, spruce_os, spruce_fixes, spruce_hotkeys, spruce_retroarch, spruce_settings, spruce_splore, spruce_syncthing, spruce_themes, spruce_wifi, splore, surprise, themeart, ui, usersettings, vita
 from . import collections as colls
 from . import guest as guests
@@ -1559,12 +1559,15 @@ def sync_card(args):
     stale_es_dir = None if esde_problem else es_dir
     warned = []
 
-    def skipped():
-        """Say (once) that the card's gamelists and collections were skipped, and why."""
+    def skipped(what="the card's gamelists and collections"):
+        """Say (once) what was skipped on ES-DE, and why: what, and the Pixel theme when sync puts it on this card."""
         if not warned:
             warned.append(esde_problem)
-            ui.warn(f"{esde_problem}, so the card's gamelists and collections were skipped; "
-                    "sync on the Steam Machine or Steam Deck to get them")
+            items = [what] + ([esde_pixel.LABEL] if what != esde_pixel.LABEL
+                              and esde_pixel.wanted(layout_name, store.saved_card(card)) else [])
+            verb, them = ("was", "it") if items == [esde_pixel.LABEL] else ("were", "them")
+            ui.warn(f"{esde_problem}, so {', and '.join(items)} {verb} skipped; "
+                    f"sync on the Steam Machine or Steam Deck to get {them}")
     scrapes = layout_name in scrape_plan.SCRAPE_LAYOUTS
     scraped = {}
 
@@ -1751,6 +1754,13 @@ def sync_card(args):
         if layout_name == "rocknix" and (plan["writes"] or plan["deletes"] or art):
             print(f"💖 Run {os.path.basename(rocknix_collections.SCRIPT)[:-3]} from Ports on the device to install them")
 
+    def pixel_step(dry_run):
+        """On esde and emudeck: install or update the Pixel ES-DE theme (outside frontend_step, which stops early when
+        the card has no collections)."""
+        if (esde_pixel.step(layout_name, base, store.saved_card(card), dry_run, esde_problem, skipped)
+                and clean_card and layout_name != "emudeck"):  # EmuDeck's ES-DE is on this computer
+            clean._clean_root = base
+
     def spruce_emu_step(dry_run):
         """On a spruce card: hide the BIOS zips in the ROM folders from PyUI's game list (Emu/<folder>/config.json)."""
         if layout_name != "spruce":
@@ -1828,6 +1838,7 @@ def sync_card(args):
                 print(f"🧹 Media on the card for ROMs it doesn't have: {stale_count} file(s) to remove")
         if not guest:
             frontend_step(True)
+            pixel_step(True)
         spruce_emu_step(True)
         if not guest:
             spruce_fixes.run(layout_name, base, True)
@@ -1980,6 +1991,7 @@ def sync_card(args):
     cardfs.clear()
     if not guest:
         frontend_step(False)
+        pixel_step(False)
     spruce_emu_step(False)
     if not guest and spruce_fixes.run(layout_name, base, False) and clean_card:
         clean._clean_root = base

@@ -447,7 +447,7 @@ def settings_menu(name, systems, playable):
         current = current if isinstance(current, str) and current else None
         i = picker.filter_list("⚙️  Settings", [
             f"🎁 Surprise: {state(surprise.enabled(entry))}",
-            f"🎨 Theme (Art Book Next, ES-DE theme, collection art): {state(store.card_flag(entry, 'theme'))}",
+            f"🎨 Theme (Art Book Next and Pixel for ES-DE, collection art): {state(store.card_flag(entry, 'theme'))}",
             f"💖 Collections (written to the frontend, Surprise's too): {state(store.card_flag(entry, 'custom_collections'))}",
             f"🏆 RAOfflineProxy (RetroAchievements offline proxy app): {state(store.card_flag(entry, 'raofflineproxy'))}",
             "Systems Surprise may use (every card)",
