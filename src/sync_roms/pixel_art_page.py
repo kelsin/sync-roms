@@ -1,15 +1,18 @@
-"""The pixel art page: every picture sync-roms draws for its spruceOS pixel themes (sprites here)."""
+"""The pixel art page: every picture sync-roms draws for its spruceOS pixel themes, and its writer."""
 import os
 import re
+import shutil
+import tempfile
 
 from PIL import Image
 
-from . import store
-from .custom_themes import palettes, theme_name
+from . import collections_page, custom_themes, store
+from .custom_themes import palettes, pixel_consoles, theme_name
 from .custom_themes.pixel import app_icons, build, frames, ids, menu, ui_settings, ui_status, variants
 from .custom_themes.pixel.sprite import render
 
 PALETTE = "Gruvbox"
+TEMPLATE_DIR = os.path.join(store.REPO_DATA, "pixel-art-page")
 
 
 def _size(theme_dir, rel, fixed=None):
@@ -183,3 +186,25 @@ def box_section(img_dir):
                  for d, s in (("Imgs", [336, 480]), ("Imgs_med", [210, 300]), ("Imgs_small", [140, 200]))]
         items.append(w.image_item(name, name, small, files))
     return _section("boxes", "Collection box art", items)
+
+
+def write(out_dir, base_dir=None):
+    """Build the page in out_dir, emptied first: index.html (page.html with its data), page.css, page.js and img/.
+    base_dir defaults to the Consoles theme's base from storage (custom_themes.fetch_base raises BaseMissing or
+    DownloadFailed)."""
+    if base_dir is None:
+        base_dir = custom_themes.fetch_base(pixel_consoles.BASE)
+    shutil.rmtree(out_dir, ignore_errors=True)
+    img_dir = os.path.join(out_dir, "img")
+    os.makedirs(img_dir)
+    with tempfile.TemporaryDirectory() as tmp:
+        theme, canvases = build_frames_theme(base_dir, tmp)
+        sections = [*sprite_sections(img_dir, theme), frame_section(img_dir, canvases), box_section(img_dir)]
+    files = {}
+    for name in ("page.html", "page.css", "page.js"):
+        with open(os.path.join(TEMPLATE_DIR, name), encoding="utf-8") as f:
+            files[name] = f.read()
+    data = {"palette": PALETTE, "home": "/", "sections": sections}
+    store.write_text(os.path.join(out_dir, "index.html"), collections_page.fill(files["page.html"], data))
+    for name in ("page.css", "page.js"):
+        store.write_text(os.path.join(out_dir, name), files[name])

@@ -9,7 +9,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import helpers  # noqa: E402
-from sync_roms import collections, collections_page, inventory, pages_site, runtime, scrape_plan, tags, usersettings  # noqa: E402
+from sync_roms import collections, collections_page, custom_themes, inventory, pages_site, pixel_art_page, runtime, scrape_plan, tags, usersettings  # noqa: E402
 
 GIT_ENV = {"GIT_AUTHOR_NAME": "Test", "GIT_AUTHOR_EMAIL": "test@example.com",
            "GIT_COMMITTER_NAME": "Test", "GIT_COMMITTER_EMAIL": "test@example.com"}
@@ -18,6 +18,15 @@ GIT_ENV = {"GIT_AUTHOR_NAME": "Test", "GIT_AUTHOR_EMAIL": "test@example.com",
 def read(*parts):
     with open(os.path.join(*parts), encoding="utf-8") as f:
         return f.read()
+
+
+REAL_PIXEL_ART_WRITE = pixel_art_page.write
+
+
+def stub_pixel_art(out_dir, base_dir=None):
+    os.makedirs(out_dir, exist_ok=True)
+    with open(os.path.join(out_dir, "index.html"), "w", encoding="utf-8") as f:
+        f.write("pixel art")
 
 
 def git_ls_tree(repo, ref):
@@ -33,6 +42,7 @@ class Site(helpers.Cmd):
         self.enterContext(mock.patch.object(tags, "load", lambda: {"tags": {}, "games": {}, "declined": {}}))
         self.enterContext(mock.patch.object(inventory, "files", lambda prefix, sizes=True: {}))
         self.enterContext(mock.patch.object(scrape_plan, "load_metadata", lambda system, fresh=False: {}))
+        self.enterContext(mock.patch.object(pixel_art_page, "write", stub_pixel_art))
         self.bare = os.path.join(self.tmpdir(), "site.git")
         subprocess.run(["git", "init", "-q", "--bare", "-b", "main", self.bare], check=True)
         usersettings.save_settings({"pages_repo": self.bare})
@@ -63,6 +73,16 @@ class Site(helpers.Cmd):
         self.assertIn('url=/', read(site, "collections", "index.html"))
         self.assertTrue(os.path.isfile(os.path.join(site, "collections", "kelsin", "page.js")))
         self.assertNotIn("Super Mario World (USA).zip", read(site, "collections", "kelsin", "index.html"))
+        self.assertTrue(os.path.isfile(os.path.join(site, "pixel-art", "index.html")))
+        self.assertIn('href="pixel-art/"', root)
+
+    def test_publish_fails_without_base(self):
+        self.enterContext(mock.patch.object(pixel_art_page, "write", REAL_PIXEL_ART_WRITE))
+        self.enterContext(mock.patch.object(custom_themes, "fetch_base", side_effect=custom_themes.BaseMissing("SPRUCE")))
+        with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as raised:
+            pages_site.publish("kelsin")
+        self.assertEqual(raised.exception.code, 1)
+        self.assertEqual(git_ls_tree(self.bare, "main"), [])
 
     def test_invalid_users_refused(self):
         for name in ("Kelsin", "a b", "../x", "a/b", "", "-x", "a" * 40):

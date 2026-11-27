@@ -4,7 +4,7 @@ import os
 import re
 import subprocess
 
-from . import collections_page, s3, store, ui, usersettings
+from . import collections_page, custom_themes, pixel_art_page, s3, store, ui, usersettings
 
 DOMAIN = "sync-roms.games"
 DEFAULT_REPO = "git@github.com:kelsin/sync-roms.games.git"
@@ -32,12 +32,14 @@ def _template(name):
 
 
 def build(site_dir, user):
-    """Write user's public page into site_dir/collections/<user>/ and the site's shared files: CNAME, .nojekyll, the
-    `collections/` redirect to the root, and the root list of every user with a page. ValueError for an invalid user."""
+    """Write user's public page into site_dir/collections/<user>/, the pixel art page into site_dir/pixel-art/ and the
+    site's shared files: CNAME, .nojekyll, the `collections/` redirect to the root, and the root list of every user
+    with a page. ValueError for an invalid user."""
     if not valid_user(user):
         raise ValueError(f"invalid user name: {user!r}")
     collections_dir = os.path.join(site_dir, "collections")
     collections_page.write_public(os.path.join(collections_dir, user), home="/")
+    pixel_art_page.write(os.path.join(site_dir, "pixel-art"))
     store.write_text(os.path.join(site_dir, "CNAME"), DOMAIN + "\n")
     store.write_text(os.path.join(site_dir, ".nojekyll"), "")
     store.write_text(os.path.join(collections_dir, "index.html"), _template("redirect.html"))
@@ -88,7 +90,7 @@ def publish(user, dry_run=False):
     git("clean", "-q", "-fdx", cwd=clone)
     try:
         build(clone, user)
-    except (SystemExit, *s3.ERRORS) as e:  # the clone is reset at the next publish
+    except (SystemExit, custom_themes.BaseMissing, custom_themes.DownloadFailed, *s3.ERRORS) as e:  # the clone is reset at the next publish
         detail = f": {e}" if not isinstance(e, SystemExit) else ""
         ui.fail(f"Storage isn't reachable, so nothing was published (the page would lack tags, sizes and scraped names){detail}", 1)
     git("add", "-A", cwd=clone)

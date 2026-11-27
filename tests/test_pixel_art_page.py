@@ -1,6 +1,9 @@
+import json
 import os
+import re
 import tempfile
 import unittest
+from unittest import mock
 
 import helpers  # noqa: F401
 from PIL import Image
@@ -156,6 +159,62 @@ class BoxSectionTest(unittest.TestCase):
                         Image.open(os.path.join(folder, f"{name}.png")) as src:
                     self.assertEqual(small.convert("RGB").resize((336, 480), Image.NEAREST).tobytes(),
                                      src.convert("RGB").tobytes())
+
+
+SECTION_IDS = ["menu", "systems-shared", "systems-consoles", "systems-controllers", "regions", "apps", "settings",
+               "status", "frames", "boxes"]
+
+
+def page_data(html):
+    return json.loads(re.search(r'id="page-data">(.*?)</script>', html, re.S).group(1))
+
+
+class WriteTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.tmp = tempfile.TemporaryDirectory()
+        cls.base = os.path.join(cls.tmp.name, "base")
+        fake_base(cls.base)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.tmp.cleanup()
+
+    def read(self, out, name):
+        with open(os.path.join(out, name), encoding="utf-8") as f:
+            return f.read()
+
+    def test_write_page(self):
+        out = os.path.join(self.tmp.name, "page")
+        os.makedirs(out)
+        open(os.path.join(out, "stale.txt"), "w").close()
+        pixel_art_page.write(out, base_dir=self.base)
+        self.assertFalse(os.path.exists(os.path.join(out, "stale.txt")))
+        html = self.read(out, "index.html")
+        data = page_data(html)
+        self.assertEqual(data["palette"], pixel_art_page.PALETTE)
+        self.assertEqual(data["home"], "/")
+        self.assertEqual([s["id"] for s in data["sections"]], SECTION_IDS)
+        for section in data["sections"]:
+            self.assertTrue(section["items"], section["id"])
+            for item in section["items"]:
+                for key in ("img", "dim"):
+                    if key in item:
+                        self.assertTrue(item[key].startswith("img/"), item[key])
+                        self.assertTrue(os.path.isfile(os.path.join(out, *item[key].split("/"))), item[key])
+        text = html + self.read(out, "page.css") + self.read(out, "page.js")
+        self.assertIsNone(re.search(r'(src|href)=["\']?(https?:)?//', text))
+
+    def test_data_escaped(self):
+        out = os.path.join(self.tmp.name, "escaped")
+        label = "</script><b>&"
+        item = {"label": label, "img": "img/x.png", "w": 1, "h": 1, "files": []}
+        with mock.patch.object(pixel_art_page, "sprite_sections",
+                               lambda img_dir, theme_dir=None: [{"id": "menu", "title": "Menu", "items": [item]}]):
+            pixel_art_page.write(out, base_dir=self.base)
+        html = self.read(out, "index.html")
+        self.assertNotIn("</script><b>", html)
+        self.assertEqual(page_data(html)["sections"][0]["items"][0]["label"], label)
 
 
 if __name__ == "__main__":
