@@ -1,5 +1,20 @@
 # Changelog
 
+## [4.13.0](https://github.com/kelsin/sync-roms/compare/v4.12.0...v4.13.0) (2026-11-27)
+
+
+### :video_game: Features
+
+* **collections:** select pixel art pictures with links instead of hover ([#671](https://github.com/kelsin/sync-roms/issues/671)) ([0183468](https://github.com/kelsin/sync-roms/commit/0183468c2be4f44d4e7f526c4b4477e27e222b4d))
+* **themes:** add six GBA palettes for the pixel themes ([#674](https://github.com/kelsin/sync-roms/issues/674)) ([91083bc](https://github.com/kelsin/sync-roms/commit/91083bc9f30e480216da83011dbf857945bac516))
+* **themes:** add the pixel theme for es-de ([#676](https://github.com/kelsin/sync-roms/issues/676)) ([5eda20a](https://github.com/kelsin/sync-roms/commit/5eda20a0afb3792c7a422770cf498d3d10fd67ea))
+
+
+### :bug: Bug Fixes
+
+* **spruce:** keep each folder's last game as nested PyUI state ([#675](https://github.com/kelsin/sync-roms/issues/675)) ([014aee5](https://github.com/kelsin/sync-roms/commit/014aee56d09735c4089ad3e462b4a2eb0af788b6))
+* **themes:** draw button hints and A/B icons in the pixel themes ([#673](https://github.com/kelsin/sync-roms/issues/673)) ([6b4b040](https://github.com/kelsin/sync-roms/commit/6b4b040a744841abc2fdf1553594fbc2a0801ea3))
+
 ## [4.12.0](https://github.com/kelsin/sync-roms/compare/v4.11.1...v4.12.0) (2026-11-27)
 
 
