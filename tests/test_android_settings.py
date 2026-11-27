@@ -25,6 +25,16 @@ class CfgWanted(helpers.DataDir):
     def test_cfg_wanted_no_overlay(self):
         self.assertNotIn("overlay_directory", android_settings.cfg_wanted())
 
+    def test_cfg_wanted_steamos_skips_hotkeys_and_folders(self):
+        w = android_settings.cfg_wanted("/some/overlay", platform="steamos")
+        self.assertEqual([k for k in w if k.endswith("_btn")], [])
+        for key in ("savefile_directory", "savestate_directory", "overlay_directory"):
+            self.assertNotIn(key, w)
+        self.assertEqual((w["sort_savefiles_enable"], w["cloud_sync_enable"], w["savestate_auto_load"]), ("true", "false", "true"))
+
+    def test_cfg_wanted_android_unchanged(self):
+        self.assertEqual(android_settings.cfg_wanted()["savefile_directory"], android.DEFAULT_SAVES)
+
     def wanted(self, **settings):
         usersettings.save_settings(settings)
         return android_settings.cfg_wanted()
