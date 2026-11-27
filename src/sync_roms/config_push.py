@@ -56,7 +56,8 @@ def fetch(host, data_dir):
 
 
 def send(host, data_dir, settings, collections):
-    """Replace the device's settings.json (mode 600) and collections/ folder with these, through a temp folder in data_dir."""
+    """Replace the device's settings.json (mode 600; the old one kept as settings.json.bak) and collections/ folder with
+    these, through a temp folder in data_dir."""
     buf = io.BytesIO()
     with tarfile.open(fileobj=buf, mode="w") as tar:
         for name, data in [("settings.json", settings)] + [(f"collections/{n}", d) for n, d in sorted(collections.items())]:
@@ -65,7 +66,9 @@ def send(host, data_dir, settings, collections):
             tar.addfile(info, io.BytesIO(data))
     folder = shlex.quote(data_dir)
     script = (f"set -e; mkdir -p {folder}; cd {folder}; tmp=$(mktemp -d .push.XXXXXX); trap 'rm -rf \"$tmp\"' EXIT; "
-              'tar -xf - -C "$tmp"; chmod 600 "$tmp/settings.json"; mv -f "$tmp/settings.json" settings.json; '
+              'tar -xf - -C "$tmp"; chmod 600 "$tmp/settings.json"; '
+              'if [ -f settings.json ]; then cp -p settings.json "$tmp/bak"; chmod 600 "$tmp/bak"; mv -f "$tmp/bak" settings.json.bak; fi; '
+              'mv -f "$tmp/settings.json" settings.json; '
               'mkdir -p "$tmp/collections"; if [ -d collections ]; then mv collections "$tmp/old"; fi; mv "$tmp/collections" collections')
     _ssh(host, script, buf.getvalue())
 

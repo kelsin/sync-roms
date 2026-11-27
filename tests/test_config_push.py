@@ -161,6 +161,15 @@ class Push(helpers.DataDir):
             self.assertIn(["-o", "ConnectTimeout=10"], [argv[i:i + 2] for i in range(len(argv))])
             self.assertIn("deck@steamdeck", argv)
 
+    def test_send_keeps_old_settings_as_bak(self):
+        self.mac({"ra_mode": "Casual"})
+        ssh = Ssh()
+        self.assertEqual(self.push(ssh)[0], 0)
+        script = ssh.calls[-1][-1]
+        backup = 'cp -p settings.json "$tmp/bak"; chmod 600 "$tmp/bak"; mv -f "$tmp/bak" settings.json.bak'
+        self.assertIn(f"if [ -f settings.json ]; then {backup}; fi", script)
+        self.assertLess(script.index(backup), script.index('mv -f "$tmp/settings.json" settings.json'))
+
     def test_remote_dir_mirrors_data_dir(self):
         ssh = Ssh(data_dir="/x/sync-roms")
         with mock.patch.object(subprocess, "run", ssh):

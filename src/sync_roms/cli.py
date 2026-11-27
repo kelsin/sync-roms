@@ -620,8 +620,9 @@ TOPICS = {
   config push USER@HOST copies settings.json, without bucket, root, endpoint, profile,
   write_profile, mirror, eject and storage_cache_declined (the device keeps its own), and every
   collection to the device's data folder over ssh (BatchMode, so an SSH key must already work);
-  the device's other settings and collections are made to match this machine's. It lists the
-  settings and collections it adds, changes or removes, by name only; --dry-run stops there.
+  the device's other settings and collections are made to match this machine's (its previous
+  settings.json is kept as settings.json.bak). It lists the settings and collections it adds,
+  changes or removes, by name only; --dry-run stops there.
 
   config import takes CARD (a card name from cards.json, found at /Volumes/<name>, or the card's
   folder; default the current folder) and picks what to import from the card's saved layout (spruce
