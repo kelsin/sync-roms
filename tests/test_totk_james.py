@@ -103,6 +103,27 @@ class Build(unittest.TestCase):
         with open(os.path.join(dest, "config.json"), encoding="utf-8") as f:
             self.assertEqual(json.load(f)["name"], "ToTK - Kelsin")
 
+    def igm(self, dest, style):
+        with open(os.path.join(dest, "igm.json"), encoding="utf-8") as f:
+            igm = json.loads(f.read())
+        self.assertEqual(igm["name"], style)
+        for key, value in igm["colors"].items():
+            self.assertRegex(value, r"^#[0-9A-Fa-f]{8}$", key)
+        self.assertNotIn("layout", igm)
+        return igm
+
+    def test_igm_json_with_hylia(self):
+        self.config("{}")
+        open(os.path.join(self.base, "HYLIA.TTF"), "wb").close()
+        for module in (totk_james, totk_kelsin):
+            igm = self.igm(module.build(self.base, self.out), module.STYLE)
+            self.assertEqual(igm["font"], {"path": "HYLIA.TTF"})
+
+    def test_igm_json_without_hylia(self):
+        self.config("{}")
+        for module in (totk_james, totk_kelsin):
+            self.assertNotIn("font", self.igm(module.build(self.base, self.out), module.STYLE))
+
     def test_no_preview_in_base(self):
         self.config("{}")
         dest = totk_james.build(self.base, self.out)

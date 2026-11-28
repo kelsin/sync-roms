@@ -11,6 +11,20 @@ BASE = "ToTK"
 PALETTES = False
 CHARACTERS = ("sidon", "riju", "mineru", "rauru")
 COLLECTIONS = "rauru"  # the character whose cards are the main menu's Collections card
+IGM = {  # the in-game menu's igm.json (spruceOS 4.5.0+), in the ToTK base theme's own colours
+    "colors": {
+        "dim_bg": "#000000D9",
+        "panel_bg": "#00000000",
+        "selection": "#E1E1E14D",  # ToTK's see-through white list highlight (skin/bg-list-s.png)
+        "accent": "#FFA800FF",  # the base's total.color gold
+        "title_line": "#AAAAAA66",  # the base's grid.color
+        "text": "#FFFFFFFF",
+        "text_selected": "#FFFFFFFF",
+        "text_title": "#FFA800FF",
+        "battery": "#FFFFFFFF",
+    },
+}
+IGM_FONT = "HYLIA.TTF"  # at the base theme's root, its title and grid font
 DATA = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "themes", "totk-james")
 
 
@@ -51,4 +65,10 @@ def build_named(base_dir, out_dir, style, title):
             config["collectionsEnabled"] = True  # PyUI's Show Collections, off when the theme doesn't set it
             with open(path, "w", encoding="utf-8") as f:
                 json.dump(config, f, indent=4, ensure_ascii=False)
+    igm = {"name": style, **IGM}
+    if os.path.isfile(os.path.join(dest, IGM_FONT)):  # a missing font would only fall back to stock
+        igm["font"] = {"path": IGM_FONT}
+    with open(os.path.join(dest, "igm.json"), "w", encoding="utf-8") as f:
+        json.dump(igm, f, indent=4)
+        f.write("\n")
     return dest

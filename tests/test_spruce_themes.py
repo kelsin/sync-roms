@@ -423,6 +423,13 @@ class Card(helpers.StorageDir):
         self.card_file("Themes/A/config.json", b"abc")
         self.assertEqual(spruce_themes.todo([job]), [])
 
+    def test_igm_compared_by_content(self):
+        self.put(f"{PREFIX}A/igm.json", b"abc")
+        job = (f"{PREFIX}A/igm.json", self.card_file("Themes/A/igm.json", b"abd"), 3)
+        self.assertEqual(spruce_themes.todo([job]), [job])
+        self.card_file("Themes/A/igm.json", b"abc")
+        self.assertEqual(spruce_themes.todo([job]), [])
+
     def test_crlf_config_identical_not_recopied(self):
         self.put(f"{PREFIX}A/config.json", b'{\r\n"a": 1\r\n}\r\n')
         job = (f"{PREFIX}A/config.json", self.card_file("Themes/A/config.json", b'{\r\n"a": 1\r\n}\r\n'), 13)

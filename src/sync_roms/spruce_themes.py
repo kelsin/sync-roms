@@ -336,12 +336,13 @@ def sorted_names(names):
 
 def todo(jobs):
     """The jobs whose card file is out of date. A file a spruce fix already made right is left alone; a config*.json
-    is compared by content, since a changed setting can keep the same size."""
+    or igm.json is compared by content, since a changed setting or colour can keep the same size."""
     result = []
     for key, path, size in jobs:
         if spruce_fixes.keeps(path):
             continue
-        if os.path.basename(path).lower().startswith("config") and path.lower().endswith(".json"):
+        name = os.path.basename(path).lower()
+        if name == "igm.json" or name.startswith("config") and name.endswith(".json"):
             try:
                 if cardfs.read(path) == s3.get_bytes(key):
                     continue

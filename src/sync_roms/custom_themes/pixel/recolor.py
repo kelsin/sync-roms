@@ -28,6 +28,27 @@ def recolor_config(config, palette):
             widget["color"] = widgets[widget["type"]]
 
 
+def igm_config(palette, font):
+    """The in-game menu's igm.json for the palette, read by spruceOS 4.5.0+ from Themes/<theme>/igm.json."""
+    return {
+        "name": palette.name,
+        "colors": {
+            "dim_bg": "#000000E6",
+            "panel_bg": "#00000000",
+            "selection": palette.bar + "FF",
+            "accent": palette.accent + "FF",
+            "title_line": palette.dim + "FF",
+            "text": palette.list + "FF",
+            "text_selected": palette.selected + "FF",
+            "text_title": palette.text + "FF",
+            "text_shadow": "#00000000",
+            "battery": palette.text + "FF",
+        },
+        "layout": {"shadow": False},
+        "font": {"path": font, "size_small_pct": 5.0},  # 24px at 480 lines, 36px at 720: where the font is crisp
+    }
+
+
 def recolor_bar(theme_dir, palette):
     """In every .png under the theme's skin*/ folders, turn the exact bar gray into the palette's bar color (alpha
     kept). A file without that gray is left as it is."""

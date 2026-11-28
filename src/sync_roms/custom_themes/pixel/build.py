@@ -140,6 +140,9 @@ def build_theme(base_dir, out_dir, name, kind, palette, canvases=None):
     recolor.recolor_bar(dest, palette)  # the base's own skins and pre-scaled copies, before anything is drawn
     shutil.copyfile(os.path.join(FONT_DIR, FONT), os.path.join(dest, FONT))
     shutil.copyfile(os.path.join(FONT_DIR, "OFL.txt"), os.path.join(dest, FONT_LICENSE))
+    with open(os.path.join(dest, "igm.json"), "w") as f:  # RetroArch's in-game menu, spruceOS 4.5.0+
+        json.dump(recolor.igm_config(palette, FONT), f, indent=4)
+        f.write("\n")
     old_fonts = set()
     for file in sorted(os.listdir(dest)):
         if not (file.startswith("config") and file.endswith(".json")):
@@ -199,7 +202,8 @@ def build_theme(base_dir, out_dir, name, kind, palette, canvases=None):
     with open(os.path.join(dest, "CREDITS.txt"), "a") as f:
         f.write(f"\n{name}: the SPRUCE theme with a black background and pixel-art icons drawn for sync-roms.\n"
                 f"Font: Fusion Pixel 12px by TakWolf (https://github.com/TakWolf/fusion-pixel-font), {FONT}, under the SIL "
-                f"Open Font License 1.1 ({FONT_LICENSE}).\n")
+                f"Open Font License 1.1 ({FONT_LICENSE}).\n"
+                "RetroArch's in-game menu (igm.json) is themed in the palette too.\n")
     return dest
 
 
