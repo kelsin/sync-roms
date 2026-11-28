@@ -11,7 +11,7 @@ from concurrent.futures import ThreadPoolExecutor
 from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError
 
 from . import __version__, bezels, budget, cardedit, cardfs, clean, commands, downloads, drivers, esde_pixel, frontend, install, inventory, m3u, mirroring, picker, runtime, s3, scrape_plan, store
-from . import knulli_conf, muos_collections, nextui_folders, onion_surprise, pico8, portmaster, raofflineproxy, rocknix_collections, saves, spruce_collections, spruce_bootlogo, spruce_emu, spruce_os, spruce_fixes, spruce_hotkeys, spruce_retroarch, spruce_settings, spruce_splore, spruce_syncthing, spruce_themes, spruce_wifi, splore, surprise, themeart, ui, usersettings, vita
+from . import knulli_conf, muos_collections, nextui_folders, onion_surprise, pico8, portmaster, raofflineproxy, rocknix_collections, saves, spruce_collections, spruce_bootlogo, spruce_emu, spruce_os, spruce_fixes, spruce_hotkeys, spruce_retroarch, spruce_settings, spruce_splore, spruce_syncthing, spruce_themes, spruce_wifi, splore, surprise, theme_options, themeart, ui, usersettings, vita
 from . import collections as colls
 from . import guest as guests
 
@@ -1826,6 +1826,7 @@ def sync_card(args):
             spruce_themes.remove(base, theme_plan["remove"], True)
             spruce_themes.clear_copies(base, spruce_themes.stale_copies(base, theme_todo), True)
             spruce_themes.select(card, base, True)
+            theme_options.write(card, base, theme_plan["names"], True)
         if not guest:
             prune_drivers(True)
             install_apps(True)
@@ -1949,7 +1950,9 @@ def sync_card(args):
     if theme_plan:
         if theme_plan["installed"] != (store.saved_card(card).get("spruce_themes_installed") or []):
             store.update_card(card, spruce_themes_installed=theme_plan["installed"])
-        if (spruce_themes.select(card, base, False) or themes_removed) and clean_card:
+        theme_selected = spruce_themes.select(card, base, False)
+        options_written = theme_options.write(card, base, theme_plan["names"], False)
+        if (theme_selected or options_written or themes_removed) and clean_card:
             clean._clean_root = base
     prefixed = 0
     for s in chosen:

@@ -19,10 +19,10 @@ def swatches(palette):
                                               palette.bar)]
 
 
-def _preview(name):
+def _preview(palette):
     """Path of the palette's preview panel, drawn into the cache."""
-    path = os.path.join(store.cache_dir(), "themes", "palette-previews", f"{name}.png")
-    palette_sheet.save_image(palette_sheet.render_panel(palettes.get(name), palette_sheet.font_path()), path)
+    path = os.path.join(store.cache_dir(), "themes", "palette-previews", f"{palette.name}.png")
+    palette_sheet.save_image(palette_sheet.render_panel(palette, palette_sheet.font_path()), path)
     return path
 
 
@@ -33,7 +33,7 @@ def pick(title, chosen):
 
     def preview(i):
         if names[i] not in drawn:  # drawn once per pick, so a changed palette never shows a stale panel
-            drawn[names[i]] = _preview(names[i])
+            drawn[names[i]] = _preview(palettes.get(names[i]))
         return drawn[names[i]]
     states = picker.filter_list(title, names, multi=True, initial=[n in chosen for n in names],
                                 extras=[swatches(palettes.get(n)) for n in names], preview=preview, esc_asks=False,
@@ -41,6 +41,23 @@ def pick(title, chosen):
     if states is None:
         return None
     return [n for n, on in zip(names, states) if on]
+
+
+def pick_one(title, names, palettes_by_name, current):
+    """Single pick of one of names ({name: Palette} in palettes_by_name), the highlight starting on current. Returns
+    the name, None when there are no names, False on Esc."""
+    if not names:
+        return None
+    drawn = {}
+
+    def preview(i):
+        if names[i] not in drawn:
+            drawn[names[i]] = _preview(palettes_by_name[names[i]])
+        return drawn[names[i]]
+    i = picker.filter_list(title, names, cursor=names.index(current) if current in names else 0,
+                           extras=[swatches(palettes_by_name[n]) for n in names], preview=preview,
+                           hint="Enter pick · / filter · Esc cancel")
+    return False if i is None else names[i]
 
 
 def saved():

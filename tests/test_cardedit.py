@@ -438,6 +438,7 @@ class Flow(DataDir):
             self.assertEqual(any("Spruce theme" in l for l in seen[-1]), shown)
         self.assertEqual(seen[-1][-2:], ["🎨 One theme only: off", "🎨 Spruce theme: none"])
 
+    @mock.patch.object(cardedit.theme_options, "manifest", lambda name: None)  # storage has no options theme
     def test_settings_menu_sets_and_clears_spruce_theme(self):
         self.card(layout="spruce")
         with mock.patch.object(picker, "filter_list", side_effect=[9, None]), \

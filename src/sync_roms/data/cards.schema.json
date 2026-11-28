@@ -42,6 +42,24 @@
         "description": "The PyUI theme folder sync-roms copies to a spruce card and selects in its Saves/*-system.json",
         "type": "string"
       },
+      "theme_options": {
+        "description": "Per PyUI theme folder with options/manifest.json, the variant and palette sync-roms writes to a spruce card's Themes/<folder>/options/selected.json",
+        "type": "object",
+        "additionalProperties": {
+          "type": "object",
+          "properties": {"variant": {"type": "string"}, "palette": {"type": "string"}},
+          "additionalProperties": false
+        }
+      },
+      "theme_options_written": {
+        "description": "The theme_options sync-roms last wrote to the card, so a choice made on the device is kept until the setting changes",
+        "type": "object",
+        "additionalProperties": {
+          "type": "object",
+          "properties": {"variant": {"type": "string"}, "palette": {"type": "string"}},
+          "additionalProperties": false
+        }
+      },
       "spruce_themes_installed": {
         "description": "PyUI theme folder names sync-roms installed in a spruce card's Themes",
         "type": "array",

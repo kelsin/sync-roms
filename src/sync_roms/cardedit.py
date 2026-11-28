@@ -2,7 +2,7 @@
 and each system's games with tag and scraped-metadata filters. Changes are saved to cards.json as they are made."""
 import queue
 
-from . import budget, cardpicks, collections as colls, edit, gamecols, guest, inventory, languages, listedit, metafilter, names, picker, previews, s3, spruce_themes, store, surprise, tagui, tags, themeart, ui, usersettings
+from . import budget, cardpicks, collections as colls, edit, gamecols, guest, inventory, languages, listedit, metafilter, names, picker, previews, s3, spruce_themes, store, surprise, tagui, tags, theme_options, themeart, ui, usersettings
 from .gamemeta import LOADING, Metadata, _spawn  # noqa: F401  (Metadata, LOADING: used here and by tests)
 
 FULL_KEY = "f"
@@ -437,14 +437,17 @@ def card_status(name, setup, systems, to_fetch=None):
 
 def settings_menu(name, systems, playable):
     """S in the system list: turn the card's Surprise, theme, custom collections or RAOfflineProxy on or off, pick the systems
-    Surprise may use on every card or on this card (playable: the systems the card can play) and, on a spruce card, its one-theme mode and current theme."""
+    Surprise may use on every card or on this card (playable: the systems the card can play) and, on a spruce card, its one-theme mode, current theme
+    and the variant and palette of each theme with options."""
     state = lambda on: "on" if on else "off"
     pos = 0
+    manifests = {}  # read once per menu: storage's theme_options.manifest of each theme listed
     while True:
         entry = store.load_cards().get(name)
         spruce = isinstance(entry, dict) and entry.get("layout") == "spruce"
         current = entry.get("spruce_theme") if spruce else None
         current = current if isinstance(current, str) and current else None
+        option_rows = theme_option_rows(entry, current, manifests) if spruce else []
         i = picker.filter_list("⚙️  Settings", [
             f"🎁 Surprise: {state(surprise.enabled(entry))}",
             f"🎨 Theme (Art Book Next and Pixel for ES-DE, collection art): {state(store.card_flag(entry, 'theme'))}",
@@ -455,7 +458,8 @@ def settings_menu(name, systems, playable):
             "Tags Surprise picks from (every card)",
             "Tags Surprise picks from (this card)",
             *([f"🎨 One theme only: {state(entry.get('one_theme') is True)}",
-               f"🎨 Spruce theme: {current or 'none'}"] if spruce else [])], cursor=pos)
+               f"🎨 Spruce theme: {current or 'none'}"] if spruce else []),
+            *(row for _, row in option_rows)], cursor=pos)
         if i is None:
             return
         pos = i
@@ -475,6 +479,62 @@ def settings_menu(name, systems, playable):
             toggle_one_theme(name)
         elif i == 9 and spruce:
             pick_spruce_theme(name, current)
+        elif i >= 10 and spruce:
+            theme = option_rows[i - 10][0]
+            pick_theme_options(name, theme, manifests.get(theme))
+
+
+def theme_option_rows(entry, current, manifests):
+    """[(theme, label)] of the S menu's theme options rows: each theme in the card's theme_options, then its current
+    theme when storage's copy has options/manifest.json. manifests caches theme_options.manifest per theme."""
+    settings = entry.get("theme_options")
+    settings = settings if isinstance(settings, dict) else {}
+    themes = sorted(t for t in settings if isinstance(t, str))
+    if current and current not in themes:
+        themes.append(current)
+    rows = []
+    for theme in themes:
+        if theme not in manifests:
+            manifests[theme] = theme_options.manifest(theme)
+        manifest = manifests[theme]
+        if manifest is None and theme not in settings:
+            continue
+        variant, palette = theme_options.choice(manifest or {}, settings.get(theme))
+        rows.append((theme, f"🎨 Theme options ({theme}): {variant or 'default'} · {palette or 'default'}"))
+    return rows
+
+
+def pick_theme_options(name, theme, manifest):
+    """Pick the theme's variant, then its palette, saved in the card's theme_options (kept as it was on Esc)."""
+    from .custom_themes import palette_picker, palettes
+    if manifest is None:
+        return
+    settings = store.saved_card(name).get("theme_options")
+    variant, palette = theme_options.choice(manifest, settings.get(theme) if isinstance(settings, dict) else None)
+    new = {}
+    variants = theme_options.variants(manifest)
+    if variants:
+        ids = [v for v, _ in variants]
+        i = picker.filter_list(f"🎨 {theme}: variant", [n for _, n in variants],
+                               cursor=ids.index(variant) if variant in ids else 0)
+        if i is None:
+            return
+        new["variant"] = ids[i]
+    choices = theme_options.palettes(manifest)
+    if choices:
+        fields = ("text", "list", "selected", "accent", "dim", "bar")
+        by_name = {n: palettes.Palette(n, *(c.get(f) or "#000000" for f in fields)) for n, c in choices.items()}
+        picked = palette_picker.pick_one(f"🎨 {theme}: palette", list(choices), by_name, palette)
+        if picked is False:
+            return
+        if picked:
+            new["palette"] = picked
+    if not new:
+        return
+    settings = store.saved_card(name).get("theme_options")
+    settings = dict(settings) if isinstance(settings, dict) else {}
+    settings[theme] = new
+    store.update_card(name, theme_options=settings)
 
 
 def toggle_one_theme(name):

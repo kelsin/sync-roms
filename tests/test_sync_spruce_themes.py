@@ -11,6 +11,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import helpers  # noqa: E402,F401
 from helpers import MANIFEST, SYSTEM  # noqa: E402
 from sync_roms import cli, inventory, picker, runtime, spruce_themes, store, ui, usersettings  # noqa: E402
+from sync_roms.custom_themes import pixel_options  # noqa: E402
 
 PREFIX = runtime.SPRUCE_THEMES_PREFIX
 LAYOUTS = {"spruce": {"label": "Spruce", "roms_dir": "Roms", "bios_dir": "BIOS"},
@@ -117,6 +118,19 @@ class SyncThemes(helpers.StorageDir):
         picked.assert_not_called()
         self.assertEqual(self.on_card(), [])
         self.assertIn("One theme only is on", self.out.getvalue())
+
+    def test_theme_options_written_by_sync(self):
+        self.put(f"{PREFIX}A/options/manifest.json", json.dumps(pixel_options.manifest()).encode())
+        store.update_card("card", theme_options={"A": {"variant": "controllers", "palette": "Nord"}})
+        path = os.path.join(self.card, "Themes", "A", "options", "selected.json")
+        self.assertEqual(self.sync(dry_run=True), 0, self.err.getvalue())
+        self.assertFalse(os.path.exists(path))
+        self.assertIn("Nord", self.out.getvalue())
+        self.assertNotIn("theme_options_written", self.saved())
+        self.assertEqual(self.sync(), 0, self.err.getvalue())
+        with open(path) as f:
+            self.assertEqual(json.load(f)["palette"], "Nord")
+        self.assertEqual(self.saved()["theme_options_written"], {"A": {"variant": "controllers", "palette": "Nord"}})
 
     def test_t_override_not_saved(self):
         store.update_card("card", spruce_theme="B")
