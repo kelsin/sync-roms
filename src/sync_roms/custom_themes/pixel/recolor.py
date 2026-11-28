@@ -10,43 +10,73 @@ def _rgb(hex_color):
     return tuple(int(hex_color[i:i + 2], 16) for i in (1, 3, 5))
 
 
+# config.json keys to palette roles (the theme options format's `configKeys`): dotted keys, and `name[field=value]` for
+# every item of a list whose `field` equals `value`
+CONFIG_KEYS = {
+    "title.color": "text", "hint.color": "text", "batteryPercentage.color": "text",
+    "currentpage.color": "text", "total.color": "accent", "grid.color": "dim",
+    "grid.selectedcolor": "accent", "list.color": "list", "list.selectedcolor": "selected",
+    "screensaver.widgets[type=clock].color": "selected",
+    "screensaver.widgets[type=date].color": "text",
+    "screensaver.widgets[type=battery].color": "accent",
+}
+# igm.json colors to palette roles (the format's `igmKeys`); their values are the role's hex plus the suffix
+IGM_KEYS = {
+    "colors.selection": {"role": "bar", "suffix": "FF"},
+    "colors.accent": {"role": "accent", "suffix": "FF"},
+    "colors.title_line": {"role": "dim", "suffix": "FF"},
+    "colors.text": {"role": "list", "suffix": "FF"},
+    "colors.text_selected": {"role": "selected", "suffix": "FF"},
+    "colors.text_title": {"role": "text", "suffix": "FF"},
+    "colors.battery": {"role": "text", "suffix": "FF"},
+}
+
+
+def set_path(data, path, value):
+    """Set `value` at `path` ("a.b", "list[field=value].key") in nested dicts and lists; the last key is set where its
+    parent exists. False when a parent isn't there (nothing is created); True once every match is set."""
+    head, _, rest = path.partition(".")
+    if "[" in head:
+        name, selector = head[:-1].split("[", 1)
+        field, _, want = selector.partition("=")
+        items = data.get(name) if isinstance(data, dict) else None
+        if not isinstance(items, list):
+            return False
+        found = False
+        for item in items:
+            if isinstance(item, dict) and item.get(field) == want:
+                found = (set_path(item, rest, value) if rest else False) or found
+        return found
+    if not isinstance(data, dict):
+        return False
+    if not rest:
+        data[head] = value
+        return True
+    return set_path(data[head], rest, value) if head in data else False
+
+
 def recolor_config(config, palette):
     """Set the palette's colors on the config's text, list, grid and screensaver entries; other keys are kept."""
-    def paint(key, **colors):
-        section = config.get(key)
-        if isinstance(section, dict):
-            section.update(colors)
-    for key in ("batteryPercentage", "title", "hint", "currentpage"):
-        paint(key, color=palette.text)
-    paint("total", color=palette.accent)
-    paint("grid", color=palette.dim, selectedcolor=palette.accent)
-    paint("list", color=palette.list, selectedcolor=palette.selected)
-    widgets = {"clock": palette.selected, "date": palette.text, "battery": palette.accent}
-    screensaver = config.get("screensaver")
-    for widget in screensaver.get("widgets", []) if isinstance(screensaver, dict) else []:
-        if isinstance(widget, dict) and widget.get("type") in widgets:
-            widget["color"] = widgets[widget["type"]]
+    for path, role in CONFIG_KEYS.items():
+        set_path(config, path, getattr(palette, role))
 
 
 def igm_config(palette, font):
     """The in-game menu's igm.json for the palette, read by spruceOS 4.5.0+ from Themes/<theme>/igm.json."""
-    return {
+    colors = {  # the palette's keys are filled below, in this order
+        "dim_bg": "#000000E6", "panel_bg": "#00000000", "selection": None, "accent": None, "title_line": None,
+        "text": None, "text_selected": None, "text_title": None, "text_shadow": "#00000000", "battery": None,
+    }
+    config = {
         "name": palette.name,
-        "colors": {
-            "dim_bg": "#000000E6",
-            "panel_bg": "#00000000",
-            "selection": palette.bar + "FF",
-            "accent": palette.accent + "FF",
-            "title_line": palette.dim + "FF",
-            "text": palette.list + "FF",
-            "text_selected": palette.selected + "FF",
-            "text_title": palette.text + "FF",
-            "text_shadow": "#00000000",
-            "battery": palette.text + "FF",
-        },
+        "colors": colors,
         "layout": {"shadow": False},
         "font": {"path": font, "size_small_pct": 5.0},  # 24px at 480 lines, 36px at 720: where the font is crisp
     }
+    for path, spec in IGM_KEYS.items():
+        key = path.split(".", 1)[1]
+        colors[key] = getattr(palette, spec["role"]) + spec["suffix"]
+    return config
 
 
 def recolor_bar(theme_dir, palette):
