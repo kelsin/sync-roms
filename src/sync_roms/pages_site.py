@@ -1,8 +1,13 @@
 """The public collections site on GitHub Pages: a clone of its repo in the cache, rebuilt and pushed by `collections publish`."""
 import html
+import http.client
+import json
 import os
 import re
+import shutil
 import subprocess
+import time
+import urllib.request
 
 from . import collections_page, custom_themes, pixel_art_page, s3, store, ui, usersettings
 
@@ -10,6 +15,9 @@ DOMAIN = "sync-roms.games"
 DEFAULT_REPO = "git@github.com:kelsin/sync-roms.games.git"
 TEMPLATE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "pages-site")
 USER = re.compile(r"[a-z0-9][a-z0-9_-]{0,38}")
+GITHUB = re.compile(r"(?:git@github\.com:|ssh://git@github\.com/|https://github\.com/)([^/]+/[^/]+?)(?:\.git)?/?")
+RUN_POLL, RUN_WAIT = 5, 120  # seconds between looks for the Pages deploy run, and how long it may take to appear
+PAGE_POLL, PAGE_WAIT = 5, 600  # seconds between fetches of the live page, and how long it may take to go live
 
 
 def CLONE_DIR():
@@ -102,3 +110,66 @@ def publish(user, dry_run=False):
         git("commit", "-q", "-m", f"publish collections for {user}", cwd=clone)
         git("push", "-q", "origin", "main", cwd=clone)
     return True, url(user)
+
+
+def github_repo(repo):
+    """`owner/repo` of a GitHub git URL (ssh or https); None for any other URL."""
+    match = GITHUB.fullmatch(repo)
+    return match and match.group(1)
+
+
+def _gh(*args):
+    return subprocess.run(["gh", *args], capture_output=True, text=True)
+
+
+def _watch_deploy(repo, sha):
+    """Watch the Pages deploy run of sha with gh until it ends; exits 1 when it failed. A dim note when gh can't."""
+    if not shutil.which("gh") or _gh("auth", "status").returncode:
+        print(ui.dim("  gh isn't installed or logged in, so the deploy run isn't watched"))
+        return
+    deadline = time.monotonic() + RUN_WAIT
+    while True:
+        result = _gh("run", "list", "-R", repo, "--commit", sha, "--workflow", "pages-build-deployment",
+                     "--json", "databaseId,url", "-L", "1")
+        try:
+            runs = json.loads(result.stdout) if not result.returncode else []
+        except ValueError:
+            runs = []
+        if runs:
+            break
+        if time.monotonic() >= deadline:
+            print(ui.dim("  No Pages deploy run showed up for the push"))
+            return
+        time.sleep(RUN_POLL)
+    if _gh("run", "watch", str(runs[0]["databaseId"]), "-R", repo, "--exit-status").returncode:
+        ui.fail(f"The Pages deploy failed: {runs[0]['url']}", 1)
+
+
+def _fetch(link):
+    """The body at link; None on a network error."""
+    try:
+        with urllib.request.urlopen(link, timeout=30) as response:
+            return response.read()
+    except (OSError, http.client.HTTPException):
+        return None
+
+
+def wait_live(user):
+    """After a push: watch the Pages deploy run (on GitHub, with gh), then fetch user's page until it is the one
+    pushed; exits 1 when the run failed or the page isn't live within PAGE_WAIT."""
+    print("Waiting for GitHub Pages to deploy…")
+    clone = CLONE_DIR()
+    sha = git("rev-parse", "HEAD", cwd=clone).strip()
+    repo = github_repo(usersettings.load_settings().get("pages_repo") or DEFAULT_REPO)
+    if repo:
+        _watch_deploy(repo, sha)
+    else:
+        print(ui.dim("  pages_repo isn't on GitHub, so the deploy run isn't watched"))
+    with open(os.path.join(clone, "collections", user, "index.html"), "rb") as f:
+        expected = f.read()
+    link = f"{url(user)}?v={sha}"
+    deadline = time.monotonic() + PAGE_WAIT
+    while _fetch(link) != expected:
+        if time.monotonic() >= deadline:
+            ui.fail(f"{url(user)} isn't live after {round(PAGE_WAIT / 60)} minutes; check the repo's Pages settings", 1)
+        time.sleep(PAGE_POLL)

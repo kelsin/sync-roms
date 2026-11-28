@@ -175,7 +175,7 @@ Every mode is a command (plain `sync-roms [CARD]` syncs a card). A command's ali
 | `collections edit` | edit your [collections](#collections-collections-edit) of favourite games | `collection` |
 | `collections import FILE...` | add [collections](#collections-collections-edit) exported from the share page; a taken id asks merge, replace, rename or skip | `collection` |
 | `collections page` | write a shareable HTML page of your collections and open it | `collection` |
-| `collections publish` | [publish](#publishing-to-github-pages) a public copy of that page to `https://sync-roms.games/collections/<user>/`; `--dry-run` lists what would change | `collection` |
+| `collections publish` | [publish](#publishing-to-github-pages) a public copy of that page to `https://sync-roms.games/collections/<user>/` and wait until GitHub Pages has it live (`--no-wait` doesn't wait); `--dry-run` lists what would change | `collection` |
 | `collections retitle` | set each game's title in your collections to its scraped name (else its file name); `--dry-run` lists the changes | |
 | `collections share\|unshare` | share that page on your tailnet through a local server and `tailscale serve`, or stop | `collection` |
 | `collections update` | run `collections share`, then `collections publish` (`--user NAME` passed on), stopping at the first failure | `collection` |
@@ -253,6 +253,7 @@ For one command:
 | `--full` | `cache update` | List every folder and stat every file of a storage folder |
 | `--retroarch DIR` | `saves stash`, `saves apply` | Read or write RetroArch's saves and states in `DIR` instead of a mounted card's RetroArch folder |
 | `--user NAME` | `collections publish` | The site folder to publish to, `collections/NAME/` (lowercase letters, digits, `-` and `_`), instead of your login name |
+| `--no-wait` | `collections publish` | Don't wait, after the push, for GitHub Pages to deploy the page |
 | `--out DIR` | `themes build` | Build into `DIR/<theme name>` (replaced) instead of the cache |
 | `--palette NAME`, `--all-palettes` | `themes build`, `themes publish` | The palettes to build each style in (`--palette` repeatable, duplicates ignored), or all 41. Without either, a terminal (without `--yes`) shows the palette picker; otherwise the saved `custom_theme_palettes` are built (none saved: exit 2). The flags never change the saved palettes |
 | `--count N` | `download pico8` | Stop after N carts to add or upgrade |
@@ -409,7 +410,7 @@ Add one to a card with `l` in the card editor; a sync then writes it as a custom
 
 #### Publishing to GitHub Pages
 
-`sync-roms collections publish [--user NAME] [--dry-run]` publishes a public copy of the page to `https://sync-roms.games/collections/<user>/` (your login name, or `NAME`). The copy has no storage paths, but it does list your games (a game with no scraped name or saved title shows its file name). It also shows each game's scraped box art (a larger picture on hover or tap) and credits ScreenScraper; the local page has neither. When storage can't be reached it publishes nothing (exit 1), rather than a page without tags, sizes or scraped names. It keeps a clone of the Pages repo (`pages_repo`, default `git@github.com:kelsin/sync-roms.games.git`) in `cache/pages/` in the data folder, resets it to the repo's `main`, replaces only your own `collections/<user>/` folder, rewrites the site's list of users at its root, the `/collections/` redirect to it, `CNAME` and `.nojekyll`, and commits and pushes when anything changed (`--dry-run` lists the changed files and pushes nothing). Setting up the repo, Pages and the domain is in [docs/github-pages.md](docs/github-pages.md).
+`sync-roms collections publish [--user NAME] [--no-wait] [--dry-run]` publishes a public copy of the page to `https://sync-roms.games/collections/<user>/` (your login name, or `NAME`). The copy has no storage paths, but it does list your games (a game with no scraped name or saved title shows its file name). It also shows each game's scraped box art (a larger picture on hover or tap) and credits ScreenScraper; the local page has neither. When storage can't be reached it publishes nothing (exit 1), rather than a page without tags, sizes or scraped names. It keeps a clone of the Pages repo (`pages_repo`, default `git@github.com:kelsin/sync-roms.games.git`) in `cache/pages/` in the data folder, resets it to the repo's `main`, replaces only your own `collections/<user>/` folder, rewrites the site's list of users at its root, the `/collections/` redirect to it, `CNAME` and `.nojekyll`, and commits and pushes when anything changed (`--dry-run` lists the changed files and pushes nothing). After a push it waits until the page is live: with `gh` installed and logged in it watches the repo's `pages-build-deployment` run (exit 1 when it fails), then fetches the page until it is the one pushed (exit 1 after 10 minutes). `--no-wait` skips that. Setting up the repo, Pages and the domain is in [docs/github-pages.md](docs/github-pages.md).
 
 #### Theme art
 
