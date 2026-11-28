@@ -73,7 +73,7 @@
           <tr><td><strong>App icons</strong><br><span class="g-note">The Apps menu (RetroArch, PortMaster, Syncthing, Boot Logo …)</span></td><td class="g-num g-big">33</td><td class="g-num">icons/app/&lt;name&gt;.png</td><td class="g-num">70×70</td><td class="g-num">×3</td><td class="g-num">22×22</td><td class="g-num">20–22 × 12–22</td></tr>
           <tr><td><strong>Settings icons</strong></td><td class="g-num g-big">27</td><td class="g-num">skin/…</td><td colspan="4" class="g-note">Mixed sizes, see Small icons by file size</td></tr>
           <tr><td><strong>Status and buttons</strong><br><span class="g-note">Battery (5 levels), charging (5), volume (21 steps, 0 to 20), Wi-Fi signal (4), sound, headphones, X/Y/L2/R2/OK/START, keyboard keys, arrows</span></td><td class="g-num g-big">54</td><td class="g-num">skin/…</td><td colspan="4" class="g-note">Mixed sizes, see Small icons by file size</td></tr>
-          <tr><td><strong>Palette icons</strong><br><span class="g-note">The A, B and X button hint pills. These change colour with the theme palette: see Palette icons below.</span></td><td class="g-num g-big">5</td><td class="g-num">skin/…</td><td colspan="4" class="g-note">See Palette icons</td></tr>
+          <tr><td><strong>Palette icons</strong><br><span class="g-note">The button hint pills: A, B, X, Y, MENU, SELECT and START. These change colour with the theme palette: see Palette icons below.</span></td><td class="g-num g-big">7</td><td class="g-num">skin/…</td><td colspan="4" class="g-note">See Palette icons</td></tr>
           <tr><td><strong>Collection box art</strong><br><span class="g-note">The picture on each collection's game box. The box, title and badge are made around it.</span></td><td class="g-num g-big">155</td><td class="g-num">sprites/&lt;id&gt;.txt</td><td class="g-num">336×480 box</td><td class="g-num">×8 on the box</td><td class="g-num">32×32</td><td class="g-num">32×32</td></tr>
         </tbody>
       </table>
@@ -102,7 +102,7 @@
     </div>
 
     <h3>Palette icons</h3>
-    <p>These are the only menu pictures spruceOS loads that change with the palette: the button hint pills in the bottom bar. Each theme is built in 41 palettes, so they are painted with key colours instead of real ones. The build swaps each key for that palette's colour. Preview your work with the Gruvbox column.</p>
+    <p>These are the button hint pills of the bottom bar, the only menu pictures that change with the palette. spruceOS shows A, B and X today; Y, MENU, SELECT and START are there for when it uses them. Each theme is built in 41 palettes, so they are painted with key colours instead of real ones. The build swaps each key for that palette's colour. Preview your work with the Gruvbox column.</p>
     <div class="g-scroll">
       <table>
         <thead><tr><th>Role</th><th>Key colour (paint with)</th><th>Gruvbox preview</th><th>Used for</th></tr></thead>
@@ -118,15 +118,15 @@
     <ul>
       <li>They are drawn on a grid of 2 px square cells. Draw at 1 px per cell, on the grid in the table.</li>
       <li>Where the file is bigger than the grid, the leftover pixels are split evenly around your art, so you don't need to position it.</li>
-      <li>Each pill holds one button letter (A, B or X) in a 13×13 grid. <code>context-a</code>, <code>context-b</code> and <code>context-x</code> are the contextual bottom bar's; <code>icon-A-54</code> and <code>icon-B-54</code> are the A and B pills again, for the standard bottom bar.</li>
+      <li>The A, B, X and Y pills hold one button letter in a 13×13 grid; MENU, SELECT and START are words in a 33×13 grid. The standard bottom bar's A and B icons (<code>icon-A-54</code>, <code>icon-B-54</code>) are copies of the A and B pills.</li>
       <li>Draw each icon once at this 640×480 grid. The theme's other screen sizes get scaled copies.</li>
     </ul>
     <div class="g-scroll">
       <table>
         <thead><tr><th>Icon</th><th>File at 640×480</th><th>Cell</th><th>Grid (cells)</th><th>Colours</th></tr></thead>
         <tbody>
-          <tr><td class="g-num">context-a / b / x</td><td class="g-num">26×26</td><td class="g-num">2 px</td><td class="g-num"><strong>13×13</strong></td><td>accent, accent shades, ink</td></tr>
-          <tr><td class="g-num">icon-A-54 / icon-B-54</td><td class="g-num">26×26</td><td class="g-num">2 px</td><td class="g-num"><strong>13×13</strong></td><td>accent, accent shades, ink</td></tr>
+          <tr><td class="g-num">context-a / b / x / y</td><td class="g-num">26×26</td><td class="g-num">2 px</td><td class="g-num"><strong>13×13</strong></td><td>accent, accent shades, ink</td></tr>
+          <tr><td class="g-num">context-menu / select / start</td><td class="g-num">66×26</td><td class="g-num">2 px</td><td class="g-num"><strong>33×13</strong></td><td>accent, accent shades, ink</td></tr>
         </tbody>
       </table>
     </div>

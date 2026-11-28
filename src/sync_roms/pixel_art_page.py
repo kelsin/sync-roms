@@ -173,9 +173,10 @@ def sprite_sections(img_dir, theme_dir=None):
             _ui(img_dir, theme_dir, "status", "Status and buttons", ui_status)]
 
 
-# The frames that are pictures spruceOS loads on every device: the hint pills PyUI's bottom bars show (it makes only
-# A, B and X hints); the bars, panels and boxes, and the frames nothing (or only one device) loads, stay off the page.
-ICON_FRAMES = ("context-a", "context-b", "context-x", "icon-A-54", "icon-B-54")
+# The frames that are pictures: the hint pills of PyUI's contextual bottom bar (it shows only A, B and X today; the
+# others are ready for when it does). The A/B icons are copies of the A and B pills, and the bars, panels and boxes,
+# and the frames nothing (or only one device) loads, stay off the page.
+ICON_FRAMES = tuple(f"context-{name}" for name in ("a", "b", "x", "y", "menu", "select", "start"))
 
 
 def build_frames_theme(base_dir, out_dir):
