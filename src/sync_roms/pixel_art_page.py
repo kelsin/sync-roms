@@ -11,7 +11,7 @@ from PIL import Image
 from . import collections_page, custom_themes, store, ui
 from .custom_themes import palettes, pixel_consoles, theme_name
 from .custom_themes.pixel import app_icons, build, frames, ids, menu, ui_settings, ui_status, variants
-from .custom_themes.pixel.sprite import render
+from .custom_themes.pixel.sprite import COLORS, INK, render
 
 PALETTE = "Gruvbox"
 TEMPLATE_DIR = os.path.join(store.REPO_DATA, "pixel-art-page")
@@ -173,8 +173,9 @@ def sprite_sections(img_dir, theme_dir=None):
             _ui(img_dir, theme_dir, "status", "Status and buttons", ui_status)]
 
 
-# Frames the real base ships fully transparent, so they have no canvas to draw over.
-TRANSPARENT = ("bg-grid-s", "div-line-v-02", "navbg", "num-bg", "preview-bg", "statbg", "thumb-default")
+# The frames that are pictures spruceOS loads on every device: the hint pills PyUI's bottom bars show (it makes only
+# A, B and X hints); the bars, panels and boxes, and the frames nothing (or only one device) loads, stay off the page.
+ICON_FRAMES = ("context-a", "context-b", "context-x", "icon-A-54", "icon-B-54")
 
 
 def build_frames_theme(base_dir, out_dir):
@@ -186,15 +187,16 @@ def build_frames_theme(base_dir, out_dir):
 
 
 def frame_section(img_dir, canvases):
-    """One item per frame the theme drew (its cell grid, one pixel per cell)."""
-    w = _Writer(img_dir, "frames")
+    """One item per ICON_FRAMES frame the theme drew (its cell grid, one pixel per cell)."""
+    w = _Writer(img_dir, "palette-icons")
     for key in sorted(frames.FRAMES):
-        if key not in canvases and _file_stem(key) not in TRANSPARENT:
+        if _file_stem(key) in ICON_FRAMES and key not in canvases:
             ui.warn(f"The frame {key} has no canvas in the base theme, so it won't show on the pixel art page")
     items = [w.image_item(_file_stem(key), _file_stem(key), canvas.cell_image(),
                           [{"path": key, "size": list(canvas.size)}], cell=canvas.cell)
-             for key, canvas in sorted(canvases.items(), key=lambda kv: kv[0].rsplit("/", 1)[-1])]
-    return _section("frames", "Frames", items)
+             for key, canvas in sorted(canvases.items(), key=lambda kv: kv[0].rsplit("/", 1)[-1])
+             if _file_stem(key) in ICON_FRAMES]
+    return _section("palette-icons", "Palette icons", items)
 
 
 def box_section(img_dir):
@@ -228,7 +230,7 @@ def write(out_dir, base_dir=None):
     for name in ("page.html", "page.css", "page.js"):
         with open(os.path.join(TEMPLATE_DIR, name), encoding="utf-8") as f:
             files[name] = f.read()
-    data = {"palette": PALETTE, "home": "/", "sections": sections}
+    data = {"palette": PALETTE, "home": "/", "sections": sections, "colors": {**COLORS, "ink": INK}}  # colors: the brief's
     store.write_text(os.path.join(out_dir, "index.html"), collections_page.fill(files["page.html"], data))
     for name in ("page.css", "page.js"):
         store.write_text(os.path.join(out_dir, name), files[name])

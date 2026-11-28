@@ -16,6 +16,7 @@ from sync_roms import pixel_art_page, store
 from sync_roms.custom_themes import palettes, theme_name
 from sync_roms.custom_themes.esde import systems as esde_systems
 from sync_roms.custom_themes.pixel import app_icons, build, frames, menu, ui_settings, ui_status, variants
+from sync_roms.custom_themes.pixel.sprite import COLORS, INK
 from sync_roms.custom_themes.pixel.sprite import render
 
 
@@ -99,7 +100,8 @@ class SpriteSectionsTest(unittest.TestCase):
         self.assertEqual(len(paths), len(set(paths)))
 
 
-TRANSPARENT = pixel_art_page.TRANSPARENT
+# Frames the real base ships fully transparent, so they have no canvas to draw over.
+TRANSPARENT = ("bg-grid-s", "div-line-v-02", "navbg", "num-bg", "preview-bg", "statbg", "thumb-default")
 
 
 def fake_base(path):
@@ -128,12 +130,14 @@ class FrameSectionTest(unittest.TestCase):
         cls.tmp.cleanup()
 
     def test_frames_section_covers_what_themes_draw(self):
-        self.assertEqual(self.section["id"], "frames")
-        want = {n for n in frames.FRAMES if n[5:-4] not in TRANSPARENT}
+        self.assertEqual(self.section["id"], "palette-icons")
+        want = {n for n in frames.FRAMES if n[5:-4] in pixel_art_page.ICON_FRAMES}
+        self.assertEqual(len(want), len(pixel_art_page.ICON_FRAMES))  # every listed frame is a registered one
         paths = {i["files"][0]["path"] for i in self.section["items"]}
         self.assertEqual(paths, want)
         # the hint pills (which the base lacks) and the A/B icons come from the build, at the pills' sizes
-        sizes = dict(HINTS, **{"icon-A-54.png": (26, 26), "icon-B-54.png": (26, 26)})
+        sizes = {name: size for name, size in dict(HINTS, **{"icon-A-54.png": (26, 26), "icon-B-54.png": (26, 26)}).items()
+                 if name[:-4] in pixel_art_page.ICON_FRAMES}
         hints = {i["files"][0]["path"][5:]: i for i in self.section["items"] if i["files"][0]["path"][5:] in sizes}
         self.assertEqual(set(hints), set(sizes))
         for name, item in hints.items():
@@ -143,22 +147,22 @@ class FrameSectionTest(unittest.TestCase):
 
     def test_warns_for_a_frame_with_no_canvas(self):
         from sync_roms import ui
-        canvases = {k: v for k, v in self.canvases.items() if k != "skin/bg-title.png"}
+        canvases = {k: v for k, v in self.canvases.items() if k not in ("skin/context-a.png", "skin/bg-title.png")}
         with mock.patch.object(ui, "warn") as warn:
             pixel_art_page.frame_section(os.path.join(self.tmp.name, "img2"), canvases)
         self.assertEqual(len(warn.call_args_list), 1)
-        self.assertIn("skin/bg-title.png", warn.call_args[0][0])
+        self.assertIn("skin/context-a.png", warn.call_args[0][0])  # bg-title isn't on the page, so no warning
         with mock.patch.object(ui, "warn") as warn:
             pixel_art_page.frame_section(os.path.join(self.tmp.name, "img3"), self.canvases)
         warn.assert_not_called()
 
     def test_frame_image_is_cells(self):
-        item = next(i for i in self.section["items"] if i["files"][0]["path"] == "skin/bg-title.png")
-        canvas = self.canvases["skin/bg-title.png"]
+        item = next(i for i in self.section["items"] if i["files"][0]["path"] == "skin/context-a.png")
+        canvas = self.canvases["skin/context-a.png"]
         self.assertEqual(item["cell"], canvas.cell)
         self.assertEqual(item["files"][0]["size"], list(canvas.size))
         with Image.open(os.path.join(self.img, *item["img"].split("/")[1:])) as cells, \
-                Image.open(os.path.join(self.theme, "skin", "bg-title.png")) as built:
+                Image.open(os.path.join(self.theme, "skin", "context-a.png")) as built:
             crop = built.convert("RGBA").crop((canvas.ox, canvas.oy, canvas.ox + canvas.cols * canvas.cell,
                                                canvas.oy + canvas.rows * canvas.cell))
             self.assertEqual(cells.convert("RGBA").resize(crop.size, Image.NEAREST).tobytes(), crop.tobytes())
@@ -201,7 +205,7 @@ class BoxSectionTest(unittest.TestCase):
 
 
 SECTION_IDS = ["menu", "systems-shared", "systems-consoles", "systems-controllers", "regions", "esde-shared",
-               "esde-consoles", "esde-controllers", "apps", "settings", "status", "frames", "boxes"]
+               "esde-consoles", "esde-controllers", "apps", "settings", "status", "palette-icons", "boxes"]
 
 
 def page_data(html):
@@ -234,6 +238,8 @@ class WriteTest(unittest.TestCase):
         self.assertEqual(data["palette"], pixel_art_page.PALETTE)
         self.assertEqual(data["home"], "/")
         self.assertEqual([s["id"] for s in data["sections"]], SECTION_IDS)
+        self.assertIn('id="artist-guide"', html)  # the artists' brief, with the sprite colours its swatches show
+        self.assertEqual(data["colors"], {**COLORS, "ink": INK})
         for section in data["sections"]:
             self.assertTrue(section["items"], section["id"])
             for item in section["items"]:

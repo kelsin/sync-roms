@@ -11,11 +11,150 @@
   <header>
     <a class="home" id="home" hidden>← sync-roms.games</a>
     <h1>Pixel art</h1>
-    <p class="intro">Every picture sync-roms draws for its spruceOS and ES-DE pixel themes, one art pixel to one image pixel. Pick a picture to see it on a pixel grid below its row, with the theme files it goes in and their sizes; the address then links straight to it.</p>
+    <p class="intro">Every icon and picture sync-roms draws for its spruceOS and ES-DE pixel themes (not the bars, panels and boxes behind the menus), one art pixel to one image pixel. Pick a picture to see it on a pixel grid below its row, with the theme files it goes in and their sizes; the address then links straight to it.</p>
     <p class="intro" id="palette"></p>
     <nav class="jump" id="jump" aria-label="Sections"></nav>
   </header>
   <main id="sections"></main>
+  <section class="guide" id="artist-guide">
+    <h2>For pixel artists</h2>
+    <p class="g-lede">The Pixel themes for spruceOS (PyUI) and ES-DE are drawn by code today. This brief is for pixel artists who'd like to draw them by hand. It lists every picture a hand-drawn set would replace, the exact canvas each one has to fit, and the rules that keep the set consistent. The pictures above are the checklist and the reference: each one is at one art pixel per image pixel, with its theme file names.</p>
+
+    <h3>How your pixels get to the screen</h3>
+    <p>You draw at <strong>1×</strong>: one art pixel is one PNG pixel. The build scales your art by a whole number with nearest-neighbour (no smoothing), places it on the theme's fixed-size file, and writes copies for each screen size. Each table below gives the <strong>art box</strong>, the most art pixels a picture may use, including its outline.</p>
+    <div class="g-diagram" role="img" aria-label="A system icon: art box 30 by 25 art pixels, scaled 4 times into the top 100 pixels of a 120 by 130 file, with 30 pixels below kept free">
+      <svg viewBox="0 0 640 230" xmlns="http://www.w3.org/2000/svg" font-family="ui-monospace, Menlo, monospace" font-size="12">
+        <rect x="20" y="40" width="60" height="50" fill="none" stroke="#e48a5c" stroke-width="2"/>
+        <text x="20" y="30" fill="#ece8e1">you draw: 30×25</text>
+        <rect x="31" y="50" width="38" height="32" fill="#4fc65d" stroke="#1b1530" stroke-width="2"/>
+        <text x="100" y="70" fill="#a39d93">×4, nearest</text>
+        <path d="M100 78 H180" stroke="#a39d93" stroke-width="2" marker-end="url(#g-arrow)"/>
+        <defs><marker id="g-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#a39d93"/></marker></defs>
+        <rect x="200" y="20" width="160" height="173" fill="none" stroke="#ece8e1" stroke-dasharray="4 3"/>
+        <rect x="200" y="20" width="160" height="133" fill="none" stroke="#e48a5c" stroke-width="2"/>
+        <rect x="222" y="40" width="116" height="90" fill="#4fc65d" stroke="#1b1530" stroke-width="3"/>
+        <text x="370" y="34" fill="#ece8e1">icons/&lt;id&gt;.png, 120×130</text>
+        <text x="370" y="90" fill="#e48a5c">art: 120×100 (top)</text>
+        <text x="370" y="108" fill="#a39d93">centred on x 60, y 50</text>
+        <text x="370" y="178" fill="#a39d93">bottom 30 px: keep empty</text>
+        <path d="M200 153 H360" stroke="#a39d93" stroke-dasharray="2 3"/>
+      </svg>
+    </div>
+    <p class="g-note">The build centres your art on the file's anchor point, so you don't need to align it. Use an even width when the drawing is symmetric, so its middle lands exactly on the anchor.</p>
+
+    <h3>Rules for every picture</h3>
+    <div class="g-rules">
+      <div class="g-rule"><h4>File format</h4><p>PNG, RGBA, at 1×. Transparent background. Each pixel is either fully opaque or fully transparent: no anti-aliasing, no soft edges, no semi-transparent pixels.</p></div>
+      <div class="g-rule"><h4>Outline</h4><p>A 1 px outline around every shape, in ink <code>#1b1530</code>. The outline counts toward the art box. Keep at least a 1 px clear border inside the box.</p></div>
+      <div class="g-rule"><h4>Light and shading</h4><p>Light comes from the top left. Use 2 to 3 tones per colour. Our code lightens a shape's top edge about 38% toward white and darkens its bottom edge about 34% toward black; staying near that keeps your pictures in line with the rest.</p></div>
+      <div class="g-rule"><h4>Clean lines</h4><p>Mirror symmetric hardware exactly. Straight and diagonal edges step in regular 1:1, 2:1 or 1:2 runs, curves step evenly, and outlines have no jogs or stray pixels. Crooked sprites get sent back.</p></div>
+      <div class="g-rule"><h4>Background</h4><p>Everything shows on black, or on a palette's dark bar colour. Check each picture on <code>#000000</code> and make sure it stands out.</p></div>
+      <div class="g-rule"><h4>No words</h4><p>Don't draw text into a picture unless the brief asks for it (the hint pills). Titles, labels and menus are set in the theme font, Fusion Pixel 12 px.</p></div>
+      <div class="g-rule"><h4>Selected and unselected</h4><p>Draw the selected (full colour) state only. The build makes the unselected state itself by desaturating 50% and darkening to 62%. If you want a different unselected picture, send it too as <code>&lt;id&gt;-n.png</code>.</p></div>
+      <div class="g-rule"><h4>Match the neighbours</h4><p>Similar things are drawn at similar sizes: two handheld consoles should be within about 4 px of each other in each direction. Compare with the existing picture above.</p></div>
+    </div>
+
+    <h3>Sprite colours</h3>
+    <p>The colours our system, menu, app and status icons are drawn in today. These icons keep the same colours in every theme palette.</p>
+    <div class="g-swatches" id="guide-swatches"></div>
+
+    <h3>What needs drawing</h3>
+    <p>About 480 pictures, plus 20 optional regional ones. The bars, panels, list highlights and boxes behind the menus stay as they are and aren't part of this brief. The art box is the largest drawing that fits at the scale given. Our existing pictures are usually a little smaller than the box.</p>
+    <div class="g-scroll">
+      <table>
+        <thead><tr><th>Group</th><th>Count</th><th>Theme file</th><th>File size</th><th>Scale</th><th>Art box (max)</th><th>Ours today</th></tr></thead>
+        <tbody>
+          <tr><td><strong>System icons, both themes</strong><br><span class="g-note">The same drawing in Consoles and Controllers (arcade boards, engines, computers)</span></td><td class="g-num g-big">34</td><td class="g-num">icons/&lt;id&gt;.png</td><td class="g-num">120×130</td><td class="g-num">×4</td><td class="g-num">30×25</td><td class="g-num">16–28 × 14–25</td></tr>
+          <tr><td><strong>Consoles</strong><br><span class="g-note">The console itself, for the Consoles theme</span></td><td class="g-num g-big">54</td><td class="g-num">icons/&lt;id&gt;.png</td><td class="g-num">120×130</td><td class="g-num">×4</td><td class="g-num">30×25</td><td class="g-num">22–28 × 14–25</td></tr>
+          <tr><td><strong>Controllers</strong><br><span class="g-note">That console's standard controller, for the Controllers theme</span></td><td class="g-num g-big">54</td><td class="g-num">icons/&lt;id&gt;.png</td><td class="g-num">120×130</td><td class="g-num">×4</td><td class="g-num">30×25</td><td class="g-num">16–28 × 14–25</td></tr>
+          <tr><td><strong>ES-DE only systems</strong><br><span class="g-note">Console and controller each: 3do, arcadia, atarijaguarcd, cdimono1, daphne, gamecom, gc, lowresnx, lutro, mark3, model2, model3, n64dd, pcfx, ps2, ps3, ps4, psvita, stv, switch, triforce, type-x, uzebox, wii, wiiu, xbox, xbox360, xboxone</span></td><td class="g-num g-big">56</td><td class="g-num">systems/consoles|controllers/&lt;name&gt;.png</td><td class="g-num">120×130</td><td class="g-num">×4</td><td class="g-num">30×25</td><td class="g-num">16–28 × 13–25</td></tr>
+          <tr><td><strong>Regional variants</strong> (optional)<br><span class="g-note">fc, sfc, sgb, md, segacd, 32x, ms, saturn, pce, pcecd in JP and US looks. One region per system is in use and counted above; the other 20 are spares.</span></td><td class="g-num">20</td><td class="g-num">icons/&lt;id&gt;.png</td><td class="g-num">120×130</td><td class="g-num">×4</td><td class="g-num">30×25</td><td class="g-num">22–28 × 13–25</td></tr>
+          <tr><td><strong>Main menu icons</strong><br><span class="g-note">favorite, recent, setting, app, collection, retroarch, and the games icon twice (a handheld for Consoles, a pad for Controllers)</span></td><td class="g-num g-big">8</td><td class="g-num">skin/ic-&lt;name&gt;-f.png</td><td class="g-num">100×140</td><td class="g-num">×4</td><td class="g-num">25×25</td><td class="g-num">20–24 × 19–22</td></tr>
+          <tr><td><strong>App icons</strong><br><span class="g-note">The Apps menu (RetroArch, PortMaster, Syncthing, Boot Logo …)</span></td><td class="g-num g-big">33</td><td class="g-num">icons/app/&lt;name&gt;.png</td><td class="g-num">70×70</td><td class="g-num">×3</td><td class="g-num">22×22</td><td class="g-num">20–22 × 12–22</td></tr>
+          <tr><td><strong>Settings icons</strong></td><td class="g-num g-big">27</td><td class="g-num">skin/…</td><td colspan="4" class="g-note">Mixed sizes, see Small icons by file size</td></tr>
+          <tr><td><strong>Status and buttons</strong><br><span class="g-note">Battery (5 levels), charging (5), volume (21 steps, 0 to 20), Wi-Fi signal (4), sound, headphones, X/Y/L2/R2/OK/START, keyboard keys, arrows</span></td><td class="g-num g-big">54</td><td class="g-num">skin/…</td><td colspan="4" class="g-note">Mixed sizes, see Small icons by file size</td></tr>
+          <tr><td><strong>Palette icons</strong><br><span class="g-note">The A, B and X button hint pills. These change colour with the theme palette: see Palette icons below.</span></td><td class="g-num g-big">5</td><td class="g-num">skin/…</td><td colspan="4" class="g-note">See Palette icons</td></tr>
+          <tr><td><strong>Collection box art</strong><br><span class="g-note">The picture on each collection's game box. The box, title and badge are made around it.</span></td><td class="g-num g-big">155</td><td class="g-num">sprites/&lt;id&gt;.txt</td><td class="g-num">336×480 box</td><td class="g-num">×8 on the box</td><td class="g-num">32×32</td><td class="g-num">32×32</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Small icons by file size</h3>
+    <p>Settings and status icons go into files the base theme already has, at whatever size that file is. The build picks the largest whole scale up to 4 that fits, so the art box is the file size divided by the scale. Draw exactly the box size or a little under.</p>
+    <div class="g-scroll">
+      <table>
+        <thead><tr><th>File size</th><th>Scale</th><th>Art box</th><th>Count</th><th>Which</th></tr></thead>
+        <tbody>
+          <tr><td class="g-num">48×48</td><td class="g-num">×2</td><td class="g-num">24×24</td><td class="g-num">21</td><td>icon-volume-00 … icon-volume-20 (ours: 24×20)</td></tr>
+          <tr><td class="g-num">40×40</td><td class="g-num">×2</td><td class="g-num">20×20</td><td class="g-num">36</td><td>Most settings icons; battery and charging levels; sound, mute; Wi-Fi signal 01–04; favourite and RetroAchievements marks; ic-MENU</td></tr>
+          <tr><td class="g-num">50×40</td><td class="g-num">×2</td><td class="g-num">25×20</td><td class="g-num">2</td><td>icon-folder, icon-folder-40</td></tr>
+          <tr><td class="g-num">110×40</td><td class="g-num">×2</td><td class="g-num">55×20</td><td class="g-num">1</td><td>ic-MENU+A (a two-button combo)</td></tr>
+          <tr><td class="g-num">30×30</td><td class="g-num">×2</td><td class="g-num">15×15</td><td class="g-num">12</td><td>headphone, wifi-connected, wifi-locked, OK, shift, shift-active, delete, space, the four arrows</td></tr>
+          <tr><td class="g-num">28×26</td><td class="g-num">×2</td><td class="g-num">14×13</td><td class="g-num">2</td><td>icon-L2, icon-R2</td></tr>
+          <tr><td class="g-num">26×26</td><td class="g-num">×2</td><td class="g-num">13×13</td><td class="g-num">2</td><td>icon-x, icon-y</td></tr>
+          <tr><td class="g-num">48×26</td><td class="g-num">×2</td><td class="g-num">24×13</td><td class="g-num">1</td><td>icon-START</td></tr>
+          <tr><td class="g-num">24×24</td><td class="g-num">×2</td><td class="g-num">12×12</td><td class="g-num">1</td><td>icon-TF (SD card)</td></tr>
+          <tr><td class="g-num">100×140</td><td class="g-num">×4</td><td class="g-num">25×35</td><td class="g-num">1</td><td>ic-collection-f-GREEN (ours: 24×30)</td></tr>
+          <tr><td class="g-num">96×96</td><td class="g-num">×4</td><td class="g-num">24×24</td><td class="g-num">1</td><td>Empty (an empty folder)</td></tr>
+          <tr><td class="g-num">240×240</td><td class="g-num">×4</td><td class="g-num">60×60</td><td class="g-num">1</td><td>missing_image, shown when a game has no art (ours: 42×34)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Palette icons</h3>
+    <p>These are the only menu pictures spruceOS loads that change with the palette: the button hint pills in the bottom bar. Each theme is built in 41 palettes, so they are painted with key colours instead of real ones. The build swaps each key for that palette's colour. Preview your work with the Gruvbox column.</p>
+    <div class="g-scroll">
+      <table>
+        <thead><tr><th>Role</th><th>Key colour (paint with)</th><th>Gruvbox preview</th><th>Used for</th></tr></thead>
+        <tbody>
+          <tr><td><strong>accent</strong></td><td><span class="g-chip"><i style="background:#FF00FF"></i>#FF00FF</span></td><td><span class="g-chip"><i style="background:#D65D0E"></i>#D65D0E</span></td><td>The pills</td></tr>
+          <tr><td><strong>accent highlight</strong></td><td><span class="g-chip"><i style="background:#FF80FF"></i>#FF80FF</span></td><td><span class="g-chip"><i style="background:#E49662"></i>#E49662</span></td><td>Top-edge light on the pills</td></tr>
+          <tr><td><strong>accent shadow</strong></td><td><span class="g-chip"><i style="background:#990099"></i>#990099</span></td><td><span class="g-chip"><i style="background:#803808"></i>#803808</span></td><td>Bottom-edge shadow on the pills</td></tr>
+          <tr><td><strong>ink</strong></td><td><span class="g-chip"><i style="background:#1B1530"></i>#1B1530</span></td><td><span class="g-chip"><i style="background:#1B1530"></i>#1B1530</span></td><td>Outlines and the pills' letters (fixed)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="g-note">Accent highlight and accent shadow come from the palette's accent colour (35% toward white, 40% toward black). Ink is the same in every palette.</p>
+    <ul>
+      <li>They are drawn on a grid of 2 px square cells. Draw at 1 px per cell, on the grid in the table.</li>
+      <li>Where the file is bigger than the grid, the leftover pixels are split evenly around your art, so you don't need to position it.</li>
+      <li>Each pill holds one button letter (A, B or X) in a 13×13 grid. <code>context-a</code>, <code>context-b</code> and <code>context-x</code> are the contextual bottom bar's; <code>icon-A-54</code> and <code>icon-B-54</code> are the A and B pills again, for the standard bottom bar.</li>
+      <li>Draw each icon once at this 640×480 grid. The theme's other screen sizes get scaled copies.</li>
+    </ul>
+    <div class="g-scroll">
+      <table>
+        <thead><tr><th>Icon</th><th>File at 640×480</th><th>Cell</th><th>Grid (cells)</th><th>Colours</th></tr></thead>
+        <tbody>
+          <tr><td class="g-num">context-a / b / x</td><td class="g-num">26×26</td><td class="g-num">2 px</td><td class="g-num"><strong>13×13</strong></td><td>accent, accent shades, ink</td></tr>
+          <tr><td class="g-num">icon-A-54 / icon-B-54</td><td class="g-num">26×26</td><td class="g-num">2 px</td><td class="g-num"><strong>13×13</strong></td><td>accent, accent shades, ink</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Collection box art</h3>
+    <p>Each collection (a tag such as RPGs, Shmups or Cave games) gets a retro game box. You draw only the picture on it.</p>
+    <ul>
+      <li>32×32 pixels, including the outline and a clear border.</li>
+      <li>Outline in <code>#181020</code>. Colours come from the 38-colour box palette (<code>box-palette.json</code> in the sync-roms repository). Send a PNG in those exact colours, or the same grid as a text file with one palette letter per pixel.</li>
+      <li>The picture must stand out against its box colour, which depends on the collection.</li>
+      <li>The box is 84×120 and is scaled ×4 to 336×480. The picture sits on it at ×2, so each of your pixels is 8×8 screen pixels on the largest box. The 210×300 and 140×200 copies are smooth downscales, so keep details at least 2 pixels wide to survive them.</li>
+      <li>The title, badge and box are drawn around the picture. Don't draw text.</li>
+    </ul>
+
+    <h3>Where the system icons show</h3>
+    <div class="g-rules">
+      <div class="g-rule"><h4>spruceOS</h4><p>The PNG is shown as it is at 640×480. On other screens the build makes copies scaled by 1.1×, 1.16×, 1.5× or 1.6× with nearest-neighbour, so on those screens some art pixels come out one screen pixel wider than others. Avoid 1-pixel details that carry meaning, such as a 1-pixel slot that has to read as a slot.</p></div>
+      <div class="g-rule"><h4>ES-DE</h4><p>The same 120×130 PNG. The selected system is drawn at 2× or 3× depending on the screen, so each art pixel is 8 or 12 screen pixels. The ones beside it are shown at half that size. All 101 ES-DE systems need a console and a controller.</p></div>
+    </div>
+
+    <h3>Drawing a system</h3>
+    <ol>
+      <li>Find photos of the real console (front and three-quarter views) and its standard controller. Note the body outline, the disc or cartridge slot, logo stripe, and the button layout and colours. Tell us which reference you used.</li>
+      <li>Draw the console the way it looks in the games and the box art, not a generic lookalike.</li>
+      <li>Check it at 1× and at 4× on black, next to two or three existing icons of similar hardware.</li>
+      <li>Then draw its controller in the same colours and at a similar size.</li>
+    </ol>
+  </section>
 </div>
 <!-- The page's data, filled in by `pixel_art_page.write`; empty in the repo. -->
 <script type="application/json" id="page-data">{}</script>

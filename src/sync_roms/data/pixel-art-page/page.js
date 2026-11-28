@@ -2,7 +2,7 @@
 (function () {
   const data = JSON.parse(document.getElementById("page-data").textContent || "{}");
   const sections = data.sections || [];
-  const BIG = { frames: 2, boxes: 2 }; // tile scale per section; sprites 3x
+  const BIG = { boxes: 2 }; // tile scale per section; sprites 3x
   const GRID = "rgba(128, 128, 128, .55)";
 
   function el(tag, cls, text) {
@@ -19,7 +19,7 @@
     home.hidden = false;
   }
   if (data.palette) {
-    document.getElementById("palette").textContent = "Frames are shown in the " + data.palette + " palette.";
+    document.getElementById("palette").textContent = "Palette icons are shown in the " + data.palette + " palette.";
   }
 
   // Sections and tiles
@@ -70,6 +70,20 @@
     box.append(h2, grid);
     main.append(box);
     grids.push({ scale: BIG[section.id] || 3, tiles });
+  }
+  const guideLink = el("a");
+  guideLink.href = "#artist-guide";
+  guideLink.append(el("span", "", "For pixel artists"));
+  jump.append(guideLink);
+
+  // The artists' brief: a swatch per sprite colour.
+  const swatches = document.getElementById("guide-swatches");
+  for (const [name, hex] of Object.entries(data.colors || {})) {
+    const chip = el("span", "g-chip");
+    const box = el("i");
+    box.style.background = hex;
+    chip.append(box, document.createTextNode(name + " " + hex));
+    swatches.append(chip);
   }
 
   // Each picture at an integer scale: the section's, or the largest that fits its tile. A picture wider than a tile
