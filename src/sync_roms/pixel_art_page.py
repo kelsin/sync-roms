@@ -1,4 +1,6 @@
-"""The pixel art page: every picture sync-roms draws for its spruceOS pixel themes, and its writer."""
+"""The pixel art page: every picture sync-roms draws for its spruceOS pixel themes and the systems only its ES-DE
+Pixel theme draws, and its writer."""
+import json
 import os
 import re
 import shutil
@@ -114,6 +116,29 @@ def _systems(img_dir, theme_dir):
     return sections
 
 
+def _esde_systems(img_dir):
+    """The systems only the ES-DE Pixel theme draws, as in its systems/consoles|controllers/<ES-DE name>.png."""
+    from .custom_themes.esde import systems as esde_systems
+    with open(os.path.join(store.REPO_DATA, "systems.json"), encoding="utf-8") as f:
+        names = {}
+        for entry in json.load(f):
+            names.setdefault(entry["folders"].get("esde"), entry["name"])
+    sections = []
+    for sid, title, kind, folders in (
+            ("esde-shared", "ES-DE system icons (both variants)", "CONSOLES", ("consoles", "controllers")),
+            ("esde-consoles", "ES-DE system icons (Consoles variant)", "CONSOLES", ("consoles",)),
+            ("esde-controllers", "ES-DE system icons (Controllers variant)", "CONTROLLERS", ("controllers",))):
+        w = _Writer(img_dir, sid)
+        items = []
+        for name, draws in esde_systems.EXTRA.items():
+            if (draws["CONSOLES"] is draws["CONTROLLERS"]) == (sid == "esde-shared"):
+                files = [{"path": f"systems/{d}/{name}.png", "size": list(build.ICON_SIZE), "theme": "Pixel ES-DE"}
+                         for d in folders]
+                items.append(w.item(names.get(name, name), name, draws[kind], files))
+        sections.append(_section(sid, title, items))
+    return sections
+
+
 def _regions(img_dir, theme_dir):
     w = _Writer(img_dir, "regions")
     items = []
@@ -142,6 +167,7 @@ def _ui(img_dir, theme_dir, sid, title, module, always=False):
 def sprite_sections(img_dir, theme_dir=None):
     """Write the sprite PNGs under img_dir (one folder per section) and describe them for the page."""
     return [_menu(img_dir, theme_dir), *_systems(img_dir, theme_dir), _regions(img_dir, theme_dir),
+            *_esde_systems(img_dir),
             _ui(img_dir, theme_dir, "apps", "App icons", app_icons, always=True),
             _ui(img_dir, theme_dir, "settings", "Settings icons", ui_settings),
             _ui(img_dir, theme_dir, "status", "Status and buttons", ui_status)]
