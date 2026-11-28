@@ -11,10 +11,13 @@ from dataclasses import dataclass, field
 
 from PIL import Image
 
+from . import recipe
 from .sprite import INK, _rgb
 
 
 def _mix(a, b, t):
+    if isinstance(a, recipe.Recipe):  # recording: keep the derivation (recipe.resolve does the arithmetic)
+        return recipe.Recipe(a, b, t)
     return tuple(round(a[i] + (b[i] - a[i]) * t) for i in range(3))
 
 
@@ -199,10 +202,11 @@ def sized(size, ratio):
     return int(size[0] * ratio), int(size[1] * ratio)
 
 
-def apply(theme_dir, palette, canvases=None):
+def apply(theme_dir, palette, canvases=None, recipes=None):
     """Redraw every registered frame present in the theme's skin*/ folders, and make the `create` ones where they are
     missing; returns the relative paths written. A dict
-    passed as `canvases` gets each drawn frame's Canvas under its relative path."""
+    passed as `canvases` gets each drawn frame's Canvas under its relative path; one passed as `recipes` gets the same
+    frame drawn again with recipe shades (cells hold Recipes, resolved per palette by recipe.resolve)."""
     colors = shades(palette)
     base_sizes = {name: _base_size(theme_dir, name.split("/", 1)[1]) for name in FRAMES}  # before skin/ is redrawn
     folders = [folder for folder in sorted(os.listdir(theme_dir))
@@ -246,6 +250,10 @@ def apply(theme_dir, palette, canvases=None):
             written.append(f"{folder}/{file}")
             if canvases is not None:
                 canvases[f"{folder}/{file}"] = canvas
+            if recipes is not None:
+                again = Canvas(size, cell, box, spec.background)
+                spec.draw(again, recipe.shades())
+                recipes[f"{folder}/{file}"] = again
     return written
 
 
