@@ -14,6 +14,7 @@ from test_frames import make_base as make_frames_base
 
 from sync_roms import pixel_art_page, store
 from sync_roms.custom_themes import palettes, theme_name
+from sync_roms.custom_themes.esde import systems as esde_systems
 from sync_roms.custom_themes.pixel import app_icons, build, frames, menu, ui_settings, ui_status, variants
 from sync_roms.custom_themes.pixel.sprite import render
 
@@ -34,12 +35,16 @@ class SpriteSectionsTest(unittest.TestCase):
         consoles, controllers = build.systems("CONSOLES"), build.systems("CONTROLLERS")
         shared = [i for i in consoles if consoles[i] is controllers[i]]
         own = [i for i in consoles if i not in shared]
+        esde_shared = [n for n, d in esde_systems.EXTRA.items() if d["CONSOLES"] is d["CONTROLLERS"]]
         counts = {
             "menu": len(menu.SPRITES) + 2,
             "systems-shared": len(shared),
             "systems-consoles": len(own),
             "systems-controllers": len(own),
             "regions": sum(len(r) * 2 for r in variants.VARIANTS.values()),
+            "esde-shared": len(esde_shared),
+            "esde-consoles": len(esde_systems.EXTRA) - len(esde_shared),
+            "esde-controllers": len(esde_systems.EXTRA) - len(esde_shared),
             "apps": len(app_icons.ICONS),
             "settings": len(ui_settings.ICONS),
             "status": len(ui_status.ICONS),
@@ -69,6 +74,25 @@ class SpriteSectionsTest(unittest.TestCase):
         status = self.by_id["status"]["items"][0]
         self.assertEqual(status["note"], "not in the SPRUCE base")
         self.assertNotIn("dim", status)
+
+    def test_esde_systems(self):
+        def paths(sid):
+            return {i["img"].rsplit("/", 1)[-1][:-4]: [f["path"] for f in i["files"]] for i in self.by_id[sid]["items"]}
+        shared, consoles, controllers = paths("esde-shared"), paths("esde-consoles"), paths("esde-controllers")
+        for name, draws in esde_systems.EXTRA.items():
+            if draws["CONSOLES"] is draws["CONTROLLERS"]:
+                self.assertEqual(shared[name], [f"systems/consoles/{name}.png", f"systems/controllers/{name}.png"])
+                self.assertNotIn(name, consoles)
+            else:
+                self.assertNotIn(name, shared)
+                self.assertEqual(consoles[name], [f"systems/consoles/{name}.png"])
+                self.assertEqual(controllers[name], [f"systems/controllers/{name}.png"])
+        items = [i for sid in ("esde-shared", "esde-consoles", "esde-controllers") for i in self.by_id[sid]["items"]]
+        self.assertTrue(all(f["theme"] == "Pixel ES-DE" and f["size"] == list(build.ICON_SIZE)
+                            for i in items for f in i["files"]))
+        self.assertTrue(all("dim" in i for i in items))
+        mark3 = next(i for i in self.by_id["esde-consoles"]["items"] if i["img"].endswith("/mark3.png"))
+        self.assertNotEqual(mark3["label"], "mark3")
 
     def test_image_paths_unique(self):
         paths = [p for s in self.sections for i in s["items"] for p in (i["img"], i.get("dim")) if p]
@@ -176,8 +200,8 @@ class BoxSectionTest(unittest.TestCase):
                                      src.convert("RGB").tobytes())
 
 
-SECTION_IDS = ["menu", "systems-shared", "systems-consoles", "systems-controllers", "regions", "apps", "settings",
-               "status", "frames", "boxes"]
+SECTION_IDS = ["menu", "systems-shared", "systems-consoles", "systems-controllers", "regions", "esde-shared",
+               "esde-consoles", "esde-controllers", "apps", "settings", "status", "frames", "boxes"]
 
 
 def page_data(html):
