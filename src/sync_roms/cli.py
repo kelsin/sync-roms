@@ -156,7 +156,7 @@ TOPICS = {
   sync-roms collections import FILE... [--dry-run] [--yes]
                                               add collections exported from a share page
   sync-roms collections page [--out FILE]     write an HTML page of your collections and open it
-  sync-roms collections publish [--user NAME] [--dry-run]
+  sync-roms collections publish [--user NAME] [--no-wait] [--dry-run]
                                               publish that page to https://sync-roms.games/
   sync-roms collections retitle [--dry-run]   set each game's title to its scraped name
   sync-roms collections share                 share that page on your tailnet with tailscale serve
@@ -199,9 +199,11 @@ TOPICS = {
   ~/.sync-roms/cache/pages/), in collections/<user>/ (your login name, or --user NAME: lowercase
   letters, digits, - and _), with the site's list of users at its root and the pixel art page
   (every picture of the spruceOS pixel themes) in pixel-art/, then commits and pushes when
-  anything changed. Only your own folder and pixel-art/ are replaced. When storage can't be
-  reached, or has no SPRUCE base theme, it publishes nothing. --dry-run lists what would change
-  and pushes nothing. Setting up the repo and domain: docs/github-pages.md.
+  anything changed, then waits until GitHub Pages has the page live (watching the deploy run with
+  gh when it is installed and logged in; --no-wait doesn't wait). Only your own folder and
+  pixel-art/ are replaced. When storage can't be reached, or has no SPRUCE base theme, it
+  publishes nothing. --dry-run lists what would change and pushes nothing.
+  Setting up the repo and domain: docs/github-pages.md.
 
   collections update runs collections share, then collections publish (with --user NAME when
   given), stopping at the first that fails. It has no --dry-run: run collections publish --dry-run.

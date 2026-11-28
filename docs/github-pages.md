@@ -66,4 +66,4 @@ Wait for GitHub to issue the certificate (the repo's Settings → Pages says whe
 - `https://sync-roms.games/collections/kelsin/` shows the page, with **← All users** back to the list.
 - `https://sync-roms.games/pixel-art/` shows the pixel art page, linked from the list.
 
-After that, run `sync-roms collections publish` whenever your collections change. It commits and pushes only when something changed.
+After that, run `sync-roms collections publish` whenever your collections change. It commits and pushes only when something changed, then waits until the page is live: with `gh` installed and logged in it watches the repo's `pages-build-deployment` run, then fetches the page until it is the one pushed (up to 10 minutes). `--no-wait` skips the wait.

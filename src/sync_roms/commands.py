@@ -1428,6 +1428,8 @@ def collections_publish_cmd(args):
         for line in pages_site.changes() if changed else []:
             print(ui.dim(f"  {line}"))
     else:
+        if changed and not args.no_wait:
+            pages_site.wait_live(user)
         print(f"Published {link}" if changed else f"Already up to date: {link}")
     return 0
 
@@ -1859,6 +1861,7 @@ def build_parser():
     p = colsub.add_parser("page", allow_abbrev=False); common(p, card=False); p.add_argument("--out", metavar="FILE")
     p.set_defaults(fn=collections_page_cmd)
     p = colsub.add_parser("publish", allow_abbrev=False); common(p, card=False); p.add_argument("--user", metavar="NAME")
+    p.add_argument("--no-wait", action="store_true")
     p.set_defaults(fn=collections_publish_cmd)
     p = colsub.add_parser("retitle", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=collections_retitle_cmd)
     p = colsub.add_parser("share", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=collections_share_cmd)
