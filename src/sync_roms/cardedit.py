@@ -534,7 +534,16 @@ def pick_theme_options(name, theme, manifest):
     settings = store.saved_card(name).get("theme_options")
     settings = dict(settings) if isinstance(settings, dict) else {}
     settings[theme] = new
-    store.update_card(name, theme_options=settings)
+    store.update_card(name, theme_options=settings)  # a fresh pick is pushed even when it equals the last written one
+    written = store.saved_card(name).get("theme_options_written")
+    if isinstance(written, dict) and theme in written:
+        written = {k: v for k, v in written.items() if k != theme}
+        cards = store.load_cards()
+        if written:
+            cards[name]["theme_options_written"] = written
+        else:
+            cards[name].pop("theme_options_written", None)
+        store.write_cards(cards)
 
 
 def toggle_one_theme(name):

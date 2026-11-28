@@ -459,6 +459,16 @@ class Flow(DataDir):
         self.assertEqual(pick.call_args.args[1], "Mono")
         self.assertNotIn("spruce_theme", self.read("cards.json")["c"])
 
+    def test_pick_theme_options_clears_what_was_written_for_the_theme(self):
+        manifest = {"variants": {"list": [{"id": "a", "name": "A"}, {"id": "b", "name": "B"}]}}
+        for written, left in (({"T": {"variant": "a"}}, None), ({"T": {"variant": "a"}, "U": {"variant": "b"}}, {"U": {"variant": "b"}})):
+            self.card(layout="spruce", theme_options={"T": {"variant": "a"}}, theme_options_written=written)
+            with mock.patch.object(picker, "filter_list", return_value=0):
+                cardedit.pick_theme_options("c", "T", manifest)
+            card = self.read("cards.json")["c"]
+            self.assertEqual(card["theme_options"]["T"], {"variant": "a"})
+            self.assertEqual(card.get("theme_options_written"), left)
+
     def test_settings_menu_toggles_one_theme(self):
         self.card(layout="spruce")
         seen = []

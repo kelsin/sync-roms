@@ -104,6 +104,20 @@ class TemplateTests(unittest.TestCase):
         r = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, stdin=subprocess.DEVNULL)
         self.assertEqual(r.returncode, 0, r.stderr)
         self.assertEqual(r.stdout.split()[:2], ["2", "1"])
+        _, _, out = templates.render(data, {"bar": "#434C5E"})
+        self.assertEqual(r.stdout.split()[2], out.hex())
+
+    def test_mix_amount_must_be_whole_thousandths(self):
+        for t in (.3504, -.1, 66.0):
+            with self.assertRaises(ValueError):
+                templates.encode(1, 1, [(Recipe("bar", WHITE, t), 255)])
+        templates.encode(1, 1, [(Recipe("bar", WHITE, .35), 255)])
+
+    def test_truncated_template_is_a_value_error(self):
+        data = templates.encode(4, 4, [(Recipe("bar", WHITE, .35), 255)] * 16)
+        for cut in (6, 12, len(data) - 3):
+            with self.assertRaises(ValueError):
+                templates.decode(data[:cut])
 
 
 if __name__ == "__main__":

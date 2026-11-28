@@ -15,6 +15,7 @@ PALETTES = False
 OPTIONS = True
 DEFAULT_VARIANT = "consoles"
 DEFAULT_PALETTE = "Gruvbox"
+assert "#%02X%02X%02X" % recolor.BAR_GRAY == palettes.get(DEFAULT_PALETTE).bar.upper()  # the bar templates are read from the default build
 VARIANTS = {"consoles": ("Consoles", "CONSOLES"), "controllers": ("Controllers", "CONTROLLERS")}
 DESCRIPTION = "Pixel-art consoles or controllers on black, in any palette."
 

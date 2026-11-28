@@ -31,6 +31,8 @@ class _Table:
         """Index of the entry for recipe `r` at `alpha`; its nested sources are added first."""
         from .pixel import recipe
         t = round(r.t * 1000)
+        if abs(r.t * 1000 - t) > 1e-9 or not 0 <= t <= 65535:
+            raise ValueError(f"mix amount {r.t} isn't a whole number of thousandths in 0..65.535")
         if isinstance(r.src, recipe.Recipe):
             src = self.recipe(r.src, 255)
             code, rgb = _target(r.target)
@@ -62,16 +64,20 @@ def encode(width, height, pixels):
 
 
 def decode(data):
-    """(width, height, entries, indexes): entries are tuples of the ENTRY fields, indexes one per pixel."""
+    """(width, height, entries, indexes): entries are tuples of the ENTRY fields, indexes one per pixel.
+    ValueError when the data isn't a PUT2 template or is truncated or corrupt."""
     if data[:4] != MAGIC:
         raise ValueError("not a PUT2 template")
-    width, height, count, flags = HEADER.unpack_from(data, 4)
-    pos = 4 + HEADER.size
-    entries = [ENTRY.unpack_from(data, pos + i * ENTRY.size) for i in range(count)]
-    raw = zlib.decompress(data[pos + count * ENTRY.size:])
-    wide = flags & 1
-    n = width * height
-    return width, height, entries, struct.unpack(f"<{n}{'H' if wide else 'B'}", raw[:n * (2 if wide else 1)])
+    try:
+        width, height, count, flags = HEADER.unpack_from(data, 4)
+        pos = 4 + HEADER.size
+        entries = [ENTRY.unpack_from(data, pos + i * ENTRY.size) for i in range(count)]
+        raw = zlib.decompress(data[pos + count * ENTRY.size:])
+        wide = flags & 1
+        n = width * height
+        return width, height, entries, struct.unpack(f"<{n}{'H' if wide else 'B'}", raw[:n * (2 if wide else 1)])
+    except (struct.error, zlib.error) as e:
+        raise ValueError(f"truncated or corrupt PUT2 template: {e}") from e
 
 
 def _mix(a, b, t):
