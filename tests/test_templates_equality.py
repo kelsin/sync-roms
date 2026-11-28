@@ -120,23 +120,29 @@ class EqualityTests(unittest.TestCase):
 
     def test_bar_templates_match_every_palette(self):
         with tempfile.TemporaryDirectory() as tmp:
-            src = os.path.join(tmp, "src.png")
-            img = Image.new("RGBA", (6, 4), (0, 0, 0, 0))
-            for x in range(6):
-                img.putpixel((x, 0), recolor.BAR_GRAY + (255,))
-                img.putpixel((x, 1), recolor.BAR_GRAY + (100,))
-                img.putpixel((x, 2), (10, 20, 30, 255))
-            img.save(src)
-            data = templates.from_bar_image(src)
-            self.assertIsNotNone(data)
+            first = os.path.join(tmp, "first")
+            make_base(first)
+            data = {}
+            for folder in sorted(os.listdir(first)):
+                for dirpath, _, files in os.walk(os.path.join(first, folder)):
+                    for file in sorted(files):
+                        path = os.path.join(dirpath, file)
+                        if folder.startswith("skin") and file.endswith(".png"):
+                            tpl = templates.from_bar_image(path)
+                            if tpl is not None:
+                                data[os.path.relpath(path, first)] = tpl
+            self.assertTrue(data)
+            # the base's soft edges are semi-transparent bar gray: that case is covered too
+            self.assertTrue(any(Image.open(os.path.join(first, k)).convert("RGBA").getextrema()[3][0] < 255
+                                for k in data))
             for name in palettes.names():
                 p = palettes.get(name)
-                theme = os.path.join(tmp, "t", "skin")
-                os.makedirs(theme, exist_ok=True)
-                out = os.path.join(theme, "x.png")
-                img.save(out)
-                recolor.recolor_bar(os.path.dirname(theme), p)
-                self.assertEqual(templates.render(data, colors_of(p))[2], rgba(out)[1], name)
+                theme = os.path.join(tmp, "t")
+                make_base(theme)
+                recolor.recolor_bar(theme, p)
+                for k, tpl in data.items():
+                    self.assertEqual(templates.render(tpl, colors_of(p))[2], rgba(os.path.join(theme, k))[1], f"{name} {k}")
+                shutil.rmtree(theme)
 
 
 if __name__ == "__main__":

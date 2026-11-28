@@ -126,9 +126,11 @@ def from_bar_image(path):
     from PIL import Image
     from .pixel.recipe import Recipe
     from .pixel.recolor import BAR_GRAY
-    img = Image.open(path).convert("RGBA")
+    with Image.open(path) as im:
+        img = im.convert("RGBA")
+    raw = img.tobytes()
     pixels, found = [], False
-    for r, g, b, a in img.getdata():
+    for r, g, b, a in zip(raw[0::4], raw[1::4], raw[2::4], raw[3::4]):
         if (r, g, b) == BAR_GRAY:
             found = True
             pixels.append((Recipe("bar"), a))
