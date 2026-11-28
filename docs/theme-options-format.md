@@ -85,8 +85,8 @@ rest   zlib-compressed index per pixel (u8, or u16 when flags bit0)
 1. Copy `options/variants/<selected>/**` over the top level.
 2. Render every `options/templates/**.tpl` with `selected.colors` and write each one atomically.
 3. Patch `configKeys` in every `config*.json`, and `igmKeys` in `igm.json` if present.
-4. Write `applied.json` = `selected.json` last, so an interrupted apply re-runs.
-5. Delete PyUI's own resized copies (see Amendment 7).
+4. Delete PyUI's own resized copies (see Amendment 7).
+5. Write `applied.json` = `selected.json` last, so an interrupted apply re-runs.
 6. Restart PyUI.
 
 ## Amendments to contract v1
@@ -99,4 +99,4 @@ Each is **Amended** relative to the contract above and wins over it.
 4. **Amended: `igmKeys` values** are `{"role": "<id>", "suffix": "FF"}` objects (igm.json colours are 8-digit `#RRGGBBAA`); `configKeys` values stay plain role ids.
 5. **Amended: shipped `applied.json` re-apply after a theme update**: when sync-roms copies a changed `options/` file to a card it also copies storage's top-level files and `applied.json` (the defaults), so the device re-applies the user's `selected.json` on next boot.
 6. **Amended: path syntax of `configKeys`/`igmKeys`** (sync-roms' `recolor.set_path`): keys are dot-separated. `name[field=value]` selects the list `name` and applies the rest of the path to every item that is an object whose `field` equals the string `value` (items that aren't objects or don't match are skipped). The last key is set whenever its parent object exists, created if it is missing; nothing else is ever created, and a missing parent (key, list or non-object) is skipped without error.
-7. **Amended: PyUI's resized copies**: PyUI makes `config_<W>x<H>.json`, `skin_<W>x<H>/` and `icons_<W>x<H>/` at the top level once and never remakes them, so copies it made keep the old colours. After applying (before restarting PyUI), delete each such top-level entry for which `options/templates/skin_<W>x<H>/` does not exist; PyUI remakes it from the freshly applied files. Every `skin_<W>x<H>/` the Pixel theme ships has templates there, so shipped copies are kept; a shipped `icons_<W>x<H>/` or `config_<W>x<H>.json` of a size with no templates would also be deleted, which is harmless because PyUI remakes it from the applied files.
+7. **Amended: PyUI's resized copies**: PyUI makes `config_<W>x<H>.json`, `skin_<W>x<H>/` and `icons_<W>x<H>/` at the top level once and never remakes them, so copies it made keep the old colours. A size `<W>x<H>` is **shipped** when `options/templates/skin_<W>x<H>/`, or `skin_<W>x<H>/`, `icons_<W>x<H>/` or `config_<W>x<H>.json` under any `options/variants/<id>/`, exists. After the templates and keys are applied and before `applied.json` is written (step 4), delete the top-level `config_<W>x<H>.json`, `skin_<W>x<H>/` and `icons_<W>x<H>/` of every size that isn't shipped; PyUI remakes them from the freshly applied `config.json`, `skin/` and `icons/`, scaled. A theme that ships its own copies for a size must therefore put at least one file of that size under `options/templates/` or `options/variants/`: otherwise the device treats them as PyUI's and deletes them, and any art or setting tuned for that size is lost to PyUI's rescale. Every size the Pixel theme ships has templates under `options/templates/skin_<W>x<H>/`.
