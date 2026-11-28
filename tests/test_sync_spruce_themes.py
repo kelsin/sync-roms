@@ -313,5 +313,71 @@ class SyncThemes(helpers.StorageDir):
         self.assertNotIn("spruce_themes_installed", self.saved())
 
 
+class OptionsThemeTodo(helpers.StorageDir):
+    """spruce_themes.todo on a theme T whose storage folder has options/manifest.json: the device renders its colours."""
+
+    FILES = {"options/manifest.json": b"{}", "options/templates/skin/bar.png.tpl": b"tpl",
+             "options/variants/a/icons/x.png": b"vx", "options/applied.json": b"{}",
+             "skin/bar.png": b"bar", "icons/x.png": b"ix", "config.json": b'{"c": 1}', "igm.json": b'{"i": 1}',
+             "icons/plain.png": b"plain"}
+
+    def setUp(self):
+        super().setUp()
+        self.card = os.path.join(self.tmp.name, "card")
+        self.rels = dict(self.FILES)
+        for rel, data in self.rels.items():
+            self.put(f"{PREFIX}T/{rel}", data)
+            self.on_card(rel, data)
+
+    def on_card(self, rel, data):
+        path = os.path.join(self.card, "Themes", "T", rel)
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "wb") as f:
+            f.write(data)
+
+    def jobs(self):
+        return [(f"{PREFIX}T/{rel}", os.path.join(self.card, "Themes", "T", rel), len(data))
+                for rel, data in self.rels.items()]
+
+    def todo_rels(self):
+        return {key[len(PREFIX + "T/"):] for key, _, _ in spruce_themes.todo(self.jobs())}
+
+    def test_generated_set(self):
+        self.assertEqual(spruce_themes.generated(set(self.rels)),
+                         {"icons/x.png", "skin/bar.png", "config.json", "igm.json", "options/applied.json"})
+        self.assertEqual(spruce_themes.generated(set(self.rels) - {"options/manifest.json"}), set())
+
+    def test_options_theme_keeps_generated_files(self):
+        self.on_card("skin/bar.png", b"rendered!")
+        self.on_card("config.json", b'{"c": 2}')
+        self.on_card("options/applied.json", b'{"x": 1}')
+        self.on_card("icons/plain.png", b"xx")
+        self.assertEqual(self.todo_rels(), {"icons/plain.png"})
+
+    def test_options_change_refreshes_everything(self):
+        self.on_card("options/templates/skin/bar.png.tpl", b"older")
+        self.on_card("skin/bar.png", b"rendered!")
+        self.on_card("config.json", b'{"c": 2}')
+        self.on_card("options/applied.json", b'{"x": 1}')
+        self.assertEqual(self.todo_rels(), {"options/templates/skin/bar.png.tpl", "skin/bar.png", "config.json",
+                                            "options/applied.json"})
+
+    def test_missing_generated_file_is_copied(self):
+        os.remove(os.path.join(self.card, "Themes", "T", "skin", "bar.png"))
+        self.assertEqual(self.todo_rels(), {"skin/bar.png"})
+
+    def test_selected_json_never_touched(self):
+        self.on_card("options/selected.json", b'{"s": 1}')
+        self.on_card("options/templates/skin/bar.png.tpl", b"older")
+        self.assertNotIn("options/selected.json", self.todo_rels())
+        self.assertTrue(os.path.exists(os.path.join(self.card, "Themes", "T", "options", "selected.json")))
+
+    def test_theme_without_manifest_unchanged(self):
+        del self.rels["options/manifest.json"]
+        self.on_card("config.json", b'{"c": 2}')
+        self.on_card("skin/bar.png", b"rendered!")
+        self.assertEqual(self.todo_rels(), {"config.json", "skin/bar.png"})
+
+
 if __name__ == "__main__":
     unittest.main()

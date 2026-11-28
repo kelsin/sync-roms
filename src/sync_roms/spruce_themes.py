@@ -334,23 +334,72 @@ def sorted_names(names):
     return sorted(set(names), key=lambda n: (n.lower(), n))
 
 
+def _out_of_date(key, path, size):
+    """Whether the card's file differs from storage's: a config*.json or igm.json by content, since a changed setting
+    or colour can keep the same size, any other file by size."""
+    name = os.path.basename(path).lower()
+    if name == "igm.json" or name.startswith("config") and name.endswith(".json"):
+        try:
+            if cardfs.read(path) == s3.get_bytes(key):
+                return False
+        except (OSError, ValueError, *s3.ERRORS):
+            pass
+        return True
+    return not downloads.is_current(path, size)
+
+
+OPTIONS_MANIFEST = "options/manifest.json"
+
+
+def generated(rels):
+    """The files of a theme (its storage-relative paths) that its device writes itself: for a theme with
+    options/manifest.json, the variant and template targets, every top-level config*.json, igm.json and
+    options/applied.json; else none."""
+    if OPTIONS_MANIFEST not in rels:
+        return set()
+    result = {"igm.json", "options/applied.json"}
+    for rel in rels:
+        parts = rel.split("/")
+        if rel.startswith("options/variants/") and len(parts) > 3:
+            result.add("/".join(parts[3:]))
+        elif rel.startswith("options/templates/") and rel.endswith(".tpl"):
+            result.add(rel[len("options/templates/"):-len(".tpl")])
+        elif len(parts) == 1 and rel.startswith("config") and rel.endswith(".json"):
+            result.add(rel)
+    return result
+
+
+def _theme_rel(key):
+    name, _, rel = key[len(runtime.SPRUCE_THEMES_PREFIX):].partition("/")
+    return name, rel
+
+
 def todo(jobs):
-    """The jobs whose card file is out of date. A file a spruce fix already made right is left alone; a config*.json
-    or igm.json is compared by content, since a changed setting or colour can keep the same size."""
+    """The jobs whose card file is out of date. A file a spruce fix already made right is left alone. For a theme
+    with options/manifest.json the device renders its colours: while no file under options/ (besides applied.json)
+    is out of date, the generated files that exist on the card are left as the device made them; otherwise
+    everything out of date is copied, so the device applies the user's choice again. options/selected.json is
+    never a job."""
+    jobs = [j for j in jobs if _theme_rel(j[0])[1] != "options/selected.json"]
+    rels = {}
+    for key, _, _ in jobs:
+        name, rel = _theme_rel(key)
+        rels.setdefault(name, set()).add(rel)
+    skip = {}
+    for name, theme_rels in rels.items():
+        skip[name] = generated(theme_rels)
+    stale = {}
     result = []
     for key, path, size in jobs:
         if spruce_fixes.keeps(path):
             continue
-        name = os.path.basename(path).lower()
-        if name == "igm.json" or name.startswith("config") and name.endswith(".json"):
-            try:
-                if cardfs.read(path) == s3.get_bytes(key):
-                    continue
-            except (OSError, ValueError, *s3.ERRORS):
-                pass
-            result.append((key, path, size))
-        elif not downloads.is_current(path, size):
-            result.append((key, path, size))
+        if _out_of_date(key, path, size):
+            stale.setdefault(_theme_rel(key)[0], []).append((key, path, size))
+    for name, items in stale.items():
+        keep_generated = skip[name] and not any(
+            _theme_rel(k)[1].startswith("options/") and _theme_rel(k)[1] != "options/applied.json" for k, _, _ in items)
+        result += [j for j in items if not (keep_generated and _theme_rel(j[0])[1] in skip[name]
+                                            and os.path.exists(j[1]))]
     return result
 
 
