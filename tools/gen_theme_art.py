@@ -2216,6 +2216,20 @@ def transformers(p):  # a semi-truck cab from the front: grille, twin exhaust st
     p.rr(-44, 28, 44, 37, 3, opaque=True)
 
 
+def wild_arms(p):  # a revolver's cylinder from the front: a hammer spur above, six chambers, a loaded one with a primer
+    cy = 8
+    p.pg([(-9, -26), (-5, -48), (14, -48), (9, -26)], 3, opaque=True)
+    p.o(0, cy, 36, opaque=True)
+    for k, a in enumerate(range(-90, 270, 60)):
+        x, y = 21 * math.cos(math.radians(a)), cy + 21 * math.sin(math.radians(a))
+        p.o(x, y, 7.5)
+        if k == 1:
+            p.o(x, y, 2.2)
+    p.o(0, cy, 5)
+    p.sparkle(-36, -38, 6)
+    p.sparkle(40, -30, 5)
+
+
 def wizardry(p):  # a tall wizard's hat: its tip curled over, a buckled band and stars
     p.o(0, 30, 50, 12)
     cone = (spline([(-26, 28), (-19, 4), (-11, -22), (-1, -40), (12, -50), (26, -50), (36, -42), (38, -32)])
@@ -2436,6 +2450,7 @@ ART = {
     "tomb-raider": (tomb_raider, (196, 150, 90), -6, 1.0, (-16, -34)),
     "tony-hawk": (tony_hawk, (226, 140, 36), -20, 1.08, (0, 0)),
     "transformers": (transformers, (178, 52, 64), -5, 0.95, (-30, 0)),
+    "wild-arms": (wild_arms, (190, 130, 70), -6, 1.0, (-14, 0)),
     "wizardry": (wizardry, (78, 62, 150), -6, 1.0, (-10, 0)),
     "worms": (worms, (100, 150, 40), -6, 1.0, (-22, 0)),
     "wwe": (wwe, (210, 50, 20), -4, 1.0, (-6, 0)),
