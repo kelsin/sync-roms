@@ -129,10 +129,13 @@ SPECS = {
 }
 
 
-def build_theme(base_dir, out_dir, name, kind, palette, canvases=None):
+def build_theme(base_dir, out_dir, name, kind, palette, canvases=None, recipes=None, description=None, drawn=None):
     """Write <out_dir>/<name>/, a copy of base_dir with the pixel-art overlays (kind: CONSOLES or CONTROLLERS) in the
-    palette's colors."""
+    palette's colors. `canvases` and `recipes` go to frames.apply; `description` replaces the kind's; a set passed as
+    `drawn` gets the paths of the files the build drew in icons/ and skin/ (their pre-scaled copies are redone too)."""
     spec = dict(SPECS[kind], systems=systems(kind))
+    if description is not None:
+        spec["description"] = description
     dest = os.path.join(out_dir, name)
     if os.path.exists(dest):
         shutil.rmtree(dest)
@@ -170,7 +173,7 @@ def build_theme(base_dir, out_dir, name, kind, palette, canvases=None):
     skin = os.path.join(dest, "skin")
     for folder in (skin, os.path.join(dest, "icons", "sel")):
         os.makedirs(folder, exist_ok=True)
-    drawn = set()
+    drawn = set() if drawn is None else drawn
     sprites = dict(menu.SPRITES, game=spec["game"])
     for key, draw in sprites.items():
         sprite = draw()
@@ -196,7 +199,7 @@ def build_theme(base_dir, out_dir, name, kind, palette, canvases=None):
             scale = max(1, min(4, size[0] // (sprite.w + 2), size[1] // (sprite.h + 2)))
             place(render(sprite, scale, "sel"), size, (size[0] / 2, size[1] / 2)).save(target)
             drawn.add(rel)
-    native = set(frames.apply(dest, palette, canvases))  # last among the skin steps, after the recolor and blacken
+    native = set(frames.apply(dest, palette, canvases, recipes))  # last among the skin steps, after the recolor and blacken
     resize_variants(dest, drawn, native)
     preview(dest, kind, palette)
     with open(os.path.join(dest, "CREDITS.txt"), "a") as f:

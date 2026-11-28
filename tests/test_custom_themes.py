@@ -114,7 +114,7 @@ class Build(unittest.TestCase):
         self.base = os.path.join(self.tmp.name, "base")
 
     def test_registry_styles(self):
-        self.assertEqual(custom_themes.styles(), ["Pixel Consoles", "Pixel Controllers", "ToTK - James", "ToTK - Kelsin"])
+        self.assertEqual(custom_themes.styles(), ["Pixel", "Pixel Consoles", "Pixel Controllers", "ToTK - James", "ToTK - Kelsin"])
         for style, module in custom_themes.STYLES.items():
             self.assertEqual(module.BASE, "ToTK" if style.startswith("ToTK") else "SPRUCE")
 
@@ -620,7 +620,7 @@ class PaletteFree(CachedBuilds, helpers.StorageDir):
         with mock.patch.object(totk_james, "build", wraps=totk_james.build) as build:
             built = custom_themes.build(None, [GRUVBOX, palettes.get("Candy")], self.out)
         self.assertEqual(sorted(built), [
-            "Pixel Consoles - Candy", "Pixel Consoles - Gruvbox",
+            "Pixel", "Pixel Consoles - Candy", "Pixel Consoles - Gruvbox",
             "Pixel Controllers - Candy", "Pixel Controllers - Gruvbox", "ToTK - James", "ToTK - Kelsin"])
         build.assert_called_once()
 
