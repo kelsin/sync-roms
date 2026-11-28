@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.16.0](https://github.com/kelsin/sync-roms/compare/v4.15.0...v4.16.0) (2026-11-28)
+
+
+### :video_game: Features
+
+* **art:** add wild arms collection art ([#684](https://github.com/kelsin/sync-roms/issues/684)) ([de10f2d](https://github.com/kelsin/sync-roms/commit/de10f2d29e8d8913b4f4d968f0ae752239f6a0cc))
+
 ## [4.15.0](https://github.com/kelsin/sync-roms/compare/v4.14.0...v4.15.0) (2026-11-28)
 
 
