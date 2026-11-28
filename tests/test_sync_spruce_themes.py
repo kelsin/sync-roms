@@ -367,10 +367,24 @@ class OptionsThemeTodo(helpers.StorageDir):
         self.assertEqual(self.todo_rels(), {"skin/bar.png"})
 
     def test_selected_json_never_touched(self):
+        self.rels["options/selected.json"] = b'{"s": 2222}'
+        self.put(f"{PREFIX}T/options/selected.json", self.rels["options/selected.json"])
         self.on_card("options/selected.json", b'{"s": 1}')
         self.on_card("options/templates/skin/bar.png.tpl", b"older")
         self.assertNotIn("options/selected.json", self.todo_rels())
         self.assertTrue(os.path.exists(os.path.join(self.card, "Themes", "T", "options", "selected.json")))
+
+    def test_same_size_applied_json_is_copied_in_a_refresh(self):
+        self.rels["options/applied.json"] = b'{"p":"Gruvbox"}'
+        self.put(f"{PREFIX}T/options/applied.json", self.rels["options/applied.json"])
+        self.on_card("options/applied.json", b'{"p":"Dracula"}')
+        self.on_card("options/templates/skin/bar.png.tpl", b"older")
+        self.assertIn("options/applied.json", self.todo_rels())
+
+    def test_same_size_manifest_change_refreshes(self):
+        self.on_card("options/manifest.json", b"{ }")
+        self.on_card("skin/bar.png", b"rendered!")
+        self.assertEqual(self.todo_rels(), {"options/manifest.json", "skin/bar.png"})
 
     def test_theme_without_manifest_unchanged(self):
         del self.rels["options/manifest.json"]

@@ -336,9 +336,10 @@ def sorted_names(names):
 
 def _out_of_date(key, path, size):
     """Whether the card's file differs from storage's: a config*.json or igm.json by content, since a changed setting
-    or colour can keep the same size, any other file by size."""
+    or colour can keep the same size (so are options/manifest.json and applied.json), any other file by size."""
     name = os.path.basename(path).lower()
-    if name == "igm.json" or name.startswith("config") and name.endswith(".json"):
+    by_content = os.path.join("options", name) in path.lower() and name in ("manifest.json", "applied.json")
+    if by_content or name == "igm.json" or name.startswith("config") and name.endswith(".json"):
         try:
             if cardfs.read(path) == s3.get_bytes(key):
                 return False
@@ -389,17 +390,17 @@ def todo(jobs):
     for name, theme_rels in rels.items():
         skip[name] = generated(theme_rels)
     stale = {}
-    result = []
     for key, path, size in jobs:
         if spruce_fixes.keeps(path):
             continue
         if _out_of_date(key, path, size):
-            stale.setdefault(_theme_rel(key)[0], []).append((key, path, size))
+            name, rel = _theme_rel(key)
+            stale.setdefault(name, []).append((rel, (key, path, size)))
+    result = []
     for name, items in stale.items():
         keep_generated = skip[name] and not any(
-            _theme_rel(k)[1].startswith("options/") and _theme_rel(k)[1] != "options/applied.json" for k, _, _ in items)
-        result += [j for j in items if not (keep_generated and _theme_rel(j[0])[1] in skip[name]
-                                            and os.path.exists(j[1]))]
+            rel.startswith("options/") and rel != "options/applied.json" for rel, _ in items)
+        result += [job for rel, job in items if not (keep_generated and rel in skip[name] and os.path.exists(job[1]))]
     return result
 
 
