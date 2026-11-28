@@ -6,9 +6,9 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 
 from .. import downloads, inventory, runtime, s3, store
-from . import manifest, pixel_consoles, pixel_controllers, totk_james, totk_kelsin
+from . import manifest, pixel_consoles, pixel_controllers, pixel_options, totk_james, totk_kelsin
 
-STYLES = {module.STYLE: module for module in (pixel_consoles, pixel_controllers, totk_james, totk_kelsin)}
+STYLES = {module.STYLE: module for module in (pixel_consoles, pixel_controllers, pixel_options, totk_james, totk_kelsin)}
 
 
 def styles():

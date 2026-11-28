@@ -14,8 +14,8 @@ import unittest
 from concurrent.futures import ThreadPoolExecutor
 
 TESTS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tests")
-SHARDS = {"test_picker_session": 5, "test_custom_themes": 4, "test_theme_palettes": 3, "test_edit": 2}
-SOLO = ["test_frames", "test_cardedit", "test_s3", "test_flash", "test_imports", "test_scrape_run"]
+SHARDS = {"test_picker_session": 5, "test_custom_themes": 4, "test_theme_palettes": 3, "test_templates_equality": 3, "test_edit": 2}
+SOLO = ["test_frames", "test_pixel_options", "test_cardedit", "test_s3", "test_flash", "test_imports", "test_scrape_run"]
 BATCH = 6
 
 

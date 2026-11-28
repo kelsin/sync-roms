@@ -87,7 +87,7 @@ class Palettes(unittest.TestCase):
         self.assertEqual(custom_themes.theme_name("Pixel Consoles", "Gruvbox"), "Pixel Consoles - Gruvbox")
 
     def test_styles(self):
-        self.assertEqual(custom_themes.styles(), ["Pixel Consoles", "Pixel Controllers", "ToTK - James", "ToTK - Kelsin"])
+        self.assertEqual(custom_themes.styles(), ["Pixel", "Pixel Consoles", "Pixel Controllers", "ToTK - James", "ToTK - Kelsin"])
         for style, module in custom_themes.STYLES.items():
             self.assertEqual((module.STYLE, module.BASE), (style, "ToTK" if style.startswith("ToTK") else "SPRUCE"))
 
@@ -220,7 +220,7 @@ class Command(helpers.StorageDir):
 
     def test_duplicate_palette_flags_collapse(self):
         self.assertEqual(commands.run(["themes", "build", "--palette", "Arcade", "--palette", "Arcade", "--out", self.out]), 0)
-        self.assertEqual(sorted(os.listdir(self.out)), ["Pixel Consoles - Arcade", "Pixel Controllers - Arcade", "ToTK - James", "ToTK - Kelsin"])
+        self.assertEqual(sorted(os.listdir(self.out)), ["Pixel", "Pixel Consoles - Arcade", "Pixel Controllers - Arcade", "ToTK - James", "ToTK - Kelsin"])
 
     def test_palette_order_kept(self):
         with mock.patch.object(custom_themes, "build", return_value={}) as build:
@@ -335,7 +335,7 @@ class Publish(helpers.StorageDir):
         with contextlib.redirect_stdout(out):
             custom_themes.publish(None, chosen, dry_run=True)
         lines = out.getvalue().splitlines()
-        names = [custom_themes.theme_name(s, p.name) for s in custom_themes.styles()[:2] for p in chosen]
+        names = [custom_themes.theme_name(s, p.name) for s in ("Pixel Consoles", "Pixel Controllers") for p in chosen]
         self.assertGreater(len(names), custom_themes.COMPACT_OVER)
         themed = [line for line in lines if line.startswith("🎨 Pixel ")]
         self.assertEqual(sorted(line.split(":")[0][2:] for line in themed), sorted(names))
@@ -350,7 +350,7 @@ class Publish(helpers.StorageDir):
 
 class Names(unittest.TestCase):
     def test_theme_names_never_collide_with_old_folders(self):
-        names = {custom_themes.theme_name(s, p) for s in custom_themes.styles()[:2] for p in palettes.names()}
+        names = {custom_themes.theme_name(s, p) for s in ("Pixel Consoles", "Pixel Controllers") for p in palettes.names()}
         self.assertEqual(len(names), 82)
         self.assertFalse(names & set(custom_themes.styles()))
         self.assertTrue(all(re.fullmatch(r"Pixel (Consoles|Controllers) - .+", n) for n in names))
