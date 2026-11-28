@@ -17,6 +17,7 @@ from sync_roms import commands, custom_themes, downloads, inventory, runtime, s3
 from sync_roms.custom_themes import palettes  # noqa: E402
 from sync_roms.custom_themes.pixel import build as pixel_build  # noqa: E402
 from sync_roms.custom_themes.pixel import ids as pixel_ids  # noqa: E402
+from sync_roms.custom_themes.pixel import recolor  # noqa: E402
 
 GRUVBOX = palettes.get("Gruvbox")
 PAL = [GRUVBOX]
@@ -175,6 +176,25 @@ class Build(unittest.TestCase):
         dest = custom_themes.STYLES["Pixel Controllers"].build(self.base, os.path.join(self.tmp.name, "out"), GRUVBOX)
         with open(os.path.join(dest, "config.json")) as f:
             self.assertIs(json.load(f)["collectionsEnabled"], True)
+
+    def test_build_writes_igm_json(self):
+        make_base(self.base)
+        dest = custom_themes.STYLES["Pixel Consoles"].build(self.base, os.path.join(self.tmp.name, "out"), GRUVBOX)
+        with open(os.path.join(dest, "igm.json")) as f:
+            igm = json.loads(f.read())
+        self.assertEqual(igm, recolor.igm_config(GRUVBOX, pixel_build.FONT))
+        self.assertEqual(igm["font"]["path"], pixel_build.FONT)
+        self.assertTrue(os.path.isfile(os.path.join(dest, igm["font"]["path"])))
+
+    def test_igm_config_colors_from_palette(self):
+        fields = {"selection": "bar", "accent": "accent", "title_line": "dim", "text": "list", "text_selected": "selected",
+                  "text_title": "text", "battery": "text"}
+        for palette in palettes.PALETTES.values():
+            colors = recolor.igm_config(palette, "f.ttf")["colors"]
+            for key, value in colors.items():
+                self.assertRegex(value, r"^#[0-9A-Fa-f]{8}$", (palette.name, key))
+            for key, field in fields.items():
+                self.assertEqual(colors[key], getattr(palette, field) + "FF", (palette.name, key))
 
     def test_set_font_rounds_each_config_down_to_multiples_of_12(self):
         config = {"list": {"size": 38, "font": "base.ttf"}, "grid": {"grid1x4": 28, "grid3x4": 18}, "title": {"size": 5},
