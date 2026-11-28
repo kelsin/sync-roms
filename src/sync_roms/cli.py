@@ -198,7 +198,7 @@ TOPICS = {
   pages_repo setting, default git@github.com:kelsin/sync-roms.games.git; kept in
   ~/.sync-roms/cache/pages/), in collections/<user>/ (your login name, or --user NAME: lowercase
   letters, digits, - and _), with the site's list of users at its root and the pixel art page
-  (every picture of the spruceOS pixel themes) in pixel-art/, then commits and pushes when
+  (every picture of the pixel themes) in pixel-art/, then commits and pushes when
   anything changed. Only your own folder and pixel-art/ are replaced. When storage can't be
   reached, or has no SPRUCE base theme, it publishes nothing. --dry-run lists what would change
   and pushes nothing. Setting up the repo and domain: docs/github-pages.md.
