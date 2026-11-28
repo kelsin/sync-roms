@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.15.0](https://github.com/kelsin/sync-roms/compare/v4.14.0...v4.15.0) (2026-11-28)
+
+
+### :video_game: Features
+
+* **themes:** build one pixel theme with variants and palettes as data ([#682](https://github.com/kelsin/sync-roms/issues/682)) ([5c837f4](https://github.com/kelsin/sync-roms/commit/5c837f42e203e7727434c086acb08216d6b1174e))
+
 ## [4.14.0](https://github.com/kelsin/sync-roms/compare/v4.13.0...v4.14.0) (2026-11-28)
 
 
