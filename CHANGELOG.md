@@ -1,5 +1,19 @@
 # Changelog
 
+## [4.14.0](https://github.com/kelsin/sync-roms/compare/v4.13.0...v4.14.0) (2026-11-28)
+
+
+### :video_game: Features
+
+* **collections:** wait for github pages to go live after publish ([#679](https://github.com/kelsin/sync-roms/issues/679)) ([001fadd](https://github.com/kelsin/sync-roms/commit/001fadd5c9780d96c58b481d349ca975103dce11))
+* **pages:** add the pixel artists' brief to the pixel art page ([#681](https://github.com/kelsin/sync-roms/issues/681)) ([ea90733](https://github.com/kelsin/sync-roms/commit/ea907331612ca4ef5abe2a5d76dda3a4aea2ec83))
+* **themes:** theme retroarch's in-game menu in the pixel and totk themes ([#677](https://github.com/kelsin/sync-roms/issues/677)) ([3382162](https://github.com/kelsin/sync-roms/commit/33821628439f9dc376a90a20517840b592a7bad8))
+
+
+### :bug: Bug Fixes
+
+* **themes:** show the es-de pixel theme's own systems on the pixel art page ([#680](https://github.com/kelsin/sync-roms/issues/680)) ([3a6875e](https://github.com/kelsin/sync-roms/commit/3a6875e975556fb082b7f8c451b29f3aa0b3ac09))
+
 ## [4.13.0](https://github.com/kelsin/sync-roms/compare/v4.12.0...v4.13.0) (2026-11-27)
 
 
